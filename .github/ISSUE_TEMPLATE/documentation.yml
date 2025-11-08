@@ -1,0 +1,34 @@
+name: 📚 Documentation Update
+description: Suggest improvements or report issues with documentation
+title: "[Docs]: "
+labels: ["📚 Documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our documentation!
+
+  - type: textarea
+    id: documentation-issue
+    attributes:
+      label: Documentation Issue
+      description: What's unclear, missing, or incorrect in the documentation?
+      placeholder: Describe the documentation issue...
+    validations:
+      required: true
+
+  - type: textarea
+    id: location
+    attributes:
+      label: Location
+      description: Where is this documentation? (e.g., README.md, CONTRIBUTING.md, specific section)
+      placeholder: Which file or section?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-improvement
+    attributes:
+      label: Suggested Improvement
+      description: How should the documentation be improved?
+      placeholder: What would be clearer or more helpful?

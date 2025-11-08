@@ -1,0 +1,37 @@
+name: 🪲 Bug Report
+description: Report a bug or unexpected behavior in GlookoDataWebApp
+title: "[Bug]: "
+labels: ["🪲 Bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please describe the issue clearly.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: Describe the bug and what you expected to happen.
+      placeholder: What's the bug and what should happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, Node.js version (if relevant)
+      placeholder: e.g., Chrome on Windows 11, Node v20.10.0
