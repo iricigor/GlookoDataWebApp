@@ -52,6 +52,17 @@ A ZIP file is marked as **invalid** when:
 
 Invalid files display a red **Invalid** badge with an error message.
 
+#### CSV Data Format
+
+The application expects CSV files with this structure:
+
+![CSV Metadata Extraction](https://github.com/user-attachments/assets/1ecdd7da-107d-4110-b5bd-80c799ae39ec)
+
+As shown in the example above, the extraction process:
+1. **Extracts the metadata line** (first row) containing patient name, date range, etc.
+2. **Parses column headers** (second row) and displays them as colored tags
+3. **Counts data rows** (excluding metadata and header rows)
+
 ### 3. File List and Management
 
 All uploaded files are displayed in a comprehensive table showing:
