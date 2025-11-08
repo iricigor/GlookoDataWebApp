@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Test coverage
+coverage
+
 # Screenshots directory (temporary test files)
 screenshots
 
