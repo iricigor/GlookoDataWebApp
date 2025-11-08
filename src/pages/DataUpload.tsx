@@ -29,11 +29,13 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground1,
     marginBottom: '8px',
     fontFamily: 'Segoe UI, sans-serif',
+    display: 'block',
   },
   description: {
     fontSize: tokens.fontSizeBase400,
     color: tokens.colorNeutralForeground2,
     fontFamily: 'Segoe UI, sans-serif',
+    display: 'block',
   },
   uploadSection: {
     marginBottom: '24px',
