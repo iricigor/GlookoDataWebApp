@@ -63,6 +63,63 @@ Thank you for your interest in contributing! This guide will help you get starte
    npm run lint
    ```
 
+5. **Write Tests**
+   - Add unit tests for new functionality
+   - Follow existing test patterns in `src/` directories
+   - Tests should be colocated with the code they test (e.g., `utils.test.ts` next to `utils.ts`)
+   - Run tests frequently during development
+
+## 🧪 Testing Guidelines
+
+### Writing Unit Tests
+
+This project uses Vitest for unit testing. Tests should be colocated with the code they test.
+
+**Example test structure:**
+
+```tsx
+import { describe, it, expect } from 'vitest';
+import { myFunction } from './myFunction';
+
+describe('myFunction', () => {
+  it('should return expected result', () => {
+    const result = myFunction('input');
+    expect(result).toBe('expected');
+  });
+});
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run tests with UI
+npm run test:ui
+
+# Generate coverage report
+npm run test:coverage
+```
+
+### Test Coverage
+
+- Aim for good test coverage of utility functions and hooks
+- Focus on testing business logic and critical paths
+- UI component testing is optional but encouraged
+
+### CI/CD Testing
+
+All pull requests automatically run:
+1. Linting (`npm run lint`)
+2. Build validation (`npm run build`)
+3. Unit tests (`npm test`)
+
+Ensure all checks pass before requesting a review.
+
 ### Testing Your Changes
 
 1. **Run the Development Server**
@@ -75,7 +132,12 @@ Thank you for your interest in contributing! This guide will help you get starte
    - Test all interactive features
    - Check console for errors
 
-3. **Build for Production**
+3. **Run Unit Tests**
+   ```bash
+   npm test
+   ```
+
+4. **Build for Production**
    ```bash
    npm run build
    npm run preview
@@ -171,8 +233,10 @@ Before submitting your PR, ensure:
 
 - [ ] Code builds without errors (`npm run build`)
 - [ ] Linter passes (`npm run lint`)
+- [ ] All tests pass (`npm test`)
 - [ ] All existing functionality still works
 - [ ] New features are properly typed with TypeScript
+- [ ] New features have unit tests where applicable
 - [ ] Fluent UI components are used appropriately
 - [ ] Code is well-commented where necessary
 - [ ] No console errors or warnings

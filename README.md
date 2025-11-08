@@ -66,6 +66,9 @@ The app will open at `http://localhost:5173/`
 - **`npm run build`** - Build the production-ready application
 - **`npm run lint`** - Run ESLint to check code quality
 - **`npm run preview`** - Preview the production build locally
+- **`npm test`** - Run unit tests with Vitest
+- **`npm run test:ui`** - Run tests with interactive UI
+- **`npm run test:coverage`** - Run tests with coverage report
 
 ### Tech Stack
 
@@ -76,6 +79,7 @@ This project is built with modern web technologies:
 - ⚡ **Vite** - Next-generation frontend build tool with lightning-fast HMR
 - 🎨 **Fluent UI React** - Microsoft's official React component library
 - 🧹 **ESLint** - Code quality and consistency
+- 🧪 **Vitest** - Fast unit testing framework
 
 ### Project Structure
 
@@ -141,13 +145,35 @@ npm install <package-name>
 
 ## 🔍 Code Quality
 
-This project uses ESLint to maintain code quality. The linter runs automatically during development and before builds.
+This project uses ESLint to maintain code quality and Vitest for unit testing. The linter runs automatically during development and before builds.
 
 To manually check your code:
 
 ```bash
 npm run lint
 ```
+
+## 🧪 Testing
+
+Run the test suite to ensure code quality:
+
+```bash
+npm test
+```
+
+For interactive testing with a UI:
+
+```bash
+npm run test:ui
+```
+
+Generate a coverage report:
+
+```bash
+npm run test:coverage
+```
+
+All pull requests to the `main` branch automatically run tests via GitHub Actions to ensure code quality and prevent regressions.
 
 ## 🏗️ Building for Production
 
