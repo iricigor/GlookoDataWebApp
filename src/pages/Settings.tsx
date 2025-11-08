@@ -3,18 +3,25 @@ import {
   Text,
   tokens,
   shorthands,
+  Card,
+  Radio,
+  RadioGroup,
+  Label,
 } from '@fluentui/react-components';
 import { SettingsRegular } from '@fluentui/react-icons';
+import type { ThemeMode } from '../hooks/useTheme';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
     ...shorthands.padding('40px', '24px'),
     minHeight: 'calc(100vh - 60px)',
+  },
+  header: {
     textAlign: 'center',
+    marginBottom: '40px',
   },
   icon: {
     fontSize: '64px',
@@ -31,23 +38,76 @@ const useStyles = makeStyles({
   description: {
     fontSize: tokens.fontSizeBase400,
     color: tokens.colorNeutralForeground2,
-    maxWidth: '600px',
     fontFamily: 'Segoe UI, sans-serif',
+  },
+  settingsCard: {
+    width: '100%',
+    maxWidth: '600px',
+    ...shorthands.padding('24px'),
+  },
+  settingSection: {
+    marginBottom: '24px',
+    '&:last-child': {
+      marginBottom: '0',
+    },
+  },
+  settingLabel: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    marginBottom: '12px',
+    display: 'block',
+  },
+  settingDescription: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    marginBottom: '12px',
   },
 });
 
-export function Settings() {
+interface SettingsProps {
+  themeMode: ThemeMode;
+  onThemeChange: (mode: ThemeMode) => void;
+}
+
+export function Settings({ themeMode, onThemeChange }: SettingsProps) {
   const styles = useStyles();
 
   return (
     <div className={styles.container}>
-      <div className={styles.icon}>
-        <SettingsRegular />
+      <div className={styles.header}>
+        <div className={styles.icon}>
+          <SettingsRegular />
+        </div>
+        <Text className={styles.title}>Settings</Text>
+        <Text className={styles.description}>
+          Configure your application preferences
+        </Text>
       </div>
-      <Text className={styles.title}>Settings</Text>
-      <Text className={styles.description}>
-        Your data is stored locally with configurable persistence options
-      </Text>
+
+      <Card className={styles.settingsCard}>
+        <div className={styles.settingSection}>
+          <Label className={styles.settingLabel}>Theme</Label>
+          <Text className={styles.settingDescription}>
+            Choose your preferred color theme. System option follows your operating system settings.
+          </Text>
+          <RadioGroup
+            value={themeMode}
+            onChange={(_, data) => onThemeChange(data.value as ThemeMode)}
+          >
+            <Radio value="light" label="Light" />
+            <Radio value="dark" label="Dark" />
+            <Radio value="system" label="System (recommended)" />
+          </RadioGroup>
+        </div>
+
+        <div className={styles.settingSection}>
+          <Label className={styles.settingLabel}>Data Privacy</Label>
+          <Text className={styles.settingDescription}>
+            Your data is stored locally with configurable persistence options. All processing happens in your browser.
+          </Text>
+        </div>
+      </Card>
     </div>
   );
 }
