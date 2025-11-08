@@ -17,7 +17,7 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    ...shorthands.padding('40px', '20px'),
+    ...shorthands.padding('40px', '24px'),
     minHeight: 'calc(100vh - 60px)',
   },
   header: {
@@ -28,21 +28,23 @@ const useStyles = makeStyles({
     color: tokens.colorBrandForeground1,
     fontSize: tokens.fontSizeHero900,
     fontWeight: tokens.fontWeightSemibold,
-    marginBottom: '12px',
+    marginBottom: '16px',
+    fontFamily: 'Segoe UI, sans-serif',
   },
   subtitle: {
     color: tokens.colorNeutralForeground2,
     fontSize: tokens.fontSizeBase400,
-    maxWidth: '700px',
+    maxWidth: '800px',
     margin: '0 auto',
+    fontFamily: 'Segoe UI, sans-serif',
   },
   cardsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gridTemplateColumns: 'repeat(2, 1fr)',
     gap: '24px',
-    maxWidth: '1200px',
+    maxWidth: '1000px',
     width: '100%',
-    ...shorthands.padding('0', '20px'),
+    ...shorthands.padding('0', '24px'),
   },
   navigationCard: {
     minHeight: '200px',
@@ -54,7 +56,7 @@ const useStyles = makeStyles({
     },
   },
   cardContent: {
-    ...shorthands.padding('24px'),
+    ...shorthands.padding('32px', '24px'),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -70,11 +72,13 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase500,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
+    fontFamily: 'Segoe UI, sans-serif',
   },
   cardDescription: {
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
     lineHeight: '1.5',
+    fontFamily: 'Segoe UI, sans-serif',
   },
 });
 

@@ -18,7 +18,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    ...shorthands.padding('12px', '24px'),
+    ...shorthands.padding('16px', '24px'),
     backgroundColor: tokens.colorNeutralBackground1,
     borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
     boxShadow: tokens.shadow4,
@@ -26,12 +26,13 @@ const useStyles = makeStyles({
   brand: {
     display: 'flex',
     alignItems: 'center',
-    ...shorthands.gap('12px'),
+    ...shorthands.gap('16px'),
   },
   brandText: {
     fontSize: tokens.fontSizeBase500,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorBrandForeground1,
+    fontFamily: 'Segoe UI, sans-serif',
   },
   navItems: {
     display: 'flex',

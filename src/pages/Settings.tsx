@@ -12,7 +12,7 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    ...shorthands.padding('40px', '20px'),
+    ...shorthands.padding('40px', '24px'),
     minHeight: 'calc(100vh - 60px)',
     textAlign: 'center',
   },
@@ -26,11 +26,13 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
     marginBottom: '16px',
+    fontFamily: 'Segoe UI, sans-serif',
   },
   description: {
     fontSize: tokens.fontSizeBase400,
     color: tokens.colorNeutralForeground2,
     maxWidth: '600px',
+    fontFamily: 'Segoe UI, sans-serif',
   },
 });
 
