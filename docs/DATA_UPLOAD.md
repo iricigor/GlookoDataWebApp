@@ -52,6 +52,10 @@ A ZIP file is marked as **invalid** when:
 
 Invalid files display a red **Invalid** badge with an error message.
 
+![Data Upload Page - Invalid Files](https://github.com/user-attachments/assets/8b230ebb-7965-40b0-9dc4-8a47812c5c51)
+
+*Example showing files marked as invalid because they contain CSV files with different metadata lines (different patients).*
+
 #### CSV Data Format
 
 The application expects CSV files with this structure:
@@ -74,9 +78,17 @@ All uploaded files are displayed in a comprehensive table showing:
 
 The table header also shows the total count of uploaded files and a **Clear All** button to remove all files at once.
 
+![Data Upload Page - With Uploaded Files](https://github.com/user-attachments/assets/00e951f4-685f-4550-8cd4-d5b1be69436f)
+
+*Example showing two valid ZIP files with green "Valid" badges. Each file has an expandable chevron icon to view details.*
+
 ### 4. Expandable Metadata View
 
 For valid ZIP files, click the **chevron icon** (▶) next to the file name to expand and view detailed information:
+
+![Data Upload Page - Expanded File Details](https://github.com/user-attachments/assets/66b9860d-3804-4952-8936-86fbe44e4395)
+
+*Example showing expanded view with metadata, CSV file names, column headers as colored tags, and row counts.*
 
 #### Metadata Section
 
