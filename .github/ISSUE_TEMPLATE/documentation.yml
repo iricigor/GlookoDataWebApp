@@ -18,15 +18,6 @@ body:
       required: true
 
   - type: textarea
-    id: location
-    attributes:
-      label: Location
-      description: Where is this documentation? (e.g., README.md, CONTRIBUTING.md, specific section)
-      placeholder: Which file or section?
-    validations:
-      required: true
-
-  - type: textarea
     id: suggested-improvement
     attributes:
       label: Suggested Improvement
