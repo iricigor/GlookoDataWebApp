@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { FluentProvider } from '@fluentui/react-components'
 import './App.css'
 import { Navigation } from './components/Navigation'
 import { Home } from './pages/Home'
@@ -6,9 +7,11 @@ import { DataUpload } from './pages/DataUpload'
 import { Reports } from './pages/Reports'
 import { AIAnalysis } from './pages/AIAnalysis'
 import { Settings } from './pages/Settings'
+import { useTheme } from './hooks/useTheme'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
+  const { theme, themeMode, setThemeMode } = useTheme()
 
   // Handle hash-based routing
   useEffect(() => {
@@ -37,17 +40,17 @@ function App() {
       case 'ai':
         return <AIAnalysis />
       case 'settings':
-        return <Settings />
+        return <Settings themeMode={themeMode} onThemeChange={setThemeMode} />
       default:
         return <Home onNavigate={handleNavigate} />
     }
   }
 
   return (
-    <>
+    <FluentProvider theme={theme}>
       <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
       {renderPage()}
-    </>
+    </FluentProvider>
   )
 }
 

@@ -13,7 +13,13 @@ The application features a modern, Microsoft Fluent UI-based interface with intu
 - **Data Upload** - Upload and manage your Glooko export files
 - **Comprehensive Reports** - View detailed analytics and trends
 - **AI Analysis** - Get intelligent insights using AI algorithms
-- **Settings** - Configure data persistence options
+- **Settings** - Configure data persistence options and theme preferences
+
+### Dark Mode
+
+![GlookoDataWebApp Home Page - Dark Mode](https://github.com/user-attachments/assets/a64897c8-019f-44d7-8957-33a61b8f6c8a)
+
+The application supports both light and dark themes with an automatic system preference detection option. Theme preferences are saved and persist across sessions.
 
 ### Data Upload Page
 
