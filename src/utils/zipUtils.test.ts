@@ -1,0 +1,262 @@
+/**
+ * Unit tests for ZIP file processing utilities
+ */
+
+import { describe, it, expect } from 'vitest';
+import JSZip from 'jszip';
+import { extractZipMetadata } from '../utils/zipUtils';
+import { generateMockCsvContent, MOCK_CSV_FILE_NAMES, MOCK_METADATA_LINE } from '../test/mockData';
+
+/**
+ * Helper function to create a mock ZIP file for testing
+ * 
+ * @param files - Object mapping file names to their content
+ * @returns Promise resolving to a File object containing the ZIP
+ */
+async function createMockZipFile(files: Record<string, string>): Promise<File> {
+  const zip = new JSZip();
+  
+  // Add each file to the ZIP
+  Object.entries(files).forEach(([fileName, content]) => {
+    zip.file(fileName, content);
+  });
+  
+  // Generate the ZIP file as a Blob
+  const blob = await zip.generateAsync({ type: 'blob' });
+  
+  // Convert Blob to File
+  return new File([blob], 'test.zip', { type: 'application/zip' });
+}
+
+describe('zipUtils', () => {
+  describe('extractZipMetadata', () => {
+    it('should extract metadata from a valid ZIP file with CSV files', async () => {
+      const files = {
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 10),
+        'cgm_data_1.csv': generateMockCsvContent('cgm_data', 15),
+      };
+      
+      const zipFile = await createMockZipFile(files);
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(true);
+      expect(result.csvFiles).toHaveLength(2);
+      expect(result.metadataLine).toBe(MOCK_METADATA_LINE);
+      expect(result.error).toBeUndefined();
+    });
+
+    it('should extract correct file names from ZIP', async () => {
+      const files = {
+        'alarms_data_1.csv': generateMockCsvContent('bg_data', 5),
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 10),
+        'carbs_data_1.csv': generateMockCsvContent('carbs_data', 8),
+      };
+      
+      const zipFile = await createMockZipFile(files);
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(true);
+      expect(result.csvFiles).toHaveLength(3);
+      
+      const fileNames = result.csvFiles.map(f => f.name);
+      expect(fileNames).toContain('alarms_data_1.csv');
+      expect(fileNames).toContain('bg_data_1.csv');
+      expect(fileNames).toContain('carbs_data_1.csv');
+    });
+
+    it('should extract correct row counts from CSV files', async () => {
+      const files = {
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 10),
+        'cgm_data_1.csv': generateMockCsvContent('cgm_data', 25),
+      };
+      
+      const zipFile = await createMockZipFile(files);
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(true);
+      expect(result.csvFiles).toHaveLength(2);
+      
+      const bgFile = result.csvFiles.find(f => f.name === 'bg_data_1.csv');
+      const cgmFile = result.csvFiles.find(f => f.name === 'cgm_data_1.csv');
+      
+      expect(bgFile?.rowCount).toBe(10);
+      expect(cgmFile?.rowCount).toBe(25);
+    });
+
+    it('should extract correct column names from CSV headers', async () => {
+      const files = {
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 5),
+      };
+      
+      const zipFile = await createMockZipFile(files);
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(true);
+      expect(result.csvFiles[0].columnNames).toEqual([
+        'Timestamp',
+        'Glucose Value (mg/dL)',
+        'Device',
+        'Notes',
+      ]);
+    });
+
+    it('should sort CSV files alphabetically by name', async () => {
+      const files = {
+        'cgm_data_1.csv': generateMockCsvContent('cgm_data', 5),
+        'alarms_data_1.csv': generateMockCsvContent('bg_data', 5),
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 5),
+      };
+      
+      const zipFile = await createMockZipFile(files);
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(true);
+      const fileNames = result.csvFiles.map(f => f.name);
+      expect(fileNames).toEqual([
+        'alarms_data_1.csv',
+        'bg_data_1.csv',
+        'cgm_data_1.csv',
+      ]);
+    });
+
+    it('should handle multiple CSV files from real Glooko export structure', async () => {
+      // Create a realistic Glooko export with multiple files
+      const files: Record<string, string> = {};
+      MOCK_CSV_FILE_NAMES.forEach(fileName => {
+        files[fileName] = generateMockCsvContent('bg_data', 5);
+      });
+      
+      const zipFile = await createMockZipFile(files);
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(true);
+      expect(result.csvFiles).toHaveLength(MOCK_CSV_FILE_NAMES.length);
+      expect(result.metadataLine).toBe(MOCK_METADATA_LINE);
+    });
+
+    it('should reject ZIP with no CSV files', async () => {
+      const files = {
+        'readme.txt': 'This is not a CSV file',
+        'image.png': 'PNG data here',
+      };
+      
+      const zipFile = await createMockZipFile(files);
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(false);
+      expect(result.csvFiles).toHaveLength(0);
+      expect(result.error).toBe('No CSV files found in ZIP archive');
+    });
+
+    it('should reject CSV files with inconsistent metadata', async () => {
+      const files = {
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 5, 'Name:John Doe\tDate Range:2025-01-01 - 2025-01-31'),
+        'cgm_data_1.csv': generateMockCsvContent('cgm_data', 5, 'Name:Jane Smith\tDate Range:2025-02-01 - 2025-02-28'),
+      };
+      
+      const zipFile = await createMockZipFile(files);
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(false);
+      expect(result.csvFiles).toHaveLength(0);
+      expect(result.error).toBe('Not all CSV files have the same metadata line');
+    });
+
+    it('should handle empty CSV files gracefully', async () => {
+      const files = {
+        'bg_data_1.csv': '',
+      };
+      
+      const zipFile = await createMockZipFile(files);
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(true);
+      expect(result.csvFiles).toHaveLength(1);
+      expect(result.csvFiles[0].rowCount).toBe(0);
+      expect(result.csvFiles[0].columnNames).toEqual([]);
+    });
+
+    it('should handle CSV files with only metadata line', async () => {
+      const files = {
+        'bg_data_1.csv': MOCK_METADATA_LINE,
+      };
+      
+      const zipFile = await createMockZipFile(files);
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(true);
+      expect(result.csvFiles).toHaveLength(1);
+      expect(result.csvFiles[0].rowCount).toBe(0);
+      expect(result.csvFiles[0].columnNames).toEqual([]);
+    });
+
+    it('should ignore directories in ZIP file', async () => {
+      const zip = new JSZip();
+      
+      // Add a directory
+      zip.folder('data');
+      
+      // Add CSV files
+      zip.file('bg_data_1.csv', generateMockCsvContent('bg_data', 5));
+      zip.file('data/cgm_data_1.csv', generateMockCsvContent('cgm_data', 5));
+      
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const zipFile = new File([blob], 'test.zip', { type: 'application/zip' });
+      
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(true);
+      expect(result.csvFiles).toHaveLength(2);
+    });
+
+    it('should extract filename without path for nested CSV files', async () => {
+      const zip = new JSZip();
+      zip.file('data/bg_data_1.csv', generateMockCsvContent('bg_data', 5));
+      zip.file('exports/cgm_data_1.csv', generateMockCsvContent('cgm_data', 5));
+      
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const zipFile = new File([blob], 'test.zip', { type: 'application/zip' });
+      
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(true);
+      expect(result.csvFiles).toHaveLength(2);
+      
+      const fileNames = result.csvFiles.map(f => f.name);
+      expect(fileNames).toContain('bg_data_1.csv');
+      expect(fileNames).toContain('cgm_data_1.csv');
+    });
+
+    it('should handle corrupted or invalid ZIP files', async () => {
+      const invalidZipFile = new File(['This is not a valid ZIP'], 'invalid.zip', {
+        type: 'application/zip',
+      });
+      
+      const result = await extractZipMetadata(invalidZipFile);
+      
+      expect(result.isValid).toBe(false);
+      expect(result.csvFiles).toHaveLength(0);
+      expect(result.error).toBeDefined();
+    });
+
+    it('should handle CSV files with different column counts', async () => {
+      const files = {
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 5),
+        'insulin_data_1.csv': generateMockCsvContent('insulin_data', 8),
+      };
+      
+      const zipFile = await createMockZipFile(files);
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(true);
+      expect(result.csvFiles).toHaveLength(2);
+      
+      // Verify different column counts
+      const bgFile = result.csvFiles.find(f => f.name === 'bg_data_1.csv');
+      const insulinFile = result.csvFiles.find(f => f.name === 'insulin_data_1.csv');
+      
+      expect(bgFile?.columnNames?.length).toBe(4);
+      expect(insulinFile?.columnNames?.length).toBe(4);
+    });
+  });
+});
