@@ -1,53 +1,86 @@
+import { useState } from 'react';
 import { 
   makeStyles, 
   Text,
   tokens,
   shorthands,
 } from '@fluentui/react-components';
-import { CloudArrowUpRegular } from '@fluentui/react-icons';
+import { FileUploadZone } from '../components/FileUploadZone';
+import { FileList } from '../components/FileList';
+import type { UploadedFile } from '../types';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
     ...shorthands.padding('40px', '24px'),
+    maxWidth: '1200px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
     minHeight: 'calc(100vh - 60px)',
-    textAlign: 'center',
   },
-  icon: {
-    fontSize: '64px',
-    color: tokens.colorBrandForeground1,
-    marginBottom: '24px',
+  header: {
+    marginBottom: '32px',
   },
   title: {
     fontSize: tokens.fontSizeHero800,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
-    marginBottom: '16px',
+    marginBottom: '8px',
     fontFamily: 'Segoe UI, sans-serif',
   },
   description: {
     fontSize: tokens.fontSizeBase400,
     color: tokens.colorNeutralForeground2,
-    maxWidth: '600px',
     fontFamily: 'Segoe UI, sans-serif',
+  },
+  uploadSection: {
+    marginBottom: '24px',
   },
 });
 
 export function DataUpload() {
   const styles = useStyles();
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+
+  const handleFilesSelected = (files: File[]) => {
+    const newFiles: UploadedFile[] = files.map((file) => ({
+      id: `${file.name}-${Date.now()}-${Math.random()}`,
+      name: file.name,
+      size: file.size,
+      uploadTime: new Date(),
+      file: file,
+    }));
+
+    setUploadedFiles((prev) => [...prev, ...newFiles]);
+  };
+
+  const handleRemoveFile = (id: string) => {
+    setUploadedFiles((prev) => prev.filter((file) => file.id !== id));
+  };
+
+  const handleClearAll = () => {
+    setUploadedFiles([]);
+  };
 
   return (
     <div className={styles.container}>
-      <div className={styles.icon}>
-        <CloudArrowUpRegular />
+      <div className={styles.header}>
+        <Text className={styles.title}>Data Upload</Text>
+        <Text className={styles.description}>
+          Upload and manage your Glooko export files with drag-and-drop support
+        </Text>
       </div>
-      <Text className={styles.title}>Data Upload</Text>
-      <Text className={styles.description}>
-        Upload and manage your Glooko export files with drag-and-drop support
-      </Text>
+
+      <div className={styles.uploadSection}>
+        <FileUploadZone onFilesSelected={handleFilesSelected} />
+      </div>
+
+      <FileList
+        files={uploadedFiles}
+        onRemoveFile={handleRemoveFile}
+        onClearAll={handleClearAll}
+      />
     </div>
   );
 }

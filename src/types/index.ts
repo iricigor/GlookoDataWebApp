@@ -40,3 +40,14 @@ export interface ApiResponse<T> {
  * Loading state type
  */
 export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
+
+/**
+ * Uploaded file metadata
+ */
+export interface UploadedFile {
+  id: string;
+  name: string;
+  size: number;
+  uploadTime: Date;
+  file: File;
+}

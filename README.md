@@ -12,6 +12,20 @@ The application features a modern, Microsoft Fluent UI-based interface with intu
 - **AI Analysis** - Get intelligent insights using AI algorithms
 - **Settings** - Configure data persistence options
 
+### Data Upload Page
+
+![Data Upload Page - Empty State](https://github.com/user-attachments/assets/039b0133-b29f-41c2-ab45-bd98e3c23b48)
+
+The Data Upload page features:
+- **Drag-and-drop upload zone** - Simply drag ZIP files onto the page or click to browse
+- **Multiple file support** - Upload one or multiple ZIP files at once
+- **File management** - View uploaded files with details like name, upload time, and size
+- **Browser-based processing** - All files are stored and processed locally in your browser
+
+![Data Upload Page - With Files](https://github.com/user-attachments/assets/31a66656-9c72-47ba-adcf-a3c7b236672c)
+
+Files are maintained in memory for the duration of your session without being transmitted to the server, ensuring your data privacy.
+
 ## 🚀 Quick Start
 
 ### Prerequisites
