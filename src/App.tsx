@@ -1,103 +1,53 @@
-import { 
-  makeStyles, 
-  Button, 
-  Card,
-  CardHeader,
-  Text,
-  tokens,
-  shorthands,
-} from '@fluentui/react-components'
-import { DatabaseRegular, ChartMultipleRegular } from '@fluentui/react-icons'
+import { useState, useEffect } from 'react'
 import './App.css'
-
-const useStyles = makeStyles({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    ...shorthands.padding('20px'),
-  },
-  card: {
-    maxWidth: '600px',
-    width: '100%',
-    ...shorthands.margin('20px', '0'),
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    ...shorthands.gap('10px'),
-  },
-  content: {
-    ...shorthands.padding('20px'),
-    display: 'flex',
-    flexDirection: 'column',
-    ...shorthands.gap('15px'),
-  },
-  buttonGroup: {
-    display: 'flex',
-    ...shorthands.gap('10px'),
-    flexWrap: 'wrap',
-  },
-  title: {
-    color: tokens.colorBrandForeground1,
-    fontSize: tokens.fontSizeHero900,
-    fontWeight: tokens.fontWeightSemibold,
-    marginBottom: '20px',
-  },
-  subtitle: {
-    color: tokens.colorNeutralForeground2,
-    fontSize: tokens.fontSizeBase400,
-  },
-})
+import { Navigation } from './components/Navigation'
+import { Home } from './pages/Home'
+import { DataUpload } from './pages/DataUpload'
+import { Reports } from './pages/Reports'
+import { AIAnalysis } from './pages/AIAnalysis'
+import { Settings } from './pages/Settings'
 
 function App() {
-  const styles = useStyles()
+  const [currentPage, setCurrentPage] = useState('home')
+
+  // Handle hash-based routing
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1) || 'home'
+      setCurrentPage(hash)
+    }
+
+    handleHashChange()
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
+
+  const handleNavigate = (page: string) => {
+    window.location.hash = page
+  }
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'home':
+        return <Home onNavigate={handleNavigate} />
+      case 'upload':
+        return <DataUpload />
+      case 'reports':
+        return <Reports />
+      case 'ai':
+        return <AIAnalysis />
+      case 'settings':
+        return <Settings />
+      default:
+        return <Home onNavigate={handleNavigate} />
+    }
+  }
 
   return (
-    <div className={styles.container}>
-      <Text className={styles.title}>
-        GlookoDataWebApp
-      </Text>
-      <Text className={styles.subtitle}>
-        A web app for importing, visualizing, and analyzing diabetes data exported from the Glooko platform
-      </Text>
-      
-      <Card className={styles.card}>
-        <CardHeader
-          header={
-            <div className={styles.header}>
-              <DatabaseRegular fontSize={24} />
-              <Text weight="semibold" size={500}>Welcome to Your Development Environment</Text>
-            </div>
-          }
-        />
-        <div className={styles.content}>
-          <Text>
-            This project is set up with:
-          </Text>
-          <ul>
-            <li>⚛️ React 19 with TypeScript</li>
-            <li>🎨 Fluent UI React Components</li>
-            <li>⚡ Vite for fast development</li>
-            <li>🤖 GitHub Copilot ready</li>
-            <li>✨ ESLint for code quality</li>
-          </ul>
-          <div className={styles.buttonGroup}>
-            <Button appearance="primary" icon={<ChartMultipleRegular />}>
-              Get Started
-            </Button>
-            <Button appearance="secondary" icon={<DatabaseRegular />}>
-              View Documentation
-            </Button>
-          </div>
-          <Text size={300} style={{ marginTop: '10px' }}>
-            Ready to build amazing features! Start editing <code>src/App.tsx</code> to begin.
-          </Text>
-        </div>
-      </Card>
-    </div>
+    <>
+      <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
+      {renderPage()}
+    </>
   )
 }
 

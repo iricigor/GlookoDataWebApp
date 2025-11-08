@@ -2,6 +2,16 @@
 
 A web app for importing, visualizing, and analyzing diabetes data exported from the Glooko platform. It extends the existing Glooko PowerShell module's capabilities by offering an interactive interface for streamlined data analysis and exploration.
 
+## 📸 Application Preview
+
+![GlookoDataWebApp Home Page](https://github.com/user-attachments/assets/3af7e1af-6380-46d6-8e01-baadc3133ab5)
+
+The application features a modern, Microsoft Fluent UI-based interface with intuitive navigation to key sections:
+- **Data Upload** - Upload and manage your Glooko export files
+- **Comprehensive Reports** - View detailed analytics and trends
+- **AI Analysis** - Get intelligent insights using AI algorithms
+- **Settings** - Configure data persistence options
+
 ## 🚀 Quick Start
 
 ### Prerequisites
