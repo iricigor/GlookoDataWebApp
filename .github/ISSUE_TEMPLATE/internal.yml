@@ -1,0 +1,40 @@
+name: 🔧 Internal Functionality
+description: Issues related to internal tools, build processes, or maintenance tasks
+title: "[Internal]: "
+labels: ["🔧 Internal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report issues with build tools, CI/CD, development environment, or other internal functionality.
+
+  - type: textarea
+    id: internal-issue
+    attributes:
+      label: Internal Issue Description
+      description: Describe the internal functionality issue
+      placeholder: What internal tool or process needs attention?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What area does this affect?
+      options:
+        - Build System (Vite, TypeScript)
+        - Development Tools (ESLint, etc.)
+        - CI/CD Pipeline
+        - Dependencies
+        - Project Configuration
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: If you have ideas on how to fix this, please share
+      placeholder: How should this be addressed?
