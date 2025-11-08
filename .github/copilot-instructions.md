@@ -24,6 +24,7 @@ GlookoDataWebApp is a modern web application for importing, visualizing, and ana
 
 ### Development Tools
 - **ESLint** - Code quality and consistency enforcement
+- **Vitest** - Unit testing framework with React Testing Library
 - **Node.js 20+** - Runtime environment
 - **npm** - Package management
 
@@ -151,18 +152,26 @@ GlookoDataWebApp is a modern web application for importing, visualizing, and ana
 
 ### Testing & Development
 
-1. **Manual testing is required** - No automated tests exist yet
+1. **Write unit tests** for new code
+   - Use Vitest testing framework (already configured)
+   - Place test files next to source files with `.test.ts` or `.test.tsx` extension
+   - Follow existing test patterns in `src/utils/helpers.test.ts` and other test files
+   - Run tests before committing: `npm test` or `npm test -- --run`
+   - Aim for good test coverage of new functionality
+   - Test edge cases, error conditions, and happy paths
+
+2. **Manual testing is also required**
    - Run `npm run dev` and test in browser
    - Test all user interactions
    - Check console for errors
    - Test edge cases (empty data, large files, etc.)
 
-2. **Build before committing**
+3. **Build before committing**
    ```bash
    npm run build
    ```
 
-3. **Preview production build**
+4. **Preview production build**
    ```bash
    npm run preview
    ```
@@ -199,12 +208,17 @@ GlookoDataWebApp/
 │   │   ├── AIAnalysis.tsx
 │   │   └── Settings.tsx
 │   ├── hooks/            # Custom React hooks
-│   │   └── useCounter.ts
+│   │   ├── useCounter.ts
+│   │   └── useCounter.test.ts
+│   ├── test/             # Test setup and utilities
+│   │   └── setup.ts      # Vitest setup configuration
 │   ├── types/            # TypeScript type definitions
 │   │   └── index.ts
 │   ├── utils/            # Utility functions
 │   │   ├── zipUtils.ts   # ZIP file processing
-│   │   └── helpers.ts    # General helpers
+│   │   ├── zipUtils.test.ts
+│   │   ├── helpers.ts    # General helpers
+│   │   └── helpers.test.ts
 │   └── assets/           # Static assets (images, icons)
 ├── public/               # Public static files
 ├── dist/                 # Production build output (generated, not committed)
@@ -212,17 +226,18 @@ GlookoDataWebApp/
 ├── package.json          # Dependencies and scripts
 ├── tsconfig.json         # TypeScript configuration
 ├── vite.config.ts        # Vite build configuration
+├── vitest.config.ts      # Vitest test configuration
 ├── eslint.config.js      # ESLint configuration
 └── README.md             # Project documentation
 ```
 
 ### Where to Add New Features
 
-- **New UI component?** → `src/components/ComponentName.tsx`
+- **New UI component?** → `src/components/ComponentName.tsx` (with `ComponentName.test.tsx`)
 - **New page?** → `src/pages/PageName.tsx` (update App.tsx navigation)
-- **New custom hook?** → `src/hooks/useHookName.ts`
+- **New custom hook?** → `src/hooks/useHookName.ts` (with `useHookName.test.ts`)
 - **New type/interface?** → `src/types/index.ts`
-- **New utility function?** → `src/utils/helpers.ts` (or create new file)
+- **New utility function?** → `src/utils/helpers.ts` (or create new file with `.test.ts` file)
 
 ## Development Workflow
 
@@ -253,22 +268,27 @@ GlookoDataWebApp/
 
 ### Before Committing
 
-1. **Lint the code**
+1. **Run tests**
+   ```bash
+   npm test -- --run
+   ```
+
+2. **Lint the code**
    ```bash
    npm run lint
    ```
 
-2. **Build for production**
+3. **Build for production**
    ```bash
    npm run build
    ```
 
-3. **Test the production build**
+4. **Test the production build**
    ```bash
    npm run preview
    ```
 
-4. **Manual testing checklist:**
+5. **Manual testing checklist:**
    - [ ] All pages load without errors
    - [ ] Navigation works correctly
    - [ ] User interactions work as expected
@@ -345,6 +365,56 @@ export function useDataProcessor() {
 }
 ```
 
+### Writing Unit Tests
+
+The project uses Vitest for unit testing. Place test files next to the source files with `.test.ts` or `.test.tsx` extension.
+
+```tsx
+// src/utils/myUtils.test.ts
+import { describe, it, expect } from 'vitest';
+import { myFunction } from './myUtils';
+
+describe('myUtils', () => {
+  describe('myFunction', () => {
+    it('should handle valid input', () => {
+      const result = myFunction('valid input');
+      expect(result).toBe('expected output');
+    });
+
+    it('should handle edge cases', () => {
+      const result = myFunction('');
+      expect(result).toBe('');
+    });
+
+    it('should throw error for invalid input', () => {
+      expect(() => myFunction(null)).toThrow();
+    });
+  });
+});
+```
+
+For React components and hooks, use React Testing Library:
+
+```tsx
+// src/components/MyComponent.test.tsx
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { MyComponent } from './MyComponent';
+
+describe('MyComponent', () => {
+  it('should render with correct text', () => {
+    render(<MyComponent title="Test Title" />);
+    expect(screen.getByText('Test Title')).toBeInTheDocument();
+  });
+});
+```
+
+**Testing Commands:**
+- `npm test` - Run tests in watch mode
+- `npm test -- --run` - Run tests once
+- `npm run test:ui` - Open Vitest UI for interactive testing
+- `npm run test:coverage` - Generate coverage report
+
 ### Handling File Upload
 
 The app uses JSZip for client-side ZIP processing. Reference `src/utils/zipUtils.ts` for examples.
@@ -368,6 +438,8 @@ zip.forEach((relativePath, zipEntry) => {
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/) - TypeScript language reference
 - [Fluent UI React v9](https://react.fluentui.dev/) - Component library documentation
 - [Vite Guide](https://vite.dev/guide/) - Build tool and configuration
+- [Vitest](https://vitest.dev/) - Unit testing framework documentation
+- [React Testing Library](https://testing-library.com/react) - React component testing utilities
 - [GitHub Copilot Docs](https://docs.github.com/en/copilot) - Using Copilot effectively
 
 ### Project Documentation
