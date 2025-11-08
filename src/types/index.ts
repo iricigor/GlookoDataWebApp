@@ -42,6 +42,23 @@ export interface ApiResponse<T> {
 export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 
 /**
+ * CSV file metadata from ZIP
+ */
+export interface CsvFileMetadata {
+  name: string;
+  rowCount: number;
+}
+
+/**
+ * ZIP file validation result
+ */
+export interface ZipMetadata {
+  isValid: boolean;
+  csvFiles: CsvFileMetadata[];
+  error?: string;
+}
+
+/**
  * Uploaded file metadata
  */
 export interface UploadedFile {
@@ -50,4 +67,5 @@ export interface UploadedFile {
   size: number;
   uploadTime: Date;
   file: File;
+  zipMetadata?: ZipMetadata;
 }

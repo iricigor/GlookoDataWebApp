@@ -14,15 +14,23 @@ The application features a modern, Microsoft Fluent UI-based interface with intu
 
 ### Data Upload Page
 
-![Data Upload Page - Empty State](https://github.com/user-attachments/assets/039b0133-b29f-41c2-ab45-bd98e3c23b48)
+![Data Upload Page - Empty State](https://github.com/user-attachments/assets/d65e9f57-6f40-4281-ac3c-c688671fd472)
 
 The Data Upload page features:
 - **Drag-and-drop upload zone** - Simply drag ZIP files onto the page or click to browse
 - **Multiple file support** - Upload one or multiple ZIP files at once
+- **ZIP file validation** - Automatically validates that ZIP files contain CSV data
+- **Expandable metadata view** - Click the chevron to see CSV files and row counts
 - **File management** - View uploaded files with details like name, upload time, and size
 - **Browser-based processing** - All files are stored and processed locally in your browser
 
-![Data Upload Page - With Files](https://github.com/user-attachments/assets/31a66656-9c72-47ba-adcf-a3c7b236672c)
+![Data Upload Page - With Files](https://github.com/user-attachments/assets/3dffe654-6757-4d53-a3bc-3bc3682669a4)
+
+The uploaded files table shows validation status with color-coded badges. Valid ZIP files display a green "Valid" badge and can be expanded to view their contents.
+
+![Data Upload Page - Expanded View](https://github.com/user-attachments/assets/4d108eb9-6e22-4222-ad9b-9ee2e9e1b2ba)
+
+When you expand a file, you can see all CSV files contained within the ZIP (including files in subfolders) along with the number of data rows in each file. Invalid ZIP files (those without CSV content) are marked with a red "Invalid" badge.
 
 Files are maintained in memory for the duration of your session without being transmitted to the server, ensuring your data privacy.
 

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   makeStyles,
   Text,
@@ -11,7 +12,7 @@ import {
   TableBody,
   TableCell,
 } from '@fluentui/react-components';
-import { DeleteRegular } from '@fluentui/react-icons';
+import { DeleteRegular, ChevronRightRegular, ChevronDownRegular } from '@fluentui/react-icons';
 import type { UploadedFile } from '../types';
 
 const useStyles = makeStyles({
@@ -44,6 +45,64 @@ const useStyles = makeStyles({
   deleteButton: {
     minWidth: 'auto',
   },
+  expandButton: {
+    minWidth: 'auto',
+    marginRight: '8px',
+  },
+  fileNameCell: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  detailsRow: {
+    backgroundColor: tokens.colorNeutralBackground2,
+  },
+  detailsCell: {
+    ...shorthands.padding('16px', '24px'),
+  },
+  metadataContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('8px'),
+  },
+  metadataHeader: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    marginBottom: '8px',
+  },
+  csvFileItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    ...shorthands.padding('4px', '8px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+  },
+  csvFileName: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground1,
+  },
+  csvRowCount: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+  },
+  errorText: {
+    color: tokens.colorPaletteRedForeground1,
+    fontSize: tokens.fontSizeBase300,
+  },
+  validationBadge: {
+    fontSize: tokens.fontSizeBase200,
+    ...shorthands.padding('2px', '8px'),
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    marginLeft: '8px',
+  },
+  validBadge: {
+    backgroundColor: tokens.colorPaletteGreenBackground2,
+    color: tokens.colorPaletteGreenForeground2,
+  },
+  invalidBadge: {
+    backgroundColor: tokens.colorPaletteRedBackground2,
+    color: tokens.colorPaletteRedForeground2,
+  },
 });
 
 interface FileListProps {
@@ -54,6 +113,19 @@ interface FileListProps {
 
 export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
   const styles = useStyles();
+  const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (fileId: string) => {
+    setExpandedFiles((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(fileId)) {
+        newSet.delete(fileId);
+      } else {
+        newSet.add(fileId);
+      }
+      return newSet;
+    });
+  };
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -104,22 +176,74 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {files.map((file) => (
-            <TableRow key={file.id}>
-              <TableCell>{file.name}</TableCell>
-              <TableCell>{formatTime(file.uploadTime)}</TableCell>
-              <TableCell>{formatFileSize(file.size)}</TableCell>
-              <TableCell>
-                <Button
-                  appearance="subtle"
-                  icon={<DeleteRegular />}
-                  onClick={() => onRemoveFile(file.id)}
-                  className={styles.deleteButton}
-                  aria-label={`Remove ${file.name}`}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
+          {files.map((file) => {
+            const isExpanded = expandedFiles.has(file.id);
+            const hasMetadata = file.zipMetadata && file.zipMetadata.csvFiles.length > 0;
+            
+            return (
+              <>
+                <TableRow key={file.id}>
+                  <TableCell>
+                    <div className={styles.fileNameCell}>
+                      {hasMetadata && (
+                        <Button
+                          appearance="subtle"
+                          icon={isExpanded ? <ChevronDownRegular /> : <ChevronRightRegular />}
+                          onClick={() => toggleExpand(file.id)}
+                          className={styles.expandButton}
+                          aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
+                        />
+                      )}
+                      <span>{file.name}</span>
+                      {file.zipMetadata && (
+                        <span className={`${styles.validationBadge} ${file.zipMetadata.isValid ? styles.validBadge : styles.invalidBadge}`}>
+                          {file.zipMetadata.isValid ? 'Valid' : 'Invalid'}
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>{formatTime(file.uploadTime)}</TableCell>
+                  <TableCell>{formatFileSize(file.size)}</TableCell>
+                  <TableCell>
+                    <Button
+                      appearance="subtle"
+                      icon={<DeleteRegular />}
+                      onClick={() => onRemoveFile(file.id)}
+                      className={styles.deleteButton}
+                      aria-label={`Remove ${file.name}`}
+                    />
+                  </TableCell>
+                </TableRow>
+                {isExpanded && file.zipMetadata && (
+                  <TableRow key={`${file.id}-details`} className={styles.detailsRow}>
+                    <TableCell colSpan={4} className={styles.detailsCell}>
+                      <div className={styles.metadataContainer}>
+                        {file.zipMetadata.isValid ? (
+                          <>
+                            <Text className={styles.metadataHeader}>
+                              CSV Files ({file.zipMetadata.csvFiles.length})
+                            </Text>
+                            {file.zipMetadata.csvFiles.map((csvFile) => (
+                              <div key={csvFile.name} className={styles.csvFileItem}>
+                                <span className={styles.csvFileName}>{csvFile.name}</span>
+                                <span className={styles.csvRowCount}>
+                                  {csvFile.rowCount} {csvFile.rowCount === 1 ? 'row' : 'rows'}
+                                </span>
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          <Text className={styles.errorText}>
+                            Error: {file.zipMetadata.error || 'Invalid ZIP file'}
+                          </Text>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

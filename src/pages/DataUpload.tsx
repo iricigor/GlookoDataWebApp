@@ -8,6 +8,7 @@ import {
 import { FileUploadZone } from '../components/FileUploadZone';
 import { FileList } from '../components/FileList';
 import type { UploadedFile } from '../types';
+import { extractZipMetadata } from '../utils/zipUtils';
 
 const useStyles = makeStyles({
   container: {
@@ -43,15 +44,22 @@ export function DataUpload() {
   const styles = useStyles();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
-  const handleFilesSelected = (files: File[]) => {
-    const newFiles: UploadedFile[] = files.map((file) => ({
-      id: `${file.name}-${Date.now()}-${Math.random()}`,
-      name: file.name,
-      size: file.size,
-      uploadTime: new Date(),
-      file: file,
-    }));
+  const handleFilesSelected = async (files: File[]) => {
+    // Process files and extract ZIP metadata
+    const newFilesPromises = files.map(async (file) => {
+      const zipMetadata = await extractZipMetadata(file);
+      
+      return {
+        id: `${file.name}-${Date.now()}-${Math.random()}`,
+        name: file.name,
+        size: file.size,
+        uploadTime: new Date(),
+        file: file,
+        zipMetadata,
+      };
+    });
 
+    const newFiles = await Promise.all(newFilesPromises);
     setUploadedFiles((prev) => [...prev, ...newFiles]);
   };
 
