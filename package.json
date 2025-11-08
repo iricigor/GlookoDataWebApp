@@ -12,11 +12,13 @@
   "dependencies": {
     "@fluentui/react-components": "^9.72.6",
     "@fluentui/react-icons": "^2.0.313",
+    "jszip": "^3.10.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@types/jszip": "^3.4.0",
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
