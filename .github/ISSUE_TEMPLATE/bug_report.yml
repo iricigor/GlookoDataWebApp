@@ -18,20 +18,19 @@ body:
       required: true
 
   - type: textarea
-    id: steps-to-reproduce
+    id: proposed-solution
     attributes:
-      label: Steps to Reproduce
-      description: How can we reproduce this issue?
-      placeholder: |
-        1. Go to '...'
-        2. Click on '...'
-        3. See error
+      label: Proposed Solution
+      description: If you have an idea for a fix or workaround, please share it here (optional).
+      placeholder: Describe any potential solutions or workarounds you've identified...
     validations:
-      required: true
+      required: false
 
   - type: textarea
-    id: environment
+    id: additional-info
     attributes:
-      label: Environment
-      description: Browser, OS, Node.js version (if relevant)
-      placeholder: e.g., Chrome on Windows 11, Node v20.10.0
+      label: Additional Info
+      description: Any extra logs, screenshots, or related context not covered above (optional).
+      placeholder: Add any additional information, logs, screenshots, environment details, or steps to reproduce...
+    validations:
+      required: false
