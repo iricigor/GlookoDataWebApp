@@ -18,15 +18,6 @@ body:
       required: true
 
   - type: textarea
-    id: use-case
-    attributes:
-      label: Why is this needed?
-      description: What problem does this solve?
-      placeholder: Explain the use case...
-    validations:
-      required: true
-
-  - type: textarea
     id: additional-context
     attributes:
       label: Additional Context
