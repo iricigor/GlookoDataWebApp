@@ -103,6 +103,28 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorPaletteRedBackground2,
     color: tokens.colorPaletteRedForeground2,
   },
+  zipMetadataLine: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    ...shorthands.padding('8px', '12px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    marginBottom: '12px',
+    fontFamily: 'Consolas, Monaco, monospace',
+  },
+  columnNamesList: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    ...shorthands.gap('6px'),
+    marginTop: '4px',
+  },
+  columnNameTag: {
+    fontSize: tokens.fontSizeBase200,
+    ...shorthands.padding('2px', '8px'),
+    backgroundColor: tokens.colorBrandBackground2,
+    color: tokens.colorBrandForeground2,
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+  },
 });
 
 interface FileListProps {
@@ -220,12 +242,33 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                       <div className={styles.metadataContainer}>
                         {file.zipMetadata.isValid ? (
                           <>
+                            {file.zipMetadata.metadataLine && (
+                              <>
+                                <Text className={styles.metadataHeader}>
+                                  Metadata
+                                </Text>
+                                <div className={styles.zipMetadataLine}>
+                                  {file.zipMetadata.metadataLine}
+                                </div>
+                              </>
+                            )}
                             <Text className={styles.metadataHeader}>
                               CSV Files ({file.zipMetadata.csvFiles.length})
                             </Text>
                             {file.zipMetadata.csvFiles.map((csvFile) => (
                               <div key={csvFile.name} className={styles.csvFileItem}>
-                                <span className={styles.csvFileName}>{csvFile.name}</span>
+                                <div style={{ flex: 1 }}>
+                                  <div className={styles.csvFileName}>{csvFile.name}</div>
+                                  {csvFile.columnNames && csvFile.columnNames.length > 0 && (
+                                    <div className={styles.columnNamesList}>
+                                      {csvFile.columnNames.map((col, idx) => (
+                                        <span key={idx} className={styles.columnNameTag}>
+                                          {col}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
                                 <span className={styles.csvRowCount}>
                                   {csvFile.rowCount} {csvFile.rowCount === 1 ? 'row' : 'rows'}
                                 </span>

@@ -47,6 +47,7 @@ export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 export interface CsvFileMetadata {
   name: string;
   rowCount: number;
+  columnNames?: string[];
 }
 
 /**
@@ -56,6 +57,7 @@ export interface ZipMetadata {
   isValid: boolean;
   csvFiles: CsvFileMetadata[];
   error?: string;
+  metadataLine?: string;
 }
 
 /**

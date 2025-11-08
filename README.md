@@ -14,25 +14,21 @@ The application features a modern, Microsoft Fluent UI-based interface with intu
 
 ### Data Upload Page
 
-![Data Upload Page - Empty State](https://github.com/user-attachments/assets/d65e9f57-6f40-4281-ac3c-c688671fd472)
+![Data Upload Page - Empty State](https://github.com/user-attachments/assets/446b5a28-4763-42f5-857d-5dd8c44147a2)
 
-The Data Upload page features:
+The Data Upload page provides an intuitive interface for importing Glooko export files with advanced features:
+
 - **Drag-and-drop upload zone** - Simply drag ZIP files onto the page or click to browse
-- **Multiple file support** - Upload one or multiple ZIP files at once
-- **ZIP file validation** - Automatically validates that ZIP files contain CSV data
-- **Expandable metadata view** - Click the chevron to see CSV files and row counts
-- **File management** - View uploaded files with details like name, upload time, and size
-- **Browser-based processing** - All files are stored and processed locally in your browser
+- **Intelligent CSV validation** - Validates metadata consistency across all CSV files
+- **Metadata extraction** - Automatically extracts and displays patient info and date ranges
+- **Column name detection** - Shows column headers from each CSV file
+- **Accurate row counting** - Displays data row counts (excluding metadata and headers)
+- **Expandable details view** - Click the chevron to see full metadata, CSV files, and column names
+- **Browser-based processing** - All files are stored and processed locally for privacy
 
-![Data Upload Page - With Files](https://github.com/user-attachments/assets/3dffe654-6757-4d53-a3bc-3bc3682669a4)
+📖 **[View complete Data Upload documentation →](docs/DATA_UPLOAD.md)**
 
-The uploaded files table shows validation status with color-coded badges. Valid ZIP files display a green "Valid" badge and can be expanded to view their contents.
-
-![Data Upload Page - Expanded View](https://github.com/user-attachments/assets/4d108eb9-6e22-4222-ad9b-9ee2e9e1b2ba)
-
-When you expand a file, you can see all CSV files contained within the ZIP (including files in subfolders) along with the number of data rows in each file. Invalid ZIP files (those without CSV content) are marked with a red "Invalid" badge.
-
-Files are maintained in memory for the duration of your session without being transmitted to the server, ensuring your data privacy.
+Files are maintained in memory for the duration of your session without being transmitted to any server, ensuring your data privacy.
 
 ## 🚀 Quick Start
 

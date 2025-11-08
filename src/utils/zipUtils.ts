@@ -6,19 +6,29 @@ import JSZip from 'jszip';
 import type { ZipMetadata, CsvFileMetadata } from '../types';
 
 /**
- * Count the number of rows in a CSV file content
+ * Extract metadata line and header from CSV content
  * 
  * @param content - The CSV file content as string
- * @returns Number of data rows (excluding header)
+ * @returns Object with metadata line, header columns, and row count
  */
-function countCsvRows(content: string): number {
+function parseCsvContent(content: string): { metadataLine: string; columnNames: string[]; rowCount: number } {
   if (!content || content.trim().length === 0) {
-    return 0;
+    return { metadataLine: '', columnNames: [], rowCount: 0 };
   }
   
   const lines = content.trim().split('\n');
-  // Subtract 1 for header row, but ensure we don't go negative
-  return Math.max(0, lines.length - 1);
+  
+  // First line is metadata (e.g., "Name:Igor Irić	Date Range:2025-07-29 - 2025-10-26")
+  const metadataLine = lines.length > 0 ? lines[0].trim() : '';
+  
+  // Second line is header with column names
+  const headerLine = lines.length > 1 ? lines[1].trim() : '';
+  const columnNames = headerLine ? headerLine.split('\t').map(col => col.trim()).filter(col => col.length > 0) : [];
+  
+  // Remaining lines are data rows (subtract metadata line and header line)
+  const rowCount = Math.max(0, lines.length - 2);
+  
+  return { metadataLine, columnNames, rowCount };
 }
 
 /**
@@ -32,6 +42,7 @@ export async function extractZipMetadata(file: File): Promise<ZipMetadata> {
   try {
     const zip = await JSZip.loadAsync(file);
     const csvFiles: CsvFileMetadata[] = [];
+    let zipMetadataLine: string | undefined = undefined;
     
     // Get all files in the ZIP
     const fileEntries = Object.keys(zip.files)
@@ -50,14 +61,26 @@ export async function extractZipMetadata(file: File): Promise<ZipMetadata> {
     for (const fileName of fileEntries) {
       const fileData = zip.files[fileName];
       const content = await fileData.async('string');
-      const rowCount = countCsvRows(content);
+      const { metadataLine, columnNames, rowCount } = parseCsvContent(content);
+      
+      // Validate that all CSV files have the same metadata line
+      if (zipMetadataLine === undefined) {
+        zipMetadataLine = metadataLine;
+      } else if (zipMetadataLine !== metadataLine) {
+        return {
+          isValid: false,
+          csvFiles: [],
+          error: 'Not all CSV files have the same metadata line'
+        };
+      }
       
       // Extract just the filename without path for display
       const displayName = fileName.split('/').pop() || fileName;
       
       csvFiles.push({
         name: displayName,
-        rowCount
+        rowCount,
+        columnNames
       });
     }
     
@@ -66,7 +89,8 @@ export async function extractZipMetadata(file: File): Promise<ZipMetadata> {
     
     return {
       isValid: true,
-      csvFiles
+      csvFiles,
+      metadataLine: zipMetadataLine
     };
   } catch (error) {
     return {
