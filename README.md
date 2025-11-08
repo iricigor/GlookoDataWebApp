@@ -1,5 +1,8 @@
 # GlookoDataWebApp
 
+[![Unit Tests](https://github.com/iricigor/GlookoDataWebApp/actions/workflows/test.yml/badge.svg)](https://github.com/iricigor/GlookoDataWebApp/actions/workflows/test.yml)
+[![Tests](https://img.shields.io/badge/tests-51%20passing-brightgreen)](https://github.com/iricigor/GlookoDataWebApp/actions/workflows/test.yml)
+
 A web app for importing, visualizing, and analyzing diabetes data exported from the Glooko platform. It extends the existing Glooko PowerShell module's capabilities by offering an interactive interface for streamlined data analysis and exploration.
 
 ## 📸 Application Preview
