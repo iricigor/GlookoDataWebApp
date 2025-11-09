@@ -10,9 +10,14 @@ import type { UploadedFile } from '../types';
  * Fluent UI color constants
  */
 const FLUENT_COLORS = {
-  NEUTRAL_GRAY_20: 'F3F2F1',    // Very light gray for header background
-  NEUTRAL_GRAY_190: '242424',   // Dark gray for header text
+  NEUTRAL_GRAY_20: 'F3F2F1',      // Very light gray for header background
+  LIGHT_BLUE_10: 'DEECF9',        // Very light, desaturated blue for header text
 };
+
+/**
+ * Font family for Excel cells
+ */
+const FONT_FAMILY = 'Segoe UI';
 
 /**
  * Number format codes
@@ -268,9 +273,10 @@ function calculateColumnWidth(data: (string | number)[], minWidth: number = 10):
  */
 function applyHeaderStyle(cell: ExcelJS.Cell): void {
   cell.font = {
+    name: FONT_FAMILY,
     bold: true,
     size: 11,
-    color: { argb: FLUENT_COLORS.NEUTRAL_GRAY_190 }
+    color: { argb: FLUENT_COLORS.LIGHT_BLUE_10 }
   };
   cell.fill = {
     type: 'pattern',
@@ -305,6 +311,9 @@ function populateSummaryWorksheet(worksheet: ExcelJS.Worksheet, summaryData: (st
   for (let rowIndex = 2; rowIndex <= worksheet.rowCount; rowIndex++) {
     const row = worksheet.getRow(rowIndex);
     row.eachCell((cell, colNumber) => {
+      // Apply Segoe UI font to all data cells
+      cell.font = { name: FONT_FAMILY };
+      
       // First column: left-aligned (dataset names)
       if (colNumber === 1) {
         cell.alignment = { horizontal: 'left', vertical: 'middle' };
@@ -377,6 +386,9 @@ function populateWorksheetFromCSV(worksheet: ExcelJS.Worksheet, csvContent: stri
     const row = worksheet.getRow(rowIndex);
     row.eachCell((cell, colNumber) => {
       const isNumeric = typeof cell.value === 'number';
+      
+      // Apply Segoe UI font to all data cells
+      cell.font = { name: FONT_FAMILY };
       
       // Apply alignment based on data type
       cell.alignment = {
