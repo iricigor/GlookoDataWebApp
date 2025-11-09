@@ -229,7 +229,7 @@ The production build can be deployed to:
 
 ## 📝 License
 
-This project is part of the Glooko data analysis ecosystem.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🔗 Related Projects
 
