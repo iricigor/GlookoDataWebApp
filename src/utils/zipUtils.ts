@@ -35,7 +35,34 @@ function extractBaseName(fileName: string): string {
 }
 
 /**
+ * Detect the delimiter used in CSV content
+ * Checks the header line (line 1) for tabs or commas
+ * 
+ * @param content - The CSV file content as string
+ * @returns The detected delimiter (tab or comma)
+ */
+function detectDelimiter(content: string): string {
+  const lines = content.trim().split('\n');
+  
+  if (lines.length < 2) {
+    return '\t'; // Default to tab
+  }
+  
+  // Check the header line (line 1) for delimiters
+  const headerLine = lines[1];
+  
+  // Count tabs and commas
+  const tabCount = (headerLine.match(/\t/g) || []).length;
+  const commaCount = (headerLine.match(/,/g) || []).length;
+  
+  // Use the delimiter that appears more frequently
+  // If equal or none found, default to tab (original behavior)
+  return commaCount > tabCount ? ',' : '\t';
+}
+
+/**
  * Extract metadata line and header from CSV content
+ * Automatically detects delimiter (tab or comma)
  * 
  * @param content - The CSV file content as string
  * @returns Object with metadata line, header columns, and row count
@@ -47,12 +74,15 @@ function parseCsvContent(content: string): { metadataLine: string; columnNames: 
   
   const lines = content.trim().split('\n');
   
+  // Detect delimiter
+  const delimiter = detectDelimiter(content);
+  
   // First line is metadata (e.g., "Name:Igor Irić	Date Range:2025-07-29 - 2025-10-26")
   const metadataLine = lines.length > 0 ? lines[0].trim() : '';
   
   // Second line is header with column names
   const headerLine = lines.length > 1 ? lines[1].trim() : '';
-  const columnNames = headerLine ? headerLine.split('\t').map(col => col.trim()).filter(col => col.length > 0) : [];
+  const columnNames = headerLine ? headerLine.split(delimiter).map(col => col.trim()).filter(col => col.length > 0) : [];
   
   // Remaining lines are data rows (subtract metadata line and header line)
   const rowCount = Math.max(0, lines.length - 2);

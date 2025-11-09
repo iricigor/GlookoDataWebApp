@@ -202,6 +202,122 @@ describe('xlsxUtils', () => {
       expect(bgData[0]).toContain('Glucose Value (mg/dL)');
     });
 
+    it('should split data into separate cells, not concatenate in column A', async () => {
+      // Create CSV with realistic alarm data like in the bug screenshot
+      const csvContent = `Name:Test User\tDate Range:2025-01-01 - 2025-12-31
+Timestamp\tAlarm/Event\tSerial Number
+2025-10-26 14:02\tResume Pump Alarm (18A)\t1266847
+2025-10-25 18:55\tdexcom_high_glucose_alert\tDexcom g7 (9042781)
+2025-10-25 17:52\ttandem_controliq_high\t1266847`;
+      
+      const csvFiles = {
+        'alarms_data_1.csv': csvContent,
+      };
+      
+      const uploadedFile = await createMockUploadedFile(csvFiles);
+      const xlsxBlob = await convertZipToXlsx(uploadedFile);
+      
+      // Parse the XLSX blob
+      const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      
+      // Get alarms sheet
+      const alarmsSheet = workbook.Sheets['alarms'];
+      
+      // Check raw cell values to see if data is properly split
+      // If bug exists, all data will be in column A (A1, A2, A3, etc.)
+      // If fixed, data will be in columns A, B, C
+      const cellA1 = alarmsSheet['A1'];
+      const cellB1 = alarmsSheet['B1'];
+      const cellC1 = alarmsSheet['C1'];
+      
+      // Debug: log cell values
+      console.log('Cell A1:', cellA1?.v);
+      console.log('Cell B1:', cellB1?.v);
+      console.log('Cell C1:', cellC1?.v);
+      
+      // The bug would cause B1 and C1 to be undefined because all data is in A1
+      expect(cellB1).toBeDefined();
+      expect(cellC1).toBeDefined();
+      
+      const alarmsData = XLSX.utils.sheet_to_json<string[]>(alarmsSheet, { header: 1 });
+      
+      // Verify header row has 3 separate values (not concatenated)
+      expect(alarmsData[0]).toHaveLength(3);
+      expect(alarmsData[0][0]).toBe('Timestamp');
+      expect(alarmsData[0][1]).toBe('Alarm/Event');
+      expect(alarmsData[0][2]).toBe('Serial Number');
+      
+      // Verify first data row has 3 separate values
+      expect(alarmsData[1]).toHaveLength(3);
+      expect(alarmsData[1][0]).toBe('2025-10-26 14:02');
+      expect(alarmsData[1][1]).toBe('Resume Pump Alarm (18A)');
+      expect(alarmsData[1][2]).toBe(1266847); // Number is parsed as number
+      
+      // Verify second data row
+      expect(alarmsData[2]).toHaveLength(3);
+      expect(alarmsData[2][0]).toBe('2025-10-25 18:55');
+      expect(alarmsData[2][1]).toBe('dexcom_high_glucose_alert');
+      expect(alarmsData[2][2]).toBe('Dexcom g7 (9042781)');
+      
+      // Verify third data row
+      expect(alarmsData[3]).toHaveLength(3);
+      expect(alarmsData[3][0]).toBe('2025-10-25 17:52');
+      expect(alarmsData[3][1]).toBe('tandem_controliq_high');
+      expect(alarmsData[3][2]).toBe(1266847); // Number is parsed as number
+    });
+
+    it('should handle comma-delimited CSV files (reproducing the bug)', async () => {
+      // Create CSV with COMMA delimiters like the user's actual data
+      // This reproduces the bug shown in the screenshot
+      const csvContent = `Name:Test User,Date Range:2025-01-01 - 2025-12-31
+Timestamp,Alarm/Event,Serial Number
+2025-10-26 14:02,Resume Pump Alarm (18A),1266847
+2025-10-25 18:55,dexcom_high_glucose_alert,Dexcom g7 (9042781)
+2025-10-25 17:52,tandem_controliq_high,1266847`;
+      
+      const csvFiles = {
+        'alarms_data_1.csv': csvContent,
+      };
+      
+      const uploadedFile = await createMockUploadedFile(csvFiles);
+      const xlsxBlob = await convertZipToXlsx(uploadedFile);
+      
+      // Parse the XLSX blob
+      const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      
+      // Get alarms sheet
+      const alarmsSheet = workbook.Sheets['alarms'];
+      
+      // Check if data is split into separate cells
+      const cellA1 = alarmsSheet['A1'];
+      const cellB1 = alarmsSheet['B1'];
+      const cellC1 = alarmsSheet['C1'];
+      
+      console.log('Comma-delimited - Cell A1:', cellA1?.v);
+      console.log('Comma-delimited - Cell B1:', cellB1?.v);
+      console.log('Comma-delimited - Cell C1:', cellC1?.v);
+      
+      // With comma delimiters, B1 and C1 should still be defined after fix
+      expect(cellB1).toBeDefined();
+      expect(cellC1).toBeDefined();
+      
+      const alarmsData = XLSX.utils.sheet_to_json<string[]>(alarmsSheet, { header: 1 });
+      
+      // Verify header row has 3 separate values
+      expect(alarmsData[0]).toHaveLength(3);
+      expect(alarmsData[0][0]).toBe('Timestamp');
+      expect(alarmsData[0][1]).toBe('Alarm/Event');
+      expect(alarmsData[0][2]).toBe('Serial Number');
+      
+      // Verify first data row has 3 separate values
+      expect(alarmsData[1]).toHaveLength(3);
+      expect(alarmsData[1][0]).toBe('2025-10-26 14:02');
+      expect(alarmsData[1][1]).toBe('Resume Pump Alarm (18A)');
+      expect(alarmsData[1][2]).toBe(1266847);
+    });
+
     it('should handle single dataset', async () => {
       const csvFiles = {
         'bg_data_1.csv': generateMockCsvContent('bg_data', 10),

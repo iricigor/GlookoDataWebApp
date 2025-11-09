@@ -152,7 +152,34 @@ function findCSVFileName(fileNames: string[], datasetName: string): string | und
 }
 
 /**
+ * Detect the delimiter used in CSV content
+ * Checks the header line (line 1) for tabs or commas
+ * 
+ * @param csvContent - The CSV file content as string
+ * @returns The detected delimiter (tab or comma)
+ */
+function detectDelimiter(csvContent: string): string {
+  const lines = csvContent.trim().split('\n');
+  
+  if (lines.length < 2) {
+    return '\t'; // Default to tab
+  }
+  
+  // Check the header line (line 1) for delimiters
+  const headerLine = lines[1];
+  
+  // Count tabs and commas
+  const tabCount = (headerLine.match(/\t/g) || []).length;
+  const commaCount = (headerLine.match(/,/g) || []).length;
+  
+  // Use the delimiter that appears more frequently
+  // If equal or none found, default to tab (original behavior)
+  return commaCount > tabCount ? ',' : '\t';
+}
+
+/**
  * Create a worksheet from CSV content
+ * Automatically detects delimiter (tab or comma)
  * 
  * @param csvContent - The CSV file content as string
  * @returns XLSX worksheet
@@ -160,12 +187,15 @@ function findCSVFileName(fileNames: string[], datasetName: string): string | und
 function createWorksheetFromCSV(csvContent: string): XLSX.WorkSheet {
   const lines = csvContent.trim().split('\n');
   
+  // Detect delimiter
+  const delimiter = detectDelimiter(csvContent);
+  
   // Skip metadata line (line 0), use header (line 1) and data (lines 2+)
   const relevantLines = lines.slice(1); // Skip metadata
   
-  // Parse tab-separated values
+  // Parse delimited values
   const data: (string | number)[][] = relevantLines.map(line => {
-    return line.split('\t').map(cell => {
+    return line.split(delimiter).map(cell => {
       const trimmed = cell.trim();
       // Try to parse as number
       const num = Number(trimmed);
