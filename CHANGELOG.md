@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Selected Data Package section now shows filename, patient name, and metadata in header, details collapsed by default
   - In Range report displays header with summary bar and legend inside collapsed section
 - AGP (Ambulatory Glucose Profile) report with statistical analysis
+  - Interactive AGP graph visualization showing glucose patterns over 24-hour period
+  - Percentile bands (10-90% and 25-75%) with median line for easy trend identification
+  - Target range indicators (3.9-10 mmol/L after-meal target) displayed on graph
   - Displays glucose statistics for each 5-minute period throughout the day (00:00 to 23:55)
   - Shows lowest, 10th, 25th, 50th (median), 75th, 90th percentiles, and highest values for each time slot
   - Calculates percentiles across all days for each time period
