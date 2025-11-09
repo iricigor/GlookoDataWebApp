@@ -7,6 +7,27 @@ import * as XLSX from 'xlsx';
 import type { UploadedFile } from '../types';
 
 /**
+ * Style definitions for Excel cells following Fluent UI design principles
+ */
+const HEADER_STYLE = {
+  font: { bold: true, sz: 11, color: { rgb: "242424" } }, // Fluent neutral gray 190
+  fill: { fgColor: { rgb: "F3F2F1" } }, // Fluent neutral gray 20 (very light)
+  alignment: { horizontal: "left", vertical: "center" }
+};
+
+const DATA_STYLE_LEFT = {
+  alignment: { horizontal: "left", vertical: "center" }
+};
+
+const DATA_STYLE_RIGHT = {
+  alignment: { horizontal: "right", vertical: "center" }
+};
+
+// Number format codes
+const NUMBER_FORMAT_INTEGER = '#,##0'; // Integer with thousands separator
+const NUMBER_FORMAT_ONE_DECIMAL = '#,##0.0'; // One decimal place with thousands separator
+
+/**
  * Convert a ZIP file to XLSX format
  * Each CSV dataset becomes a sheet, with a summary sheet as the first sheet
  * 
@@ -77,11 +98,8 @@ export async function convertZipToXlsx(uploadedFile: UploadedFile): Promise<Blob
   // Create summary worksheet
   const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryData);
   
-  // Set column widths for summary sheet
-  summaryWorksheet['!cols'] = [
-    { wch: 30 }, // Dataset Name
-    { wch: 20 }  // Number of Records
-  ];
+  // Apply formatting to summary sheet
+  applySummaryFormatting(summaryWorksheet);
   
   // Insert summary sheet at the beginning
   workbook.SheetNames.unshift('Summary');
@@ -90,7 +108,8 @@ export async function convertZipToXlsx(uploadedFile: UploadedFile): Promise<Blob
   // Generate XLSX file as array buffer
   const xlsxArrayBuffer = XLSX.write(workbook, {
     bookType: 'xlsx',
-    type: 'array'
+    type: 'array',
+    cellStyles: true  // Enable cell styling
   });
   
   // Convert to Blob
@@ -204,7 +223,12 @@ function createWorksheetFromCSV(csvContent: string): XLSX.WorkSheet {
   });
   
   // Create worksheet from array of arrays
-  return XLSX.utils.aoa_to_sheet(data);
+  const worksheet = XLSX.utils.aoa_to_sheet(data);
+  
+  // Apply formatting to the worksheet
+  applyDataSheetFormatting(worksheet, data);
+  
+  return worksheet;
 }
 
 /**
@@ -226,6 +250,179 @@ function sanitizeSheetName(name: string): string {
   
   return sanitized;
 }
+
+/**
+ * Determine if a column should use number formatting based on column name
+ * 
+ * @param columnName - The name of the column
+ * @returns Object with shouldFormat flag and format code
+ */
+function getColumnNumberFormat(columnName: string): { shouldFormat: boolean; format: string } {
+  const lowerName = columnName.toLowerCase();
+  
+  // Integer columns (counts, IDs, serial numbers)
+  if (lowerName.includes('count') || 
+      lowerName.includes('number of') ||
+      lowerName.includes('serial') ||
+      lowerName.includes('id')) {
+    return { shouldFormat: true, format: NUMBER_FORMAT_INTEGER };
+  }
+  
+  // Decimal columns (glucose, insulin, carbs, bg, cgm)
+  if (lowerName.includes('glucose') || 
+      lowerName.includes('insulin') ||
+      lowerName.includes('carb') ||
+      lowerName.includes('bg') ||
+      lowerName.includes('cgm') ||
+      lowerName.includes('dose') ||
+      lowerName.includes('value') ||
+      lowerName.includes('rate')) {
+    return { shouldFormat: true, format: NUMBER_FORMAT_ONE_DECIMAL };
+  }
+  
+  return { shouldFormat: false, format: '' };
+}
+
+/**
+ * Calculate optimal column width with padding
+ * 
+ * @param data - The data in the column
+ * @param minWidth - Minimum width
+ * @returns Column width
+ */
+function calculateColumnWidth(data: (string | number)[], minWidth: number = 10): number {
+  let maxLength = minWidth;
+  
+  for (const cell of data) {
+    const cellStr = cell?.toString() || '';
+    const cellLength = cellStr.length;
+    if (cellLength > maxLength) {
+      maxLength = cellLength;
+    }
+  }
+  
+  // Add padding (1-2 units as per requirements)
+  return maxLength + 2;
+}
+
+/**
+ * Apply formatting to the Summary sheet
+ * 
+ * @param worksheet - The worksheet to format
+ */
+function applySummaryFormatting(worksheet: XLSX.WorkSheet): void {
+  const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+  const colCount = range.e.c + 1;
+  
+  // Set column widths with padding
+  const colWidths: XLSX.ColInfo[] = [];
+  for (let col = 0; col <= range.e.c; col++) {
+    const columnData: (string | number)[] = [];
+    for (let row = 0; row <= range.e.r; row++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+      const cell = worksheet[cellAddress];
+      if (cell && cell.v !== undefined) {
+        columnData.push(cell.v);
+      }
+    }
+    colWidths.push({ wch: calculateColumnWidth(columnData, col === 0 ? 20 : 15) });
+  }
+  worksheet['!cols'] = colWidths;
+  
+  // Apply header styling (row 0)
+  for (let col = 0; col < colCount; col++) {
+    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+    const cell = worksheet[cellAddress];
+    if (cell) {
+      cell.s = HEADER_STYLE;
+    }
+  }
+  
+  // Apply data styling for data rows
+  for (let row = 1; row <= range.e.r; row++) {
+    for (let col = 0; col < colCount; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+      const cell = worksheet[cellAddress];
+      if (cell) {
+        // First column: left-aligned (dataset names)
+        // Second column: right-aligned with integer format (counts)
+        if (col === 0) {
+          cell.s = DATA_STYLE_LEFT;
+        } else {
+          cell.s = DATA_STYLE_RIGHT;
+          if (typeof cell.v === 'number') {
+            cell.z = NUMBER_FORMAT_INTEGER;
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Apply formatting to data sheets (individual CSV datasets)
+ * 
+ * @param worksheet - The worksheet to format
+ * @param data - The data array used to create the worksheet
+ */
+function applyDataSheetFormatting(worksheet: XLSX.WorkSheet, data: (string | number)[][]): void {
+  if (!worksheet['!ref'] || data.length === 0) return;
+  
+  const range = XLSX.utils.decode_range(worksheet['!ref']);
+  const colCount = range.e.c + 1;
+  const headerRow = data[0];
+  
+  // Determine number formats for each column based on header names
+  const columnFormats: { shouldFormat: boolean; format: string }[] = [];
+  for (let col = 0; col < colCount; col++) {
+    const headerCell = headerRow[col];
+    const columnName = headerCell?.toString() || '';
+    columnFormats.push(getColumnNumberFormat(columnName));
+  }
+  
+  // Calculate column widths with padding
+  const colWidths: XLSX.ColInfo[] = [];
+  for (let col = 0; col <= range.e.c; col++) {
+    const columnData: (string | number)[] = [];
+    for (let row = 0; row <= range.e.r; row++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+      const cell = worksheet[cellAddress];
+      if (cell && cell.v !== undefined) {
+        columnData.push(cell.v);
+      }
+    }
+    colWidths.push({ wch: calculateColumnWidth(columnData, 10) });
+  }
+  worksheet['!cols'] = colWidths;
+  
+  // Apply header styling (row 0)
+  for (let col = 0; col < colCount; col++) {
+    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+    const cell = worksheet[cellAddress];
+    if (cell) {
+      cell.s = HEADER_STYLE;
+    }
+  }
+  
+  // Apply data styling for data rows (row 1+)
+  for (let row = 1; row <= range.e.r; row++) {
+    for (let col = 0; col < colCount; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+      const cell = worksheet[cellAddress];
+      if (cell) {
+        // Determine alignment based on data type
+        const isNumeric = typeof cell.v === 'number';
+        cell.s = isNumeric ? DATA_STYLE_RIGHT : DATA_STYLE_LEFT;
+        
+        // Apply number format if applicable
+        if (isNumeric && columnFormats[col].shouldFormat) {
+          cell.z = columnFormats[col].format;
+        }
+      }
+    }
+  }
+}
+
 
 /**
  * Download XLSX file to user's computer

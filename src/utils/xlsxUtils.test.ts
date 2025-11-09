@@ -374,5 +374,105 @@ Timestamp,Alarm/Event,Serial Number
         expect(sheetName.length).toBeLessThanOrEqual(31);
       });
     });
+
+    it('should apply formatting to summary sheet headers', async () => {
+      const csvFiles = {
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 10),
+        'cgm_data_1.csv': generateMockCsvContent('cgm_data', 15),
+      };
+      
+      const uploadedFile = await createMockUploadedFile(csvFiles);
+      const xlsxBlob = await convertZipToXlsx(uploadedFile);
+      
+      // Parse the XLSX blob
+      const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
+      const workbook = XLSX.read(arrayBuffer, { type: 'array', cellStyles: true });
+      
+      // Get summary sheet
+      const summarySheet = workbook.Sheets['Summary'];
+      
+      // Check that header cells have styling
+      const headerCellA1 = summarySheet['A1'];
+      const headerCellB1 = summarySheet['B1'];
+      
+      // Headers should have style property
+      expect(headerCellA1.s).toBeDefined();
+      expect(headerCellB1.s).toBeDefined();
+      
+      // Verify header values
+      expect(headerCellA1.v).toBe('Dataset Name');
+      expect(headerCellB1.v).toBe('Number of Records');
+    });
+
+    it('should apply number formatting to summary sheet counts', async () => {
+      const csvFiles = {
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 1234),
+      };
+      
+      const uploadedFile = await createMockUploadedFile(csvFiles);
+      const xlsxBlob = await convertZipToXlsx(uploadedFile);
+      
+      // Parse the XLSX blob
+      const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
+      const workbook = XLSX.read(arrayBuffer, { type: 'array', cellStyles: true });
+      
+      // Get summary sheet
+      const summarySheet = workbook.Sheets['Summary'];
+      
+      // Check the count cell (B2)
+      const countCell = summarySheet['B2'];
+      
+      // Should have number format with thousands separator
+      expect(countCell.v).toBe(1234);
+      expect(countCell.z).toBeDefined();
+      expect(countCell.z).toContain('#,##0');
+    });
+
+    it('should set appropriate column widths with padding', async () => {
+      const csvFiles = {
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 10),
+      };
+      
+      const uploadedFile = await createMockUploadedFile(csvFiles);
+      const xlsxBlob = await convertZipToXlsx(uploadedFile);
+      
+      // Parse the XLSX blob
+      const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
+      const workbook = XLSX.read(arrayBuffer, { type: 'array', cellStyles: true });
+      
+      // Check summary sheet has column widths set
+      const summarySheet = workbook.Sheets['Summary'];
+      expect(summarySheet['!cols']).toBeDefined();
+      expect(summarySheet['!cols']!.length).toBeGreaterThan(0);
+      
+      // Check data sheets have column widths
+      const bgSheet = workbook.Sheets['bg'];
+      expect(bgSheet['!cols']).toBeDefined();
+      expect(bgSheet['!cols']!.length).toBeGreaterThan(0);
+    });
+
+    it('should apply formatting to data sheet headers', async () => {
+      const csvFiles = {
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 5),
+      };
+      
+      const uploadedFile = await createMockUploadedFile(csvFiles);
+      const xlsxBlob = await convertZipToXlsx(uploadedFile);
+      
+      // Parse the XLSX blob
+      const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
+      const workbook = XLSX.read(arrayBuffer, { type: 'array', cellStyles: true });
+      
+      // Get bg sheet
+      const bgSheet = workbook.Sheets['bg'];
+      
+      // Check that header cells have styling
+      const headerCellA1 = bgSheet['A1'];
+      const headerCellB1 = bgSheet['B1'];
+      
+      // Headers should have style property
+      expect(headerCellA1.s).toBeDefined();
+      expect(headerCellB1.s).toBeDefined();
+    });
   });
 });
