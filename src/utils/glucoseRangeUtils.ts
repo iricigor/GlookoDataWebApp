@@ -7,6 +7,7 @@ import type {
   GlucoseRangeStats,
   DayOfWeekReport,
   DailyReport,
+  WeeklyReport,
   RangeCategoryMode,
   DayOfWeek,
   GlucoseThresholds,
@@ -216,6 +217,98 @@ export function groupByDate(
       date,
       stats: calculateGlucoseRangeStats(dateGroups[date], thresholds, mode),
     }));
+
+  return reports;
+}
+
+/**
+ * Get the start of the week (Monday) for a given date
+ * 
+ * @param date - Date object
+ * @returns Date object representing the Monday of that week
+ */
+export function getWeekStart(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+  return new Date(d.setDate(diff));
+}
+
+/**
+ * Get the end of the week (Sunday) for a given date
+ * 
+ * @param date - Date object
+ * @returns Date object representing the Sunday of that week
+ */
+export function getWeekEnd(date: Date): Date {
+  const weekStart = getWeekStart(date);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  return weekEnd;
+}
+
+/**
+ * Format a week range as "MMM D-D" (e.g., "Oct 6-12")
+ * 
+ * @param startDate - Week start date
+ * @param endDate - Week end date
+ * @returns Formatted week range string
+ */
+export function formatWeekRange(startDate: Date, endDate: Date): string {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const startMonth = months[startDate.getMonth()];
+  const startDay = startDate.getDate();
+  const endDay = endDate.getDate();
+  
+  // If in same month
+  if (startDate.getMonth() === endDate.getMonth()) {
+    return `${startMonth} ${startDay}-${endDay}`;
+  } else {
+    // Different months
+    const endMonth = months[endDate.getMonth()];
+    return `${startMonth} ${startDay}-${endMonth} ${endDay}`;
+  }
+}
+
+/**
+ * Group glucose readings by week
+ * 
+ * @param readings - Array of glucose readings
+ * @param thresholds - Glucose thresholds
+ * @param mode - 3 or 5 category mode
+ * @returns Array of weekly reports sorted by date
+ */
+export function groupByWeek(
+  readings: GlucoseReading[],
+  thresholds: GlucoseThresholds,
+  mode: RangeCategoryMode = 3
+): WeeklyReport[] {
+  // Group readings by week
+  const weekGroups: Record<string, GlucoseReading[]> = {};
+
+  readings.forEach(reading => {
+    const weekStart = getWeekStart(reading.timestamp);
+    const weekKey = formatDate(weekStart);
+    if (!weekGroups[weekKey]) {
+      weekGroups[weekKey] = [];
+    }
+    weekGroups[weekKey].push(reading);
+  });
+
+  // Calculate stats for each week and sort
+  const reports: WeeklyReport[] = Object.keys(weekGroups)
+    .sort() // Sort weeks chronologically
+    .map(weekStartKey => {
+      const weekStartDate = new Date(weekStartKey);
+      const weekEndDate = getWeekEnd(weekStartDate);
+      
+      return {
+        weekLabel: formatWeekRange(weekStartDate, weekEndDate),
+        weekStart: weekStartKey,
+        weekEnd: formatDate(weekEndDate),
+        stats: calculateGlucoseRangeStats(weekGroups[weekStartKey], thresholds, mode),
+      };
+    });
 
   return reports;
 }

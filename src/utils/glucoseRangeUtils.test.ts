@@ -11,6 +11,10 @@ import {
   groupByDayOfWeek,
   formatDate,
   groupByDate,
+  getWeekStart,
+  getWeekEnd,
+  formatWeekRange,
+  groupByWeek,
   calculatePercentage,
 } from './glucoseRangeUtils';
 import type { GlucoseReading, GlucoseThresholds } from '../types';
@@ -245,6 +249,134 @@ describe('glucoseRangeUtils', () => {
 
     it('should handle zero count', () => {
       expect(calculatePercentage(0, 100)).toBe(0);
+    });
+  });
+
+  describe('getWeekStart', () => {
+    it('should return Monday for any day in the week', () => {
+      // Week of Jan 6-12, 2025 (Monday to Sunday)
+      expect(formatDate(getWeekStart(new Date('2025-01-06')))).toBe('2025-01-06'); // Monday
+      expect(formatDate(getWeekStart(new Date('2025-01-07')))).toBe('2025-01-06'); // Tuesday
+      expect(formatDate(getWeekStart(new Date('2025-01-08')))).toBe('2025-01-06'); // Wednesday
+      expect(formatDate(getWeekStart(new Date('2025-01-09')))).toBe('2025-01-06'); // Thursday
+      expect(formatDate(getWeekStart(new Date('2025-01-10')))).toBe('2025-01-06'); // Friday
+      expect(formatDate(getWeekStart(new Date('2025-01-11')))).toBe('2025-01-06'); // Saturday
+      expect(formatDate(getWeekStart(new Date('2025-01-12')))).toBe('2025-01-06'); // Sunday
+    });
+
+    it('should handle week crossing year boundary', () => {
+      // Week of Dec 30, 2024 - Jan 5, 2025
+      expect(formatDate(getWeekStart(new Date('2025-01-01')))).toBe('2024-12-30'); // Wednesday
+    });
+  });
+
+  describe('getWeekEnd', () => {
+    it('should return Sunday for any day in the week', () => {
+      // Week of Jan 6-12, 2025
+      expect(formatDate(getWeekEnd(new Date('2025-01-06')))).toBe('2025-01-12'); // Monday
+      expect(formatDate(getWeekEnd(new Date('2025-01-07')))).toBe('2025-01-12'); // Tuesday
+      expect(formatDate(getWeekEnd(new Date('2025-01-12')))).toBe('2025-01-12'); // Sunday
+    });
+  });
+
+  describe('formatWeekRange', () => {
+    it('should format week range within same month', () => {
+      const start = new Date('2025-01-06'); // Jan 6 (Monday)
+      const end = new Date('2025-01-12');   // Jan 12 (Sunday)
+      expect(formatWeekRange(start, end)).toBe('Jan 6-12');
+    });
+
+    it('should format week range across different months', () => {
+      const start = new Date('2025-01-27'); // Jan 27 (Monday)
+      const end = new Date('2025-02-02');   // Feb 2 (Sunday)
+      expect(formatWeekRange(start, end)).toBe('Jan 27-Feb 2');
+    });
+
+    it('should format week range in October (as per requirement example)', () => {
+      const start = new Date('2024-10-07'); // Oct 7 (Monday)
+      const end = new Date('2024-10-13');   // Oct 13 (Sunday)
+      expect(formatWeekRange(start, end)).toBe('Oct 7-13');
+    });
+  });
+
+  describe('groupByWeek', () => {
+    it('should group readings by week', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2025-01-06T10:00:00'), value: 100 }, // Week 1 (Jan 6-12)
+        { timestamp: new Date('2025-01-06T14:00:00'), value: 150 }, // Week 1
+        { timestamp: new Date('2025-01-08T10:00:00'), value: 120 }, // Week 1
+        { timestamp: new Date('2025-01-13T10:00:00'), value: 180 }, // Week 2 (Jan 13-19)
+        { timestamp: new Date('2025-01-14T10:00:00'), value: 200 }, // Week 2
+      ];
+
+      const reports = groupByWeek(readings, standardThresholds, 3);
+
+      expect(reports).toHaveLength(2);
+      
+      // First week
+      expect(reports[0].weekStart).toBe('2025-01-06');
+      expect(reports[0].weekEnd).toBe('2025-01-12');
+      expect(reports[0].weekLabel).toBe('Jan 6-12');
+      expect(reports[0].stats.total).toBe(3);
+
+      // Second week
+      expect(reports[1].weekStart).toBe('2025-01-13');
+      expect(reports[1].weekEnd).toBe('2025-01-19');
+      expect(reports[1].weekLabel).toBe('Jan 13-19');
+      expect(reports[1].stats.total).toBe(2);
+    });
+
+    it('should sort reports by week chronologically', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2025-01-15T10:00:00'), value: 100 }, // Week 2
+        { timestamp: new Date('2025-01-08T10:00:00'), value: 150 }, // Week 1
+        { timestamp: new Date('2025-01-22T10:00:00'), value: 120 }, // Week 3
+      ];
+
+      const reports = groupByWeek(readings, standardThresholds, 3);
+
+      expect(reports).toHaveLength(3);
+      expect(reports[0].weekStart).toBe('2025-01-06');
+      expect(reports[1].weekStart).toBe('2025-01-13');
+      expect(reports[2].weekStart).toBe('2025-01-20');
+    });
+
+    it('should handle week spanning across months', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2025-01-27T10:00:00'), value: 100 },
+        { timestamp: new Date('2025-02-01T10:00:00'), value: 150 },
+      ];
+
+      const reports = groupByWeek(readings, standardThresholds, 3);
+
+      expect(reports).toHaveLength(1);
+      expect(reports[0].weekLabel).toBe('Jan 27-Feb 2');
+      expect(reports[0].stats.total).toBe(2);
+    });
+
+    it('should handle empty readings array', () => {
+      const reports = groupByWeek([], standardThresholds, 3);
+      expect(reports).toHaveLength(0);
+    });
+
+    it('should correctly calculate stats in 5-category mode', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2025-01-06T10:00:00'), value: 50 },  // veryLow
+        { timestamp: new Date('2025-01-06T11:00:00'), value: 60 },  // low
+        { timestamp: new Date('2025-01-06T12:00:00'), value: 100 }, // inRange
+        { timestamp: new Date('2025-01-06T13:00:00'), value: 200 }, // high
+        { timestamp: new Date('2025-01-06T14:00:00'), value: 300 }, // veryHigh
+      ];
+
+      const reports = groupByWeek(readings, standardThresholds, 5);
+
+      expect(reports).toHaveLength(1);
+      expect(reports[0].stats.veryLow).toBe(1);
+      expect(reports[0].stats.low).toBe(1);
+      expect(reports[0].stats.inRange).toBe(1);
+      expect(reports[0].stats.high).toBe(1);
+      expect(reports[0].stats.veryHigh).toBe(1);
+      expect(reports[0].stats.total).toBe(5);
     });
   });
 });

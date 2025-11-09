@@ -149,6 +149,16 @@ export interface DailyReport {
 }
 
 /**
+ * Glucose range report by week
+ */
+export interface WeeklyReport {
+  weekLabel: string; // e.g., "Oct 6-12"
+  weekStart: string; // YYYY-MM-DD format
+  weekEnd: string;   // YYYY-MM-DD format
+  stats: GlucoseRangeStats;
+}
+
+/**
  * Parsed glucose reading from CSV data
  */
 export interface GlucoseReading {
