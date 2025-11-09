@@ -30,6 +30,7 @@ When creating a pull request:
 - [1.0.90] Add version information and build ID tracking system (PR #90)
 
 ### Fixes
+- [1.0.buildId] Update README test count badge from 51 to 122 passing tests (Issue #TBD)
 
 ### Documentation
 - [1.0.buildId] Add CHANGELOG.md file and update copilot instructions to require changelog updates in each PR (Issue #91)
