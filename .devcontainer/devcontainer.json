@@ -1,6 +1,11 @@
 {
   "name": "GlookoDataWebApp Dev Container",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "features": {
+    "ghcr.io/devcontainers/features/git-lfs:1": {
+      "version": "latest"
+    }
+  },
   "postCreateCommand": "npm install",
   "forwardPorts": [5173],
   "portsAttributes": {
