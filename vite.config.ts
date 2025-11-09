@@ -11,5 +11,8 @@ export default defineConfig({
     hmr: {
       clientPort: 443 // Required for Codespaces port forwarding over HTTPS
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 1000 // Increase chunk size warning limit to 1000 kB
   }
 })
