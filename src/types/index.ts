@@ -94,3 +94,64 @@ export interface GlucoseThresholds {
   low: number;
   veryLow: number;
 }
+
+/**
+ * Glucose data source type
+ */
+export type GlucoseDataSource = 'cgm' | 'bg';
+
+/**
+ * Glucose range category mode (3 or 5 categories)
+ */
+export type RangeCategoryMode = 3 | 5;
+
+/**
+ * Glucose range category for 3-category mode
+ */
+export type GlucoseRangeCategory3 = 'low' | 'inRange' | 'high';
+
+/**
+ * Glucose range category for 5-category mode
+ */
+export type GlucoseRangeCategory5 = 'veryLow' | 'low' | 'inRange' | 'high' | 'veryHigh';
+
+/**
+ * Glucose range statistics
+ */
+export interface GlucoseRangeStats {
+  veryLow?: number;  // Count or percentage (only for 5-category mode)
+  low: number;       // Count or percentage
+  inRange: number;   // Count or percentage
+  high: number;      // Count or percentage
+  veryHigh?: number; // Count or percentage (only for 5-category mode)
+  total: number;     // Total number of readings
+}
+
+/**
+ * Day of week identifier
+ */
+export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday' | 'Workday' | 'Weekend';
+
+/**
+ * Glucose range report by day of week
+ */
+export interface DayOfWeekReport {
+  day: DayOfWeek;
+  stats: GlucoseRangeStats;
+}
+
+/**
+ * Glucose range report by date
+ */
+export interface DailyReport {
+  date: string; // YYYY-MM-DD format
+  stats: GlucoseRangeStats;
+}
+
+/**
+ * Parsed glucose reading from CSV data
+ */
+export interface GlucoseReading {
+  timestamp: Date;
+  value: number; // Glucose value in mg/dL
+}
