@@ -163,5 +163,20 @@ export interface WeeklyReport {
  */
 export interface GlucoseReading {
   timestamp: Date;
-  value: number; // Glucose value in mg/dL
+  value: number; // Glucose value in mmol/L
+}
+
+/**
+ * AGP (Ambulatory Glucose Profile) statistics for a 5-minute time period
+ */
+export interface AGPTimeSlotStats {
+  timeSlot: string; // HH:MM format (e.g., "00:00", "00:05", "00:10")
+  lowest: number;   // Minimum glucose value in mmol/L
+  p10: number;      // 10th percentile in mmol/L
+  p25: number;      // 25th percentile in mmol/L
+  p50: number;      // 50th percentile (median) in mmol/L
+  p75: number;      // 75th percentile in mmol/L
+  p90: number;      // 90th percentile in mmol/L
+  highest: number;  // Maximum glucose value in mmol/L
+  count: number;    // Number of readings in this time slot
 }

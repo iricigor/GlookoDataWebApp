@@ -20,7 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#114](../../pull/114) Optimize Reports page with collapsible sections for better organization and scalability
   - Selected Data Package section now shows filename, patient name, and metadata in header, details collapsed by default
   - In Range report displays header with summary bar and legend inside collapsed section
-- [#XXX](../../pull/XXX) Add AGP Data report placeholder with "Coming soon" message
+- AGP (Ambulatory Glucose Profile) report with statistical analysis
+  - Displays glucose statistics for each 5-minute period throughout the day (00:00 to 23:55)
+  - Shows lowest, 10th, 25th, 50th (median), 75th, 90th percentiles, and highest values for each time slot
+  - Calculates percentiles across all days for each time period
+  - Supports both CGM and BG data sources
+  - Includes comprehensive unit tests for AGP calculations
 - In-Range Report feature with glucose range analysis by day of week and by date
 - Add weekly grouping report showing glucose ranges by week (e.g., "Oct 6-12")
 - Add summary section with horizontal colored bar chart showing overall glucose distribution

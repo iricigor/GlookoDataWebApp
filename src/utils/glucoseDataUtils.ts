@@ -37,7 +37,7 @@ function parseGlucoseReadingsFromCSV(csvContent: string, delimiter: string = '\t
   const glucoseHeader = headers[glucoseIndex];
   const isMMOL = glucoseHeader.toLowerCase().includes('mmol/l') || 
                  glucoseHeader.toLowerCase().includes('mmol');
-  const conversionFactor = isMMOL ? 18.018 : 1.0; // Convert mmol/L to mg/dL if needed
+  const conversionFactor = isMMOL ? 1.0 : 1.0 / 18.018; // Convert mg/dL to mmol/L if needed
 
   const readings: GlucoseReading[] = [];
 
@@ -57,11 +57,11 @@ function parseGlucoseReadingsFromCSV(csvContent: string, delimiter: string = '\t
     const timestamp = new Date(timestampStr);
     if (isNaN(timestamp.getTime())) continue;
 
-    // Parse glucose value and convert to mg/dL if necessary
+    // Parse glucose value and convert to mmol/L if necessary
     let value = parseFloat(glucoseStr);
     if (isNaN(value) || value <= 0) continue;
     
-    // Convert mmol/L to mg/dL for consistent comparison
+    // Convert mg/dL to mmol/L if needed for consistent storage in mmol/L
     value = value * conversionFactor;
 
     readings.push({ timestamp, value });
