@@ -6,6 +6,7 @@ import {
 } from '@fluentui/react-components';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { InRangeReport } from '../components/InRangeReport';
+import { AGPReport } from '../components/AGPReport';
 import type { UploadedFile } from '../types';
 
 const useStyles = makeStyles({
@@ -62,6 +63,7 @@ export function Reports({ selectedFile }: ReportsProps) {
 
       <div className={styles.content}>
         <InRangeReport selectedFile={selectedFile} />
+        <AGPReport selectedFile={selectedFile} />
       </div>
     </div>
   );
