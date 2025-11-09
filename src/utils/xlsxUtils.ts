@@ -1,34 +1,27 @@
 /**
- * Utility functions for XLSX file generation
+ * Utility functions for XLSX file generation using ExcelJS
  */
 
 import JSZip from 'jszip';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import type { UploadedFile } from '../types';
 
 /**
- * Style definitions for Excel cells following Fluent UI design principles
+ * Fluent UI color constants
  */
-const HEADER_STYLE = {
-  font: { bold: true, sz: 11, color: { rgb: "242424" } }, // Fluent neutral gray 190
-  fill: { fgColor: { rgb: "F3F2F1" } }, // Fluent neutral gray 20 (very light)
-  alignment: { horizontal: "left", vertical: "center" }
+const FLUENT_COLORS = {
+  NEUTRAL_GRAY_20: 'F3F2F1',    // Very light gray for header background
+  NEUTRAL_GRAY_190: '242424',   // Dark gray for header text
 };
 
-const DATA_STYLE_LEFT = {
-  alignment: { horizontal: "left", vertical: "center" }
-};
-
-const DATA_STYLE_RIGHT = {
-  alignment: { horizontal: "right", vertical: "center" }
-};
-
-// Number format codes
+/**
+ * Number format codes
+ */
 const NUMBER_FORMAT_INTEGER = '#,##0'; // Integer with thousands separator
 const NUMBER_FORMAT_ONE_DECIMAL = '#,##0.0'; // One decimal place with thousands separator
 
 /**
- * Convert a ZIP file to XLSX format
+ * Convert a ZIP file to XLSX format using ExcelJS
  * Each CSV dataset becomes a sheet, with a summary sheet as the first sheet
  * 
  * @param uploadedFile - The uploaded file with ZIP metadata
@@ -42,8 +35,10 @@ export async function convertZipToXlsx(uploadedFile: UploadedFile): Promise<Blob
   // Load the ZIP file
   const zip = await JSZip.loadAsync(uploadedFile.file);
   
-  // Create a new workbook
-  const workbook = XLSX.utils.book_new();
+  // Create a new workbook with ExcelJS
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'GlookoDataWebApp';
+  workbook.created = new Date();
   
   // Prepare summary data
   const summaryData: (string | number)[][] = [
@@ -52,6 +47,9 @@ export async function convertZipToXlsx(uploadedFile: UploadedFile): Promise<Blob
   
   // Get all CSV files from the ZIP
   const csvFiles = uploadedFile.zipMetadata.csvFiles;
+  
+  // Collect data for summary
+  const dataSheets: { name: string; content: string }[] = [];
   
   // Process each dataset
   for (const csvFile of csvFiles) {
@@ -85,35 +83,28 @@ export async function convertZipToXlsx(uploadedFile: UploadedFile): Promise<Blob
     }
     
     if (csvContent) {
-      // Parse CSV content and create worksheet
-      const worksheet = createWorksheetFromCSV(csvContent);
-      
-      // Add worksheet to workbook with dataset name as sheet name
-      // Sanitize sheet name (Excel limits: max 31 chars, no special chars)
-      const sheetName = sanitizeSheetName(csvFile.name);
-      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      dataSheets.push({
+        name: sanitizeSheetName(csvFile.name),
+        content: csvContent
+      });
     }
   }
   
-  // Create summary worksheet
-  const summaryWorksheet = XLSX.utils.aoa_to_sheet(summaryData);
+  // Create summary worksheet as first sheet
+  const summaryWorksheet = workbook.addWorksheet('Summary');
+  populateSummaryWorksheet(summaryWorksheet, summaryData);
   
-  // Apply formatting to summary sheet
-  applySummaryFormatting(summaryWorksheet);
+  // Create data sheets
+  for (const sheet of dataSheets) {
+    const worksheet = workbook.addWorksheet(sheet.name);
+    populateWorksheetFromCSV(worksheet, sheet.content);
+  }
   
-  // Insert summary sheet at the beginning
-  workbook.SheetNames.unshift('Summary');
-  workbook.Sheets['Summary'] = summaryWorksheet;
-  
-  // Generate XLSX file as array buffer
-  const xlsxArrayBuffer = XLSX.write(workbook, {
-    bookType: 'xlsx',
-    type: 'array',
-    cellStyles: true  // Enable cell styling
-  });
+  // Generate XLSX file as buffer
+  const buffer = await workbook.xlsx.writeBuffer();
   
   // Convert to Blob
-  return new Blob([xlsxArrayBuffer], {
+  return new Blob([buffer], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
   });
 }
@@ -197,41 +188,6 @@ function detectDelimiter(csvContent: string): string {
 }
 
 /**
- * Create a worksheet from CSV content
- * Automatically detects delimiter (tab or comma)
- * 
- * @param csvContent - The CSV file content as string
- * @returns XLSX worksheet
- */
-function createWorksheetFromCSV(csvContent: string): XLSX.WorkSheet {
-  const lines = csvContent.trim().split('\n');
-  
-  // Detect delimiter
-  const delimiter = detectDelimiter(csvContent);
-  
-  // Skip metadata line (line 0), use header (line 1) and data (lines 2+)
-  const relevantLines = lines.slice(1); // Skip metadata
-  
-  // Parse delimited values
-  const data: (string | number)[][] = relevantLines.map(line => {
-    return line.split(delimiter).map(cell => {
-      const trimmed = cell.trim();
-      // Try to parse as number
-      const num = Number(trimmed);
-      return !isNaN(num) && trimmed !== '' ? num : trimmed;
-    });
-  });
-  
-  // Create worksheet from array of arrays
-  const worksheet = XLSX.utils.aoa_to_sheet(data);
-  
-  // Apply formatting to the worksheet
-  applyDataSheetFormatting(worksheet, data);
-  
-  return worksheet;
-}
-
-/**
  * Sanitize sheet name to meet Excel requirements
  * - Max 31 characters
  * - No special characters: \ / * ? [ ] :
@@ -306,121 +262,149 @@ function calculateColumnWidth(data: (string | number)[], minWidth: number = 10):
 }
 
 /**
- * Apply formatting to the Summary sheet
+ * Apply header styling to a cell following Fluent UI design principles
  * 
- * @param worksheet - The worksheet to format
+ * @param cell - The ExcelJS cell to style
  */
-function applySummaryFormatting(worksheet: XLSX.WorkSheet): void {
-  const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
-  const colCount = range.e.c + 1;
-  
-  // Set column widths with padding
-  const colWidths: XLSX.ColInfo[] = [];
-  for (let col = 0; col <= range.e.c; col++) {
-    const columnData: (string | number)[] = [];
-    for (let row = 0; row <= range.e.r; row++) {
-      const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-      const cell = worksheet[cellAddress];
-      if (cell && cell.v !== undefined) {
-        columnData.push(cell.v);
-      }
-    }
-    colWidths.push({ wch: calculateColumnWidth(columnData, col === 0 ? 20 : 15) });
-  }
-  worksheet['!cols'] = colWidths;
-  
-  // Apply header styling (row 0)
-  for (let col = 0; col < colCount; col++) {
-    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-    const cell = worksheet[cellAddress];
-    if (cell) {
-      cell.s = HEADER_STYLE;
-    }
-  }
-  
-  // Apply data styling for data rows
-  for (let row = 1; row <= range.e.r; row++) {
-    for (let col = 0; col < colCount; col++) {
-      const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-      const cell = worksheet[cellAddress];
-      if (cell) {
-        // First column: left-aligned (dataset names)
-        // Second column: right-aligned with integer format (counts)
-        if (col === 0) {
-          cell.s = DATA_STYLE_LEFT;
-        } else {
-          cell.s = DATA_STYLE_RIGHT;
-          if (typeof cell.v === 'number') {
-            cell.z = NUMBER_FORMAT_INTEGER;
-          }
-        }
-      }
-    }
-  }
+function applyHeaderStyle(cell: ExcelJS.Cell): void {
+  cell.font = {
+    bold: true,
+    size: 11,
+    color: { argb: FLUENT_COLORS.NEUTRAL_GRAY_190 }
+  };
+  cell.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: FLUENT_COLORS.NEUTRAL_GRAY_20 }
+  };
+  cell.alignment = {
+    horizontal: 'left',
+    vertical: 'middle'
+  };
 }
 
 /**
- * Apply formatting to data sheets (individual CSV datasets)
+ * Populate summary worksheet with data and formatting
  * 
- * @param worksheet - The worksheet to format
- * @param data - The data array used to create the worksheet
+ * @param worksheet - The ExcelJS worksheet
+ * @param summaryData - Array of arrays containing summary data
  */
-function applyDataSheetFormatting(worksheet: XLSX.WorkSheet, data: (string | number)[][]): void {
-  if (!worksheet['!ref'] || data.length === 0) return;
+function populateSummaryWorksheet(worksheet: ExcelJS.Worksheet, summaryData: (string | number)[][]): void {
+  // Add all rows
+  summaryData.forEach(row => {
+    worksheet.addRow(row);
+  });
   
-  const range = XLSX.utils.decode_range(worksheet['!ref']);
-  const colCount = range.e.c + 1;
+  // Apply header formatting to first row
+  const headerRow = worksheet.getRow(1);
+  headerRow.eachCell((cell) => {
+    applyHeaderStyle(cell);
+  });
+  
+  // Apply data styling and formatting
+  for (let rowIndex = 2; rowIndex <= worksheet.rowCount; rowIndex++) {
+    const row = worksheet.getRow(rowIndex);
+    row.eachCell((cell, colNumber) => {
+      // First column: left-aligned (dataset names)
+      if (colNumber === 1) {
+        cell.alignment = { horizontal: 'left', vertical: 'middle' };
+      } else {
+        // Second column: right-aligned with integer format (counts)
+        cell.alignment = { horizontal: 'right', vertical: 'middle' };
+        if (typeof cell.value === 'number') {
+          cell.numFmt = NUMBER_FORMAT_INTEGER;
+        }
+      }
+    });
+  }
+  
+  // Set column widths with padding
+  worksheet.columns = [
+    { width: calculateColumnWidth(['Dataset Name', ...summaryData.slice(1).map(r => r[0])], 20) },
+    { width: calculateColumnWidth(['Number of Records', ...summaryData.slice(1).map(r => r[1])], 15) }
+  ];
+}
+
+/**
+ * Populate worksheet from CSV content with proper formatting
+ * 
+ * @param worksheet - The ExcelJS worksheet
+ * @param csvContent - The CSV file content as string
+ */
+function populateWorksheetFromCSV(worksheet: ExcelJS.Worksheet, csvContent: string): void {
+  const lines = csvContent.trim().split('\n');
+  
+  // Detect delimiter
+  const delimiter = detectDelimiter(csvContent);
+  
+  // Skip metadata line (line 0), use header (line 1) and data (lines 2+)
+  const relevantLines = lines.slice(1); // Skip metadata
+  
+  // Parse delimited values
+  const data: (string | number)[][] = relevantLines.map(line => {
+    return line.split(delimiter).map(cell => {
+      const trimmed = cell.trim();
+      // Try to parse as number
+      const num = Number(trimmed);
+      return !isNaN(num) && trimmed !== '' ? num : trimmed;
+    });
+  });
+  
+  if (data.length === 0) return;
+  
   const headerRow = data[0];
   
   // Determine number formats for each column based on header names
   const columnFormats: { shouldFormat: boolean; format: string }[] = [];
-  for (let col = 0; col < colCount; col++) {
-    const headerCell = headerRow[col];
-    const columnName = headerCell?.toString() || '';
+  for (let col = 0; col < headerRow.length; col++) {
+    const columnName = headerRow[col]?.toString() || '';
     columnFormats.push(getColumnNumberFormat(columnName));
   }
   
-  // Calculate column widths with padding
-  const colWidths: XLSX.ColInfo[] = [];
-  for (let col = 0; col <= range.e.c; col++) {
+  // Add all rows to worksheet
+  data.forEach(row => {
+    worksheet.addRow(row);
+  });
+  
+  // Apply header formatting to first row
+  const firstRow = worksheet.getRow(1);
+  firstRow.eachCell((cell) => {
+    applyHeaderStyle(cell);
+  });
+  
+  // Apply data styling and formatting
+  for (let rowIndex = 2; rowIndex <= worksheet.rowCount; rowIndex++) {
+    const row = worksheet.getRow(rowIndex);
+    row.eachCell((cell, colNumber) => {
+      const isNumeric = typeof cell.value === 'number';
+      
+      // Apply alignment based on data type
+      cell.alignment = {
+        horizontal: isNumeric ? 'right' : 'left',
+        vertical: 'middle'
+      };
+      
+      // Apply number format if applicable
+      const colIndex = colNumber - 1; // Convert to 0-based index
+      if (isNumeric && columnFormats[colIndex]?.shouldFormat) {
+        cell.numFmt = columnFormats[colIndex].format;
+      }
+    });
+  }
+  
+  // Calculate and set column widths with padding
+  const columnWidths: number[] = [];
+  for (let colIndex = 0; colIndex < headerRow.length; colIndex++) {
     const columnData: (string | number)[] = [];
-    for (let row = 0; row <= range.e.r; row++) {
-      const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-      const cell = worksheet[cellAddress];
-      if (cell && cell.v !== undefined) {
-        columnData.push(cell.v);
+    for (let rowIndex = 0; rowIndex < data.length; rowIndex++) {
+      if (data[rowIndex][colIndex] !== undefined) {
+        columnData.push(data[rowIndex][colIndex]);
       }
     }
-    colWidths.push({ wch: calculateColumnWidth(columnData, 10) });
-  }
-  worksheet['!cols'] = colWidths;
-  
-  // Apply header styling (row 0)
-  for (let col = 0; col < colCount; col++) {
-    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-    const cell = worksheet[cellAddress];
-    if (cell) {
-      cell.s = HEADER_STYLE;
-    }
+    columnWidths.push(calculateColumnWidth(columnData, 10));
   }
   
-  // Apply data styling for data rows (row 1+)
-  for (let row = 1; row <= range.e.r; row++) {
-    for (let col = 0; col < colCount; col++) {
-      const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-      const cell = worksheet[cellAddress];
-      if (cell) {
-        // Determine alignment based on data type
-        const isNumeric = typeof cell.v === 'number';
-        cell.s = isNumeric ? DATA_STYLE_RIGHT : DATA_STYLE_LEFT;
-        
-        // Apply number format if applicable
-        if (isNumeric && columnFormats[col].shouldFormat) {
-          cell.z = columnFormats[col].format;
-        }
-      }
-    }
-  }
+  worksheet.columns = columnWidths.map(width => ({ width }));
 }
 
 

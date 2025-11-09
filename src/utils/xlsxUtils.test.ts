@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import JSZip from 'jszip';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { convertZipToXlsx } from './xlsxUtils';
 import { generateMockCsvContent } from '../test/mockData';
 import type { UploadedFile } from '../types';
@@ -120,14 +120,16 @@ describe('xlsxUtils', () => {
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Check that Summary sheet is first
-      expect(workbook.SheetNames[0]).toBe('Summary');
+      expect(workbook.worksheets[0].name).toBe('Summary');
       
       // Check that other sheets exist
-      expect(workbook.SheetNames).toContain('bg');
-      expect(workbook.SheetNames).toContain('cgm');
+      const sheetNames = workbook.worksheets.map(ws => ws.name);
+      expect(sheetNames).toContain('bg');
+      expect(sheetNames).toContain('cgm');
     });
 
     it('should populate summary sheet with dataset names and row counts', async () => {
@@ -141,18 +143,26 @@ describe('xlsxUtils', () => {
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Get summary sheet
-      const summarySheet = workbook.Sheets['Summary'];
-      const summaryData = XLSX.utils.sheet_to_json(summarySheet, { header: 1 });
+      const summarySheet = workbook.getWorksheet('Summary');
+      expect(summarySheet).toBeDefined();
       
       // Check header
-      expect(summaryData[0]).toEqual(['Dataset Name', 'Number of Records']);
+      const headerRow = summarySheet!.getRow(1);
+      expect(headerRow.getCell(1).value).toBe('Dataset Name');
+      expect(headerRow.getCell(2).value).toBe('Number of Records');
       
       // Check data rows
-      expect(summaryData[1]).toEqual(['bg', 10]);
-      expect(summaryData[2]).toEqual(['cgm', 15]);
+      const row2 = summarySheet!.getRow(2);
+      expect(row2.getCell(1).value).toBe('bg');
+      expect(row2.getCell(2).value).toBe(10);
+      
+      const row3 = summarySheet!.getRow(3);
+      expect(row3.getCell(1).value).toBe('cgm');
+      expect(row3.getCell(2).value).toBe(15);
     });
 
     it('should create individual sheets for each dataset', async () => {
@@ -166,19 +176,18 @@ describe('xlsxUtils', () => {
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Check that bg sheet exists and has data
-      const bgSheet = workbook.Sheets['bg'];
+      const bgSheet = workbook.getWorksheet('bg');
       expect(bgSheet).toBeDefined();
-      const bgData = XLSX.utils.sheet_to_json(bgSheet, { header: 1 });
-      expect(bgData.length).toBeGreaterThan(0); // Has header and data rows
+      expect(bgSheet!.rowCount).toBeGreaterThan(0); // Has header and data rows
       
       // Check that cgm sheet exists and has data
-      const cgmSheet = workbook.Sheets['cgm'];
+      const cgmSheet = workbook.getWorksheet('cgm');
       expect(cgmSheet).toBeDefined();
-      const cgmData = XLSX.utils.sheet_to_json(cgmSheet, { header: 1 });
-      expect(cgmData.length).toBeGreaterThan(0);
+      expect(cgmSheet!.rowCount).toBeGreaterThan(0);
     });
 
     it('should include headers in dataset sheets', async () => {
@@ -191,15 +200,22 @@ describe('xlsxUtils', () => {
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Get bg sheet
-      const bgSheet = workbook.Sheets['bg'];
-      const bgData = XLSX.utils.sheet_to_json<string[]>(bgSheet, { header: 1 });
+      const bgSheet = workbook.getWorksheet('bg');
+      expect(bgSheet).toBeDefined();
       
       // First row should be header
-      expect(bgData[0]).toContain('Timestamp');
-      expect(bgData[0]).toContain('Glucose Value (mg/dL)');
+      const headerRow = bgSheet!.getRow(1);
+      const headerValues: string[] = [];
+      headerRow.eachCell((cell) => {
+        headerValues.push(cell.value?.toString() || '');
+      });
+      
+      expect(headerValues).toContain('Timestamp');
+      expect(headerValues).toContain('Glucose Value (mg/dL)');
     });
 
     it('should split data into separate cells, not concatenate in column A', async () => {
@@ -219,52 +235,50 @@ Timestamp\tAlarm/Event\tSerial Number
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Get alarms sheet
-      const alarmsSheet = workbook.Sheets['alarms'];
+      const alarmsSheet = workbook.getWorksheet('alarms');
+      expect(alarmsSheet).toBeDefined();
       
       // Check raw cell values to see if data is properly split
-      // If bug exists, all data will be in column A (A1, A2, A3, etc.)
-      // If fixed, data will be in columns A, B, C
-      const cellA1 = alarmsSheet['A1'];
-      const cellB1 = alarmsSheet['B1'];
-      const cellC1 = alarmsSheet['C1'];
+      const headerRow = alarmsSheet!.getRow(1);
+      const cellA1 = headerRow.getCell(1);
+      const cellB1 = headerRow.getCell(2);
+      const cellC1 = headerRow.getCell(3);
       
       // Debug: log cell values
-      console.log('Cell A1:', cellA1?.v);
-      console.log('Cell B1:', cellB1?.v);
-      console.log('Cell C1:', cellC1?.v);
+      console.log('Cell A1:', cellA1.value);
+      console.log('Cell B1:', cellB1.value);
+      console.log('Cell C1:', cellC1.value);
       
       // The bug would cause B1 and C1 to be undefined because all data is in A1
-      expect(cellB1).toBeDefined();
-      expect(cellC1).toBeDefined();
-      
-      const alarmsData = XLSX.utils.sheet_to_json<string[]>(alarmsSheet, { header: 1 });
+      expect(cellB1.value).toBeDefined();
+      expect(cellC1.value).toBeDefined();
       
       // Verify header row has 3 separate values (not concatenated)
-      expect(alarmsData[0]).toHaveLength(3);
-      expect(alarmsData[0][0]).toBe('Timestamp');
-      expect(alarmsData[0][1]).toBe('Alarm/Event');
-      expect(alarmsData[0][2]).toBe('Serial Number');
+      expect(cellA1.value).toBe('Timestamp');
+      expect(cellB1.value).toBe('Alarm/Event');
+      expect(cellC1.value).toBe('Serial Number');
       
       // Verify first data row has 3 separate values
-      expect(alarmsData[1]).toHaveLength(3);
-      expect(alarmsData[1][0]).toBe('2025-10-26 14:02');
-      expect(alarmsData[1][1]).toBe('Resume Pump Alarm (18A)');
-      expect(alarmsData[1][2]).toBe(1266847); // Number is parsed as number
+      const dataRow1 = alarmsSheet!.getRow(2);
+      expect(dataRow1.getCell(1).value).toBe('2025-10-26 14:02');
+      expect(dataRow1.getCell(2).value).toBe('Resume Pump Alarm (18A)');
+      expect(dataRow1.getCell(3).value).toBe(1266847); // Number is parsed as number
       
       // Verify second data row
-      expect(alarmsData[2]).toHaveLength(3);
-      expect(alarmsData[2][0]).toBe('2025-10-25 18:55');
-      expect(alarmsData[2][1]).toBe('dexcom_high_glucose_alert');
-      expect(alarmsData[2][2]).toBe('Dexcom g7 (9042781)');
+      const dataRow2 = alarmsSheet!.getRow(3);
+      expect(dataRow2.getCell(1).value).toBe('2025-10-25 18:55');
+      expect(dataRow2.getCell(2).value).toBe('dexcom_high_glucose_alert');
+      expect(dataRow2.getCell(3).value).toBe('Dexcom g7 (9042781)');
       
       // Verify third data row
-      expect(alarmsData[3]).toHaveLength(3);
-      expect(alarmsData[3][0]).toBe('2025-10-25 17:52');
-      expect(alarmsData[3][1]).toBe('tandem_controliq_high');
-      expect(alarmsData[3][2]).toBe(1266847); // Number is parsed as number
+      const dataRow3 = alarmsSheet!.getRow(4);
+      expect(dataRow3.getCell(1).value).toBe('2025-10-25 17:52');
+      expect(dataRow3.getCell(2).value).toBe('tandem_controliq_high');
+      expect(dataRow3.getCell(3).value).toBe(1266847); // Number is parsed as number
     });
 
     it('should handle comma-delimited CSV files (reproducing the bug)', async () => {
@@ -285,37 +299,37 @@ Timestamp,Alarm/Event,Serial Number
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Get alarms sheet
-      const alarmsSheet = workbook.Sheets['alarms'];
+      const alarmsSheet = workbook.getWorksheet('alarms');
+      expect(alarmsSheet).toBeDefined();
       
       // Check if data is split into separate cells
-      const cellA1 = alarmsSheet['A1'];
-      const cellB1 = alarmsSheet['B1'];
-      const cellC1 = alarmsSheet['C1'];
+      const headerRow = alarmsSheet!.getRow(1);
+      const cellA1 = headerRow.getCell(1);
+      const cellB1 = headerRow.getCell(2);
+      const cellC1 = headerRow.getCell(3);
       
-      console.log('Comma-delimited - Cell A1:', cellA1?.v);
-      console.log('Comma-delimited - Cell B1:', cellB1?.v);
-      console.log('Comma-delimited - Cell C1:', cellC1?.v);
+      console.log('Comma-delimited - Cell A1:', cellA1.value);
+      console.log('Comma-delimited - Cell B1:', cellB1.value);
+      console.log('Comma-delimited - Cell C1:', cellC1.value);
       
       // With comma delimiters, B1 and C1 should still be defined after fix
-      expect(cellB1).toBeDefined();
-      expect(cellC1).toBeDefined();
-      
-      const alarmsData = XLSX.utils.sheet_to_json<string[]>(alarmsSheet, { header: 1 });
+      expect(cellB1.value).toBeDefined();
+      expect(cellC1.value).toBeDefined();
       
       // Verify header row has 3 separate values
-      expect(alarmsData[0]).toHaveLength(3);
-      expect(alarmsData[0][0]).toBe('Timestamp');
-      expect(alarmsData[0][1]).toBe('Alarm/Event');
-      expect(alarmsData[0][2]).toBe('Serial Number');
+      expect(cellA1.value).toBe('Timestamp');
+      expect(cellB1.value).toBe('Alarm/Event');
+      expect(cellC1.value).toBe('Serial Number');
       
       // Verify first data row has 3 separate values
-      expect(alarmsData[1]).toHaveLength(3);
-      expect(alarmsData[1][0]).toBe('2025-10-26 14:02');
-      expect(alarmsData[1][1]).toBe('Resume Pump Alarm (18A)');
-      expect(alarmsData[1][2]).toBe(1266847);
+      const dataRow1 = alarmsSheet!.getRow(2);
+      expect(dataRow1.getCell(1).value).toBe('2025-10-26 14:02');
+      expect(dataRow1.getCell(2).value).toBe('Resume Pump Alarm (18A)');
+      expect(dataRow1.getCell(3).value).toBe(1266847);
     });
 
     it('should handle single dataset', async () => {
@@ -328,12 +342,14 @@ Timestamp,Alarm/Event,Serial Number
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Should have Summary and bg sheets
-      expect(workbook.SheetNames).toHaveLength(2);
-      expect(workbook.SheetNames).toContain('Summary');
-      expect(workbook.SheetNames).toContain('bg');
+      expect(workbook.worksheets).toHaveLength(2);
+      const sheetNames = workbook.worksheets.map(ws => ws.name);
+      expect(sheetNames).toContain('Summary');
+      expect(sheetNames).toContain('bg');
     });
 
     it('should handle multiple datasets', async () => {
@@ -349,11 +365,12 @@ Timestamp,Alarm/Event,Serial Number
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Should have Summary + 4 dataset sheets
-      expect(workbook.SheetNames).toHaveLength(5);
-      expect(workbook.SheetNames[0]).toBe('Summary');
+      expect(workbook.worksheets).toHaveLength(5);
+      expect(workbook.worksheets[0].name).toBe('Summary');
     });
 
     it('should sanitize sheet names to meet Excel requirements', async () => {
@@ -366,12 +383,13 @@ Timestamp,Alarm/Event,Serial Number
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Sheet names should not contain invalid characters
-      workbook.SheetNames.forEach(sheetName => {
-        expect(sheetName).not.toMatch(/[\\/*?[\]:]/);
-        expect(sheetName.length).toBeLessThanOrEqual(31);
+      workbook.worksheets.forEach((worksheet) => {
+        expect(worksheet.name).not.toMatch(/[\\/*?[\]:]/);
+        expect(worksheet.name.length).toBeLessThanOrEqual(31);
       });
     });
 
@@ -386,22 +404,26 @@ Timestamp,Alarm/Event,Serial Number
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array', cellStyles: true });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Get summary sheet
-      const summarySheet = workbook.Sheets['Summary'];
+      const summarySheet = workbook.getWorksheet('Summary');
+      expect(summarySheet).toBeDefined();
       
       // Check that header cells have styling
-      const headerCellA1 = summarySheet['A1'];
-      const headerCellB1 = summarySheet['B1'];
+      const headerRow = summarySheet!.getRow(1);
+      const cellA1 = headerRow.getCell(1);
+      const cellB1 = headerRow.getCell(2);
       
-      // Headers should have style property
-      expect(headerCellA1.s).toBeDefined();
-      expect(headerCellB1.s).toBeDefined();
+      // Headers should have bold font and fill
+      expect(cellA1.font?.bold).toBe(true);
+      expect(cellB1.font?.bold).toBe(true);
+      expect(cellA1.fill).toBeDefined();
       
       // Verify header values
-      expect(headerCellA1.v).toBe('Dataset Name');
-      expect(headerCellB1.v).toBe('Number of Records');
+      expect(cellA1.value).toBe('Dataset Name');
+      expect(cellB1.value).toBe('Number of Records');
     });
 
     it('should apply number formatting to summary sheet counts', async () => {
@@ -414,18 +436,21 @@ Timestamp,Alarm/Event,Serial Number
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array', cellStyles: true });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Get summary sheet
-      const summarySheet = workbook.Sheets['Summary'];
+      const summarySheet = workbook.getWorksheet('Summary');
+      expect(summarySheet).toBeDefined();
       
       // Check the count cell (B2)
-      const countCell = summarySheet['B2'];
+      const row2 = summarySheet!.getRow(2);
+      const countCell = row2.getCell(2);
       
       // Should have number format with thousands separator
-      expect(countCell.v).toBe(1234);
-      expect(countCell.z).toBeDefined();
-      expect(countCell.z).toContain('#,##0');
+      expect(countCell.value).toBe(1234);
+      expect(countCell.numFmt).toBeDefined();
+      expect(countCell.numFmt).toContain('#,##0');
     });
 
     it('should set appropriate column widths with padding', async () => {
@@ -438,17 +463,20 @@ Timestamp,Alarm/Event,Serial Number
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array', cellStyles: true });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Check summary sheet has column widths set
-      const summarySheet = workbook.Sheets['Summary'];
-      expect(summarySheet['!cols']).toBeDefined();
-      expect(summarySheet['!cols']!.length).toBeGreaterThan(0);
+      const summarySheet = workbook.getWorksheet('Summary');
+      expect(summarySheet).toBeDefined();
+      expect(summarySheet!.columns.length).toBeGreaterThan(0);
+      expect(summarySheet!.getColumn(1).width).toBeGreaterThan(0);
       
       // Check data sheets have column widths
-      const bgSheet = workbook.Sheets['bg'];
-      expect(bgSheet['!cols']).toBeDefined();
-      expect(bgSheet['!cols']!.length).toBeGreaterThan(0);
+      const bgSheet = workbook.getWorksheet('bg');
+      expect(bgSheet).toBeDefined();
+      expect(bgSheet!.columns.length).toBeGreaterThan(0);
+      expect(bgSheet!.getColumn(1).width).toBeGreaterThan(0);
     });
 
     it('should apply formatting to data sheet headers', async () => {
@@ -461,18 +489,21 @@ Timestamp,Alarm/Event,Serial Number
       
       // Parse the XLSX blob
       const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
-      const workbook = XLSX.read(arrayBuffer, { type: 'array', cellStyles: true });
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
       
       // Get bg sheet
-      const bgSheet = workbook.Sheets['bg'];
+      const bgSheet = workbook.getWorksheet('bg');
+      expect(bgSheet).toBeDefined();
       
       // Check that header cells have styling
-      const headerCellA1 = bgSheet['A1'];
-      const headerCellB1 = bgSheet['B1'];
+      const headerRow = bgSheet!.getRow(1);
+      const cellA1 = headerRow.getCell(1);
+      const cellB1 = headerRow.getCell(2);
       
-      // Headers should have style property
-      expect(headerCellA1.s).toBeDefined();
-      expect(headerCellB1.s).toBeDefined();
+      // Headers should have bold font
+      expect(cellA1.font?.bold).toBe(true);
+      expect(cellB1.font?.bold).toBe(true);
     });
   });
 });
