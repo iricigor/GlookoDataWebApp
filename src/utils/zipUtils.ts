@@ -3,7 +3,7 @@
  */
 
 import JSZip from 'jszip';
-import type { ZipMetadata, CsvFileMetadata } from '../types';
+import type { ZipMetadata, CsvFileMetadata, ParsedMetadata } from '../types';
 
 /**
  * Extract the base name from a CSV file name
@@ -32,6 +32,44 @@ function extractBaseName(fileName: string): string {
   
   // If no pattern found, return the name as-is
   return nameWithoutExt;
+}
+
+/**
+ * Parse metadata line from CSV file header
+ * Metadata format: Key:Value\tKey:Value\t...
+ * Example: "Name:Igor Irić\tDate Range:2025-07-29 - 2025-10-26"
+ * 
+ * @param metadataLine - The metadata line to parse
+ * @returns Parsed metadata object with key-value pairs
+ */
+export function parseMetadata(metadataLine: string): ParsedMetadata {
+  if (!metadataLine || metadataLine.trim().length === 0) {
+    return {};
+  }
+
+  const metadata: ParsedMetadata = {};
+  
+  // Split by tab or comma to get individual key-value pairs
+  const delimiter = metadataLine.includes('\t') ? '\t' : ',';
+  const pairs = metadataLine.split(delimiter);
+  
+  for (const pair of pairs) {
+    // Split each pair by the first colon
+    const colonIndex = pair.indexOf(':');
+    if (colonIndex > 0) {
+      const key = pair.substring(0, colonIndex).trim();
+      const value = pair.substring(colonIndex + 1).trim();
+      
+      // Convert key to camelCase for consistent JavaScript naming
+      // "Name" -> "name", "Date Range" -> "dateRange"
+      const camelKey = key.charAt(0).toLowerCase() + 
+        key.slice(1).replace(/\s+(\w)/g, (_, letter) => letter.toUpperCase());
+      
+      metadata[camelKey] = value;
+    }
+  }
+  
+  return metadata;
 }
 
 /**
@@ -211,10 +249,14 @@ export async function extractZipMetadata(file: File): Promise<ZipMetadata> {
     // Group and merge related CSV files
     const groupedCsvFiles = groupCsvFiles(csvFiles);
     
+    // Parse metadata line into structured object
+    const parsedMetadata = zipMetadataLine ? parseMetadata(zipMetadataLine) : undefined;
+    
     return {
       isValid: true,
       csvFiles: groupedCsvFiles,
-      metadataLine: zipMetadataLine
+      metadataLine: zipMetadataLine,
+      parsedMetadata
     };
   } catch (error) {
     return {

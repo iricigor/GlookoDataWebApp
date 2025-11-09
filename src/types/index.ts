@@ -53,6 +53,15 @@ export interface CsvFileMetadata {
 }
 
 /**
+ * Parsed metadata from CSV file header
+ */
+export interface ParsedMetadata {
+  name?: string;
+  dateRange?: string;
+  [key: string]: string | undefined; // Allow additional metadata fields
+}
+
+/**
  * ZIP file validation result
  */
 export interface ZipMetadata {
@@ -60,6 +69,7 @@ export interface ZipMetadata {
   csvFiles: CsvFileMetadata[];
   error?: string;
   metadataLine?: string;
+  parsedMetadata?: ParsedMetadata;
 }
 
 /**

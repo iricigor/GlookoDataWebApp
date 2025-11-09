@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import JSZip from 'jszip';
-import { extractZipMetadata } from '../utils/zipUtils';
+import { extractZipMetadata, parseMetadata } from '../utils/zipUtils';
 import { generateMockCsvContent, MOCK_CSV_FILE_NAMES, MOCK_METADATA_LINE } from '../test/mockData';
 
 /**
@@ -43,6 +43,20 @@ describe('zipUtils', () => {
       expect(result.csvFiles).toHaveLength(2);
       expect(result.metadataLine).toBe(MOCK_METADATA_LINE);
       expect(result.error).toBeUndefined();
+    });
+
+    it('should parse metadata and include it in the result', async () => {
+      const files = {
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 10),
+      };
+      
+      const zipFile = await createMockZipFile(files);
+      const result = await extractZipMetadata(zipFile);
+      
+      expect(result.isValid).toBe(true);
+      expect(result.parsedMetadata).toBeDefined();
+      expect(result.parsedMetadata?.name).toBe('Igor Irić');
+      expect(result.parsedMetadata?.dateRange).toBe('2025-07-29 - 2025-10-26');
     });
 
     it('should extract correct file names from ZIP', async () => {
@@ -401,6 +415,106 @@ describe('zipUtils', () => {
           'insulin',
         ]);
       });
+    });
+  });
+
+  describe('parseMetadata', () => {
+    it('should parse tab-delimited metadata line with Name and Date Range', () => {
+      const metadataLine = 'Name:Igor Irić\tDate Range:2025-07-29 - 2025-10-26';
+      const result = parseMetadata(metadataLine);
+      
+      expect(result.name).toBe('Igor Irić');
+      expect(result.dateRange).toBe('2025-07-29 - 2025-10-26');
+    });
+
+    it('should parse comma-delimited metadata line', () => {
+      const metadataLine = 'Name:John Doe,Date Range:2025-01-01 - 2025-12-31';
+      const result = parseMetadata(metadataLine);
+      
+      expect(result.name).toBe('John Doe');
+      expect(result.dateRange).toBe('2025-01-01 - 2025-12-31');
+    });
+
+    it('should convert keys to camelCase', () => {
+      const metadataLine = 'Patient Name:Jane Smith\tDate Range:2025-03-01 - 2025-03-31\tDevice ID:ABC123';
+      const result = parseMetadata(metadataLine);
+      
+      expect(result.patientName).toBe('Jane Smith');
+      expect(result.dateRange).toBe('2025-03-01 - 2025-03-31');
+      expect(result.deviceID).toBe('ABC123');
+    });
+
+    it('should handle metadata with extra whitespace', () => {
+      const metadataLine = '  Name:  Test User  \t  Date Range:  2025-01-01 - 2025-01-31  ';
+      const result = parseMetadata(metadataLine);
+      
+      expect(result.name).toBe('Test User');
+      expect(result.dateRange).toBe('2025-01-01 - 2025-01-31');
+    });
+
+    it('should handle single key-value pair', () => {
+      const metadataLine = 'Name:Single User';
+      const result = parseMetadata(metadataLine);
+      
+      expect(result.name).toBe('Single User');
+      expect(Object.keys(result)).toHaveLength(1);
+    });
+
+    it('should handle empty metadata line', () => {
+      const result = parseMetadata('');
+      
+      expect(result).toEqual({});
+      expect(Object.keys(result)).toHaveLength(0);
+    });
+
+    it('should handle metadata line with only whitespace', () => {
+      const result = parseMetadata('   \t   ');
+      
+      expect(result).toEqual({});
+      expect(Object.keys(result)).toHaveLength(0);
+    });
+
+    it('should ignore invalid key-value pairs without colon', () => {
+      const metadataLine = 'Name:Valid Name\tInvalidPair\tDate Range:2025-01-01 - 2025-01-31';
+      const result = parseMetadata(metadataLine);
+      
+      expect(result.name).toBe('Valid Name');
+      expect(result.dateRange).toBe('2025-01-01 - 2025-01-31');
+      expect(Object.keys(result)).toHaveLength(2);
+    });
+
+    it('should handle metadata with colons in values', () => {
+      const metadataLine = 'Name:User:With:Colons\tTime:12:30:45';
+      const result = parseMetadata(metadataLine);
+      
+      expect(result.name).toBe('User:With:Colons');
+      expect(result.time).toBe('12:30:45');
+    });
+
+    it('should handle multiple word keys', () => {
+      const metadataLine = 'First Name:John\tLast Name:Doe\tDate Of Birth:1990-01-01';
+      const result = parseMetadata(metadataLine);
+      
+      expect(result.firstName).toBe('John');
+      expect(result.lastName).toBe('Doe');
+      expect(result.dateOfBirth).toBe('1990-01-01');
+    });
+
+    it('should handle keys with special characters', () => {
+      const metadataLine = 'Name:Test User\tE-mail:test@example.com\tPhone #:123-456-7890';
+      const result = parseMetadata(metadataLine);
+      
+      expect(result.name).toBe('Test User');
+      expect(result['e-mail']).toBe('test@example.com');
+      expect(result['phone #']).toBe('123-456-7890');
+    });
+
+    it('should handle empty values', () => {
+      const metadataLine = 'Name:\tDate Range:2025-01-01 - 2025-01-31';
+      const result = parseMetadata(metadataLine);
+      
+      expect(result.name).toBe('');
+      expect(result.dateRange).toBe('2025-01-01 - 2025-01-31');
     });
   });
 });

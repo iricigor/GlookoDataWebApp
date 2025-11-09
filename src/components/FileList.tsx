@@ -300,13 +300,25 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                       <div className={styles.metadataContainer}>
                         {file.zipMetadata.isValid ? (
                           <>
-                            {file.zipMetadata.metadataLine && (
+                            {file.zipMetadata.parsedMetadata && Object.keys(file.zipMetadata.parsedMetadata).length > 0 && (
                               <>
                                 <Text className={styles.metadataHeader}>
                                   Metadata
                                 </Text>
                                 <div className={styles.zipMetadataLine}>
-                                  {file.zipMetadata.metadataLine}
+                                  {Object.entries(file.zipMetadata.parsedMetadata).map(([key, value]) => {
+                                    if (!value) return null;
+                                    // Convert camelCase back to readable format
+                                    const readableKey = key
+                                      .replace(/([A-Z])/g, ' $1')
+                                      .replace(/^./, (str) => str.toUpperCase())
+                                      .trim();
+                                    return (
+                                      <div key={key} style={{ marginBottom: '4px' }}>
+                                        <strong>{readableKey}:</strong> {value}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               </>
                             )}
