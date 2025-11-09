@@ -223,6 +223,7 @@ GlookoDataWebApp/
 ├── public/               # Public static files
 ├── dist/                 # Production build output (generated, not committed)
 ├── docs/                 # Documentation
+├── CHANGELOG.md          # Version history and change log
 ├── package.json          # Dependencies and scripts
 ├── tsconfig.json         # TypeScript configuration
 ├── vite.config.ts        # Vite build configuration
@@ -268,27 +269,38 @@ GlookoDataWebApp/
 
 ### Before Committing
 
-1. **Run tests**
+1. **Update the CHANGELOG.md**
+   - Add an entry under the current version section (e.g., `[1.0.x]`)
+   - Place it in the correct category based on your PR/issue label:
+     - **New Features** - for ✨ Feature label
+     - **Fixes** - for 🪲 Bug label
+     - **Documentation** - for 📚 Documentation label
+     - **Other** - for other changes
+   - Format: `- [1.0.buildId] Description of the change (PR #number or Issue #number)`
+   - Use the next available build ID number or leave as `buildId` to be updated after merge
+   - Keep entries within each category sorted by version (newest first)
+
+2. **Run tests**
    ```bash
    npm test -- --run
    ```
 
-2. **Lint the code**
+3. **Lint the code**
    ```bash
    npm run lint
    ```
 
-3. **Build for production**
+4. **Build for production**
    ```bash
    npm run build
    ```
 
-4. **Test the production build**
+5. **Test the production build**
    ```bash
    npm run preview
    ```
 
-5. **Manual testing checklist:**
+6. **Manual testing checklist:**
    - [ ] All pages load without errors
    - [ ] Navigation works correctly
    - [ ] User interactions work as expected
@@ -446,6 +458,7 @@ zip.forEach((relativePath, zipEntry) => {
 - [README.md](../README.md) - Project overview and quick start
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Detailed contribution guidelines
 - [QUICKSTART.md](../QUICKSTART.md) - Quick start guide
+- [CHANGELOG.md](../CHANGELOG.md) - Version history and change log
 - [docs/DATA_UPLOAD.md](../docs/DATA_UPLOAD.md) - Data upload feature documentation
 
 ### Related Projects
