@@ -3,4 +3,4 @@
  * Configures the testing environment and global test utilities
  */
 
-// Setup file for future test configurations
+import '@testing-library/jest-dom';

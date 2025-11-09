@@ -15,6 +15,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const { theme, themeMode, setThemeMode } = useTheme()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
 
   // Handle hash-based routing
   useEffect(() => {
@@ -38,11 +39,25 @@ function App() {
 
   const handleRemoveFile = (id: string) => {
     setUploadedFiles((prev) => prev.filter((file) => file.id !== id))
+    // Clear selection if the removed file was selected
+    if (selectedFileId === id) {
+      setSelectedFileId(null)
+    }
   }
 
   const handleClearAll = () => {
     setUploadedFiles([])
+    setSelectedFileId(null)
   }
+
+  const handleSelectFile = (id: string | null) => {
+    setSelectedFileId(id)
+  }
+
+  // Find the selected file object
+  const selectedFile = selectedFileId 
+    ? uploadedFiles.find(file => file.id === selectedFileId) 
+    : undefined
 
   const renderPage = () => {
     switch (currentPage) {
@@ -55,12 +70,14 @@ function App() {
             onAddFiles={handleAddFiles}
             onRemoveFile={handleRemoveFile}
             onClearAll={handleClearAll}
+            selectedFileId={selectedFileId}
+            onSelectFile={handleSelectFile}
           />
         )
       case 'reports':
-        return <Reports />
+        return <Reports selectedFile={selectedFile} />
       case 'ai':
-        return <AIAnalysis />
+        return <AIAnalysis selectedFile={selectedFile} />
       case 'settings':
         return <Settings themeMode={themeMode} onThemeChange={setThemeMode} />
       default:

@@ -11,6 +11,7 @@ import {
   TableHeaderCell,
   TableBody,
   TableCell,
+  Radio,
 } from '@fluentui/react-components';
 import { DeleteRegular, ChevronRightRegular, ChevronDownRegular, ArrowDownloadRegular } from '@fluentui/react-icons';
 import type { UploadedFile } from '../types';
@@ -151,6 +152,8 @@ interface FileListProps {
   files: UploadedFile[];
   onRemoveFile: (id: string) => void;
   onClearAll: () => void;
+  selectedFileId?: string | null;
+  onSelectFile?: (id: string | null) => void;
 }
 
 /**
@@ -171,7 +174,7 @@ function getDataSetColor(rowCount: number): string {
   }
 }
 
-export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
+export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSelectFile }: FileListProps) {
   const styles = useStyles();
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
   const [exportingFiles, setExportingFiles] = useState<Set<string>>(new Set());
@@ -253,6 +256,7 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
       <Table className={styles.table}>
         <TableHeader>
           <TableRow>
+            {onSelectFile && <TableHeaderCell>Select</TableHeaderCell>}
             <TableHeaderCell>File Name</TableHeaderCell>
             <TableHeaderCell className={styles.hideOnMobile}>Upload Time</TableHeaderCell>
             <TableHeaderCell className={styles.hideOnMobile}>File Size</TableHeaderCell>
@@ -263,10 +267,22 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
           {files.map((file) => {
             const isExpanded = expandedFiles.has(file.id);
             const hasMetadata = file.zipMetadata && file.zipMetadata.csvFiles.length > 0;
+            const isValidFile = file.zipMetadata?.isValid ?? false;
             
             return (
               <React.Fragment key={file.id}>
                 <TableRow>
+                  {onSelectFile && (
+                    <TableCell>
+                      <Radio 
+                        value={file.id}
+                        checked={selectedFileId === file.id}
+                        onChange={() => onSelectFile(file.id)}
+                        disabled={!isValidFile}
+                        aria-label={`Select ${file.name}`}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>
                     <div className={styles.fileNameCell}>
                       {hasMetadata && (
@@ -311,7 +327,7 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                 </TableRow>
                 {isExpanded && file.zipMetadata && (
                   <TableRow key={`${file.id}-details`} className={styles.detailsRow}>
-                    <TableCell colSpan={4} className={styles.detailsCell}>
+                    <TableCell colSpan={onSelectFile ? 5 : 4} className={styles.detailsCell}>
                       <div className={styles.metadataContainer}>
                         {file.zipMetadata.isValid ? (
                           <>
