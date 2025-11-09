@@ -13,7 +13,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - name: Checkout code
@@ -37,20 +37,30 @@ jobs:
       - name: Run unit tests
         run: npm test -- --run
 
-      - name: Update test badge in README
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      - name: Extract Test Statistics
+        if: always()
         run: |
-          bash .github/scripts/update-test-badge.sh
+          # Run tests again with JSON reporter to get statistics
+          npm test -- --run --reporter=json > test-results.json 2>&1 || true
+          
+          # Extract test count from JSON output
+          TEST_COUNT=$(grep -o '"numTotalTests":[0-9]*' test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
+          TEST_PASSED=$(grep -o '"numPassedTests":[0-9]*' test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
+          TEST_FAILED=$(grep -o '"numFailedTests":[0-9]*' test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
+          
+          echo "TESTS_TOTAL=$TEST_COUNT" >> $GITHUB_ENV
+          echo "TESTS_PASSED=$TEST_PASSED" >> $GITHUB_ENV
+          echo "TESTS_FAILED=$TEST_FAILED" >> $GITHUB_ENV
+          
+          echo "::notice::Tests: $TEST_PASSED/$TEST_COUNT passed"
 
-      - name: Commit and push badge update
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add README.md
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore: auto-update test count badge [skip ci]"
-            git push
-          fi
+      - name: Update Test Count Badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        if: github.ref == 'refs/heads/main' && always()
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: TBD-CREATE-NEW-GIST
+          filename: glookodata-webapp-tests.json
+          label: tests
+          message: ${{ env.TESTS_PASSED }}/${{ env.TESTS_TOTAL }} passing
+          color: ${{ env.TESTS_FAILED == '0' && 'brightgreen' || 'critical' }}

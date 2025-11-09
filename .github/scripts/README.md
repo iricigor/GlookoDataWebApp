@@ -1,25 +1,43 @@
 # GitHub Actions Scripts
 
-This directory contains scripts used by GitHub Actions workflows to automate various tasks.
+This directory contains scripts and documentation for GitHub Actions workflows.
 
-## update-test-badge.sh
+## Dynamic Test Badge System
 
-**Purpose**: Automatically updates the test count badge in README.md after tests run.
+The repository uses a **dynamic badge** approach for displaying test counts in README.md.
 
-**How it works**:
-1. Runs the test suite with JSON reporter to get the exact test count
-2. Extracts the total number of tests from the JSON output
-3. Compares the current badge count in README.md with the actual test count
-4. Updates the badge if the counts differ
+### How It Works
 
-**Usage**: 
-- Automatically triggered by the `test.yml` workflow on pushes to the `main` branch
-- Can be run manually: `bash .github/scripts/update-test-badge.sh`
+Instead of committing badge updates to the repository, the system:
+1. Runs tests and extracts statistics via GitHub Actions
+2. Updates a GitHub Gist with the test data using `schneegans/dynamic-badges-action`
+3. The README badge reads from the Gist endpoint URL
+4. Updates happen automatically without creating commits
 
-**Benefits**:
-- ✅ No more manual updates when tests are added or removed
-- ✅ README badge always reflects the current test count
-- ✅ Commits use `[skip ci]` to avoid triggering infinite workflow loops
-- ✅ Only runs on main branch, not on PRs
+### Setup Instructions
 
-**Example commit message**: `chore: auto-update test count badge [skip ci]`
+See **[BADGE_SETUP.md](BADGE_SETUP.md)** for complete setup instructions including:
+- Creating a GitHub Gist
+- Generating a personal access token
+- Configuring repository secrets
+- Updating the workflow and README
+
+### Benefits
+
+✅ **No repository commits** - Clean git history without automated commits  
+✅ **Always accurate** - Badge updates automatically after tests run  
+✅ **Real-time updates** - Changes reflect within seconds  
+✅ **Works on forks** - Each fork can maintain its own badge  
+
+### Example
+
+This approach is used successfully in the [Glooko repository](https://github.com/iricigor/Glooko).
+
+## Files
+
+- **`BADGE_SETUP.md`** - Complete setup guide for the dynamic badge system
+- **`update-test-badge.sh`** - (Deprecated) Legacy script for direct README updates
+
+## Migration Note
+
+The original `update-test-badge.sh` script updated README.md directly and committed changes. This has been replaced with the dynamic badge approach which is cleaner and doesn't create automated commits.
