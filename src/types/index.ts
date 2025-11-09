@@ -48,6 +48,8 @@ export interface CsvFileMetadata {
   name: string;
   rowCount: number;
   columnNames?: string[];
+  fileCount?: number; // Number of files merged (for grouped datasets)
+  sourceFiles?: string[]; // Original file names (for grouped datasets)
 }
 
 /**

@@ -66,6 +66,23 @@ As shown in the example above, the extraction process:
 1. **Extracts the metadata line** (first row) containing patient name, date range, etc.
 2. **Parses column headers** (second row) and displays them as colored tags
 3. **Counts data rows** (excluding metadata and header rows)
+4. **Merges related datasets** - Files with the same base name (e.g., `cgm_data_1.csv`, `cgm_data_2.csv`, `cgm_data_3.csv`) are automatically merged into a single dataset (e.g., `cgm_data.csv`) with combined row counts
+
+#### Dataset Merging
+
+The application automatically merges multiple CSV files of the same type:
+
+- **Automatic Detection**: Files following the pattern `{type}_data_{number}.csv` are grouped by type
+- **Row Aggregation**: Row counts are summed across all files in the group (e.g., 100 + 150 + 200 = 450 rows)
+- **Column Validation**: Files are only merged if they have identical column structures
+- **Source Tracking**: Original file names are preserved and displayed for transparency
+- **Visual Indicators**: Merged datasets show "(merged from N files)" with source file list
+
+**Example:**
+- Input: `cgm_data_1.csv` (100 rows), `cgm_data_2.csv` (150 rows), `cgm_data_3.csv` (200 rows)
+- Output: `cgm_data.csv` (450 rows) - merged from 3 files
+
+This feature reduces visual clutter and provides a clearer understanding of your data volume while maintaining full transparency through source file tracking.
 
 ### 3. File List and Management
 
