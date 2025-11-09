@@ -133,6 +133,24 @@ interface FileListProps {
   onClearAll: () => void;
 }
 
+/**
+ * Calculate the color for a data set name based on its row count
+ * @param rowCount - Number of rows in the data set
+ * @returns CSS color value
+ */
+function getDataSetColor(rowCount: number): string {
+  if (rowCount === 0) {
+    // Very pale color for empty data sets
+    return tokens.colorNeutralForeground4;
+  } else if (rowCount < 10) {
+    // Pale color for small data sets (1-9 rows)
+    return tokens.colorNeutralForeground3;
+  } else {
+    // Standard color for data sets with 10+ rows
+    return tokens.colorNeutralForeground1;
+  }
+}
+
 export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
   const styles = useStyles();
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
@@ -258,7 +276,7 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                             {file.zipMetadata.csvFiles.map((csvFile) => (
                               <div key={csvFile.name} className={styles.csvFileItem}>
                                 <div style={{ flex: 1 }}>
-                                  <div className={styles.csvFileName}>
+                                  <div className={styles.csvFileName} style={{ color: getDataSetColor(csvFile.rowCount) }}>
                                     {csvFile.name}
                                     {csvFile.fileCount && csvFile.fileCount > 1 && (
                                       <span style={{ 
