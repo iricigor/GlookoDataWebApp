@@ -5,6 +5,44 @@ All notable changes to GlookoDataWebApp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Table of Contents
+
+- [Current Development - 1.0.x](#10x---current-development)
+- [Future Versions](#future-versions)
+- [Version Format](#version-format)
+- [How to Update This File](#how-to-update-this-file)
+
+## [1.0.x] - Current Development
+
+### New Features
+- [1.0.106] Add metadata parsing utilities to process structured metadata from CSV files with support for both comma-separated and tab-separated formats (#106)
+- [1.0.101] Implement dynamic test count badge using GitHub Gist endpoint (#101)
+- [1.0.90] Add version information and build ID tracking system (#90)
+
+### Fixes
+- [1.0.108] Reduce Select column width by applying explicit width style while keeping header text (#108)
+- [1.0.103] Fix footer positioning to stay at bottom of viewport using flexbox sticky footer layout (#103)
+
+### Documentation
+- Add CHANGELOG.md file and update copilot instructions to require changelog updates in each PR (#91)
+
+### Other
+
+---
+
+## Future Versions
+
+### [1.1.x] - Nov 9
+- Provide static data analysis under Reports page
+
+### [1.2.x] - ETA Nov 11
+- Provide access to AI analysis
+
+### [2.0.x] - Future
+- Major version updates and breaking changes will be listed here
+
+---
+
 ## Version Format
 
 Versions follow the format: `major.minor.buildId`
@@ -25,31 +63,3 @@ When creating a pull request:
    - Use `#PR_NUMBER` format for linkability in GitHub (e.g., `#152`)
    - For issues without PRs, use `Issue #ISSUE_NUMBER`
 4. Entries within each category should be sorted by PR/issue number (descending - highest first)
-
-## [1.0.x] - Current Development
-
-### New Features
-- [1.0.buildId] Add metadata parsing utilities to process structured metadata from CSV files with support for both comma-separated and tab-separated formats (Issue #buildId)
-- [1.0.90] Add version information and build ID tracking system (PR #90)
-- [1.0.buildId] Implement dynamic test count badge using GitHub Gist endpoint (Issue #100)
-- Add version information and build ID tracking system (#90)
-- 
-### Fixes
-- [1.0.buildId] Reduce Select column width by applying explicit width style while keeping header text (Issue #107)
-- [1.0.102] Fix footer positioning to stay at bottom of viewport using flexbox sticky footer layout (Issue 102)
-- [1.0.buildId] Update README test count badge from 51 to 122 passing tests (Issue #100)
-
-### Documentation
-- Add CHANGELOG.md file and update copilot instructions to require changelog updates in each PR (Issue #91)
-
-### Other
-
----
-
-## Future Versions
-
-### [1.1.x] - Planned
-- Future enhancements and features will be listed here
-
-### [2.0.x] - Future
-- Major version updates and breaking changes will be listed here
