@@ -71,3 +71,13 @@ export interface UploadedFile {
   file: File;
   zipMetadata?: ZipMetadata;
 }
+
+/**
+ * Blood glucose thresholds (in mmol/L)
+ */
+export interface GlucoseThresholds {
+  veryHigh: number;
+  high: number;
+  low: number;
+  veryLow: number;
+}

@@ -10,6 +10,8 @@ import {
 } from '@fluentui/react-components';
 import { SettingsRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
+import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
+import { GlucoseThresholdsSection } from '../components/GlucoseThresholdsSection';
 
 const useStyles = makeStyles({
   container: {
@@ -72,6 +74,8 @@ interface SettingsProps {
 
 export function Settings({ themeMode, onThemeChange }: SettingsProps) {
   const styles = useStyles();
+  const { thresholds, updateThreshold, validateThresholds, isValid } = useGlucoseThresholds();
+  const validationError = validateThresholds(thresholds);
 
   return (
     <div className={styles.container}>
@@ -100,6 +104,13 @@ export function Settings({ themeMode, onThemeChange }: SettingsProps) {
             <Radio value="system" label="System (recommended)" />
           </RadioGroup>
         </div>
+
+        <GlucoseThresholdsSection
+          thresholds={thresholds}
+          onUpdateThreshold={updateThreshold}
+          isValid={isValid}
+          validationError={validationError}
+        />
 
         <div className={styles.settingSection}>
           <Label className={styles.settingLabel}>Data Privacy</Label>
