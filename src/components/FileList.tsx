@@ -57,6 +57,21 @@ const useStyles = makeStyles({
   fileNameCell: {
     display: 'flex',
     alignItems: 'center',
+    maxWidth: '100%',
+    overflow: 'hidden',
+  },
+  fileName: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    '@media (max-width: 768px)': {
+      maxWidth: '150px',
+    },
+  },
+  hideOnMobile: {
+    '@media (max-width: 768px)': {
+      display: 'none',
+    },
   },
   detailsRow: {
     backgroundColor: tokens.colorNeutralBackground2,
@@ -239,8 +254,8 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
         <TableHeader>
           <TableRow>
             <TableHeaderCell>File Name</TableHeaderCell>
-            <TableHeaderCell>Upload Time</TableHeaderCell>
-            <TableHeaderCell>File Size</TableHeaderCell>
+            <TableHeaderCell className={styles.hideOnMobile}>Upload Time</TableHeaderCell>
+            <TableHeaderCell className={styles.hideOnMobile}>File Size</TableHeaderCell>
             <TableHeaderCell>Actions</TableHeaderCell>
           </TableRow>
         </TableHeader>
@@ -263,7 +278,7 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                           aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
                         />
                       )}
-                      <span>{file.name}</span>
+                      <span className={styles.fileName} title={file.name}>{file.name}</span>
                       {file.zipMetadata && (
                         <span className={`${styles.validationBadge} ${file.zipMetadata.isValid ? styles.validBadge : styles.invalidBadge}`}>
                           {file.zipMetadata.isValid ? 'Valid' : 'Invalid'}
@@ -271,8 +286,8 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{formatTime(file.uploadTime)}</TableCell>
-                  <TableCell>{formatFileSize(file.size)}</TableCell>
+                  <TableCell className={styles.hideOnMobile}>{formatTime(file.uploadTime)}</TableCell>
+                  <TableCell className={styles.hideOnMobile}>{formatFileSize(file.size)}</TableCell>
                   <TableCell>
                     {file.zipMetadata?.isValid && (
                       <Button
