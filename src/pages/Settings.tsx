@@ -37,11 +37,13 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground1,
     marginBottom: '16px',
     fontFamily: 'Segoe UI, sans-serif',
+    display: 'block',
   },
   description: {
     fontSize: tokens.fontSizeBase400,
     color: tokens.colorNeutralForeground2,
     fontFamily: 'Segoe UI, sans-serif',
+    display: 'block',
   },
   settingsCard: {
     width: '100%',
