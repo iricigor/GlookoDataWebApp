@@ -41,5 +41,10 @@
     "typescript-eslint": "^8.45.0",
     "vite": "^7.1.7",
     "vitest": "^3.0.5"
+  },
+  "overrides": {
+    "archiver": "^7.0.1",
+    "unzipper": "^0.12.3",
+    "lodash.isequal": "npm:lodash@^4.17.21"
   }
 }
