@@ -15,16 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.x] - Current Development
 
 ### New Features
-- [1.0.106] Add metadata parsing utilities to process structured metadata from CSV files with support for both comma-separated and tab-separated formats (#106)
-- [1.0.101] Implement dynamic test count badge using GitHub Gist endpoint (#101)
-- [1.0.90] Add version information and build ID tracking system (#90)
+- [#106](../../pull/106) Add metadata parsing utilities to process structured metadata from CSV files with support for both comma-separated and tab-separated formats
+- [#101](../../pull/101) Implement dynamic test count badge using GitHub Gist endpoint
+- [#90](../../pull/90) Add version information and build ID tracking system
 
 ### Fixes
-- [1.0.108] Reduce Select column width by applying explicit width style while keeping header text (#108)
-- [1.0.103] Fix footer positioning to stay at bottom of viewport using flexbox sticky footer layout (#103)
+- [#108](../../pull/108) Reduce Select column width by applying explicit width style while keeping header text
+- [#103](../../pull/103) Fix footer positioning to stay at bottom of viewport using flexbox sticky footer layout
 
 ### Documentation
-- Add CHANGELOG.md file and update copilot instructions to require changelog updates in each PR (#91)
+- [#91](../../pull/91) Add CHANGELOG.md file and update copilot instructions to require changelog updates in each PR
 
 ### Other
 
@@ -59,7 +59,7 @@ When creating a pull request:
    - **Fixes** - for 🪲 Bug label
    - **Documentation** - for 📚 Documentation label
    - **Other** - for other changes
-3. Format: `- Description of the change (#PR_NUMBER or Issue #ISSUE_NUMBER)`
-   - Use `#PR_NUMBER` format for linkability in GitHub (e.g., `#152`)
-   - For issues without PRs, use `Issue #ISSUE_NUMBER`
+3. Format: `- [#PR_NUMBER](../../pull/PR_NUMBER) Description of the change`
+   - Use relative link format for PRs: `[#152](../../pull/152)`
+   - For issues without PRs, use: `[Issue #ISSUE_NUMBER](../../issues/ISSUE_NUMBER)`
 4. Entries within each category should be sorted by PR/issue number (descending - highest first)
