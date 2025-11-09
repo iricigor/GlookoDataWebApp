@@ -276,9 +276,10 @@ GlookoDataWebApp/
      - **Fixes** - for 🪲 Bug label
      - **Documentation** - for 📚 Documentation label
      - **Other** - for other changes
-   - Format: `- [1.0.buildId] Description of the change (PR #number or Issue #number)`
-   - Use the next available build ID number or leave as `buildId` to be updated after merge
-   - Keep entries within each category sorted by version (newest first)
+   - Format: `- Description of the change (#PR_NUMBER or Issue #ISSUE_NUMBER)`
+   - Use `#PR_NUMBER` format for linkability in GitHub (e.g., `#152`)
+   - For issues without PRs, use `Issue #ISSUE_NUMBER`
+   - Keep entries within each category sorted by PR/issue number (descending - highest first)
 
 2. **Run tests**
    ```bash
