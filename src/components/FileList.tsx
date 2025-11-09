@@ -256,7 +256,7 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
       <Table className={styles.table}>
         <TableHeader>
           <TableRow>
-            {onSelectFile && <TableHeaderCell>Select</TableHeaderCell>}
+            {onSelectFile && <TableHeaderCell />}
             <TableHeaderCell>File Name</TableHeaderCell>
             <TableHeaderCell className={styles.hideOnMobile}>Upload Time</TableHeaderCell>
             <TableHeaderCell className={styles.hideOnMobile}>File Size</TableHeaderCell>
