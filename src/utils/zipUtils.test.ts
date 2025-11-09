@@ -59,10 +59,10 @@ describe('zipUtils', () => {
       expect(result.csvFiles).toHaveLength(3);
       
       const fileNames = result.csvFiles.map(f => f.name);
-      // Files without duplicates keep their original names
-      expect(fileNames).toContain('alarms_data_1.csv');
-      expect(fileNames).toContain('bg_data_1.csv');
-      expect(fileNames).toContain('carbs_data_1.csv');
+      // Files display only the set name (e.g., 'alarms' from 'alarms_data_1.csv')
+      expect(fileNames).toContain('alarms');
+      expect(fileNames).toContain('bg');
+      expect(fileNames).toContain('carbs');
     });
 
     it('should extract correct row counts from CSV files', async () => {
@@ -77,8 +77,8 @@ describe('zipUtils', () => {
       expect(result.isValid).toBe(true);
       expect(result.csvFiles).toHaveLength(2);
       
-      const bgFile = result.csvFiles.find(f => f.name === 'bg_data_1.csv');
-      const cgmFile = result.csvFiles.find(f => f.name === 'cgm_data_1.csv');
+      const bgFile = result.csvFiles.find(f => f.name === 'bg');
+      const cgmFile = result.csvFiles.find(f => f.name === 'cgm');
       
       expect(bgFile?.rowCount).toBe(10);
       expect(cgmFile?.rowCount).toBe(25);
@@ -114,9 +114,9 @@ describe('zipUtils', () => {
       expect(result.isValid).toBe(true);
       const fileNames = result.csvFiles.map(f => f.name);
       expect(fileNames).toEqual([
-        'alarms_data_1.csv',
-        'bg_data_1.csv',
-        'cgm_data_1.csv',
+        'alarms',
+        'bg',
+        'cgm',
       ]);
     });
 
@@ -232,8 +232,8 @@ describe('zipUtils', () => {
       expect(result.csvFiles).toHaveLength(2);
       
       const fileNames = result.csvFiles.map(f => f.name);
-      expect(fileNames).toContain('bg_data_1.csv');
-      expect(fileNames).toContain('cgm_data_1.csv');
+      expect(fileNames).toContain('bg');
+      expect(fileNames).toContain('cgm');
     });
 
     it('should handle corrupted or invalid ZIP files', async () => {
@@ -260,9 +260,9 @@ describe('zipUtils', () => {
       expect(result.isValid).toBe(true);
       expect(result.csvFiles).toHaveLength(2);
       
-      // Verify different column counts (single files keep their names)
-      const bgFile = result.csvFiles.find(f => f.name === 'bg_data_1.csv');
-      const insulinFile = result.csvFiles.find(f => f.name === 'insulin_data_1.csv');
+      // Verify different column counts (single files show only set name)
+      const bgFile = result.csvFiles.find(f => f.name === 'bg');
+      const insulinFile = result.csvFiles.find(f => f.name === 'insulin');
       
       expect(bgFile?.columnNames?.length).toBe(4);
       expect(insulinFile?.columnNames?.length).toBe(4);
@@ -305,8 +305,8 @@ describe('zipUtils', () => {
         expect(result.csvFiles).toHaveLength(3); // cgm_data merged, bg_data and insulin_data separate
         
         const cgmFile = result.csvFiles.find(f => f.name === 'cgm');
-        const bgFile = result.csvFiles.find(f => f.name === 'bg_data_1.csv');
-        const insulinFile = result.csvFiles.find(f => f.name === 'insulin_data_1.csv');
+        const bgFile = result.csvFiles.find(f => f.name === 'bg');
+        const insulinFile = result.csvFiles.find(f => f.name === 'insulin');
         
         expect(cgmFile?.rowCount).toBe(25); // 10 + 15
         expect(cgmFile?.fileCount).toBe(2);
@@ -359,7 +359,7 @@ describe('zipUtils', () => {
         expect(cgmFile?.sourceFiles).toEqual(['cgm_data_1.csv', 'cgm_data_2.csv', 'cgm_data_3.csv']);
       });
 
-      it('should keep single files as-is without merge metadata', async () => {
+      it('should keep single files with just the set name', async () => {
         const files = {
           'bg_data_1.csv': generateMockCsvContent('bg_data', 10),
         };
@@ -371,7 +371,7 @@ describe('zipUtils', () => {
         expect(result.csvFiles).toHaveLength(1);
         
         const file = result.csvFiles[0];
-        expect(file.name).toBe('bg_data_1.csv'); // Keep original name
+        expect(file.name).toBe('bg'); // Show only set name
         expect(file.rowCount).toBe(10);
         expect(file.fileCount).toBeUndefined(); // Not merged
         expect(file.sourceFiles).toBeUndefined(); // Not merged
@@ -393,12 +393,12 @@ describe('zipUtils', () => {
         const fileNames = result.csvFiles.map(f => f.name);
         
         // Should be sorted alphabetically
-        // Single files keep their original names, merged files show just the set name
+        // All files show just the set name
         expect(fileNames).toEqual([
-          'alarms_data_1.csv',
-          'bg_data_1.csv',
+          'alarms',
+          'bg',
           'cgm',
-          'insulin_data_1.csv',
+          'insulin',
         ]);
       });
     });

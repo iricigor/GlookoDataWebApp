@@ -84,8 +84,11 @@ function groupCsvFiles(files: CsvFileMetadata[]): CsvFileMetadata[] {
   
   for (const [baseName, groupFiles] of groups.entries()) {
     if (groupFiles.length === 1) {
-      // Single file, keep as-is
-      mergedFiles.push(groupFiles[0]);
+      // Single file, use base name (set name) instead of full filename
+      mergedFiles.push({
+        ...groupFiles[0],
+        name: baseName
+      });
     } else {
       // Multiple files, merge them
       const totalRowCount = groupFiles.reduce((sum, file) => sum + file.rowCount, 0);
