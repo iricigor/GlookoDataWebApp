@@ -17,9 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Features
 - In-Range Report feature with glucose range analysis by day of week and by date
-- Configurable data source selection (CGM vs BG data)
-- Configurable category mode (3 vs 5 categories)
+- Add weekly grouping report showing glucose ranges by week (e.g., "Oct 6-12")
+- Add summary section with horizontal colored bar chart showing overall glucose distribution
+- Add date range selector to filter data between custom start/end dates
+- Configurable data source selection (CGM vs BG data) with improved button group UI
+- Configurable category mode (3 vs 5 categories) with improved button group UI
 - Support for both simple (Low, In Range, High) and detailed (Very Low, Low, In Range, High, Very High) glucose categorization
+- Collapsible accordion sections for all reports (collapsed by default, summary always visible)
+- Emphasized "In Range" column with bold text and brand color
+- Improved value display format showing "percentage (count)" instead of "count (percentage)"
 
 ### Documentation
 - Add docs/REPORTS.md with comprehensive feature documentation and screenshots
