@@ -37,10 +37,6 @@ const useStyles = makeStyles({
   table: {
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    '@media (max-width: 768px)': {
-      display: 'block',
-      overflowX: 'auto',
-    },
   },
   emptyState: {
     textAlign: 'center',
@@ -61,10 +57,20 @@ const useStyles = makeStyles({
   fileNameCell: {
     display: 'flex',
     alignItems: 'center',
+    maxWidth: '100%',
+    overflow: 'hidden',
+  },
+  fileName: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
     '@media (max-width: 768px)': {
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-      ...shorthands.gap('4px'),
+      maxWidth: '150px',
+    },
+  },
+  hideOnMobile: {
+    '@media (max-width: 768px)': {
+      display: 'none',
     },
   },
   detailsRow: {
@@ -138,38 +144,6 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorBrandBackground2,
     color: tokens.colorBrandForeground2,
     ...shorthands.borderRadius(tokens.borderRadiusSmall),
-  },
-  mobileTableCell: {
-    '@media (max-width: 768px)': {
-      display: 'block',
-      textAlign: 'left',
-      ...shorthands.padding('8px', '12px'),
-      fontSize: tokens.fontSizeBase300,
-    },
-  },
-  mobileHideHeader: {
-    '@media (max-width: 768px)': {
-      display: 'none',
-    },
-  },
-  mobileTableRow: {
-    '@media (max-width: 768px)': {
-      display: 'block',
-      ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke2),
-      ...shorthands.padding('12px'),
-    },
-  },
-  mobileLabel: {
-    '@media (max-width: 768px)': {
-      fontWeight: tokens.fontWeightSemibold,
-      color: tokens.colorNeutralForeground2,
-      fontSize: tokens.fontSizeBase200,
-      marginRight: '8px',
-      display: 'inline-block',
-    },
-    '@media (min-width: 769px)': {
-      display: 'none',
-    },
   },
 });
 
@@ -277,11 +251,11 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
         </Button>
       </div>
       <Table className={styles.table}>
-        <TableHeader className={styles.mobileHideHeader}>
+        <TableHeader>
           <TableRow>
             <TableHeaderCell>File Name</TableHeaderCell>
-            <TableHeaderCell>Upload Time</TableHeaderCell>
-            <TableHeaderCell>File Size</TableHeaderCell>
+            <TableHeaderCell className={styles.hideOnMobile}>Upload Time</TableHeaderCell>
+            <TableHeaderCell className={styles.hideOnMobile}>File Size</TableHeaderCell>
             <TableHeaderCell>Actions</TableHeaderCell>
           </TableRow>
         </TableHeader>
@@ -292,9 +266,8 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
             
             return (
               <React.Fragment key={file.id}>
-                <TableRow className={styles.mobileTableRow}>
-                  <TableCell className={styles.mobileTableCell}>
-                    <span className={styles.mobileLabel}>File:</span>
+                <TableRow>
+                  <TableCell>
                     <div className={styles.fileNameCell}>
                       {hasMetadata && (
                         <Button
@@ -305,7 +278,7 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                           aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
                         />
                       )}
-                      <span>{file.name}</span>
+                      <span className={styles.fileName} title={file.name}>{file.name}</span>
                       {file.zipMetadata && (
                         <span className={`${styles.validationBadge} ${file.zipMetadata.isValid ? styles.validBadge : styles.invalidBadge}`}>
                           {file.zipMetadata.isValid ? 'Valid' : 'Invalid'}
@@ -313,16 +286,9 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className={styles.mobileTableCell}>
-                    <span className={styles.mobileLabel}>Uploaded:</span>
-                    {formatTime(file.uploadTime)}
-                  </TableCell>
-                  <TableCell className={styles.mobileTableCell}>
-                    <span className={styles.mobileLabel}>Size:</span>
-                    {formatFileSize(file.size)}
-                  </TableCell>
-                  <TableCell className={styles.mobileTableCell}>
-                    <span className={styles.mobileLabel}>Actions:</span>
+                  <TableCell className={styles.hideOnMobile}>{formatTime(file.uploadTime)}</TableCell>
+                  <TableCell className={styles.hideOnMobile}>{formatFileSize(file.size)}</TableCell>
+                  <TableCell>
                     {file.zipMetadata?.isValid && (
                       <Button
                         appearance="subtle"
