@@ -29,10 +29,13 @@ When creating a pull request:
 ## [1.0.x] - Current Development
 
 ### New Features
+- [1.0.90] Add version information and build ID tracking system (PR #90)
+- [1.0.buildId] Implement dynamic test count badge using GitHub Gist endpoint (Issue #100)
 - Add version information and build ID tracking system (#90)
-
+- 
 ### Fixes
 - [1.0.102] Fix footer positioning to stay at bottom of viewport using flexbox sticky footer layout (Issue 102)
+- [1.0.buildId] Update README test count badge from 51 to 122 passing tests (Issue #100)
 
 ### Documentation
 - Add CHANGELOG.md file and update copilot instructions to require changelog updates in each PR (Issue #91)
