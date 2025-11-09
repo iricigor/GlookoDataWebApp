@@ -65,7 +65,7 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
 
       <div className={styles.content}>
         <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} />
-        <AGPReport />
+        <AGPReport selectedFile={selectedFile} />
       </div>
     </div>
   );

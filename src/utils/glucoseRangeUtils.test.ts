@@ -30,50 +30,50 @@ const standardThresholds: GlucoseThresholds = {
 describe('glucoseRangeUtils', () => {
   describe('categorizeGlucose', () => {
     it('should categorize glucose in 3-category mode', () => {
-      // low < 3.9 mmol/L (~70.27 mg/dL)
-      expect(categorizeGlucose(60, standardThresholds, 3)).toBe('low');
-      expect(categorizeGlucose(70, standardThresholds, 3)).toBe('low');
+      // low < 3.9 mmol/L
+      expect(categorizeGlucose(3.0, standardThresholds, 3)).toBe('low');
+      expect(categorizeGlucose(3.5, standardThresholds, 3)).toBe('low');
       
-      // inRange: 3.9-10.0 mmol/L (~70.27-180.18 mg/dL)
-      expect(categorizeGlucose(71, standardThresholds, 3)).toBe('inRange');
-      expect(categorizeGlucose(100, standardThresholds, 3)).toBe('inRange');
-      expect(categorizeGlucose(180, standardThresholds, 3)).toBe('inRange');
+      // inRange: 3.9-10.0 mmol/L
+      expect(categorizeGlucose(4.0, standardThresholds, 3)).toBe('inRange');
+      expect(categorizeGlucose(5.5, standardThresholds, 3)).toBe('inRange');
+      expect(categorizeGlucose(10.0, standardThresholds, 3)).toBe('inRange');
       
-      // high > 10.0 mmol/L (~180.18 mg/dL)
-      expect(categorizeGlucose(181, standardThresholds, 3)).toBe('high');
-      expect(categorizeGlucose(250, standardThresholds, 3)).toBe('high');
+      // high > 10.0 mmol/L
+      expect(categorizeGlucose(10.1, standardThresholds, 3)).toBe('high');
+      expect(categorizeGlucose(14.0, standardThresholds, 3)).toBe('high');
     });
 
     it('should categorize glucose in 5-category mode', () => {
-      // veryLow < 3.0 mmol/L (~54.05 mg/dL)
-      expect(categorizeGlucose(50, standardThresholds, 5)).toBe('veryLow');
-      expect(categorizeGlucose(53, standardThresholds, 5)).toBe('veryLow');
+      // veryLow < 3.0 mmol/L
+      expect(categorizeGlucose(2.5, standardThresholds, 5)).toBe('veryLow');
+      expect(categorizeGlucose(2.9, standardThresholds, 5)).toBe('veryLow');
       
-      // low: 3.0-3.9 mmol/L (~54.05-70.27 mg/dL)
-      expect(categorizeGlucose(55, standardThresholds, 5)).toBe('low');
-      expect(categorizeGlucose(70, standardThresholds, 5)).toBe('low');
+      // low: 3.0-3.9 mmol/L
+      expect(categorizeGlucose(3.0, standardThresholds, 5)).toBe('low');
+      expect(categorizeGlucose(3.8, standardThresholds, 5)).toBe('low');
       
-      // inRange: 3.9-10.0 mmol/L (~70.27-180.18 mg/dL)
-      expect(categorizeGlucose(71, standardThresholds, 5)).toBe('inRange');
-      expect(categorizeGlucose(180, standardThresholds, 5)).toBe('inRange');
+      // inRange: 3.9-10.0 mmol/L
+      expect(categorizeGlucose(4.0, standardThresholds, 5)).toBe('inRange');
+      expect(categorizeGlucose(10.0, standardThresholds, 5)).toBe('inRange');
       
-      // high: 10.0-13.9 mmol/L (~180.18-250.45 mg/dL)
-      expect(categorizeGlucose(181, standardThresholds, 5)).toBe('high');
-      expect(categorizeGlucose(250, standardThresholds, 5)).toBe('high');
+      // high: 10.0-13.9 mmol/L
+      expect(categorizeGlucose(10.1, standardThresholds, 5)).toBe('high');
+      expect(categorizeGlucose(13.0, standardThresholds, 5)).toBe('high');
       
-      // veryHigh > 13.9 mmol/L (~250.45 mg/dL)
-      expect(categorizeGlucose(251, standardThresholds, 5)).toBe('veryHigh');
-      expect(categorizeGlucose(300, standardThresholds, 5)).toBe('veryHigh');
+      // veryHigh > 13.9 mmol/L
+      expect(categorizeGlucose(14.0, standardThresholds, 5)).toBe('veryHigh');
+      expect(categorizeGlucose(16.0, standardThresholds, 5)).toBe('veryHigh');
     });
   });
 
   describe('calculateGlucoseRangeStats', () => {
     it('should calculate stats for 3-category mode', () => {
       const readings: GlucoseReading[] = [
-        { timestamp: new Date('2025-01-01T10:00:00'), value: 60 },  // low
-        { timestamp: new Date('2025-01-01T11:00:00'), value: 100 }, // inRange
-        { timestamp: new Date('2025-01-01T12:00:00'), value: 150 }, // inRange
-        { timestamp: new Date('2025-01-01T13:00:00'), value: 200 }, // high
+        { timestamp: new Date('2025-01-01T10:00:00'), value: 3.3 },  // low
+        { timestamp: new Date('2025-01-01T11:00:00'), value: 5.5 }, // inRange
+        { timestamp: new Date('2025-01-01T12:00:00'), value: 8.3 }, // inRange
+        { timestamp: new Date('2025-01-01T13:00:00'), value: 11.1 }, // high
       ];
 
       const stats = calculateGlucoseRangeStats(readings, standardThresholds, 3);
@@ -88,11 +88,11 @@ describe('glucoseRangeUtils', () => {
 
     it('should calculate stats for 5-category mode', () => {
       const readings: GlucoseReading[] = [
-        { timestamp: new Date('2025-01-01T10:00:00'), value: 50 },  // veryLow
-        { timestamp: new Date('2025-01-01T11:00:00'), value: 60 },  // low
-        { timestamp: new Date('2025-01-01T12:00:00'), value: 100 }, // inRange
-        { timestamp: new Date('2025-01-01T13:00:00'), value: 200 }, // high
-        { timestamp: new Date('2025-01-01T14:00:00'), value: 300 }, // veryHigh
+        { timestamp: new Date('2025-01-01T10:00:00'), value: 2.8 },  // veryLow
+        { timestamp: new Date('2025-01-01T11:00:00'), value: 3.3 },  // low
+        { timestamp: new Date('2025-01-01T12:00:00'), value: 5.5 }, // inRange
+        { timestamp: new Date('2025-01-01T13:00:00'), value: 11.1 }, // high
+        { timestamp: new Date('2025-01-01T14:00:00'), value: 16.7 }, // veryHigh
       ];
 
       const stats = calculateGlucoseRangeStats(readings, standardThresholds, 5);
@@ -149,10 +149,10 @@ describe('glucoseRangeUtils', () => {
   describe('groupByDayOfWeek', () => {
     it('should group readings by day of week', () => {
       const readings: GlucoseReading[] = [
-        { timestamp: new Date('2025-01-06T10:00:00'), value: 100 }, // Monday
-        { timestamp: new Date('2025-01-06T14:00:00'), value: 150 }, // Monday
-        { timestamp: new Date('2025-01-07T10:00:00'), value: 120 }, // Tuesday
-        { timestamp: new Date('2025-01-11T10:00:00'), value: 200 }, // Saturday
+        { timestamp: new Date('2025-01-06T10:00:00'), value: 5.5 }, // Monday
+        { timestamp: new Date('2025-01-06T14:00:00'), value: 8.3 }, // Monday
+        { timestamp: new Date('2025-01-07T10:00:00'), value: 6.7 }, // Tuesday
+        { timestamp: new Date('2025-01-11T10:00:00'), value: 11.1 }, // Saturday
       ];
 
       const reports = groupByDayOfWeek(readings, standardThresholds, 3);
@@ -196,11 +196,11 @@ describe('glucoseRangeUtils', () => {
   describe('groupByDate', () => {
     it('should group readings by date', () => {
       const readings: GlucoseReading[] = [
-        { timestamp: new Date('2025-01-06T10:00:00'), value: 100 },
-        { timestamp: new Date('2025-01-06T14:00:00'), value: 150 },
-        { timestamp: new Date('2025-01-07T10:00:00'), value: 120 },
-        { timestamp: new Date('2025-01-07T14:00:00'), value: 180 },
-        { timestamp: new Date('2025-01-08T10:00:00'), value: 200 },
+        { timestamp: new Date('2025-01-06T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2025-01-06T14:00:00'), value: 8.3 },
+        { timestamp: new Date('2025-01-07T10:00:00'), value: 6.7 },
+        { timestamp: new Date('2025-01-07T14:00:00'), value: 10.0 },
+        { timestamp: new Date('2025-01-08T10:00:00'), value: 11.1 },
       ];
 
       const reports = groupByDate(readings, standardThresholds, 3);
@@ -216,9 +216,9 @@ describe('glucoseRangeUtils', () => {
 
     it('should sort reports by date chronologically', () => {
       const readings: GlucoseReading[] = [
-        { timestamp: new Date('2025-01-08T10:00:00'), value: 100 },
-        { timestamp: new Date('2025-01-06T10:00:00'), value: 150 },
-        { timestamp: new Date('2025-01-07T10:00:00'), value: 120 },
+        { timestamp: new Date('2025-01-08T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2025-01-06T10:00:00'), value: 8.3 },
+        { timestamp: new Date('2025-01-07T10:00:00'), value: 6.7 },
       ];
 
       const reports = groupByDate(readings, standardThresholds, 3);
@@ -302,11 +302,11 @@ describe('glucoseRangeUtils', () => {
   describe('groupByWeek', () => {
     it('should group readings by week', () => {
       const readings: GlucoseReading[] = [
-        { timestamp: new Date('2025-01-06T10:00:00'), value: 100 }, // Week 1 (Jan 6-12)
-        { timestamp: new Date('2025-01-06T14:00:00'), value: 150 }, // Week 1
-        { timestamp: new Date('2025-01-08T10:00:00'), value: 120 }, // Week 1
-        { timestamp: new Date('2025-01-13T10:00:00'), value: 180 }, // Week 2 (Jan 13-19)
-        { timestamp: new Date('2025-01-14T10:00:00'), value: 200 }, // Week 2
+        { timestamp: new Date('2025-01-06T10:00:00'), value: 5.5 }, // Week 1 (Jan 6-12)
+        { timestamp: new Date('2025-01-06T14:00:00'), value: 8.3 }, // Week 1
+        { timestamp: new Date('2025-01-08T10:00:00'), value: 6.7 }, // Week 1
+        { timestamp: new Date('2025-01-13T10:00:00'), value: 10.0 }, // Week 2 (Jan 13-19)
+        { timestamp: new Date('2025-01-14T10:00:00'), value: 11.1 }, // Week 2
       ];
 
       const reports = groupByWeek(readings, standardThresholds, 3);
@@ -328,9 +328,9 @@ describe('glucoseRangeUtils', () => {
 
     it('should sort reports by week chronologically', () => {
       const readings: GlucoseReading[] = [
-        { timestamp: new Date('2025-01-15T10:00:00'), value: 100 }, // Week 2
-        { timestamp: new Date('2025-01-08T10:00:00'), value: 150 }, // Week 1
-        { timestamp: new Date('2025-01-22T10:00:00'), value: 120 }, // Week 3
+        { timestamp: new Date('2025-01-15T10:00:00'), value: 5.5 }, // Week 2
+        { timestamp: new Date('2025-01-08T10:00:00'), value: 8.3 }, // Week 1
+        { timestamp: new Date('2025-01-22T10:00:00'), value: 6.7 }, // Week 3
       ];
 
       const reports = groupByWeek(readings, standardThresholds, 3);
@@ -343,8 +343,8 @@ describe('glucoseRangeUtils', () => {
 
     it('should handle week spanning across months', () => {
       const readings: GlucoseReading[] = [
-        { timestamp: new Date('2025-01-27T10:00:00'), value: 100 },
-        { timestamp: new Date('2025-02-01T10:00:00'), value: 150 },
+        { timestamp: new Date('2025-01-27T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2025-02-01T10:00:00'), value: 8.3 },
       ];
 
       const reports = groupByWeek(readings, standardThresholds, 3);
@@ -361,11 +361,11 @@ describe('glucoseRangeUtils', () => {
 
     it('should correctly calculate stats in 5-category mode', () => {
       const readings: GlucoseReading[] = [
-        { timestamp: new Date('2025-01-06T10:00:00'), value: 50 },  // veryLow
-        { timestamp: new Date('2025-01-06T11:00:00'), value: 60 },  // low
-        { timestamp: new Date('2025-01-06T12:00:00'), value: 100 }, // inRange
-        { timestamp: new Date('2025-01-06T13:00:00'), value: 200 }, // high
-        { timestamp: new Date('2025-01-06T14:00:00'), value: 300 }, // veryHigh
+        { timestamp: new Date('2025-01-06T10:00:00'), value: 2.8 },  // veryLow
+        { timestamp: new Date('2025-01-06T11:00:00'), value: 3.3 },  // low
+        { timestamp: new Date('2025-01-06T12:00:00'), value: 5.5 }, // inRange
+        { timestamp: new Date('2025-01-06T13:00:00'), value: 11.1 }, // high
+        { timestamp: new Date('2025-01-06T14:00:00'), value: 16.7 }, // veryHigh
       ];
 
       const reports = groupByWeek(readings, standardThresholds, 5);
