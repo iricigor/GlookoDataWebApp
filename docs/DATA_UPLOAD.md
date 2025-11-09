@@ -91,7 +91,7 @@ All uploaded files are displayed in a comprehensive table showing:
 - **File Name**: The name of the uploaded ZIP file with validation badge
 - **Upload Time**: When the file was uploaded (local time)
 - **File Size**: Size of the ZIP file in human-readable format (KB, MB)
-- **Actions**: Remove button to delete individual files
+- **Actions**: Export to XLSX and Remove buttons for managing individual files
 
 The table header also shows the total count of uploaded files and a **Clear All** button to remove all files at once.
 
@@ -133,7 +133,55 @@ glucose_data.csv
 9 rows
 ```
 
-### 5. Data Processing
+### 5. XLSX Export
+
+For valid ZIP files, you can export the data to Excel (XLSX) format by clicking the **Export** button (download icon) in the Actions column.
+
+![Data Upload with Export Button](https://github.com/user-attachments/assets/1ce3d310-e4cd-4a1a-9ea7-b9ec16592a2a)
+
+*Example showing a valid ZIP file with the export button (download icon) in the Actions column.*
+
+#### XLSX File Structure
+
+The exported XLSX file contains:
+
+1. **Summary Sheet** (first sheet): Lists all datasets with their record counts
+   - Column headers: "Dataset Name" and "Number of Records"
+   - One row for each dataset showing the dataset name and total row count
+   
+2. **Individual Dataset Sheets**: One sheet per CSV dataset
+   - Sheet name matches the dataset name (e.g., "bg", "cgm", "insulin")
+   - First row contains column headers from the original CSV
+   - Subsequent rows contain the actual data
+   - For merged datasets, all data is combined into a single sheet
+
+#### Example XLSX Export
+
+Given a ZIP file with:
+- bg_data_1.csv (5 rows)
+- cgm_data_1.csv (3 rows) + cgm_data_2.csv (2 rows)
+- insulin_data_1.csv (3 rows)
+
+The exported XLSX will contain:
+- **Summary** sheet: Lists 3 datasets (bg: 5 rows, cgm: 5 rows, insulin: 3 rows)
+- **bg** sheet: 5 data rows + header
+- **cgm** sheet: 5 data rows + header (merged from 2 files)
+- **insulin** sheet: 3 data rows + header
+
+![Expanded Details with Export](https://github.com/user-attachments/assets/55141ff6-118f-4a7b-a49c-020429060bb4)
+
+*Expanded view showing the datasets that will be exported to XLSX.*
+
+#### Export Process
+
+1. Click the **Export** button (download icon) for a valid ZIP file
+2. The application processes the ZIP file and creates an XLSX file
+3. The XLSX file is automatically downloaded to your default downloads folder
+4. The file name matches the original ZIP file name with .xlsx extension (e.g., `test_glooko_export.xlsx`)
+
+**Note**: The export button is only available for valid ZIP files. Invalid files cannot be exported.
+
+### 6. Data Processing
 
 The application processes your data as follows:
 
@@ -143,7 +191,7 @@ The application processes your data as follows:
 4. **Counts data rows**: Calculates the number of actual data rows (excluding metadata and header)
 5. **Stores information**: Keeps all data in browser memory for the session
 
-### 6. Browser-Based Storage
+### 7. Browser-Based Storage
 
 **Important**: All uploaded files are stored in your browser's memory:
 - ✅ No data is sent to any server
@@ -178,6 +226,16 @@ The application processes your data as follows:
 4. Scroll through the list of CSV files
 5. Check the column names to understand the data structure
 6. Note the row counts for each CSV file
+
+### Example 4: Exporting to XLSX
+
+1. Upload a valid ZIP file
+2. Wait for the file to be validated (green "Valid" badge appears)
+3. Click the **Export** button (download icon) in the Actions column
+4. The XLSX file will be automatically downloaded to your downloads folder
+5. Open the XLSX file in Excel, LibreOffice, or any spreadsheet application
+6. Review the Summary sheet to see all datasets and their record counts
+7. Navigate to individual dataset sheets to view the actual data
 
 ## Data Format Requirements
 
