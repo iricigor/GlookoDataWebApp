@@ -63,7 +63,7 @@ export function Reports({ selectedFile }: ReportsProps) {
 
       <div className={styles.content}>
         <InRangeReport selectedFile={selectedFile} />
-        <AGPReport selectedFile={selectedFile} />
+        <AGPReport />
       </div>
     </div>
   );

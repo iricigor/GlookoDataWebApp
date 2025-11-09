@@ -13,7 +13,6 @@ import {
   AccordionHeader,
   AccordionPanel,
 } from '@fluentui/react-components';
-import type { UploadedFile } from '../types';
 
 const useStyles = makeStyles({
   reportContainer: {
@@ -35,31 +34,8 @@ const useStyles = makeStyles({
   },
 });
 
-interface AGPReportProps {
-  selectedFile?: UploadedFile;
-}
-
-export function AGPReport({ selectedFile }: AGPReportProps) {
+export function AGPReport() {
   const styles = useStyles();
-
-  if (!selectedFile) {
-    return (
-      <div className={styles.reportContainer}>
-        <Accordion collapsible>
-          <AccordionItem value="agp">
-            <AccordionHeader>
-              <Text className={styles.reportTitle}>AGP Data</Text>
-            </AccordionHeader>
-            <AccordionPanel>
-              <Text className={styles.placeholder}>
-                No data package selected. Please select a valid ZIP file from the Data Upload page.
-              </Text>
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.reportContainer}>
