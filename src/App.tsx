@@ -10,12 +10,49 @@ import { AIAnalysis } from './pages/AIAnalysis'
 import { Settings } from './pages/Settings'
 import { useTheme } from './hooks/useTheme'
 import type { UploadedFile } from './types'
+import { extractZipMetadata } from './utils/zipUtils'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const { theme, themeMode, setThemeMode } = useTheme()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
+
+  // Load demo data on app startup
+  useEffect(() => {
+    const loadDemoData = async () => {
+      try {
+        // Fetch the demo data file from public folder
+        const response = await fetch('/demo-data.zip')
+        if (!response.ok) {
+          console.warn('Demo data file not found')
+          return
+        }
+
+        const blob = await response.blob()
+        const file = new File([blob], 'demo-data.zip', { type: 'application/zip' })
+
+        // Extract metadata from the demo file
+        const zipMetadata = await extractZipMetadata(file)
+
+        const demoFile: UploadedFile = {
+          id: `demo-${Date.now()}`,
+          name: 'demo-data.zip',
+          size: file.size,
+          uploadTime: new Date(),
+          file: file,
+          zipMetadata,
+        }
+
+        setUploadedFiles([demoFile])
+        setSelectedFileId(demoFile.id)
+      } catch (error) {
+        console.error('Failed to load demo data:', error)
+      }
+    }
+
+    loadDemoData()
+  }, [])
 
   // Handle hash-based routing
   useEffect(() => {
