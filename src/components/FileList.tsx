@@ -253,7 +253,7 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                               </>
                             )}
                             <Text className={styles.metadataHeader}>
-                              CSV Files ({file.zipMetadata.csvFiles.length})
+                              Data Sets ({file.zipMetadata.csvFiles.length})
                             </Text>
                             {file.zipMetadata.csvFiles.map((csvFile) => (
                               <div key={csvFile.name} className={styles.csvFileItem}>
