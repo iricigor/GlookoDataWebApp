@@ -270,16 +270,6 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                                       </span>
                                     )}
                                   </div>
-                                  {csvFile.sourceFiles && csvFile.sourceFiles.length > 1 && (
-                                    <div style={{ 
-                                      marginTop: '4px',
-                                      fontSize: tokens.fontSizeBase200,
-                                      color: tokens.colorNeutralForeground3,
-                                      fontStyle: 'italic',
-                                    }}>
-                                      Source: {csvFile.sourceFiles.join(', ')}
-                                    </div>
-                                  )}
                                   {csvFile.columnNames && csvFile.columnNames.length > 0 && (
                                     <div className={styles.columnNamesList}>
                                       {csvFile.columnNames.map((col, idx) => (
