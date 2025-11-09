@@ -43,6 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Emphasized "In Range" column with bold text and brand color
 - Improved value display format showing "percentage (count)" instead of "count (percentage)"
 
+### Fixes
+- Center-align all column headers and data cells in AGP report table for improved readability
+
 ### Documentation
 - Add docs/REPORTS.md with comprehensive feature documentation and screenshots
 - Document alternative visualization options for future implementation
