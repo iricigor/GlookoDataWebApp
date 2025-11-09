@@ -78,6 +78,7 @@ const useStyles = makeStyles({
     top: 0,
     backgroundColor: tokens.colorNeutralBackground1,
     zIndex: 1,
+    textAlign: 'center',
     '::after': {
       content: '""',
       position: 'absolute',
@@ -110,9 +111,10 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     fontFamily: 'monospace',
     verticalAlign: 'middle',
+    textAlign: 'center',
   },
   valueCell: {
-    textAlign: 'right',
+    textAlign: 'center',
     fontFamily: 'monospace',
     verticalAlign: 'middle',
   },
