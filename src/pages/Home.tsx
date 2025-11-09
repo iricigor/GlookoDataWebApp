@@ -19,6 +19,11 @@ const useStyles = makeStyles({
     alignItems: 'center',
     ...shorthands.padding('40px', '24px'),
     minHeight: 'calc(100vh - 60px)',
+    maxWidth: '100%',
+    overflowX: 'hidden',
+    '@media (max-width: 768px)': {
+      ...shorthands.padding('24px', '16px'),
+    },
   },
   header: {
     textAlign: 'center',
@@ -31,6 +36,9 @@ const useStyles = makeStyles({
     marginBottom: '16px',
     fontFamily: 'Segoe UI, sans-serif',
     display: 'block',
+    '@media (max-width: 768px)': {
+      fontSize: tokens.fontSizeHero700,
+    },
   },
   subtitle: {
     color: tokens.colorNeutralForeground2,
@@ -47,6 +55,10 @@ const useStyles = makeStyles({
     maxWidth: '1000px',
     width: '100%',
     ...shorthands.padding('0', '24px'),
+    '@media (max-width: 768px)': {
+      gridTemplateColumns: '1fr',
+      ...shorthands.padding('0', '16px'),
+    },
   },
   navigationCard: {
     minHeight: '200px',

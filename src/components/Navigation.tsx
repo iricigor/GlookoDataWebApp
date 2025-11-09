@@ -4,6 +4,11 @@ import {
   Text,
   tokens,
   shorthands,
+  Menu,
+  MenuTrigger,
+  MenuPopover,
+  MenuList,
+  MenuItem,
 } from '@fluentui/react-components';
 import { 
   HomeRegular,
@@ -11,6 +16,7 @@ import {
   ChartMultipleRegular,
   BrainCircuitRegular,
   SettingsRegular,
+  NavigationRegular,
 } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
@@ -22,6 +28,9 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
     borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
     boxShadow: tokens.shadow4,
+    '@media (max-width: 768px)': {
+      ...shorthands.padding('12px', '16px'),
+    },
   },
   brand: {
     display: 'flex',
@@ -33,11 +42,23 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorBrandForeground1,
     fontFamily: 'Segoe UI, sans-serif',
+    '@media (max-width: 768px)': {
+      fontSize: tokens.fontSizeBase400,
+    },
   },
   navItems: {
     display: 'flex',
     ...shorthands.gap('8px'),
     alignItems: 'center',
+    '@media (max-width: 768px)': {
+      display: 'none',
+    },
+  },
+  hamburgerMenu: {
+    display: 'none',
+    '@media (max-width: 768px)': {
+      display: 'flex',
+    },
   },
 });
 
@@ -62,6 +83,8 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
       <div className={styles.brand}>
         <Text className={styles.brandText}>Glooko Insights</Text>
       </div>
+      
+      {/* Desktop Navigation */}
       <div className={styles.navItems}>
         {navItems.map((item) => (
           <Button
@@ -73,6 +96,32 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
             {item.label}
           </Button>
         ))}
+      </div>
+
+      {/* Mobile Hamburger Menu */}
+      <div className={styles.hamburgerMenu}>
+        <Menu>
+          <MenuTrigger disableButtonEnhancement>
+            <Button 
+              appearance="subtle" 
+              icon={<NavigationRegular />}
+              aria-label="Navigation menu"
+            />
+          </MenuTrigger>
+          <MenuPopover>
+            <MenuList>
+              {navItems.map((item) => (
+                <MenuItem
+                  key={item.page}
+                  icon={item.icon}
+                  onClick={() => onNavigate(item.page)}
+                >
+                  {item.label}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </MenuPopover>
+        </Menu>
       </div>
     </nav>
   );

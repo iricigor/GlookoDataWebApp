@@ -21,6 +21,21 @@ The application features a modern, Microsoft Fluent UI-based interface with intu
 
 The application supports both light and dark themes with an automatic system preference detection option. Theme preferences are saved and persist across sessions.
 
+### Mobile Responsive Design
+
+![Mobile View](https://github.com/user-attachments/assets/9a03cc4e-a204-43f8-8726-815a5218e5b0)
+
+The application is fully responsive and optimized for mobile devices:
+
+- **Hamburger Menu** - Navigation automatically switches to a compact menu on small screens
+- **Single Column Layout** - Content cards stack vertically for better readability
+- **Touch-Friendly** - All interactive elements are sized appropriately for touch input
+- **No Horizontal Overflow** - Content fits perfectly within the viewport
+
+![Mobile Menu Open](https://github.com/user-attachments/assets/b7570844-07a1-4f59-98b8-dc8a44858cea)
+
+The hamburger menu provides easy access to all navigation items with a clean, touch-friendly interface.
+
 ### Data Upload Page
 
 ![Data Upload Page - Empty State](https://github.com/user-attachments/assets/446b5a28-4763-42f5-857d-5dd8c44147a2)
