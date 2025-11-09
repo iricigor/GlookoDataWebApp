@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bloodGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e63946;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c1121f;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Blood drop shape -->
+  <path d="M 64 20 C 64 20 44 50 44 70 C 44 85.464 54.536 98 64 98 C 73.464 98 84 85.464 84 70 C 84 50 64 20 64 20 Z" 
+        fill="url(#bloodGradient)" 
+        stroke="#780000" 
+        stroke-width="2"/>
+  
+  <!-- Pulse line (EKG style) -->
+  <g stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="35,64 45,64 50,54 56,74 62,50 68,70 74,64 93,64" opacity="0.9"/>
+  </g>
+  
+  <!-- Highlight/shine on drop -->
+  <ellipse cx="58" cy="40" rx="8" ry="12" fill="#ffffff" opacity="0.3"/>
+</svg>

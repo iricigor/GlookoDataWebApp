@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="crossGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06a77d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#005f4b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Medical cross -->
+  <g fill="url(#crossGradient)" stroke="#003d2e" stroke-width="2">
+    <!-- Vertical bar -->
+    <rect x="52" y="28" width="24" height="72" rx="4" ry="4"/>
+    <!-- Horizontal bar -->
+    <rect x="28" y="52" width="72" height="24" rx="4" ry="4"/>
+  </g>
+  
+  <!-- Graph/trend line overlay -->
+  <g stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="36,72 44,68 52,60 60,64 68,56 76,62 84,58 92,54" opacity="0.9"/>
+    <!-- Data points -->
+    <circle cx="44" cy="68" r="3" fill="#ffffff" opacity="0.9"/>
+    <circle cx="52" cy="60" r="3" fill="#ffffff" opacity="0.9"/>
+    <circle cx="60" cy="64" r="3" fill="#ffffff" opacity="0.9"/>
+    <circle cx="68" cy="56" r="3" fill="#ffffff" opacity="0.9"/>
+    <circle cx="76" cy="62" r="3" fill="#ffffff" opacity="0.9"/>
+    <circle cx="84" cy="58" r="3" fill="#ffffff" opacity="0.9"/>
+  </g>
+  
+  <!-- Blood drop accent in center -->
+  <path d="M 64 60 C 64 60 60 66 60 70 C 60 73 61.8 75 64 75 C 66.2 75 68 73 68 70 C 68 66 64 60 64 60 Z" 
+        fill="#e63946" opacity="0.85" stroke="#c1121f" stroke-width="1"/>
+</svg>
