@@ -7,12 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Table of Contents
 
-- [Current Development - 1.0.x](#10x---current-development)
+- [Current Development - 1.1.x](#11x---current-development)
+- [Version 1.0.x](#10x---released)
 - [Future Versions](#future-versions)
 - [Version Format](#version-format)
 - [How to Update This File](#how-to-update-this-file)
 
-## [1.0.x] - Current Development
+## [1.1.x] - Current Development
+
+### New Features
+- In-Range Report feature with glucose range analysis by day of week and by date
+- Configurable data source selection (CGM vs BG data)
+- Configurable category mode (3 vs 5 categories)
+- Support for both simple (Low, In Range, High) and detailed (Very Low, Low, In Range, High, Very High) glucose categorization
+
+### Documentation
+- Add docs/REPORTS.md with comprehensive feature documentation and screenshots
+- Document alternative visualization options for future implementation
+
+### Other
+
+---
+
+## [1.0.x] - Released
 
 ### New Features
 - [#106](../../pull/106) Add metadata parsing utilities to process structured metadata from CSV files with support for both comma-separated and tab-separated formats
@@ -31,9 +48,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## Future Versions
-
-### [1.1.x] - Nov 9
-- Provide static data analysis under Reports page
 
 ### [1.2.x] - ETA Nov 11
 - Provide access to AI analysis
