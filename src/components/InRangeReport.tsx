@@ -394,6 +394,117 @@ export function InRangeReport({ selectedFile }: InRangeReportProps) {
             {error && <Text className={styles.error}>{error}</Text>}
             
             <div className={styles.container}>
+              {/* Summary bar */}
+              {!loading && !error && dayOfWeekReports.length > 0 && (
+                <div className={styles.summaryBar}>
+                  {categoryMode === 5 && (summary.veryLow ?? 0) > 0 && (
+                    <div
+                      className={styles.summarySegment}
+                      style={{
+                        width: `${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`,
+                        backgroundColor: getColorForCategory('veryLow'),
+                      }}
+                      title={`Very Low: ${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`}
+                    >
+                      {calculatePercentage(summary.veryLow ?? 0, summary.total) >= 5 && `${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`}
+                    </div>
+                  )}
+                  {summary.low > 0 && (
+                    <div
+                      className={styles.summarySegment}
+                      style={{
+                        width: `${calculatePercentage(summary.low, summary.total)}%`,
+                        backgroundColor: getColorForCategory('low'),
+                      }}
+                      title={`Low: ${calculatePercentage(summary.low, summary.total)}%`}
+                    >
+                      {calculatePercentage(summary.low, summary.total) >= 5 && `${calculatePercentage(summary.low, summary.total)}%`}
+                    </div>
+                  )}
+                  {summary.inRange > 0 && (
+                    <div
+                      className={styles.summarySegment}
+                      style={{
+                        width: `${calculatePercentage(summary.inRange, summary.total)}%`,
+                        backgroundColor: getColorForCategory('inRange'),
+                      }}
+                      title={`In Range: ${calculatePercentage(summary.inRange, summary.total)}%`}
+                    >
+                      {calculatePercentage(summary.inRange, summary.total) >= 5 && `${calculatePercentage(summary.inRange, summary.total)}%`}
+                    </div>
+                  )}
+                  {summary.high > 0 && (
+                    <div
+                      className={styles.summarySegment}
+                      style={{
+                        width: `${calculatePercentage(summary.high, summary.total)}%`,
+                        backgroundColor: getColorForCategory('high'),
+                      }}
+                      title={`High: ${calculatePercentage(summary.high, summary.total)}%`}
+                    >
+                      {calculatePercentage(summary.high, summary.total) >= 5 && `${calculatePercentage(summary.high, summary.total)}%`}
+                    </div>
+                  )}
+                  {categoryMode === 5 && (summary.veryHigh ?? 0) > 0 && (
+                    <div
+                      className={styles.summarySegment}
+                      style={{
+                        width: `${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`,
+                        backgroundColor: getColorForCategory('veryHigh'),
+                      }}
+                      title={`Very High: ${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`}
+                    >
+                      {calculatePercentage(summary.veryHigh ?? 0, summary.total) >= 5 && `${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Legend directly under summary bar */}
+              {!loading && !error && dayOfWeekReports.length > 0 && (
+                <div className={styles.summaryLegend}>
+                  {categoryMode === 5 && (
+                    <div className={styles.legendItem}>
+                      <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('veryLow') }} />
+                      <Text className={styles.legendText}>
+                        Very Low: {calculatePercentage(summary.veryLow ?? 0, summary.total)}% ({summary.veryLow ?? 0})
+                      </Text>
+                    </div>
+                  )}
+                  <div className={styles.legendItem}>
+                    <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('low') }} />
+                    <Text className={styles.legendText}>
+                      Low: {calculatePercentage(summary.low, summary.total)}% ({summary.low})
+                    </Text>
+                  </div>
+                  <div className={styles.legendItem}>
+                    <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('inRange') }} />
+                    <Text className={styles.legendText} style={{ fontWeight: tokens.fontWeightBold }}>
+                      In Range: {calculatePercentage(summary.inRange, summary.total)}% ({summary.inRange})
+                    </Text>
+                  </div>
+                  <div className={styles.legendItem}>
+                    <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('high') }} />
+                    <Text className={styles.legendText}>
+                      High: {calculatePercentage(summary.high, summary.total)}% ({summary.high})
+                    </Text>
+                  </div>
+                  {categoryMode === 5 && (
+                    <div className={styles.legendItem}>
+                      <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('veryHigh') }} />
+                      <Text className={styles.legendText}>
+                        Very High: {calculatePercentage(summary.veryHigh ?? 0, summary.total)}% ({summary.veryHigh ?? 0})
+                      </Text>
+                    </div>
+                  )}
+                  <div className={styles.legendItem}>
+                    <Text className={styles.legendText} style={{ fontWeight: tokens.fontWeightSemibold }}>
+                      Total Readings: {summary.total}
+                    </Text>
+                  </div>
+                </div>
+              )}
+
               {/* Controls */}
               <div className={styles.controls}>
                 <div className={styles.controlRow}>
@@ -455,58 +566,6 @@ export function InRangeReport({ selectedFile }: InRangeReportProps) {
                   </div>
                 )}
               </div>
-
-              {/* Summary Legend (collapsible) */}
-              {!loading && !error && dayOfWeekReports.length > 0 && (
-                <Accordion collapsible>
-                  <AccordionItem value="legend">
-                    <AccordionHeader>Summary Legend</AccordionHeader>
-                    <AccordionPanel>
-                      <div className={styles.summaryLegend}>
-                        {categoryMode === 5 && (
-                          <div className={styles.legendItem}>
-                            <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('veryLow') }} />
-                            <Text className={styles.legendText}>
-                              Very Low: {calculatePercentage(summary.veryLow ?? 0, summary.total)}% ({summary.veryLow ?? 0})
-                            </Text>
-                          </div>
-                        )}
-                        <div className={styles.legendItem}>
-                          <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('low') }} />
-                          <Text className={styles.legendText}>
-                            Low: {calculatePercentage(summary.low, summary.total)}% ({summary.low})
-                          </Text>
-                        </div>
-                        <div className={styles.legendItem}>
-                          <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('inRange') }} />
-                          <Text className={styles.legendText} style={{ fontWeight: tokens.fontWeightBold }}>
-                            In Range: {calculatePercentage(summary.inRange, summary.total)}% ({summary.inRange})
-                          </Text>
-                        </div>
-                        <div className={styles.legendItem}>
-                          <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('high') }} />
-                          <Text className={styles.legendText}>
-                            High: {calculatePercentage(summary.high, summary.total)}% ({summary.high})
-                          </Text>
-                        </div>
-                        {categoryMode === 5 && (
-                          <div className={styles.legendItem}>
-                            <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('veryHigh') }} />
-                            <Text className={styles.legendText}>
-                              Very High: {calculatePercentage(summary.veryHigh ?? 0, summary.total)}% ({summary.veryHigh ?? 0})
-                            </Text>
-                          </div>
-                        )}
-                        <div className={styles.legendItem}>
-                          <Text className={styles.legendText} style={{ fontWeight: tokens.fontWeightSemibold }}>
-                            Total Readings: {summary.total}
-                          </Text>
-                        </div>
-                      </div>
-                    </AccordionPanel>
-                  </AccordionItem>
-                </Accordion>
-              )}
 
               {/* Collapsible Reports */}
               {!loading && !error && (dayOfWeekReports.length > 0 || weeklyReports.length > 0 || dailyReports.length > 0) && (
@@ -597,72 +656,6 @@ export function InRangeReport({ selectedFile }: InRangeReportProps) {
           </AccordionPanel>
         </AccordionItem>
       </Accordion>
-      
-      {/* Summary bar visible outside accordion */}
-      {!loading && !error && dayOfWeekReports.length > 0 && (
-        <div className={styles.summaryBar}>
-          {categoryMode === 5 && (summary.veryLow ?? 0) > 0 && (
-            <div
-              className={styles.summarySegment}
-              style={{
-                width: `${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`,
-                backgroundColor: getColorForCategory('veryLow'),
-              }}
-              title={`Very Low: ${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`}
-            >
-              {calculatePercentage(summary.veryLow ?? 0, summary.total) >= 5 && `${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`}
-            </div>
-          )}
-          {summary.low > 0 && (
-            <div
-              className={styles.summarySegment}
-              style={{
-                width: `${calculatePercentage(summary.low, summary.total)}%`,
-                backgroundColor: getColorForCategory('low'),
-              }}
-              title={`Low: ${calculatePercentage(summary.low, summary.total)}%`}
-            >
-              {calculatePercentage(summary.low, summary.total) >= 5 && `${calculatePercentage(summary.low, summary.total)}%`}
-            </div>
-          )}
-          {summary.inRange > 0 && (
-            <div
-              className={styles.summarySegment}
-              style={{
-                width: `${calculatePercentage(summary.inRange, summary.total)}%`,
-                backgroundColor: getColorForCategory('inRange'),
-              }}
-              title={`In Range: ${calculatePercentage(summary.inRange, summary.total)}%`}
-            >
-              {calculatePercentage(summary.inRange, summary.total) >= 5 && `${calculatePercentage(summary.inRange, summary.total)}%`}
-            </div>
-          )}
-          {summary.high > 0 && (
-            <div
-              className={styles.summarySegment}
-              style={{
-                width: `${calculatePercentage(summary.high, summary.total)}%`,
-                backgroundColor: getColorForCategory('high'),
-              }}
-              title={`High: ${calculatePercentage(summary.high, summary.total)}%`}
-            >
-              {calculatePercentage(summary.high, summary.total) >= 5 && `${calculatePercentage(summary.high, summary.total)}%`}
-            </div>
-          )}
-          {categoryMode === 5 && (summary.veryHigh ?? 0) > 0 && (
-            <div
-              className={styles.summarySegment}
-              style={{
-                width: `${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`,
-                backgroundColor: getColorForCategory('veryHigh'),
-              }}
-              title={`Very High: ${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`}
-            >
-              {calculatePercentage(summary.veryHigh ?? 0, summary.total) >= 5 && `${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

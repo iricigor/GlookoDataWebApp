@@ -126,6 +126,7 @@ export function SelectedFileMetadata({ selectedFile }: SelectedFileMetadataProps
               <Text className={styles.headerMetadata}>
                 ({formatFileSize(selectedFile.size)}
                 {selectedFile.zipMetadata?.isValid && `, ${selectedFile.zipMetadata.csvFiles.length} datasets`}
+                {selectedFile.zipMetadata?.parsedMetadata?.name && `, ${selectedFile.zipMetadata.parsedMetadata.name}`}
                 {selectedFile.zipMetadata?.parsedMetadata?.dateRange && `, ${selectedFile.zipMetadata.parsedMetadata.dateRange}`})
               </Text>
             </div>
