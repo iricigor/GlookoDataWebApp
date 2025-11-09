@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.x] - Current Development
 
 ### New Features
+- Add realistic demo data for John Doe (two weeks of diabetes data) that automatically loads on app startup
 - In-Range Report feature with glucose range analysis by day of week and by date
 - Add weekly grouping report showing glucose ranges by week (e.g., "Oct 6-12")
 - Add summary section with horizontal colored bar chart showing overall glucose distribution
