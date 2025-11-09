@@ -86,9 +86,11 @@ function App() {
   }
 
   return (
-    <FluentProvider theme={theme}>
+    <FluentProvider theme={theme} className="app-container">
       <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
-      {renderPage()}
+      <main className="main-content">
+        {renderPage()}
+      </main>
       <Footer />
     </FluentProvider>
   )
