@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Features
 - Add realistic demo data for John Doe (two weeks of diabetes data) that automatically loads on app startup
+- [#114](../../pull/114) Optimize Reports page with collapsible sections for better organization and scalability
+  - Selected Data Package section now shows filename, patient name, and metadata in header, details collapsed by default
+  - In Range report displays header with summary bar and legend inside collapsed section
+- [#XXX](../../pull/XXX) Add AGP Data report placeholder with "Coming soon" message
 - In-Range Report feature with glucose range analysis by day of week and by date
 - Add weekly grouping report showing glucose ranges by week (e.g., "Oct 6-12")
 - Add summary section with horizontal colored bar chart showing overall glucose distribution
