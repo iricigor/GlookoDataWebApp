@@ -1,6 +1,6 @@
 /**
  * CopyToCsvButton component
- * A button that appears on hover and copies table data to clipboard in CSV format
+ * A button that appears on hover and copies table data to clipboard in CSV/TSV format
  */
 
 import { useState } from 'react';
@@ -12,7 +12,8 @@ import {
   shorthands,
 } from '@fluentui/react-components';
 import { CopyRegular, CheckmarkRegular } from '@fluentui/react-icons';
-import { convertToCSV, copyToClipboard } from '../utils/csvUtils';
+import { convertToDelimitedFormat, copyToClipboard } from '../utils/csvUtils';
+import type { ExportFormat } from '../utils/csvUtils';
 
 const useStyles = makeStyles({
   button: {
@@ -29,18 +30,23 @@ const useStyles = makeStyles({
 interface CopyToCsvButtonProps {
   /** 2D array of data where first row is headers */
   data: (string | number)[][];
+  /** Export format (CSV or TSV) */
+  format?: ExportFormat;
   /** Optional aria label for accessibility */
   ariaLabel?: string;
 }
 
-export function CopyToCsvButton({ data, ariaLabel = 'Copy as CSV' }: CopyToCsvButtonProps) {
+export function CopyToCsvButton({ data, format = 'csv', ariaLabel }: CopyToCsvButtonProps) {
   const styles = useStyles();
   const [copied, setCopied] = useState(false);
+  
+  const formatLabel = format.toUpperCase();
+  const defaultAriaLabel = `Copy as ${formatLabel}`;
 
   const handleCopy = async () => {
     try {
-      const csv = convertToCSV(data);
-      await copyToClipboard(csv);
+      const output = convertToDelimitedFormat(data, format);
+      await copyToClipboard(output);
       setCopied(true);
       
       // Reset copied state after 2 seconds
@@ -55,15 +61,16 @@ export function CopyToCsvButton({ data, ariaLabel = 'Copy as CSV' }: CopyToCsvBu
 
   return (
     <Tooltip
-      content={copied ? 'Copied!' : 'Copy As CSV'}
+      content={copied ? 'Copied!' : `Copy As ${formatLabel}`}
       relationship="label"
+      positioning="below"
     >
       <Button
         appearance="subtle"
         icon={copied ? <CheckmarkRegular /> : <CopyRegular />}
         onClick={handleCopy}
         className={copied ? styles.copiedButton : styles.button}
-        aria-label={ariaLabel}
+        aria-label={ariaLabel || defaultAriaLabel}
       />
     </Tooltip>
   );

@@ -7,6 +7,7 @@ import {
 import { FileUploadZone } from '../components/FileUploadZone';
 import { FileList } from '../components/FileList';
 import type { UploadedFile } from '../types';
+import type { ExportFormat } from '../hooks/useExportFormat';
 import { extractZipMetadata } from '../utils/zipUtils';
 
 const useStyles = makeStyles({
@@ -48,9 +49,10 @@ interface DataUploadProps {
   onClearAll: () => void;
   selectedFileId: string | null;
   onSelectFile: (id: string | null) => void;
+  exportFormat: ExportFormat;
 }
 
-export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll, selectedFileId, onSelectFile }: DataUploadProps) {
+export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll, selectedFileId, onSelectFile, exportFormat }: DataUploadProps) {
   const styles = useStyles();
 
   const handleFilesSelected = async (files: File[]) => {
@@ -91,6 +93,7 @@ export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll
         onClearAll={onClearAll}
         selectedFileId={selectedFileId}
         onSelectFile={onSelectFile}
+        exportFormat={exportFormat}
       />
     </div>
   );

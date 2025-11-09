@@ -30,6 +30,7 @@ import type {
   WeeklyReport,
   GlucoseReading,
 } from '../types';
+import type { ExportFormat } from '../hooks/useExportFormat';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
 import { groupByDayOfWeek, groupByDate, groupByWeek, calculatePercentage } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
@@ -130,7 +131,7 @@ const useStyles = makeStyles({
     },
   },
   csvButton: {
-    position: 'absolute',
+    position: 'sticky',
     top: '8px',
     right: '8px',
     opacity: 0,
@@ -139,6 +140,9 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.borderRadius(tokens.borderRadiusCircular),
     boxShadow: tokens.shadow4,
+    float: 'right',
+    marginRight: '8px',
+    marginTop: '8px',
   },
   summaryLegend: {
     display: 'flex',
@@ -188,9 +192,10 @@ const useStyles = makeStyles({
 
 interface InRangeReportProps {
   selectedFile?: UploadedFile;
+  exportFormat: ExportFormat;
 }
 
-export function InRangeReport({ selectedFile }: InRangeReportProps) {
+export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
 
@@ -638,7 +643,8 @@ export function InRangeReport({ selectedFile }: InRangeReportProps) {
                                 dayOfWeekReports.map(r => ({ label: r.day, stats: r.stats })),
                                 'Day'
                               )}
-                              ariaLabel="Copy glucose range by day of week as CSV"
+                              format={exportFormat}
+                              ariaLabel={`Copy glucose range by day of week as ${exportFormat.toUpperCase()}`}
                             />
                           </div>
                           <Table>
@@ -674,7 +680,8 @@ export function InRangeReport({ selectedFile }: InRangeReportProps) {
                                 weeklyReports.map(r => ({ label: r.weekLabel, stats: r.stats })),
                                 'Week'
                               )}
-                              ariaLabel="Copy glucose range by week as CSV"
+                              format={exportFormat}
+                              ariaLabel={`Copy glucose range by week as ${exportFormat.toUpperCase()}`}
                             />
                           </div>
                           <Table>
@@ -710,7 +717,8 @@ export function InRangeReport({ selectedFile }: InRangeReportProps) {
                                 dailyReports.map(r => ({ label: r.date, stats: r.stats })),
                                 'Date'
                               )}
-                              ariaLabel="Copy glucose range by date as CSV"
+                              format={exportFormat}
+                              ariaLabel={`Copy glucose range by date as ${exportFormat.toUpperCase()}`}
                             />
                           </div>
                           <Table>
