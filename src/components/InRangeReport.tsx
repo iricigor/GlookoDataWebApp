@@ -35,6 +35,40 @@ import { groupByDayOfWeek, groupByDate, groupByWeek, calculatePercentage } from 
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 
 const useStyles = makeStyles({
+  reportContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('16px'),
+  },
+  reportHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  reportTitle: {
+    fontSize: tokens.fontSizeBase500,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+  },
+  summaryBar: {
+    display: 'flex',
+    height: '40px',
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.overflow('hidden'),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+  },
+  summarySegment: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForegroundOnBrand,
+    fontWeight: tokens.fontWeightSemibold,
+    ...shorthands.transition('all', '0.2s'),
+    '&:hover': {
+      opacity: 0.8,
+    },
+  },
   container: {
     display: 'flex',
     flexDirection: 'column',
@@ -90,30 +124,12 @@ const useStyles = makeStyles({
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
     ...shorthands.overflow('hidden'),
   },
-  summaryBar: {
-    display: 'flex',
-    height: '40px',
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    ...shorthands.overflow('hidden'),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-  },
-  summarySegment: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: tokens.fontSizeBase200,
-    color: tokens.colorNeutralForegroundOnBrand,
-    fontWeight: tokens.fontWeightSemibold,
-    ...shorthands.transition('all', '0.2s'),
-    '&:hover': {
-      opacity: 0.8,
-    },
-  },
   summaryLegend: {
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('8px'),
     ...shorthands.padding('12px', '0'),
+    marginTop: '12px',
   },
   legendItem: {
     display: 'flex',
@@ -343,284 +359,303 @@ export function InRangeReport({ selectedFile }: InRangeReportProps) {
 
   if (!selectedFile) {
     return (
-      <div className={styles.container}>
-        <Text className={styles.noData}>
-          No data package selected. Please select a valid ZIP file from the Data Upload page.
-        </Text>
+      <div className={styles.reportContainer}>
+        <Accordion collapsible>
+          <AccordionItem value="inRange">
+            <AccordionHeader>
+              <Text className={styles.reportTitle}>In Range</Text>
+            </AccordionHeader>
+            <AccordionPanel>
+              <Text className={styles.noData}>
+                No data package selected. Please select a valid ZIP file from the Data Upload page.
+              </Text>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
       </div>
     );
   }
 
+  // Calculate overall summary stats
+  const summary = calculateOverallStats();
+  
   return (
-    <div className={styles.container}>
-      {/* Controls */}
-      <div className={styles.controls}>
-        <div className={styles.controlRow}>
-          <Text className={styles.controlLabel}>Data Source:</Text>
-          <div className={styles.buttonGroup}>
-            <Button
-              appearance={dataSource === 'cgm' ? 'primary' : 'secondary'}
-              onClick={() => setDataSource('cgm')}
-            >
-              CGM
-            </Button>
-            <Button
-              appearance={dataSource === 'bg' ? 'primary' : 'secondary'}
-              onClick={() => setDataSource('bg')}
-            >
-              BG
-            </Button>
-          </div>
-        </div>
-        <div className={styles.controlRow}>
-          <Text className={styles.controlLabel}>Categories:</Text>
-          <div className={styles.buttonGroup}>
-            <Button
-              appearance={categoryMode === 3 ? 'primary' : 'secondary'}
-              onClick={() => setCategoryMode(3)}
-            >
-              3 Categories
-            </Button>
-            <Button
-              appearance={categoryMode === 5 ? 'primary' : 'secondary'}
-              onClick={() => setCategoryMode(5)}
-            >
-              5 Categories
-            </Button>
-          </div>
-        </div>
-        {minDate && maxDate && (
-          <div className={styles.controlRow}>
-            <Text className={styles.controlLabel}>Date Range:</Text>
-            <div className={styles.dateInputGroup}>
-              <input
-                type="date"
-                className={styles.dateInput}
-                value={startDate}
-                min={minDate}
-                max={maxDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-              <Text>to</Text>
-              <input
-                type="date"
-                className={styles.dateInput}
-                value={endDate}
-                min={minDate}
-                max={maxDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
+    <div className={styles.reportContainer}>
+      <Accordion collapsible>
+        <AccordionItem value="inRange">
+          <AccordionHeader>
+            <div className={styles.reportHeader}>
+              <Text className={styles.reportTitle}>In Range</Text>
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Loading/Error states */}
-      {loading && <Text className={styles.loading}>Loading glucose data...</Text>}
-      {error && <Text className={styles.error}>{error}</Text>}
-
-      {/* Summary Section */}
-      {!loading && !error && dayOfWeekReports.length > 0 && (() => {
-        const summary = calculateOverallStats();
-        return (
-          <div className={styles.section}>
-            <Text className={styles.sectionTitle}>Summary - Glucose ({dataSource.toUpperCase()})</Text>
+          </AccordionHeader>
+          <AccordionPanel>
+            {/* Loading/Error states */}
+            {loading && <Text className={styles.loading}>Loading glucose data...</Text>}
+            {error && <Text className={styles.error}>{error}</Text>}
             
-            {/* Colored horizontal bar */}
-            <div className={styles.summaryBar}>
-              {categoryMode === 5 && (summary.veryLow ?? 0) > 0 && (
-                <div
-                  className={styles.summarySegment}
-                  style={{
-                    width: `${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`,
-                    backgroundColor: getColorForCategory('veryLow'),
-                  }}
-                  title={`Very Low: ${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`}
-                >
-                  {calculatePercentage(summary.veryLow ?? 0, summary.total) >= 5 && `${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`}
+            <div className={styles.container}>
+              {/* Summary bar */}
+              {!loading && !error && dayOfWeekReports.length > 0 && (
+                <div className={styles.summaryBar}>
+                  {categoryMode === 5 && (summary.veryLow ?? 0) > 0 && (
+                    <div
+                      className={styles.summarySegment}
+                      style={{
+                        width: `${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`,
+                        backgroundColor: getColorForCategory('veryLow'),
+                      }}
+                      title={`Very Low: ${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`}
+                    >
+                      {calculatePercentage(summary.veryLow ?? 0, summary.total) >= 5 && `${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`}
+                    </div>
+                  )}
+                  {summary.low > 0 && (
+                    <div
+                      className={styles.summarySegment}
+                      style={{
+                        width: `${calculatePercentage(summary.low, summary.total)}%`,
+                        backgroundColor: getColorForCategory('low'),
+                      }}
+                      title={`Low: ${calculatePercentage(summary.low, summary.total)}%`}
+                    >
+                      {calculatePercentage(summary.low, summary.total) >= 5 && `${calculatePercentage(summary.low, summary.total)}%`}
+                    </div>
+                  )}
+                  {summary.inRange > 0 && (
+                    <div
+                      className={styles.summarySegment}
+                      style={{
+                        width: `${calculatePercentage(summary.inRange, summary.total)}%`,
+                        backgroundColor: getColorForCategory('inRange'),
+                      }}
+                      title={`In Range: ${calculatePercentage(summary.inRange, summary.total)}%`}
+                    >
+                      {calculatePercentage(summary.inRange, summary.total) >= 5 && `${calculatePercentage(summary.inRange, summary.total)}%`}
+                    </div>
+                  )}
+                  {summary.high > 0 && (
+                    <div
+                      className={styles.summarySegment}
+                      style={{
+                        width: `${calculatePercentage(summary.high, summary.total)}%`,
+                        backgroundColor: getColorForCategory('high'),
+                      }}
+                      title={`High: ${calculatePercentage(summary.high, summary.total)}%`}
+                    >
+                      {calculatePercentage(summary.high, summary.total) >= 5 && `${calculatePercentage(summary.high, summary.total)}%`}
+                    </div>
+                  )}
+                  {categoryMode === 5 && (summary.veryHigh ?? 0) > 0 && (
+                    <div
+                      className={styles.summarySegment}
+                      style={{
+                        width: `${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`,
+                        backgroundColor: getColorForCategory('veryHigh'),
+                      }}
+                      title={`Very High: ${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`}
+                    >
+                      {calculatePercentage(summary.veryHigh ?? 0, summary.total) >= 5 && `${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`}
+                    </div>
+                  )}
                 </div>
               )}
-              {summary.low > 0 && (
-                <div
-                  className={styles.summarySegment}
-                  style={{
-                    width: `${calculatePercentage(summary.low, summary.total)}%`,
-                    backgroundColor: getColorForCategory('low'),
-                  }}
-                  title={`Low: ${calculatePercentage(summary.low, summary.total)}%`}
-                >
-                  {calculatePercentage(summary.low, summary.total) >= 5 && `${calculatePercentage(summary.low, summary.total)}%`}
+
+              {/* Legend directly under summary bar */}
+              {!loading && !error && dayOfWeekReports.length > 0 && (
+                <div className={styles.summaryLegend}>
+                  {categoryMode === 5 && (
+                    <div className={styles.legendItem}>
+                      <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('veryLow') }} />
+                      <Text className={styles.legendText}>
+                        Very Low: {calculatePercentage(summary.veryLow ?? 0, summary.total)}% ({summary.veryLow ?? 0})
+                      </Text>
+                    </div>
+                  )}
+                  <div className={styles.legendItem}>
+                    <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('low') }} />
+                    <Text className={styles.legendText}>
+                      Low: {calculatePercentage(summary.low, summary.total)}% ({summary.low})
+                    </Text>
+                  </div>
+                  <div className={styles.legendItem}>
+                    <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('inRange') }} />
+                    <Text className={styles.legendText} style={{ fontWeight: tokens.fontWeightBold }}>
+                      In Range: {calculatePercentage(summary.inRange, summary.total)}% ({summary.inRange})
+                    </Text>
+                  </div>
+                  <div className={styles.legendItem}>
+                    <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('high') }} />
+                    <Text className={styles.legendText}>
+                      High: {calculatePercentage(summary.high, summary.total)}% ({summary.high})
+                    </Text>
+                  </div>
+                  {categoryMode === 5 && (
+                    <div className={styles.legendItem}>
+                      <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('veryHigh') }} />
+                      <Text className={styles.legendText}>
+                        Very High: {calculatePercentage(summary.veryHigh ?? 0, summary.total)}% ({summary.veryHigh ?? 0})
+                      </Text>
+                    </div>
+                  )}
+                  <div className={styles.legendItem}>
+                    <Text className={styles.legendText} style={{ fontWeight: tokens.fontWeightSemibold }}>
+                      Total Readings: {summary.total}
+                    </Text>
+                  </div>
                 </div>
               )}
-              {summary.inRange > 0 && (
-                <div
-                  className={styles.summarySegment}
-                  style={{
-                    width: `${calculatePercentage(summary.inRange, summary.total)}%`,
-                    backgroundColor: getColorForCategory('inRange'),
-                  }}
-                  title={`In Range: ${calculatePercentage(summary.inRange, summary.total)}%`}
-                >
-                  {calculatePercentage(summary.inRange, summary.total) >= 5 && `${calculatePercentage(summary.inRange, summary.total)}%`}
+
+              {/* Controls */}
+              <div className={styles.controls}>
+                <div className={styles.controlRow}>
+                  <Text className={styles.controlLabel}>Data Source:</Text>
+                  <div className={styles.buttonGroup}>
+                    <Button
+                      appearance={dataSource === 'cgm' ? 'primary' : 'secondary'}
+                      onClick={() => setDataSource('cgm')}
+                    >
+                      CGM
+                    </Button>
+                    <Button
+                      appearance={dataSource === 'bg' ? 'primary' : 'secondary'}
+                      onClick={() => setDataSource('bg')}
+                    >
+                      BG
+                    </Button>
+                  </div>
                 </div>
-              )}
-              {summary.high > 0 && (
-                <div
-                  className={styles.summarySegment}
-                  style={{
-                    width: `${calculatePercentage(summary.high, summary.total)}%`,
-                    backgroundColor: getColorForCategory('high'),
-                  }}
-                  title={`High: ${calculatePercentage(summary.high, summary.total)}%`}
-                >
-                  {calculatePercentage(summary.high, summary.total) >= 5 && `${calculatePercentage(summary.high, summary.total)}%`}
+                <div className={styles.controlRow}>
+                  <Text className={styles.controlLabel}>Categories:</Text>
+                  <div className={styles.buttonGroup}>
+                    <Button
+                      appearance={categoryMode === 3 ? 'primary' : 'secondary'}
+                      onClick={() => setCategoryMode(3)}
+                    >
+                      3 Categories
+                    </Button>
+                    <Button
+                      appearance={categoryMode === 5 ? 'primary' : 'secondary'}
+                      onClick={() => setCategoryMode(5)}
+                    >
+                      5 Categories
+                    </Button>
+                  </div>
                 </div>
-              )}
-              {categoryMode === 5 && (summary.veryHigh ?? 0) > 0 && (
-                <div
-                  className={styles.summarySegment}
-                  style={{
-                    width: `${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`,
-                    backgroundColor: getColorForCategory('veryHigh'),
-                  }}
-                  title={`Very High: ${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`}
-                >
-                  {calculatePercentage(summary.veryHigh ?? 0, summary.total) >= 5 && `${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`}
-                </div>
+                {minDate && maxDate && (
+                  <div className={styles.controlRow}>
+                    <Text className={styles.controlLabel}>Date Range:</Text>
+                    <div className={styles.dateInputGroup}>
+                      <input
+                        type="date"
+                        className={styles.dateInput}
+                        value={startDate}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                      />
+                      <Text>to</Text>
+                      <input
+                        type="date"
+                        className={styles.dateInput}
+                        value={endDate}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Collapsible Reports */}
+              {!loading && !error && (dayOfWeekReports.length > 0 || weeklyReports.length > 0 || dailyReports.length > 0) && (
+                <Accordion multiple collapsible defaultOpenItems={[]}>
+                  {/* Day of Week Report */}
+                  {dayOfWeekReports.length > 0 && (
+                    <AccordionItem value="dayOfWeek">
+                      <AccordionHeader>Glucose Range by Day of Week</AccordionHeader>
+                      <AccordionPanel>
+                        <div className={styles.tableContainer}>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell>Day</TableHeaderCell>
+                                {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
+                                <TableHeaderCell>Low</TableHeaderCell>
+                                <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
+                                <TableHeaderCell>High</TableHeaderCell>
+                                {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
+                                <TableHeaderCell>Total</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {dayOfWeekReports.map(report => renderStatsRow(report.day, report.stats))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </AccordionPanel>
+                    </AccordionItem>
+                  )}
+
+                  {/* Weekly Report */}
+                  {weeklyReports.length > 0 && (
+                    <AccordionItem value="weekly">
+                      <AccordionHeader>Glucose Range by Week</AccordionHeader>
+                      <AccordionPanel>
+                        <div className={styles.tableContainer}>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell>Week</TableHeaderCell>
+                                {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
+                                <TableHeaderCell>Low</TableHeaderCell>
+                                <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
+                                <TableHeaderCell>High</TableHeaderCell>
+                                {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
+                                <TableHeaderCell>Total</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {weeklyReports.map(report => renderStatsRow(report.weekLabel, report.stats))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </AccordionPanel>
+                    </AccordionItem>
+                  )}
+
+                  {/* Daily Report */}
+                  {dailyReports.length > 0 && (
+                    <AccordionItem value="daily">
+                      <AccordionHeader>Glucose Range by Date</AccordionHeader>
+                      <AccordionPanel>
+                        <div className={styles.tableContainer}>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHeaderCell>Date</TableHeaderCell>
+                                {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
+                                <TableHeaderCell>Low</TableHeaderCell>
+                                <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
+                                <TableHeaderCell>High</TableHeaderCell>
+                                {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
+                                <TableHeaderCell>Total</TableHeaderCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {dailyReports.map(report => renderStatsRow(report.date, report.stats))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </AccordionPanel>
+                    </AccordionItem>
+                  )}
+                </Accordion>
               )}
             </div>
-
-            {/* Legend */}
-            <div className={styles.summaryLegend}>
-              {categoryMode === 5 && (
-                <div className={styles.legendItem}>
-                  <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('veryLow') }} />
-                  <Text className={styles.legendText}>
-                    Very Low: {calculatePercentage(summary.veryLow ?? 0, summary.total)}% ({summary.veryLow ?? 0})
-                  </Text>
-                </div>
-              )}
-              <div className={styles.legendItem}>
-                <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('low') }} />
-                <Text className={styles.legendText}>
-                  Low: {calculatePercentage(summary.low, summary.total)}% ({summary.low})
-                </Text>
-              </div>
-              <div className={styles.legendItem}>
-                <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('inRange') }} />
-                <Text className={styles.legendText} style={{ fontWeight: tokens.fontWeightBold }}>
-                  In Range: {calculatePercentage(summary.inRange, summary.total)}% ({summary.inRange})
-                </Text>
-              </div>
-              <div className={styles.legendItem}>
-                <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('high') }} />
-                <Text className={styles.legendText}>
-                  High: {calculatePercentage(summary.high, summary.total)}% ({summary.high})
-                </Text>
-              </div>
-              {categoryMode === 5 && (
-                <div className={styles.legendItem}>
-                  <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('veryHigh') }} />
-                  <Text className={styles.legendText}>
-                    Very High: {calculatePercentage(summary.veryHigh ?? 0, summary.total)}% ({summary.veryHigh ?? 0})
-                  </Text>
-                </div>
-              )}
-              <div className={styles.legendItem}>
-                <Text className={styles.legendText} style={{ fontWeight: tokens.fontWeightSemibold }}>
-                  Total Readings: {summary.total}
-                </Text>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Collapsible Reports */}
-      {!loading && !error && (dayOfWeekReports.length > 0 || weeklyReports.length > 0 || dailyReports.length > 0) && (
-        <Accordion multiple collapsible defaultOpenItems={[]}>
-          {/* Day of Week Report */}
-          {dayOfWeekReports.length > 0 && (
-            <AccordionItem value="dayOfWeek">
-              <AccordionHeader>Glucose Range by Day of Week</AccordionHeader>
-              <AccordionPanel>
-                <div className={styles.tableContainer}>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHeaderCell>Day</TableHeaderCell>
-                        {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
-                        <TableHeaderCell>Low</TableHeaderCell>
-                        <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
-                        <TableHeaderCell>High</TableHeaderCell>
-                        {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
-                        <TableHeaderCell>Total</TableHeaderCell>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {dayOfWeekReports.map(report => renderStatsRow(report.day, report.stats))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </AccordionPanel>
-            </AccordionItem>
-          )}
-
-          {/* Weekly Report */}
-          {weeklyReports.length > 0 && (
-            <AccordionItem value="weekly">
-              <AccordionHeader>Glucose Range by Week</AccordionHeader>
-              <AccordionPanel>
-                <div className={styles.tableContainer}>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHeaderCell>Week</TableHeaderCell>
-                        {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
-                        <TableHeaderCell>Low</TableHeaderCell>
-                        <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
-                        <TableHeaderCell>High</TableHeaderCell>
-                        {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
-                        <TableHeaderCell>Total</TableHeaderCell>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {weeklyReports.map(report => renderStatsRow(report.weekLabel, report.stats))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </AccordionPanel>
-            </AccordionItem>
-          )}
-
-          {/* Daily Report */}
-          {dailyReports.length > 0 && (
-            <AccordionItem value="daily">
-              <AccordionHeader>Glucose Range by Date</AccordionHeader>
-              <AccordionPanel>
-                <div className={styles.tableContainer}>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHeaderCell>Date</TableHeaderCell>
-                        {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
-                        <TableHeaderCell>Low</TableHeaderCell>
-                        <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
-                        <TableHeaderCell>High</TableHeaderCell>
-                        {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
-                        <TableHeaderCell>Total</TableHeaderCell>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {dailyReports.map(report => renderStatsRow(report.date, report.stats))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </AccordionPanel>
-            </AccordionItem>
-          )}
-        </Accordion>
-      )}
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 }
