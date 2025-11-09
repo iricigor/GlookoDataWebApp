@@ -11,6 +11,7 @@ import {
 } from '@fluentui/react-components';
 import { SettingsRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
+import type { ExportFormat } from '../hooks/useExportFormat';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { GlucoseThresholdsSection } from '../components/GlucoseThresholdsSection';
 import { getVersionInfo, formatBuildDate } from '../utils/version';
@@ -102,9 +103,11 @@ const useStyles = makeStyles({
 interface SettingsProps {
   themeMode: ThemeMode;
   onThemeChange: (mode: ThemeMode) => void;
+  exportFormat: ExportFormat;
+  onExportFormatChange: (format: ExportFormat) => void;
 }
 
-export function Settings({ themeMode, onThemeChange }: SettingsProps) {
+export function Settings({ themeMode, onThemeChange, exportFormat, onExportFormatChange }: SettingsProps) {
   const styles = useStyles();
   const { thresholds, updateThreshold, validateThresholds, isValid } = useGlucoseThresholds();
   const validationError = validateThresholds(thresholds);
@@ -136,6 +139,21 @@ export function Settings({ themeMode, onThemeChange }: SettingsProps) {
             <Radio value="light" label="Light" />
             <Radio value="dark" label="Dark" />
             <Radio value="system" label="System (recommended)" />
+          </RadioGroup>
+        </div>
+
+        <div className={styles.settingSection}>
+          <Title3 className={styles.sectionTitle}>Export Format</Title3>
+          <Divider className={styles.divider} />
+          <Text className={styles.settingDescription}>
+            Choose the format for exporting table data to clipboard (CSV or TSV).
+          </Text>
+          <RadioGroup
+            value={exportFormat}
+            onChange={(_, data) => onExportFormatChange(data.value as ExportFormat)}
+          >
+            <Radio value="csv" label="CSV (Comma-Separated Values)" />
+            <Radio value="tsv" label="TSV (Tab-Separated Values)" />
           </RadioGroup>
         </div>
 

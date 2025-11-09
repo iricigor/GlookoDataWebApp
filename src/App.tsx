@@ -9,12 +9,14 @@ import { Reports } from './pages/Reports'
 import { AIAnalysis } from './pages/AIAnalysis'
 import { Settings } from './pages/Settings'
 import { useTheme } from './hooks/useTheme'
+import { useExportFormat } from './hooks/useExportFormat'
 import type { UploadedFile } from './types'
 import { extractZipMetadata } from './utils/zipUtils'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const { theme, themeMode, setThemeMode } = useTheme()
+  const { exportFormat, setExportFormat } = useExportFormat()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
 
@@ -109,14 +111,15 @@ function App() {
             onClearAll={handleClearAll}
             selectedFileId={selectedFileId}
             onSelectFile={handleSelectFile}
+            exportFormat={exportFormat}
           />
         )
       case 'reports':
-        return <Reports selectedFile={selectedFile} />
+        return <Reports selectedFile={selectedFile} exportFormat={exportFormat} />
       case 'ai':
         return <AIAnalysis selectedFile={selectedFile} />
       case 'settings':
-        return <Settings themeMode={themeMode} onThemeChange={setThemeMode} />
+        return <Settings themeMode={themeMode} onThemeChange={setThemeMode} exportFormat={exportFormat} onExportFormatChange={setExportFormat} />
       default:
         return <Home onNavigate={handleNavigate} />
     }

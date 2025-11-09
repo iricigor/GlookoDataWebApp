@@ -15,7 +15,9 @@ import {
 } from '@fluentui/react-components';
 import { DeleteRegular, ChevronRightRegular, ChevronDownRegular, ArrowDownloadRegular } from '@fluentui/react-icons';
 import type { UploadedFile } from '../types';
+import type { ExportFormat } from '../hooks/useExportFormat';
 import { convertZipToXlsx, downloadXlsx } from '../utils/xlsxUtils';
+import { CopyToCsvButton } from './CopyToCsvButton';
 
 const useStyles = makeStyles({
   container: {
@@ -34,6 +36,26 @@ const useStyles = makeStyles({
   },
   clearButton: {
     marginLeft: 'auto',
+  },
+  tableWrapper: {
+    position: 'relative',
+    '&:hover .csv-button': {
+      opacity: 1,
+    },
+  },
+  csvButton: {
+    position: 'sticky',
+    top: '8px',
+    right: '8px',
+    opacity: 0,
+    ...shorthands.transition('opacity', '0.2s'),
+    zIndex: 10,
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderRadius(tokens.borderRadiusCircular),
+    boxShadow: tokens.shadow4,
+    float: 'right',
+    marginRight: '8px',
+    marginTop: '8px',
   },
   table: {
     backgroundColor: tokens.colorNeutralBackground1,
@@ -158,6 +180,7 @@ interface FileListProps {
   onClearAll: () => void;
   selectedFileId?: string | null;
   onSelectFile?: (id: string | null) => void;
+  exportFormat: ExportFormat;
 }
 
 /**
@@ -178,7 +201,7 @@ function getDataSetColor(rowCount: number): string {
   }
 }
 
-export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSelectFile }: FileListProps) {
+export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSelectFile, exportFormat }: FileListProps) {
   const styles = useStyles();
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
   const [exportingFiles, setExportingFiles] = useState<Set<string>>(new Set());
@@ -230,6 +253,30 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
     return date.toLocaleString();
   };
 
+  // Extract CSV data from the files list for export
+  const getFilesListAsCSV = (): (string | number)[][] => {
+    const headers = onSelectFile 
+      ? ['Select', 'File Name', 'Upload Time', 'File Size', 'Status']
+      : ['File Name', 'Upload Time', 'File Size', 'Status'];
+    
+    const rows = files.map(file => {
+      const row = [
+        file.name,
+        formatTime(file.uploadTime),
+        formatFileSize(file.size),
+        file.zipMetadata?.isValid ? 'Valid' : 'Invalid',
+      ];
+      
+      if (onSelectFile) {
+        row.unshift(selectedFileId === file.id ? 'Selected' : '');
+      }
+      
+      return row;
+    });
+    
+    return [headers, ...rows];
+  };
+
   if (files.length === 0) {
     return (
       <div className={styles.container}>
@@ -257,7 +304,15 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
           Clear All
         </Button>
       </div>
-      <Table className={styles.table}>
+      <div className={styles.tableWrapper}>
+        <div className={`${styles.csvButton} csv-button`}>
+          <CopyToCsvButton 
+            data={getFilesListAsCSV()} 
+            format={exportFormat}
+            ariaLabel={`Copy uploaded files table as ${exportFormat.toUpperCase()}`}
+          />
+        </div>
+        <Table className={styles.table}>
         <TableHeader>
           <TableRow>
             {onSelectFile && <TableHeaderCell className={styles.selectCell}>Select</TableHeaderCell>}
@@ -393,6 +448,7 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
           })}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

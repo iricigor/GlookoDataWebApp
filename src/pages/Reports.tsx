@@ -8,6 +8,7 @@ import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { InRangeReport } from '../components/InRangeReport';
 import { AGPReport } from '../components/AGPReport';
 import type { UploadedFile } from '../types';
+import type { ExportFormat } from '../hooks/useExportFormat';
 
 const useStyles = makeStyles({
   container: {
@@ -45,9 +46,10 @@ const useStyles = makeStyles({
 
 interface ReportsProps {
   selectedFile?: UploadedFile;
+  exportFormat: ExportFormat;
 }
 
-export function Reports({ selectedFile }: ReportsProps) {
+export function Reports({ selectedFile, exportFormat }: ReportsProps) {
   const styles = useStyles();
 
   return (
@@ -62,7 +64,7 @@ export function Reports({ selectedFile }: ReportsProps) {
       <SelectedFileMetadata selectedFile={selectedFile} />
 
       <div className={styles.content}>
-        <InRangeReport selectedFile={selectedFile} />
+        <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} />
         <AGPReport selectedFile={selectedFile} />
       </div>
     </div>

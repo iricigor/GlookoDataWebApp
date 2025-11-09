@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.x] - Current Development
 
 ### New Features
+- [#XXX](../../pull/XXX) Add CSV export functionality to all data tables
+  - Copy icon appears in top-right corner on table hover with "Copy As CSV" tooltip
+  - Export FileList table showing uploaded files with metadata
+  - Export In Range reports (Day of Week, Weekly, Daily tables)
+  - Proper CSV formatting with comma escaping and quote handling
+  - Visual feedback with checkmark icon after successful copy
 - Add realistic demo data for John Doe (two weeks of diabetes data) that automatically loads on app startup
 - [#114](../../pull/114) Optimize Reports page with collapsible sections for better organization and scalability
   - Selected Data Package section now shows filename, patient name, and metadata in header, details collapsed by default
