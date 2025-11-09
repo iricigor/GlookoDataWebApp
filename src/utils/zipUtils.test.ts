@@ -137,7 +137,7 @@ describe('zipUtils', () => {
       expect(result.metadataLine).toBe(MOCK_METADATA_LINE);
       
       // Check that cgm_data files were merged
-      const cgmFile = result.csvFiles.find(f => f.name === 'cgm_data.csv');
+      const cgmFile = result.csvFiles.find(f => f.name === 'cgm');
       expect(cgmFile).toBeDefined();
       expect(cgmFile?.fileCount).toBe(3);
       expect(cgmFile?.rowCount).toBe(15); // 3 files * 5 rows each
@@ -284,7 +284,7 @@ describe('zipUtils', () => {
         expect(result.csvFiles).toHaveLength(1); // Merged into one
         
         const mergedFile = result.csvFiles[0];
-        expect(mergedFile.name).toBe('cgm_data.csv');
+        expect(mergedFile.name).toBe('cgm');
         expect(mergedFile.rowCount).toBe(45); // 10 + 15 + 20
         expect(mergedFile.fileCount).toBe(3);
         expect(mergedFile.sourceFiles).toEqual(['cgm_data_1.csv', 'cgm_data_2.csv', 'cgm_data_3.csv']);
@@ -304,7 +304,7 @@ describe('zipUtils', () => {
         expect(result.isValid).toBe(true);
         expect(result.csvFiles).toHaveLength(3); // cgm_data merged, bg_data and insulin_data separate
         
-        const cgmFile = result.csvFiles.find(f => f.name === 'cgm_data.csv');
+        const cgmFile = result.csvFiles.find(f => f.name === 'cgm');
         const bgFile = result.csvFiles.find(f => f.name === 'bg_data_1.csv');
         const insulinFile = result.csvFiles.find(f => f.name === 'insulin_data_1.csv');
         
@@ -353,7 +353,7 @@ describe('zipUtils', () => {
         expect(result.isValid).toBe(true);
         expect(result.csvFiles).toHaveLength(4); // cgm merged, others separate
         
-        const cgmFile = result.csvFiles.find(f => f.name === 'cgm_data.csv');
+        const cgmFile = result.csvFiles.find(f => f.name === 'cgm');
         expect(cgmFile?.rowCount).toBe(450); // 100 + 150 + 200
         expect(cgmFile?.fileCount).toBe(3);
         expect(cgmFile?.sourceFiles).toEqual(['cgm_data_1.csv', 'cgm_data_2.csv', 'cgm_data_3.csv']);
@@ -393,11 +393,11 @@ describe('zipUtils', () => {
         const fileNames = result.csvFiles.map(f => f.name);
         
         // Should be sorted alphabetically
-        // Single files keep their numeric suffix, merged files don't
+        // Single files keep their original names, merged files show just the set name
         expect(fileNames).toEqual([
           'alarms_data_1.csv',
           'bg_data_1.csv',
-          'cgm_data.csv',
+          'cgm',
           'insulin_data_1.csv',
         ]);
       });

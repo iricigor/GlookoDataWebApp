@@ -7,23 +7,30 @@ import type { ZipMetadata, CsvFileMetadata } from '../types';
 
 /**
  * Extract the base name from a CSV file name
- * For example: 'cgm_data_1.csv' -> 'cgm_data', 'bg_data_1.csv' -> 'bg_data'
+ * Pattern: <set_name>_data_<set_number>.csv
+ * For example: 'cgm_data_1.csv' -> 'cgm', 'bg_data_1.csv' -> 'bg'
  * 
  * @param fileName - The CSV file name
- * @returns Base name without numeric suffix and extension
+ * @returns Set name without '_data_<number>' suffix and extension
  */
 function extractBaseName(fileName: string): string {
   // Remove .csv extension
   const nameWithoutExt = fileName.replace(/\.csv$/i, '');
   
-  // Match pattern: {name}_data_{number} or {name}_{number}
-  const match = nameWithoutExt.match(/^(.+?)_(\d+)$/);
+  // Match pattern: {set_name}_data_{number}
+  const match = nameWithoutExt.match(/^(.+?)_data_(\d+)$/);
   
   if (match) {
-    return match[1]; // Return the base name without the number
+    return match[1]; // Return the set name without '_data_<number>'
   }
   
-  // If no number pattern found, return the name as-is
+  // Fallback: try pattern {name}_{number} (for files not following _data_ convention)
+  const simpleMatch = nameWithoutExt.match(/^(.+?)_(\d+)$/);
+  if (simpleMatch) {
+    return simpleMatch[1];
+  }
+  
+  // If no pattern found, return the name as-is
   return nameWithoutExt;
 }
 
@@ -99,7 +106,7 @@ function groupCsvFiles(files: CsvFileMetadata[]): CsvFileMetadata[] {
       } else {
         // Create merged file metadata
         mergedFiles.push({
-          name: `${baseName}.csv`,
+          name: baseName, // Just the set name, no extension
           rowCount: totalRowCount,
           columnNames,
           fileCount: groupFiles.length,
