@@ -71,6 +71,25 @@ const useStyles = makeStyles({
     ...shorthands.overflow('hidden'),
     maxHeight: '600px',
     overflowY: 'auto',
+    position: 'relative',
+  },
+  stickyHeader: {
+    position: 'sticky',
+    top: 0,
+    backgroundColor: tokens.colorNeutralBackground1,
+    zIndex: 1,
+    '::after': {
+      content: '""',
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: '1px',
+      backgroundColor: tokens.colorNeutralStroke1,
+    },
+  },
+  tableCell: {
+    verticalAlign: 'middle',
   },
   noData: {
     color: tokens.colorNeutralForeground3,
@@ -90,15 +109,18 @@ const useStyles = makeStyles({
   timeCell: {
     fontWeight: tokens.fontWeightSemibold,
     fontFamily: 'monospace',
+    verticalAlign: 'middle',
   },
   valueCell: {
     textAlign: 'right',
     fontFamily: 'monospace',
+    verticalAlign: 'middle',
   },
   countCell: {
     textAlign: 'center',
     color: tokens.colorNeutralForeground2,
     fontSize: tokens.fontSizeBase200,
+    verticalAlign: 'middle',
   },
   info: {
     fontSize: tokens.fontSizeBase300,
@@ -225,15 +247,15 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHeaderCell>Time</TableHeaderCell>
-                        <TableHeaderCell>Lowest</TableHeaderCell>
-                        <TableHeaderCell>10%</TableHeaderCell>
-                        <TableHeaderCell>25%</TableHeaderCell>
-                        <TableHeaderCell>50% (Median)</TableHeaderCell>
-                        <TableHeaderCell>75%</TableHeaderCell>
-                        <TableHeaderCell>90%</TableHeaderCell>
-                        <TableHeaderCell>Highest</TableHeaderCell>
-                        <TableHeaderCell>Count</TableHeaderCell>
+                        <TableHeaderCell className={styles.stickyHeader}>Time</TableHeaderCell>
+                        <TableHeaderCell className={styles.stickyHeader}>Lowest</TableHeaderCell>
+                        <TableHeaderCell className={styles.stickyHeader}>10%</TableHeaderCell>
+                        <TableHeaderCell className={styles.stickyHeader}>25%</TableHeaderCell>
+                        <TableHeaderCell className={styles.stickyHeader}>50% (Median)</TableHeaderCell>
+                        <TableHeaderCell className={styles.stickyHeader}>75%</TableHeaderCell>
+                        <TableHeaderCell className={styles.stickyHeader}>90%</TableHeaderCell>
+                        <TableHeaderCell className={styles.stickyHeader}>Highest</TableHeaderCell>
+                        <TableHeaderCell className={styles.stickyHeader}>Count</TableHeaderCell>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
