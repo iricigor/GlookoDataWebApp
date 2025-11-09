@@ -8,10 +8,12 @@ import { Reports } from './pages/Reports'
 import { AIAnalysis } from './pages/AIAnalysis'
 import { Settings } from './pages/Settings'
 import { useTheme } from './hooks/useTheme'
+import type { UploadedFile } from './types'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const { theme, themeMode, setThemeMode } = useTheme()
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
 
   // Handle hash-based routing
   useEffect(() => {
@@ -29,12 +31,31 @@ function App() {
     window.location.hash = page
   }
 
+  const handleAddFiles = (newFiles: UploadedFile[]) => {
+    setUploadedFiles((prev) => [...prev, ...newFiles])
+  }
+
+  const handleRemoveFile = (id: string) => {
+    setUploadedFiles((prev) => prev.filter((file) => file.id !== id))
+  }
+
+  const handleClearAll = () => {
+    setUploadedFiles([])
+  }
+
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
         return <Home onNavigate={handleNavigate} />
       case 'upload':
-        return <DataUpload />
+        return (
+          <DataUpload 
+            uploadedFiles={uploadedFiles}
+            onAddFiles={handleAddFiles}
+            onRemoveFile={handleRemoveFile}
+            onClearAll={handleClearAll}
+          />
+        )
       case 'reports':
         return <Reports />
       case 'ai':

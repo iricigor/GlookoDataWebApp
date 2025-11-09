@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { 
   makeStyles, 
   Text,
@@ -42,9 +41,15 @@ const useStyles = makeStyles({
   },
 });
 
-export function DataUpload() {
+interface DataUploadProps {
+  uploadedFiles: UploadedFile[];
+  onAddFiles: (files: UploadedFile[]) => void;
+  onRemoveFile: (id: string) => void;
+  onClearAll: () => void;
+}
+
+export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll }: DataUploadProps) {
   const styles = useStyles();
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
   const handleFilesSelected = async (files: File[]) => {
     // Process files and extract ZIP metadata
@@ -62,15 +67,7 @@ export function DataUpload() {
     });
 
     const newFiles = await Promise.all(newFilesPromises);
-    setUploadedFiles((prev) => [...prev, ...newFiles]);
-  };
-
-  const handleRemoveFile = (id: string) => {
-    setUploadedFiles((prev) => prev.filter((file) => file.id !== id));
-  };
-
-  const handleClearAll = () => {
-    setUploadedFiles([]);
+    onAddFiles(newFiles);
   };
 
   return (
@@ -88,8 +85,8 @@ export function DataUpload() {
 
       <FileList
         files={uploadedFiles}
-        onRemoveFile={handleRemoveFile}
-        onClearAll={handleClearAll}
+        onRemoveFile={onRemoveFile}
+        onClearAll={onClearAll}
       />
     </div>
   );
