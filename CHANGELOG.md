@@ -35,6 +35,7 @@ When creating a pull request:
 - Add version information and build ID tracking system (#90)
 - 
 ### Fixes
+- [1.0.buildId] Reduce Select column width by applying explicit width style while keeping header text (Issue #107)
 - [1.0.102] Fix footer positioning to stay at bottom of viewport using flexbox sticky footer layout (Issue 102)
 - [1.0.buildId] Update README test count badge from 51 to 122 passing tests (Issue #100)
 

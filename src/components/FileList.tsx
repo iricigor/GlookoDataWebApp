@@ -74,6 +74,10 @@ const useStyles = makeStyles({
       display: 'none',
     },
   },
+  selectCell: {
+    width: '45px',
+    ...shorthands.padding('8px', '12px'),
+  },
   detailsRow: {
     backgroundColor: tokens.colorNeutralBackground2,
   },
@@ -256,7 +260,7 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
       <Table className={styles.table}>
         <TableHeader>
           <TableRow>
-            {onSelectFile && <TableHeaderCell>Select</TableHeaderCell>}
+            {onSelectFile && <TableHeaderCell className={styles.selectCell}>Select</TableHeaderCell>}
             <TableHeaderCell>File Name</TableHeaderCell>
             <TableHeaderCell className={styles.hideOnMobile}>Upload Time</TableHeaderCell>
             <TableHeaderCell className={styles.hideOnMobile}>File Size</TableHeaderCell>
@@ -273,7 +277,7 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
               <React.Fragment key={file.id}>
                 <TableRow>
                   {onSelectFile && (
-                    <TableCell>
+                    <TableCell className={styles.selectCell}>
                       <Radio 
                         value={file.id}
                         checked={selectedFileId === file.id}
