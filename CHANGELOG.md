@@ -30,7 +30,7 @@ When creating a pull request:
 - [1.0.90] Add version information and build ID tracking system (PR #90)
 
 ### Fixes
-- [1.0.buildId] Remove extra space in Select column header to match narrow width of radio buttons (Bug)
+- [1.0.buildId] Reduce Select column width by applying explicit width style while keeping header text (Issue #107)
 - [1.0.102] Fix footer positioning to stay at bottom of viewport using flexbox sticky footer layout (Issue 102)
 
 ### Documentation
