@@ -12,7 +12,7 @@ This directory contains the minimal development container configuration for Gloo
   - Runs `npm install` after container creation
 
 - **Port Forwarding**:
-  - Port 5173 (Vite dev server) is automatically forwarded
+  - Port 5173 (Vite dev server) is automatically forwarded and opens in browser
 
 ## Usage
 
