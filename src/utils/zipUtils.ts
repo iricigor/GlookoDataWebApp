@@ -4,6 +4,7 @@
 
 import JSZip from 'jszip';
 import type { ZipMetadata, CsvFileMetadata } from '../types';
+import { parseMetadata } from './metadataUtils';
 
 /**
  * Extract the base name from a CSV file name
@@ -211,10 +212,14 @@ export async function extractZipMetadata(file: File): Promise<ZipMetadata> {
     // Group and merge related CSV files
     const groupedCsvFiles = groupCsvFiles(csvFiles);
     
+    // Parse the metadata line if it exists
+    const parsedMetadata = zipMetadataLine ? parseMetadata(zipMetadataLine) : undefined;
+    
     return {
       isValid: true,
       csvFiles: groupedCsvFiles,
-      metadataLine: zipMetadataLine
+      metadataLine: zipMetadataLine,
+      parsedMetadata
     };
   } catch (error) {
     return {

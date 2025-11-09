@@ -402,5 +402,73 @@ describe('zipUtils', () => {
         ]);
       });
     });
+
+    // Tests for metadata parsing
+    describe('metadata parsing', () => {
+      it('should parse metadata line and include parsed fields', async () => {
+        const files = {
+          'bg_data_1.csv': generateMockCsvContent('bg_data', 10),
+        };
+        
+        const zipFile = await createMockZipFile(files);
+        const result = await extractZipMetadata(zipFile);
+        
+        expect(result.isValid).toBe(true);
+        expect(result.metadataLine).toBe(MOCK_METADATA_LINE);
+        expect(result.parsedMetadata).toBeDefined();
+        expect(result.parsedMetadata?.name).toBe('Igor Irić');
+        expect(result.parsedMetadata?.dateRange).toBe('2025-07-29 - 2025-10-26');
+        expect(result.parsedMetadata?.startDate).toBe('2025-07-29');
+        expect(result.parsedMetadata?.endDate).toBe('2025-10-26');
+      });
+
+      it('should handle comma-separated metadata format', async () => {
+        const commaSeparatedMetadata = 'Name:John Doe, Date Range:2025-01-01 - 2025-01-31';
+        const files = {
+          'bg_data_1.csv': generateMockCsvContent('bg_data', 5, commaSeparatedMetadata),
+        };
+        
+        const zipFile = await createMockZipFile(files);
+        const result = await extractZipMetadata(zipFile);
+        
+        expect(result.isValid).toBe(true);
+        expect(result.parsedMetadata).toBeDefined();
+        expect(result.parsedMetadata?.name).toBe('John Doe');
+        expect(result.parsedMetadata?.dateRange).toBe('2025-01-01 - 2025-01-31');
+        expect(result.parsedMetadata?.startDate).toBe('2025-01-01');
+        expect(result.parsedMetadata?.endDate).toBe('2025-01-31');
+      });
+
+      it('should handle tab-separated metadata format', async () => {
+        const tabSeparatedMetadata = 'Name:Jane Smith\tDate Range:2025-02-01 - 2025-02-28';
+        const files = {
+          'bg_data_1.csv': generateMockCsvContent('bg_data', 5, tabSeparatedMetadata),
+        };
+        
+        const zipFile = await createMockZipFile(files);
+        const result = await extractZipMetadata(zipFile);
+        
+        expect(result.isValid).toBe(true);
+        expect(result.parsedMetadata).toBeDefined();
+        expect(result.parsedMetadata?.name).toBe('Jane Smith');
+        expect(result.parsedMetadata?.dateRange).toBe('2025-02-01 - 2025-02-28');
+        expect(result.parsedMetadata?.startDate).toBe('2025-02-01');
+        expect(result.parsedMetadata?.endDate).toBe('2025-02-28');
+      });
+
+      it('should handle empty metadata line', async () => {
+        const files = {
+          'bg_data_1.csv': generateMockCsvContent('bg_data', 5, ''),
+        };
+        
+        const zipFile = await createMockZipFile(files);
+        const result = await extractZipMetadata(zipFile);
+        
+        expect(result.isValid).toBe(true);
+        expect(result.parsedMetadata).toBeDefined();
+        expect(result.parsedMetadata?.name).toBeUndefined();
+        expect(result.parsedMetadata?.dateRange).toBeUndefined();
+      });
+    });
   });
 });
