@@ -24,6 +24,7 @@ import {
 import type { UploadedFile, GlucoseDataSource, AGPTimeSlotStats } from '../types';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
 import { calculateAGPStats } from '../utils/agpUtils';
+import { AGPGraph } from './AGPGraph';
 
 const useStyles = makeStyles({
   reportContainer: {
@@ -234,6 +235,11 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
                   </div>
                 </div>
               </div>
+
+              {/* AGP Graph */}
+              {!loading && !error && statsWithData.length > 0 && (
+                <AGPGraph data={agpStats} unit="mmol/L" />
+              )}
 
               {/* Info text */}
               {!loading && !error && statsWithData.length > 0 && (
