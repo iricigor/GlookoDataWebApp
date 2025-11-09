@@ -30,6 +30,7 @@ When creating a pull request:
 - [1.0.90] Add version information and build ID tracking system (PR #90)
 
 ### Fixes
+- [1.0.buildId] Fix footer positioning to stay at bottom of viewport using flexbox sticky footer layout (Issue #92)
 
 ### Documentation
 - [1.0.buildId] Add CHANGELOG.md file and update copilot instructions to require changelog updates in each PR (Issue #91)
