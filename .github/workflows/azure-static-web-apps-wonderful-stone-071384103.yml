@@ -1,4 +1,4 @@
-name: Azure Static Web Apps CI/CD
+name: 🚀 Deploy to Azure
 
 on:
   workflow_dispatch:
