@@ -416,10 +416,20 @@ Timestamp,Alarm/Event,Serial Number
       const cellA1 = headerRow.getCell(1);
       const cellB1 = headerRow.getCell(2);
       
-      // Headers should have bold font and fill
+      // Headers should have bold font with size 9 and black color
       expect(cellA1.font?.bold).toBe(true);
+      expect(cellA1.font?.size).toBe(9);
+      expect(cellA1.font?.color?.argb).toBe('000000'); // Black
       expect(cellB1.font?.bold).toBe(true);
+      expect(cellB1.font?.size).toBe(9);
+      expect(cellB1.font?.color?.argb).toBe('000000'); // Black
+      
+      // Headers should have pale blue background
       expect(cellA1.fill).toBeDefined();
+      expect(cellA1.fill?.type).toBe('pattern');
+      if (cellA1.fill && cellA1.fill.type === 'pattern') {
+        expect(cellA1.fill.fgColor?.argb).toBe('DEECF9'); // Pale blue
+      }
       
       // Verify header values
       expect(cellA1.value).toBe('Dataset Name');
@@ -501,9 +511,92 @@ Timestamp,Alarm/Event,Serial Number
       const cellA1 = headerRow.getCell(1);
       const cellB1 = headerRow.getCell(2);
       
-      // Headers should have bold font
+      // Headers should have bold font with size 9 and black color
       expect(cellA1.font?.bold).toBe(true);
+      expect(cellA1.font?.size).toBe(9);
+      expect(cellA1.font?.color?.argb).toBe('000000'); // Black
       expect(cellB1.font?.bold).toBe(true);
+      expect(cellB1.font?.size).toBe(9);
+      
+      // Headers should have pale blue background
+      expect(cellA1.fill).toBeDefined();
+      if (cellA1.fill && cellA1.fill.type === 'pattern') {
+        expect(cellA1.fill.fgColor?.argb).toBe('DEECF9'); // Pale blue
+      }
+    });
+
+    it('should apply font size 9 to all data cells', async () => {
+      const csvFiles = {
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 5),
+      };
+      
+      const uploadedFile = await createMockUploadedFile(csvFiles);
+      const xlsxBlob = await convertZipToXlsx(uploadedFile);
+      
+      // Parse the XLSX blob
+      const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      
+      // Check summary sheet
+      const summarySheet = workbook.getWorksheet('Summary');
+      expect(summarySheet).toBeDefined();
+      
+      // Check data cells in summary sheet have font size 9
+      const dataRow = summarySheet!.getRow(2);
+      const dataCell = dataRow.getCell(1);
+      expect(dataCell.font?.size).toBe(9);
+      
+      // Check bg sheet
+      const bgSheet = workbook.getWorksheet('bg');
+      expect(bgSheet).toBeDefined();
+      
+      // Check data cells in bg sheet have font size 9
+      const bgDataRow = bgSheet!.getRow(2);
+      const bgDataCell = bgDataRow.getCell(1);
+      expect(bgDataCell.font?.size).toBe(9);
+    });
+
+    it('should freeze top row in all sheets', async () => {
+      const csvFiles = {
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 5),
+        'cgm_data_1.csv': generateMockCsvContent('cgm_data', 10),
+      };
+      
+      const uploadedFile = await createMockUploadedFile(csvFiles);
+      const xlsxBlob = await convertZipToXlsx(uploadedFile);
+      
+      // Parse the XLSX blob
+      const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      
+      // Check summary sheet has frozen pane
+      const summarySheet = workbook.getWorksheet('Summary');
+      expect(summarySheet).toBeDefined();
+      expect(summarySheet!.views).toBeDefined();
+      expect(summarySheet!.views!.length).toBeGreaterThan(0);
+      expect(summarySheet!.views![0].state).toBe('frozen');
+      const summaryView = summarySheet!.views![0] as ExcelJS.WorksheetView & { ySplit?: number };
+      expect(summaryView.ySplit).toBe(1);
+      
+      // Check bg sheet has frozen pane
+      const bgSheet = workbook.getWorksheet('bg');
+      expect(bgSheet).toBeDefined();
+      expect(bgSheet!.views).toBeDefined();
+      expect(bgSheet!.views!.length).toBeGreaterThan(0);
+      expect(bgSheet!.views![0].state).toBe('frozen');
+      const bgView = bgSheet!.views![0] as ExcelJS.WorksheetView & { ySplit?: number };
+      expect(bgView.ySplit).toBe(1);
+      
+      // Check cgm sheet has frozen pane
+      const cgmSheet = workbook.getWorksheet('cgm');
+      expect(cgmSheet).toBeDefined();
+      expect(cgmSheet!.views).toBeDefined();
+      expect(cgmSheet!.views!.length).toBeGreaterThan(0);
+      expect(cgmSheet!.views![0].state).toBe('frozen');
+      const cgmView = cgmSheet!.views![0] as ExcelJS.WorksheetView & { ySplit?: number };
+      expect(cgmView.ySplit).toBe(1);
     });
   });
 });

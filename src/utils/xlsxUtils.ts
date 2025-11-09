@@ -10,14 +10,19 @@ import type { UploadedFile } from '../types';
  * Fluent UI color constants
  */
 const FLUENT_COLORS = {
-  NEUTRAL_GRAY_20: 'F3F2F1',      // Very light gray for header background
-  LIGHT_BLUE_10: 'DEECF9',        // Very light, desaturated blue for header text
+  LIGHT_BLUE_10: 'DEECF9',        // Very light, desaturated blue for header background
+  BLACK: '000000',                // Black for header text
 };
 
 /**
  * Font family for Excel cells
  */
 const FONT_FAMILY = 'Segoe UI';
+
+/**
+ * Font size for Excel cells
+ */
+const FONT_SIZE = 9;
 
 /**
  * Number format codes
@@ -275,13 +280,13 @@ function applyHeaderStyle(cell: ExcelJS.Cell): void {
   cell.font = {
     name: FONT_FAMILY,
     bold: true,
-    size: 11,
-    color: { argb: FLUENT_COLORS.LIGHT_BLUE_10 }
+    size: FONT_SIZE,
+    color: { argb: FLUENT_COLORS.BLACK }
   };
   cell.fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: { argb: FLUENT_COLORS.NEUTRAL_GRAY_20 }
+    fgColor: { argb: FLUENT_COLORS.LIGHT_BLUE_10 }
   };
   cell.alignment = {
     horizontal: 'left',
@@ -312,7 +317,7 @@ function populateSummaryWorksheet(worksheet: ExcelJS.Worksheet, summaryData: (st
     const row = worksheet.getRow(rowIndex);
     row.eachCell((cell, colNumber) => {
       // Apply Segoe UI font to all data cells
-      cell.font = { name: FONT_FAMILY };
+      cell.font = { name: FONT_FAMILY, size: FONT_SIZE };
       
       // First column: left-aligned (dataset names)
       if (colNumber === 1) {
@@ -331,6 +336,11 @@ function populateSummaryWorksheet(worksheet: ExcelJS.Worksheet, summaryData: (st
   worksheet.columns = [
     { width: calculateColumnWidth(['Dataset Name', ...summaryData.slice(1).map(r => r[0])], 20) },
     { width: calculateColumnWidth(['Number of Records', ...summaryData.slice(1).map(r => r[1])], 15) }
+  ];
+  
+  // Freeze top row
+  worksheet.views = [
+    { state: 'frozen', ySplit: 1 }
   ];
 }
 
@@ -388,7 +398,7 @@ function populateWorksheetFromCSV(worksheet: ExcelJS.Worksheet, csvContent: stri
       const isNumeric = typeof cell.value === 'number';
       
       // Apply Segoe UI font to all data cells
-      cell.font = { name: FONT_FAMILY };
+      cell.font = { name: FONT_FAMILY, size: FONT_SIZE };
       
       // Apply alignment based on data type
       cell.alignment = {
@@ -417,6 +427,11 @@ function populateWorksheetFromCSV(worksheet: ExcelJS.Worksheet, csvContent: stri
   }
   
   worksheet.columns = columnWidths.map(width => ({ width }));
+  
+  // Freeze top row
+  worksheet.views = [
+    { state: 'frozen', ySplit: 1 }
+  ];
 }
 
 
