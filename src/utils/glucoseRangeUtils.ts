@@ -16,8 +16,8 @@ import type {
 /**
  * Categorize a glucose reading based on thresholds
  * 
- * @param value - Glucose value in mg/dL
- * @param thresholds - Glucose thresholds in mg/dL
+ * @param value - Glucose value in mmol/L
+ * @param thresholds - Glucose thresholds in mmol/L
  * @param mode - 3 or 5 category mode
  * @returns Category name
  */
@@ -26,11 +26,11 @@ export function categorizeGlucose(
   thresholds: GlucoseThresholds,
   mode: RangeCategoryMode = 3
 ): string {
-  // Convert thresholds from mmol/L to mg/dL (multiply by 18.018)
-  const veryLowThreshold = thresholds.veryLow * 18.018;
-  const lowThreshold = thresholds.low * 18.018;
-  const highThreshold = thresholds.high * 18.018;
-  const veryHighThreshold = thresholds.veryHigh * 18.018;
+  // Use thresholds directly (already in mmol/L)
+  const veryLowThreshold = thresholds.veryLow;
+  const lowThreshold = thresholds.low;
+  const highThreshold = thresholds.high;
+  const veryHighThreshold = thresholds.veryHigh;
 
   if (mode === 5) {
     if (value < veryLowThreshold) return 'veryLow';

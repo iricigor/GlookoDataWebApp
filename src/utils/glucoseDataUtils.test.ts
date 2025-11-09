@@ -59,7 +59,7 @@ async function createMockUploadedFileWithUnit(
 
 describe('glucoseDataUtils', () => {
   describe('extractGlucoseReadings', () => {
-    it('should convert mmol/L values to mg/dL', async () => {
+    it('should keep mmol/L values unchanged', async () => {
       // Values in mmol/L: 13.4, 12.8, 12.4, 12, 11.7, 11, 9.6, 9.2
       const mmolValues = [13.4, 12.8, 12.4, 12, 11.7, 11, 9.6, 9.2];
       const uploadedFile = await createMockUploadedFileWithUnit('bg', 'mmol/L', mmolValues);
@@ -68,15 +68,15 @@ describe('glucoseDataUtils', () => {
       
       expect(readings).toHaveLength(8);
       
-      // Check conversions (mmol/L * 18.018 = mg/dL)
-      expect(readings[0].value).toBeCloseTo(13.4 * 18.018, 1); // ~241.4 mg/dL
-      expect(readings[1].value).toBeCloseTo(12.8 * 18.018, 1); // ~230.6 mg/dL
-      expect(readings[6].value).toBeCloseTo(9.6 * 18.018, 1);  // ~173.0 mg/dL
-      expect(readings[7].value).toBeCloseTo(9.2 * 18.018, 1);  // ~165.8 mg/dL
+      // Values should remain in mmol/L
+      expect(readings[0].value).toBe(13.4);
+      expect(readings[1].value).toBe(12.8);
+      expect(readings[6].value).toBe(9.6);
+      expect(readings[7].value).toBe(9.2);
     });
 
-    it('should keep mg/dL values unchanged', async () => {
-      // Values already in mg/dL
+    it('should convert mg/dL values to mmol/L', async () => {
+      // Values in mg/dL
       const mgdlValues = [241, 231, 223, 216, 211, 198, 173, 166];
       const uploadedFile = await createMockUploadedFileWithUnit('bg', 'mg/dL', mgdlValues);
       
@@ -84,11 +84,11 @@ describe('glucoseDataUtils', () => {
       
       expect(readings).toHaveLength(8);
       
-      // Values should remain the same
-      expect(readings[0].value).toBe(241);
-      expect(readings[1].value).toBe(231);
-      expect(readings[6].value).toBe(173);
-      expect(readings[7].value).toBe(166);
+      // Check conversions (mg/dL / 18.018 = mmol/L)
+      expect(readings[0].value).toBeCloseTo(241 / 18.018, 1); // ~13.4 mmol/L
+      expect(readings[1].value).toBeCloseTo(231 / 18.018, 1); // ~12.8 mmol/L
+      expect(readings[6].value).toBeCloseTo(173 / 18.018, 1); // ~9.6 mmol/L
+      expect(readings[7].value).toBeCloseTo(166 / 18.018, 1); // ~9.2 mmol/L
     });
 
     it('should detect mmol/L without slash', async () => {
@@ -118,7 +118,7 @@ describe('glucoseDataUtils', () => {
       const readings = await extractGlucoseReadings(uploadedFile, 'bg');
       
       expect(readings).toHaveLength(1);
-      expect(readings[0].value).toBeCloseTo(180.18, 1); // 10.0 * 18.018
+      expect(readings[0].value).toBe(10.0); // Stays as mmol/L
     });
 
     it('should handle mixed case in units', async () => {
@@ -148,7 +148,7 @@ describe('glucoseDataUtils', () => {
       const readings = await extractGlucoseReadings(uploadedFile, 'bg');
       
       expect(readings).toHaveLength(1);
-      expect(readings[0].value).toBeCloseTo(99.1, 1); // 5.5 * 18.018
+      expect(readings[0].value).toBe(5.5); // Stays as mmol/L
     });
   });
 });

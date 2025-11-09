@@ -215,7 +215,7 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
               {!loading && !error && statsWithData.length > 0 && (
                 <Text className={styles.info}>
                   Showing statistics for {statsWithData.length} time periods with data. 
-                  All values are in mg/dL. Percentiles are calculated across all days for each 5-minute time slot.
+                  All values are in mmol/L. Percentiles are calculated across all days for each 5-minute time slot.
                 </Text>
               )}
 

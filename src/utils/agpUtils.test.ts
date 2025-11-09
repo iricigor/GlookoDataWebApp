@@ -145,10 +145,10 @@ describe('agpUtils', () => {
 
     it('should group readings by 5-minute time slots', () => {
       const readings: GlucoseReading[] = [
-        { timestamp: new Date('2024-01-01T10:00:00'), value: 100 },
-        { timestamp: new Date('2024-01-01T10:02:00'), value: 110 },
-        { timestamp: new Date('2024-01-01T10:04:00'), value: 120 },
-        { timestamp: new Date('2024-01-02T10:03:00'), value: 105 }, // Different day, same time
+        { timestamp: new Date('2024-01-01T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-01T10:02:00'), value: 6.1 },
+        { timestamp: new Date('2024-01-01T10:04:00'), value: 6.7 },
+        { timestamp: new Date('2024-01-02T10:03:00'), value: 5.8 }, // Different day, same time
       ];
 
       const stats = calculateAGPStats(readings);
@@ -158,21 +158,21 @@ describe('agpUtils', () => {
       
       expect(slot1000).toBeDefined();
       expect(slot1000?.count).toBe(4);
-      expect(slot1000?.lowest).toBe(100);
-      expect(slot1000?.highest).toBe(120);
-      expect(slot1000?.p50).toBe(107.5); // Median of [100, 105, 110, 120]
+      expect(slot1000?.lowest).toBe(5.5);
+      expect(slot1000?.highest).toBe(6.7);
+      expect(slot1000?.p50).toBeCloseTo(5.95, 1); // Median of [5.5, 5.8, 6.1, 6.7]
     });
 
     it('should calculate percentiles correctly for a time slot with data', () => {
       const readings: GlucoseReading[] = [];
       
-      // Add 10 readings at 14:30 with values 100, 110, 120, ..., 190
+      // Add 10 readings at 14:30 with values 5.0, 6.0, 7.0, ..., 14.0 (mmol/L range)
       // Use different days to accumulate data for the same time slot
       for (let i = 0; i < 10; i++) {
         const day = (i + 1).toString().padStart(2, '0');
         readings.push({
           timestamp: new Date(`2024-01-${day}T14:30:00`),
-          value: 100 + i * 10,
+          value: 5.0 + i * 1.0,
         });
       }
 
@@ -183,19 +183,19 @@ describe('agpUtils', () => {
       
       expect(slot1430).toBeDefined();
       expect(slot1430?.count).toBe(10);
-      expect(slot1430?.lowest).toBe(100);
-      expect(slot1430?.highest).toBe(190);
-      expect(slot1430?.p50).toBe(145); // Median of [100, 110, 120, 130, 140, 150, 160, 170, 180, 190]
-      expect(slot1430?.p25).toBe(122.5); // 25th percentile
-      expect(slot1430?.p75).toBe(167.5); // 75th percentile
+      expect(slot1430?.lowest).toBe(5.0);
+      expect(slot1430?.highest).toBe(14.0);
+      expect(slot1430?.p50).toBe(9.5); // Median of [5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0]
+      expect(slot1430?.p25).toBe(7.25); // 25th percentile
+      expect(slot1430?.p75).toBe(11.75); // 75th percentile
     });
 
     it('should handle readings from multiple days for same time slot', () => {
       const readings: GlucoseReading[] = [
-        { timestamp: new Date('2024-01-01T08:15:00'), value: 90 },
-        { timestamp: new Date('2024-01-02T08:15:00'), value: 100 },
-        { timestamp: new Date('2024-01-03T08:17:00'), value: 110 }, // Same slot (rounds to 08:15)
-        { timestamp: new Date('2024-01-04T08:15:00'), value: 120 },
+        { timestamp: new Date('2024-01-01T08:15:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-02T08:15:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-03T08:17:00'), value: 6.1 }, // Same slot (rounds to 08:15)
+        { timestamp: new Date('2024-01-04T08:15:00'), value: 6.7 },
       ];
 
       const stats = calculateAGPStats(readings);
@@ -204,14 +204,14 @@ describe('agpUtils', () => {
       
       expect(slot0815).toBeDefined();
       expect(slot0815?.count).toBe(4);
-      expect(slot0815?.lowest).toBe(90);
-      expect(slot0815?.highest).toBe(120);
-      expect(slot0815?.p50).toBe(105); // Median of [90, 100, 110, 120]
+      expect(slot0815?.lowest).toBe(5.0);
+      expect(slot0815?.highest).toBe(6.7);
+      expect(slot0815?.p50).toBe(5.8); // Median of [5.0, 5.5, 6.1, 6.7]
     });
 
     it('should handle time slot with single reading', () => {
       const readings: GlucoseReading[] = [
-        { timestamp: new Date('2024-01-01T15:45:00'), value: 150 },
+        { timestamp: new Date('2024-01-01T15:45:00'), value: 8.3 },
       ];
 
       const stats = calculateAGPStats(readings);
@@ -220,13 +220,13 @@ describe('agpUtils', () => {
       
       expect(slot1545).toBeDefined();
       expect(slot1545?.count).toBe(1);
-      expect(slot1545?.lowest).toBe(150);
-      expect(slot1545?.p10).toBe(150);
-      expect(slot1545?.p25).toBe(150);
-      expect(slot1545?.p50).toBe(150);
-      expect(slot1545?.p75).toBe(150);
-      expect(slot1545?.p90).toBe(150);
-      expect(slot1545?.highest).toBe(150);
+      expect(slot1545?.lowest).toBe(8.3);
+      expect(slot1545?.p10).toBe(8.3);
+      expect(slot1545?.p25).toBe(8.3);
+      expect(slot1545?.p50).toBe(8.3);
+      expect(slot1545?.p75).toBe(8.3);
+      expect(slot1545?.p90).toBe(8.3);
+      expect(slot1545?.highest).toBe(8.3);
     });
   });
 });
