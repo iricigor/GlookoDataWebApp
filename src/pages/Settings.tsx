@@ -6,7 +6,8 @@ import {
   Card,
   Radio,
   RadioGroup,
-  Label,
+  Divider,
+  Title3,
 } from '@fluentui/react-components';
 import { SettingsRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
@@ -53,6 +54,18 @@ const useStyles = makeStyles({
       marginBottom: '0',
     },
   },
+  sectionTitle: {
+    fontFamily: 'Segoe UI, sans-serif',
+    fontSize: tokens.fontSizeHero700,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    lineHeight: tokens.lineHeightHero700,
+    marginBottom: '8px',
+  },
+  divider: {
+    marginTop: '8px',
+    marginBottom: '16px',
+  },
   settingLabel: {
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
@@ -91,7 +104,8 @@ export function Settings({ themeMode, onThemeChange }: SettingsProps) {
 
       <Card className={styles.settingsCard}>
         <div className={styles.settingSection}>
-          <Label className={styles.settingLabel}>Theme</Label>
+          <Title3 className={styles.sectionTitle}>Theme</Title3>
+          <Divider className={styles.divider} />
           <Text className={styles.settingDescription}>
             Choose your preferred color theme. System option follows your operating system settings.
           </Text>
@@ -113,7 +127,8 @@ export function Settings({ themeMode, onThemeChange }: SettingsProps) {
         />
 
         <div className={styles.settingSection}>
-          <Label className={styles.settingLabel}>Data Privacy</Label>
+          <Title3 className={styles.sectionTitle}>Data Privacy</Title3>
+          <Divider className={styles.divider} />
           <Text className={styles.settingDescription}>
             Your data is stored locally with configurable persistence options. All processing happens in your browser.
           </Text>
