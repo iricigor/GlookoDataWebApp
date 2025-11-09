@@ -37,6 +37,10 @@ const useStyles = makeStyles({
   table: {
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    '@media (max-width: 768px)': {
+      display: 'block',
+      overflowX: 'auto',
+    },
   },
   emptyState: {
     textAlign: 'center',
@@ -57,6 +61,11 @@ const useStyles = makeStyles({
   fileNameCell: {
     display: 'flex',
     alignItems: 'center',
+    '@media (max-width: 768px)': {
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      ...shorthands.gap('4px'),
+    },
   },
   detailsRow: {
     backgroundColor: tokens.colorNeutralBackground2,
@@ -129,6 +138,38 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorBrandBackground2,
     color: tokens.colorBrandForeground2,
     ...shorthands.borderRadius(tokens.borderRadiusSmall),
+  },
+  mobileTableCell: {
+    '@media (max-width: 768px)': {
+      display: 'block',
+      textAlign: 'left',
+      ...shorthands.padding('8px', '12px'),
+      fontSize: tokens.fontSizeBase300,
+    },
+  },
+  mobileHideHeader: {
+    '@media (max-width: 768px)': {
+      display: 'none',
+    },
+  },
+  mobileTableRow: {
+    '@media (max-width: 768px)': {
+      display: 'block',
+      ...shorthands.borderBottom('1px', 'solid', tokens.colorNeutralStroke2),
+      ...shorthands.padding('12px'),
+    },
+  },
+  mobileLabel: {
+    '@media (max-width: 768px)': {
+      fontWeight: tokens.fontWeightSemibold,
+      color: tokens.colorNeutralForeground2,
+      fontSize: tokens.fontSizeBase200,
+      marginRight: '8px',
+      display: 'inline-block',
+    },
+    '@media (min-width: 769px)': {
+      display: 'none',
+    },
   },
 });
 
@@ -236,7 +277,7 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
         </Button>
       </div>
       <Table className={styles.table}>
-        <TableHeader>
+        <TableHeader className={styles.mobileHideHeader}>
           <TableRow>
             <TableHeaderCell>File Name</TableHeaderCell>
             <TableHeaderCell>Upload Time</TableHeaderCell>
@@ -251,8 +292,9 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
             
             return (
               <React.Fragment key={file.id}>
-                <TableRow>
-                  <TableCell>
+                <TableRow className={styles.mobileTableRow}>
+                  <TableCell className={styles.mobileTableCell}>
+                    <span className={styles.mobileLabel}>File:</span>
                     <div className={styles.fileNameCell}>
                       {hasMetadata && (
                         <Button
@@ -271,9 +313,16 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{formatTime(file.uploadTime)}</TableCell>
-                  <TableCell>{formatFileSize(file.size)}</TableCell>
-                  <TableCell>
+                  <TableCell className={styles.mobileTableCell}>
+                    <span className={styles.mobileLabel}>Uploaded:</span>
+                    {formatTime(file.uploadTime)}
+                  </TableCell>
+                  <TableCell className={styles.mobileTableCell}>
+                    <span className={styles.mobileLabel}>Size:</span>
+                    {formatFileSize(file.size)}
+                  </TableCell>
+                  <TableCell className={styles.mobileTableCell}>
+                    <span className={styles.mobileLabel}>Actions:</span>
                     {file.zipMetadata?.isValid && (
                       <Button
                         appearance="subtle"
