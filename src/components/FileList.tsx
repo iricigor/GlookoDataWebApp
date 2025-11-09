@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   makeStyles,
   Text,
@@ -203,8 +203,8 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
             const hasMetadata = file.zipMetadata && file.zipMetadata.csvFiles.length > 0;
             
             return (
-              <>
-                <TableRow key={file.id}>
+              <React.Fragment key={file.id}>
+                <TableRow>
                   <TableCell>
                     <div className={styles.fileNameCell}>
                       {hasMetadata && (
@@ -258,7 +258,28 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                             {file.zipMetadata.csvFiles.map((csvFile) => (
                               <div key={csvFile.name} className={styles.csvFileItem}>
                                 <div style={{ flex: 1 }}>
-                                  <div className={styles.csvFileName}>{csvFile.name}</div>
+                                  <div className={styles.csvFileName}>
+                                    {csvFile.name}
+                                    {csvFile.fileCount && csvFile.fileCount > 1 && (
+                                      <span style={{ 
+                                        marginLeft: '8px', 
+                                        fontSize: tokens.fontSizeBase200,
+                                        color: tokens.colorNeutralForeground2,
+                                      }}>
+                                        (merged from {csvFile.fileCount} files)
+                                      </span>
+                                    )}
+                                  </div>
+                                  {csvFile.sourceFiles && csvFile.sourceFiles.length > 1 && (
+                                    <div style={{ 
+                                      marginTop: '4px',
+                                      fontSize: tokens.fontSizeBase200,
+                                      color: tokens.colorNeutralForeground3,
+                                      fontStyle: 'italic',
+                                    }}>
+                                      Source: {csvFile.sourceFiles.join(', ')}
+                                    </div>
+                                  )}
                                   {csvFile.columnNames && csvFile.columnNames.length > 0 && (
                                     <div className={styles.columnNamesList}>
                                       {csvFile.columnNames.map((col, idx) => (
@@ -284,7 +305,7 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                     </TableCell>
                   </TableRow>
                 )}
-              </>
+              </React.Fragment>
             );
           })}
         </TableBody>
