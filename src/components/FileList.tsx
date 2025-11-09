@@ -12,8 +12,9 @@ import {
   TableBody,
   TableCell,
 } from '@fluentui/react-components';
-import { DeleteRegular, ChevronRightRegular, ChevronDownRegular } from '@fluentui/react-icons';
+import { DeleteRegular, ChevronRightRegular, ChevronDownRegular, ArrowDownloadRegular } from '@fluentui/react-icons';
 import type { UploadedFile } from '../types';
+import { convertZipToXlsx, downloadXlsx } from '../utils/xlsxUtils';
 
 const useStyles = makeStyles({
   container: {
@@ -44,6 +45,10 @@ const useStyles = makeStyles({
   },
   deleteButton: {
     minWidth: 'auto',
+  },
+  exportButton: {
+    minWidth: 'auto',
+    marginRight: '8px',
   },
   expandButton: {
     minWidth: 'auto',
@@ -136,6 +141,7 @@ interface FileListProps {
 export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
   const styles = useStyles();
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
+  const [exportingFiles, setExportingFiles] = useState<Set<string>>(new Set());
 
   const toggleExpand = (fileId: string) => {
     setExpandedFiles((prev) => {
@@ -147,6 +153,29 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
       }
       return newSet;
     });
+  };
+
+  const handleExportToXlsx = async (file: UploadedFile) => {
+    if (!file.zipMetadata?.isValid) {
+      return;
+    }
+
+    setExportingFiles((prev) => new Set(prev).add(file.id));
+
+    try {
+      const xlsxBlob = await convertZipToXlsx(file);
+      const fileName = file.name.replace(/\.zip$/i, '');
+      downloadXlsx(xlsxBlob, fileName);
+    } catch (error) {
+      console.error('Failed to export to XLSX:', error);
+      alert(`Failed to export file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setExportingFiles((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(file.id);
+        return newSet;
+      });
+    }
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -227,6 +256,17 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                   <TableCell>{formatTime(file.uploadTime)}</TableCell>
                   <TableCell>{formatFileSize(file.size)}</TableCell>
                   <TableCell>
+                    {file.zipMetadata?.isValid && (
+                      <Button
+                        appearance="subtle"
+                        icon={<ArrowDownloadRegular />}
+                        onClick={() => handleExportToXlsx(file)}
+                        className={styles.exportButton}
+                        disabled={exportingFiles.has(file.id)}
+                        aria-label={`Export ${file.name} to XLSX`}
+                        title="Export to XLSX"
+                      />
+                    )}
                     <Button
                       appearance="subtle"
                       icon={<DeleteRegular />}
