@@ -16,6 +16,7 @@ import {
 import { DeleteRegular, ChevronRightRegular, ChevronDownRegular, ArrowDownloadRegular } from '@fluentui/react-icons';
 import type { UploadedFile } from '../types';
 import { convertZipToXlsx, downloadXlsx } from '../utils/xlsxUtils';
+import { CopyToCsvButton } from './CopyToCsvButton';
 
 const useStyles = makeStyles({
   container: {
@@ -34,6 +35,23 @@ const useStyles = makeStyles({
   },
   clearButton: {
     marginLeft: 'auto',
+  },
+  tableWrapper: {
+    position: 'relative',
+    '&:hover .csv-button': {
+      opacity: 1,
+    },
+  },
+  csvButton: {
+    position: 'absolute',
+    top: '8px',
+    right: '8px',
+    opacity: 0,
+    ...shorthands.transition('opacity', '0.2s'),
+    zIndex: 10,
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderRadius(tokens.borderRadiusCircular),
+    boxShadow: tokens.shadow4,
   },
   table: {
     backgroundColor: tokens.colorNeutralBackground1,
@@ -230,6 +248,30 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
     return date.toLocaleString();
   };
 
+  // Extract CSV data from the files list for export
+  const getFilesListAsCSV = (): (string | number)[][] => {
+    const headers = onSelectFile 
+      ? ['Select', 'File Name', 'Upload Time', 'File Size', 'Status']
+      : ['File Name', 'Upload Time', 'File Size', 'Status'];
+    
+    const rows = files.map(file => {
+      const row = [
+        file.name,
+        formatTime(file.uploadTime),
+        formatFileSize(file.size),
+        file.zipMetadata?.isValid ? 'Valid' : 'Invalid',
+      ];
+      
+      if (onSelectFile) {
+        row.unshift(selectedFileId === file.id ? 'Selected' : '');
+      }
+      
+      return row;
+    });
+    
+    return [headers, ...rows];
+  };
+
   if (files.length === 0) {
     return (
       <div className={styles.container}>
@@ -257,7 +299,14 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
           Clear All
         </Button>
       </div>
-      <Table className={styles.table}>
+      <div className={styles.tableWrapper}>
+        <div className={`${styles.csvButton} csv-button`}>
+          <CopyToCsvButton 
+            data={getFilesListAsCSV()} 
+            ariaLabel="Copy uploaded files table as CSV"
+          />
+        </div>
+        <Table className={styles.table}>
         <TableHeader>
           <TableRow>
             {onSelectFile && <TableHeaderCell className={styles.selectCell}>Select</TableHeaderCell>}
@@ -393,6 +442,7 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
           })}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }
