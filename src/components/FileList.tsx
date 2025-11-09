@@ -75,7 +75,7 @@ const useStyles = makeStyles({
     },
   },
   selectCell: {
-    width: '40px',
+    width: '45px',
     ...shorthands.padding('8px', '12px'),
   },
   detailsRow: {
