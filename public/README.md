@@ -6,24 +6,24 @@ This directory contains the website favicon (browser tab icon) for GlookoDataWeb
 
 **`favicon.svg`** - The active favicon used by the application
 
-- **Design**: Glucose Meter with AI Neural Network (Option 2)
-- **Theme**: Technology meets diabetes care
-- **Description**: Blue glucose meter with display showing "125", AI neural network pattern, and blood drop accent
-- **Rationale**: This icon uniquely combines diabetes care (glucose meter) with AI/technology (neural network), directly representing the app's purpose of analyzing Glooko glucose data with intelligent insights
+- **Design**: Blood Drop with Pulse (Option 1)
+- **Theme**: Blood glucose monitoring
+- **Description**: Red blood drop with white heartbeat/pulse line
+- **Rationale**: This icon is instantly recognizable with a clear diabetes association. The blood drop directly represents blood glucose testing, while the pulse line indicates health monitoring and vital signs tracking
 
 ## Alternative Options
 
 Three icon designs were created and evaluated:
 
-### Option 1: Blood Drop with Pulse
-**File**: `favicon-option1.svg`
+### Option 1: Blood Drop with Pulse (SELECTED)
+**File**: `favicon-option1.svg` → `favicon.svg`
 - **Theme**: Blood glucose monitoring
 - **Design**: Red blood drop with white heartbeat/pulse line
 - **Pros**: Instantly recognizable, clear diabetes association, simple yet meaningful
 - **Cons**: Very direct/medical, red color may be intense
 
-### Option 2: Glucose Meter with AI (SELECTED)
-**File**: `favicon-option2.svg` → `favicon.svg`
+### Option 2: Glucose Meter with AI
+**File**: `favicon-option2.svg`
 - **Theme**: Technology meets diabetes care
 - **Design**: Blue glucose meter with neural network pattern
 - **Pros**: Captures both diabetes and AI aspects, modern tech aesthetic, unique
@@ -40,7 +40,7 @@ Three icon designs were created and evaluated:
 
 - **Format**: SVG (Scalable Vector Graphics)
 - **Size**: Optimized for display at 16×16, 32×32, and 64×64 pixels
-- **Color Scheme**: Professional blue gradient with purple AI accents and red blood drop
+- **Color Scheme**: Red blood drop with white pulse line, creating a clear medical/health monitoring aesthetic
 - **Browser Support**: All modern browsers support SVG favicons
 
 ## Changing the Icon
