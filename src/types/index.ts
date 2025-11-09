@@ -42,6 +42,16 @@ export interface ApiResponse<T> {
 export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 
 /**
+ * Parsed metadata fields from CSV metadata line
+ */
+export interface ParsedMetadata {
+  name?: string;        // Patient/user name
+  dateRange?: string;   // Full date range string
+  startDate?: string;   // Start date in YYYY-MM-DD format
+  endDate?: string;     // End date in YYYY-MM-DD format
+}
+
+/**
  * CSV file metadata from ZIP
  */
 export interface CsvFileMetadata {
@@ -60,6 +70,7 @@ export interface ZipMetadata {
   csvFiles: CsvFileMetadata[];
   error?: string;
   metadataLine?: string;
+  parsedMetadata?: ParsedMetadata; // Parsed metadata fields
 }
 
 /**

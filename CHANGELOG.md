@@ -29,6 +29,7 @@ When creating a pull request:
 ## [1.0.x] - Current Development
 
 ### New Features
+- [1.0.buildId] Add metadata parsing utilities to process structured metadata from CSV files with support for both comma-separated and tab-separated formats (Issue #buildId)
 - [1.0.90] Add version information and build ID tracking system (PR #90)
 - [1.0.buildId] Implement dynamic test count badge using GitHub Gist endpoint (Issue #100)
 - Add version information and build ID tracking system (#90)

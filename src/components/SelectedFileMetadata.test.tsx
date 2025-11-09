@@ -60,7 +60,7 @@ describe('SelectedFileMetadata', () => {
   it('should display metadata line when available', () => {
     render(<SelectedFileMetadata selectedFile={mockFile} />);
     
-    expect(screen.getByText('Package Metadata:')).toBeInTheDocument();
+    expect(screen.getByText('Raw Metadata:')).toBeInTheDocument();
     expect(screen.getByText('Test metadata line')).toBeInTheDocument();
   });
 
@@ -91,7 +91,7 @@ describe('SelectedFileMetadata', () => {
 
     render(<SelectedFileMetadata selectedFile={fileWithoutMetadata} />);
     
-    expect(screen.queryByText('Package Metadata:')).not.toBeInTheDocument();
+    expect(screen.queryByText('Raw Metadata:')).not.toBeInTheDocument();
   });
 
   it('should format file size correctly', () => {
@@ -119,5 +119,94 @@ describe('SelectedFileMetadata', () => {
 
     render(<SelectedFileMetadata selectedFile={multiFileData} />);
     expect(screen.getByText('600')).toBeInTheDocument();
+  });
+
+  it('should display parsed patient name when available', () => {
+    const fileWithParsedMetadata: UploadedFile = {
+      ...mockFile,
+      zipMetadata: {
+        ...mockFile.zipMetadata!,
+        parsedMetadata: {
+          name: 'John Doe',
+          dateRange: '2025-01-01 - 2025-01-31',
+          startDate: '2025-01-01',
+          endDate: '2025-01-31',
+        },
+      },
+    };
+
+    render(<SelectedFileMetadata selectedFile={fileWithParsedMetadata} />);
+    expect(screen.getByText('Patient Name:')).toBeInTheDocument();
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+  });
+
+  it('should display parsed date range when available', () => {
+    const fileWithParsedMetadata: UploadedFile = {
+      ...mockFile,
+      zipMetadata: {
+        ...mockFile.zipMetadata!,
+        parsedMetadata: {
+          name: 'John Doe',
+          dateRange: '2025-01-01 - 2025-01-31',
+          startDate: '2025-01-01',
+          endDate: '2025-01-31',
+        },
+      },
+    };
+
+    render(<SelectedFileMetadata selectedFile={fileWithParsedMetadata} />);
+    expect(screen.getByText('Date Range:')).toBeInTheDocument();
+    expect(screen.getByText('2025-01-01 - 2025-01-31')).toBeInTheDocument();
+  });
+
+  it('should display raw metadata label when parsed metadata is available', () => {
+    const fileWithParsedMetadata: UploadedFile = {
+      ...mockFile,
+      zipMetadata: {
+        ...mockFile.zipMetadata!,
+        metadataLine: 'Name:John Doe, Date Range:2025-01-01 - 2025-01-31',
+        parsedMetadata: {
+          name: 'John Doe',
+          dateRange: '2025-01-01 - 2025-01-31',
+        },
+      },
+    };
+
+    render(<SelectedFileMetadata selectedFile={fileWithParsedMetadata} />);
+    expect(screen.getByText('Raw Metadata:')).toBeInTheDocument();
+  });
+
+  it('should handle partial parsed metadata (name only)', () => {
+    const fileWithPartialMetadata: UploadedFile = {
+      ...mockFile,
+      zipMetadata: {
+        ...mockFile.zipMetadata!,
+        parsedMetadata: {
+          name: 'Jane Smith',
+        },
+      },
+    };
+
+    render(<SelectedFileMetadata selectedFile={fileWithPartialMetadata} />);
+    expect(screen.getByText('Patient Name:')).toBeInTheDocument();
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.queryByText('Date Range:')).not.toBeInTheDocument();
+  });
+
+  it('should handle partial parsed metadata (date range only)', () => {
+    const fileWithPartialMetadata: UploadedFile = {
+      ...mockFile,
+      zipMetadata: {
+        ...mockFile.zipMetadata!,
+        parsedMetadata: {
+          dateRange: '2025-02-01 - 2025-02-28',
+        },
+      },
+    };
+
+    render(<SelectedFileMetadata selectedFile={fileWithPartialMetadata} />);
+    expect(screen.queryByText('Patient Name:')).not.toBeInTheDocument();
+    expect(screen.getByText('Date Range:')).toBeInTheDocument();
+    expect(screen.getByText('2025-02-01 - 2025-02-28')).toBeInTheDocument();
   });
 });

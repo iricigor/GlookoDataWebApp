@@ -130,11 +130,29 @@ export function SelectedFileMetadata({ selectedFile }: SelectedFileMetadataProps
             <Text className={styles.value}>{getTotalRows(selectedFile).toLocaleString()}</Text>
           </>
         )}
+
+        {selectedFile.zipMetadata?.parsedMetadata && (
+          <>
+            {selectedFile.zipMetadata.parsedMetadata.name && (
+              <>
+                <Text className={styles.label}>Patient Name:</Text>
+                <Text className={styles.value}>{selectedFile.zipMetadata.parsedMetadata.name}</Text>
+              </>
+            )}
+            
+            {selectedFile.zipMetadata.parsedMetadata.dateRange && (
+              <>
+                <Text className={styles.label}>Date Range:</Text>
+                <Text className={styles.value}>{selectedFile.zipMetadata.parsedMetadata.dateRange}</Text>
+              </>
+            )}
+          </>
+        )}
       </div>
 
       {selectedFile.zipMetadata?.metadataLine && (
         <div>
-          <Text className={styles.label} style={{ marginBottom: '4px', display: 'block' }}>Package Metadata:</Text>
+          <Text className={styles.label} style={{ marginBottom: '4px', display: 'block' }}>Raw Metadata:</Text>
           <div className={styles.metadataLine}>
             {selectedFile.zipMetadata.metadataLine}
           </div>
