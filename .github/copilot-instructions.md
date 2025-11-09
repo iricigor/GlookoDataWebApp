@@ -276,9 +276,9 @@ GlookoDataWebApp/
      - **Fixes** - for 🪲 Bug label
      - **Documentation** - for 📚 Documentation label
      - **Other** - for other changes
-   - Format: `- Description of the change (#PR_NUMBER or Issue #ISSUE_NUMBER)`
-   - Use `#PR_NUMBER` format for linkability in GitHub (e.g., `#152`)
-   - For issues without PRs, use `Issue #ISSUE_NUMBER`
+   - Format: `- [#PR_NUMBER](../../pull/PR_NUMBER) Description of the change`
+   - Use relative link format for PRs: `[#152](../../pull/152)`
+   - For issues without PRs, use: `[Issue #ISSUE_NUMBER](../../issues/ISSUE_NUMBER)`
    - Keep entries within each category sorted by PR/issue number (descending - highest first)
 
 2. **Run tests**
