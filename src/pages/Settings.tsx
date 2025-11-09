@@ -13,6 +13,7 @@ import { SettingsRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { GlucoseThresholdsSection } from '../components/GlucoseThresholdsSection';
+import { getVersionInfo, formatBuildDate } from '../utils/version';
 
 const useStyles = makeStyles({
   container: {
@@ -80,6 +81,22 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     marginBottom: '12px',
   },
+  versionItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '8px',
+  },
+  versionLabel: {
+    fontSize: tokens.fontSizeBase300,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+  },
+  versionValue: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    fontFamily: 'monospace',
+  },
 });
 
 interface SettingsProps {
@@ -91,6 +108,7 @@ export function Settings({ themeMode, onThemeChange }: SettingsProps) {
   const styles = useStyles();
   const { thresholds, updateThreshold, validateThresholds, isValid } = useGlucoseThresholds();
   const validationError = validateThresholds(thresholds);
+  const versionInfo = getVersionInfo();
 
   return (
     <div className={styles.container}>
@@ -134,6 +152,27 @@ export function Settings({ themeMode, onThemeChange }: SettingsProps) {
           <Text className={styles.settingDescription}>
             Your data is stored locally with configurable persistence options. All processing happens in your browser.
           </Text>
+        </div>
+
+        <div className={styles.settingSection}>
+          <Title3 className={styles.sectionTitle}>Version Information</Title3>
+          <Divider className={styles.divider} />
+          <div className={styles.versionItem}>
+            <Text className={styles.versionLabel}>Version:</Text>
+            <Text className={styles.versionValue}>{versionInfo.version}</Text>
+          </div>
+          <div className={styles.versionItem}>
+            <Text className={styles.versionLabel}>Build ID:</Text>
+            <Text className={styles.versionValue}>{versionInfo.buildId}</Text>
+          </div>
+          <div className={styles.versionItem}>
+            <Text className={styles.versionLabel}>Build Date:</Text>
+            <Text className={styles.versionValue}>{formatBuildDate(versionInfo.buildDate)}</Text>
+          </div>
+          <div className={styles.versionItem}>
+            <Text className={styles.versionLabel}>Full Version:</Text>
+            <Text className={styles.versionValue}>{versionInfo.fullVersion}</Text>
+          </div>
         </div>
       </Card>
     </div>

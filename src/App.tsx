@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { FluentProvider } from '@fluentui/react-components'
 import './App.css'
 import { Navigation } from './components/Navigation'
+import { Footer } from './components/Footer'
 import { Home } from './pages/Home'
 import { DataUpload } from './pages/DataUpload'
 import { Reports } from './pages/Reports'
@@ -71,6 +72,7 @@ function App() {
     <FluentProvider theme={theme}>
       <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
       {renderPage()}
+      <Footer />
     </FluentProvider>
   )
 }
