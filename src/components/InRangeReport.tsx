@@ -16,6 +16,10 @@ import {
   TableHeaderCell,
   TableBody,
   TableCell,
+  Accordion,
+  AccordionItem,
+  AccordionHeader,
+  AccordionPanel,
 } from '@fluentui/react-components';
 import type { 
   UploadedFile, 
@@ -24,6 +28,7 @@ import type {
   DayOfWeekReport,
   DailyReport,
   GlucoseReading,
+  GlucoseRangeStats,
 } from '../types';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
 import { groupByDayOfWeek, groupByDate, calculatePercentage } from '../utils/glucoseRangeUtils';
@@ -34,6 +39,46 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('24px'),
+  },
+  accordion: {
+    backgroundColor: tokens.colorNeutralBackground2,
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+  },
+  headerContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('4px'),
+    width: '100%',
+  },
+  reportTitle: {
+    fontSize: tokens.fontSizeBase500,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+  },
+  summaryLine: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+  },
+  panelContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('16px'),
+  },
+  legend: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('8px'),
+    ...shorthands.padding('12px', '16px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+  },
+  legendTitle: {
+    fontSize: tokens.fontSizeBase300,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    marginBottom: '4px',
   },
   controls: {
     display: 'flex',
@@ -149,6 +194,57 @@ export function InRangeReport({ selectedFile }: InRangeReportProps) {
     }
   }, [categoryMode, readings, thresholds]);
 
+  // Calculate overall summary statistics
+  const getOverallStats = (): GlucoseRangeStats | null => {
+    if (readings.length === 0) return null;
+    
+    const stats: GlucoseRangeStats = {
+      veryLow: 0,
+      low: 0,
+      inRange: 0,
+      high: 0,
+      veryHigh: 0,
+      total: readings.length,
+    };
+
+    readings.forEach(reading => {
+      if (categoryMode === 5) {
+        if (reading.value < thresholds.veryLow * 18) {
+          stats.veryLow!++;
+        } else if (reading.value < thresholds.low * 18) {
+          stats.low++;
+        } else if (reading.value <= thresholds.high * 18) {
+          stats.inRange++;
+        } else if (reading.value <= thresholds.veryHigh * 18) {
+          stats.high++;
+        } else {
+          stats.veryHigh!++;
+        }
+      } else {
+        if (reading.value < thresholds.low * 18) {
+          stats.low++;
+        } else if (reading.value <= thresholds.high * 18) {
+          stats.inRange++;
+        } else {
+          stats.high++;
+        }
+      }
+    });
+
+    return stats;
+  };
+
+  const getSummaryLine = (): string => {
+    if (loading) return 'Loading data...';
+    if (error) return 'No data available';
+    
+    const stats = getOverallStats();
+    if (!stats) return 'No data';
+
+    const inRangePercent = calculatePercentage(stats.inRange, stats.total);
+    return `${stats.total.toLocaleString()} readings • ${inRangePercent}% in range • ${dataSource.toUpperCase()} • ${categoryMode} categories`;
+  };
+
   const renderStatsRow = (
     label: string,
     stats: { veryLow?: number; low: number; inRange: number; high: number; veryHigh?: number; total: number }
@@ -180,89 +276,131 @@ export function InRangeReport({ selectedFile }: InRangeReportProps) {
 
   if (!selectedFile) {
     return (
-      <div className={styles.container}>
-        <Text className={styles.noData}>
-          No data package selected. Please select a valid ZIP file from the Data Upload page.
-        </Text>
-      </div>
+      <Accordion className={styles.accordion} collapsible defaultOpenItems={['in-range']}>
+        <AccordionItem value="in-range">
+          <AccordionHeader>
+            <div className={styles.headerContent}>
+              <Text className={styles.reportTitle}>In Range</Text>
+              <Text className={styles.summaryLine}>No data package selected</Text>
+            </div>
+          </AccordionHeader>
+          <AccordionPanel>
+            <Text className={styles.noData}>
+              No data package selected. Please select a valid ZIP file from the Data Upload page.
+            </Text>
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
     );
   }
 
   return (
-    <div className={styles.container}>
-      {/* Controls */}
-      <div className={styles.controls}>
-        <div className={styles.controlRow}>
-          <Text className={styles.controlLabel}>Data Source:</Text>
-          <Switch
-            checked={dataSource === 'bg'}
-            onChange={(_, data) => setDataSource(data.checked ? 'bg' : 'cgm')}
-            label={dataSource === 'cgm' ? 'CGM Data' : 'BG Data'}
-          />
-        </div>
-        <div className={styles.controlRow}>
-          <Text className={styles.controlLabel}>Category Mode:</Text>
-          <Switch
-            checked={categoryMode === 5}
-            onChange={(_, data) => setCategoryMode(data.checked ? 5 : 3)}
-            label={categoryMode === 3 ? '3 Categories (Low, In Range, High)' : '5 Categories (Very Low, Low, In Range, High, Very High)'}
-          />
-        </div>
-      </div>
-
-      {/* Loading/Error states */}
-      {loading && <Text className={styles.loading}>Loading glucose data...</Text>}
-      {error && <Text className={styles.error}>{error}</Text>}
-
-      {/* Day of Week Report */}
-      {!loading && !error && dayOfWeekReports.length > 0 && (
-        <div className={styles.section}>
-          <Text className={styles.sectionTitle}>Glucose Range by Day of Week</Text>
-          <div className={styles.tableContainer}>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHeaderCell>Day</TableHeaderCell>
-                  {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
-                  <TableHeaderCell>Low</TableHeaderCell>
-                  <TableHeaderCell>In Range</TableHeaderCell>
-                  <TableHeaderCell>High</TableHeaderCell>
-                  {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
-                  <TableHeaderCell>Total</TableHeaderCell>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {dayOfWeekReports.map(report => renderStatsRow(report.day, report.stats))}
-              </TableBody>
-            </Table>
+    <Accordion className={styles.accordion} collapsible defaultOpenItems={['in-range']}>
+      <AccordionItem value="in-range">
+        <AccordionHeader>
+          <div className={styles.headerContent}>
+            <Text className={styles.reportTitle}>In Range</Text>
+            <Text className={styles.summaryLine}>{getSummaryLine()}</Text>
           </div>
-        </div>
-      )}
+        </AccordionHeader>
+        <AccordionPanel>
+          <div className={styles.panelContent}>
+            {/* Legend */}
+            <div className={styles.legend}>
+              <Text className={styles.legendTitle}>Range Definitions</Text>
+              {categoryMode === 5 ? (
+                <>
+                  <div>• Very Low: &lt; {thresholds.veryLow} mmol/L (&lt; {Math.round(thresholds.veryLow * 18)} mg/dL)</div>
+                  <div>• Low: {thresholds.veryLow} - {thresholds.low} mmol/L ({Math.round(thresholds.veryLow * 18)} - {Math.round(thresholds.low * 18)} mg/dL)</div>
+                  <div>• In Range: {thresholds.low} - {thresholds.high} mmol/L ({Math.round(thresholds.low * 18)} - {Math.round(thresholds.high * 18)} mg/dL)</div>
+                  <div>• High: {thresholds.high} - {thresholds.veryHigh} mmol/L ({Math.round(thresholds.high * 18)} - {Math.round(thresholds.veryHigh * 18)} mg/dL)</div>
+                  <div>• Very High: &gt; {thresholds.veryHigh} mmol/L (&gt; {Math.round(thresholds.veryHigh * 18)} mg/dL)</div>
+                </>
+              ) : (
+                <>
+                  <div>• Low: &lt; {thresholds.low} mmol/L (&lt; {Math.round(thresholds.low * 18)} mg/dL)</div>
+                  <div>• In Range: {thresholds.low} - {thresholds.high} mmol/L ({Math.round(thresholds.low * 18)} - {Math.round(thresholds.high * 18)} mg/dL)</div>
+                  <div>• High: &gt; {thresholds.high} mmol/L (&gt; {Math.round(thresholds.high * 18)} mg/dL)</div>
+                </>
+              )}
+            </div>
 
-      {/* Daily Report */}
-      {!loading && !error && dailyReports.length > 0 && (
-        <div className={styles.section}>
-          <Text className={styles.sectionTitle}>Glucose Range by Date</Text>
-          <div className={styles.tableContainer}>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHeaderCell>Date</TableHeaderCell>
-                  {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
-                  <TableHeaderCell>Low</TableHeaderCell>
-                  <TableHeaderCell>In Range</TableHeaderCell>
-                  <TableHeaderCell>High</TableHeaderCell>
-                  {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
-                  <TableHeaderCell>Total</TableHeaderCell>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {dailyReports.map(report => renderStatsRow(report.date, report.stats))}
-              </TableBody>
-            </Table>
+            {/* Controls */}
+            <div className={styles.controls}>
+              <div className={styles.controlRow}>
+                <Text className={styles.controlLabel}>Data Source:</Text>
+                <Switch
+                  checked={dataSource === 'bg'}
+                  onChange={(_, data) => setDataSource(data.checked ? 'bg' : 'cgm')}
+                  label={dataSource === 'cgm' ? 'CGM Data' : 'BG Data'}
+                />
+              </div>
+              <div className={styles.controlRow}>
+                <Text className={styles.controlLabel}>Category Mode:</Text>
+                <Switch
+                  checked={categoryMode === 5}
+                  onChange={(_, data) => setCategoryMode(data.checked ? 5 : 3)}
+                  label={categoryMode === 3 ? '3 Categories (Low, In Range, High)' : '5 Categories (Very Low, Low, In Range, High, Very High)'}
+                />
+              </div>
+            </div>
+
+            {/* Loading/Error states */}
+            {loading && <Text className={styles.loading}>Loading glucose data...</Text>}
+            {error && <Text className={styles.error}>{error}</Text>}
+
+            {/* Day of Week Report */}
+            {!loading && !error && dayOfWeekReports.length > 0 && (
+              <div className={styles.section}>
+                <Text className={styles.sectionTitle}>Glucose Range by Day of Week</Text>
+                <div className={styles.tableContainer}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHeaderCell>Day</TableHeaderCell>
+                        {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
+                        <TableHeaderCell>Low</TableHeaderCell>
+                        <TableHeaderCell>In Range</TableHeaderCell>
+                        <TableHeaderCell>High</TableHeaderCell>
+                        {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
+                        <TableHeaderCell>Total</TableHeaderCell>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {dayOfWeekReports.map(report => renderStatsRow(report.day, report.stats))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            )}
+
+            {/* Daily Report */}
+            {!loading && !error && dailyReports.length > 0 && (
+              <div className={styles.section}>
+                <Text className={styles.sectionTitle}>Glucose Range by Date</Text>
+                <div className={styles.tableContainer}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHeaderCell>Date</TableHeaderCell>
+                        {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
+                        <TableHeaderCell>Low</TableHeaderCell>
+                        <TableHeaderCell>In Range</TableHeaderCell>
+                        <TableHeaderCell>High</TableHeaderCell>
+                        {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
+                        <TableHeaderCell>Total</TableHeaderCell>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {dailyReports.map(report => renderStatsRow(report.date, report.stats))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-    </div>
+        </AccordionPanel>
+      </AccordionItem>
+    </Accordion>
   );
 }

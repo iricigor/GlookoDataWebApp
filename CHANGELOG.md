@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.x] - Current Development
 
 ### New Features
+- Collapsible sections for Reports page to better organize multiple reports
+- SelectedFileMetadata component now uses collapsible accordion with summary in header
+- InRangeReport component now uses collapsible accordion with summary statistics in header
+- AGPReport placeholder component added with "Coming soon" message
 - In-Range Report feature with glucose range analysis by day of week and by date
 - Configurable data source selection (CGM vs BG data)
 - Configurable category mode (3 vs 5 categories)
