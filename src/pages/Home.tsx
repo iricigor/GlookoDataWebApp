@@ -142,7 +142,7 @@ export function Home({ onNavigate }: HomeProps) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Text className={styles.title}>Glooko Data Analyzer</Text>
+        <Text className={styles.title}>Glooko Insights</Text>
         <Text className={styles.subtitle}>
           A web app for importing, visualizing, and analyzing diabetes data exported from the Glooko platform
         </Text>

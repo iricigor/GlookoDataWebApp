@@ -60,7 +60,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   return (
     <nav className={styles.nav}>
       <div className={styles.brand}>
-        <Text className={styles.brandText}>GlookoDataWebApp</Text>
+        <Text className={styles.brandText}>Glooko Insights</Text>
       </div>
       <div className={styles.navItems}>
         {navItems.map((item) => (
