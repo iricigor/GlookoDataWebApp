@@ -28,6 +28,7 @@ When creating a pull request:
 
 ### New Features
 - [1.0.90] Add version information and build ID tracking system (PR #90)
+- [1.0.buildId] Add automated test count badge update in GitHub Actions workflow (Issue #100)
 
 ### Fixes
 - [1.0.buildId] Update README test count badge from 51 to 122 passing tests (Issue #TBD)
