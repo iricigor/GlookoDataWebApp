@@ -4,8 +4,8 @@ import {
   tokens,
   shorthands,
 } from '@fluentui/react-components';
-import { ChartMultipleRegular } from '@fluentui/react-icons';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
+import { InRangeReport } from '../components/InRangeReport';
 import type { UploadedFile } from '../types';
 
 const useStyles = makeStyles({
@@ -35,23 +35,10 @@ const useStyles = makeStyles({
     fontFamily: 'Segoe UI, sans-serif',
     display: 'block',
   },
-  placeholderContainer: {
+  content: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shorthands.padding('60px', '24px'),
-    textAlign: 'center',
-  },
-  icon: {
-    fontSize: '64px',
-    color: tokens.colorBrandForeground1,
-    marginBottom: '24px',
-  },
-  placeholderText: {
-    fontSize: tokens.fontSizeBase400,
-    color: tokens.colorNeutralForeground2,
-    maxWidth: '600px',
+    ...shorthands.gap('24px'),
   },
 });
 
@@ -73,13 +60,8 @@ export function Reports({ selectedFile }: ReportsProps) {
 
       <SelectedFileMetadata selectedFile={selectedFile} />
 
-      <div className={styles.placeholderContainer}>
-        <div className={styles.icon}>
-          <ChartMultipleRegular />
-        </div>
-        <Text className={styles.placeholderText}>
-          Reports and analytics will be displayed here once implemented
-        </Text>
+      <div className={styles.content}>
+        <InRangeReport selectedFile={selectedFile} />
       </div>
     </div>
   );
