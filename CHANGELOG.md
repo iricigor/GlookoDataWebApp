@@ -21,18 +21,20 @@ When creating a pull request:
    - **Fixes** - for 🪲 Bug label
    - **Documentation** - for 📚 Documentation label
    - **Other** - for other changes
-3. Format: `- [1.0.buildId] Description of the change (PR #number or Issue #number)`
-4. Entries within each category should be sorted by version number (newest first)
+3. Format: `- Description of the change (#PR_NUMBER or Issue #ISSUE_NUMBER)`
+   - Use `#PR_NUMBER` format for linkability in GitHub (e.g., `#152`)
+   - For issues without PRs, use `Issue #ISSUE_NUMBER`
+4. Entries within each category should be sorted by PR/issue number (descending - highest first)
 
 ## [1.0.x] - Current Development
 
 ### New Features
-- [1.0.90] Add version information and build ID tracking system (PR #90)
+- Add version information and build ID tracking system (#90)
 
 ### Fixes
 
 ### Documentation
-- [1.0.buildId] Add CHANGELOG.md file and update copilot instructions to require changelog updates in each PR (Issue #91)
+- Add CHANGELOG.md file and update copilot instructions to require changelog updates in each PR (Issue #91)
 
 ### Other
 
