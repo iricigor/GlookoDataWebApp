@@ -25,7 +25,7 @@ All data processing happens locally in your browser. No files or data are transm
 
 ### For Users
 
-Visit the live application at [GlookoDataWebApp](https://github.com/iricigor/GlookoDataWebApp) (deployment link to be added)
+Visit the live application at [https://glooko.iric.online](https://glooko.iric.online)
 
 ### For Developers
 
