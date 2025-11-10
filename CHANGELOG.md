@@ -120,6 +120,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Expand "Understanding Your Results" with AGP interpretation guidelines
 
 ### Other
+- Fix CHANGELOG.md by replacing all #XXX placeholder entries with correct PR numbers
+  - Identified 11 placeholder entries with #XXX format
+  - Used GitHub API to search for and identify correct PR numbers
+  - All PR links now point to their correct pull requests
 - [#161](../../pull/161) Optimize test execution performance with parallel test running
   - Enable parallel test execution in Vitest configuration using thread pool
   - Run tests once with JSON reporter to extract statistics immediately
