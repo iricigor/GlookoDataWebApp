@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### New Features
 - Implement Perplexity AI integration for time-in-range glucose analysis
-  - Real AI-powered analysis using Perplexity API (llama-3.1-sonar-small-128k-online model)
+  - Real AI-powered analysis using Perplexity API (sonar model with 127K context window)
   - Complete prompt: "Given a patient's percent time-in-range (TIR) from continuous glucose monitoring is X%, provide a brief clinical assessment and 2-3 specific, actionable recommendations"
   - Loading spinner animation while waiting for API response
   - Success message with checkmark icon when analysis completes
