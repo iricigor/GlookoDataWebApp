@@ -379,6 +379,7 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
                     selectedOptions={[dayFilter]}
                     onOptionSelect={(_, data) => setDayFilter(data.optionValue as AGPDayOfWeekFilter)}
                     positioning="below-start"
+                    inlinePopup
                   >
                     {dayOfWeekOptions.map(day => (
                       <Option key={day} value={day}>
