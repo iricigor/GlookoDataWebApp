@@ -106,6 +106,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved value display format showing "percentage (count)" instead of "count (percentage)"
 
 ### Fixes
+- Fix AI response to use European glucose units (mmol/L) and direct second-person language
+  - Updated system message to specify all glucose measurements are in mmol/L (European standard)
+  - Changed prompt from third-person ("patient's") to first/second-person ("my"/"your") language
+  - Added explicit reminder that glucose values are in mmol/L (not mg/dL)
+  - Instructed AI to communicate directly without assuming healthcare provider intermediary
+  - Added comprehensive unit tests for new prompt content
 - [#157](../../pull/157) Make version footer visible without scrolling on home page
   - Reduced container top/bottom padding from 40px to 24px
   - Reduced header margin-bottom from 40px to 24px
