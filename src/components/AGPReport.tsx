@@ -238,7 +238,7 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
 
               {/* AGP Graph */}
               {!loading && !error && statsWithData.length > 0 && (
-                <AGPGraph data={agpStats} unit="mmol/L" />
+                <AGPGraph data={agpStats} />
               )}
 
               {/* Info text */}
