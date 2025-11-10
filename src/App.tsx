@@ -10,6 +10,7 @@ import { AIAnalysis } from './pages/AIAnalysis'
 import { Settings } from './pages/Settings'
 import { useTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
+import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
 import type { UploadedFile } from './types'
 import { extractZipMetadata } from './utils/zipUtils'
 
@@ -17,6 +18,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const { theme, themeMode, setThemeMode } = useTheme()
   const { exportFormat, setExportFormat } = useExportFormat()
+  const { apiKey: perplexityApiKey, setApiKey: setPerplexityApiKey } = usePerplexityApiKey()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
 
@@ -117,9 +119,9 @@ function App() {
       case 'reports':
         return <Reports selectedFile={selectedFile} exportFormat={exportFormat} />
       case 'ai':
-        return <AIAnalysis selectedFile={selectedFile} />
+        return <AIAnalysis selectedFile={selectedFile} perplexityApiKey={perplexityApiKey} />
       case 'settings':
-        return <Settings themeMode={themeMode} onThemeChange={setThemeMode} exportFormat={exportFormat} onExportFormatChange={setExportFormat} />
+        return <Settings themeMode={themeMode} onThemeChange={setThemeMode} exportFormat={exportFormat} onExportFormatChange={setExportFormat} perplexityApiKey={perplexityApiKey} onPerplexityApiKeyChange={setPerplexityApiKey} />
       default:
         return <Home onNavigate={handleNavigate} />
     }

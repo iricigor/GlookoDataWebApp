@@ -3,6 +3,7 @@ import {
   Text,
   tokens,
   shorthands,
+  Link,
 } from '@fluentui/react-components';
 import { BrainCircuitRegular } from '@fluentui/react-icons';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
@@ -53,13 +54,20 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     maxWidth: '600px',
   },
+  warningText: {
+    fontSize: tokens.fontSizeBase400,
+    color: tokens.colorStatusWarningForeground1,
+    maxWidth: '600px',
+    marginTop: '16px',
+  },
 });
 
 interface AIAnalysisProps {
   selectedFile?: UploadedFile;
+  perplexityApiKey: string;
 }
 
-export function AIAnalysis({ selectedFile }: AIAnalysisProps) {
+export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) {
   const styles = useStyles();
 
   return (
@@ -77,9 +85,21 @@ export function AIAnalysis({ selectedFile }: AIAnalysisProps) {
         <div className={styles.icon}>
           <BrainCircuitRegular />
         </div>
-        <Text className={styles.placeholderText}>
-          AI-powered analysis and insights will be displayed here once implemented
-        </Text>
+        {!perplexityApiKey ? (
+          <>
+            <Text className={styles.placeholderText}>
+              To use AI-powered analysis, you need to configure your Perplexity API key.
+            </Text>
+            <Text className={styles.warningText}>
+              Please add your API key in the{' '}
+              <Link href="#settings">Settings page</Link>.
+            </Text>
+          </>
+        ) : (
+          <Text className={styles.placeholderText}>
+            AI-powered analysis and insights will be displayed here once implemented
+          </Text>
+        )}
       </div>
     </div>
   );

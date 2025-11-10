@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.x] - Current Development
 
 ### New Features
+- Add AI settings configuration in Settings page
+  - Password-type input field for Perplexity API key with visual confirmation checkmark
+  - API key stored securely in browser cookies with persistent storage
+  - AI Analysis page displays helpful message with link to Settings when API key is not configured
+  - Follows existing settings patterns with Fluent UI components for consistency
 - [#XXX](../../pull/XXX) Add CSV export functionality to all data tables
   - Copy icon appears in top-right corner on table hover with "Copy As CSV" tooltip
   - Export FileList table showing uploaded files with metadata
