@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  lint-and-build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,15 +34,118 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Run unit tests
-        run: npm test -- --run
+  test-utils:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run utility tests
+        run: npm test -- --run src/utils
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-utils
+          path: test-results*.json
+          retention-days: 1
+
+  test-hooks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run hooks tests
+        run: npm test -- --run src/hooks
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-hooks
+          path: test-results*.json
+          retention-days: 1
+
+  test-components:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run component tests
+        run: npm test -- --run src/components
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-components
+          path: test-results*.json
+          retention-days: 1
+
+  aggregate-results:
+    runs-on: ubuntu-latest
+    needs: [lint-and-build, test-utils, test-hooks, test-components]
+    if: always()
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run all tests with JSON reporter
+        run: npm test -- --run --reporter=json > test-results.json 2>&1 || true
 
       - name: Extract Test Statistics
-        if: always()
         run: |
-          # Run tests again with JSON reporter to get statistics
-          npm test -- --run --reporter=json > test-results.json 2>&1 || true
-          
           # Extract test count from JSON output
           TEST_COUNT=$(grep -o '"numTotalTests":[0-9]*' test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
           TEST_PASSED=$(grep -o '"numPassedTests":[0-9]*' test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
@@ -56,7 +159,7 @@ jobs:
 
       - name: Update Test Count Badge
         uses: schneegans/dynamic-badges-action@v1.7.0
-        if: github.ref == 'refs/heads/main' && always()
+        if: github.ref == 'refs/heads/main'
         with:
           auth: ${{ secrets.GIST_TOKEN }}
           gistID: d15ec8d49e21d87f7b2fd54869d44085
