@@ -61,7 +61,7 @@ describe('perplexityApi', () => {
         ok: true,
         json: async () => ({
           id: 'test-id',
-          model: 'llama-3.1-sonar-small-128k-online',
+          model: 'sonar',
           created: 1234567890,
           usage: {
             prompt_tokens: 10,
@@ -291,7 +291,7 @@ describe('perplexityApi', () => {
       const callArgs = mockFetch.mock.calls[0][1];
       const body = JSON.parse(callArgs.body);
       
-      expect(body.model).toBe('llama-3.1-sonar-small-128k-online');
+      expect(body.model).toBe('sonar');
       expect(body.temperature).toBe(0.2);
       expect(body.max_tokens).toBe(1000);
     });
