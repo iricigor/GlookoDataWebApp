@@ -10,13 +10,17 @@ import {
   AccordionItem,
   AccordionHeader,
   AccordionPanel,
+  Spinner,
+  MessageBar,
+  MessageBarBody,
 } from '@fluentui/react-components';
-import { BrainCircuitRegular } from '@fluentui/react-icons';
+import { BrainCircuitRegular, CheckmarkCircleRegular, ErrorCircleRegular } from '@fluentui/react-icons';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import type { UploadedFile } from '../types';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
 import { calculateGlucoseRangeStats, calculatePercentage } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
+import { callPerplexityApi, generateTimeInRangePrompt } from '../utils/perplexityApi';
 
 const useStyles = makeStyles({
   container: {
@@ -99,6 +103,35 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
     fontStyle: 'italic',
   },
+  aiResponseContainer: {
+    ...shorthands.padding('16px'),
+    ...shorthands.borderRadius('8px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    marginTop: '16px',
+  },
+  aiResponseText: {
+    fontSize: tokens.fontSizeBase400,
+    color: tokens.colorNeutralForeground1,
+    lineHeight: '1.6',
+    whiteSpace: 'pre-wrap',
+  },
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+    ...shorthands.padding('24px'),
+  },
+  errorContainer: {
+    marginTop: '16px',
+  },
+  successIcon: {
+    color: tokens.colorStatusSuccessForeground1,
+  },
+  errorIcon: {
+    color: tokens.colorStatusDangerForeground1,
+  },
 });
 
 interface AIAnalysisProps {
@@ -112,18 +145,23 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
   
   const [inRangePercentage, setInRangePercentage] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  const [analyzeClicked, setAnalyzeClicked] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [aiResponse, setAiResponse] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Calculate in-range percentage when file is selected
   useEffect(() => {
     if (!selectedFile) {
       setInRangePercentage(null);
-      setAnalyzeClicked(false);
+      setAiResponse(null);
+      setError(null);
       return;
     }
 
     const calculateInRange = async () => {
       setLoading(true);
+      setAiResponse(null);
+      setError(null);
       try {
         // Extract CGM readings (default data source)
         const readings = await extractGlucoseReadings(selectedFile, 'cgm');
@@ -147,8 +185,32 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
     calculateInRange();
   }, [selectedFile, thresholds]);
 
-  const handleAnalyzeClick = () => {
-    setAnalyzeClicked(true);
+  const handleAnalyzeClick = async () => {
+    if (!perplexityApiKey || inRangePercentage === null) {
+      return;
+    }
+
+    setAnalyzing(true);
+    setError(null);
+    setAiResponse(null);
+
+    try {
+      // Generate the prompt with the TIR percentage
+      const prompt = generateTimeInRangePrompt(inRangePercentage);
+
+      // Call Perplexity API
+      const result = await callPerplexityApi(perplexityApiKey, prompt);
+
+      if (result.success && result.content) {
+        setAiResponse(result.content);
+      } else {
+        setError(result.error || 'Failed to get AI response');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   return (
@@ -202,17 +264,52 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
                       <div className={styles.buttonContainer}>
                         <Button
                           appearance="primary"
-                          disabled={!perplexityApiKey}
+                          disabled={!perplexityApiKey || analyzing}
                           onClick={handleAnalyzeClick}
+                          icon={analyzing ? <Spinner size="tiny" /> : undefined}
                         >
-                          Analyze with AI
+                          {analyzing ? 'Analyzing...' : 'Analyze with AI'}
                         </Button>
-                        <Text className={styles.helperText}>
-                          {analyzeClicked
-                            ? 'AI analysis not implemented yet'
-                            : 'Click Analyze to get AI Powered analysis'}
-                        </Text>
+                        {!analyzing && !aiResponse && !error && (
+                          <Text className={styles.helperText}>
+                            Click Analyze to get AI-powered analysis
+                          </Text>
+                        )}
                       </div>
+
+                      {analyzing && (
+                        <div className={styles.loadingContainer}>
+                          <Spinner size="medium" />
+                          <Text className={styles.helperText}>
+                            Getting AI analysis... This may take a few seconds.
+                          </Text>
+                        </div>
+                      )}
+
+                      {error && (
+                        <div className={styles.errorContainer}>
+                          <MessageBar intent="error" icon={<ErrorCircleRegular className={styles.errorIcon} />}>
+                            <MessageBarBody>
+                              <strong>Error:</strong> {error}
+                            </MessageBarBody>
+                          </MessageBar>
+                        </div>
+                      )}
+
+                      {aiResponse && (
+                        <>
+                          <MessageBar intent="success" icon={<CheckmarkCircleRegular className={styles.successIcon} />}>
+                            <MessageBarBody>
+                              AI analysis completed successfully
+                            </MessageBarBody>
+                          </MessageBar>
+                          <div className={styles.aiResponseContainer}>
+                            <Text className={styles.aiResponseText}>
+                              {aiResponse}
+                            </Text>
+                          </div>
+                        </>
+                      )}
                     </>
                   ) : (
                     <Text className={styles.helperText}>

@@ -7,13 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Table of Contents
 
-- [Current Development - 1.1.x](#11x---current-development)
+- [Current Development - 1.2.x](#12x---current-development)
+- [Version 1.1.x](#11x---released)
 - [Version 1.0.x](#10x---released)
 - [Future Versions](#future-versions)
 - [Version Format](#version-format)
 - [How to Update This File](#how-to-update-this-file)
 
-## [1.1.x] - Current Development
+## [1.2.x] - Current Development
+
+### New Features
+- Implement Perplexity AI integration for time-in-range glucose analysis
+  - Real AI-powered analysis using Perplexity API (llama-3.1-sonar-small-128k-online model)
+  - Complete prompt: "Given a patient's percent time-in-range (TIR) from continuous glucose monitoring is X%, provide a brief clinical assessment and 2-3 specific, actionable recommendations"
+  - Loading spinner animation while waiting for API response
+  - Success message with checkmark icon when analysis completes
+  - Error handling for unauthorized access (401/403), API errors, and network issues
+  - AI response displayed in formatted container with proper whitespace handling
+  - Button disabled during analysis to prevent duplicate requests
+  - Comprehensive unit tests for API utility with 16 test cases
+  - Security: API key transmitted securely via HTTPS, stored only in browser cookies
+  - Privacy: All AI communication happens directly from browser, no server intermediary
+
+---
+
+## [1.1.x] - Released
 
 ### New Features
 - [#144](../../pull/144) Add swipe gesture navigation for mobile devices
@@ -151,9 +169,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## Future Versions
-
-### [1.2.x] - ETA Nov 11
-- Provide access to AI analysis
 
 ### [2.0.x] - Future
 - Major version updates and breaking changes will be listed here
