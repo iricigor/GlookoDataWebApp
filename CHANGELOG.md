@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.x] - Current Development
 
 ### New Features
+- [#XXX](../../pull/XXX) Add bug report and feature request links to Settings page
+  - New "Support" section at the top of Settings page
+  - Quick access buttons to create GitHub issues directly from the app
+  - Bug report button links to bug_report.yml template
+  - Feature request button links to feature_request.yml template
+  - Opens in new tab with proper security attributes (noopener noreferrer)
 - [#XXX](../../pull/XXX) Add first AI analysis prompts to AI Analysis page
   - Two collapsible accordion sections (both collapsed by default)
   - First prompt: "Time in Range Analysis" displays calculated glucose percentage in range
