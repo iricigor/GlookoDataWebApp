@@ -27,6 +27,16 @@ Thank you for your interest in contributing! This guide will help you get starte
    - Sign in with your GitHub account
    - Copilot will help you write code faster and with fewer errors
 
+### Available Scripts
+
+- **`npm run dev`** - Start development server with hot module replacement (HMR)
+- **`npm run build`** - Build the production-ready application
+- **`npm run lint`** - Run ESLint to check code quality
+- **`npm run preview`** - Preview the production build locally
+- **`npm test`** - Run unit tests with Vitest
+- **`npm run test:ui`** - Run tests with interactive UI
+- **`npm run test:coverage`** - Run tests with coverage report
+
 ## 💻 Development Workflow
 
 ### Before You Start Coding
@@ -40,6 +50,28 @@ Thank you for your interest in contributing! This guide will help you get starte
    - Review existing components in `src/`
    - Check how Fluent UI components are used in `App.tsx`
    - Look at the TypeScript types and interfaces
+
+### Project Structure
+
+```
+GlookoDataWebApp/
+├── src/
+│   ├── App.tsx          # Main application component
+│   ├── main.tsx         # Application entry point
+│   ├── components/      # Reusable UI components
+│   ├── pages/           # Page-level components
+│   ├── hooks/           # Custom React hooks
+│   ├── types/           # TypeScript type definitions
+│   ├── utils/           # Utility functions
+│   └── assets/          # Static assets
+├── public/              # Public assets
+├── docs/                # Documentation
+├── dist/                # Production build output (generated)
+├── package.json         # Project dependencies and scripts
+├── tsconfig.json        # TypeScript configuration
+├── vite.config.ts       # Vite configuration
+└── eslint.config.js     # ESLint configuration
+```
 
 ### While Coding
 
