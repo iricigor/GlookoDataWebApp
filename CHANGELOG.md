@@ -48,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 - Center-align all column headers and data cells in AGP report table for improved readability
+- Update demo CGM data to have realistic glucose variability matching clinical distribution (1% very low, 2% low, 71% in range, 19% high, 7% very high)
 
 ### Documentation
 - Add docs/REPORTS.md with comprehensive feature documentation and screenshots
