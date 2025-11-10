@@ -133,6 +133,11 @@ export interface GlucoseRangeStats {
 export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday' | 'Workday' | 'Weekend';
 
 /**
+ * AGP day of week filter option (includes "All Days")
+ */
+export type AGPDayOfWeekFilter = 'All Days' | DayOfWeek;
+
+/**
  * Glucose range report by day of week
  */
 export interface DayOfWeekReport {

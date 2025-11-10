@@ -20,11 +20,15 @@ import {
   AccordionItem,
   AccordionHeader,
   AccordionPanel,
+  Dropdown,
+  Option,
 } from '@fluentui/react-components';
-import type { UploadedFile, GlucoseDataSource, AGPTimeSlotStats } from '../types';
+import type { UploadedFile, GlucoseDataSource, AGPTimeSlotStats, AGPDayOfWeekFilter } from '../types';
+import type { ExportFormat } from '../utils/csvUtils';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
-import { calculateAGPStats } from '../utils/agpUtils';
+import { calculateAGPStats, filterReadingsByDayOfWeek, filterReadingsByTimeRange } from '../utils/agpUtils';
 import { AGPGraph } from './AGPGraph';
+import { CopyToCsvButton } from './CopyToCsvButton';
 
 const useStyles = makeStyles({
   reportContainer: {
@@ -73,6 +77,9 @@ const useStyles = makeStyles({
     maxHeight: '600px',
     overflowY: 'auto',
     position: 'relative',
+    '&:hover .csv-button': {
+      opacity: 1,
+    },
   },
   stickyHeader: {
     position: 'sticky',
@@ -130,16 +137,48 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     ...shorthands.padding('12px', '0'),
   },
+  dropdown: {
+    minWidth: '160px',
+  },
+  timeInput: {
+    fontSize: tokens.fontSizeBase300,
+    ...shorthands.padding('6px', '8px'),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+  },
+  timeInputGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
+  csvButton: {
+    position: 'sticky',
+    top: '8px',
+    right: '8px',
+    opacity: 0,
+    ...shorthands.transition('opacity', '0.2s'),
+    zIndex: 10,
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderRadius(tokens.borderRadiusCircular),
+    boxShadow: tokens.shadow4,
+    float: 'right',
+    marginRight: '8px',
+    marginTop: '8px',
+  },
 });
 
 interface AGPReportProps {
   selectedFile?: UploadedFile;
+  exportFormat: ExportFormat;
 }
 
-export function AGPReport({ selectedFile }: AGPReportProps) {
+export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
   const styles = useStyles();
 
   const [dataSource, setDataSource] = useState<GlucoseDataSource>('cgm');
+  const [dayFilter, setDayFilter] = useState<AGPDayOfWeekFilter>('All Days');
+  const [startTime, setStartTime] = useState<string>('00:00');
+  const [endTime, setEndTime] = useState<string>('23:59');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agpStats, setAgpStats] = useState<AGPTimeSlotStats[]>([]);
@@ -162,8 +201,22 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
           setError(`No ${dataSource.toUpperCase()} data found in the selected file`);
           setAgpStats([]);
         } else {
-          const stats = calculateAGPStats(glucoseReadings);
-          setAgpStats(stats);
+          // Apply filters
+          let filteredReadings = glucoseReadings;
+          
+          // Filter by day of week
+          filteredReadings = filterReadingsByDayOfWeek(filteredReadings, dayFilter);
+          
+          // Filter by time range
+          filteredReadings = filterReadingsByTimeRange(filteredReadings, startTime, endTime);
+          
+          if (filteredReadings.length === 0) {
+            setError('No data matches the selected filters');
+            setAgpStats([]);
+          } else {
+            const stats = calculateAGPStats(filteredReadings);
+            setAgpStats(stats);
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load glucose data');
@@ -174,7 +227,7 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
     };
 
     loadData();
-  }, [selectedFile, dataSource]);
+  }, [selectedFile, dataSource, dayFilter, startTime, endTime]);
 
   const formatValue = (value: number): string => {
     if (value === 0) return '-';
@@ -183,6 +236,37 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
 
   // Filter out time slots with no data
   const statsWithData = agpStats.filter(stat => stat.count > 0);
+
+  // Day of week filter options
+  const dayOfWeekOptions: AGPDayOfWeekFilter[] = [
+    'All Days',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+    'Workday',
+    'Weekend',
+  ];
+
+  // Helper function to convert AGP stats to CSV format
+  const convertAGPStatsToCSV = (stats: AGPTimeSlotStats[]): (string | number)[][] => {
+    const headers = ['Time', 'Lowest', '10%', '25%', '50% (Median)', '75%', '90%', 'Highest', 'Count'];
+    const rows = stats.map(stat => [
+      stat.timeSlot,
+      formatValue(stat.lowest),
+      formatValue(stat.p10),
+      formatValue(stat.p25),
+      formatValue(stat.p50),
+      formatValue(stat.p75),
+      formatValue(stat.p90),
+      formatValue(stat.highest),
+      stat.count,
+    ]);
+    return [headers, ...rows];
+  };
 
   if (!selectedFile) {
     return (
@@ -234,6 +318,39 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
                     </Button>
                   </div>
                 </div>
+                <div className={styles.controlRow}>
+                  <Text className={styles.controlLabel}>Day of Week:</Text>
+                  <Dropdown
+                    className={styles.dropdown}
+                    value={dayFilter}
+                    selectedOptions={[dayFilter]}
+                    onOptionSelect={(_, data) => setDayFilter(data.optionValue as AGPDayOfWeekFilter)}
+                  >
+                    {dayOfWeekOptions.map(day => (
+                      <Option key={day} value={day}>
+                        {day}
+                      </Option>
+                    ))}
+                  </Dropdown>
+                </div>
+                <div className={styles.controlRow}>
+                  <Text className={styles.controlLabel}>Time Range:</Text>
+                  <div className={styles.timeInputGroup}>
+                    <input
+                      type="time"
+                      className={styles.timeInput}
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                    />
+                    <Text>to</Text>
+                    <input
+                      type="time"
+                      className={styles.timeInput}
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* AGP Graph */}
@@ -252,6 +369,13 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
               {/* AGP Table */}
               {!loading && !error && statsWithData.length > 0 && (
                 <div className={styles.tableContainer}>
+                  <div className={`${styles.csvButton} csv-button`}>
+                    <CopyToCsvButton 
+                      data={convertAGPStatsToCSV(statsWithData)}
+                      format={exportFormat}
+                      ariaLabel={`Copy AGP data as ${exportFormat.toUpperCase()}`}
+                    />
+                  </div>
                   <Table>
                     <TableHeader>
                       <TableRow>

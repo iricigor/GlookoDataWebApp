@@ -8,6 +8,8 @@ import {
   formatTimeSlot,
   getTimeSlotKey,
   calculateAGPStats,
+  filterReadingsByDayOfWeek,
+  filterReadingsByTimeRange,
 } from './agpUtils';
 import type { GlucoseReading } from '../types';
 
@@ -227,6 +229,141 @@ describe('agpUtils', () => {
       expect(slot1545?.p75).toBe(8.3);
       expect(slot1545?.p90).toBe(8.3);
       expect(slot1545?.highest).toBe(8.3);
+    });
+  });
+
+  describe('filterReadingsByDayOfWeek', () => {
+    const createReading = (year: number, month: number, day: number, value: number): GlucoseReading => ({
+      timestamp: new Date(year, month, day, 12, 0, 0),
+      value,
+    });
+
+    // Create sample readings for each day of the week
+    // 2025-01-06 is Monday, 2025-01-07 is Tuesday, etc.
+    const readings: GlucoseReading[] = [
+      createReading(2025, 0, 5, 5.0),  // Sunday
+      createReading(2025, 0, 6, 5.5),  // Monday
+      createReading(2025, 0, 7, 6.0),  // Tuesday
+      createReading(2025, 0, 8, 6.5),  // Wednesday
+      createReading(2025, 0, 9, 7.0),  // Thursday
+      createReading(2025, 0, 10, 7.5), // Friday
+      createReading(2025, 0, 11, 8.0), // Saturday
+    ];
+
+    it('should return all readings when filter is "All Days"', () => {
+      const result = filterReadingsByDayOfWeek(readings, 'All Days');
+      expect(result).toHaveLength(7);
+    });
+
+    it('should filter Monday readings correctly', () => {
+      const result = filterReadingsByDayOfWeek(readings, 'Monday');
+      expect(result).toHaveLength(1);
+      expect(result[0].value).toBe(5.5);
+    });
+
+    it('should filter Tuesday readings correctly', () => {
+      const result = filterReadingsByDayOfWeek(readings, 'Tuesday');
+      expect(result).toHaveLength(1);
+      expect(result[0].value).toBe(6.0);
+    });
+
+    it('should filter Wednesday readings correctly', () => {
+      const result = filterReadingsByDayOfWeek(readings, 'Wednesday');
+      expect(result).toHaveLength(1);
+      expect(result[0].value).toBe(6.5);
+    });
+
+    it('should filter Thursday readings correctly', () => {
+      const result = filterReadingsByDayOfWeek(readings, 'Thursday');
+      expect(result).toHaveLength(1);
+      expect(result[0].value).toBe(7.0);
+    });
+
+    it('should filter Friday readings correctly', () => {
+      const result = filterReadingsByDayOfWeek(readings, 'Friday');
+      expect(result).toHaveLength(1);
+      expect(result[0].value).toBe(7.5);
+    });
+
+    it('should filter Saturday readings correctly', () => {
+      const result = filterReadingsByDayOfWeek(readings, 'Saturday');
+      expect(result).toHaveLength(1);
+      expect(result[0].value).toBe(8.0);
+    });
+
+    it('should filter Sunday readings correctly', () => {
+      const result = filterReadingsByDayOfWeek(readings, 'Sunday');
+      expect(result).toHaveLength(1);
+      expect(result[0].value).toBe(5.0);
+    });
+
+    it('should filter Workday readings correctly (Mon-Fri)', () => {
+      const result = filterReadingsByDayOfWeek(readings, 'Workday');
+      expect(result).toHaveLength(5);
+      expect(result.map(r => r.value)).toEqual([5.5, 6.0, 6.5, 7.0, 7.5]);
+    });
+
+    it('should filter Weekend readings correctly (Sat-Sun)', () => {
+      const result = filterReadingsByDayOfWeek(readings, 'Weekend');
+      expect(result).toHaveLength(2);
+      expect(result.map(r => r.value)).toEqual([5.0, 8.0]);
+    });
+  });
+
+  describe('filterReadingsByTimeRange', () => {
+    const createReading = (hour: number, minute: number, value: number): GlucoseReading => ({
+      timestamp: new Date(2025, 0, 1, hour, minute, 0),
+      value,
+    });
+
+    const readings: GlucoseReading[] = [
+      createReading(0, 0, 5.0),   // 00:00
+      createReading(6, 0, 5.5),   // 06:00
+      createReading(8, 30, 6.0),  // 08:30
+      createReading(12, 0, 6.5),  // 12:00
+      createReading(15, 45, 7.0), // 15:45
+      createReading(18, 0, 7.5),  // 18:00
+      createReading(22, 30, 8.0), // 22:30
+      createReading(23, 59, 8.5), // 23:59
+    ];
+
+    it('should return all readings when start and end times are not provided', () => {
+      const result1 = filterReadingsByTimeRange(readings, '', '23:59');
+      expect(result1).toHaveLength(8);
+      
+      const result2 = filterReadingsByTimeRange(readings, '00:00', '');
+      expect(result2).toHaveLength(8);
+    });
+
+    it('should filter readings within daytime range (08:00 to 18:00)', () => {
+      const result = filterReadingsByTimeRange(readings, '08:00', '18:00');
+      expect(result).toHaveLength(4);
+      expect(result.map(r => r.value)).toEqual([6.0, 6.5, 7.0, 7.5]);
+    });
+
+    it('should filter readings within morning range (06:00 to 12:00)', () => {
+      const result = filterReadingsByTimeRange(readings, '06:00', '12:00');
+      expect(result).toHaveLength(3);
+      expect(result.map(r => r.value)).toEqual([5.5, 6.0, 6.5]);
+    });
+
+    it('should filter readings within evening range (18:00 to 23:59)', () => {
+      const result = filterReadingsByTimeRange(readings, '18:00', '23:59');
+      expect(result).toHaveLength(3);
+      expect(result.map(r => r.value)).toEqual([7.5, 8.0, 8.5]);
+    });
+
+    it('should handle time range crossing midnight (22:00 to 08:00)', () => {
+      const result = filterReadingsByTimeRange(readings, '22:00', '08:00');
+      expect(result).toHaveLength(4);
+      // Should include 22:30, 23:59, 00:00, 06:00
+      expect(result.map(r => r.value)).toEqual([5.0, 5.5, 8.0, 8.5]);
+    });
+
+    it('should include readings at exact boundary times', () => {
+      const result = filterReadingsByTimeRange(readings, '08:30', '15:45');
+      expect(result).toHaveLength(3);
+      expect(result.map(r => r.value)).toEqual([6.0, 6.5, 7.0]);
     });
   });
 });
