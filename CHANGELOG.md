@@ -16,26 +16,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.x] - Current Development
 
 ### New Features
-- [#XXX](../../pull/XXX) Add swipe gesture navigation for mobile devices
+- [#144](../../pull/144) Add swipe gesture navigation for mobile devices
   - Horizontal swipe left/right to navigate between pages
   - Page order: Home → Data Upload → Reports → AI Analysis → Settings
   - Custom `useSwipeGesture` hook with configurable sensitivity
   - Works on both touch devices (mobile) and mouse (desktop testing)
   - Prevents accidental triggers with vertical scroll detection
-- [#XXX](../../pull/XXX) Add bug report and feature request links to Settings page
+- [#148](../../pull/148) Add bug report and feature request links to Settings page
   - New "Support" section at the top of Settings page
   - Quick access buttons to create GitHub issues directly from the app
   - Bug report button links to bug_report.yml template
   - Feature request button links to feature_request.yml template
   - Opens in new tab with proper security attributes (noopener noreferrer)
-- [#XXX](../../pull/XXX) Add first AI analysis prompts to AI Analysis page
+- [#142](../../pull/142) Add first AI analysis prompts to AI Analysis page
   - Two collapsible accordion sections (both collapsed by default)
   - First prompt: "Time in Range Analysis" displays calculated glucose percentage in range
   - "Analyze with AI" button (enabled only when API key is configured)
   - Button shows helper text before clicking, changes to "AI analysis not implemented yet" after click
   - Second prompt: "Additional Analysis" placeholder with "To be added soon" message
   - UI setup for future AI functionality integration
-- [#XXX](../../pull/XXX) Add AGP report filters and CSV export
+- [#138](../../pull/138) Add AGP report filters and CSV export
   - Day-of-week filter dropdown with options: All Days, Mon-Sun, Workdays, Weekends
   - Time range filters (start/end) to analyze specific hours of the day
   - CSV export button for AGP statistics table with hover effect
@@ -44,14 +44,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - API key stored securely in browser cookies with persistent storage
   - AI Analysis page displays helpful message with link to Settings when API key is not configured
   - Follows existing settings patterns with Fluent UI components for consistency
-- [#XXX](../../pull/XXX) Enhanced API key input with inline label layout and comprehensive security explanation
+- [#140](../../pull/140) Enhanced API key input with inline label layout and comprehensive security explanation
   - Label and input field now displayed in the same row for improved visual organization
   - Detailed security explanation covering storage mechanism (browser cookies, 1-year expiry)
   - Privacy transparency: explains no server transmission, client-side only processing
   - Best practices guidance with links to Perplexity API settings for minimal permissions
   - Risk warning about session compromise with mitigation strategies
   - Link to GitHub repository for open source transparency
-- [#XXX](../../pull/XXX) Add CSV export functionality to all data tables
+- [#122](../../pull/122) Add CSV export functionality to all data tables
   - Copy icon appears in top-right corner on table hover with "Copy As CSV" tooltip
   - Export FileList table showing uploaded files with metadata
   - Export In Range reports (Day of Week, Weekly, Daily tables)
@@ -82,20 +82,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved value display format showing "percentage (count)" instead of "count (percentage)"
 
 ### Fixes
-- [#XXX](../../pull/XXX) Make version footer visible without scrolling on home page
+- [#157](../../pull/157) Make version footer visible without scrolling on home page
   - Reduced container top/bottom padding from 40px to 24px
   - Reduced header margin-bottom from 40px to 24px
   - Reduced title margin-bottom from 16px to 12px
   - Reduced cards grid gap from 24px to 16px
   - Reduced navigation card minimum height from 200px to 190px
   - Footer now fits within viewport on standard screen sizes
-- [#XXX](../../pull/XXX) Fix CHANGELOG entry format instructions to prevent HTML anchor tags
+- [#151](../../pull/151) Fix CHANGELOG entry format instructions to prevent HTML anchor tags
   - Updated copilot instructions to explicitly require markdown link format
   - Added clear examples and warnings against using HTML anchor tags
   - Clarified that relative paths must always be used for PR/issue links
   - Updated CHANGELOG.md instructions to match copilot instructions
   - Fixed current version reference from 1.0.x to 1.1.x
-- [#XXX](../../pull/XXX) Improve AI settings text clarity by restructuring into separate paragraphs
+- [#146](../../pull/146) Improve AI settings text clarity by restructuring into separate paragraphs
   - Replace inline `<br/>` tags with proper paragraph structure using `<Text as="p">` components
   - Increase font size from Base200 to Base300 and adjust line height for better readability
   - Add proper spacing between paragraphs with marginBottom style
@@ -104,7 +104,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update demo CGM data to have realistic glucose variability matching clinical distribution (1% very low, 2% low, 71% in range, 19% high, 7% very high)
 
 ### Documentation
-- [#XXX](../../pull/XXX) Add link to published app (https://glooko.iric.online) in README Quick Start section
+- [#159](../../pull/159) Add link to published app (https://glooko.iric.online) in README Quick Start section
 - Simplify README by keeping only one screenshot and essential information
   - Move all additional screenshots to new docs/SCREENSHOTS.md page
   - Add comprehensive documentation links section in README
@@ -120,7 +120,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Expand "Understanding Your Results" with AGP interpretation guidelines
 
 ### Other
-- [#XXX](../../pull/XXX) Optimize test execution performance with parallel test running
+- Fix CHANGELOG.md by replacing all #XXX placeholder entries with correct PR numbers
+  - Identified 11 placeholder entries with #XXX format
+  - Used GitHub API to search for and identify correct PR numbers
+  - All PR links now point to their correct pull requests
+- [#161](../../pull/161) Optimize test execution performance with parallel test running
   - Enable parallel test execution in Vitest configuration using thread pool
   - Run tests once with JSON reporter to extract statistics immediately
   - Eliminate duplicate test run in CI workflow (previously ran tests twice)
