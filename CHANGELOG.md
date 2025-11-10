@@ -82,6 +82,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved value display format showing "percentage (count)" instead of "count (percentage)"
 
 ### Fixes
+- [#XXX](../../pull/XXX) Make version footer visible without scrolling on home page
+  - Reduced container top/bottom padding from 40px to 24px
+  - Reduced header margin-bottom from 40px to 24px
+  - Reduced title margin-bottom from 16px to 12px
+  - Reduced cards grid gap from 24px to 16px
+  - Reduced navigation card minimum height from 200px to 190px
+  - Footer now fits within viewport on standard screen sizes
 - [#XXX](../../pull/XXX) Improve AI settings text clarity by restructuring into separate paragraphs
   - Replace inline `<br/>` tags with proper paragraph structure using `<Text as="p">` components
   - Increase font size from Base200 to Base300 and adjust line height for better readability

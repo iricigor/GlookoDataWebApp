@@ -17,23 +17,22 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    ...shorthands.padding('40px', '24px'),
-    minHeight: 'calc(100vh - 60px)',
+    ...shorthands.padding('24px', '24px'),
     maxWidth: '100%',
     overflowX: 'hidden',
     '@media (max-width: 768px)': {
-      ...shorthands.padding('24px', '16px'),
+      ...shorthands.padding('16px', '16px'),
     },
   },
   header: {
     textAlign: 'center',
-    marginBottom: '40px',
+    marginBottom: '24px',
   },
   title: {
     color: tokens.colorBrandForeground1,
     fontSize: tokens.fontSizeHero900,
     fontWeight: tokens.fontWeightSemibold,
-    marginBottom: '16px',
+    marginBottom: '12px',
     fontFamily: 'Segoe UI, sans-serif',
     display: 'block',
     '@media (max-width: 768px)': {
@@ -51,7 +50,7 @@ const useStyles = makeStyles({
   cardsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '24px',
+    gap: '16px',
     maxWidth: '1000px',
     width: '100%',
     ...shorthands.padding('0', '24px'),
@@ -61,7 +60,7 @@ const useStyles = makeStyles({
     },
   },
   navigationCard: {
-    minHeight: '200px',
+    minHeight: '190px',
     cursor: 'pointer',
     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
     ':hover': {
