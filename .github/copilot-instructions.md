@@ -276,9 +276,11 @@ GlookoDataWebApp/
      - **Fixes** - for 🪲 Bug label
      - **Documentation** - for 📚 Documentation label
      - **Other** - for other changes
-   - Format: `- [#PR_NUMBER](../../pull/PR_NUMBER) Description of the change`
-   - Use relative link format for PRs: `[#152](../../pull/152)`
-   - For issues without PRs, use: `[Issue #ISSUE_NUMBER](../../issues/ISSUE_NUMBER)`
+   - **Use markdown link format (NOT HTML):** Each entry must start with a markdown link like `[#152](../../pull/152)` followed by the description
+   - **Always use relative paths** for links: `../../pull/PR_NUMBER` or `../../issues/ISSUE_NUMBER`
+   - **Example entry:** `- [#152](../../pull/152) Add new feature description`
+   - For issues without PRs: `- [Issue #100](../../issues/100) Description`
+   - **Never use HTML anchor tags** like `<a href="...">` - only use markdown format
    - Keep entries within each category sorted by PR/issue number (descending - highest first)
 
 2. **Run tests**
