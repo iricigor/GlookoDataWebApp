@@ -180,20 +180,6 @@ export function AGPGraph({ data, unit = 'mmol/L' }: AGPGraphProps) {
             
             <Tooltip content={<CustomTooltip />} />
             
-            {/* Target range */}
-            <ReferenceLine 
-              y={targetMin} 
-              stroke="#4CAF50" 
-              strokeDasharray="5 5" 
-              strokeWidth={2}
-            />
-            <ReferenceLine 
-              y={targetMax} 
-              stroke="#4CAF50" 
-              strokeDasharray="5 5" 
-              strokeWidth={2}
-            />
-            
             {/* 10-90 percentile range */}
             <Area
               type="monotone"
@@ -234,6 +220,22 @@ export function AGPGraph({ data, unit = 'mmol/L' }: AGPGraphProps) {
               strokeWidth={2}
               fill="none"
               dot={false}
+            />
+            
+            {/* Target range reference lines - both upper and lower target */}
+            <ReferenceLine 
+              y={targetMin} 
+              stroke="#4CAF50" 
+              strokeDasharray="5 5" 
+              strokeWidth={2}
+              ifOverflow="extendDomain"
+            />
+            <ReferenceLine 
+              y={targetMax} 
+              stroke="#4CAF50" 
+              strokeDasharray="5 5" 
+              strokeWidth={2}
+              ifOverflow="extendDomain"
             />
           </AreaChart>
         </ResponsiveContainer>
