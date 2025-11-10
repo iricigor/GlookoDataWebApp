@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.x] - Current Development
 
 ### New Features
+- [#XXX](../../pull/XXX) Add swipe gesture navigation for mobile devices
+  - Horizontal swipe left/right to navigate between pages
+  - Page order: Home → Data Upload → Reports → AI Analysis → Settings
+  - Custom `useSwipeGesture` hook with configurable sensitivity
+  - Works on both touch devices (mobile) and mouse (desktop testing)
+  - Prevents accidental triggers with vertical scroll detection
 - [#XXX](../../pull/XXX) Add first AI analysis prompts to AI Analysis page
   - Two collapsible accordion sections (both collapsed by default)
   - First prompt: "Time in Range Analysis" displays calculated glucose percentage in range
