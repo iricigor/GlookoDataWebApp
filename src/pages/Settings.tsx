@@ -10,8 +10,10 @@ import {
   Title3,
   Input,
   Label,
+  Link,
+  Button,
 } from '@fluentui/react-components';
-import { SettingsRegular } from '@fluentui/react-icons';
+import { SettingsRegular, BugRegular, LightbulbRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
@@ -101,12 +103,16 @@ const useStyles = makeStyles({
     flexGrow: 1,
   },
   securityExplanation: {
-    fontSize: tokens.fontSizeBase200,
+    fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
-    lineHeight: tokens.lineHeightBase200,
-    ...shorthands.padding('12px'),
+    lineHeight: tokens.lineHeightBase300,
+    ...shorthands.padding('16px'),
     backgroundColor: tokens.colorNeutralBackground3,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    '& p': {
+      margin: '0',
+      fontSize: tokens.fontSizeBase300,
+    },
     '& strong': {
       color: tokens.colorNeutralForeground1,
       fontWeight: tokens.fontWeightSemibold,
@@ -134,6 +140,11 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
     fontFamily: 'monospace',
+  },
+  supportButtons: {
+    display: 'flex',
+    ...shorthands.gap('12px'),
+    flexWrap: 'wrap',
   },
 });
 
@@ -165,6 +176,40 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
       </div>
 
       <Card className={styles.settingsCard}>
+        <div className={styles.settingSection}>
+          <Title3 className={styles.sectionTitle}>Support</Title3>
+          <Divider className={styles.divider} />
+          <Text className={styles.settingDescription}>
+            Help us improve the app by reporting bugs or suggesting new features.
+          </Text>
+          <div className={styles.supportButtons}>
+            <Link 
+              href="https://github.com/iricigor/GlookoDataWebApp/issues/new?template=bug_report.yml"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button 
+                appearance="secondary" 
+                icon={<BugRegular />}
+              >
+                Report a Bug
+              </Button>
+            </Link>
+            <Link 
+              href="https://github.com/iricigor/GlookoDataWebApp/issues/new?template=feature_request.yml"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button 
+                appearance="secondary" 
+                icon={<LightbulbRegular />}
+              >
+                Request a Feature
+              </Button>
+            </Link>
+          </div>
+        </div>
+
         <div className={styles.settingSection}>
           <Title3 className={styles.sectionTitle}>Theme</Title3>
           <Divider className={styles.divider} />
@@ -223,23 +268,29 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
               className={styles.apiKeyInput}
             />
           </div>
-          <Text className={styles.securityExplanation}>
-            <strong>Security & Privacy:</strong> Your API key is stored locally in your browser's cookies (expires after 1 year) 
-            and is never transmitted to our servers or any third party. All AI analysis happens directly between your browser 
-            and Perplexity's API. This application is fully open source—you can{' '}
-            <a href="https://github.com/iricigor/GlookoDataWebApp" target="_blank" rel="noopener noreferrer">
-              review the code on GitHub
-            </a>{' '}
-            or deploy your own instance for complete control.<br /><br />
-            <strong>Best Practices:</strong> For maximum security, create an API key with minimal permissions at{' '}
-            <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
-              Perplexity Settings
-            </a>. 
-            Use keys designated for client-side applications and set spending limits to protect against unauthorized usage.<br /><br />
-            <strong>Risk Warning:</strong> If someone gains access to your browser session or computer, they could potentially 
-            access your stored API key. To mitigate this risk: (1) log out from shared computers, (2) use browser privacy features, 
-            (3) regularly rotate your API keys, and (4) monitor your API usage in Perplexity's dashboard.
-          </Text>
+          <div className={styles.securityExplanation}>
+            <Text as="p" style={{ marginBottom: '12px' }}>
+              <strong>Security & Privacy:</strong> Your API key is stored locally in your browser's cookies (expires after 1 year) 
+              and is never transmitted to our servers or any third party. All AI analysis happens directly between your browser 
+              and Perplexity's API. This application is fully open source—you can{' '}
+              <a href="https://github.com/iricigor/GlookoDataWebApp" target="_blank" rel="noopener noreferrer">
+                review the code on GitHub
+              </a>{' '}
+              or deploy your own instance for complete control.
+            </Text>
+            <Text as="p" style={{ marginBottom: '12px' }}>
+              <strong>Best Practices:</strong> For maximum security, create an API key with minimal permissions at{' '}
+              <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
+                Perplexity Settings
+              </a>. 
+              Use keys designated for client-side applications and set spending limits to protect against unauthorized usage.
+            </Text>
+            <Text as="p">
+              <strong>Risk Warning:</strong> If someone gains access to your browser session or computer, they could potentially 
+              access your stored API key. To mitigate this risk: (1) log out from shared computers, (2) use browser privacy features, 
+              (3) regularly rotate your API keys, and (4) monitor your API usage in Perplexity's dashboard.
+            </Text>
+          </div>
         </div>
 
         <div className={styles.settingSection}>

@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Custom `useSwipeGesture` hook with configurable sensitivity
   - Works on both touch devices (mobile) and mouse (desktop testing)
   - Prevents accidental triggers with vertical scroll detection
+- [#XXX](../../pull/XXX) Add bug report and feature request links to Settings page
+  - New "Support" section at the top of Settings page
+  - Quick access buttons to create GitHub issues directly from the app
+  - Bug report button links to bug_report.yml template
+  - Feature request button links to feature_request.yml template
+  - Opens in new tab with proper security attributes (noopener noreferrer)
 - [#XXX](../../pull/XXX) Add first AI analysis prompts to AI Analysis page
   - Two collapsible accordion sections (both collapsed by default)
   - First prompt: "Time in Range Analysis" displays calculated glucose percentage in range
@@ -38,13 +44,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - API key stored securely in browser cookies with persistent storage
   - AI Analysis page displays helpful message with link to Settings when API key is not configured
   - Follows existing settings patterns with Fluent UI components for consistency
-  - [#XXX](../../pull/XXX) Enhanced API key input with inline label layout and comprehensive security explanation
-    - Label and input field now displayed in the same row for improved visual organization
-    - Detailed security explanation covering storage mechanism (browser cookies, 1-year expiry)
-    - Privacy transparency: explains no server transmission, client-side only processing
-    - Best practices guidance with links to Perplexity API settings for minimal permissions
-    - Risk warning about session compromise with mitigation strategies
-    - Link to GitHub repository for open source transparency
+- [#XXX](../../pull/XXX) Enhanced API key input with inline label layout and comprehensive security explanation
+  - Label and input field now displayed in the same row for improved visual organization
+  - Detailed security explanation covering storage mechanism (browser cookies, 1-year expiry)
+  - Privacy transparency: explains no server transmission, client-side only processing
+  - Best practices guidance with links to Perplexity API settings for minimal permissions
+  - Risk warning about session compromise with mitigation strategies
+  - Link to GitHub repository for open source transparency
 - [#XXX](../../pull/XXX) Add CSV export functionality to all data tables
   - Copy icon appears in top-right corner on table hover with "Copy As CSV" tooltip
   - Export FileList table showing uploaded files with metadata
@@ -76,6 +82,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved value display format showing "percentage (count)" instead of "count (percentage)"
 
 ### Fixes
+- [#XXX](../../pull/XXX) Improve AI settings text clarity by restructuring into separate paragraphs
+  - Replace inline `<br/>` tags with proper paragraph structure using `<Text as="p">` components
+  - Increase font size from Base200 to Base300 and adjust line height for better readability
+  - Add proper spacing between paragraphs with marginBottom style
+  - Text now matches the clean, readable style of other settings sections
 - Center-align all column headers and data cells in AGP report table for improved readability
 - Update demo CGM data to have realistic glucose variability matching clinical distribution (1% very low, 2% low, 71% in range, 19% high, 7% very high)
 
