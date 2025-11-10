@@ -70,6 +70,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved value display format showing "percentage (count)" instead of "count (percentage)"
 
 ### Fixes
+- [#XXX](../../pull/XXX) Improve AI settings text clarity by restructuring into separate paragraphs
+  - Replace inline `<br/>` tags with proper paragraph structure using `<Text as="p">` components
+  - Increase font size from Base200 to Base300 and adjust line height for better readability
+  - Add proper spacing between paragraphs with marginBottom style
+  - Text now matches the clean, readable style of other settings sections
 - Center-align all column headers and data cells in AGP report table for improved readability
 - Update demo CGM data to have realistic glucose variability matching clinical distribution (1% very low, 2% low, 71% in range, 19% high, 7% very high)
 
