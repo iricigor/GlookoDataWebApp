@@ -26,9 +26,22 @@ describe('perplexityApi', () => {
       expect(prompt).toContain('continuous glucose monitoring');
     });
 
-    it('should include clinical context in the prompt', () => {
+    it('should include mmol/L unit specification', () => {
       const prompt = generateTimeInRangePrompt(80);
-      expect(prompt).toContain('clinical assessment');
+      expect(prompt).toContain('mmol/L');
+      expect(prompt).toContain('not mg/dL');
+    });
+
+    it('should use second-person language (you/your)', () => {
+      const prompt = generateTimeInRangePrompt(75);
+      expect(prompt).toContain('My');
+      expect(prompt).toContain('you/your');
+      expect(prompt).not.toContain('patient');
+    });
+
+    it('should include assessment and recommendations context', () => {
+      const prompt = generateTimeInRangePrompt(80);
+      expect(prompt).toContain('assessment');
       expect(prompt).toContain('recommendations');
       expect(prompt).toContain('70%');
     });
@@ -266,6 +279,8 @@ describe('perplexityApi', () => {
       expect(body.messages).toHaveLength(2);
       expect(body.messages[0].role).toBe('system');
       expect(body.messages[0].content).toContain('medical assistant');
+      expect(body.messages[0].content).toContain('mmol/L');
+      expect(body.messages[0].content).toContain('second person');
       expect(body.messages[1].role).toBe('user');
       expect(body.messages[1].content).toBe('test prompt');
     });
