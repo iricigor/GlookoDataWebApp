@@ -17,21 +17,6 @@ body:
     validations:
       required: true
 
-  - type: dropdown
-    id: category
-    attributes:
-      label: Category
-      description: What area does this affect?
-      options:
-        - Build System (Vite, TypeScript)
-        - Development Tools (ESLint, etc.)
-        - CI/CD Pipeline
-        - Dependencies
-        - Project Configuration
-        - Other
-    validations:
-      required: true
-
   - type: textarea
     id: proposed-solution
     attributes:
