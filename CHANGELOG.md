@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
+- [#166](../../pull/166) Implement markdown rendering for AI responses
+  - Add react-markdown library for proper markdown formatting
+  - Create MarkdownRenderer component with Fluent UI styling
+  - Display AI responses with proper headers, bold text, lists, and other markdown features
+  - Comprehensive styling for all markdown elements (headings, lists, code, tables, blockquotes, links)
+  - 10 unit tests covering various markdown rendering scenarios
 - Implement Perplexity AI integration for time-in-range glucose analysis
   - Real AI-powered analysis using Perplexity API (sonar model with 127K context window)
   - Complete prompt: "Given a patient's percent time-in-range (TIR) from continuous glucose monitoring is X%, provide a brief clinical assessment and 2-3 specific, actionable recommendations"
