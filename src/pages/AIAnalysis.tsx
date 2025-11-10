@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   makeStyles, 
   Text,
@@ -13,6 +13,7 @@ import {
   Spinner,
   MessageBar,
   MessageBarBody,
+  ProgressBar,
 } from '@fluentui/react-components';
 import { BrainCircuitRegular, CheckmarkCircleRegular, ErrorCircleRegular } from '@fluentui/react-icons';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
@@ -132,11 +133,30 @@ const useStyles = makeStyles({
   errorIcon: {
     color: tokens.colorStatusDangerForeground1,
   },
+  countdownContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('8px'),
+    ...shorthands.padding('12px'),
+    ...shorthands.borderRadius('4px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+  },
+  countdownText: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    textAlign: 'center',
+  },
 });
 
 interface AIAnalysisProps {
   selectedFile?: UploadedFile;
   perplexityApiKey: string;
+}
+
+// Interface for storing AI response data per file
+interface FileAIResponse {
+  response: string;
+  timestamp: number;
 }
 
 export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) {
@@ -146,8 +166,18 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
   const [inRangePercentage, setInRangePercentage] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  
+  // Store AI responses per file ID to persist across navigation
+  const [aiResponsesMap, setAiResponsesMap] = useState<Map<string, FileAIResponse>>(new Map());
+  
+  // Current file's AI response and error
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Button state management
+  const [isWaitingForReanalysis, setIsWaitingForReanalysis] = useState(false);
+  const [countdownSeconds, setCountdownSeconds] = useState(3);
+  const countdownIntervalRef = useRef<number | null>(null);
 
   // Calculate in-range percentage when file is selected
   useEffect(() => {
@@ -158,10 +188,19 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
       return;
     }
 
-    const calculateInRange = async () => {
-      setLoading(true);
+    // Load AI response from map if it exists for this file
+    const storedResponse = aiResponsesMap.get(selectedFile.id);
+    if (storedResponse) {
+      setAiResponse(storedResponse.response);
+      setError(null);
+    } else {
       setAiResponse(null);
       setError(null);
+    }
+
+    const calculateInRange = async () => {
+      setLoading(true);
+      // Don't clear AI response when recalculating
       try {
         // Extract CGM readings (default data source)
         const readings = await extractGlucoseReadings(selectedFile, 'cgm');
@@ -183,7 +222,37 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
     };
 
     calculateInRange();
-  }, [selectedFile, thresholds]);
+  }, [selectedFile, thresholds, aiResponsesMap]);
+
+  // Cleanup countdown timer on unmount
+  useEffect(() => {
+    return () => {
+      if (countdownIntervalRef.current !== null) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // Start countdown timer for re-analysis
+  const startCountdown = () => {
+    setIsWaitingForReanalysis(true);
+    setCountdownSeconds(3);
+
+    countdownIntervalRef.current = window.setInterval(() => {
+      setCountdownSeconds((prev) => {
+        if (prev <= 1) {
+          // Countdown finished
+          if (countdownIntervalRef.current !== null) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+          }
+          setIsWaitingForReanalysis(false);
+          return 3;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
   const handleAnalyzeClick = async () => {
     if (!perplexityApiKey || inRangePercentage === null) {
@@ -192,7 +261,17 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
 
     setAnalyzing(true);
     setError(null);
+    // Clear current response before starting new analysis
     setAiResponse(null);
+    
+    // Clear stored response for this file since we're getting a new one
+    if (selectedFile) {
+      setAiResponsesMap((prev) => {
+        const newMap = new Map(prev);
+        newMap.delete(selectedFile.id);
+        return newMap;
+      });
+    }
 
     try {
       // Generate the prompt with the TIR percentage
@@ -203,6 +282,18 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
 
       if (result.success && result.content) {
         setAiResponse(result.content);
+        
+        // Store the response in the map for persistence
+        if (selectedFile) {
+          setAiResponsesMap((prev) => {
+            const newMap = new Map(prev);
+            newMap.set(selectedFile.id, {
+              response: result.content!,
+              timestamp: Date.now(),
+            });
+            return newMap;
+          });
+        }
       } else {
         setError(result.error || 'Failed to get AI response');
       }
@@ -211,6 +302,10 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
     } finally {
       setAnalyzing(false);
     }
+  };
+
+  const handleEnableReanalysisClick = () => {
+    startCountdown();
   };
 
   return (
@@ -262,15 +357,38 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
                         Your glucose is {inRangePercentage}% of time in range.
                       </Text>
                       <div className={styles.buttonContainer}>
-                        <Button
-                          appearance="primary"
-                          disabled={!perplexityApiKey || analyzing}
-                          onClick={handleAnalyzeClick}
-                          icon={analyzing ? <Spinner size="tiny" /> : undefined}
-                        >
-                          {analyzing ? 'Analyzing...' : 'Analyze with AI'}
-                        </Button>
-                        {!analyzing && !aiResponse && !error && (
+                        {/* Show countdown if waiting for re-analysis */}
+                        {isWaitingForReanalysis ? (
+                          <div className={styles.countdownContainer}>
+                            <Text className={styles.countdownText}>
+                              New analysis will be available in {countdownSeconds} second{countdownSeconds !== 1 ? 's' : ''}...
+                            </Text>
+                            <ProgressBar 
+                              value={(3 - countdownSeconds) / 3} 
+                              max={1}
+                            />
+                          </div>
+                        ) : aiResponse && !analyzing ? (
+                          // Show "Enable new analysis" button after successful analysis
+                          <Button
+                            appearance="secondary"
+                            disabled={!perplexityApiKey}
+                            onClick={handleEnableReanalysisClick}
+                          >
+                            Click to enable new analysis
+                          </Button>
+                        ) : (
+                          // Show regular analyze button
+                          <Button
+                            appearance="primary"
+                            disabled={!perplexityApiKey || analyzing}
+                            onClick={handleAnalyzeClick}
+                            icon={analyzing ? <Spinner size="tiny" /> : undefined}
+                          >
+                            {analyzing ? 'Analyzing...' : 'Analyze with AI'}
+                          </Button>
+                        )}
+                        {!analyzing && !aiResponse && !error && !isWaitingForReanalysis && (
                           <Text className={styles.helperText}>
                             Click Analyze to get AI-powered analysis
                           </Text>

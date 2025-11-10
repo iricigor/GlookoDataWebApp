@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.x] - Current Development
 
+### Fixes
+- [#ISSUE_NUMBER](../../issues/ISSUE_NUMBER) Fix AI analysis response persistence and button state management
+  - AI responses now persist when navigating away from the page and returning
+  - AI responses persist when switching between files - each file has its own stored response
+  - After successful analysis, button changes to "Click to enable new analysis"
+  - Clicking the button shows a 3-second countdown before allowing new analysis
+  - Failed analysis attempts no longer clear existing successful AI responses
+  - Countdown displays with progress bar for better user experience
+
 ### New Features
 - Implement Perplexity AI integration for time-in-range glucose analysis
   - Real AI-powered analysis using Perplexity API (sonar model with 127K context window)
