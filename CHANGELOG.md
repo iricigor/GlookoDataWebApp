@@ -89,6 +89,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Reduced cards grid gap from 24px to 16px
   - Reduced navigation card minimum height from 200px to 190px
   - Footer now fits within viewport on standard screen sizes
+- [#XXX](../../pull/XXX) Fix CHANGELOG entry format instructions to prevent HTML anchor tags
+  - Updated copilot instructions to explicitly require markdown link format
+  - Added clear examples and warnings against using HTML anchor tags
+  - Clarified that relative paths must always be used for PR/issue links
+  - Updated CHANGELOG.md instructions to match copilot instructions
+  - Fixed current version reference from 1.0.x to 1.1.x
 - [#XXX](../../pull/XXX) Improve AI settings text clarity by restructuring into separate paragraphs
   - Replace inline `<br/>` tags with proper paragraph structure using `<Text as="p">` components
   - Increase font size from Base200 to Base300 and adjust line height for better readability
@@ -98,6 +104,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update demo CGM data to have realistic glucose variability matching clinical distribution (1% very low, 2% low, 71% in range, 19% high, 7% very high)
 
 ### Documentation
+- [#XXX](../../pull/XXX) Add link to published app (https://glooko.iric.online) in README Quick Start section
 - Simplify README by keeping only one screenshot and essential information
   - Move all additional screenshots to new docs/SCREENSHOTS.md page
   - Add comprehensive documentation links section in README
@@ -154,13 +161,16 @@ Versions follow the format: `major.minor.buildId`
 ## How to Update This File
 
 When creating a pull request:
-1. Add an entry under the appropriate version section (current: 1.0.x)
+1. Add an entry under the appropriate version section (current: 1.1.x)
 2. Place the entry in the correct category based on the PR/issue label:
    - **New Features** - for ✨ Feature label
    - **Fixes** - for 🪲 Bug label
    - **Documentation** - for 📚 Documentation label
    - **Other** - for other changes
-3. Format: `- [#PR_NUMBER](../../pull/PR_NUMBER) Description of the change`
-   - Use relative link format for PRs: `[#152](../../pull/152)`
-   - For issues without PRs, use: `[Issue #ISSUE_NUMBER](../../issues/ISSUE_NUMBER)`
+3. **Entry format - Use markdown links (NOT HTML):**
+   - Each entry must start with a markdown link like `[#152](../../pull/152)` followed by the description
+   - **Always use relative paths:** `../../pull/PR_NUMBER` or `../../issues/ISSUE_NUMBER`
+   - **Example:** `- [#152](../../pull/152) Add new feature description`
+   - **For issues without PRs:** `- [Issue #100](../../issues/100) Description`
+   - **Never use HTML anchor tags** like `<a href="...">` - only use markdown format
 4. Entries within each category should be sorted by PR/issue number (descending - highest first)
