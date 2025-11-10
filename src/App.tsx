@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { FluentProvider } from '@fluentui/react-components'
 import './App.css'
 import { Navigation } from './components/Navigation'
@@ -11,8 +11,12 @@ import { Settings } from './pages/Settings'
 import { useTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
 import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
+import { useSwipeGesture } from './hooks/useSwipeGesture'
 import type { UploadedFile } from './types'
 import { extractZipMetadata } from './utils/zipUtils'
+
+// Page navigation order for swipe gestures
+const PAGE_ORDER = ['home', 'upload', 'reports', 'ai', 'settings'] as const
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
@@ -74,6 +78,38 @@ function App() {
     window.location.hash = page
   }
 
+  // Navigate to the next or previous page based on swipe direction
+  const navigateToPage = useCallback((direction: 'next' | 'prev') => {
+    const currentIndex = PAGE_ORDER.indexOf(currentPage as typeof PAGE_ORDER[number])
+    if (currentIndex === -1) return
+
+    let newIndex: number
+    if (direction === 'next') {
+      newIndex = (currentIndex + 1) % PAGE_ORDER.length
+    } else {
+      newIndex = currentIndex - 1
+      if (newIndex < 0) newIndex = PAGE_ORDER.length - 1
+    }
+
+    handleNavigate(PAGE_ORDER[newIndex])
+  }, [currentPage])
+
+  // Ref for the main content container
+  const mainContentRef = useRef<HTMLDivElement>(null)
+
+  // Setup swipe gesture detection (mobile only)
+  useSwipeGesture(
+    mainContentRef.current,
+    {
+      onSwipeLeft: () => navigateToPage('next'),
+      onSwipeRight: () => navigateToPage('prev'),
+    },
+    {
+      minSwipeDistance: 50,
+      maxVerticalMovement: 100,
+    }
+  )
+
   const handleAddFiles = (newFiles: UploadedFile[]) => {
     setUploadedFiles((prev) => [...prev, ...newFiles])
   }
@@ -130,7 +166,7 @@ function App() {
   return (
     <FluentProvider theme={theme} className="app-container">
       <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
-      <main className="main-content">
+      <main ref={mainContentRef} className="main-content">
         {renderPage()}
       </main>
       <Footer />
