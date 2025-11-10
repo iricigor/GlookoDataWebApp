@@ -63,6 +63,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improve README organization and readability
 - Add docs/REPORTS.md with comprehensive feature documentation and screenshots
 - Document alternative visualization options for future implementation
+- Update docs/REPORTS.md with AGP Report screenshots and enhanced descriptions
+  - Add AGP graph visualization screenshot showing percentile bands and target ranges
+  - Enhance AGP section with detailed interpretation guide
+  - Add clinical context and usage tips for both In-Range and AGP reports
+  - Update "How to Use" section with step-by-step instructions for both reports
+  - Expand "Understanding Your Results" with AGP interpretation guidelines
 
 ### Other
 
