@@ -56,6 +56,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update demo CGM data to have realistic glucose variability matching clinical distribution (1% very low, 2% low, 71% in range, 19% high, 7% very high)
 
 ### Documentation
+- Simplify README by keeping only one screenshot and essential information
+  - Move all additional screenshots to new docs/SCREENSHOTS.md page
+  - Add comprehensive documentation links section in README
+  - Move developer-specific content (Available Scripts, Project Structure) to CONTRIBUTING.md
+  - Improve README organization and readability
 - Add docs/REPORTS.md with comprehensive feature documentation and screenshots
 - Document alternative visualization options for future implementation
 
