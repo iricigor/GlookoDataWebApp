@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.x] - Current Development
 
 ### New Features
+- [#XXX](../../pull/XXX) Add first AI analysis prompts to AI Analysis page
+  - Two collapsible accordion sections (both collapsed by default)
+  - First prompt: "Time in Range Analysis" displays calculated glucose percentage in range
+  - "Analyze with AI" button (enabled only when API key is configured)
+  - Button shows helper text before clicking, changes to "AI analysis not implemented yet" after click
+  - Second prompt: "Additional Analysis" placeholder with "To be added soon" message
+  - UI setup for future AI functionality integration
 - [#XXX](../../pull/XXX) Add AGP report filters and CSV export
   - Day-of-week filter dropdown with options: All Days, Mon-Sun, Workdays, Weekends
   - Time range filters (start/end) to analyze specific hours of the day
