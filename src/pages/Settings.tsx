@@ -8,6 +8,8 @@ import {
   RadioGroup,
   Divider,
   Title3,
+  Input,
+  Label,
 } from '@fluentui/react-components';
 import { SettingsRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
@@ -105,9 +107,11 @@ interface SettingsProps {
   onThemeChange: (mode: ThemeMode) => void;
   exportFormat: ExportFormat;
   onExportFormatChange: (format: ExportFormat) => void;
+  perplexityApiKey: string;
+  onPerplexityApiKeyChange: (key: string) => void;
 }
 
-export function Settings({ themeMode, onThemeChange, exportFormat, onExportFormatChange }: SettingsProps) {
+export function Settings({ themeMode, onThemeChange, exportFormat, onExportFormatChange, perplexityApiKey, onPerplexityApiKeyChange }: SettingsProps) {
   const styles = useStyles();
   const { thresholds, updateThreshold, validateThresholds, isValid } = useGlucoseThresholds();
   const validationError = validateThresholds(thresholds);
@@ -163,6 +167,25 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
           isValid={isValid}
           validationError={validationError}
         />
+
+        <div className={styles.settingSection}>
+          <Title3 className={styles.sectionTitle}>AI</Title3>
+          <Divider className={styles.divider} />
+          <Text className={styles.settingDescription}>
+            Configure your AI settings for intelligent analysis.
+          </Text>
+          <Label htmlFor="perplexity-api-key" className={styles.settingLabel}>
+            Perplexity API Key
+          </Label>
+          <Input
+            id="perplexity-api-key"
+            type="password"
+            value={perplexityApiKey}
+            onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
+            placeholder="Enter your Perplexity API key"
+            contentAfter={perplexityApiKey ? '✓' : undefined}
+          />
+        </div>
 
         <div className={styles.settingSection}>
           <Title3 className={styles.sectionTitle}>Data Privacy</Title3>
