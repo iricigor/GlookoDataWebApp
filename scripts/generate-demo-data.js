@@ -3,12 +3,12 @@
 /**
  * Script to generate demo CGM data with proper glucose distribution
  * 
- * Distribution requirements:
- * - 1% very low < 54 mg/dL (< 3.0 mmol/L)
- * - 2% low 54-68 mg/dL (3.0-3.8 mmol/L)
- * - 71% in range 70-180 mg/dL (3.9-10.0 mmol/L)
- * - 19% high 182-250 mg/dL (10.1-13.9 mmol/L)
- * - 7% very high 252-297 mg/dL (14.0-16.5 mmol/L)
+ * Distribution requirements (in mmol/L):
+ * - 1% very low < 3.0 mmol/L
+ * - 2% low 3.0-3.8 mmol/L
+ * - 71% in range 3.9-10.0 mmol/L
+ * - 19% high 10.1-13.9 mmol/L
+ * - 7% very high 14.0-16.5 mmol/L
  */
 
 import fs from 'fs';
@@ -19,13 +19,13 @@ import JSZip from 'jszip';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Glucose range definitions (in mg/dL)
+// Glucose range definitions (in mmol/L)
 const RANGES = {
-  VERY_LOW: { min: 40, max: 53, percentage: 0.01 },
-  LOW: { min: 54, max: 68, percentage: 0.02 },
-  IN_RANGE: { min: 70, max: 180, percentage: 0.71 },
-  HIGH: { min: 182, max: 250, percentage: 0.19 },
-  VERY_HIGH: { min: 252, max: 297, percentage: 0.07 },
+  VERY_LOW: { min: 2.2, max: 2.9, percentage: 0.01 },
+  LOW: { min: 3.0, max: 3.8, percentage: 0.02 },
+  IN_RANGE: { min: 3.9, max: 10.0, percentage: 0.71 },
+  HIGH: { min: 10.1, max: 13.9, percentage: 0.19 },
+  VERY_HIGH: { min: 14.0, max: 16.5, percentage: 0.07 },
 };
 
 // Trend arrows
@@ -39,15 +39,24 @@ function randomInt(min, max) {
 }
 
 /**
+ * Generate a random float between min and max (inclusive), rounded to 1 decimal place
+ */
+function randomFloat(min, max) {
+  return Math.round((Math.random() * (max - min) + min) * 10) / 10;
+}
+
+/**
  * Select a trend arrow based on current and previous glucose value
+ * Thresholds are adjusted for mmol/L scale
  */
 function selectTrendArrow(current, previous) {
   const diff = current - previous;
   
-  if (diff <= -4) return 'DoubleDown';
-  if (diff <= -2) return 'SingleDown';
-  if (diff >= 4) return 'DoubleUp';
-  if (diff >= 2) return 'SingleUp';
+  // Thresholds in mmol/L: approximately 1/18 of mg/dL thresholds
+  if (diff <= -0.22) return 'DoubleDown';
+  if (diff <= -0.11) return 'SingleDown';
+  if (diff >= 0.22) return 'DoubleUp';
+  if (diff >= 0.11) return 'SingleUp';
   return 'Flat';
 }
 
@@ -66,19 +75,19 @@ function generateGlucoseValues(count) {
   
   // Generate values for each range
   for (let i = 0; i < veryLowCount; i++) {
-    values.push(randomInt(RANGES.VERY_LOW.min, RANGES.VERY_LOW.max));
+    values.push(randomFloat(RANGES.VERY_LOW.min, RANGES.VERY_LOW.max));
   }
   for (let i = 0; i < lowCount; i++) {
-    values.push(randomInt(RANGES.LOW.min, RANGES.LOW.max));
+    values.push(randomFloat(RANGES.LOW.min, RANGES.LOW.max));
   }
   for (let i = 0; i < inRangeCount; i++) {
-    values.push(randomInt(RANGES.IN_RANGE.min, RANGES.IN_RANGE.max));
+    values.push(randomFloat(RANGES.IN_RANGE.min, RANGES.IN_RANGE.max));
   }
   for (let i = 0; i < highCount; i++) {
-    values.push(randomInt(RANGES.HIGH.min, RANGES.HIGH.max));
+    values.push(randomFloat(RANGES.HIGH.min, RANGES.HIGH.max));
   }
   for (let i = 0; i < veryHighCount; i++) {
-    values.push(randomInt(RANGES.VERY_HIGH.min, RANGES.VERY_HIGH.max));
+    values.push(randomFloat(RANGES.VERY_HIGH.min, RANGES.VERY_HIGH.max));
   }
   
   // Shuffle the values to distribute them throughout the dataset
@@ -105,7 +114,7 @@ function generateCGMFile(fileNumber, startDate, days) {
   const startDateStr = startDate.toISOString().split('T')[0];
   const endDateStr = endDate.toISOString().split('T')[0];
   lines.push(`Name:John Doe\tDate Range:${startDateStr} - ${endDateStr}`);
-  lines.push('Timestamp\tGlucose Value (mg/dL)\tTrend Arrow\tTransmitter ID');
+  lines.push('Timestamp\tGlucose Value (mmol/L)\tTrend Arrow\tTransmitter ID');
   
   // Calculate total readings (one every ~8.5 minutes for the number of days, matching original data density)
   const readingsPerDay = 166; // Match original data density (~166 readings per day for 14 days = 2326 total)
@@ -225,21 +234,21 @@ async function main() {
   const cgm1Lines = cgm1Content.split('\n');
   const values = cgm1Lines.slice(2).map(line => {
     const parts = line.split('\t');
-    return parseInt(parts[1]);
+    return parseFloat(parts[1]);
   }).filter(v => !isNaN(v));
   
-  const veryLowCount = values.filter(v => v < 54).length;
-  const lowCount = values.filter(v => v >= 54 && v <= 68).length;
-  const inRangeCount = values.filter(v => v >= 70 && v <= 180).length;
-  const highCount = values.filter(v => v >= 182 && v <= 250).length;
-  const veryHighCount = values.filter(v => v >= 252).length;
+  const veryLowCount = values.filter(v => v < 3.0).length;
+  const lowCount = values.filter(v => v >= 3.0 && v <= 3.8).length;
+  const inRangeCount = values.filter(v => v >= 3.9 && v <= 10.0).length;
+  const highCount = values.filter(v => v >= 10.1 && v <= 13.9).length;
+  const veryHighCount = values.filter(v => v >= 14.0).length;
   const total = values.length;
   
-  console.log(`  Very Low (<54): ${veryLowCount} (${(veryLowCount/total*100).toFixed(1)}%)`);
-  console.log(`  Low (54-68): ${lowCount} (${(lowCount/total*100).toFixed(1)}%)`);
-  console.log(`  In Range (70-180): ${inRangeCount} (${(inRangeCount/total*100).toFixed(1)}%)`);
-  console.log(`  High (182-250): ${highCount} (${(highCount/total*100).toFixed(1)}%)`);
-  console.log(`  Very High (252-297): ${veryHighCount} (${(veryHighCount/total*100).toFixed(1)}%)`);
+  console.log(`  Very Low (<3.0): ${veryLowCount} (${(veryLowCount/total*100).toFixed(1)}%)`);
+  console.log(`  Low (3.0-3.8): ${lowCount} (${(lowCount/total*100).toFixed(1)}%)`);
+  console.log(`  In Range (3.9-10.0): ${inRangeCount} (${(inRangeCount/total*100).toFixed(1)}%)`);
+  console.log(`  High (10.1-13.9): ${highCount} (${(highCount/total*100).toFixed(1)}%)`);
+  console.log(`  Very High (14.0-16.5): ${veryHighCount} (${(veryHighCount/total*100).toFixed(1)}%)`);
   console.log(`  Total readings: ${total}`);
 }
 

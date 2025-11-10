@@ -74,10 +74,9 @@ const useStyles = makeStyles({
 
 interface AGPGraphProps {
   data: AGPTimeSlotStats[];
-  unit?: 'mmol/L' | 'mg/dL';
 }
 
-export function AGPGraph({ data, unit = 'mmol/L' }: AGPGraphProps) {
+export function AGPGraph({ data }: AGPGraphProps) {
   const styles = useStyles();
 
   // Filter data to only include slots with readings
@@ -106,9 +105,9 @@ export function AGPGraph({ data, unit = 'mmol/L' }: AGPGraphProps) {
     highest: slot.highest,
   }));
 
-  // Target range in mmol/L (70-180 mg/dL = 3.9-10.0 mmol/L)
-  const targetMin = unit === 'mmol/L' ? 3.9 : 70;
-  const targetMax = unit === 'mmol/L' ? 10.0 : 180;
+  // Target range in mmol/L (3.9-10.0 mmol/L)
+  const targetMin = 3.9;
+  const targetMax = 10.0;
 
   // Custom tooltip
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string; median: number; p25_p75_min: number; p25_p75_max: number; p10_p90_min: number; p10_p90_max: number } }> }) => {
@@ -125,9 +124,9 @@ export function AGPGraph({ data, unit = 'mmol/L' }: AGPGraphProps) {
           <div style={{ fontWeight: tokens.fontWeightSemibold, marginBottom: '4px' }}>
             {data.time}
           </div>
-          <div>Median: {data.median.toFixed(1)} {unit}</div>
-          <div>25-75%: {data.p25_p75_min.toFixed(1)} - {data.p25_p75_max.toFixed(1)} {unit}</div>
-          <div>10-90%: {data.p10_p90_min.toFixed(1)} - {data.p10_p90_max.toFixed(1)} {unit}</div>
+          <div>Median: {data.median.toFixed(1)} mmol/L</div>
+          <div>25-75%: {data.p25_p75_min.toFixed(1)} - {data.p25_p75_max.toFixed(1)} mmol/L</div>
+          <div>10-90%: {data.p10_p90_min.toFixed(1)} - {data.p10_p90_max.toFixed(1)} mmol/L</div>
         </div>
       );
     }
@@ -172,8 +171,8 @@ export function AGPGraph({ data, unit = 'mmol/L' }: AGPGraphProps) {
             />
             
             <YAxis 
-              domain={[0, unit === 'mmol/L' ? 20 : 400]}
-              label={{ value: `Glucose (${unit})`, angle: -90, position: 'insideLeft', style: { fontSize: tokens.fontSizeBase200 } }}
+              domain={[0, 20]}
+              label={{ value: 'Glucose (mmol/L)', angle: -90, position: 'insideLeft', style: { fontSize: tokens.fontSizeBase200 } }}
               stroke={tokens.colorNeutralForeground2}
               style={{ fontSize: tokens.fontSizeBase200 }}
             />
@@ -245,7 +244,7 @@ export function AGPGraph({ data, unit = 'mmol/L' }: AGPGraphProps) {
       <div className={styles.legendContainer}>
         <div className={styles.legendItem}>
           <div className={styles.targetRangeColor} />
-          <Text>After Meal Target Range ({targetMin}-{targetMax} {unit})</Text>
+          <Text>After Meal Target Range ({targetMin}-{targetMax} mmol/L)</Text>
         </div>
         <div className={styles.legendItem}>
           <div className={styles.legendColor} style={{ backgroundColor: '#64B5F6', opacity: 0.5 }} />

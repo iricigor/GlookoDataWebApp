@@ -75,24 +75,24 @@ describe('glucoseDataUtils', () => {
       expect(readings[7].value).toBe(9.2);
     });
 
-    it('should convert mg/dL values to mmol/L', async () => {
-      // Values in mg/dL
-      const mgdlValues = [241, 231, 223, 216, 211, 198, 173, 166];
-      const uploadedFile = await createMockUploadedFileWithUnit('bg', 'mg/dL', mgdlValues);
+    it('should handle data with mmol/L values', async () => {
+      // All input data is assumed to be in mmol/L
+      const mmolValues = [13.4, 12.8, 12.4, 12, 11.7, 11, 9.6, 9.2];
+      const uploadedFile = await createMockUploadedFileWithUnit('bg', 'mmol/L', mmolValues);
       
       const readings = await extractGlucoseReadings(uploadedFile, 'bg');
       
       expect(readings).toHaveLength(8);
       
-      // Check conversions (mg/dL / 18.018 = mmol/L)
-      expect(readings[0].value).toBeCloseTo(241 / 18.018, 1); // ~13.4 mmol/L
-      expect(readings[1].value).toBeCloseTo(231 / 18.018, 1); // ~12.8 mmol/L
-      expect(readings[6].value).toBeCloseTo(173 / 18.018, 1); // ~9.6 mmol/L
-      expect(readings[7].value).toBeCloseTo(166 / 18.018, 1); // ~9.2 mmol/L
+      // Values should remain in mmol/L (no conversion)
+      expect(readings[0].value).toBe(13.4);
+      expect(readings[1].value).toBe(12.8);
+      expect(readings[6].value).toBe(9.6);
+      expect(readings[7].value).toBe(9.2);
     });
 
-    it('should detect mmol/L without slash', async () => {
-      // Test with "mmol" instead of "mmol/L"
+    it('should handle data regardless of unit header label', async () => {
+      // Test with "mmol" label - input is still assumed to be mmol/L
       const zip = new JSZip();
       const lines: string[] = [];
       lines.push('Name:Test\tDate Range:2025-01-01 - 2025-01-01');
@@ -118,11 +118,11 @@ describe('glucoseDataUtils', () => {
       const readings = await extractGlucoseReadings(uploadedFile, 'bg');
       
       expect(readings).toHaveLength(1);
-      expect(readings[0].value).toBe(10.0); // Stays as mmol/L
+      expect(readings[0].value).toBe(10.0); // Input is in mmol/L
     });
 
-    it('should handle mixed case in units', async () => {
-      // Test case-insensitive unit detection
+    it('should handle data with MMOL/L label (case insensitive)', async () => {
+      // Test case-insensitive - input is assumed to be in mmol/L
       const zip = new JSZip();
       const lines: string[] = [];
       lines.push('Name:Test\tDate Range:2025-01-01 - 2025-01-01');
@@ -148,7 +148,7 @@ describe('glucoseDataUtils', () => {
       const readings = await extractGlucoseReadings(uploadedFile, 'bg');
       
       expect(readings).toHaveLength(1);
-      expect(readings[0].value).toBe(5.5); // Stays as mmol/L
+      expect(readings[0].value).toBe(5.5); // Input is in mmol/L
     });
   });
 });
