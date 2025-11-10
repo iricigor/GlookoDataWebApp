@@ -84,6 +84,41 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     marginBottom: '12px',
   },
+  apiKeyRow: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+    marginBottom: '12px',
+  },
+  apiKeyLabel: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    minWidth: '150px',
+    flexShrink: 0,
+  },
+  apiKeyInput: {
+    flexGrow: 1,
+  },
+  securityExplanation: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+    lineHeight: tokens.lineHeightBase200,
+    ...shorthands.padding('12px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    '& strong': {
+      color: tokens.colorNeutralForeground1,
+      fontWeight: tokens.fontWeightSemibold,
+    },
+    '& a': {
+      color: tokens.colorBrandForeground1,
+      textDecoration: 'none',
+      '&:hover': {
+        textDecoration: 'underline',
+      },
+    },
+  },
   versionItem: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -174,17 +209,37 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
           <Text className={styles.settingDescription}>
             Configure your AI settings for intelligent analysis.
           </Text>
-          <Label htmlFor="perplexity-api-key" className={styles.settingLabel}>
-            Perplexity API Key
-          </Label>
-          <Input
-            id="perplexity-api-key"
-            type="password"
-            value={perplexityApiKey}
-            onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
-            placeholder="Enter your Perplexity API key"
-            contentAfter={perplexityApiKey ? '✓' : undefined}
-          />
+          <div className={styles.apiKeyRow}>
+            <Label htmlFor="perplexity-api-key" className={styles.apiKeyLabel}>
+              Perplexity API Key
+            </Label>
+            <Input
+              id="perplexity-api-key"
+              type="password"
+              value={perplexityApiKey}
+              onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
+              placeholder="Enter your Perplexity API key"
+              contentAfter={perplexityApiKey ? '✓' : undefined}
+              className={styles.apiKeyInput}
+            />
+          </div>
+          <Text className={styles.securityExplanation}>
+            <strong>Security & Privacy:</strong> Your API key is stored locally in your browser's cookies (expires after 1 year) 
+            and is never transmitted to our servers or any third party. All AI analysis happens directly between your browser 
+            and Perplexity's API. This application is fully open source—you can{' '}
+            <a href="https://github.com/iricigor/GlookoDataWebApp" target="_blank" rel="noopener noreferrer">
+              review the code on GitHub
+            </a>{' '}
+            or deploy your own instance for complete control.<br /><br />
+            <strong>Best Practices:</strong> For maximum security, create an API key with minimal permissions at{' '}
+            <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
+              Perplexity Settings
+            </a>. 
+            Use keys designated for client-side applications and set spending limits to protect against unauthorized usage.<br /><br />
+            <strong>Risk Warning:</strong> If someone gains access to your browser session or computer, they could potentially 
+            access your stored API key. To mitigate this risk: (1) log out from shared computers, (2) use browser privacy features, 
+            (3) regularly rotate your API keys, and (4) monitor your API usage in Perplexity's dashboard.
+          </Text>
         </div>
 
         <div className={styles.settingSection}>

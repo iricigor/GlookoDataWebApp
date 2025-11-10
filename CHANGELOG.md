@@ -25,6 +25,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - API key stored securely in browser cookies with persistent storage
   - AI Analysis page displays helpful message with link to Settings when API key is not configured
   - Follows existing settings patterns with Fluent UI components for consistency
+  - [#XXX](../../pull/XXX) Enhanced API key input with inline label layout and comprehensive security explanation
+    - Label and input field now displayed in the same row for improved visual organization
+    - Detailed security explanation covering storage mechanism (browser cookies, 1-year expiry)
+    - Privacy transparency: explains no server transmission, client-side only processing
+    - Best practices guidance with links to Perplexity API settings for minimal permissions
+    - Risk warning about session compromise with mitigation strategies
+    - Link to GitHub repository for open source transparency
 - [#XXX](../../pull/XXX) Add CSV export functionality to all data tables
   - Copy icon appears in top-right corner on table hover with "Copy As CSV" tooltip
   - Export FileList table showing uploaded files with metadata
