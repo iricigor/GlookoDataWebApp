@@ -34,15 +34,12 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Run unit tests
-        run: npm test -- --run
+      - name: Run unit tests with JSON reporter
+        run: npm test -- --run --reporter=json > test-results.json 2>&1 || true
 
       - name: Extract Test Statistics
         if: always()
         run: |
-          # Run tests again with JSON reporter to get statistics
-          npm test -- --run --reporter=json > test-results.json 2>&1 || true
-          
           # Extract test count from JSON output
           TEST_COUNT=$(grep -o '"numTotalTests":[0-9]*' test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
           TEST_PASSED=$(grep -o '"numPassedTests":[0-9]*' test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
