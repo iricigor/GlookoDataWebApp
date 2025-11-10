@@ -20,11 +20,15 @@ import {
   AccordionItem,
   AccordionHeader,
   AccordionPanel,
+  Dropdown,
+  Option,
 } from '@fluentui/react-components';
-import type { UploadedFile, GlucoseDataSource, AGPTimeSlotStats } from '../types';
+import type { UploadedFile, GlucoseDataSource, AGPTimeSlotStats, AGPDayOfWeekFilter, GlucoseReading } from '../types';
+import type { ExportFormat } from '../utils/csvUtils';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
-import { calculateAGPStats } from '../utils/agpUtils';
+import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/agpUtils';
 import { AGPGraph } from './AGPGraph';
+import { CopyToCsvButton } from './CopyToCsvButton';
 
 const useStyles = makeStyles({
   reportContainer: {
@@ -49,6 +53,7 @@ const useStyles = makeStyles({
     ...shorthands.padding('16px', '20px'),
     backgroundColor: tokens.colorNeutralBackground2,
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.overflow('visible'),
   },
   controlRow: {
     display: 'flex',
@@ -73,6 +78,9 @@ const useStyles = makeStyles({
     maxHeight: '600px',
     overflowY: 'auto',
     position: 'relative',
+    '&:hover .csv-button': {
+      opacity: 1,
+    },
   },
   stickyHeader: {
     position: 'sticky',
@@ -130,24 +138,64 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     ...shorthands.padding('12px', '0'),
   },
+  dropdown: {
+    minWidth: '160px',
+  },
+  dateInput: {
+    fontSize: tokens.fontSizeBase300,
+    ...shorthands.padding('6px', '8px'),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+  },
+  dateInputGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
+  csvButton: {
+    position: 'sticky',
+    top: '8px',
+    right: '8px',
+    opacity: 0,
+    ...shorthands.transition('opacity', '0.2s'),
+    zIndex: 10,
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderRadius(tokens.borderRadiusCircular),
+    boxShadow: tokens.shadow4,
+    float: 'right',
+    marginRight: '8px',
+    marginTop: '8px',
+  },
 });
 
 interface AGPReportProps {
   selectedFile?: UploadedFile;
+  exportFormat: ExportFormat;
 }
 
-export function AGPReport({ selectedFile }: AGPReportProps) {
+export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
   const styles = useStyles();
 
   const [dataSource, setDataSource] = useState<GlucoseDataSource>('cgm');
+  const [dayFilter, setDayFilter] = useState<AGPDayOfWeekFilter>('All Days');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [minDate, setMinDate] = useState<string>('');
+  const [maxDate, setMaxDate] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agpStats, setAgpStats] = useState<AGPTimeSlotStats[]>([]);
+  const [allReadings, setAllReadings] = useState<GlucoseReading[]>([]);
 
   useEffect(() => {
     if (!selectedFile) {
       setAgpStats([]);
+      setAllReadings([]);
       setError(null);
+      setStartDate('');
+      setEndDate('');
+      setMinDate('');
+      setMaxDate('');
       return;
     }
 
@@ -161,20 +209,78 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
         if (glucoseReadings.length === 0) {
           setError(`No ${dataSource.toUpperCase()} data found in the selected file`);
           setAgpStats([]);
+          setAllReadings([]);
+          setStartDate('');
+          setEndDate('');
+          setMinDate('');
+          setMaxDate('');
         } else {
-          const stats = calculateAGPStats(glucoseReadings);
-          setAgpStats(stats);
+          // Find min and max dates
+          const timestamps = glucoseReadings.map(r => r.timestamp.getTime());
+          const minTimestamp = Math.min(...timestamps);
+          const maxTimestamp = Math.max(...timestamps);
+          const minDateStr = new Date(minTimestamp).toISOString().split('T')[0];
+          const maxDateStr = new Date(maxTimestamp).toISOString().split('T')[0];
+          
+          setAllReadings(glucoseReadings);
+          setMinDate(minDateStr);
+          setMaxDate(maxDateStr);
+          setStartDate(minDateStr);
+          setEndDate(maxDateStr);
+          
+          // Apply day-of-week filter
+          const filteredReadings = filterReadingsByDayOfWeek(glucoseReadings, dayFilter);
+          
+          if (filteredReadings.length === 0) {
+            setError('No data matches the selected filters');
+            setAgpStats([]);
+          } else {
+            const stats = calculateAGPStats(filteredReadings);
+            setAgpStats(stats);
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load glucose data');
         setAgpStats([]);
+        setAllReadings([]);
+        setStartDate('');
+        setEndDate('');
+        setMinDate('');
+        setMaxDate('');
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [selectedFile, dataSource]);
+  }, [selectedFile, dataSource, dayFilter]);
+
+  // Filter readings by date range
+  useEffect(() => {
+    if (allReadings.length > 0 && startDate && endDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      
+      const filteredByDate = allReadings.filter(r => {
+        const timestamp = r.timestamp.getTime();
+        return timestamp >= start.getTime() && timestamp <= end.getTime();
+      });
+      
+      // Apply day-of-week filter to date-filtered readings
+      const filteredReadings = filterReadingsByDayOfWeek(filteredByDate, dayFilter);
+      
+      if (filteredReadings.length === 0) {
+        setError('No data matches the selected filters');
+        setAgpStats([]);
+      } else {
+        setError(null);
+        const stats = calculateAGPStats(filteredReadings);
+        setAgpStats(stats);
+      }
+    }
+  }, [startDate, endDate, allReadings, dayFilter]);
 
   const formatValue = (value: number): string => {
     if (value === 0) return '-';
@@ -183,6 +289,37 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
 
   // Filter out time slots with no data
   const statsWithData = agpStats.filter(stat => stat.count > 0);
+
+  // Day of week filter options
+  const dayOfWeekOptions: AGPDayOfWeekFilter[] = [
+    'All Days',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+    'Workday',
+    'Weekend',
+  ];
+
+  // Helper function to convert AGP stats to CSV format
+  const convertAGPStatsToCSV = (stats: AGPTimeSlotStats[]): (string | number)[][] => {
+    const headers = ['Time', 'Lowest', '10%', '25%', '50% (Median)', '75%', '90%', 'Highest', 'Count'];
+    const rows = stats.map(stat => [
+      stat.timeSlot,
+      formatValue(stat.lowest),
+      formatValue(stat.p10),
+      formatValue(stat.p25),
+      formatValue(stat.p50),
+      formatValue(stat.p75),
+      formatValue(stat.p90),
+      formatValue(stat.highest),
+      stat.count,
+    ]);
+    return [headers, ...rows];
+  };
 
   if (!selectedFile) {
     return (
@@ -234,6 +371,47 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
                     </Button>
                   </div>
                 </div>
+                <div className={styles.controlRow}>
+                  <Text className={styles.controlLabel}>Day of Week:</Text>
+                  <Dropdown
+                    className={styles.dropdown}
+                    value={dayFilter}
+                    selectedOptions={[dayFilter]}
+                    onOptionSelect={(_, data) => setDayFilter(data.optionValue as AGPDayOfWeekFilter)}
+                    positioning="below-start"
+                    inlinePopup
+                  >
+                    {dayOfWeekOptions.map(day => (
+                      <Option key={day} value={day}>
+                        {day}
+                      </Option>
+                    ))}
+                  </Dropdown>
+                </div>
+                {minDate && maxDate && (
+                  <div className={styles.controlRow}>
+                    <Text className={styles.controlLabel}>Date Range:</Text>
+                    <div className={styles.dateInputGroup}>
+                      <input
+                        type="date"
+                        className={styles.dateInput}
+                        value={startDate}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                      />
+                      <Text>to</Text>
+                      <input
+                        type="date"
+                        className={styles.dateInput}
+                        value={endDate}
+                        min={minDate}
+                        max={maxDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* AGP Graph */}
@@ -252,6 +430,13 @@ export function AGPReport({ selectedFile }: AGPReportProps) {
               {/* AGP Table */}
               {!loading && !error && statsWithData.length > 0 && (
                 <div className={styles.tableContainer}>
+                  <div className={`${styles.csvButton} csv-button`}>
+                    <CopyToCsvButton 
+                      data={convertAGPStatsToCSV(statsWithData)}
+                      format={exportFormat}
+                      ariaLabel={`Copy AGP data as ${exportFormat.toUpperCase()}`}
+                    />
+                  </div>
                   <Table>
                     <TableHeader>
                       <TableRow>

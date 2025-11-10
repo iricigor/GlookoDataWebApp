@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.x] - Current Development
 
 ### New Features
+- [#XXX](../../pull/XXX) Add AGP report filters and CSV export
+  - Day-of-week filter dropdown with options: All Days, Mon-Sun, Workdays, Weekends
+  - Time range filters (start/end) to analyze specific hours of the day
+  - CSV export button for AGP statistics table with hover effect
 - Add AI settings configuration in Settings page
   - Password-type input field for Perplexity API key with visual confirmation checkmark
   - API key stored securely in browser cookies with persistent storage

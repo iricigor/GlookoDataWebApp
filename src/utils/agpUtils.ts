@@ -2,7 +2,7 @@
  * Utility functions for AGP (Ambulatory Glucose Profile) analysis
  */
 
-import type { GlucoseReading, AGPTimeSlotStats } from '../types';
+import type { GlucoseReading, AGPTimeSlotStats, AGPDayOfWeekFilter } from '../types';
 
 /**
  * Calculate percentile value from sorted array of numbers
@@ -122,4 +122,82 @@ export function calculateAGPStats(readings: GlucoseReading[]): AGPTimeSlotStats[
   }
 
   return stats;
+}
+
+/**
+ * Filter glucose readings by day of week
+ * 
+ * @param readings - Array of glucose readings
+ * @param dayFilter - Day of week filter
+ * @returns Filtered array of glucose readings
+ */
+export function filterReadingsByDayOfWeek(
+  readings: GlucoseReading[],
+  dayFilter: AGPDayOfWeekFilter
+): GlucoseReading[] {
+  if (dayFilter === 'All Days') {
+    return readings;
+  }
+
+  return readings.filter(reading => {
+    const dayOfWeek = reading.timestamp.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    
+    if (dayFilter === 'Workday') {
+      return dayOfWeek >= 1 && dayOfWeek <= 5; // Monday to Friday
+    }
+    
+    if (dayFilter === 'Weekend') {
+      return dayOfWeek === 0 || dayOfWeek === 6; // Saturday or Sunday
+    }
+    
+    // Map day names to day numbers
+    const dayMap: Record<string, number> = {
+      'Sunday': 0,
+      'Monday': 1,
+      'Tuesday': 2,
+      'Wednesday': 3,
+      'Thursday': 4,
+      'Friday': 5,
+      'Saturday': 6,
+    };
+    
+    return dayOfWeek === dayMap[dayFilter];
+  });
+}
+
+/**
+ * Filter glucose readings by time range
+ * 
+ * @param readings - Array of glucose readings
+ * @param startTime - Start time in HH:MM format (e.g., "08:00")
+ * @param endTime - End time in HH:MM format (e.g., "22:00")
+ * @returns Filtered array of glucose readings
+ */
+export function filterReadingsByTimeRange(
+  readings: GlucoseReading[],
+  startTime: string,
+  endTime: string
+): GlucoseReading[] {
+  if (!startTime || !endTime) {
+    return readings;
+  }
+
+  const [startHour, startMinute] = startTime.split(':').map(Number);
+  const [endHour, endMinute] = endTime.split(':').map(Number);
+  
+  const startMinutes = startHour * 60 + startMinute;
+  const endMinutes = endHour * 60 + endMinute;
+
+  return readings.filter(reading => {
+    const hour = reading.timestamp.getHours();
+    const minute = reading.timestamp.getMinutes();
+    const totalMinutes = hour * 60 + minute;
+    
+    // Handle case where time range crosses midnight
+    if (startMinutes <= endMinutes) {
+      return totalMinutes >= startMinutes && totalMinutes <= endMinutes;
+    } else {
+      return totalMinutes >= startMinutes || totalMinutes <= endMinutes;
+    }
+  });
 }
