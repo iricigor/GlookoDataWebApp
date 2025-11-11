@@ -30,6 +30,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive unit tests (35 new tests added for Gemini and unified API)
   - Updated security documentation to cover both AI providers
   - Links to both Perplexity Settings and Google AI Studio for API key creation
+- [#166](../../pull/166) Implement markdown rendering for AI responses
+  - Add react-markdown library for proper markdown formatting
+  - Create MarkdownRenderer component with Fluent UI styling
+  - Display AI responses with proper headers, bold text, lists, and other markdown features
+  - Comprehensive styling for all markdown elements (headings, lists, code, tables, blockquotes, links)
+  - 10 unit tests covering various markdown rendering scenarios
 - Implement Perplexity AI integration for time-in-range glucose analysis
   - Real AI-powered analysis using Perplexity API (sonar model with 127K context window)
   - Complete prompt: "Given a patient's percent time-in-range (TIR) from continuous glucose monitoring is X%, provide a brief clinical assessment and 2-3 specific, actionable recommendations"
@@ -113,6 +119,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved value display format showing "percentage (count)" instead of "count (percentage)"
 
 ### Fixes
+- Fix AI response to use European glucose units (mmol/L) and direct second-person language
+  - Updated system message to specify all glucose measurements are in mmol/L (European standard)
+  - Changed prompt from third-person ("patient's") to first/second-person ("my"/"your") language
+  - Added explicit reminder that glucose values are in mmol/L (not mg/dL)
+  - Instructed AI to communicate directly without assuming healthcare provider intermediary
+  - Added comprehensive unit tests for new prompt content
 - [#157](../../pull/157) Make version footer visible without scrolling on home page
   - Reduced container top/bottom padding from 40px to 24px
   - Reduced header margin-bottom from 40px to 24px

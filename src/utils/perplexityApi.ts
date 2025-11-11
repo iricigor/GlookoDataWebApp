@@ -92,7 +92,7 @@ export async function callPerplexityApi(
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful medical assistant specializing in diabetes care and continuous glucose monitoring analysis. Provide clear, actionable, and evidence-based recommendations.',
+            content: 'You are a helpful medical assistant specializing in diabetes care and continuous glucose monitoring analysis. Provide clear, actionable, and evidence-based recommendations. IMPORTANT: All glucose measurements are in mmol/L (European standard). Communicate directly with the user in second person (use "you/your" instead of "patient"). Do not assume there is a healthcare provider intermediary.',
           },
           {
             role: 'user',
@@ -173,5 +173,5 @@ export async function callPerplexityApi(
  * @returns Formatted prompt for AI analysis
  */
 export function generateTimeInRangePrompt(tirPercentage: number): string {
-  return `Given a patient's percent time-in-range (TIR) from continuous glucose monitoring is ${tirPercentage.toFixed(1)}%, provide a brief clinical assessment and 2-3 specific, actionable recommendations to improve their glucose management. The target TIR for most adults with diabetes is 70% or higher. Keep your response concise (under 200 words) and practical.`;
+  return `My percent time-in-range (TIR) from continuous glucose monitoring is ${tirPercentage.toFixed(1)}%. Provide a brief assessment and 2-3 specific, actionable recommendations to improve my glucose management. Remember that all glucose values are in mmol/L (not mg/dL). The target TIR for most adults with diabetes is 70% or higher. Keep your response concise (under 200 words) and practical. Address me directly using "you/your" language.`;
 }

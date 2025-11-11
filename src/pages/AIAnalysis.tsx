@@ -16,6 +16,7 @@ import {
 } from '@fluentui/react-components';
 import { BrainCircuitRegular, CheckmarkCircleRegular, ErrorCircleRegular } from '@fluentui/react-icons';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
+import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import type { UploadedFile } from '../types';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
 import { calculateGlucoseRangeStats, calculatePercentage } from '../utils/glucoseRangeUtils';
@@ -110,12 +111,6 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     marginTop: '16px',
-  },
-  aiResponseText: {
-    fontSize: tokens.fontSizeBase400,
-    color: tokens.colorNeutralForeground1,
-    lineHeight: '1.6',
-    whiteSpace: 'pre-wrap',
   },
   loadingContainer: {
     display: 'flex',
@@ -313,9 +308,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey }: AIA
                             </MessageBarBody>
                           </MessageBar>
                           <div className={styles.aiResponseContainer}>
-                            <Text className={styles.aiResponseText}>
-                              {aiResponse}
-                            </Text>
+                            <MarkdownRenderer content={aiResponse} />
                           </div>
                         </>
                       )}
