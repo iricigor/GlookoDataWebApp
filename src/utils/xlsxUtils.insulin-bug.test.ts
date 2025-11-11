@@ -182,9 +182,9 @@ Timestamp\tName\tValue\tInsulin Type
   });
 });
 
-  it('should handle case when insulin file is not found in ZIP but metadata exists', async () => {
-    // Simulate a scenario where metadata says insulin exists, but the actual file
-    // in the ZIP has a slightly different name or is missing
+  it('should NOT match manual_insulin when looking for insulin (bug fix verification)', async () => {
+    // This test verifies the bug fix: when insulin file is missing from ZIP,
+    // the fallback should NOT match manual_insulin_data_1.csv
     
     // Create a ZIP with manual_insulin but no insulin
     const manualInsulinCsv = `Name:Igor Irić\tDate Range:2025-07-29 - 2025-10-26
@@ -198,7 +198,7 @@ Timestamp\tName\tValue\tInsulin Type
     const blob = await zip.generateAsync({ type: 'blob' });
     const file = new File([blob], 'test.zip', { type: 'application/zip' });
     
-    // But metadata claims there's an insulin dataset
+    // Metadata claims there's an insulin dataset
     // (simulating a mismatch between metadata and actual files)
     const uploadedFile: UploadedFile = {
       id: 'test-id',
@@ -216,7 +216,7 @@ Timestamp\tName\tValue\tInsulin Type
           },
           {
             name: 'manual_insulin',
-            rowCount: 2,
+            rowCount: 1,
             columnNames: ['Timestamp', 'Name', 'Value', 'Insulin Type'],
           }
         ],
@@ -235,21 +235,21 @@ Timestamp\tName\tValue\tInsulin Type
     const sheetNames = workbook.worksheets.map(ws => ws.name);
     console.log('Sheets created:', sheetNames);
     
-    // Get insulin sheet (if it exists)
-    const insulinSheet = workbook.getWorksheet('insulin');
+    // After fix: insulin sheet should NOT be created because file wasn't found
+    // The bug would have created it with manual_insulin data
+    expect(sheetNames).toContain('Summary');
+    expect(sheetNames).toContain('manual_insulin');
+    expect(sheetNames).not.toContain('insulin'); // This is the key assertion - insulin sheet should not exist
     
-    if (insulinSheet) {
-      console.log('Insulin sheet exists with', insulinSheet.rowCount, 'rows');
-      
-      // Check if it's empty or has wrong data
-      if (insulinSheet.rowCount > 0) {
-        const headerRow = insulinSheet.getRow(1);
-        console.log('Insulin header cells:');
-        for (let i = 1; i <= 5; i++) {
-          console.log(`  Cell ${i}:`, headerRow.getCell(i).value);
-        }
-      }
-    } else {
-      console.log('Insulin sheet was not created');
-    }
+    // Get manual_insulin sheet - should have correct data
+    const manualInsulinSheet = workbook.getWorksheet('manual_insulin');
+    expect(manualInsulinSheet).toBeDefined();
+    expect(manualInsulinSheet!.rowCount).toBeGreaterThan(0);
+    
+    // Verify manual_insulin has correct columns (not insulin columns)
+    const miHeaderRow = manualInsulinSheet!.getRow(1);
+    expect(miHeaderRow.getCell(1).value).toBe('Timestamp');
+    expect(miHeaderRow.getCell(2).value).toBe('Name');
+    expect(miHeaderRow.getCell(3).value).toBe('Value');
+    expect(miHeaderRow.getCell(4).value).toBe('Insulin Type');
   });

@@ -54,6 +54,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Privacy: All AI communication happens directly from browser, no server intermediary
 
 ### Fixes
+- Fix insulin dataset being exported with wrong column headers from manual_insulin
+  - Fixed `findCSVFileName` function fallback logic to use prefix matching instead of substring matching
+  - Prevents "insulin" search from incorrectly matching "manual_insulin_data_1.csv"
+  - Insulin data now exports correctly with proper columns: Timestamp, Total Bolus (U), Total Insulin (U), Total Basal (U), Serial Number
+  - Added comprehensive bug reproduction tests
 - [#173](../../pull/173) Fix AI analysis button not returning to initial state after cooldown
   - Button now correctly returns to "Analyze with AI" after 3-second cooldown completes
   - Previous behavior: button stayed as "Click to enable new analysis" indefinitely

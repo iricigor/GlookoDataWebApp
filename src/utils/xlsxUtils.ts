@@ -159,16 +159,18 @@ function mergeCSVContents(contents: string[]): string {
  */
 function findCSVFileName(fileNames: string[], datasetName: string): string | undefined {
   // Look for exact match first (e.g., "bg_data_1.csv" for "bg")
-  const pattern = new RegExp(`${datasetName}_data_\\d+\\.csv$`, 'i');
+  const pattern = new RegExp(`^${datasetName}_data_\\d+\\.csv$`, 'i');
   const match = fileNames.find(name => pattern.test(name));
   
   if (match) return match;
   
-  // Fallback: look for any file containing the dataset name
-  return fileNames.find(name => 
-    name.toLowerCase().includes(datasetName.toLowerCase()) && 
-    name.toLowerCase().endsWith('.csv')
-  );
+  // Fallback: look for files that START with the dataset name (not substring match)
+  // This prevents "insulin" from matching "manual_insulin"
+  return fileNames.find(name => {
+    const lowerName = name.toLowerCase();
+    const lowerDataset = datasetName.toLowerCase();
+    return lowerName.startsWith(lowerDataset) && lowerName.endsWith('.csv');
+  });
 }
 
 /**
