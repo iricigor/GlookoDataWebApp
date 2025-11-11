@@ -77,10 +77,10 @@ describe('AIAnalysis', () => {
       />
     );
 
-    // Wait for the button to be available
+    // Wait for the button to be available (after data loads)
     await waitFor(() => {
       expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
 
     // Click the analyze button
     const analyzeButton = screen.getByText('Analyze with AI');
@@ -89,11 +89,66 @@ describe('AIAnalysis', () => {
     // Wait for analysis to complete
     await waitFor(() => {
       expect(screen.getByText('This is a test AI response')).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
 
     // Check button text changed
-    expect(screen.getByText('Click to enable new analysis')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Click to enable new analysis')).toBeInTheDocument();
+    }, { timeout: 2000 });
   });
+
+  it('should return button to "Analyze with AI" after cooldown completes', async () => {
+    const mockResponse = {
+      success: true,
+      content: 'This is a test AI response',
+    };
+    vi.mocked(aiApi.callAIApi).mockResolvedValue(mockResponse);
+
+    render(
+      <AIAnalysis
+        selectedFile={mockFile}
+        perplexityApiKey=""
+        geminiApiKey="test-key"
+        onAnalysisComplete={mockAnalysisComplete}
+      />
+    );
+
+    // Wait for the button to be available
+    await waitFor(() => {
+      expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
+    }, { timeout: 2000 });
+
+    // Click to start first analysis
+    fireEvent.click(screen.getByText('Analyze with AI'));
+
+    // Wait for analysis to complete
+    await waitFor(() => {
+      expect(screen.getByText('This is a test AI response')).toBeInTheDocument();
+    }, { timeout: 2000 });
+
+    // Button should now show "Click to enable new analysis"
+    await waitFor(() => {
+      expect(screen.getByText('Click to enable new analysis')).toBeInTheDocument();
+    }, { timeout: 2000 });
+
+    // Click to enable new analysis (starts cooldown)
+    fireEvent.click(screen.getByText('Click to enable new analysis'));
+
+    // Should show cooldown message
+    await waitFor(() => {
+      expect(screen.getByText(/Please wait \d+ second/)).toBeInTheDocument();
+    });
+
+    // Wait for cooldown to complete naturally (using real time)
+    await waitFor(() => {
+      expect(screen.queryByText(/Please wait/)).not.toBeInTheDocument();
+    }, { timeout: 4000 });
+
+    // Button should return to "Analyze with AI"
+    await waitFor(() => {
+      expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
+    }, { timeout: 2000 });
+  }, 10000); // 10 second timeout for this test
 
   it('should show cooldown when clicking button after successful analysis', async () => {
     const mockResponse = {
@@ -114,13 +169,13 @@ describe('AIAnalysis', () => {
     // Wait for the button and click it
     await waitFor(() => {
       expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
     fireEvent.click(screen.getByText('Analyze with AI'));
 
     // Wait for analysis to complete
     await waitFor(() => {
       expect(screen.getByText('Click to enable new analysis')).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
 
     // Click again to trigger cooldown
     fireEvent.click(screen.getByText('Click to enable new analysis'));
@@ -180,28 +235,36 @@ describe('AIAnalysis', () => {
     // First analysis
     await waitFor(() => {
       expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
     fireEvent.click(screen.getByText('Analyze with AI'));
 
     await waitFor(() => {
       expect(screen.getByText('Successful analysis')).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
 
     // Second call fails
     vi.mocked(aiApi.callAIApi).mockResolvedValueOnce(mockErrorResponse);
 
     // Trigger cooldown and wait for it to complete
+    await waitFor(() => {
+      expect(screen.getByText('Click to enable new analysis')).toBeInTheDocument();
+    }, { timeout: 2000 });
     fireEvent.click(screen.getByText('Click to enable new analysis'));
     
     // Wait for cooldown to start
     await waitFor(() => {
       expect(screen.getByText(/Please wait/)).toBeInTheDocument();
-    }, { timeout: 1000 });
+    });
 
-    // Wait for cooldown to complete (3 seconds)
+    // Wait for cooldown to complete naturally (using real time)
     await waitFor(() => {
       expect(screen.queryByText(/Please wait/)).not.toBeInTheDocument();
     }, { timeout: 4000 });
+
+    // Button should now show "Analyze with AI"
+    await waitFor(() => {
+      expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
+    }, { timeout: 2000 });
 
     // Click analyze again
     fireEvent.click(screen.getByText('Analyze with AI'));
@@ -209,11 +272,11 @@ describe('AIAnalysis', () => {
     // Wait for error to appear
     await waitFor(() => {
       expect(screen.getByText(/API error occurred/)).toBeInTheDocument();
-    });
+    }, { timeout: 2000 });
 
     // Previous response should still be visible
     expect(screen.getByText('Successful analysis')).toBeInTheDocument();
-  });
+  }, 10000); // 10 second timeout for this test
 
   it('should call onAnalysisComplete with correct parameters', async () => {
     const mockResponse = {

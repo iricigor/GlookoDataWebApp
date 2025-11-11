@@ -54,6 +54,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Privacy: All AI communication happens directly from browser, no server intermediary
 
 ### Fixes
+- [#173](../../pull/173) Fix AI analysis button not returning to initial state after cooldown
+  - Button now correctly returns to "Analyze with AI" after 3-second cooldown completes
+  - Previous behavior: button stayed as "Click to enable new analysis" indefinitely
+  - Added `readyForNewAnalysis` state to track post-cooldown status
+  - Accordion now opens by default for better user experience
+  - Added ResizeObserver mock for test environment
+  - Added new test to verify button state after cooldown completion
 - Fix AI analysis response persistence and button state management
   - AI responses now persist when navigating to other pages and returning
   - AI responses preserved even after failed API calls
