@@ -154,13 +154,19 @@ interface SettingsProps {
   onExportFormatChange: (format: ExportFormat) => void;
   perplexityApiKey: string;
   onPerplexityApiKeyChange: (key: string) => void;
+  geminiApiKey: string;
+  onGeminiApiKeyChange: (key: string) => void;
 }
 
-export function Settings({ themeMode, onThemeChange, exportFormat, onExportFormatChange, perplexityApiKey, onPerplexityApiKeyChange }: SettingsProps) {
+export function Settings({ themeMode, onThemeChange, exportFormat, onExportFormatChange, perplexityApiKey, onPerplexityApiKeyChange, geminiApiKey, onGeminiApiKeyChange }: SettingsProps) {
   const styles = useStyles();
   const { thresholds, updateThreshold, validateThresholds, isValid } = useGlucoseThresholds();
   const validationError = validateThresholds(thresholds);
   const versionInfo = getVersionInfo();
+
+  // Determine which provider is active based on available keys
+  // Priority: Perplexity > Gemini
+  const activeProvider = perplexityApiKey ? 'perplexity' : (geminiApiKey ? 'gemini' : null);
 
   return (
     <div className={styles.container}>
@@ -251,7 +257,11 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
           <Title3 className={styles.sectionTitle}>AI</Title3>
           <Divider className={styles.divider} />
           <Text className={styles.settingDescription}>
-            Configure your AI settings for intelligent analysis.
+            Configure your AI settings for intelligent analysis. {activeProvider && (
+              <strong style={{ color: tokens.colorBrandForeground1 }}>
+                Currently using: {activeProvider === 'perplexity' ? 'Perplexity' : 'Google Gemini'}
+              </strong>
+            )}
           </Text>
           <div className={styles.apiKeyRow}>
             <Label htmlFor="perplexity-api-key" className={styles.apiKeyLabel}>
@@ -263,26 +273,47 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
               value={perplexityApiKey}
               onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
               placeholder="Enter your Perplexity API key"
-              contentAfter={perplexityApiKey ? '✓' : undefined}
+              contentAfter={perplexityApiKey ? (activeProvider === 'perplexity' ? '✓ Selected' : '✓') : undefined}
+              className={styles.apiKeyInput}
+            />
+          </div>
+          <div className={styles.apiKeyRow}>
+            <Label htmlFor="gemini-api-key" className={styles.apiKeyLabel}>
+              Google Gemini API Key
+            </Label>
+            <Input
+              id="gemini-api-key"
+              type="password"
+              value={geminiApiKey}
+              onChange={(_, data) => onGeminiApiKeyChange(data.value)}
+              placeholder="Enter your Google Gemini API key"
+              contentAfter={geminiApiKey ? (activeProvider === 'gemini' ? '✓ Selected' : '✓') : undefined}
               className={styles.apiKeyInput}
             />
           </div>
           <div className={styles.securityExplanation}>
             <Text as="p" style={{ marginBottom: '12px' }}>
-              <strong>Security & Privacy:</strong> Your API key is stored locally in your browser's cookies (expires after 1 year) 
-              and is never transmitted to our servers or any third party. All AI analysis happens directly between your browser 
-              and Perplexity's API. This application is fully open source—you can{' '}
+              <strong>Security & Privacy:</strong> Your API keys are stored locally in your browser's cookies (expires after 1 year) 
+              and are never transmitted to our servers or any third party. All AI analysis happens directly between your browser 
+              and the selected AI provider's API. This application is fully open source—you can{' '}
               <a href="https://github.com/iricigor/GlookoDataWebApp" target="_blank" rel="noopener noreferrer">
                 review the code on GitHub
               </a>{' '}
               or deploy your own instance for complete control.
             </Text>
             <Text as="p" style={{ marginBottom: '12px' }}>
-              <strong>Best Practices:</strong> For maximum security, create an API key with minimal permissions at{' '}
+              <strong>Best Practices:</strong> For maximum security, create API keys with minimal permissions at{' '}
               <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
                 Perplexity Settings
+              </a> or{' '}
+              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
+                Google AI Studio
               </a>. 
               Use keys designated for client-side applications and set spending limits to protect against unauthorized usage.
+            </Text>
+            <Text as="p" style={{ marginBottom: '12px' }}>
+              <strong>Provider Selection:</strong> If both API keys are configured, Perplexity will be used by default. 
+              To use Google Gemini, remove the Perplexity API key.
             </Text>
             <Text as="p">
               <strong>Risk Warning:</strong> If someone gains access to your browser session or computer, they could potentially 

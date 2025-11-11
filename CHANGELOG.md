@@ -17,6 +17,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
+- Add Google Gemini AI integration alongside Perplexity AI
+  - Support for Google Gemini API (using gemini-2.0-flash-exp model)
+  - Unified AI API interface that routes to appropriate provider (Perplexity or Gemini)
+  - Settings page now includes both Perplexity and Google Gemini API key fields
+  - Visual indicator showing which AI provider is currently selected
+  - "✓ Selected" badge next to the active provider's API key
+  - Provider selection logic: Perplexity is prioritized if both keys are configured
+  - AI Analysis page shows active provider in accordion header (e.g., "Using Perplexity")
+  - Helper text indicates which provider will be used for analysis
+  - Both API keys stored securely in browser cookies with 1-year expiration
+  - Comprehensive unit tests (35 new tests added for Gemini and unified API)
+  - Updated security documentation to cover both AI providers
+  - Links to both Perplexity Settings and Google AI Studio for API key creation
+- [#166](../../pull/166) Implement markdown rendering for AI responses
+  - Add react-markdown library for proper markdown formatting
+  - Create MarkdownRenderer component with Fluent UI styling
+  - Display AI responses with proper headers, bold text, lists, and other markdown features
+  - Comprehensive styling for all markdown elements (headings, lists, code, tables, blockquotes, links)
+  - 10 unit tests covering various markdown rendering scenarios
 - Implement Perplexity AI integration for time-in-range glucose analysis
   - Real AI-powered analysis using Perplexity API (sonar model with 127K context window)
   - Complete prompt: "Given a patient's percent time-in-range (TIR) from continuous glucose monitoring is X%, provide a brief clinical assessment and 2-3 specific, actionable recommendations"
@@ -105,6 +124,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Made main-content scrollable with overflow-y: auto to keep footer always visible
   - Removed minHeight constraints from all page components (DataUpload, Reports, AIAnalysis, Settings)
   - Footer now always remains visible at bottom of viewport, content scrolls within main area
+- Fix AI response to use European glucose units (mmol/L) and direct second-person language
+  - Updated system message to specify all glucose measurements are in mmol/L (European standard)
+  - Changed prompt from third-person ("patient's") to first/second-person ("my"/"your") language
+  - Added explicit reminder that glucose values are in mmol/L (not mg/dL)
+  - Instructed AI to communicate directly without assuming healthcare provider intermediary
+  - Added comprehensive unit tests for new prompt content
 - [#157](../../pull/157) Make version footer visible without scrolling on home page
   - Reduced container top/bottom padding from 40px to 24px
   - Reduced header margin-bottom from 40px to 24px

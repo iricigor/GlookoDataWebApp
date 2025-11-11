@@ -1,17 +1,17 @@
 /**
- * Custom hook for managing Perplexity API key
+ * Custom hook for managing Google Gemini API key
  * 
  * This hook manages API key state with cookie persistence
  */
 
 import { useState, useCallback } from 'react';
 
-export interface UsePerplexityApiKeyReturn {
+export interface UseGeminiApiKeyReturn {
   apiKey: string;
   setApiKey: (key: string) => void;
 }
 
-const API_KEY_COOKIE_NAME = 'glooko-perplexity-api-key';
+const API_KEY_COOKIE_NAME = 'glooko-gemini-api-key';
 const COOKIE_EXPIRY_DAYS = 365;
 
 /**
@@ -40,9 +40,9 @@ function saveApiKeyToCookie(key: string): void {
 }
 
 /**
- * Hook to manage Perplexity API key
+ * Hook to manage Google Gemini API key
  */
-export function usePerplexityApiKey(): UsePerplexityApiKeyReturn {
+export function useGeminiApiKey(): UseGeminiApiKeyReturn {
   const [apiKey, setApiKeyState] = useState<string>(() => {
     // Initialize from cookie or default to empty string
     return getApiKeyFromCookie();
