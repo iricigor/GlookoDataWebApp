@@ -20,6 +20,8 @@ import {
   TableHeaderCell,
   TableBody,
   TableCell,
+  TabList,
+  Tab,
 } from '@fluentui/react-components';
 import { BrainCircuitRegular, CheckmarkCircleRegular, ErrorCircleRegular } from '@fluentui/react-icons';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
@@ -58,6 +60,26 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     fontFamily: 'Segoe UI, sans-serif',
     display: 'block',
+  },
+  fileMetadata: {
+    marginBottom: '24px',
+  },
+  contentWrapper: {
+    display: 'flex',
+    ...shorthands.gap('24px'),
+    '@media (max-width: 768px)': {
+      flexDirection: 'column',
+    },
+  },
+  tabList: {
+    flexShrink: 0,
+    width: '200px',
+    '@media (max-width: 768px)': {
+      width: '100%',
+    },
+  },
+  contentArea: {
+    flex: 1,
   },
   placeholderContainer: {
     display: 'flex',
@@ -197,6 +219,7 @@ interface AIAnalysisProps {
 export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, existingAnalysis, onAnalysisComplete }: AIAnalysisProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
+  const [selectedTab, setSelectedTab] = useState<string>('timeInRange');
   
   const [inRangePercentage, setInRangePercentage] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -445,6 +468,236 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
     }
   };
 
+  const renderTabContent = () => {
+    if (selectedTab === 'timeInRange') {
+      return (
+        <div className={styles.promptContent}>
+          {loading ? (
+            <Text className={styles.helperText}>Loading glucose data...</Text>
+          ) : inRangePercentage !== null ? (
+            <>
+              <Text className={styles.statementText}>
+                Your glucose is {inRangePercentage}% of time in range.
+              </Text>
+              <div className={styles.buttonContainer}>
+                <Button
+                  appearance="primary"
+                  disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
+                  onClick={handleAnalyzeClick}
+                  icon={analyzing ? <Spinner size="tiny" /> : undefined}
+                >
+                  {analyzing 
+                    ? 'Analyzing...' 
+                    : aiResponse && !readyForNewAnalysis
+                    ? 'Click to enable new analysis'
+                    : 'Analyze with AI'}
+                </Button>
+                {cooldownActive && cooldownSeconds > 0 && (
+                  <div className={styles.cooldownContainer}>
+                    <Text className={styles.cooldownText}>
+                      Please wait {cooldownSeconds} second{cooldownSeconds !== 1 ? 's' : ''} before requesting new analysis...
+                    </Text>
+                    <ProgressBar 
+                      value={(3 - cooldownSeconds) / 3} 
+                      thickness="large"
+                    />
+                  </div>
+                )}
+                {!analyzing && !aiResponse && !error && !cooldownActive && (
+                  <Text className={styles.helperText}>
+                    Click Analyze to get AI-powered analysis
+                  </Text>
+                )}
+                {aiResponse && !readyForNewAnalysis && !cooldownActive && !analyzing && (
+                  <Text className={styles.helperText}>
+                    Click the button above to request a new analysis
+                  </Text>
+                )}
+              </div>
+
+              {analyzing && (
+                <div className={styles.loadingContainer}>
+                  <Spinner size="medium" />
+                  <Text className={styles.helperText}>
+                    Getting AI analysis... This may take a few seconds.
+                  </Text>
+                </div>
+              )}
+
+              {error && (
+                <div className={styles.errorContainer}>
+                  <MessageBar intent="error" icon={<ErrorCircleRegular className={styles.errorIcon} />}>
+                    <MessageBarBody>
+                      <strong>Error:</strong> {error}
+                    </MessageBarBody>
+                  </MessageBar>
+                </div>
+              )}
+
+              {aiResponse && (
+                <>
+                  <MessageBar intent="success" icon={<CheckmarkCircleRegular className={styles.successIcon} />}>
+                    <MessageBarBody>
+                      AI analysis completed successfully
+                    </MessageBarBody>
+                  </MessageBar>
+                  <div className={styles.aiResponseContainer}>
+                    <MarkdownRenderer content={aiResponse} />
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <Text className={styles.helperText}>
+              No CGM data available for analysis
+            </Text>
+          )}
+        </div>
+      );
+    } else if (selectedTab === 'glucoseInsulin') {
+      return (
+        <div className={styles.promptContent}>
+          {loading ? (
+            <Text className={styles.helperText}>Loading data...</Text>
+          ) : combinedDataset.length > 0 ? (
+            <>
+              {/* Button moved to top */}
+              <div className={styles.buttonContainer}>
+                <Button
+                  appearance="primary"
+                  size="large"
+                  disabled={!hasApiKey || analyzingSecondPrompt || (secondPromptCooldownActive && secondPromptCooldownSeconds > 0)}
+                  onClick={handleSecondPromptClick}
+                  icon={analyzingSecondPrompt ? <Spinner size="tiny" /> : undefined}
+                >
+                  {analyzingSecondPrompt
+                    ? 'Analyzing...'
+                    : secondPromptResponse && !secondPromptReady
+                    ? 'Click to enable new analysis'
+                    : 'Analyze with AI'}
+                </Button>
+                {secondPromptCooldownActive && secondPromptCooldownSeconds > 0 && (
+                  <div className={styles.cooldownContainer}>
+                    <Text className={styles.cooldownText}>
+                      Please wait {secondPromptCooldownSeconds} second{secondPromptCooldownSeconds !== 1 ? 's' : ''} before requesting new analysis...
+                    </Text>
+                    <ProgressBar 
+                      value={(3 - secondPromptCooldownSeconds) / 3} 
+                      thickness="large"
+                    />
+                  </div>
+                )}
+                {!analyzingSecondPrompt && !secondPromptResponse && !secondPromptError && !secondPromptCooldownActive && (
+                  <Text className={styles.helperText}>
+                    Click Analyze to get AI-powered correlation analysis
+                  </Text>
+                )}
+                {secondPromptResponse && !secondPromptReady && !secondPromptCooldownActive && !analyzingSecondPrompt && (
+                  <Text className={styles.helperText}>
+                    Click the button above to request a new analysis
+                  </Text>
+                )}
+              </div>
+
+              {/* Accordion to show prompt text - moved below button */}
+              <Accordion collapsible style={{ marginTop: '16px' }}>
+                <AccordionItem value="promptText">
+                  <AccordionHeader>View AI Prompt</AccordionHeader>
+                  <AccordionPanel>
+                    <div className={styles.promptTextContainer}>
+                      {(() => {
+                        const csvData = convertDailyReportsToCSV(combinedDataset);
+                        const base64CsvData = base64Encode(csvData);
+                        return generateGlucoseInsulinPrompt(base64CsvData);
+                      })()}
+                    </div>
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
+
+              <Text className={styles.statementText} style={{ marginTop: '16px' }}>
+                Dataset showing glucose ranges and insulin doses by date:
+              </Text>
+              <div className={styles.scrollableTableContainer}>
+                <Table className={styles.scrollableTable}>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHeaderCell>Date</TableHeaderCell>
+                      <TableHeaderCell className={styles.emphasizedHeaderCell}>Day of Week</TableHeaderCell>
+                      <TableHeaderCell>BG Below (%)</TableHeaderCell>
+                      <TableHeaderCell className={styles.emphasizedHeaderCell}>BG In Range (%)</TableHeaderCell>
+                      <TableHeaderCell>BG Above (%)</TableHeaderCell>
+                      <TableHeaderCell className={styles.emphasizedHeaderCell}>Basal Insulin</TableHeaderCell>
+                      <TableHeaderCell>Bolus Insulin</TableHeaderCell>
+                      <TableHeaderCell>Total Insulin</TableHeaderCell>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {combinedDataset.map(report => {
+                      const date = new Date(report.date);
+                      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                      const dayOfWeek = dayNames[date.getDay()];
+                      
+                      return (
+                        <TableRow key={report.date}>
+                          <TableCell>{report.date}</TableCell>
+                          <TableCell className={styles.emphasizedCell}>{dayOfWeek}</TableCell>
+                          <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}%</TableCell>
+                          <TableCell className={styles.emphasizedCell}>{calculatePercentage(report.stats.inRange, report.stats.total)}%</TableCell>
+                          <TableCell>{calculatePercentage(report.stats.high, report.stats.total)}%</TableCell>
+                          <TableCell className={styles.emphasizedCell}>{report.basalInsulin !== undefined ? report.basalInsulin : '-'}</TableCell>
+                          <TableCell>{report.bolusInsulin !== undefined ? report.bolusInsulin : '-'}</TableCell>
+                          <TableCell>{report.totalInsulin !== undefined ? report.totalInsulin : '-'}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {analyzingSecondPrompt && (
+                <div className={styles.loadingContainer}>
+                  <Spinner size="medium" />
+                  <Text className={styles.helperText}>
+                    Getting AI analysis... This may take a few seconds.
+                  </Text>
+                </div>
+              )}
+
+              {secondPromptError && (
+                <div className={styles.errorContainer}>
+                  <MessageBar intent="error" icon={<ErrorCircleRegular className={styles.errorIcon} />}>
+                    <MessageBarBody>
+                      <strong>Error:</strong> {secondPromptError}
+                    </MessageBarBody>
+                  </MessageBar>
+                </div>
+              )}
+
+              {secondPromptResponse && (
+                <>
+                  <MessageBar intent="success" icon={<CheckmarkCircleRegular className={styles.successIcon} />}>
+                    <MessageBarBody>
+                      AI analysis completed successfully
+                    </MessageBarBody>
+                  </MessageBar>
+                  <div className={styles.aiResponseContainer}>
+                    <MarkdownRenderer content={secondPromptResponse} />
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <Text className={styles.helperText}>
+              No data available for analysis
+            </Text>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -454,7 +707,9 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
         </Text>
       </div>
 
-      <SelectedFileMetadata selectedFile={selectedFile} />
+      <div className={styles.fileMetadata}>
+        <SelectedFileMetadata selectedFile={selectedFile} />
+      </div>
 
       {!selectedFile ? (
         <div className={styles.placeholderContainer}>
@@ -479,241 +734,20 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
           </Text>
         </div>
       ) : (
-        <div className={styles.promptContainer}>
-          <Accordion collapsible defaultOpenItems={["timeInRange"]}>
-            {/* First Prompt: Time in Range Analysis */}
-            <AccordionItem value="timeInRange">
-              <AccordionHeader>Time in Range Analysis</AccordionHeader>
-              <AccordionPanel>
-                <div className={styles.promptContent}>
-                  {loading ? (
-                    <Text className={styles.helperText}>Loading glucose data...</Text>
-                  ) : inRangePercentage !== null ? (
-                    <>
-                      <Text className={styles.statementText}>
-                        Your glucose is {inRangePercentage}% of time in range.
-                      </Text>
-                      <div className={styles.buttonContainer}>
-                        <Button
-                          appearance="primary"
-                          disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
-                          onClick={handleAnalyzeClick}
-                          icon={analyzing ? <Spinner size="tiny" /> : undefined}
-                        >
-                          {analyzing 
-                            ? 'Analyzing...' 
-                            : aiResponse && !readyForNewAnalysis
-                            ? 'Click to enable new analysis'
-                            : 'Analyze with AI'}
-                        </Button>
-                        {cooldownActive && cooldownSeconds > 0 && (
-                          <div className={styles.cooldownContainer}>
-                            <Text className={styles.cooldownText}>
-                              Please wait {cooldownSeconds} second{cooldownSeconds !== 1 ? 's' : ''} before requesting new analysis...
-                            </Text>
-                            <ProgressBar 
-                              value={(3 - cooldownSeconds) / 3} 
-                              thickness="large"
-                            />
-                          </div>
-                        )}
-                        {!analyzing && !aiResponse && !error && !cooldownActive && (
-                          <Text className={styles.helperText}>
-                            Click Analyze to get AI-powered analysis
-                          </Text>
-                        )}
-                        {aiResponse && !readyForNewAnalysis && !cooldownActive && !analyzing && (
-                          <Text className={styles.helperText}>
-                            Click the button above to request a new analysis
-                          </Text>
-                        )}
-                      </div>
+        <div className={styles.contentWrapper}>
+          <TabList
+            vertical
+            selectedValue={selectedTab}
+            onTabSelect={(_, data) => setSelectedTab(data.value as string)}
+            className={styles.tabList}
+          >
+            <Tab value="timeInRange">Time in Range</Tab>
+            <Tab value="glucoseInsulin">Glucose & Insulin</Tab>
+          </TabList>
 
-                      {analyzing && (
-                        <div className={styles.loadingContainer}>
-                          <Spinner size="medium" />
-                          <Text className={styles.helperText}>
-                            Getting AI analysis... This may take a few seconds.
-                          </Text>
-                        </div>
-                      )}
-
-                      {error && (
-                        <div className={styles.errorContainer}>
-                          <MessageBar intent="error" icon={<ErrorCircleRegular className={styles.errorIcon} />}>
-                            <MessageBarBody>
-                              <strong>Error:</strong> {error}
-                            </MessageBarBody>
-                          </MessageBar>
-                        </div>
-                      )}
-
-                      {aiResponse && (
-                        <>
-                          <MessageBar intent="success" icon={<CheckmarkCircleRegular className={styles.successIcon} />}>
-                            <MessageBarBody>
-                              AI analysis completed successfully
-                            </MessageBarBody>
-                          </MessageBar>
-                          <div className={styles.aiResponseContainer}>
-                            <MarkdownRenderer content={aiResponse} />
-                          </div>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <Text className={styles.helperText}>
-                      No CGM data available for analysis
-                    </Text>
-                  )}
-                </div>
-              </AccordionPanel>
-            </AccordionItem>
-
-            {/* Second Prompt: Glucose and Insulin Analysis */}
-            <AccordionItem value="glucoseInsulin">
-              <AccordionHeader>Glucose and Insulin Analysis</AccordionHeader>
-              <AccordionPanel>
-                <div className={styles.promptContent}>
-                  {loading ? (
-                    <Text className={styles.helperText}>Loading data...</Text>
-                  ) : combinedDataset.length > 0 ? (
-                    <>
-                      {/* Button moved to top */}
-                      <div className={styles.buttonContainer}>
-                        <Button
-                          appearance="primary"
-                          size="large"
-                          disabled={!hasApiKey || analyzingSecondPrompt || (secondPromptCooldownActive && secondPromptCooldownSeconds > 0)}
-                          onClick={handleSecondPromptClick}
-                          icon={analyzingSecondPrompt ? <Spinner size="tiny" /> : undefined}
-                        >
-                          {analyzingSecondPrompt
-                            ? 'Analyzing...'
-                            : secondPromptResponse && !secondPromptReady
-                            ? 'Click to enable new analysis'
-                            : 'Analyze with AI'}
-                        </Button>
-                        {secondPromptCooldownActive && secondPromptCooldownSeconds > 0 && (
-                          <div className={styles.cooldownContainer}>
-                            <Text className={styles.cooldownText}>
-                              Please wait {secondPromptCooldownSeconds} second{secondPromptCooldownSeconds !== 1 ? 's' : ''} before requesting new analysis...
-                            </Text>
-                            <ProgressBar 
-                              value={(3 - secondPromptCooldownSeconds) / 3} 
-                              thickness="large"
-                            />
-                          </div>
-                        )}
-                        {!analyzingSecondPrompt && !secondPromptResponse && !secondPromptError && !secondPromptCooldownActive && (
-                          <Text className={styles.helperText}>
-                            Click Analyze to get AI-powered correlation analysis
-                          </Text>
-                        )}
-                        {secondPromptResponse && !secondPromptReady && !secondPromptCooldownActive && !analyzingSecondPrompt && (
-                          <Text className={styles.helperText}>
-                            Click the button above to request a new analysis
-                          </Text>
-                        )}
-                      </div>
-
-                      {/* Accordion to show prompt text - moved below button */}
-                      <Accordion collapsible style={{ marginTop: '16px' }}>
-                        <AccordionItem value="promptText">
-                          <AccordionHeader>View AI Prompt</AccordionHeader>
-                          <AccordionPanel>
-                            <div className={styles.promptTextContainer}>
-                              {(() => {
-                                const csvData = convertDailyReportsToCSV(combinedDataset);
-                                const base64CsvData = base64Encode(csvData);
-                                return generateGlucoseInsulinPrompt(base64CsvData);
-                              })()}
-                            </div>
-                          </AccordionPanel>
-                        </AccordionItem>
-                      </Accordion>
-
-                      <Text className={styles.statementText} style={{ marginTop: '16px' }}>
-                        Dataset showing glucose ranges and insulin doses by date:
-                      </Text>
-                      <div className={styles.scrollableTableContainer}>
-                        <Table className={styles.scrollableTable}>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHeaderCell>Date</TableHeaderCell>
-                              <TableHeaderCell className={styles.emphasizedHeaderCell}>Day of Week</TableHeaderCell>
-                              <TableHeaderCell>BG Below (%)</TableHeaderCell>
-                              <TableHeaderCell className={styles.emphasizedHeaderCell}>BG In Range (%)</TableHeaderCell>
-                              <TableHeaderCell>BG Above (%)</TableHeaderCell>
-                              <TableHeaderCell className={styles.emphasizedHeaderCell}>Basal Insulin</TableHeaderCell>
-                              <TableHeaderCell>Bolus Insulin</TableHeaderCell>
-                              <TableHeaderCell>Total Insulin</TableHeaderCell>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {combinedDataset.map(report => {
-                              const date = new Date(report.date);
-                              const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                              const dayOfWeek = dayNames[date.getDay()];
-                              
-                              return (
-                                <TableRow key={report.date}>
-                                  <TableCell>{report.date}</TableCell>
-                                  <TableCell className={styles.emphasizedCell}>{dayOfWeek}</TableCell>
-                                  <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}%</TableCell>
-                                  <TableCell className={styles.emphasizedCell}>{calculatePercentage(report.stats.inRange, report.stats.total)}%</TableCell>
-                                  <TableCell>{calculatePercentage(report.stats.high, report.stats.total)}%</TableCell>
-                                  <TableCell className={styles.emphasizedCell}>{report.basalInsulin !== undefined ? report.basalInsulin : '-'}</TableCell>
-                                  <TableCell>{report.bolusInsulin !== undefined ? report.bolusInsulin : '-'}</TableCell>
-                                  <TableCell>{report.totalInsulin !== undefined ? report.totalInsulin : '-'}</TableCell>
-                                </TableRow>
-                              );
-                            })}
-                          </TableBody>
-                        </Table>
-                      </div>
-
-                      {analyzingSecondPrompt && (
-                        <div className={styles.loadingContainer}>
-                          <Spinner size="medium" />
-                          <Text className={styles.helperText}>
-                            Getting AI analysis... This may take a few seconds.
-                          </Text>
-                        </div>
-                      )}
-
-                      {secondPromptError && (
-                        <div className={styles.errorContainer}>
-                          <MessageBar intent="error" icon={<ErrorCircleRegular className={styles.errorIcon} />}>
-                            <MessageBarBody>
-                              <strong>Error:</strong> {secondPromptError}
-                            </MessageBarBody>
-                          </MessageBar>
-                        </div>
-                      )}
-
-                      {secondPromptResponse && (
-                        <>
-                          <MessageBar intent="success" icon={<CheckmarkCircleRegular className={styles.successIcon} />}>
-                            <MessageBarBody>
-                              AI analysis completed successfully
-                            </MessageBarBody>
-                          </MessageBar>
-                          <div className={styles.aiResponseContainer}>
-                            <MarkdownRenderer content={secondPromptResponse} />
-                          </div>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <Text className={styles.helperText}>
-                      No data available for analysis
-                    </Text>
-                  )}
-                </div>
-              </AccordionPanel>
-            </AccordionItem>
-          </Accordion>
+          <div className={styles.contentArea}>
+            {renderTabContent()}
+          </div>
         </div>
       )}
     </div>
