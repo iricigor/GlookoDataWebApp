@@ -598,5 +598,66 @@ Timestamp,Alarm/Event,Serial Number
       const cgmView = cgmSheet!.views![0] as ExcelJS.WorksheetView & { ySplit?: number };
       expect(cgmView.ySplit).toBe(1);
     });
+
+    it('should create tabs for all datasets in the Summary sheet - reproducing bug from issue', async () => {
+      // Reproduce the exact bug: Summary shows all datasets, but not all get tabs
+      // This test creates a scenario similar to the user's screenshot
+      const csvFiles = {
+        'alarms_data_1.csv': generateMockCsvContent('bg_data', 1040),
+        'basal_data_1.csv': generateMockCsvContent('basal_data', 12533),
+        'bg_data_1.csv': generateMockCsvContent('bg_data', 309),
+        'bolus_data_1.csv': generateMockCsvContent('bolus_data', 730),
+        'carbs_data_1.csv': generateMockCsvContent('carbs_data', 0),
+        'cgm_data_1.csv': generateMockCsvContent('cgm_data', 41903),
+        'exercise_data_1.csv': generateMockCsvContent('bg_data', 0),
+        'food_data_1.csv': generateMockCsvContent('bg_data', 0),
+        'insulin_data_1.csv': generateMockCsvContent('insulin_data', 91),
+        'manual_insulin_data_1.csv': generateMockCsvContent('insulin_data', 0),
+        'medication_data_1.csv': generateMockCsvContent('bg_data', 1),
+        'notes_data_1.csv': generateMockCsvContent('bg_data', 0),
+      };
+      
+      const uploadedFile = await createMockUploadedFile(csvFiles);
+      const xlsxBlob = await convertZipToXlsx(uploadedFile);
+      
+      // Parse the XLSX blob
+      const arrayBuffer = await blobToArrayBuffer(xlsxBlob);
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      
+      // Should have Summary + 12 dataset sheets (one for each dataset)
+      // Before fix: would only have 6 tabs (Summary, alarms, bg, carbs, cgm, insulin)
+      // After fix: should have 13 tabs (Summary + all 12 datasets)
+      expect(workbook.worksheets.length).toBe(13);
+      
+      // Verify Summary sheet exists
+      expect(workbook.worksheets[0].name).toBe('Summary');
+      
+      // Verify all dataset tabs exist (the ones that were missing in the bug)
+      const sheetNames = workbook.worksheets.map(ws => ws.name);
+      expect(sheetNames).toContain('alarms');
+      expect(sheetNames).toContain('basal');     // This was missing!
+      expect(sheetNames).toContain('bg');
+      expect(sheetNames).toContain('bolus');     // This was missing!
+      expect(sheetNames).toContain('carbs');
+      expect(sheetNames).toContain('cgm');
+      expect(sheetNames).toContain('exercise');  // This was missing!
+      expect(sheetNames).toContain('food');      // This was missing!
+      expect(sheetNames).toContain('insulin');
+      expect(sheetNames).toContain('manual_insulin'); // This was missing!
+      expect(sheetNames).toContain('medication'); // This was missing!
+      expect(sheetNames).toContain('notes');     // This was missing!
+      
+      // Verify that Summary sheet has all 12 datasets listed
+      const summarySheet = workbook.getWorksheet('Summary');
+      expect(summarySheet).toBeDefined();
+      expect(summarySheet!.rowCount).toBe(13); // Header + 12 datasets
+      
+      // Verify row counts match what's in the CSV files
+      expect(summarySheet!.getRow(2).getCell(2).value).toBe(1040);   // alarms
+      expect(summarySheet!.getRow(3).getCell(2).value).toBe(12533);  // basal
+      expect(summarySheet!.getRow(4).getCell(2).value).toBe(309);    // bg
+      expect(summarySheet!.getRow(5).getCell(2).value).toBe(730);    // bolus
+    });
   });
 });
