@@ -97,9 +97,9 @@ export function convertDailyReportsToCSV(reports: DailyReport[]): string {
     'BG Below (%)',
     'BG In Range (%)',
     'BG Above (%)',
-    'Basal Insulin (Units)',
-    'Bolus Insulin (Units)',
-    'Total Insulin (Units)'
+    'Basal Insulin',
+    'Bolus Insulin',
+    'Total Insulin'
   ];
 
   // Convert reports to rows

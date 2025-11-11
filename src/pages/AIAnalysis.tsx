@@ -26,7 +26,7 @@ import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import type { UploadedFile, AIAnalysisResult, DailyReport } from '../types';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
-import { extractInsulinReadings, aggregateInsulinByDate } from '../utils/insulinDataUtils';
+import { extractDailyInsulinSummaries } from '../utils/insulinDataUtils';
 import { calculateGlucoseRangeStats, calculatePercentage, groupByDate } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { generateTimeInRangePrompt, generateGlucoseInsulinPrompt, base64Encode } from '../utils/perplexityApi';
@@ -177,6 +177,13 @@ const useStyles = makeStyles({
     maxHeight: '300px',
     overflowY: 'auto',
   },
+  emphasizedHeaderCell: {
+    fontWeight: tokens.fontWeightSemibold,
+    backgroundColor: tokens.colorNeutralBackground3,
+  },
+  emphasizedCell: {
+    fontWeight: tokens.fontWeightSemibold,
+  },
 });
 
 interface AIAnalysisProps {
@@ -242,6 +249,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
 
     const calculateInRange = async () => {
       setLoading(true);
+      // Only clear responses when new file is selected, not during recalculation
       setAiResponse(null);
       setError(null);
       setReadyForNewAnalysis(false);
@@ -263,8 +271,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
           
           // Extract and aggregate insulin data
           try {
-            const insulinReadings = await extractInsulinReadings(selectedFile);
-            const insulinData = aggregateInsulinByDate(insulinReadings);
+            const insulinData = await extractDailyInsulinSummaries(selectedFile);
             
             // Merge insulin data with daily glucose reports
             const mergedData = dailyGlucoseReports.map(report => {
@@ -572,47 +579,8 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                     <Text className={styles.helperText}>Loading data...</Text>
                   ) : combinedDataset.length > 0 ? (
                     <>
-                      <Text className={styles.statementText}>
-                        Dataset showing glucose ranges and insulin doses by date:
-                      </Text>
-                      <div className={styles.scrollableTableContainer}>
-                        <Table className={styles.scrollableTable}>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHeaderCell>Date</TableHeaderCell>
-                              <TableHeaderCell>Day of Week</TableHeaderCell>
-                              <TableHeaderCell>BG Below (%)</TableHeaderCell>
-                              <TableHeaderCell>BG In Range (%)</TableHeaderCell>
-                              <TableHeaderCell>BG Above (%)</TableHeaderCell>
-                              <TableHeaderCell>Basal Insulin (Units)</TableHeaderCell>
-                              <TableHeaderCell>Bolus Insulin (Units)</TableHeaderCell>
-                              <TableHeaderCell>Total Insulin (Units)</TableHeaderCell>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {combinedDataset.map(report => {
-                              const date = new Date(report.date);
-                              const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                              const dayOfWeek = dayNames[date.getDay()];
-                              
-                              return (
-                                <TableRow key={report.date}>
-                                  <TableCell>{report.date}</TableCell>
-                                  <TableCell>{dayOfWeek}</TableCell>
-                                  <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}%</TableCell>
-                                  <TableCell>{calculatePercentage(report.stats.inRange, report.stats.total)}%</TableCell>
-                                  <TableCell>{calculatePercentage(report.stats.high, report.stats.total)}%</TableCell>
-                                  <TableCell>{report.basalInsulin !== undefined ? report.basalInsulin : '-'}</TableCell>
-                                  <TableCell>{report.bolusInsulin !== undefined ? report.bolusInsulin : '-'}</TableCell>
-                                  <TableCell>{report.totalInsulin !== undefined ? report.totalInsulin : '-'}</TableCell>
-                                </TableRow>
-                              );
-                            })}
-                          </TableBody>
-                        </Table>
-                      </div>
-                      
-                      <div className={styles.buttonContainer} style={{ marginTop: '24px' }}>
+                      {/* Button moved to top */}
+                      <div className={styles.buttonContainer}>
                         <Button
                           appearance="primary"
                           size="large"
@@ -649,7 +617,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                         )}
                       </div>
 
-                      {/* Accordion to show prompt text */}
+                      {/* Accordion to show prompt text - moved below button */}
                       <Accordion collapsible style={{ marginTop: '16px' }}>
                         <AccordionItem value="promptText">
                           <AccordionHeader>View AI Prompt</AccordionHeader>
@@ -664,6 +632,46 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                           </AccordionPanel>
                         </AccordionItem>
                       </Accordion>
+
+                      <Text className={styles.statementText} style={{ marginTop: '16px' }}>
+                        Dataset showing glucose ranges and insulin doses by date:
+                      </Text>
+                      <div className={styles.scrollableTableContainer}>
+                        <Table className={styles.scrollableTable}>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHeaderCell>Date</TableHeaderCell>
+                              <TableHeaderCell className={styles.emphasizedHeaderCell}>Day of Week</TableHeaderCell>
+                              <TableHeaderCell>BG Below (%)</TableHeaderCell>
+                              <TableHeaderCell className={styles.emphasizedHeaderCell}>BG In Range (%)</TableHeaderCell>
+                              <TableHeaderCell>BG Above (%)</TableHeaderCell>
+                              <TableHeaderCell className={styles.emphasizedHeaderCell}>Basal Insulin</TableHeaderCell>
+                              <TableHeaderCell>Bolus Insulin</TableHeaderCell>
+                              <TableHeaderCell>Total Insulin</TableHeaderCell>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {combinedDataset.map(report => {
+                              const date = new Date(report.date);
+                              const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                              const dayOfWeek = dayNames[date.getDay()];
+                              
+                              return (
+                                <TableRow key={report.date}>
+                                  <TableCell>{report.date}</TableCell>
+                                  <TableCell className={styles.emphasizedCell}>{dayOfWeek}</TableCell>
+                                  <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}%</TableCell>
+                                  <TableCell className={styles.emphasizedCell}>{calculatePercentage(report.stats.inRange, report.stats.total)}%</TableCell>
+                                  <TableCell>{calculatePercentage(report.stats.high, report.stats.total)}%</TableCell>
+                                  <TableCell className={styles.emphasizedCell}>{report.basalInsulin !== undefined ? report.basalInsulin : '-'}</TableCell>
+                                  <TableCell>{report.bolusInsulin !== undefined ? report.bolusInsulin : '-'}</TableCell>
+                                  <TableCell>{report.totalInsulin !== undefined ? report.totalInsulin : '-'}</TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
 
                       {analyzingSecondPrompt && (
                         <div className={styles.loadingContainer}>
