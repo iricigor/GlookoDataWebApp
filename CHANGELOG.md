@@ -100,6 +100,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved value display format showing "percentage (count)" instead of "count (percentage)"
 
 ### Fixes
+- Make version footer visible without scrolling on all pages
+  - Changed app container from min-height to fixed height (100vh) to constrain layout
+  - Made main-content scrollable with overflow-y: auto to keep footer always visible
+  - Removed minHeight constraints from all page components (DataUpload, Reports, AIAnalysis, Settings)
+  - Footer now always remains visible at bottom of viewport, content scrolls within main area
 - [#157](../../pull/157) Make version footer visible without scrolling on home page
   - Reduced container top/bottom padding from 40px to 24px
   - Reduced header margin-bottom from 40px to 24px

@@ -18,7 +18,6 @@ const useStyles = makeStyles({
     maxWidth: '1200px',
     marginLeft: 'auto',
     marginRight: 'auto',
-    minHeight: 'calc(100vh - 60px)',
   },
   header: {
     marginBottom: '24px',
