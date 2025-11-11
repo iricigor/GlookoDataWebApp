@@ -3,7 +3,10 @@ import {
   Text,
   tokens,
   shorthands,
+  TabList,
+  Tab,
 } from '@fluentui/react-components';
+import { useState } from 'react';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { InRangeReport } from '../components/InRangeReport';
 import { AGPReport } from '../components/AGPReport';
@@ -18,8 +21,6 @@ const useStyles = makeStyles({
     maxWidth: '1200px',
     marginLeft: 'auto',
     marginRight: 'auto',
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    backgroundColor: tokens.colorNeutralBackground1,
   },
   header: {
     marginBottom: '24px',
@@ -38,10 +39,25 @@ const useStyles = makeStyles({
     fontFamily: 'Segoe UI, sans-serif',
     display: 'block',
   },
-  content: {
+  fileMetadata: {
+    marginBottom: '24px',
+  },
+  contentWrapper: {
     display: 'flex',
-    flexDirection: 'column',
     ...shorthands.gap('24px'),
+    '@media (max-width: 768px)': {
+      flexDirection: 'column',
+    },
+  },
+  tabList: {
+    flexShrink: 0,
+    width: '200px',
+    '@media (max-width: 768px)': {
+      width: '100%',
+    },
+  },
+  contentArea: {
+    flex: 1,
   },
 });
 
@@ -52,6 +68,18 @@ interface ReportsProps {
 
 export function Reports({ selectedFile, exportFormat }: ReportsProps) {
   const styles = useStyles();
+  const [selectedTab, setSelectedTab] = useState<string>('inRange');
+
+  const renderTabContent = () => {
+    switch (selectedTab) {
+      case 'inRange':
+        return <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} />;
+      case 'agp':
+        return <AGPReport selectedFile={selectedFile} exportFormat={exportFormat} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -62,11 +90,24 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
         </Text>
       </div>
 
-      <SelectedFileMetadata selectedFile={selectedFile} />
+      <div className={styles.fileMetadata}>
+        <SelectedFileMetadata selectedFile={selectedFile} />
+      </div>
 
-      <div className={styles.content}>
-        <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} />
-        <AGPReport selectedFile={selectedFile} exportFormat={exportFormat} />
+      <div className={styles.contentWrapper}>
+        <TabList
+          vertical
+          selectedValue={selectedTab}
+          onTabSelect={(_, data) => setSelectedTab(data.value as string)}
+          className={styles.tabList}
+        >
+          <Tab value="inRange">Time in Range</Tab>
+          <Tab value="agp">AGP Data</Tab>
+        </TabList>
+
+        <div className={styles.contentArea}>
+          {renderTabContent()}
+        </div>
       </div>
     </div>
   );
