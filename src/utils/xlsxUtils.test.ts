@@ -59,6 +59,7 @@ async function createMockUploadedFile(csvFiles: Record<string, string>): Promise
       name: baseName,
       rowCount,
       columnNames,
+      sourceFiles: [fileName], // Populate sourceFiles like groupCsvFiles does
     };
   });
   
@@ -658,6 +659,6 @@ Timestamp,Alarm/Event,Serial Number
       expect(summarySheet!.getRow(3).getCell(2).value).toBe(12533);  // basal
       expect(summarySheet!.getRow(4).getCell(2).value).toBe(309);    // bg
       expect(summarySheet!.getRow(5).getCell(2).value).toBe(730);    // bolus
-    });
+    }, 10000); // Increase timeout to 10 seconds for this large test
   });
 });
