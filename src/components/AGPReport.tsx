@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react';
 import {
   makeStyles,
   Text,
-  Button,
   tokens,
   shorthands,
   Table,
@@ -22,6 +21,9 @@ import {
   AccordionPanel,
   Dropdown,
   Option,
+  TabList,
+  Tab,
+  Input,
 } from '@fluentui/react-components';
 import type { UploadedFile, GlucoseDataSource, AGPTimeSlotStats, AGPDayOfWeekFilter, GlucoseReading } from '../types';
 import type { ExportFormat } from '../utils/csvUtils';
@@ -50,9 +52,10 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('16px'),
-    ...shorthands.padding('16px', '20px'),
+    ...shorthands.padding('20px'),
     backgroundColor: tokens.colorNeutralBackground2,
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    boxShadow: tokens.shadow2,
     ...shorthands.overflow('visible'),
   },
   controlRow: {
@@ -67,9 +70,10 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground1,
     minWidth: '140px',
   },
-  buttonGroup: {
+  datePickerGroup: {
     display: 'flex',
-    ...shorthands.gap('8px'),
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
   },
   tableContainer: {
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
@@ -140,17 +144,6 @@ const useStyles = makeStyles({
   },
   dropdown: {
     minWidth: '160px',
-  },
-  dateInput: {
-    fontSize: tokens.fontSizeBase300,
-    ...shorthands.padding('6px', '8px'),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-  },
-  dateInputGroup: {
-    display: 'flex',
-    alignItems: 'center',
-    ...shorthands.gap('8px'),
   },
   csvButton: {
     position: 'sticky',
@@ -356,20 +349,13 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
               <div className={styles.controls}>
                 <div className={styles.controlRow}>
                   <Text className={styles.controlLabel}>Data Source:</Text>
-                  <div className={styles.buttonGroup}>
-                    <Button
-                      appearance={dataSource === 'cgm' ? 'primary' : 'secondary'}
-                      onClick={() => setDataSource('cgm')}
-                    >
-                      CGM
-                    </Button>
-                    <Button
-                      appearance={dataSource === 'bg' ? 'primary' : 'secondary'}
-                      onClick={() => setDataSource('bg')}
-                    >
-                      BG
-                    </Button>
-                  </div>
+                  <TabList
+                    selectedValue={dataSource}
+                    onTabSelect={(_, data) => setDataSource(data.value as GlucoseDataSource)}
+                  >
+                    <Tab value="cgm">CGM</Tab>
+                    <Tab value="bg">BG</Tab>
+                  </TabList>
                 </div>
                 <div className={styles.controlRow}>
                   <Text className={styles.controlLabel}>Day of Week:</Text>
@@ -391,23 +377,23 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
                 {minDate && maxDate && (
                   <div className={styles.controlRow}>
                     <Text className={styles.controlLabel}>Date Range:</Text>
-                    <div className={styles.dateInputGroup}>
-                      <input
+                    <div className={styles.datePickerGroup}>
+                      <Input
                         type="date"
-                        className={styles.dateInput}
                         value={startDate}
                         min={minDate}
                         max={maxDate}
                         onChange={(e) => setStartDate(e.target.value)}
+                        appearance="outline"
                       />
                       <Text>to</Text>
-                      <input
+                      <Input
                         type="date"
-                        className={styles.dateInput}
                         value={endDate}
                         min={minDate}
                         max={maxDate}
                         onChange={(e) => setEndDate(e.target.value)}
+                        appearance="outline"
                       />
                     </div>
                   </div>
