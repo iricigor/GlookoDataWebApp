@@ -26,7 +26,6 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     alignItems: 'center',
     ...shorthands.padding('40px', '24px'),
-    minHeight: 'calc(100vh - 60px)',
   },
   header: {
     textAlign: 'center',
