@@ -163,6 +163,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
   const [error, setError] = useState<string | null>(null);
   const [cooldownActive, setCooldownActive] = useState(false);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
+  const [readyForNewAnalysis, setReadyForNewAnalysis] = useState(false);
 
   // Determine which AI provider to use
   const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey);
@@ -182,6 +183,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
       setInRangePercentage(null);
       setAiResponse(null);
       setError(null);
+      setReadyForNewAnalysis(false);
       return;
     }
 
@@ -194,6 +196,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
       setLoading(true);
       setAiResponse(null);
       setError(null);
+      setReadyForNewAnalysis(false);
       try {
         // Extract CGM readings (default data source)
         const readings = await extractGlucoseReadings(selectedFile, 'cgm');
@@ -226,6 +229,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
       return () => clearTimeout(timer);
     } else if (cooldownActive && cooldownSeconds === 0) {
       setCooldownActive(false);
+      setReadyForNewAnalysis(true);
     }
   }, [cooldownSeconds, cooldownActive]);
 
@@ -235,15 +239,10 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
     }
 
     // If there's already a response, start cooldown before allowing new analysis
-    if (aiResponse && !cooldownActive) {
+    if (aiResponse && !cooldownActive && !readyForNewAnalysis) {
       setCooldownActive(true);
       setCooldownSeconds(3);
       return;
-    }
-
-    // If cooldown is complete, proceed with analysis
-    if (cooldownActive && cooldownSeconds === 0) {
-      setCooldownActive(false);
     }
 
     // Don't analyze if cooldown is active
@@ -253,6 +252,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
 
     setAnalyzing(true);
     setError(null);
+    setReadyForNewAnalysis(false); // Reset the flag when starting new analysis
     const previousResponse = aiResponse; // Keep previous response in case of error
 
     try {
@@ -324,7 +324,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
         </div>
       ) : (
         <div className={styles.promptContainer}>
-          <Accordion collapsible>
+          <Accordion collapsible defaultOpenItems={["timeInRange"]}>
             {/* First Prompt: Time in Range Analysis */}
             <AccordionItem value="timeInRange">
               <AccordionHeader>Time in Range Analysis{activeProvider ? ` (Using ${getProviderDisplayName(activeProvider)})` : ''}</AccordionHeader>
@@ -346,7 +346,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                         >
                           {analyzing 
                             ? 'Analyzing...' 
-                            : aiResponse && !cooldownActive
+                            : aiResponse && !readyForNewAnalysis
                             ? 'Click to enable new analysis'
                             : 'Analyze with AI'}
                         </Button>
@@ -366,7 +366,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                             Click Analyze to get AI-powered analysis using {activeProvider ? getProviderDisplayName(activeProvider) : 'AI'}
                           </Text>
                         )}
-                        {aiResponse && !cooldownActive && !analyzing && (
+                        {aiResponse && !readyForNewAnalysis && !cooldownActive && !analyzing && (
                           <Text className={styles.helperText}>
                             Click the button above to request a new analysis
                           </Text>
