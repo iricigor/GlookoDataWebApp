@@ -130,6 +130,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved value display format showing "percentage (count)" instead of "count (percentage)"
 
 ### Fixes
+- Fix black screen overlay when clicking hamburger menu on mobile devices
+  - Added `inline` prop to Menu component in Navigation.tsx
+  - Prevents modal backdrop from covering the screen when menu is open
+  - Similar fix to the dropdown issue that was previously resolved on Reports page
 - Make version footer visible without scrolling on all pages
   - Changed app container from min-height to fixed height (100vh) to constrain layout
   - Made main-content scrollable with overflow-y: auto to keep footer always visible

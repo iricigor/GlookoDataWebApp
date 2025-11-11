@@ -100,7 +100,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
 
       {/* Mobile Hamburger Menu */}
       <div className={styles.hamburgerMenu}>
-        <Menu>
+        <Menu inline>
           <MenuTrigger disableButtonEnhancement>
             <Button 
               appearance="subtle" 
