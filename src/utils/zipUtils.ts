@@ -116,11 +116,11 @@ function groupCsvFiles(files: CsvFileMetadata[]): CsvFileMetadata[] {
   for (const [baseName, groupFiles] of groups.entries()) {
     if (groupFiles.length === 1) {
       // Single file, use base name (set name) instead of full filename
-      // Also preserve the original file name in sourceFiles for xlsx export
+      // Preserve the full path in sourceFiles for xlsx export
       mergedFiles.push({
         ...groupFiles[0],
         name: baseName,
-        sourceFiles: [groupFiles[0].name]
+        sourceFiles: groupFiles[0].sourceFiles || [groupFiles[0].name]
       });
     } else {
       // Multiple files, merge them
@@ -141,12 +141,17 @@ function groupCsvFiles(files: CsvFileMetadata[]): CsvFileMetadata[] {
         mergedFiles.push(...groupFiles);
       } else {
         // Create merged file metadata
+        // Collect all source file paths
+        const sourceFiles = groupFiles
+          .flatMap(f => f.sourceFiles || [f.name])
+          .sort();
+        
         mergedFiles.push({
           name: baseName, // Just the set name, no extension
           rowCount: totalRowCount,
           columnNames,
           fileCount: groupFiles.length,
-          sourceFiles: groupFiles.map(f => f.name).sort()
+          sourceFiles
         });
       }
     }
@@ -207,7 +212,9 @@ export async function extractZipMetadata(file: File): Promise<ZipMetadata> {
       csvFiles.push({
         name: displayName,
         rowCount,
-        columnNames
+        columnNames,
+        // Store the full path so we can access it later in xlsxUtils
+        sourceFiles: [fileName]
       });
     }
     
