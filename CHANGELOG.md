@@ -69,6 +69,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Privacy: All AI communication happens directly from browser, no server intermediary
 
 ### Fixes
+- Fix missing tabs in Excel export for single-file datasets
+  - Fixed `groupCsvFiles` function in zipUtils.ts to preserve original file names in `sourceFiles` field
+  - Previously, only merged datasets had their source files tracked, causing single-file datasets to be missing from Excel exports
+  - Ensures all datasets shown in Summary sheet get their own tabs in exported xlsx file
+  - Fixes missing tabs for: basal, bolus, exercise, food, manual_insulin, medication, notes
+  - Added comprehensive test reproducing the bug with 12 datasets
 - Fix insulin dataset being exported with wrong column headers from manual_insulin
   - Fixed `findCSVFileName` function fallback logic to use prefix matching instead of substring matching
   - Prevents "insulin" search from incorrectly matching "manual_insulin_data_1.csv"
