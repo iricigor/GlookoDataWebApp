@@ -116,9 +116,11 @@ function groupCsvFiles(files: CsvFileMetadata[]): CsvFileMetadata[] {
   for (const [baseName, groupFiles] of groups.entries()) {
     if (groupFiles.length === 1) {
       // Single file, use base name (set name) instead of full filename
+      // Also preserve the original file name in sourceFiles for xlsx export
       mergedFiles.push({
         ...groupFiles[0],
-        name: baseName
+        name: baseName,
+        sourceFiles: [groupFiles[0].name]
       });
     } else {
       // Multiple files, merge them
