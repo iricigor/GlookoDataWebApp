@@ -373,8 +373,8 @@ describe('zipUtils', () => {
         const file = result.csvFiles[0];
         expect(file.name).toBe('bg'); // Show only set name
         expect(file.rowCount).toBe(10);
-        expect(file.fileCount).toBeUndefined(); // Not merged
-        expect(file.sourceFiles).toBeUndefined(); // Not merged
+        expect(file.fileCount).toBeUndefined(); // Not merged (single file)
+        expect(file.sourceFiles).toEqual(['bg_data_1.csv']); // Preserve original file name for xlsx export
       });
 
       it('should sort merged datasets alphabetically', async () => {
