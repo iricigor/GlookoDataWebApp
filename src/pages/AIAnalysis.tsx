@@ -13,11 +13,12 @@ import {
   Spinner,
   MessageBar,
   MessageBarBody,
+  ProgressBar,
 } from '@fluentui/react-components';
 import { BrainCircuitRegular, CheckmarkCircleRegular, ErrorCircleRegular } from '@fluentui/react-icons';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
-import type { UploadedFile } from '../types';
+import type { UploadedFile, AIAnalysisResult } from '../types';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
 import { calculateGlucoseRangeStats, calculatePercentage } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
@@ -127,15 +128,31 @@ const useStyles = makeStyles({
   errorIcon: {
     color: tokens.colorStatusDangerForeground1,
   },
+  cooldownContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('8px'),
+    ...shorthands.padding('12px'),
+    ...shorthands.borderRadius('4px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    marginTop: '8px',
+  },
+  cooldownText: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    textAlign: 'center',
+  },
 });
 
 interface AIAnalysisProps {
   selectedFile?: UploadedFile;
   perplexityApiKey: string;
   geminiApiKey: string;
+  existingAnalysis?: AIAnalysisResult;
+  onAnalysisComplete: (fileId: string, response: string, inRangePercentage: number) => void;
 }
 
-export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey }: AIAnalysisProps) {
+export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, existingAnalysis, onAnalysisComplete }: AIAnalysisProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
   
@@ -144,10 +161,20 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey }: AIA
   const [analyzing, setAnalyzing] = useState(false);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [cooldownActive, setCooldownActive] = useState(false);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
   // Determine which AI provider to use
   const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey);
   const hasApiKey = activeProvider !== null;
+
+  // Load existing analysis when component mounts or file changes
+  useEffect(() => {
+    if (existingAnalysis && selectedFile?.id === existingAnalysis.fileId) {
+      setAiResponse(existingAnalysis.response);
+      setInRangePercentage(existingAnalysis.inRangePercentage);
+    }
+  }, [existingAnalysis, selectedFile?.id]);
 
   // Calculate in-range percentage when file is selected
   useEffect(() => {
@@ -155,6 +182,11 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey }: AIA
       setInRangePercentage(null);
       setAiResponse(null);
       setError(null);
+      return;
+    }
+
+    // If we have existing analysis for this file, don't recalculate
+    if (existingAnalysis && selectedFile.id === existingAnalysis.fileId) {
       return;
     }
 
@@ -183,16 +215,45 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey }: AIA
     };
 
     calculateInRange();
-  }, [selectedFile, thresholds]);
+  }, [selectedFile, thresholds, existingAnalysis]);
+
+  // Handle cooldown timer
+  useEffect(() => {
+    if (cooldownSeconds > 0) {
+      const timer = setTimeout(() => {
+        setCooldownSeconds(prev => prev - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (cooldownActive && cooldownSeconds === 0) {
+      setCooldownActive(false);
+    }
+  }, [cooldownSeconds, cooldownActive]);
 
   const handleAnalyzeClick = async () => {
     if (!activeProvider || !hasApiKey || inRangePercentage === null) {
       return;
     }
 
+    // If there's already a response, start cooldown before allowing new analysis
+    if (aiResponse && !cooldownActive) {
+      setCooldownActive(true);
+      setCooldownSeconds(3);
+      return;
+    }
+
+    // If cooldown is complete, proceed with analysis
+    if (cooldownActive && cooldownSeconds === 0) {
+      setCooldownActive(false);
+    }
+
+    // Don't analyze if cooldown is active
+    if (cooldownActive) {
+      return;
+    }
+
     setAnalyzing(true);
     setError(null);
-    setAiResponse(null);
+    const previousResponse = aiResponse; // Keep previous response in case of error
 
     try {
       // Generate the prompt with the TIR percentage
@@ -206,11 +267,23 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey }: AIA
 
       if (result.success && result.content) {
         setAiResponse(result.content);
+        // Save the analysis result
+        if (selectedFile?.id) {
+          onAnalysisComplete(selectedFile.id, result.content, inRangePercentage);
+        }
       } else {
+        // On error, keep the previous response if it exists
         setError(result.error || 'Failed to get AI response');
+        if (previousResponse) {
+          setAiResponse(previousResponse);
+        }
       }
     } catch (err) {
+      // On error, keep the previous response if it exists
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      if (previousResponse) {
+        setAiResponse(previousResponse);
+      }
     } finally {
       setAnalyzing(false);
     }
@@ -267,15 +340,35 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey }: AIA
                       <div className={styles.buttonContainer}>
                         <Button
                           appearance="primary"
-                          disabled={!hasApiKey || analyzing}
+                          disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
                           onClick={handleAnalyzeClick}
                           icon={analyzing ? <Spinner size="tiny" /> : undefined}
                         >
-                          {analyzing ? 'Analyzing...' : 'Analyze with AI'}
+                          {analyzing 
+                            ? 'Analyzing...' 
+                            : aiResponse && !cooldownActive
+                            ? 'Click to enable new analysis'
+                            : 'Analyze with AI'}
                         </Button>
-                        {!analyzing && !aiResponse && !error && (
+                        {cooldownActive && cooldownSeconds > 0 && (
+                          <div className={styles.cooldownContainer}>
+                            <Text className={styles.cooldownText}>
+                              Please wait {cooldownSeconds} second{cooldownSeconds !== 1 ? 's' : ''} before requesting new analysis...
+                            </Text>
+                            <ProgressBar 
+                              value={(3 - cooldownSeconds) / 3} 
+                              thickness="large"
+                            />
+                          </div>
+                        )}
+                        {!analyzing && !aiResponse && !error && !cooldownActive && (
                           <Text className={styles.helperText}>
                             Click Analyze to get AI-powered analysis using {activeProvider ? getProviderDisplayName(activeProvider) : 'AI'}
+                          </Text>
+                        )}
+                        {aiResponse && !cooldownActive && !analyzing && (
+                          <Text className={styles.helperText}>
+                            Click the button above to request a new analysis
                           </Text>
                         )}
                       </div>

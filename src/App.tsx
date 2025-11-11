@@ -13,7 +13,7 @@ import { useExportFormat } from './hooks/useExportFormat'
 import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
 import { useGeminiApiKey } from './hooks/useGeminiApiKey'
 import { useSwipeGesture } from './hooks/useSwipeGesture'
-import type { UploadedFile } from './types'
+import type { UploadedFile, AIAnalysisResult } from './types'
 import { extractZipMetadata } from './utils/zipUtils'
 
 // Page navigation order for swipe gestures
@@ -27,6 +27,20 @@ function App() {
   const { apiKey: geminiApiKey, setApiKey: setGeminiApiKey } = useGeminiApiKey()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
+  const [aiAnalysisResults, setAiAnalysisResults] = useState<Record<string, AIAnalysisResult>>({})
+
+  // Save AI results when they change
+  const handleAIAnalysisComplete = useCallback((fileId: string, response: string, inRangePercentage: number) => {
+    setAiAnalysisResults(prev => ({
+      ...prev,
+      [fileId]: {
+        fileId,
+        response,
+        timestamp: new Date(),
+        inRangePercentage,
+      }
+    }))
+  }, [])
 
   // Load demo data on app startup
   useEffect(() => {
@@ -122,11 +136,18 @@ function App() {
     if (selectedFileId === id) {
       setSelectedFileId(null)
     }
+    // Remove AI analysis result for the deleted file
+    setAiAnalysisResults(prev => {
+      const updated = { ...prev }
+      delete updated[id]
+      return updated
+    })
   }
 
   const handleClearAll = () => {
     setUploadedFiles([])
     setSelectedFileId(null)
+    setAiAnalysisResults({})
   }
 
   const handleSelectFile = (id: string | null) => {
@@ -137,6 +158,9 @@ function App() {
   const selectedFile = selectedFileId 
     ? uploadedFiles.find(file => file.id === selectedFileId) 
     : undefined
+
+  // Get AI analysis result for selected file
+  const currentAIAnalysis = selectedFileId ? aiAnalysisResults[selectedFileId] : undefined
 
   const renderPage = () => {
     switch (currentPage) {
@@ -157,7 +181,15 @@ function App() {
       case 'reports':
         return <Reports selectedFile={selectedFile} exportFormat={exportFormat} />
       case 'ai':
-        return <AIAnalysis selectedFile={selectedFile} perplexityApiKey={perplexityApiKey} geminiApiKey={geminiApiKey} />
+        return (
+          <AIAnalysis 
+            selectedFile={selectedFile} 
+            perplexityApiKey={perplexityApiKey} 
+            geminiApiKey={geminiApiKey}
+            existingAnalysis={currentAIAnalysis}
+            onAnalysisComplete={handleAIAnalysisComplete}
+          />
+        )
       case 'settings':
         return <Settings themeMode={themeMode} onThemeChange={setThemeMode} exportFormat={exportFormat} onExportFormatChange={setExportFormat} perplexityApiKey={perplexityApiKey} onPerplexityApiKeyChange={setPerplexityApiKey} geminiApiKey={geminiApiKey} onGeminiApiKeyChange={setGeminiApiKey} />
       default:

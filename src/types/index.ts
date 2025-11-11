@@ -185,3 +185,13 @@ export interface AGPTimeSlotStats {
   highest: number;  // Maximum glucose value in mmol/L
   count: number;    // Number of readings in this time slot
 }
+
+/**
+ * AI analysis result for a file
+ */
+export interface AIAnalysisResult {
+  fileId: string;
+  response: string;
+  timestamp: Date;
+  inRangePercentage: number;
+}
