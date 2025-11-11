@@ -11,6 +11,7 @@ import { Settings } from './pages/Settings'
 import { useTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
 import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
+import { useGeminiApiKey } from './hooks/useGeminiApiKey'
 import { useSwipeGesture } from './hooks/useSwipeGesture'
 import type { UploadedFile } from './types'
 import { extractZipMetadata } from './utils/zipUtils'
@@ -23,6 +24,7 @@ function App() {
   const { theme, themeMode, setThemeMode } = useTheme()
   const { exportFormat, setExportFormat } = useExportFormat()
   const { apiKey: perplexityApiKey, setApiKey: setPerplexityApiKey } = usePerplexityApiKey()
+  const { apiKey: geminiApiKey, setApiKey: setGeminiApiKey } = useGeminiApiKey()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
 
@@ -155,9 +157,9 @@ function App() {
       case 'reports':
         return <Reports selectedFile={selectedFile} exportFormat={exportFormat} />
       case 'ai':
-        return <AIAnalysis selectedFile={selectedFile} perplexityApiKey={perplexityApiKey} />
+        return <AIAnalysis selectedFile={selectedFile} perplexityApiKey={perplexityApiKey} geminiApiKey={geminiApiKey} />
       case 'settings':
-        return <Settings themeMode={themeMode} onThemeChange={setThemeMode} exportFormat={exportFormat} onExportFormatChange={setExportFormat} perplexityApiKey={perplexityApiKey} onPerplexityApiKeyChange={setPerplexityApiKey} />
+        return <Settings themeMode={themeMode} onThemeChange={setThemeMode} exportFormat={exportFormat} onExportFormatChange={setExportFormat} perplexityApiKey={perplexityApiKey} onPerplexityApiKeyChange={setPerplexityApiKey} geminiApiKey={geminiApiKey} onGeminiApiKeyChange={setGeminiApiKey} />
       default:
         return <Home onNavigate={handleNavigate} />
     }

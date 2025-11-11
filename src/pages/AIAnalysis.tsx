@@ -20,7 +20,8 @@ import type { UploadedFile } from '../types';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
 import { calculateGlucoseRangeStats, calculatePercentage } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
-import { callPerplexityApi, generateTimeInRangePrompt } from '../utils/perplexityApi';
+import { generateTimeInRangePrompt } from '../utils/perplexityApi';
+import { callAIApi, determineActiveProvider, getProviderDisplayName } from '../utils/aiApi';
 
 const useStyles = makeStyles({
   container: {
@@ -137,9 +138,10 @@ const useStyles = makeStyles({
 interface AIAnalysisProps {
   selectedFile?: UploadedFile;
   perplexityApiKey: string;
+  geminiApiKey: string;
 }
 
-export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) {
+export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey }: AIAnalysisProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
   
@@ -148,6 +150,10 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
   const [analyzing, setAnalyzing] = useState(false);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Determine which AI provider to use
+  const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey);
+  const hasApiKey = activeProvider !== null;
 
   // Calculate in-range percentage when file is selected
   useEffect(() => {
@@ -186,7 +192,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
   }, [selectedFile, thresholds]);
 
   const handleAnalyzeClick = async () => {
-    if (!perplexityApiKey || inRangePercentage === null) {
+    if (!activeProvider || !hasApiKey || inRangePercentage === null) {
       return;
     }
 
@@ -198,8 +204,11 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
       // Generate the prompt with the TIR percentage
       const prompt = generateTimeInRangePrompt(inRangePercentage);
 
-      // Call Perplexity API
-      const result = await callPerplexityApi(perplexityApiKey, prompt);
+      // Get the appropriate API key for the active provider
+      const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : geminiApiKey;
+
+      // Call the AI API using the selected provider
+      const result = await callAIApi(activeProvider, apiKey, prompt);
 
       if (result.success && result.content) {
         setAiResponse(result.content);
@@ -233,13 +242,13 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
             Please select a data file from the Data Upload page to begin AI analysis
           </Text>
         </div>
-      ) : !perplexityApiKey ? (
+      ) : !hasApiKey ? (
         <div className={styles.placeholderContainer}>
           <div className={styles.icon}>
             <BrainCircuitRegular />
           </div>
           <Text className={styles.placeholderText}>
-            To use AI-powered analysis, you need to configure your Perplexity API key.
+            To use AI-powered analysis, you need to configure an API key (Perplexity or Google Gemini).
           </Text>
           <Text className={styles.warningText}>
             Please add your API key in the{' '}
@@ -251,7 +260,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
           <Accordion collapsible>
             {/* First Prompt: Time in Range Analysis */}
             <AccordionItem value="timeInRange">
-              <AccordionHeader>Time in Range Analysis</AccordionHeader>
+              <AccordionHeader>Time in Range Analysis{activeProvider ? ` (Using ${getProviderDisplayName(activeProvider)})` : ''}</AccordionHeader>
               <AccordionPanel>
                 <div className={styles.promptContent}>
                   {loading ? (
@@ -264,7 +273,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
                       <div className={styles.buttonContainer}>
                         <Button
                           appearance="primary"
-                          disabled={!perplexityApiKey || analyzing}
+                          disabled={!hasApiKey || analyzing}
                           onClick={handleAnalyzeClick}
                           icon={analyzing ? <Spinner size="tiny" /> : undefined}
                         >
@@ -272,7 +281,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey }: AIAnalysisProps) 
                         </Button>
                         {!analyzing && !aiResponse && !error && (
                           <Text className={styles.helperText}>
-                            Click Analyze to get AI-powered analysis
+                            Click Analyze to get AI-powered analysis using {activeProvider ? getProviderDisplayName(activeProvider) : 'AI'}
                           </Text>
                         )}
                       </div>
