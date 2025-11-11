@@ -39,9 +39,6 @@ const useStyles = makeStyles({
     fontFamily: 'Segoe UI, sans-serif',
     display: 'block',
   },
-  fileMetadata: {
-    marginBottom: '24px',
-  },
   contentWrapper: {
     display: 'flex',
     ...shorthands.gap('24px'),
@@ -52,6 +49,10 @@ const useStyles = makeStyles({
   tabList: {
     flexShrink: 0,
     width: '200px',
+    ...shorthands.padding('12px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     '@media (max-width: 768px)': {
       width: '100%',
     },
@@ -72,6 +73,12 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
 
   const renderTabContent = () => {
     switch (selectedTab) {
+      case 'fileInfo':
+        return (
+          <div>
+            <SelectedFileMetadata selectedFile={selectedFile} />
+          </div>
+        );
       case 'inRange':
         return <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} />;
       case 'agp':
@@ -90,10 +97,6 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
         </Text>
       </div>
 
-      <div className={styles.fileMetadata}>
-        <SelectedFileMetadata selectedFile={selectedFile} />
-      </div>
-
       <div className={styles.contentWrapper}>
         <TabList
           vertical
@@ -101,6 +104,7 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
           onTabSelect={(_, data) => setSelectedTab(data.value as string)}
           className={styles.tabList}
         >
+          <Tab value="fileInfo">File Info</Tab>
           <Tab value="inRange">Time in Range</Tab>
           <Tab value="agp">AGP Data</Tab>
         </TabList>

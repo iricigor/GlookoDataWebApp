@@ -74,6 +74,10 @@ const useStyles = makeStyles({
   tabList: {
     flexShrink: 0,
     width: '200px',
+    ...shorthands.padding('12px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     '@media (max-width: 768px)': {
       width: '100%',
     },
@@ -201,10 +205,11 @@ const useStyles = makeStyles({
   },
   emphasizedHeaderCell: {
     fontWeight: tokens.fontWeightSemibold,
-    backgroundColor: tokens.colorNeutralBackground3,
+    backgroundColor: tokens.colorNeutralBackground2,
   },
   emphasizedCell: {
-    fontWeight: tokens.fontWeightSemibold,
+    fontWeight: tokens.fontWeightRegular,
+    backgroundColor: tokens.colorNeutralBackground2,
   },
 });
 
@@ -479,6 +484,8 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
               <Text className={styles.statementText}>
                 Your glucose is {inRangePercentage}% of time in range.
               </Text>
+              
+              {/* Button container */}
               <div className={styles.buttonContainer}>
                 <Button
                   appearance="primary"
@@ -492,6 +499,18 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                     ? 'Click to enable new analysis'
                     : 'Analyze with AI'}
                 </Button>
+                
+                {!analyzing && !aiResponse && !error && !cooldownActive && (
+                  <Text className={styles.helperText}>
+                    Click Analyze to get AI-powered analysis
+                  </Text>
+                )}
+                {aiResponse && !readyForNewAnalysis && !cooldownActive && !analyzing && (
+                  <Text className={styles.helperText}>
+                    Click the button above to request a new analysis
+                  </Text>
+                )}
+                
                 {cooldownActive && cooldownSeconds > 0 && (
                   <div className={styles.cooldownContainer}>
                     <Text className={styles.cooldownText}>
@@ -503,17 +522,19 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                     />
                   </div>
                 )}
-                {!analyzing && !aiResponse && !error && !cooldownActive && (
-                  <Text className={styles.helperText}>
-                    Click Analyze to get AI-powered analysis
-                  </Text>
-                )}
-                {aiResponse && !readyForNewAnalysis && !cooldownActive && !analyzing && (
-                  <Text className={styles.helperText}>
-                    Click the button above to request a new analysis
-                  </Text>
-                )}
               </div>
+
+              {/* Accordion to show prompt text */}
+              <Accordion collapsible style={{ marginTop: '16px' }}>
+                <AccordionItem value="promptText">
+                  <AccordionHeader>View AI Prompt</AccordionHeader>
+                  <AccordionPanel>
+                    <div className={styles.promptTextContainer}>
+                      {generateTimeInRangePrompt(inRangePercentage)}
+                    </div>
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
 
               {analyzing && (
                 <div className={styles.loadingContainer}>
@@ -561,11 +582,10 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
             <Text className={styles.helperText}>Loading data...</Text>
           ) : combinedDataset.length > 0 ? (
             <>
-              {/* Button moved to top */}
+              {/* Button container */}
               <div className={styles.buttonContainer}>
                 <Button
                   appearance="primary"
-                  size="large"
                   disabled={!hasApiKey || analyzingSecondPrompt || (secondPromptCooldownActive && secondPromptCooldownSeconds > 0)}
                   onClick={handleSecondPromptClick}
                   icon={analyzingSecondPrompt ? <Spinner size="tiny" /> : undefined}
@@ -576,6 +596,18 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                     ? 'Click to enable new analysis'
                     : 'Analyze with AI'}
                 </Button>
+                
+                {!analyzingSecondPrompt && !secondPromptResponse && !secondPromptError && !secondPromptCooldownActive && (
+                  <Text className={styles.helperText}>
+                    Click Analyze to get AI-powered correlation analysis
+                  </Text>
+                )}
+                {secondPromptResponse && !secondPromptReady && !secondPromptCooldownActive && !analyzingSecondPrompt && (
+                  <Text className={styles.helperText}>
+                    Click the button above to request a new analysis
+                  </Text>
+                )}
+                
                 {secondPromptCooldownActive && secondPromptCooldownSeconds > 0 && (
                   <div className={styles.cooldownContainer}>
                     <Text className={styles.cooldownText}>
@@ -587,19 +619,9 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                     />
                   </div>
                 )}
-                {!analyzingSecondPrompt && !secondPromptResponse && !secondPromptError && !secondPromptCooldownActive && (
-                  <Text className={styles.helperText}>
-                    Click Analyze to get AI-powered correlation analysis
-                  </Text>
-                )}
-                {secondPromptResponse && !secondPromptReady && !secondPromptCooldownActive && !analyzingSecondPrompt && (
-                  <Text className={styles.helperText}>
-                    Click the button above to request a new analysis
-                  </Text>
-                )}
               </div>
 
-              {/* Accordion to show prompt text - moved below button */}
+              {/* Accordion to show prompt text */}
               <Accordion collapsible style={{ marginTop: '16px' }}>
                 <AccordionItem value="promptText">
                   <AccordionHeader>View AI Prompt</AccordionHeader>
@@ -615,45 +637,50 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                 </AccordionItem>
               </Accordion>
 
-              <Text className={styles.statementText} style={{ marginTop: '16px' }}>
-                Dataset showing glucose ranges and insulin doses by date:
-              </Text>
-              <div className={styles.scrollableTableContainer}>
-                <Table className={styles.scrollableTable}>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHeaderCell>Date</TableHeaderCell>
-                      <TableHeaderCell className={styles.emphasizedHeaderCell}>Day of Week</TableHeaderCell>
-                      <TableHeaderCell>BG Below (%)</TableHeaderCell>
-                      <TableHeaderCell className={styles.emphasizedHeaderCell}>BG In Range (%)</TableHeaderCell>
-                      <TableHeaderCell>BG Above (%)</TableHeaderCell>
-                      <TableHeaderCell className={styles.emphasizedHeaderCell}>Basal Insulin</TableHeaderCell>
-                      <TableHeaderCell>Bolus Insulin</TableHeaderCell>
-                      <TableHeaderCell>Total Insulin</TableHeaderCell>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {combinedDataset.map(report => {
-                      const date = new Date(report.date);
-                      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                      const dayOfWeek = dayNames[date.getDay()];
-                      
-                      return (
-                        <TableRow key={report.date}>
-                          <TableCell>{report.date}</TableCell>
-                          <TableCell className={styles.emphasizedCell}>{dayOfWeek}</TableCell>
-                          <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}%</TableCell>
-                          <TableCell className={styles.emphasizedCell}>{calculatePercentage(report.stats.inRange, report.stats.total)}%</TableCell>
-                          <TableCell>{calculatePercentage(report.stats.high, report.stats.total)}%</TableCell>
-                          <TableCell className={styles.emphasizedCell}>{report.basalInsulin !== undefined ? report.basalInsulin : '-'}</TableCell>
-                          <TableCell>{report.bolusInsulin !== undefined ? report.bolusInsulin : '-'}</TableCell>
-                          <TableCell>{report.totalInsulin !== undefined ? report.totalInsulin : '-'}</TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
+              {/* Accordion for dataset table */}
+              <Accordion collapsible style={{ marginTop: '16px' }}>
+                <AccordionItem value="datasetTable">
+                  <AccordionHeader>Dataset showing glucose ranges and insulin doses by date</AccordionHeader>
+                  <AccordionPanel>
+                    <div className={styles.scrollableTableContainer}>
+                      <Table className={styles.scrollableTable}>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHeaderCell>Date</TableHeaderCell>
+                            <TableHeaderCell className={styles.emphasizedHeaderCell}>Day of Week</TableHeaderCell>
+                            <TableHeaderCell>BG Below (%)</TableHeaderCell>
+                            <TableHeaderCell className={styles.emphasizedHeaderCell}>BG In Range (%)</TableHeaderCell>
+                            <TableHeaderCell>BG Above (%)</TableHeaderCell>
+                            <TableHeaderCell className={styles.emphasizedHeaderCell}>Basal Insulin</TableHeaderCell>
+                            <TableHeaderCell>Bolus Insulin</TableHeaderCell>
+                            <TableHeaderCell className={styles.emphasizedHeaderCell}>Total Insulin</TableHeaderCell>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {combinedDataset.map(report => {
+                            const date = new Date(report.date);
+                            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                            const dayOfWeek = dayNames[date.getDay()];
+                            
+                            return (
+                              <TableRow key={report.date}>
+                                <TableCell>{report.date}</TableCell>
+                                <TableCell className={styles.emphasizedCell}>{dayOfWeek}</TableCell>
+                                <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}%</TableCell>
+                                <TableCell className={styles.emphasizedCell}>{calculatePercentage(report.stats.inRange, report.stats.total)}%</TableCell>
+                                <TableCell>{calculatePercentage(report.stats.high, report.stats.total)}%</TableCell>
+                                <TableCell className={styles.emphasizedCell}>{report.basalInsulin !== undefined ? report.basalInsulin : '-'}</TableCell>
+                                <TableCell>{report.bolusInsulin !== undefined ? report.bolusInsulin : '-'}</TableCell>
+                                <TableCell className={styles.emphasizedCell}>{report.totalInsulin !== undefined ? report.totalInsulin : '-'}</TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
 
               {analyzingSecondPrompt && (
                 <div className={styles.loadingContainer}>

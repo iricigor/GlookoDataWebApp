@@ -58,6 +58,10 @@ const useStyles = makeStyles({
   tabList: {
     flexShrink: 0,
     width: '200px',
+    ...shorthands.padding('12px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     '@media (max-width: 768px)': {
       width: '100%',
     },
@@ -177,7 +181,7 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
   const { thresholds, updateThreshold, validateThresholds, isValid } = useGlucoseThresholds();
   const validationError = validateThresholds(thresholds);
   const versionInfo = getVersionInfo();
-  const [selectedTab, setSelectedTab] = useState<string>('support');
+  const [selectedTab, setSelectedTab] = useState<string>('general');
 
   // Determine which provider is active based on available keys
   // Priority: Perplexity > Gemini
@@ -185,94 +189,100 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
 
   const renderTabContent = () => {
     switch (selectedTab) {
-      case 'support':
+      case 'general':
         return (
-          <div className={styles.settingSection}>
-            <Title3 className={styles.sectionTitle}>Support</Title3>
-            <Divider className={styles.divider} />
-            <Text className={styles.settingDescription}>
-              Help us improve the app by reporting bugs or suggesting new features.
-            </Text>
-            <div className={styles.supportButtons}>
-              <Link 
-                href="https://github.com/iricigor/GlookoDataWebApp/issues/new?template=bug_report.yml"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button 
-                  appearance="secondary" 
-                  icon={<BugRegular />}
+          <>
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>Support</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Help us improve the app by reporting bugs or suggesting new features.
+              </Text>
+              <div className={styles.supportButtons}>
+                <Link 
+                  href="https://github.com/iricigor/GlookoDataWebApp/issues/new?template=bug_report.yml"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  Report a Bug
-                </Button>
-              </Link>
-              <Link 
-                href="https://github.com/iricigor/GlookoDataWebApp/issues/new?template=feature_request.yml"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button 
-                  appearance="secondary" 
-                  icon={<LightbulbRegular />}
+                  <Button 
+                    appearance="secondary" 
+                    icon={<BugRegular />}
+                  >
+                    Report a Bug
+                  </Button>
+                </Link>
+                <Link 
+                  href="https://github.com/iricigor/GlookoDataWebApp/issues/new?template=feature_request.yml"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  Request a Feature
-                </Button>
-              </Link>
+                  <Button 
+                    appearance="secondary" 
+                    icon={<LightbulbRegular />}
+                  >
+                    Request a Feature
+                  </Button>
+                </Link>
+              </div>
             </div>
-          </div>
+
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>Theme</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Choose your preferred color theme. System option follows your operating system settings.
+              </Text>
+              <RadioGroup
+                value={themeMode}
+                onChange={(_, data) => onThemeChange(data.value as ThemeMode)}
+              >
+                <Radio value="light" label="Light" />
+                <Radio value="dark" label="Dark" />
+                <Radio value="system" label="System (recommended)" />
+              </RadioGroup>
+            </div>
+
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>Export Format</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Choose the format for exporting table data to clipboard (CSV or TSV).
+              </Text>
+              <RadioGroup
+                value={exportFormat}
+                onChange={(_, data) => onExportFormatChange(data.value as ExportFormat)}
+              >
+                <Radio value="csv" label="CSV (Comma-Separated Values)" />
+                <Radio value="tsv" label="TSV (Tab-Separated Values)" />
+              </RadioGroup>
+            </div>
+          </>
         );
       
-      case 'theme':
+      case 'data':
         return (
-          <div className={styles.settingSection}>
-            <Title3 className={styles.sectionTitle}>Theme</Title3>
-            <Divider className={styles.divider} />
-            <Text className={styles.settingDescription}>
-              Choose your preferred color theme. System option follows your operating system settings.
-            </Text>
-            <RadioGroup
-              value={themeMode}
-              onChange={(_, data) => onThemeChange(data.value as ThemeMode)}
-            >
-              <Radio value="light" label="Light" />
-              <Radio value="dark" label="Dark" />
-              <Radio value="system" label="System (recommended)" />
-            </RadioGroup>
-          </div>
-        );
-      
-      case 'export':
-        return (
-          <div className={styles.settingSection}>
-            <Title3 className={styles.sectionTitle}>Export Format</Title3>
-            <Divider className={styles.divider} />
-            <Text className={styles.settingDescription}>
-              Choose the format for exporting table data to clipboard (CSV or TSV).
-            </Text>
-            <RadioGroup
-              value={exportFormat}
-              onChange={(_, data) => onExportFormatChange(data.value as ExportFormat)}
-            >
-              <Radio value="csv" label="CSV (Comma-Separated Values)" />
-              <Radio value="tsv" label="TSV (Tab-Separated Values)" />
-            </RadioGroup>
-          </div>
-        );
-      
-      case 'glucose':
-        return (
-          <GlucoseThresholdsSection
-            thresholds={thresholds}
-            onUpdateThreshold={updateThreshold}
-            isValid={isValid}
-            validationError={validationError}
-          />
+          <>
+            <GlucoseThresholdsSection
+              thresholds={thresholds}
+              onUpdateThreshold={updateThreshold}
+              isValid={isValid}
+              validationError={validationError}
+            />
+
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>Data Privacy</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Your data is stored locally with configurable persistence options. All processing happens in your browser.
+              </Text>
+            </div>
+          </>
         );
       
       case 'ai':
         return (
           <div className={styles.settingSection}>
-            <Title3 className={styles.sectionTitle}>AI</Title3>
+            <Title3 className={styles.sectionTitle}>AI Configuration</Title3>
             <Divider className={styles.divider} />
             <Text className={styles.settingDescription}>
               Configure your AI settings for intelligent analysis. {activeProvider && (
@@ -342,18 +352,7 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
           </div>
         );
       
-      case 'privacy':
-        return (
-          <div className={styles.settingSection}>
-            <Title3 className={styles.sectionTitle}>Data Privacy</Title3>
-            <Divider className={styles.divider} />
-            <Text className={styles.settingDescription}>
-              Your data is stored locally with configurable persistence options. All processing happens in your browser.
-            </Text>
-          </div>
-        );
-      
-      case 'version':
+      case 'about':
         return (
           <div className={styles.settingSection}>
             <Title3 className={styles.sectionTitle}>Version Information</Title3>
@@ -398,13 +397,10 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
           onTabSelect={(_, data) => setSelectedTab(data.value as string)}
           className={styles.tabList}
         >
-          <Tab value="support">Support</Tab>
-          <Tab value="theme">Theme</Tab>
-          <Tab value="export">Export Format</Tab>
-          <Tab value="glucose">Glucose Thresholds</Tab>
+          <Tab value="general">General</Tab>
+          <Tab value="data">Data</Tab>
           <Tab value="ai">AI</Tab>
-          <Tab value="privacy">Data Privacy</Tab>
-          <Tab value="version">Version Info</Tab>
+          <Tab value="about">About</Tab>
         </TabList>
 
         <div className={styles.contentArea}>
