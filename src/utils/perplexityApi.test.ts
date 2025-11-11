@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { callPerplexityApi, generateTimeInRangePrompt } from './perplexityApi';
+import { callPerplexityApi, generateTimeInRangePrompt, generateGlucoseInsulinPrompt, base64Encode, base64Decode } from './perplexityApi';
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -16,6 +16,124 @@ describe('perplexityApi', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe('base64Encode', () => {
+    it('should encode a simple string to base64', () => {
+      const result = base64Encode('Hello World');
+      expect(result).toBe('SGVsbG8gV29ybGQ=');
+    });
+
+    it('should encode empty string', () => {
+      const result = base64Encode('');
+      expect(result).toBe('');
+    });
+
+    it('should encode special characters', () => {
+      const result = base64Encode('Test@123!#$');
+      expect(result).toBe('VGVzdEAxMjMhIyQ=');
+    });
+
+    it('should encode CSV data', () => {
+      const csvData = 'Date,Day,BG\n2024-01-01,Monday,85';
+      const result = base64Encode(csvData);
+      expect(result).toBeTruthy();
+      expect(result.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('base64Decode', () => {
+    it('should decode a base64 string', () => {
+      const result = base64Decode('SGVsbG8gV29ybGQ=');
+      expect(result).toBe('Hello World');
+    });
+
+    it('should decode empty string', () => {
+      const result = base64Decode('');
+      expect(result).toBe('');
+    });
+
+    it('should decode special characters', () => {
+      const result = base64Decode('VGVzdEAxMjMhIyQ=');
+      expect(result).toBe('Test@123!#$');
+    });
+
+    it('should encode and decode correctly (round trip)', () => {
+      const original = 'Date,Day,BG\n2024-01-01,Monday,85';
+      const encoded = base64Encode(original);
+      const decoded = base64Decode(encoded);
+      expect(decoded).toBe(original);
+    });
+  });
+
+  describe('generateGlucoseInsulinPrompt', () => {
+    it('should generate a prompt with decoded CSV data', () => {
+      const csvData = 'Date,Day,BG\n2024-01-01,Monday,85';
+      const base64Data = base64Encode(csvData);
+      const prompt = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(prompt).toContain('Date,Day,BG');
+      expect(prompt).toContain('2024-01-01,Monday,85');
+      expect(prompt).toContain('Temporal Trends');
+      expect(prompt).toContain('Insulin Efficacy Correlation');
+      expect(prompt).toContain('Anomalies and Key Events');
+      expect(prompt).toContain('Actionable Summary');
+    });
+
+    it('should include role and goal section', () => {
+      const csvData = 'Date,Day\n2024-01-01,Monday';
+      const base64Data = base64Encode(csvData);
+      const prompt = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(prompt).toContain('Role and Goal');
+      expect(prompt).toContain('Data Analyst and Diabetes Management Specialist');
+    });
+
+    it('should include mmol/L unit specification', () => {
+      const csvData = 'Date,Day\n2024-01-01,Monday';
+      const base64Data = base64Encode(csvData);
+      const prompt = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(prompt).toContain('mmol/L');
+      expect(prompt).toContain('not mg/dL');
+    });
+
+    it('should use second-person language', () => {
+      const csvData = 'Date,Day\n2024-01-01,Monday';
+      const base64Data = base64Encode(csvData);
+      const prompt = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(prompt).toContain('you/your');
+    });
+
+    it('should request analysis of best and worst days', () => {
+      const csvData = 'Date,Day\n2024-01-01,Monday';
+      const base64Data = base64Encode(csvData);
+      const prompt = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(prompt).toContain('3 best days');
+      expect(prompt).toContain('3 worst days');
+      expect(prompt).toContain('highest BG In Range');
+      expect(prompt).toContain('lowest BG In Range');
+    });
+
+    it('should request correlation analysis', () => {
+      const csvData = 'Date,Day\n2024-01-01,Monday';
+      const base64Data = base64Encode(csvData);
+      const prompt = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(prompt).toContain('correlation between Total Insulin');
+      expect(prompt).toContain('Basal and Bolus insulin');
+    });
+
+    it('should request actionable recommendations', () => {
+      const csvData = 'Date,Day\n2024-01-01,Monday';
+      const base64Data = base64Encode(csvData);
+      const prompt = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(prompt).toContain('3-point summary');
+      expect(prompt).toContain('2-3 specific, actionable recommendations');
+    });
   });
 
   describe('generateTimeInRangePrompt', () => {

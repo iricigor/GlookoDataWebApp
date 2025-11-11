@@ -3,7 +3,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { convertToCSV } from './csvUtils';
+import { convertToCSV, convertDailyReportsToCSV } from './csvUtils';
+import type { DailyReport } from '../types';
 
 describe('csvUtils', () => {
   describe('convertToCSV', () => {
@@ -135,6 +136,107 @@ describe('csvUtils', () => {
       const result = convertToCSV(data);
       
       expect(result).toBe('Name,Quote\nJohn,"He said, ""Hello, World!"""');
+    });
+  });
+
+  describe('convertDailyReportsToCSV', () => {
+    it('should convert daily reports to CSV with headers', () => {
+      const reports: DailyReport[] = [
+        {
+          date: '2024-01-01',
+          stats: { low: 10, inRange: 85, high: 5, total: 100 },
+          basalInsulin: 20.5,
+          bolusInsulin: 15.3,
+          totalInsulin: 35.8,
+        },
+        {
+          date: '2024-01-02',
+          stats: { low: 5, inRange: 90, high: 5, total: 100 },
+          basalInsulin: 21.0,
+          bolusInsulin: 16.0,
+          totalInsulin: 37.0,
+        },
+      ];
+
+      const result = convertDailyReportsToCSV(reports);
+      
+      // Check headers
+      expect(result).toContain('Date,Day of Week,BG Below (%),BG In Range (%),BG Above (%)');
+      expect(result).toContain('Basal Insulin (Units),Bolus Insulin (Units),Total Insulin (Units)');
+      
+      // Check data rows
+      expect(result).toContain('2024-01-01,Monday,10,85,5,20.50,15.30,35.80');
+      expect(result).toContain('2024-01-02,Tuesday,5,90,5,21.00,16.00,37.00');
+    });
+
+    it('should handle missing insulin data', () => {
+      const reports: DailyReport[] = [
+        {
+          date: '2024-01-01',
+          stats: { low: 10, inRange: 85, high: 5, total: 100 },
+        },
+      ];
+
+      const result = convertDailyReportsToCSV(reports);
+      
+      expect(result).toContain('Date,Day of Week,BG Below (%),BG In Range (%),BG Above (%)');
+      expect(result).toContain('2024-01-01,Monday,10,85,5,,,');
+    });
+
+    it('should handle empty array', () => {
+      const result = convertDailyReportsToCSV([]);
+      
+      expect(result).toBe('');
+    });
+
+    it('should calculate percentages correctly', () => {
+      const reports: DailyReport[] = [
+        {
+          date: '2024-01-01',
+          stats: { low: 25, inRange: 50, high: 25, total: 100 },
+          basalInsulin: 20.0,
+          bolusInsulin: 15.0,
+          totalInsulin: 35.0,
+        },
+      ];
+
+      const result = convertDailyReportsToCSV(reports);
+      
+      expect(result).toContain('2024-01-01,Monday,25,50,25,20.00,15.00,35.00');
+    });
+
+    it('should handle different days of the week correctly', () => {
+      const reports: DailyReport[] = [
+        {
+          date: '2024-01-07', // Sunday
+          stats: { low: 10, inRange: 80, high: 10, total: 100 },
+        },
+        {
+          date: '2024-01-13', // Saturday
+          stats: { low: 15, inRange: 75, high: 10, total: 100 },
+        },
+      ];
+
+      const result = convertDailyReportsToCSV(reports);
+      
+      expect(result).toContain('2024-01-07,Sunday');
+      expect(result).toContain('2024-01-13,Saturday');
+    });
+
+    it('should format insulin values with 2 decimal places', () => {
+      const reports: DailyReport[] = [
+        {
+          date: '2024-01-01',
+          stats: { low: 10, inRange: 80, high: 10, total: 100 },
+          basalInsulin: 20.123456,
+          bolusInsulin: 15.987654,
+          totalInsulin: 36.111110,
+        },
+      ];
+
+      const result = convertDailyReportsToCSV(reports);
+      
+      expect(result).toContain('20.12,15.99,36.11');
     });
   });
 });
