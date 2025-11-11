@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
+- [#171](../../pull/171) Align Reports page with Fluent UI design standards
+  - Wrap In Range summary data in Fluent UI Card component for better visual organization
+  - Replace button groups with Fluent UI TabList for Data Source (CGM/BG) and Categories (3/5) selectors
+  - Add rounded corners and subtle elevation to main content container for improved visual hierarchy
+  - Standardize all interactive elements with consistent Fluent UI styling
 - Add Google Gemini AI integration alongside Perplexity AI
   - Support for Google Gemini API (using gemini-2.0-flash-exp model)
   - Unified AI API interface that routes to appropriate provider (Perplexity or Gemini)

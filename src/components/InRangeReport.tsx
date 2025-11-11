@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react';
 import {
   makeStyles,
   Text,
-  Button,
   tokens,
   shorthands,
   Table,
@@ -20,6 +19,10 @@ import {
   AccordionItem,
   AccordionHeader,
   AccordionPanel,
+  Card,
+  TabList,
+  Tab,
+  Input,
 } from '@fluentui/react-components';
 import type { 
   UploadedFile, 
@@ -76,13 +79,19 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     ...shorthands.gap('24px'),
   },
+  summaryCard: {
+    ...shorthands.padding('20px'),
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    boxShadow: tokens.shadow4,
+  },
   controls: {
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('16px'),
-    ...shorthands.padding('16px', '20px'),
+    ...shorthands.padding('20px'),
     backgroundColor: tokens.colorNeutralBackground2,
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    boxShadow: tokens.shadow2,
   },
   controlRow: {
     display: 'flex',
@@ -96,20 +105,10 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground1,
     minWidth: '140px',
   },
-  buttonGroup: {
-    display: 'flex',
-    ...shorthands.gap('8px'),
-  },
-  dateInputGroup: {
+  datePickerGroup: {
     display: 'flex',
     alignItems: 'center',
-    ...shorthands.gap('8px'),
-  },
-  dateInput: {
-    fontSize: tokens.fontSizeBase300,
-    ...shorthands.padding('6px', '8px'),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.gap('12px'),
   },
   section: {
     display: 'flex',
@@ -455,173 +454,159 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
             {error && <Text className={styles.error}>{error}</Text>}
             
             <div className={styles.container}>
-              {/* Summary bar */}
+              {/* Summary bar and legend in Card */}
               {!loading && !error && dayOfWeekReports.length > 0 && (
-                <div className={styles.summaryBar}>
-                  {categoryMode === 5 && (summary.veryLow ?? 0) > 0 && (
-                    <div
-                      className={styles.summarySegment}
-                      style={{
-                        width: `${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`,
-                        backgroundColor: getColorForCategory('veryLow'),
-                      }}
-                      title={`Very Low: ${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`}
-                    >
-                      {calculatePercentage(summary.veryLow ?? 0, summary.total) >= 5 && `${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`}
-                    </div>
-                  )}
-                  {summary.low > 0 && (
-                    <div
-                      className={styles.summarySegment}
-                      style={{
-                        width: `${calculatePercentage(summary.low, summary.total)}%`,
-                        backgroundColor: getColorForCategory('low'),
-                      }}
-                      title={`Low: ${calculatePercentage(summary.low, summary.total)}%`}
-                    >
-                      {calculatePercentage(summary.low, summary.total) >= 5 && `${calculatePercentage(summary.low, summary.total)}%`}
-                    </div>
-                  )}
-                  {summary.inRange > 0 && (
-                    <div
-                      className={styles.summarySegment}
-                      style={{
-                        width: `${calculatePercentage(summary.inRange, summary.total)}%`,
-                        backgroundColor: getColorForCategory('inRange'),
-                      }}
-                      title={`In Range: ${calculatePercentage(summary.inRange, summary.total)}%`}
-                    >
-                      {calculatePercentage(summary.inRange, summary.total) >= 5 && `${calculatePercentage(summary.inRange, summary.total)}%`}
-                    </div>
-                  )}
-                  {summary.high > 0 && (
-                    <div
-                      className={styles.summarySegment}
-                      style={{
-                        width: `${calculatePercentage(summary.high, summary.total)}%`,
-                        backgroundColor: getColorForCategory('high'),
-                      }}
-                      title={`High: ${calculatePercentage(summary.high, summary.total)}%`}
-                    >
-                      {calculatePercentage(summary.high, summary.total) >= 5 && `${calculatePercentage(summary.high, summary.total)}%`}
-                    </div>
-                  )}
-                  {categoryMode === 5 && (summary.veryHigh ?? 0) > 0 && (
-                    <div
-                      className={styles.summarySegment}
-                      style={{
-                        width: `${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`,
-                        backgroundColor: getColorForCategory('veryHigh'),
-                      }}
-                      title={`Very High: ${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`}
-                    >
-                      {calculatePercentage(summary.veryHigh ?? 0, summary.total) >= 5 && `${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`}
-                    </div>
-                  )}
-                </div>
-              )}
+                <Card className={styles.summaryCard}>
+                  <div className={styles.summaryBar}>
+                    {categoryMode === 5 && (summary.veryLow ?? 0) > 0 && (
+                      <div
+                        className={styles.summarySegment}
+                        style={{
+                          width: `${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`,
+                          backgroundColor: getColorForCategory('veryLow'),
+                        }}
+                        title={`Very Low: ${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`}
+                      >
+                        {calculatePercentage(summary.veryLow ?? 0, summary.total) >= 5 && `${calculatePercentage(summary.veryLow ?? 0, summary.total)}%`}
+                      </div>
+                    )}
+                    {summary.low > 0 && (
+                      <div
+                        className={styles.summarySegment}
+                        style={{
+                          width: `${calculatePercentage(summary.low, summary.total)}%`,
+                          backgroundColor: getColorForCategory('low'),
+                        }}
+                        title={`Low: ${calculatePercentage(summary.low, summary.total)}%`}
+                      >
+                        {calculatePercentage(summary.low, summary.total) >= 5 && `${calculatePercentage(summary.low, summary.total)}%`}
+                      </div>
+                    )}
+                    {summary.inRange > 0 && (
+                      <div
+                        className={styles.summarySegment}
+                        style={{
+                          width: `${calculatePercentage(summary.inRange, summary.total)}%`,
+                          backgroundColor: getColorForCategory('inRange'),
+                        }}
+                        title={`In Range: ${calculatePercentage(summary.inRange, summary.total)}%`}
+                      >
+                        {calculatePercentage(summary.inRange, summary.total) >= 5 && `${calculatePercentage(summary.inRange, summary.total)}%`}
+                      </div>
+                    )}
+                    {summary.high > 0 && (
+                      <div
+                        className={styles.summarySegment}
+                        style={{
+                          width: `${calculatePercentage(summary.high, summary.total)}%`,
+                          backgroundColor: getColorForCategory('high'),
+                        }}
+                        title={`High: ${calculatePercentage(summary.high, summary.total)}%`}
+                      >
+                        {calculatePercentage(summary.high, summary.total) >= 5 && `${calculatePercentage(summary.high, summary.total)}%`}
+                      </div>
+                    )}
+                    {categoryMode === 5 && (summary.veryHigh ?? 0) > 0 && (
+                      <div
+                        className={styles.summarySegment}
+                        style={{
+                          width: `${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`,
+                          backgroundColor: getColorForCategory('veryHigh'),
+                        }}
+                        title={`Very High: ${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`}
+                      >
+                        {calculatePercentage(summary.veryHigh ?? 0, summary.total) >= 5 && `${calculatePercentage(summary.veryHigh ?? 0, summary.total)}%`}
+                      </div>
+                    )}
+                  </div>
 
-              {/* Legend directly under summary bar */}
-              {!loading && !error && dayOfWeekReports.length > 0 && (
-                <div className={styles.summaryLegend}>
-                  {categoryMode === 5 && (
+                  {/* Legend directly under summary bar */}
+                  <div className={styles.summaryLegend}>
+                    {categoryMode === 5 && (
+                      <div className={styles.legendItem}>
+                        <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('veryLow') }} />
+                        <Text className={styles.legendText}>
+                          Very Low: {calculatePercentage(summary.veryLow ?? 0, summary.total)}% ({summary.veryLow ?? 0})
+                        </Text>
+                      </div>
+                    )}
                     <div className={styles.legendItem}>
-                      <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('veryLow') }} />
+                      <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('low') }} />
                       <Text className={styles.legendText}>
-                        Very Low: {calculatePercentage(summary.veryLow ?? 0, summary.total)}% ({summary.veryLow ?? 0})
+                        Low: {calculatePercentage(summary.low, summary.total)}% ({summary.low})
                       </Text>
                     </div>
-                  )}
-                  <div className={styles.legendItem}>
-                    <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('low') }} />
-                    <Text className={styles.legendText}>
-                      Low: {calculatePercentage(summary.low, summary.total)}% ({summary.low})
-                    </Text>
-                  </div>
-                  <div className={styles.legendItem}>
-                    <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('inRange') }} />
-                    <Text className={styles.legendText} style={{ fontWeight: tokens.fontWeightBold }}>
-                      In Range: {calculatePercentage(summary.inRange, summary.total)}% ({summary.inRange})
-                    </Text>
-                  </div>
-                  <div className={styles.legendItem}>
-                    <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('high') }} />
-                    <Text className={styles.legendText}>
-                      High: {calculatePercentage(summary.high, summary.total)}% ({summary.high})
-                    </Text>
-                  </div>
-                  {categoryMode === 5 && (
                     <div className={styles.legendItem}>
-                      <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('veryHigh') }} />
-                      <Text className={styles.legendText}>
-                        Very High: {calculatePercentage(summary.veryHigh ?? 0, summary.total)}% ({summary.veryHigh ?? 0})
+                      <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('inRange') }} />
+                      <Text className={styles.legendText} style={{ fontWeight: tokens.fontWeightBold }}>
+                        In Range: {calculatePercentage(summary.inRange, summary.total)}% ({summary.inRange})
                       </Text>
                     </div>
-                  )}
-                  <div className={styles.legendItem}>
-                    <Text className={styles.legendText} style={{ fontWeight: tokens.fontWeightSemibold }}>
-                      Total Readings: {summary.total}
-                    </Text>
+                    <div className={styles.legendItem}>
+                      <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('high') }} />
+                      <Text className={styles.legendText}>
+                        High: {calculatePercentage(summary.high, summary.total)}% ({summary.high})
+                      </Text>
+                    </div>
+                    {categoryMode === 5 && (
+                      <div className={styles.legendItem}>
+                        <div className={styles.legendColor} style={{ backgroundColor: getColorForCategory('veryHigh') }} />
+                        <Text className={styles.legendText}>
+                          Very High: {calculatePercentage(summary.veryHigh ?? 0, summary.total)}% ({summary.veryHigh ?? 0})
+                        </Text>
+                      </div>
+                    )}
+                    <div className={styles.legendItem}>
+                      <Text className={styles.legendText} style={{ fontWeight: tokens.fontWeightSemibold }}>
+                        Total Readings: {summary.total}
+                      </Text>
+                    </div>
                   </div>
-                </div>
+                </Card>
               )}
 
               {/* Controls */}
               <div className={styles.controls}>
                 <div className={styles.controlRow}>
                   <Text className={styles.controlLabel}>Data Source:</Text>
-                  <div className={styles.buttonGroup}>
-                    <Button
-                      appearance={dataSource === 'cgm' ? 'primary' : 'secondary'}
-                      onClick={() => setDataSource('cgm')}
-                    >
-                      CGM
-                    </Button>
-                    <Button
-                      appearance={dataSource === 'bg' ? 'primary' : 'secondary'}
-                      onClick={() => setDataSource('bg')}
-                    >
-                      BG
-                    </Button>
-                  </div>
+                  <TabList
+                    selectedValue={dataSource}
+                    onTabSelect={(_, data) => setDataSource(data.value as GlucoseDataSource)}
+                  >
+                    <Tab value="cgm">CGM</Tab>
+                    <Tab value="bg">BG</Tab>
+                  </TabList>
                 </div>
                 <div className={styles.controlRow}>
                   <Text className={styles.controlLabel}>Categories:</Text>
-                  <div className={styles.buttonGroup}>
-                    <Button
-                      appearance={categoryMode === 3 ? 'primary' : 'secondary'}
-                      onClick={() => setCategoryMode(3)}
-                    >
-                      3 Categories
-                    </Button>
-                    <Button
-                      appearance={categoryMode === 5 ? 'primary' : 'secondary'}
-                      onClick={() => setCategoryMode(5)}
-                    >
-                      5 Categories
-                    </Button>
-                  </div>
+                  <TabList
+                    selectedValue={String(categoryMode)}
+                    onTabSelect={(_, data) => setCategoryMode(Number(data.value) as RangeCategoryMode)}
+                  >
+                    <Tab value="3">3 Categories</Tab>
+                    <Tab value="5">5 Categories</Tab>
+                  </TabList>
                 </div>
                 {minDate && maxDate && (
                   <div className={styles.controlRow}>
                     <Text className={styles.controlLabel}>Date Range:</Text>
-                    <div className={styles.dateInputGroup}>
-                      <input
+                    <div className={styles.datePickerGroup}>
+                      <Input
                         type="date"
-                        className={styles.dateInput}
                         value={startDate}
                         min={minDate}
                         max={maxDate}
                         onChange={(e) => setStartDate(e.target.value)}
+                        appearance="outline"
                       />
                       <Text>to</Text>
-                      <input
+                      <Input
                         type="date"
-                        className={styles.dateInput}
                         value={endDate}
                         min={minDate}
                         max={maxDate}
                         onChange={(e) => setEndDate(e.target.value)}
+                        appearance="outline"
                       />
                     </div>
                   </div>

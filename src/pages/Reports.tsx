@@ -18,6 +18,8 @@ const useStyles = makeStyles({
     maxWidth: '1200px',
     marginLeft: 'auto',
     marginRight: 'auto',
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    backgroundColor: tokens.colorNeutralBackground1,
   },
   header: {
     marginBottom: '24px',
