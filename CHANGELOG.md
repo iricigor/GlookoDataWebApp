@@ -74,6 +74,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Privacy: All AI communication happens directly from browser, no server intermediary
 
 ### Fixes
+- [#TODO](../../pull/TODO) Simplify XLSX export to use metadata-based approach
+  - Removed `findCSVFileName` fallback function that tried to guess file names based on patterns
+  - XLSX export now always uses `sourceFiles` array from metadata (populated by `groupCsvFiles`)
+  - Eliminates inconsistency between Summary sheet (which shows all datasets) and actual exported sheets
+  - Added warning messages when source files are not found in ZIP
+  - Ensures "For each line in summary page, we need to have one sheet in excel" as requested
+  - All 20 unit tests passing including edge cases with missing files and merged datasets
 - Fix missing tabs in Excel export for single-file datasets
   - Fixed `groupCsvFiles` function in zipUtils.ts to preserve original file names in `sourceFiles` field
   - Previously, only merged datasets had their source files tracked, causing single-file datasets to be missing from Excel exports

@@ -67,6 +67,7 @@ async function createMockUploadedFile(csvFiles: Record<string, string>): Promise
       name: baseName,
       rowCount,
       columnNames,
+      sourceFiles: [fileName], // Populate sourceFiles like groupCsvFiles does
     };
   });
   
@@ -184,7 +185,7 @@ Timestamp\tName\tValue\tInsulin Type
 
   it('should NOT match manual_insulin when looking for insulin (bug fix verification)', async () => {
     // This test verifies the bug fix: when insulin file is missing from ZIP,
-    // the fallback should NOT match manual_insulin_data_1.csv
+    // it should NOT be created at all (previously the fallback could match manual_insulin_data_1.csv)
     
     // Create a ZIP with manual_insulin but no insulin
     const manualInsulinCsv = `Name:Igor Irić\tDate Range:2025-07-29 - 2025-10-26
@@ -213,11 +214,13 @@ Timestamp\tName\tValue\tInsulin Type
             name: 'insulin',  // Metadata says insulin exists
             rowCount: 91,
             columnNames: ['Timestamp', 'Total Bolus (U)', 'Total Insulin (U)', 'Total Basal (U)', 'Serial Number'],
+            sourceFiles: ['insulin_data_1.csv'], // Points to a file that doesn't exist in ZIP
           },
           {
             name: 'manual_insulin',
             rowCount: 1,
             columnNames: ['Timestamp', 'Name', 'Value', 'Insulin Type'],
+            sourceFiles: ['manual_insulin_data_1.csv'], // Points to actual file in ZIP
           }
         ],
         metadataLine: 'Name:Igor Irić\tDate Range:2025-07-29 - 2025-10-26',

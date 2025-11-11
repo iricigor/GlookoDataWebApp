@@ -66,33 +66,31 @@ export async function convertZipToXlsx(uploadedFile: UploadedFile): Promise<Blob
     // Add to summary
     summaryData.push([csvFile.name, csvFile.rowCount]);
     
-    // Find the actual CSV file(s) in the ZIP
-    let csvContent = '';
+    // Get the actual CSV file(s) from the ZIP using sourceFiles
+    // sourceFiles is always populated by groupCsvFiles in zipUtils
+    if (!csvFile.sourceFiles || csvFile.sourceFiles.length === 0) {
+      // Skip datasets without source files (shouldn't happen with current zipUtils logic)
+      console.warn(`Dataset "${csvFile.name}" has no source files, skipping`);
+      continue;
+    }
     
-    if (csvFile.sourceFiles && csvFile.sourceFiles.length > 0) {
-      // Merged dataset - combine all source files
-      const contents: string[] = [];
-      
-      for (const sourceFileName of csvFile.sourceFiles) {
-        const fileData = zip.files[sourceFileName];
-        if (fileData) {
-          const content = await fileData.async('string');
-          contents.push(content);
-        }
-      }
-      
-      // Merge the content (skip metadata and header for subsequent files)
-      csvContent = mergeCSVContents(contents);
-    } else {
-      // Single file dataset - find by pattern
-      const fileName = findCSVFileName(Object.keys(zip.files), csvFile.name);
-      if (fileName) {
-        const fileData = zip.files[fileName];
-        csvContent = await fileData.async('string');
+    const contents: string[] = [];
+    
+    for (const sourceFileName of csvFile.sourceFiles) {
+      const fileData = zip.files[sourceFileName];
+      if (fileData) {
+        const content = await fileData.async('string');
+        contents.push(content);
+      } else {
+        console.warn(`Source file "${sourceFileName}" not found in ZIP for dataset "${csvFile.name}"`);
       }
     }
     
-    if (csvContent) {
+    // Only create sheet if we found at least one file
+    if (contents.length > 0) {
+      // Merge the content (skip metadata and header for subsequent files)
+      const csvContent = mergeCSVContents(contents);
+      
       dataSheets.push({
         name: sanitizeSheetName(csvFile.name),
         content: csvContent
@@ -148,29 +146,6 @@ function mergeCSVContents(contents: string[]): string {
   }
   
   return lines.join('\n');
-}
-
-/**
- * Find CSV file name in ZIP that matches the dataset name
- * 
- * @param fileNames - Array of file names in the ZIP
- * @param datasetName - The dataset name to find
- * @returns The matching file name or undefined
- */
-function findCSVFileName(fileNames: string[], datasetName: string): string | undefined {
-  // Look for exact match first (e.g., "bg_data_1.csv" for "bg")
-  const pattern = new RegExp(`^${datasetName}_data_\\d+\\.csv$`, 'i');
-  const match = fileNames.find(name => pattern.test(name));
-  
-  if (match) return match;
-  
-  // Fallback: look for files that START with the dataset name (not substring match)
-  // This prevents "insulin" from matching "manual_insulin"
-  return fileNames.find(name => {
-    const lowerName = name.toLowerCase();
-    const lowerDataset = datasetName.toLowerCase();
-    return lowerName.startsWith(lowerDataset) && lowerName.endsWith('.csv');
-  });
 }
 
 /**
