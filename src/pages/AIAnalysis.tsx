@@ -150,6 +150,33 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     textAlign: 'center',
   },
+  scrollableTableContainer: {
+    marginTop: '16px',
+    maxHeight: '400px',
+    overflowY: 'auto',
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...shorthands.borderRadius('4px'),
+    position: 'relative',
+  },
+  scrollableTable: {
+    width: '100%',
+    '& thead': {
+      position: 'sticky',
+      top: 0,
+      backgroundColor: tokens.colorNeutralBackground1,
+      zIndex: 1,
+    },
+  },
+  promptTextContainer: {
+    ...shorthands.padding('12px'),
+    ...shorthands.borderRadius('4px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    fontFamily: 'monospace',
+    fontSize: tokens.fontSizeBase300,
+    whiteSpace: 'pre-wrap',
+    maxHeight: '300px',
+    overflowY: 'auto',
+  },
 });
 
 interface AIAnalysisProps {
@@ -548,8 +575,8 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                       <Text className={styles.statementText}>
                         Dataset showing glucose ranges and insulin doses by date:
                       </Text>
-                      <div style={{ marginTop: '16px', overflowX: 'auto' }}>
-                        <Table>
+                      <div className={styles.scrollableTableContainer}>
+                        <Table className={styles.scrollableTable}>
                           <TableHeader>
                             <TableRow>
                               <TableHeaderCell>Date</TableHeaderCell>
@@ -584,9 +611,11 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                           </TableBody>
                         </Table>
                       </div>
-                      <div className={styles.buttonContainer} style={{ marginTop: '16px' }}>
+                      
+                      <div className={styles.buttonContainer} style={{ marginTop: '24px' }}>
                         <Button
                           appearance="primary"
+                          size="large"
                           disabled={!hasApiKey || analyzingSecondPrompt || (secondPromptCooldownActive && secondPromptCooldownSeconds > 0)}
                           onClick={handleSecondPromptClick}
                           icon={analyzingSecondPrompt ? <Spinner size="tiny" /> : undefined}
@@ -619,6 +648,22 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                           </Text>
                         )}
                       </div>
+
+                      {/* Accordion to show prompt text */}
+                      <Accordion collapsible style={{ marginTop: '16px' }}>
+                        <AccordionItem value="promptText">
+                          <AccordionHeader>View AI Prompt</AccordionHeader>
+                          <AccordionPanel>
+                            <div className={styles.promptTextContainer}>
+                              {(() => {
+                                const csvData = convertDailyReportsToCSV(combinedDataset);
+                                const base64CsvData = base64Encode(csvData);
+                                return generateGlucoseInsulinPrompt(base64CsvData);
+                              })()}
+                            </div>
+                          </AccordionPanel>
+                        </AccordionItem>
+                      </Accordion>
 
                       {analyzingSecondPrompt && (
                         <div className={styles.loadingContainer}>
