@@ -34,7 +34,9 @@ function getApiKeyFromCookie(): string {
 function saveApiKeyToCookie(key: string): void {
   const expiryDate = new Date();
   expiryDate.setDate(expiryDate.getDate() + COOKIE_EXPIRY_DAYS);
-  document.cookie = `${API_KEY_COOKIE_NAME}=${encodeURIComponent(key)}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Strict`;
+  const isSecure = window.location.protocol === 'https:';
+  const secureFlag = isSecure ? '; Secure' : '';
+  document.cookie = `${API_KEY_COOKIE_NAME}=${encodeURIComponent(key)}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Strict${secureFlag}`;
 }
 
 /**
