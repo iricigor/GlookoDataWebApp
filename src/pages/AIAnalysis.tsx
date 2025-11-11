@@ -14,16 +14,23 @@ import {
   MessageBar,
   MessageBarBody,
   ProgressBar,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHeaderCell,
+  TableBody,
+  TableCell,
 } from '@fluentui/react-components';
 import { BrainCircuitRegular, CheckmarkCircleRegular, ErrorCircleRegular } from '@fluentui/react-icons';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
-import type { UploadedFile, AIAnalysisResult } from '../types';
+import type { UploadedFile, AIAnalysisResult, DailyReport } from '../types';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
-import { calculateGlucoseRangeStats, calculatePercentage } from '../utils/glucoseRangeUtils';
+import { extractInsulinReadings, aggregateInsulinByDate } from '../utils/insulinDataUtils';
+import { calculateGlucoseRangeStats, calculatePercentage, groupByDate } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { generateTimeInRangePrompt } from '../utils/perplexityApi';
-import { callAIApi, determineActiveProvider, getProviderDisplayName } from '../utils/aiApi';
+import { callAIApi, determineActiveProvider } from '../utils/aiApi';
 
 const useStyles = makeStyles({
   container: {
@@ -164,6 +171,8 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
   const [cooldownActive, setCooldownActive] = useState(false);
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [readyForNewAnalysis, setReadyForNewAnalysis] = useState(false);
+  const [combinedDataset, setCombinedDataset] = useState<DailyReport[]>([]);
+  const [secondPromptClicked, setSecondPromptClicked] = useState(false);
 
   // Determine which AI provider to use
   const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey);
@@ -177,13 +186,15 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
     }
   }, [existingAnalysis, selectedFile?.id]);
 
-  // Calculate in-range percentage when file is selected
+  // Calculate in-range percentage and combined dataset when file is selected
   useEffect(() => {
     if (!selectedFile) {
       setInRangePercentage(null);
       setAiResponse(null);
       setError(null);
       setReadyForNewAnalysis(false);
+      setCombinedDataset([]);
+      setSecondPromptClicked(false);
       return;
     }
 
@@ -197,6 +208,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
       setAiResponse(null);
       setError(null);
       setReadyForNewAnalysis(false);
+      setSecondPromptClicked(false);
       try {
         // Extract CGM readings (default data source)
         const readings = await extractGlucoseReadings(selectedFile, 'cgm');
@@ -206,12 +218,39 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
           const stats = calculateGlucoseRangeStats(readings, thresholds, 3);
           const percentage = calculatePercentage(stats.inRange, stats.total);
           setInRangePercentage(percentage);
+
+          // Generate combined dataset for second prompt
+          const dailyGlucoseReports = groupByDate(readings, thresholds, 3);
+          
+          // Extract and aggregate insulin data
+          try {
+            const insulinReadings = await extractInsulinReadings(selectedFile);
+            const insulinData = aggregateInsulinByDate(insulinReadings);
+            
+            // Merge insulin data with daily glucose reports
+            const mergedData = dailyGlucoseReports.map(report => {
+              const insulinForDate = insulinData.find(ins => ins.date === report.date);
+              return {
+                ...report,
+                basalInsulin: insulinForDate?.basalTotal,
+                bolusInsulin: insulinForDate?.bolusTotal,
+                totalInsulin: insulinForDate?.totalInsulin,
+              };
+            });
+            setCombinedDataset(mergedData);
+          } catch (insulinErr) {
+            // If insulin extraction fails, just use glucose reports without insulin data
+            console.warn('Failed to extract insulin data:', insulinErr);
+            setCombinedDataset(dailyGlucoseReports);
+          }
         } else {
           setInRangePercentage(null);
+          setCombinedDataset([]);
         }
       } catch (error) {
         console.error('Failed to calculate in-range percentage:', error);
         setInRangePercentage(null);
+        setCombinedDataset([]);
       } finally {
         setLoading(false);
       }
@@ -289,6 +328,10 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
     }
   };
 
+  const handleSecondPromptClick = () => {
+    setSecondPromptClicked(true);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -327,7 +370,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
           <Accordion collapsible defaultOpenItems={["timeInRange"]}>
             {/* First Prompt: Time in Range Analysis */}
             <AccordionItem value="timeInRange">
-              <AccordionHeader>Time in Range Analysis{activeProvider ? ` (Using ${getProviderDisplayName(activeProvider)})` : ''}</AccordionHeader>
+              <AccordionHeader>Time in Range Analysis</AccordionHeader>
               <AccordionPanel>
                 <div className={styles.promptContent}>
                   {loading ? (
@@ -363,7 +406,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                         )}
                         {!analyzing && !aiResponse && !error && !cooldownActive && (
                           <Text className={styles.helperText}>
-                            Click Analyze to get AI-powered analysis using {activeProvider ? getProviderDisplayName(activeProvider) : 'AI'}
+                            Click Analyze to get AI-powered analysis
                           </Text>
                         )}
                         {aiResponse && !readyForNewAnalysis && !cooldownActive && !analyzing && (
@@ -414,14 +457,74 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
               </AccordionPanel>
             </AccordionItem>
 
-            {/* Second Prompt: Coming Soon */}
-            <AccordionItem value="comingSoon">
-              <AccordionHeader>Additional Analysis</AccordionHeader>
+            {/* Second Prompt: Glucose and Insulin Analysis */}
+            <AccordionItem value="glucoseInsulin">
+              <AccordionHeader>Glucose and Insulin Analysis</AccordionHeader>
               <AccordionPanel>
                 <div className={styles.promptContent}>
-                  <Text className={styles.comingSoonText}>
-                    To be added soon
-                  </Text>
+                  {loading ? (
+                    <Text className={styles.helperText}>Loading data...</Text>
+                  ) : combinedDataset.length > 0 ? (
+                    <>
+                      <Text className={styles.statementText}>
+                        Dataset showing glucose ranges and insulin doses by date:
+                      </Text>
+                      <div style={{ marginTop: '16px', overflowX: 'auto' }}>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHeaderCell>Date</TableHeaderCell>
+                              <TableHeaderCell>Day of Week</TableHeaderCell>
+                              <TableHeaderCell>BG Below (%)</TableHeaderCell>
+                              <TableHeaderCell>BG In Range (%)</TableHeaderCell>
+                              <TableHeaderCell>BG Above (%)</TableHeaderCell>
+                              <TableHeaderCell>Basal Insulin (Units)</TableHeaderCell>
+                              <TableHeaderCell>Bolus Insulin (Units)</TableHeaderCell>
+                              <TableHeaderCell>Total Insulin (Units)</TableHeaderCell>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {combinedDataset.map(report => {
+                              const date = new Date(report.date);
+                              const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                              const dayOfWeek = dayNames[date.getDay()];
+                              
+                              return (
+                                <TableRow key={report.date}>
+                                  <TableCell>{report.date}</TableCell>
+                                  <TableCell>{dayOfWeek}</TableCell>
+                                  <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}%</TableCell>
+                                  <TableCell>{calculatePercentage(report.stats.inRange, report.stats.total)}%</TableCell>
+                                  <TableCell>{calculatePercentage(report.stats.high, report.stats.total)}%</TableCell>
+                                  <TableCell>{report.basalInsulin !== undefined ? report.basalInsulin : '-'}</TableCell>
+                                  <TableCell>{report.bolusInsulin !== undefined ? report.bolusInsulin : '-'}</TableCell>
+                                  <TableCell>{report.totalInsulin !== undefined ? report.totalInsulin : '-'}</TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
+                      <div className={styles.buttonContainer} style={{ marginTop: '16px' }}>
+                        <Button
+                          appearance="primary"
+                          disabled={!hasApiKey}
+                          onClick={handleSecondPromptClick}
+                        >
+                          {secondPromptClicked ? 'AI analysis not implemented yet' : 'Analyze with AI'}
+                        </Button>
+                        {!secondPromptClicked && (
+                          <Text className={styles.helperText}>
+                            Click Analyze to get AI-powered analysis (coming soon)
+                          </Text>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <Text className={styles.helperText}>
+                      No data available for analysis
+                    </Text>
+                  )}
                 </div>
               </AccordionPanel>
             </AccordionItem>

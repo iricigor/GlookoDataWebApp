@@ -3,10 +3,12 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { AIAnalysis } from './AIAnalysis';
 import type { UploadedFile, AIAnalysisResult } from '../types';
 import * as glucoseDataUtils from '../utils/glucoseDataUtils';
+import * as insulinDataUtils from '../utils/insulinDataUtils';
 import * as aiApi from '../utils/aiApi';
 
 // Mock the modules
 vi.mock('../utils/glucoseDataUtils');
+vi.mock('../utils/insulinDataUtils');
 vi.mock('../utils/aiApi');
 vi.mock('../hooks/useGlucoseThresholds', () => ({
   useGlucoseThresholds: () => ({
@@ -30,6 +32,12 @@ describe('AIAnalysis', () => {
 
   const mockAnalysisComplete = vi.fn();
 
+  // Helper function to get the first "Analyze with AI" button (Time in Range Analysis)
+  const getFirstAnalyzeButton = () => {
+    const buttons = screen.getAllByText('Analyze with AI');
+    return buttons[0];
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock glucose data extraction
@@ -37,9 +45,11 @@ describe('AIAnalysis', () => {
       { timestamp: new Date(), value: 7.0 },
       { timestamp: new Date(), value: 8.0 },
     ]);
+    // Mock insulin data extraction
+    vi.mocked(insulinDataUtils.extractInsulinReadings).mockResolvedValue([]);
+    vi.mocked(insulinDataUtils.aggregateInsulinByDate).mockReturnValue([]);
     // Mock AI provider
     vi.mocked(aiApi.determineActiveProvider).mockReturnValue('gemini');
-    vi.mocked(aiApi.getProviderDisplayName).mockReturnValue('Google Gemini');
   });
 
   afterEach(() => {
@@ -57,7 +67,7 @@ describe('AIAnalysis', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
+      expect(getFirstAnalyzeButton()).toBeInTheDocument();
     });
   });
 
@@ -79,11 +89,11 @@ describe('AIAnalysis', () => {
 
     // Wait for the button to be available (after data loads)
     await waitFor(() => {
-      expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
+      expect(getFirstAnalyzeButton()).toBeInTheDocument();
     }, { timeout: 2000 });
 
     // Click the analyze button
-    const analyzeButton = screen.getByText('Analyze with AI');
+    const analyzeButton = getFirstAnalyzeButton();
     fireEvent.click(analyzeButton);
 
     // Wait for analysis to complete
@@ -115,11 +125,11 @@ describe('AIAnalysis', () => {
 
     // Wait for the button to be available
     await waitFor(() => {
-      expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
+      expect(getFirstAnalyzeButton()).toBeInTheDocument();
     }, { timeout: 2000 });
 
     // Click to start first analysis
-    fireEvent.click(screen.getByText('Analyze with AI'));
+    fireEvent.click(getFirstAnalyzeButton());
 
     // Wait for analysis to complete
     await waitFor(() => {
@@ -146,7 +156,7 @@ describe('AIAnalysis', () => {
 
     // Button should return to "Analyze with AI"
     await waitFor(() => {
-      expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
+      expect(getFirstAnalyzeButton()).toBeInTheDocument();
     }, { timeout: 2000 });
   }, 10000); // 10 second timeout for this test
 
@@ -168,9 +178,9 @@ describe('AIAnalysis', () => {
 
     // Wait for the button and click it
     await waitFor(() => {
-      expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
+      expect(getFirstAnalyzeButton()).toBeInTheDocument();
     }, { timeout: 2000 });
-    fireEvent.click(screen.getByText('Analyze with AI'));
+    fireEvent.click(getFirstAnalyzeButton());
 
     // Wait for analysis to complete
     await waitFor(() => {
@@ -234,9 +244,9 @@ describe('AIAnalysis', () => {
 
     // First analysis
     await waitFor(() => {
-      expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
+      expect(getFirstAnalyzeButton()).toBeInTheDocument();
     }, { timeout: 2000 });
-    fireEvent.click(screen.getByText('Analyze with AI'));
+    fireEvent.click(getFirstAnalyzeButton());
 
     await waitFor(() => {
       expect(screen.getByText('Successful analysis')).toBeInTheDocument();
@@ -263,11 +273,11 @@ describe('AIAnalysis', () => {
 
     // Button should now show "Analyze with AI"
     await waitFor(() => {
-      expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
+      expect(getFirstAnalyzeButton()).toBeInTheDocument();
     }, { timeout: 2000 });
 
     // Click analyze again
-    fireEvent.click(screen.getByText('Analyze with AI'));
+    fireEvent.click(getFirstAnalyzeButton());
 
     // Wait for error to appear
     await waitFor(() => {
@@ -295,10 +305,10 @@ describe('AIAnalysis', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Analyze with AI')).toBeInTheDocument();
+      expect(getFirstAnalyzeButton()).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Analyze with AI'));
+    fireEvent.click(getFirstAnalyzeButton());
 
     await waitFor(() => {
       expect(mockAnalysisComplete).toHaveBeenCalledWith(

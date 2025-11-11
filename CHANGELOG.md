@@ -17,6 +17,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
+- Add second AI prompt with glucose and insulin data integration
+  - New "Glucose and Insulin Analysis" section on AI Analysis page
+  - Displays comprehensive dataset combining glucose ranges and insulin doses by date
+  - Dataset includes: Date, Day of Week, BG Below (%), BG In Range (%), BG Above (%), Basal Insulin (Units), Bolus Insulin (Units), Total Insulin (Units)
+  - Insulin data extracted from basal and bolus CSV files in Glooko exports
+  - Automatic aggregation of insulin doses by date with rounding to 1 decimal place
+  - Graceful handling of missing insulin data (displays "-" when unavailable)
+  - Fake AI button placeholder for future AI analysis functionality
+  - Remove AI provider name (e.g., "Using Perplexity") from accordion headers for cleaner UI
+  - 6 comprehensive unit tests for insulin data extraction and aggregation
+- Enhance daily glucose reports with insulin data
+  - Add "Day of Week" column to "Glucose Range by Date" table in Reports page
+  - Add three new columns: Basal Insulin (Units), Bolus Insulin (Units), Total Insulin (Units)
+  - Insulin data automatically merged with glucose data by date
+  - Missing insulin data displayed as "-" for dates without insulin records
 - [#171](../../pull/171) Align Reports page with Fluent UI design standards
   - Wrap In Range summary data in Fluent UI Card component for better visual organization
   - Replace button groups with Fluent UI TabList for Data Source (CGM/BG) and Categories (3/5) selectors

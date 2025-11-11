@@ -32,9 +32,11 @@ import type {
   DailyReport,
   WeeklyReport,
   GlucoseReading,
+  DailyInsulinSummary,
 } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
+import { extractInsulinReadings, aggregateInsulinByDate } from '../utils/insulinDataUtils';
 import { groupByDayOfWeek, groupByDate, groupByWeek, calculatePercentage } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { CopyToCsvButton } from './CopyToCsvButton';
@@ -206,6 +208,7 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
   const [dayOfWeekReports, setDayOfWeekReports] = useState<DayOfWeekReport[]>([]);
   const [dailyReports, setDailyReports] = useState<DailyReport[]>([]);
   const [weeklyReports, setWeeklyReports] = useState<WeeklyReport[]>([]);
+  const [insulinSummaries, setInsulinSummaries] = useState<DailyInsulinSummary[]>([]);
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [minDate, setMinDate] = useState<string>('');
@@ -217,6 +220,7 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
       setDayOfWeekReports([]);
       setDailyReports([]);
       setWeeklyReports([]);
+      setInsulinSummaries([]);
       setError(null);
       setStartDate('');
       setEndDate('');
@@ -238,6 +242,7 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
           setDayOfWeekReports([]);
           setDailyReports([]);
           setWeeklyReports([]);
+          setInsulinSummaries([]);
           setStartDate('');
           setEndDate('');
           setMinDate('');
@@ -256,9 +261,34 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
           setStartDate(minDateStr);
           setEndDate(maxDateStr);
           
+          // Generate reports
+          const dailyGlucoseReports = groupByDate(glucoseReadings, thresholds, categoryMode);
           setDayOfWeekReports(groupByDayOfWeek(glucoseReadings, thresholds, categoryMode));
-          setDailyReports(groupByDate(glucoseReadings, thresholds, categoryMode));
           setWeeklyReports(groupByWeek(glucoseReadings, thresholds, categoryMode));
+          
+          // Extract and aggregate insulin data
+          try {
+            const insulinReadings = await extractInsulinReadings(selectedFile);
+            const insulinData = aggregateInsulinByDate(insulinReadings);
+            setInsulinSummaries(insulinData);
+            
+            // Merge insulin data with daily glucose reports
+            const mergedDailyReports = dailyGlucoseReports.map(report => {
+              const insulinForDate = insulinData.find(ins => ins.date === report.date);
+              return {
+                ...report,
+                basalInsulin: insulinForDate?.basalTotal,
+                bolusInsulin: insulinForDate?.bolusTotal,
+                totalInsulin: insulinForDate?.totalInsulin,
+              };
+            });
+            setDailyReports(mergedDailyReports);
+          } catch (insulinErr) {
+            // If insulin extraction fails, just use glucose reports without insulin data
+            console.warn('Failed to extract insulin data:', insulinErr);
+            setInsulinSummaries([]);
+            setDailyReports(dailyGlucoseReports);
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load glucose data');
@@ -266,6 +296,7 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
         setDayOfWeekReports([]);
         setDailyReports([]);
         setWeeklyReports([]);
+        setInsulinSummaries([]);
       } finally {
         setLoading(false);
       }
@@ -278,10 +309,22 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
   useEffect(() => {
     if (readings.length > 0) {
       setDayOfWeekReports(groupByDayOfWeek(readings, thresholds, categoryMode));
-      setDailyReports(groupByDate(readings, thresholds, categoryMode));
+      const dailyGlucoseReports = groupByDate(readings, thresholds, categoryMode);
       setWeeklyReports(groupByWeek(readings, thresholds, categoryMode));
+      
+      // Merge with insulin data
+      const mergedDailyReports = dailyGlucoseReports.map(report => {
+        const insulinForDate = insulinSummaries.find(ins => ins.date === report.date);
+        return {
+          ...report,
+          basalInsulin: insulinForDate?.basalTotal,
+          bolusInsulin: insulinForDate?.bolusTotal,
+          totalInsulin: insulinForDate?.totalInsulin,
+        };
+      });
+      setDailyReports(mergedDailyReports);
     }
-  }, [categoryMode, readings, thresholds]);
+  }, [categoryMode, readings, thresholds, insulinSummaries]);
 
   // Filter readings by date range
   useEffect(() => {
@@ -297,10 +340,22 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
       });
       
       setDayOfWeekReports(groupByDayOfWeek(filteredReadings, thresholds, categoryMode));
-      setDailyReports(groupByDate(filteredReadings, thresholds, categoryMode));
+      const dailyGlucoseReports = groupByDate(filteredReadings, thresholds, categoryMode);
       setWeeklyReports(groupByWeek(filteredReadings, thresholds, categoryMode));
+      
+      // Merge with insulin data
+      const mergedDailyReports = dailyGlucoseReports.map(report => {
+        const insulinForDate = insulinSummaries.find(ins => ins.date === report.date);
+        return {
+          ...report,
+          basalInsulin: insulinForDate?.basalTotal,
+          bolusInsulin: insulinForDate?.bolusTotal,
+          totalInsulin: insulinForDate?.totalInsulin,
+        };
+      });
+      setDailyReports(mergedDailyReports);
     }
-  }, [startDate, endDate, readings, thresholds, categoryMode]);
+  }, [startDate, endDate, readings, thresholds, categoryMode, insulinSummaries]);
 
   // Calculate overall summary stats
   const calculateOverallStats = () => {
@@ -372,6 +427,44 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
           <TableCell className={styles.inRangeCell}>{calculatePercentage(stats.inRange, stats.total)}% ({stats.inRange})</TableCell>
           <TableCell>{calculatePercentage(stats.high, stats.total)}% ({stats.high})</TableCell>
           <TableCell>{stats.total}</TableCell>
+        </TableRow>
+      );
+    }
+  };
+
+  // Render daily report row with insulin data
+  const renderDailyReportRow = (report: DailyReport) => {
+    // Get day of week from date
+    const date = new Date(report.date);
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayOfWeek = dayNames[date.getDay()];
+    
+    if (categoryMode === 5) {
+      return (
+        <TableRow key={report.date}>
+          <TableCell>{report.date}</TableCell>
+          <TableCell>{dayOfWeek}</TableCell>
+          <TableCell>{calculatePercentage(report.stats.veryLow ?? 0, report.stats.total)}% ({report.stats.veryLow ?? 0})</TableCell>
+          <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}% ({report.stats.low})</TableCell>
+          <TableCell className={styles.inRangeCell}>{calculatePercentage(report.stats.inRange, report.stats.total)}% ({report.stats.inRange})</TableCell>
+          <TableCell>{calculatePercentage(report.stats.high, report.stats.total)}% ({report.stats.high})</TableCell>
+          <TableCell>{calculatePercentage(report.stats.veryHigh ?? 0, report.stats.total)}% ({report.stats.veryHigh ?? 0})</TableCell>
+          <TableCell>{report.basalInsulin !== undefined ? report.basalInsulin : '-'}</TableCell>
+          <TableCell>{report.bolusInsulin !== undefined ? report.bolusInsulin : '-'}</TableCell>
+          <TableCell>{report.totalInsulin !== undefined ? report.totalInsulin : '-'}</TableCell>
+        </TableRow>
+      );
+    } else {
+      return (
+        <TableRow key={report.date}>
+          <TableCell>{report.date}</TableCell>
+          <TableCell>{dayOfWeek}</TableCell>
+          <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}% ({report.stats.low})</TableCell>
+          <TableCell className={styles.inRangeCell}>{calculatePercentage(report.stats.inRange, report.stats.total)}% ({report.stats.inRange})</TableCell>
+          <TableCell>{calculatePercentage(report.stats.high, report.stats.total)}% ({report.stats.high})</TableCell>
+          <TableCell>{report.basalInsulin !== undefined ? report.basalInsulin : '-'}</TableCell>
+          <TableCell>{report.bolusInsulin !== undefined ? report.bolusInsulin : '-'}</TableCell>
+          <TableCell>{report.totalInsulin !== undefined ? report.totalInsulin : '-'}</TableCell>
         </TableRow>
       );
     }
@@ -710,16 +803,19 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
                             <TableHeader>
                               <TableRow>
                                 <TableHeaderCell>Date</TableHeaderCell>
+                                <TableHeaderCell>Day of Week</TableHeaderCell>
                                 {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
                                 <TableHeaderCell>Low</TableHeaderCell>
                                 <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
                                 <TableHeaderCell>High</TableHeaderCell>
                                 {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
-                                <TableHeaderCell>Total</TableHeaderCell>
+                                <TableHeaderCell>Basal Insulin (Units)</TableHeaderCell>
+                                <TableHeaderCell>Bolus Insulin (Units)</TableHeaderCell>
+                                <TableHeaderCell>Total Insulin (Units)</TableHeaderCell>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {dailyReports.map(report => renderStatsRow(report.date, report.stats))}
+                              {dailyReports.map(report => renderDailyReportRow(report))}
                             </TableBody>
                           </Table>
                         </div>
