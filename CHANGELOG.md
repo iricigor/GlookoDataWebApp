@@ -48,6 +48,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Security: API key transmitted securely via HTTPS, stored only in browser cookies
   - Privacy: All AI communication happens directly from browser, no server intermediary
 
+### Fixes
+- Fix AI analysis response persistence and button state management
+  - AI responses now persist when navigating to other pages and returning
+  - AI responses preserved even after failed API calls
+  - Button changes to "Click to enable new analysis" after successful analysis
+  - 3-second cooldown with progress bar when requesting new analysis
+  - Cooldown prevents accidental multiple API calls
+  - State lifted to App.tsx for proper persistence across navigation
+  - Added comprehensive unit tests for new behavior (7 new tests)
+  - Prevents users from spamming the analyze button
+
 ---
 
 ## [1.1.x] - Released
