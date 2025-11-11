@@ -17,16 +17,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
-- Add second AI prompt with glucose and insulin data integration
+- Finalize second AI prompt with glucose and insulin correlation analysis
   - New "Glucose and Insulin Analysis" section on AI Analysis page
   - Displays comprehensive dataset combining glucose ranges and insulin doses by date
   - Dataset includes: Date, Day of Week, BG Below (%), BG In Range (%), BG Above (%), Basal Insulin (Units), Bolus Insulin (Units), Total Insulin (Units)
   - Insulin data extracted from basal and bolus CSV files in Glooko exports
   - Automatic aggregation of insulin doses by date with rounding to 1 decimal place
   - Graceful handling of missing insulin data (displays "-" when unavailable)
-  - Fake AI button placeholder for future AI analysis functionality
+  - **Full AI functionality now implemented** - converts dataset to CSV format and base64 encodes for AI analysis
+  - Comprehensive AI prompt analyzing temporal trends, insulin efficacy correlations, anomalies, and actionable recommendations
+  - Cooldown mechanism (3 seconds) to prevent excessive API calls with progress bar
+  - Loading spinner, success messages, and error handling for AI analysis
+  - Supports both Google Gemini and Perplexity AI APIs
+  - New utility functions: `convertDailyReportsToCSV()`, `base64Encode()`, `base64Decode()`, `generateGlucoseInsulinPrompt()`
+  - 22 comprehensive unit tests for CSV conversion, base64 encoding, and prompt generation
   - Remove AI provider name (e.g., "Using Perplexity") from accordion headers for cleaner UI
-  - 6 comprehensive unit tests for insulin data extraction and aggregation
 - Enhance daily glucose reports with insulin data
   - Add "Day of Week" column to "Glucose Range by Date" table in Reports page
   - Add three new columns: Basal Insulin (Units), Bolus Insulin (Units), Total Insulin (Units)

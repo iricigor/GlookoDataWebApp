@@ -6,6 +6,71 @@ import JSZip from 'jszip';
 import type { UploadedFile, InsulinReading, DailyInsulinSummary } from '../types';
 
 /**
+ * Parse daily insulin totals from combined insulin CSV (format: Timestamp, Total Bolus, Total Insulin, Total Basal)
+ * 
+ * @param csvContent - The CSV file content as string
+ * @param delimiter - The delimiter used in the CSV (tab or comma)
+ * @returns Array of daily insulin summaries
+ */
+function parseDailyInsulinFromCSV(
+  csvContent: string,
+  delimiter: string = '\t'
+): DailyInsulinSummary[] {
+  const lines = csvContent.trim().split('\n');
+  
+  if (lines.length < 2) {
+    return [];
+  }
+
+  // Line 0: metadata, Line 1: headers, Lines 2+: data
+  const headerLine = lines[1];
+  const headers = headerLine.split(delimiter).map(h => h.trim());
+  
+  // Find column indices
+  const timestampIndex = headers.findIndex(h => h.toLowerCase().includes('timestamp'));
+  const totalBolusIndex = headers.findIndex(h => h.toLowerCase().includes('total bolus') || h.toLowerCase() === 'total bolus (u)');
+  const totalBasalIndex = headers.findIndex(h => h.toLowerCase().includes('total basal') || h.toLowerCase() === 'total basal (u)');
+  const totalInsulinIndex = headers.findIndex(h => h.toLowerCase().includes('total insulin') || h.toLowerCase() === 'total insulin (u)');
+
+  if (timestampIndex === -1) {
+    return [];
+  }
+
+  const summaries: DailyInsulinSummary[] = [];
+
+  // Process data rows (starting from line 2)
+  for (let i = 2; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    const values = line.split(delimiter);
+    
+    const timestampStr = values[timestampIndex]?.trim();
+    if (!timestampStr) continue;
+
+    // Parse timestamp and format as date
+    const timestamp = new Date(timestampStr);
+    if (isNaN(timestamp.getTime())) continue;
+    
+    const date = formatDate(timestamp);
+
+    // Parse insulin values
+    const totalBolus = totalBolusIndex !== -1 ? parseFloat(values[totalBolusIndex]?.trim() || '0') : 0;
+    const totalBasal = totalBasalIndex !== -1 ? parseFloat(values[totalBasalIndex]?.trim() || '0') : 0;
+    const totalInsulin = totalInsulinIndex !== -1 ? parseFloat(values[totalInsulinIndex]?.trim() || '0') : (totalBasal + totalBolus);
+
+    summaries.push({
+      date,
+      basalTotal: Math.round(totalBasal * 10) / 10,
+      bolusTotal: Math.round(totalBolus * 10) / 10,
+      totalInsulin: Math.round(totalInsulin * 10) / 10,
+    });
+  }
+
+  return summaries;
+}
+
+/**
  * Parse insulin readings from CSV content
  * 
  * @param csvContent - The CSV file content as string
@@ -112,10 +177,55 @@ function findCSVFileName(fileNames: string[], datasetName: string): string | und
 }
 
 /**
+ * Extract daily insulin summaries from uploaded file
+ * Supports both combined insulin file format and separate basal/bolus files
+ * 
+ * @param uploadedFile - The uploaded file with ZIP metadata
+ * @returns Promise resolving to array of daily insulin summaries
+ */
+export async function extractDailyInsulinSummaries(
+  uploadedFile: UploadedFile
+): Promise<DailyInsulinSummary[]> {
+  if (!uploadedFile.zipMetadata || !uploadedFile.zipMetadata.isValid) {
+    throw new Error('Invalid ZIP file');
+  }
+
+  // Load the ZIP file
+  const zip = await JSZip.loadAsync(uploadedFile.file);
+
+  // First check for combined insulin file (insulin_data_*.csv with daily totals)
+  const insulinFile = uploadedFile.zipMetadata.csvFiles.find(f => f.name === 'insulin');
+  if (insulinFile) {
+    // Combined insulin file with daily totals
+    if (insulinFile.sourceFiles && insulinFile.sourceFiles.length > 0) {
+      const sourceFileName = insulinFile.sourceFiles[0]; // Use first file
+      const fileData = zip.files[sourceFileName];
+      if (fileData) {
+        const content = await fileData.async('string');
+        const delimiter = detectDelimiter(content);
+        return parseDailyInsulinFromCSV(content, delimiter);
+      }
+    } else {
+      const fileName = findCSVFileName(Object.keys(zip.files), 'insulin');
+      if (fileName) {
+        const fileData = zip.files[fileName];
+        const content = await fileData.async('string');
+        const delimiter = detectDelimiter(content);
+        return parseDailyInsulinFromCSV(content, delimiter);
+      }
+    }
+  }
+
+  // Fall back to extracting from separate basal/bolus files
+  const readings = await extractInsulinReadings(uploadedFile);
+  return aggregateInsulinByDate(readings);
+}
+
+/**
  * Extract insulin readings from uploaded file
  * 
  * @param uploadedFile - The uploaded file with ZIP metadata
- * @returns Promise resolving to array of insulin readings
+ * @returns Promise resolving to array of daily insulin summaries (for combined format) or insulin readings (for separate format)
  */
 export async function extractInsulinReadings(
   uploadedFile: UploadedFile
@@ -126,6 +236,14 @@ export async function extractInsulinReadings(
 
   // Load the ZIP file
   const zip = await JSZip.loadAsync(uploadedFile.file);
+
+  // First check for combined insulin file (insulin_data_*.csv with daily totals)
+  const insulinFile = uploadedFile.zipMetadata.csvFiles.find(f => f.name === 'insulin');
+  if (insulinFile) {
+    // This is a combined insulin file with daily totals - we need to convert it differently
+    // For now, return empty to avoid confusion - will handle this in aggregateInsulinByDate
+    return [];
+  }
 
   let allReadings: InsulinReading[] = [];
 

@@ -26,11 +26,12 @@ import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
 import type { UploadedFile, AIAnalysisResult, DailyReport } from '../types';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
-import { extractInsulinReadings, aggregateInsulinByDate } from '../utils/insulinDataUtils';
+import { extractDailyInsulinSummaries } from '../utils/insulinDataUtils';
 import { calculateGlucoseRangeStats, calculatePercentage, groupByDate } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
-import { generateTimeInRangePrompt } from '../utils/perplexityApi';
+import { generateTimeInRangePrompt, generateGlucoseInsulinPrompt, base64Encode } from '../utils/perplexityApi';
 import { callAIApi, determineActiveProvider } from '../utils/aiApi';
+import { convertDailyReportsToCSV } from '../utils/csvUtils';
 
 const useStyles = makeStyles({
   container: {
@@ -149,6 +150,40 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     textAlign: 'center',
   },
+  scrollableTableContainer: {
+    marginTop: '16px',
+    maxHeight: '400px',
+    overflowY: 'auto',
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...shorthands.borderRadius('4px'),
+    position: 'relative',
+  },
+  scrollableTable: {
+    width: '100%',
+    '& thead': {
+      position: 'sticky',
+      top: 0,
+      backgroundColor: tokens.colorNeutralBackground1,
+      zIndex: 1,
+    },
+  },
+  promptTextContainer: {
+    ...shorthands.padding('12px'),
+    ...shorthands.borderRadius('4px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    fontFamily: 'monospace',
+    fontSize: tokens.fontSizeBase300,
+    whiteSpace: 'pre-wrap',
+    maxHeight: '300px',
+    overflowY: 'auto',
+  },
+  emphasizedHeaderCell: {
+    fontWeight: tokens.fontWeightSemibold,
+    backgroundColor: tokens.colorNeutralBackground3,
+  },
+  emphasizedCell: {
+    fontWeight: tokens.fontWeightSemibold,
+  },
 });
 
 interface AIAnalysisProps {
@@ -172,7 +207,14 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [readyForNewAnalysis, setReadyForNewAnalysis] = useState(false);
   const [combinedDataset, setCombinedDataset] = useState<DailyReport[]>([]);
-  const [secondPromptClicked, setSecondPromptClicked] = useState(false);
+  
+  // Second prompt state
+  const [analyzingSecondPrompt, setAnalyzingSecondPrompt] = useState(false);
+  const [secondPromptResponse, setSecondPromptResponse] = useState<string | null>(null);
+  const [secondPromptError, setSecondPromptError] = useState<string | null>(null);
+  const [secondPromptCooldownActive, setSecondPromptCooldownActive] = useState(false);
+  const [secondPromptCooldownSeconds, setSecondPromptCooldownSeconds] = useState(0);
+  const [secondPromptReady, setSecondPromptReady] = useState(false);
 
   // Determine which AI provider to use
   const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey);
@@ -194,7 +236,9 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
       setError(null);
       setReadyForNewAnalysis(false);
       setCombinedDataset([]);
-      setSecondPromptClicked(false);
+      setSecondPromptResponse(null);
+      setSecondPromptError(null);
+      setSecondPromptReady(false);
       return;
     }
 
@@ -205,10 +249,13 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
 
     const calculateInRange = async () => {
       setLoading(true);
+      // Only clear responses when new file is selected, not during recalculation
       setAiResponse(null);
       setError(null);
       setReadyForNewAnalysis(false);
-      setSecondPromptClicked(false);
+      setSecondPromptResponse(null);
+      setSecondPromptError(null);
+      setSecondPromptReady(false);
       try {
         // Extract CGM readings (default data source)
         const readings = await extractGlucoseReadings(selectedFile, 'cgm');
@@ -224,8 +271,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
           
           // Extract and aggregate insulin data
           try {
-            const insulinReadings = await extractInsulinReadings(selectedFile);
-            const insulinData = aggregateInsulinByDate(insulinReadings);
+            const insulinData = await extractDailyInsulinSummaries(selectedFile);
             
             // Merge insulin data with daily glucose reports
             const mergedData = dailyGlucoseReports.map(report => {
@@ -271,6 +317,19 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
       setReadyForNewAnalysis(true);
     }
   }, [cooldownSeconds, cooldownActive]);
+
+  // Handle cooldown timer for second prompt
+  useEffect(() => {
+    if (secondPromptCooldownSeconds > 0) {
+      const timer = setTimeout(() => {
+        setSecondPromptCooldownSeconds(prev => prev - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (secondPromptCooldownActive && secondPromptCooldownSeconds === 0) {
+      setSecondPromptCooldownActive(false);
+      setSecondPromptReady(true);
+    }
+  }, [secondPromptCooldownSeconds, secondPromptCooldownActive]);
 
   const handleAnalyzeClick = async () => {
     if (!activeProvider || !hasApiKey || inRangePercentage === null) {
@@ -328,8 +387,62 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
     }
   };
 
-  const handleSecondPromptClick = () => {
-    setSecondPromptClicked(true);
+  const handleSecondPromptClick = async () => {
+    if (!activeProvider || !hasApiKey || combinedDataset.length === 0) {
+      return;
+    }
+
+    // If there's already a response, start cooldown before allowing new analysis
+    if (secondPromptResponse && !secondPromptCooldownActive && !secondPromptReady) {
+      setSecondPromptCooldownActive(true);
+      setSecondPromptCooldownSeconds(3);
+      return;
+    }
+
+    // Don't analyze if cooldown is active
+    if (secondPromptCooldownActive) {
+      return;
+    }
+
+    setAnalyzingSecondPrompt(true);
+    setSecondPromptError(null);
+    setSecondPromptReady(false); // Reset the flag when starting new analysis
+    const previousResponse = secondPromptResponse; // Keep previous response in case of error
+
+    try {
+      // Convert combined dataset to CSV
+      const csvData = convertDailyReportsToCSV(combinedDataset);
+      
+      // Base64 encode the CSV data
+      const base64CsvData = base64Encode(csvData);
+
+      // Generate the prompt with the base64 CSV data
+      const prompt = generateGlucoseInsulinPrompt(base64CsvData);
+
+      // Get the appropriate API key for the active provider
+      const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : geminiApiKey;
+
+      // Call the AI API using the selected provider
+      const result = await callAIApi(activeProvider, apiKey, prompt);
+
+      if (result.success && result.content) {
+        setSecondPromptResponse(result.content);
+      } else {
+        // On error, keep the previous response if it exists
+        setSecondPromptError(result.error || 'Failed to get AI response');
+        if (previousResponse) {
+          setSecondPromptResponse(previousResponse);
+        }
+      }
+    } catch (err) {
+      // On error, keep the previous response if it exists
+      setSecondPromptError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      if (previousResponse) {
+        setSecondPromptResponse(previousResponse);
+      }
+    } finally {
+      setAnalyzingSecondPrompt(false);
+    }
   };
 
   return (
@@ -466,21 +579,75 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                     <Text className={styles.helperText}>Loading data...</Text>
                   ) : combinedDataset.length > 0 ? (
                     <>
-                      <Text className={styles.statementText}>
+                      {/* Button moved to top */}
+                      <div className={styles.buttonContainer}>
+                        <Button
+                          appearance="primary"
+                          size="large"
+                          disabled={!hasApiKey || analyzingSecondPrompt || (secondPromptCooldownActive && secondPromptCooldownSeconds > 0)}
+                          onClick={handleSecondPromptClick}
+                          icon={analyzingSecondPrompt ? <Spinner size="tiny" /> : undefined}
+                        >
+                          {analyzingSecondPrompt
+                            ? 'Analyzing...'
+                            : secondPromptResponse && !secondPromptReady
+                            ? 'Click to enable new analysis'
+                            : 'Analyze with AI'}
+                        </Button>
+                        {secondPromptCooldownActive && secondPromptCooldownSeconds > 0 && (
+                          <div className={styles.cooldownContainer}>
+                            <Text className={styles.cooldownText}>
+                              Please wait {secondPromptCooldownSeconds} second{secondPromptCooldownSeconds !== 1 ? 's' : ''} before requesting new analysis...
+                            </Text>
+                            <ProgressBar 
+                              value={(3 - secondPromptCooldownSeconds) / 3} 
+                              thickness="large"
+                            />
+                          </div>
+                        )}
+                        {!analyzingSecondPrompt && !secondPromptResponse && !secondPromptError && !secondPromptCooldownActive && (
+                          <Text className={styles.helperText}>
+                            Click Analyze to get AI-powered correlation analysis
+                          </Text>
+                        )}
+                        {secondPromptResponse && !secondPromptReady && !secondPromptCooldownActive && !analyzingSecondPrompt && (
+                          <Text className={styles.helperText}>
+                            Click the button above to request a new analysis
+                          </Text>
+                        )}
+                      </div>
+
+                      {/* Accordion to show prompt text - moved below button */}
+                      <Accordion collapsible style={{ marginTop: '16px' }}>
+                        <AccordionItem value="promptText">
+                          <AccordionHeader>View AI Prompt</AccordionHeader>
+                          <AccordionPanel>
+                            <div className={styles.promptTextContainer}>
+                              {(() => {
+                                const csvData = convertDailyReportsToCSV(combinedDataset);
+                                const base64CsvData = base64Encode(csvData);
+                                return generateGlucoseInsulinPrompt(base64CsvData);
+                              })()}
+                            </div>
+                          </AccordionPanel>
+                        </AccordionItem>
+                      </Accordion>
+
+                      <Text className={styles.statementText} style={{ marginTop: '16px' }}>
                         Dataset showing glucose ranges and insulin doses by date:
                       </Text>
-                      <div style={{ marginTop: '16px', overflowX: 'auto' }}>
-                        <Table>
+                      <div className={styles.scrollableTableContainer}>
+                        <Table className={styles.scrollableTable}>
                           <TableHeader>
                             <TableRow>
                               <TableHeaderCell>Date</TableHeaderCell>
-                              <TableHeaderCell>Day of Week</TableHeaderCell>
+                              <TableHeaderCell className={styles.emphasizedHeaderCell}>Day of Week</TableHeaderCell>
                               <TableHeaderCell>BG Below (%)</TableHeaderCell>
-                              <TableHeaderCell>BG In Range (%)</TableHeaderCell>
+                              <TableHeaderCell className={styles.emphasizedHeaderCell}>BG In Range (%)</TableHeaderCell>
                               <TableHeaderCell>BG Above (%)</TableHeaderCell>
-                              <TableHeaderCell>Basal Insulin (Units)</TableHeaderCell>
-                              <TableHeaderCell>Bolus Insulin (Units)</TableHeaderCell>
-                              <TableHeaderCell>Total Insulin (Units)</TableHeaderCell>
+                              <TableHeaderCell className={styles.emphasizedHeaderCell}>Basal Insulin</TableHeaderCell>
+                              <TableHeaderCell>Bolus Insulin</TableHeaderCell>
+                              <TableHeaderCell>Total Insulin</TableHeaderCell>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -492,11 +659,11 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                               return (
                                 <TableRow key={report.date}>
                                   <TableCell>{report.date}</TableCell>
-                                  <TableCell>{dayOfWeek}</TableCell>
+                                  <TableCell className={styles.emphasizedCell}>{dayOfWeek}</TableCell>
                                   <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}%</TableCell>
-                                  <TableCell>{calculatePercentage(report.stats.inRange, report.stats.total)}%</TableCell>
+                                  <TableCell className={styles.emphasizedCell}>{calculatePercentage(report.stats.inRange, report.stats.total)}%</TableCell>
                                   <TableCell>{calculatePercentage(report.stats.high, report.stats.total)}%</TableCell>
-                                  <TableCell>{report.basalInsulin !== undefined ? report.basalInsulin : '-'}</TableCell>
+                                  <TableCell className={styles.emphasizedCell}>{report.basalInsulin !== undefined ? report.basalInsulin : '-'}</TableCell>
                                   <TableCell>{report.bolusInsulin !== undefined ? report.bolusInsulin : '-'}</TableCell>
                                   <TableCell>{report.totalInsulin !== undefined ? report.totalInsulin : '-'}</TableCell>
                                 </TableRow>
@@ -505,20 +672,38 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                           </TableBody>
                         </Table>
                       </div>
-                      <div className={styles.buttonContainer} style={{ marginTop: '16px' }}>
-                        <Button
-                          appearance="primary"
-                          disabled={!hasApiKey}
-                          onClick={handleSecondPromptClick}
-                        >
-                          {secondPromptClicked ? 'AI analysis not implemented yet' : 'Analyze with AI'}
-                        </Button>
-                        {!secondPromptClicked && (
+
+                      {analyzingSecondPrompt && (
+                        <div className={styles.loadingContainer}>
+                          <Spinner size="medium" />
                           <Text className={styles.helperText}>
-                            Click Analyze to get AI-powered analysis (coming soon)
+                            Getting AI analysis... This may take a few seconds.
                           </Text>
-                        )}
-                      </div>
+                        </div>
+                      )}
+
+                      {secondPromptError && (
+                        <div className={styles.errorContainer}>
+                          <MessageBar intent="error" icon={<ErrorCircleRegular className={styles.errorIcon} />}>
+                            <MessageBarBody>
+                              <strong>Error:</strong> {secondPromptError}
+                            </MessageBarBody>
+                          </MessageBar>
+                        </div>
+                      )}
+
+                      {secondPromptResponse && (
+                        <>
+                          <MessageBar intent="success" icon={<CheckmarkCircleRegular className={styles.successIcon} />}>
+                            <MessageBarBody>
+                              AI analysis completed successfully
+                            </MessageBarBody>
+                          </MessageBar>
+                          <div className={styles.aiResponseContainer}>
+                            <MarkdownRenderer content={secondPromptResponse} />
+                          </div>
+                        </>
+                      )}
                     </>
                   ) : (
                     <Text className={styles.helperText}>
