@@ -17,6 +17,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
+- Add Google Gemini AI integration alongside Perplexity AI
+  - Support for Google Gemini API (using gemini-2.0-flash-exp model)
+  - Unified AI API interface that routes to appropriate provider (Perplexity or Gemini)
+  - Settings page now includes both Perplexity and Google Gemini API key fields
+  - Visual indicator showing which AI provider is currently selected
+  - "✓ Selected" badge next to the active provider's API key
+  - Provider selection logic: Perplexity is prioritized if both keys are configured
+  - AI Analysis page shows active provider in accordion header (e.g., "Using Perplexity")
+  - Helper text indicates which provider will be used for analysis
+  - Both API keys stored securely in browser cookies with 1-year expiration
+  - Comprehensive unit tests (35 new tests added for Gemini and unified API)
+  - Updated security documentation to cover both AI providers
+  - Links to both Perplexity Settings and Google AI Studio for API key creation
 - Implement Perplexity AI integration for time-in-range glucose analysis
   - Real AI-powered analysis using Perplexity API (sonar model with 127K context window)
   - Complete prompt: "Given a patient's percent time-in-range (TIR) from continuous glucose monitoring is X%, provide a brief clinical assessment and 2-3 specific, actionable recommendations"
