@@ -151,6 +151,9 @@ export interface DayOfWeekReport {
 export interface DailyReport {
   date: string; // YYYY-MM-DD format
   stats: GlucoseRangeStats;
+  basalInsulin?: number; // Daily total basal dose in units
+  bolusInsulin?: number; // Daily total bolus dose in units
+  totalInsulin?: number; // Basal + Bolus in units
 }
 
 /**
@@ -161,6 +164,25 @@ export interface WeeklyReport {
   weekStart: string; // YYYY-MM-DD format
   weekEnd: string;   // YYYY-MM-DD format
   stats: GlucoseRangeStats;
+}
+
+/**
+ * Parsed insulin reading from CSV data
+ */
+export interface InsulinReading {
+  timestamp: Date;
+  dose: number;     // Dose in units
+  insulinType: 'basal' | 'bolus'; // Type of insulin
+}
+
+/**
+ * Daily insulin aggregation
+ */
+export interface DailyInsulinSummary {
+  date: string;           // YYYY-MM-DD format
+  basalTotal: number;     // Total basal dose in units
+  bolusTotal: number;     // Total bolus dose in units
+  totalInsulin: number;   // Basal + Bolus
 }
 
 /**
