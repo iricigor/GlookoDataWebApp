@@ -217,11 +217,12 @@ interface AIAnalysisProps {
   perplexityApiKey: string;
   geminiApiKey: string;
   grokApiKey: string;
+  deepseekApiKey: string;
   existingAnalysis?: AIAnalysisResult;
   onAnalysisComplete: (fileId: string, response: string, inRangePercentage: number) => void;
 }
 
-export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokApiKey, existingAnalysis, onAnalysisComplete }: AIAnalysisProps) {
+export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey, existingAnalysis, onAnalysisComplete }: AIAnalysisProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
   const [selectedTab, setSelectedTab] = useState<string>('fileInfo');
@@ -258,7 +259,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
   }>({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
 
   // Determine which AI provider to use
-  const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey, grokApiKey);
+  const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
   const hasApiKey = activeProvider !== null;
 
   // Load existing analysis when component mounts or file changes

@@ -8,21 +8,22 @@
 import { callPerplexityApi, type PerplexityResult } from './perplexityApi';
 import { callGeminiApi, type GeminiResult } from './geminiApi';
 import { callGrokApi, type GrokResult } from './grokApi';
+import { callDeepSeekApi, type DeepSeekResult } from './deepseekApi';
 
 /**
  * Supported AI providers
  */
-export type AIProvider = 'perplexity' | 'gemini' | 'grok';
+export type AIProvider = 'perplexity' | 'gemini' | 'grok' | 'deepseek';
 
 /**
  * Unified AI result type
  */
-export type AIResult = PerplexityResult | GeminiResult | GrokResult;
+export type AIResult = PerplexityResult | GeminiResult | GrokResult | DeepSeekResult;
 
 /**
  * Call the appropriate AI API based on provider selection
  * 
- * @param provider - The AI provider to use ('perplexity', 'gemini', or 'grok')
+ * @param provider - The AI provider to use ('perplexity', 'gemini', 'grok', or 'deepseek')
  * @param apiKey - The API key for the selected provider
  * @param prompt - The prompt to send to the AI
  * @returns Promise with the result containing success status and content or error
@@ -39,6 +40,8 @@ export async function callAIApi(
       return callGeminiApi(apiKey, prompt);
     case 'grok':
       return callGrokApi(apiKey, prompt);
+    case 'deepseek':
+      return callDeepSeekApi(apiKey, prompt);
     default:
       return {
         success: false,
@@ -62,6 +65,8 @@ export function getProviderDisplayName(provider: AIProvider): string {
       return 'Google Gemini';
     case 'grok':
       return 'Grok AI';
+    case 'deepseek':
+      return 'DeepSeek';
     default:
       return provider;
   }
@@ -73,19 +78,24 @@ export function getProviderDisplayName(provider: AIProvider): string {
  * @param perplexityKey - Perplexity API key
  * @param geminiKey - Google Gemini API key
  * @param grokKey - Grok AI API key
+ * @param deepseekKey - DeepSeek API key
  * @returns The provider to use, or null if no keys are available
  */
 export function determineActiveProvider(
   perplexityKey: string,
   geminiKey: string,
-  grokKey: string
+  grokKey: string,
+  deepseekKey: string = ''
 ): AIProvider | null {
-  // Priority order: Perplexity > Grok > Gemini
+  // Priority order: Perplexity > Grok > DeepSeek > Gemini
   if (perplexityKey && perplexityKey.trim() !== '') {
     return 'perplexity';
   }
   if (grokKey && grokKey.trim() !== '') {
     return 'grok';
+  }
+  if (deepseekKey && deepseekKey.trim() !== '') {
+    return 'deepseek';
   }
   if (geminiKey && geminiKey.trim() !== '') {
     return 'gemini';
