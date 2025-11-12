@@ -11,6 +11,7 @@ import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { InRangeReport } from '../components/InRangeReport';
 import { AGPReport } from '../components/AGPReport';
 import { BGValuesReport } from '../components/BGValuesReport';
+import { InsulinDailyReport } from '../components/InsulinDailyReport';
 import type { UploadedFile } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 
@@ -83,16 +84,7 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
       case 'detailedCgm':
         return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} />;
       case 'detailedInsulin':
-        return (
-          <div style={{ padding: '24px' }}>
-            <Text style={{ fontSize: tokens.fontSizeBase500, fontWeight: tokens.fontWeightSemibold, color: tokens.colorNeutralForeground1, marginBottom: '12px' }}>
-              Detailed Insulin
-            </Text>
-            <Text style={{ fontSize: tokens.fontSizeBase400, color: tokens.colorNeutralForeground2 }}>
-              Detailed analysis about basal, bolus and total insulin intake - To be implemented
-            </Text>
-          </div>
-        );
+        return <InsulinDailyReport selectedFile={selectedFile} />;
       default:
         return null;
     }

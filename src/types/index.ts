@@ -186,6 +186,17 @@ export interface DailyInsulinSummary {
 }
 
 /**
+ * Hourly insulin data point for timeline chart
+ */
+export interface InsulinTimelineDataPoint {
+  hour: number;           // Hour of day (0-23)
+  timeLabel: string;      // Formatted time label (e.g., "00:00", "06:00")
+  basalRate: number;      // Average basal rate for this hour in units
+  bolusDoses: number[];   // All bolus doses during this hour
+  bolusTotal: number;     // Total bolus for this hour in units
+}
+
+/**
  * Parsed glucose reading from CSV data
  */
 export interface GlucoseReading {

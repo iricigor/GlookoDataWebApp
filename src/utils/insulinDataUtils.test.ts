@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { aggregateInsulinByDate } from './insulinDataUtils';
+import { aggregateInsulinByDate, prepareInsulinTimelineData } from './insulinDataUtils';
 import type { InsulinReading } from '../types';
 
 describe('insulinDataUtils', () => {
@@ -104,6 +104,118 @@ describe('insulinDataUtils', () => {
       expect(result[0].date).toBe('2024-01-01');
       expect(result[1].date).toBe('2024-01-02');
       expect(result[2].date).toBe('2024-01-03');
+    });
+  });
+
+  describe('prepareInsulinTimelineData', () => {
+    it('should prepare 24-hour timeline data for a specific date', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00'), dose: 2.5, insulinType: 'basal' },
+        { timestamp: new Date('2024-01-01T08:30:00'), dose: 5.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-01-01T12:00:00'), dose: 2.0, insulinType: 'basal' },
+        { timestamp: new Date('2024-01-01T12:15:00'), dose: 8.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-01-01T18:00:00'), dose: 6.5, insulinType: 'bolus' },
+      ];
+
+      const result = prepareInsulinTimelineData(readings, '2024-01-01');
+
+      // Should return 24 hours of data
+      expect(result).toHaveLength(24);
+      
+      // Check hour 8 (has both basal and bolus)
+      const hour8 = result[8];
+      expect(hour8.hour).toBe(8);
+      expect(hour8.timeLabel).toBe('08:00');
+      expect(hour8.basalRate).toBe(2.5);
+      expect(hour8.bolusTotal).toBe(5.0);
+
+      // Check hour 12 (has both basal and bolus)
+      const hour12 = result[12];
+      expect(hour12.hour).toBe(12);
+      expect(hour12.timeLabel).toBe('12:00');
+      expect(hour12.basalRate).toBe(2.0);
+      expect(hour12.bolusTotal).toBe(8.0);
+
+      // Check hour 18 (has only bolus)
+      const hour18 = result[18];
+      expect(hour18.hour).toBe(18);
+      expect(hour18.timeLabel).toBe('18:00');
+      expect(hour18.basalRate).toBe(0);
+      expect(hour18.bolusTotal).toBe(6.5);
+
+      // Check hour 0 (no data)
+      const hour0 = result[0];
+      expect(hour0.hour).toBe(0);
+      expect(hour0.timeLabel).toBe('00:00');
+      expect(hour0.basalRate).toBe(0);
+      expect(hour0.bolusTotal).toBe(0);
+    });
+
+    it('should filter readings by specified date', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00'), dose: 2.5, insulinType: 'basal' },
+        { timestamp: new Date('2024-01-02T08:00:00'), dose: 3.0, insulinType: 'basal' },
+        { timestamp: new Date('2024-01-01T12:00:00'), dose: 5.0, insulinType: 'bolus' },
+      ];
+
+      const result = prepareInsulinTimelineData(readings, '2024-01-01');
+
+      // Should only include data from 2024-01-01
+      const hour8 = result[8];
+      expect(hour8.basalRate).toBe(2.5);
+      expect(hour8.bolusTotal).toBe(0);
+
+      const hour12 = result[12];
+      expect(hour12.basalRate).toBe(0);
+      expect(hour12.bolusTotal).toBe(5.0);
+    });
+
+    it('should handle empty readings array', () => {
+      const readings: InsulinReading[] = [];
+      const result = prepareInsulinTimelineData(readings, '2024-01-01');
+
+      expect(result).toHaveLength(24);
+      result.forEach(hour => {
+        expect(hour.basalRate).toBe(0);
+        expect(hour.bolusTotal).toBe(0);
+      });
+    });
+
+    it('should average multiple basal readings in the same hour', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00'), dose: 2.0, insulinType: 'basal' },
+        { timestamp: new Date('2024-01-01T08:30:00'), dose: 3.0, insulinType: 'basal' },
+        { timestamp: new Date('2024-01-01T08:45:00'), dose: 4.0, insulinType: 'basal' },
+      ];
+
+      const result = prepareInsulinTimelineData(readings, '2024-01-01');
+      const hour8 = result[8];
+
+      // Average of 2.0, 3.0, 4.0 should be 3.0
+      expect(hour8.basalRate).toBe(3.0);
+    });
+
+    it('should sum multiple bolus readings in the same hour', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T12:00:00'), dose: 5.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-01-01T12:30:00'), dose: 3.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-01-01T12:45:00'), dose: 2.5, insulinType: 'bolus' },
+      ];
+
+      const result = prepareInsulinTimelineData(readings, '2024-01-01');
+      const hour12 = result[12];
+
+      // Sum of 5.0 + 3.0 + 2.5 should be 10.5
+      expect(hour12.bolusTotal).toBe(10.5);
+    });
+
+    it('should format time labels correctly', () => {
+      const readings: InsulinReading[] = [];
+      const result = prepareInsulinTimelineData(readings, '2024-01-01');
+
+      expect(result[0].timeLabel).toBe('00:00');
+      expect(result[9].timeLabel).toBe('09:00');
+      expect(result[23].timeLabel).toBe('23:00');
     });
   });
 });

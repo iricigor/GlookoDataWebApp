@@ -17,6 +17,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
+- [#TBD](../../pull/TBD) Add detailed insulin daily report with 24-hour timeline
+  - New "Detailed Insulin" report in Reports page showing daily insulin delivery patterns
+  - 24-hour timeline chart with basal insulin (line) and bolus insulin (bars) using Recharts
+  - Day navigation with Previous/Next buttons to browse through available dates
+  - Date display showing current selected date (e.g., "Tuesday, January 14, 2025")
+  - Summary cards displaying Total Basal, Total Bolus, and Total Insulin for the selected day
+  - Visual legend distinguishing basal rate (continuous delivery) from bolus (meal/correction doses)
+  - Hourly data aggregation: basal rates averaged, bolus totals summed per hour
+  - Data extracted from basal and bolus CSV files in Glooko exports
+  - Automatic date extraction from insulin readings with chronological sorting
+  - Graceful handling of missing data with appropriate messages
+  - New components: `InsulinDailyReport.tsx`, `InsulinTimeline.tsx`
+  - New utility function: `prepareInsulinTimelineData()` for processing insulin readings
+  - New TypeScript interface: `InsulinTimelineDataPoint` for timeline data structure
+  - 7 comprehensive unit tests for timeline data preparation covering various scenarios
 - [#TBD](../../pull/TBD) Implement comprehensive Playwright E2E testing suite
   - Add Playwright testing framework with configuration for Chromium, Firefox, and WebKit browsers
   - Implement Page Object Model (POM) pattern for maintainable test architecture
