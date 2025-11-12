@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { callGeminiApi, generateTimeInRangePrompt } from './geminiApi';
+import { callGeminiApi } from './geminiApi';
 
 describe('geminiApi', () => {
   describe('callGeminiApi', () => {
@@ -240,28 +240,6 @@ describe('geminiApi', () => {
       expect(body.contents[0].parts[0].text).toContain('test prompt');
       expect(body.generationConfig.temperature).toBe(0.2);
       expect(body.generationConfig.maxOutputTokens).toBe(1000);
-    });
-  });
-
-  describe('generateTimeInRangePrompt', () => {
-    it('should generate prompt with correct TIR percentage', () => {
-      const prompt = generateTimeInRangePrompt(75.5);
-      
-      expect(prompt).toContain('75.5%');
-      expect(prompt).toContain('time-in-range');
-      expect(prompt).toContain('70%');
-    });
-
-    it('should handle integer percentages', () => {
-      const prompt = generateTimeInRangePrompt(80);
-      
-      expect(prompt).toContain('80.0%');
-    });
-
-    it('should handle low percentages', () => {
-      const prompt = generateTimeInRangePrompt(45.2);
-      
-      expect(prompt).toContain('45.2%');
     });
   });
 });

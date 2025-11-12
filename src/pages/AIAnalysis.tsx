@@ -31,7 +31,7 @@ import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
 import { extractDailyInsulinSummaries, extractInsulinReadings } from '../utils/insulinDataUtils';
 import { calculateGlucoseRangeStats, calculatePercentage, groupByDate } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
-import { generateTimeInRangePrompt, generateGlucoseInsulinPrompt, generateMealTimingPrompt, base64Encode } from '../utils/perplexityApi';
+import { generateTimeInRangePrompt, generateGlucoseInsulinPrompt, generateMealTimingPrompt, base64Encode } from '../utils/promptUtils';
 import { callAIApi, determineActiveProvider, getProviderDisplayName } from '../utils/aiApi';
 import { convertDailyReportsToCSV, convertGlucoseReadingsToCSV, convertBolusReadingsToCSV, convertBasalReadingsToCSV, filterGlucoseReadingsToLastDays, filterInsulinReadingsToLastDays } from '../utils/csvUtils';
 
