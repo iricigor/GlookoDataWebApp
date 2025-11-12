@@ -490,6 +490,7 @@ describe('perplexityApi', () => {
         base64Encode(basalData)
       );
       
+      expect(prompt).toContain('Detailed Meal Analysis for Last 3 Days');
       expect(prompt).toContain('Temporal Trends');
       expect(prompt).toContain('Insulin Efficacy Tiering');
       expect(prompt).toContain('Post-Meal Timing Efficacy');
@@ -564,6 +565,68 @@ describe('perplexityApi', () => {
       );
       
       expect(prompt).toContain('you/your');
+    });
+
+    it('should request detailed meal analysis for last 3 days', () => {
+      const cgmData = 'Timestamp,CGM Glucose Value (mmol/L)\n2024-01-01T08:00:00Z,6.5';
+      const bolusData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T08:00:00Z,5.0';
+      const basalData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T00:00:00Z,1.0';
+      
+      const prompt = generateMealTimingPrompt(
+        base64Encode(cgmData),
+        base64Encode(bolusData),
+        base64Encode(basalData)
+      );
+      
+      // Should request detailed analysis for last 3 days
+      expect(prompt).toContain('last 3 days');
+      expect(prompt).toContain('most recent 3 days');
+      
+      // Should request meal event identification
+      expect(prompt).toContain('meal events');
+      expect(prompt).toContain('bolus insulin doses');
+      
+      // Should request specific meal details
+      expect(prompt).toContain('Date and time of the bolus insulin dose');
+      expect(prompt).toContain('Amount of insulin delivered');
+      expect(prompt).toContain('Estimated meal type');
+      expect(prompt).toContain('Breakfast/Lunch/Dinner/Snack');
+      
+      // Should request timing analysis
+      expect(prompt).toContain('Time elapsed between insulin bolus and subsequent BG rise');
+      expect(prompt).toContain('Post-meal BG pattern');
+      
+      // Should request structured output
+      expect(prompt).toContain('structured format');
+      expect(prompt).toContain('chronological sequence');
+      
+      // Should request pattern identification
+      expect(prompt).toContain('pre-bolusing');
+      expect(prompt).toContain('reactive bolusing');
+      expect(prompt).toContain('missed meal coverage');
+    });
+
+    it('should include detailed meal insights in actionable summary', () => {
+      const cgmData = 'Timestamp,CGM Glucose Value (mmol/L)\n2024-01-01T08:00:00Z,6.5';
+      const bolusData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T08:00:00Z,5.0';
+      const basalData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T00:00:00Z,1.0';
+      
+      const prompt = generateMealTimingPrompt(
+        base64Encode(cgmData),
+        base64Encode(bolusData),
+        base64Encode(basalData)
+      );
+      
+      // Should include reference to detailed meal review in summary
+      expect(prompt).toContain('detailed 3-day meal review');
+      expect(prompt).toContain('In the last 3 days');
+      
+      // Should request recommendations based on recent patterns
+      expect(prompt).toContain('Recent Patterns');
+      expect(prompt).toContain('last 3 days\' detailed meal analysis');
+      expect(prompt).toContain('late bolusing');
+      expect(prompt).toContain('missed meals');
+      expect(prompt).toContain('inadequate doses');
     });
   });
 });
