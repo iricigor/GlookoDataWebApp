@@ -133,6 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Helper text now shows "Click Analyze to get AI-powered analysis (using Perplexity)" or similar based on active provider
   - Fixed conditional logic to show appropriate helper text in all states (initial, analyzing, cooldown, ready for new analysis)
   - Applied consistent logic across all three AI analysis tabs
+  - Fixed Meal Timing tab to properly extract bolus insulin data by improving column matching logic to include "delivered" pattern
 - [#TODO](../../pull/TODO) Simplify XLSX export to use metadata-based approach
   - Removed `findCSVFileName` fallback function that tried to guess file names based on patterns
   - XLSX export now always uses `sourceFiles` array from metadata (populated by `groupCsvFiles`)

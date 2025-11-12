@@ -95,11 +95,13 @@ function parseInsulinReadingsFromCSV(
   
   // Find timestamp and dose column indices
   const timestampIndex = headers.findIndex(h => h.toLowerCase().includes('timestamp'));
-  const doseIndex = headers.findIndex(h => 
-    h.toLowerCase().includes('dose') || 
-    h.toLowerCase().includes('units') ||
-    h.toLowerCase().includes('rate')
-  );
+  const doseIndex = headers.findIndex(h => {
+    const lower = h.toLowerCase();
+    return lower.includes('dose') || 
+           lower.includes('units') ||
+           lower.includes('rate') ||
+           lower.includes('delivered');
+  });
 
   if (timestampIndex === -1 || doseIndex === -1) {
     return [];
