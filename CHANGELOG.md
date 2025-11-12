@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>244 Fix CHANGELOG: wrap unnamed issues in collapsible details format</summary>
+
+[#244](../../pull/244) Fix CHANGELOG: wrap unnamed issues in collapsible details format
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>236 Fix CHANGELOG: Add collapsible format, document it, and automate updates via workflow</summary>
 
 [#236](../../pull/236) Fix CHANGELOG: Add collapsible format, document it, and automate updates via workflow
