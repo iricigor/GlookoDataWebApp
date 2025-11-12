@@ -40,16 +40,17 @@ const useStyles = makeStyles({
     ...shorthands.gap('24px'),
   },
   reportTitle: {
-    fontSize: tokens.fontSizeBase500,
+    fontSize: tokens.fontSizeHero700,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
+    fontFamily: tokens.fontFamilyBase,
   },
   chartCard: {
     ...shorthands.padding('24px'),
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    boxShadow: tokens.shadow2,
+    boxShadow: tokens.shadow4,
   },
   chartContainer: {
     width: '100%',
@@ -68,10 +69,10 @@ const useStyles = makeStyles({
     ...shorthands.gap('12px'),
   },
   statsCard: {
-    ...shorthands.padding('20px'),
+    ...shorthands.padding('24px'),
     backgroundColor: tokens.colorNeutralBackground2,
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    boxShadow: tokens.shadow2,
+    boxShadow: tokens.shadow4,
   },
   statsGrid: {
     display: 'grid',
@@ -87,19 +88,21 @@ const useStyles = makeStyles({
   statLabel: {
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
+    fontFamily: tokens.fontFamilyBase,
   },
   statValue: {
     fontSize: tokens.fontSizeHero800,
     fontWeight: tokens.fontWeightSemibold,
+    fontFamily: tokens.fontFamilyBase,
   },
   statValueBelow: {
-    color: '#d32f2f', // Red for below range
+    color: tokens.colorPaletteRedForeground1,
   },
   statValueInRange: {
-    color: '#4CAF50', // Green for in range
+    color: tokens.colorPaletteGreenForeground1,
   },
   statValueAbove: {
-    color: '#ff9800', // Orange for above range
+    color: tokens.colorPaletteMarigoldForeground1,
   },
   noDataMessage: {
     textAlign: 'center',
@@ -217,7 +220,7 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
     }
   };
 
-  // Custom tooltip
+  // Custom tooltip with Fluent UI styling
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string; value: number; originalValue: number } }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -231,12 +234,20 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
           padding: '12px',
           border: `1px solid ${tokens.colorNeutralStroke1}`,
           borderRadius: tokens.borderRadiusMedium,
-          fontSize: tokens.fontSizeBase200,
+          fontSize: tokens.fontSizeBase300,
+          fontFamily: tokens.fontFamilyBase,
+          boxShadow: tokens.shadow8,
         }}>
-          <div style={{ fontWeight: tokens.fontWeightSemibold }}>
+          <div style={{ 
+            fontWeight: tokens.fontWeightSemibold,
+            marginBottom: '4px',
+            color: tokens.colorNeutralForeground1,
+          }}>
             {data.time}
           </div>
-          <div>Glucose: {displayValue} mmol/L</div>
+          <div style={{ color: tokens.colorNeutralForeground2 }}>
+            Glucose: {displayValue} mmol/L
+          </div>
         </div>
       );
     }
@@ -304,11 +315,20 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
       {/* Chart */}
       <Card className={styles.chartCard}>
         <div className={styles.controlsRow}>
-          <Text style={{ fontSize: tokens.fontSizeBase400, fontWeight: tokens.fontWeightSemibold }}>
+          <Text style={{ 
+            fontSize: tokens.fontSizeBase500, 
+            fontWeight: tokens.fontWeightSemibold,
+            fontFamily: tokens.fontFamilyBase,
+            color: tokens.colorNeutralForeground1,
+          }}>
             Glucose Values Throughout the Day
           </Text>
           <div className={styles.maxValueContainer}>
-            <Text style={{ fontSize: tokens.fontSizeBase300 }}>
+            <Text style={{ 
+              fontSize: tokens.fontSizeBase300,
+              fontFamily: tokens.fontFamilyBase,
+              color: tokens.colorNeutralForeground2,
+            }}>
               Max: {maxGlucose.toFixed(1)} mmol/L
             </Text>
             <TabList
@@ -325,49 +345,91 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
         <div className={styles.chartContainer}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              {/* Remove CartesianGrid to eliminate vertical dotted lines */}
+              {/* No CartesianGrid for clean Fluent UI look */}
               
               <XAxis
                 dataKey="time"
                 domain={['00:00', '23:59']}
                 tickFormatter={formatXAxis}
-                stroke={tokens.colorNeutralForeground2}
-                style={{ fontSize: tokens.fontSizeBase200 }}
+                stroke={tokens.colorNeutralStroke1}
+                tick={{ 
+                  fill: tokens.colorNeutralForeground2,
+                  fontSize: tokens.fontSizeBase200,
+                  fontFamily: tokens.fontFamilyBase,
+                }}
+                axisLine={{ strokeWidth: 1 }}
+                tickLine={false}
               />
               
               <YAxis
                 domain={[0, maxGlucose]}
-                label={{ value: 'Glucose (mmol/L)', angle: -90, position: 'insideLeft', style: { fontSize: tokens.fontSizeBase200 } }}
-                stroke={tokens.colorNeutralForeground2}
-                style={{ fontSize: tokens.fontSizeBase200 }}
+                label={{ 
+                  value: 'Glucose (mmol/L)', 
+                  angle: -90, 
+                  position: 'insideLeft', 
+                  style: { 
+                    fontSize: tokens.fontSizeBase200,
+                    fontFamily: tokens.fontFamilyBase,
+                    fill: tokens.colorNeutralForeground2,
+                  } 
+                }}
+                stroke={tokens.colorNeutralStroke1}
+                tick={{ 
+                  fill: tokens.colorNeutralForeground2,
+                  fontSize: tokens.fontSizeBase200,
+                  fontFamily: tokens.fontFamilyBase,
+                }}
+                axisLine={{ strokeWidth: 1 }}
+                tickLine={false}
               />
               
               <Tooltip content={<CustomTooltip />} />
               
-              {/* Target range reference lines */}
+              {/* Target range reference lines with Fluent UI semantic colors */}
               <ReferenceLine 
                 y={thresholds.low} 
-                stroke="#d32f2f" 
+                stroke={tokens.colorPaletteRedBorder1}
                 strokeDasharray="5 5" 
                 strokeWidth={1.5}
-                label={{ value: `Low (${thresholds.low})`, position: 'insideTopLeft', style: { fontSize: '11px' } }}
+                label={{ 
+                  value: `Low (${thresholds.low})`, 
+                  position: 'insideTopLeft', 
+                  style: { 
+                    fontSize: tokens.fontSizeBase200,
+                    fontFamily: tokens.fontFamilyBase,
+                    fill: tokens.colorPaletteRedForeground1,
+                  } 
+                }}
               />
               <ReferenceLine 
                 y={thresholds.high} 
-                stroke="#ff9800" 
+                stroke={tokens.colorPaletteMarigoldBorder1}
                 strokeDasharray="5 5" 
                 strokeWidth={1.5}
-                label={{ value: `High (${thresholds.high})`, position: 'insideTopLeft', style: { fontSize: '11px' } }}
+                label={{ 
+                  value: `High (${thresholds.high})`, 
+                  position: 'insideTopLeft', 
+                  style: { 
+                    fontSize: tokens.fontSizeBase200,
+                    fontFamily: tokens.fontFamilyBase,
+                    fill: tokens.colorPaletteMarigoldForeground1,
+                  } 
+                }}
               />
               
-              {/* Glucose values line - minimal dots */}
+              {/* Glucose values line with Fluent UI brand color and smooth curve */}
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#1976D2"
+                stroke={tokens.colorBrandForeground1}
                 strokeWidth={2}
-                dot={{ fill: '#1976D2', r: 1 }}
-                activeDot={{ r: 3, strokeWidth: 1 }}
+                dot={false}
+                activeDot={{ 
+                  r: 4, 
+                  strokeWidth: 2,
+                  stroke: tokens.colorNeutralBackground1,
+                  fill: tokens.colorBrandForeground1,
+                }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -376,7 +438,12 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
 
       {/* Daily Statistics */}
       <Card className={styles.statsCard}>
-        <Text style={{ fontSize: tokens.fontSizeBase400, fontWeight: tokens.fontWeightSemibold }}>
+        <Text style={{ 
+          fontSize: tokens.fontSizeBase500, 
+          fontWeight: tokens.fontWeightSemibold,
+          fontFamily: tokens.fontFamilyBase,
+          color: tokens.colorNeutralForeground1,
+        }}>
           Daily Statistics
         </Text>
         <div className={styles.statsGrid}>
