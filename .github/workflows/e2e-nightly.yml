@@ -26,7 +26,8 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
+        # Note: --with-deps is not needed as GitHub Actions runners already include necessary system dependencies for Chromium
+        run: npx playwright install chromium
 
       - name: Run Playwright tests
         run: npm run test:e2e -- --project=chromium --workers=4
