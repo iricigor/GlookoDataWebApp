@@ -541,16 +541,28 @@ Versions follow the format: `major.minor.buildId`
 ## How to Update This File
 
 When creating a pull request:
-1. Add an entry under the appropriate version section (current: 1.1.x)
+1. Add an entry under the appropriate version section (current: 1.2.x)
 2. Place the entry in the correct category based on the PR/issue label:
    - **New Features** - for ✨ Feature label
    - **Fixes** - for 🪲 Bug label
    - **Documentation** - for 📚 Documentation label
    - **Other** - for other changes
-3. **Entry format - Use markdown links (NOT HTML):**
-   - Each entry must start with a markdown link like `[#152](../../pull/152)` followed by the description
+3. **Entry format - Use collapsible details with plain text summary:**
+   ```markdown
+   <details>
+   <summary>213 Enable smaller data set for "Meal Timing" analysis</summary>
+   
+   [#213](../../pull/213) Enable smaller data set for "Meal Timing" analysis
+     - Add automatic fallback to last 28 days when AI API returns "request too large" error
+     - New utility functions: `filterGlucoseReadingsToLastDays()` and `filterInsulinReadingsToLastDays()`
+     - Enhanced error detection for request size limitations
+     - [... more sub-bullets as needed ...]
+   </details>
+   ```
+   - **Summary tag**: Plain PR number (no `#`) + title (no hyperlink)
+   - **First line in details**: Full hyperlinked version with `#` symbol: `[#213](../../pull/213) Title`
    - **Always use relative paths:** `../../pull/PR_NUMBER` or `../../issues/ISSUE_NUMBER`
-   - **Example:** `- [#152](../../pull/152) Add new feature description`
-   - **For issues without PRs:** `- [Issue #100](../../issues/100) Description`
+   - **Sub-bullets**: List all changes as indented bullet points (2 spaces + dash)
    - **Never use HTML anchor tags** like `<a href="...">` - only use markdown format
+   - **For issues without PRs:** `[Issue #100](../../issues/100) Description`
 4. Entries within each category should be sorted by PR/issue number (descending - highest first)

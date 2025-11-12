@@ -271,10 +271,10 @@ GlookoDataWebApp/
 
 ### Before Committing
 
-1. **Do NOT update CHANGELOG.md manually**
-   - CHANGELOG updates are handled automatically by a dedicated pipeline AFTER the PR is merged
-   - Do not add, modify, or remove entries from CHANGELOG.md in your PR
+1. **Do NOT update CHANGELOG.md manually** unless you're making documentation fixes
+   - For feature/bug PRs, CHANGELOG updates are handled automatically by a dedicated pipeline AFTER the PR is merged
    - The automated system will generate the changelog entry based on your PR title and description
+   - **If you do need to manually update CHANGELOG.md**, use the proper format (see CHANGELOG Format section below)
 
 2. **Run tests**
    ```bash
@@ -303,6 +303,33 @@ GlookoDataWebApp/
    - [ ] No console errors or warnings
    - [ ] Responsive design works on different screen sizes
    - [ ] Privacy: no data sent to external servers
+
+### CHANGELOG Format
+
+When manually adding or updating entries in CHANGELOG.md, use the following format for versions 1.2.x and 1.1.x:
+
+```markdown
+<details>
+<summary>213 Enable smaller data set for "Meal Timing" analysis</summary>
+
+[#213](../../pull/213) Enable smaller data set for "Meal Timing" analysis
+  - Add automatic fallback to last 28 days when AI API returns "request too large" error
+  - New utility functions: `filterGlucoseReadingsToLastDays()` and `filterInsulinReadingsToLastDays()`
+  - Enhanced error detection for request size limitations
+  - [... more sub-bullets as needed ...]
+</details>
+```
+
+**Key requirements:**
+- **Summary tag**: Plain PR number (no `#` symbol) + title (no hyperlink)
+  - Example: `213 Enable smaller data set for "Meal Timing" analysis`
+- **First line in details**: Full hyperlinked version with `#` symbol
+  - Example: `[#213](../../pull/213) Enable smaller data set for "Meal Timing" analysis`
+- **Sub-bullets**: List all changes as indented bullet points (2 spaces + dash)
+- **Use markdown links** (NOT HTML anchor tags)
+- **Use relative paths**: `../../pull/PR_NUMBER` or `../../issues/ISSUE_NUMBER`
+- Place entry under correct category: New Features, Fixes, Documentation, or Other
+- Sort entries by PR number (descending - highest first)
 
 ### Commit Message Format
 
