@@ -7,6 +7,7 @@ import { callAIApi, getProviderDisplayName, determineActiveProvider, type AIProv
 import * as perplexityApi from './perplexityApi';
 import * as geminiApi from './geminiApi';
 import * as grokApi from './grokApi';
+import * as deepseekApi from './deepseekApi';
 
 describe('aiApi', () => {
   // Save original fetch
@@ -51,6 +52,16 @@ describe('aiApi', () => {
       expect(result).toEqual(mockResult);
     });
 
+    it('should call DeepSeek API when provider is deepseek', async () => {
+      const mockResult = { success: true, content: 'DeepSeek response' };
+      const spy = vi.spyOn(deepseekApi, 'callDeepSeekApi').mockResolvedValue(mockResult);
+
+      const result = await callAIApi('deepseek', 'test-key', 'test prompt');
+
+      expect(spy).toHaveBeenCalledWith('test-key', 'test prompt');
+      expect(result).toEqual(mockResult);
+    });
+
     it('should return error for unknown provider', async () => {
       const result = await callAIApi('unknown' as AIProvider, 'test-key', 'test prompt');
 
@@ -73,6 +84,10 @@ describe('aiApi', () => {
       expect(getProviderDisplayName('grok')).toBe('Grok AI');
     });
 
+    it('should return "DeepSeek AI" for deepseek provider', () => {
+      expect(getProviderDisplayName('deepseek')).toBe('DeepSeek AI');
+    });
+
     it('should return the provider value for unknown providers', () => {
       expect(getProviderDisplayName('unknown' as AIProvider)).toBe('unknown');
     });
@@ -80,52 +95,67 @@ describe('aiApi', () => {
 
   describe('determineActiveProvider', () => {
     it('should return perplexity when only Perplexity key is provided', () => {
-      const result = determineActiveProvider('perplexity-key', '', '');
+      const result = determineActiveProvider('perplexity-key', '', '', '');
       expect(result).toBe('perplexity');
     });
 
     it('should return grok when only Grok key is provided', () => {
-      const result = determineActiveProvider('', '', 'grok-key');
+      const result = determineActiveProvider('', '', 'grok-key', '');
       expect(result).toBe('grok');
     });
 
+    it('should return deepseek when only DeepSeek key is provided', () => {
+      const result = determineActiveProvider('', '', '', 'deepseek-key');
+      expect(result).toBe('deepseek');
+    });
+
     it('should return gemini when only Gemini key is provided', () => {
-      const result = determineActiveProvider('', 'gemini-key', '');
+      const result = determineActiveProvider('', 'gemini-key', '', '');
       expect(result).toBe('gemini');
     });
 
     it('should prioritize Perplexity when all keys are provided', () => {
-      const result = determineActiveProvider('perplexity-key', 'gemini-key', 'grok-key');
+      const result = determineActiveProvider('perplexity-key', 'gemini-key', 'grok-key', 'deepseek-key');
       expect(result).toBe('perplexity');
     });
 
-    it('should prioritize Grok over Gemini when both are provided', () => {
-      const result = determineActiveProvider('', 'gemini-key', 'grok-key');
+    it('should prioritize Grok over DeepSeek and Gemini when both are provided', () => {
+      const result = determineActiveProvider('', 'gemini-key', 'grok-key', 'deepseek-key');
       expect(result).toBe('grok');
     });
 
+    it('should prioritize DeepSeek over Gemini when both are provided', () => {
+      const result = determineActiveProvider('', 'gemini-key', '', 'deepseek-key');
+      expect(result).toBe('deepseek');
+    });
+
     it('should return null when no keys are provided', () => {
-      const result = determineActiveProvider('', '', '');
+      const result = determineActiveProvider('', '', '', '');
       expect(result).toBe(null);
     });
 
     it('should return null when keys are only whitespace', () => {
-      const result = determineActiveProvider('  ', '  ', '  ');
+      const result = determineActiveProvider('  ', '  ', '  ', '  ');
       expect(result).toBe(null);
     });
 
     it('should treat whitespace-only Perplexity key as empty', () => {
-      const result = determineActiveProvider('  ', 'gemini-key', 'grok-key');
+      const result = determineActiveProvider('  ', 'gemini-key', 'grok-key', 'deepseek-key');
       expect(result).toBe('grok');
     });
 
     it('should treat whitespace-only Grok key as empty', () => {
-      const result = determineActiveProvider('  ', 'gemini-key', '  ');
+      const result = determineActiveProvider('  ', 'gemini-key', '  ', 'deepseek-key');
+      expect(result).toBe('deepseek');
+    });
+
+    it('should treat whitespace-only DeepSeek key as empty', () => {
+      const result = determineActiveProvider('  ', 'gemini-key', '  ', '  ');
       expect(result).toBe('gemini');
     });
 
     it('should treat whitespace-only Gemini key as empty', () => {
-      const result = determineActiveProvider('perplexity-key', '  ', '  ');
+      const result = determineActiveProvider('perplexity-key', '  ', '  ', '  ');
       expect(result).toBe('perplexity');
     });
   });

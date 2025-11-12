@@ -13,6 +13,7 @@ import { useExportFormat } from './hooks/useExportFormat'
 import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
 import { useGeminiApiKey } from './hooks/useGeminiApiKey'
 import { useGrokApiKey } from './hooks/useGrokApiKey'
+import { useDeepSeekApiKey } from './hooks/useDeepSeekApiKey'
 import { useSwipeGesture } from './hooks/useSwipeGesture'
 import type { UploadedFile, AIAnalysisResult } from './types'
 import { extractZipMetadata } from './features/dataUpload/utils'
@@ -27,6 +28,7 @@ function App() {
   const { apiKey: perplexityApiKey, setApiKey: setPerplexityApiKey } = usePerplexityApiKey()
   const { apiKey: geminiApiKey, setApiKey: setGeminiApiKey } = useGeminiApiKey()
   const { apiKey: grokApiKey, setApiKey: setGrokApiKey } = useGrokApiKey()
+  const { apiKey: deepseekApiKey, setApiKey: setDeepSeekApiKey } = useDeepSeekApiKey()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
   const [aiAnalysisResults, setAiAnalysisResults] = useState<Record<string, AIAnalysisResult>>({})
@@ -189,12 +191,13 @@ function App() {
             perplexityApiKey={perplexityApiKey} 
             geminiApiKey={geminiApiKey}
             grokApiKey={grokApiKey}
+            deepseekApiKey={deepseekApiKey}
             existingAnalysis={currentAIAnalysis}
             onAnalysisComplete={handleAIAnalysisComplete}
           />
         )
       case 'settings':
-        return <Settings themeMode={themeMode} onThemeChange={setThemeMode} exportFormat={exportFormat} onExportFormatChange={setExportFormat} perplexityApiKey={perplexityApiKey} onPerplexityApiKeyChange={setPerplexityApiKey} geminiApiKey={geminiApiKey} onGeminiApiKeyChange={setGeminiApiKey} grokApiKey={grokApiKey} onGrokApiKeyChange={setGrokApiKey} />
+        return <Settings themeMode={themeMode} onThemeChange={setThemeMode} exportFormat={exportFormat} onExportFormatChange={setExportFormat} perplexityApiKey={perplexityApiKey} onPerplexityApiKeyChange={setPerplexityApiKey} geminiApiKey={geminiApiKey} onGeminiApiKeyChange={setGeminiApiKey} grokApiKey={grokApiKey} onGrokApiKeyChange={setGrokApiKey} deepseekApiKey={deepseekApiKey} onDeepSeekApiKeyChange={setDeepSeekApiKey} />
       default:
         return <Home onNavigate={handleNavigate} />
     }
