@@ -127,6 +127,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Privacy: All AI communication happens directly from browser, no server intermediary
 
 ### Fixes
+- [#TBD](../../pull/TBD) Fix AI analysis helper text and provider display issues
+  - Helper text now correctly reappears after cooldown completes and button returns to "Analyze with AI"
+  - All three AI tabs (Time in Range, Glucose & Insulin, Meal Timing) now display active AI provider name in helper text
+  - Helper text now shows "Click Analyze to get AI-powered analysis (using Perplexity)" or similar based on active provider
+  - Fixed conditional logic to show appropriate helper text in all states (initial, analyzing, cooldown, ready for new analysis)
+  - Applied consistent logic across all three AI analysis tabs
+  - Fixed Meal Timing tab to properly extract bolus insulin data by improving column matching logic to include "delivered" pattern
+  - Fixed insulin data extraction to process basal and bolus files even when manual insulin file is present in ZIP
 - [#181](../../pull/181) Fix BG Values graph UI issues and improve Detailed CGM report
   - Removed vertical dotted grid lines (CartesianGrid) from the glucose chart for cleaner visualization
   - Replaced Switch with Fluent UI TabList for max value selector (16.0/22.0 mmol/L) following Time in Range report pattern

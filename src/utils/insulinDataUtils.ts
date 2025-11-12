@@ -95,11 +95,13 @@ function parseInsulinReadingsFromCSV(
   
   // Find timestamp and dose column indices
   const timestampIndex = headers.findIndex(h => h.toLowerCase().includes('timestamp'));
-  const doseIndex = headers.findIndex(h => 
-    h.toLowerCase().includes('dose') || 
-    h.toLowerCase().includes('units') ||
-    h.toLowerCase().includes('rate')
-  );
+  const doseIndex = headers.findIndex(h => {
+    const lower = h.toLowerCase();
+    return lower.includes('dose') || 
+           lower.includes('units') ||
+           lower.includes('rate') ||
+           lower.includes('delivered');
+  });
 
   if (timestampIndex === -1 || doseIndex === -1) {
     return [];
@@ -237,13 +239,8 @@ export async function extractInsulinReadings(
   // Load the ZIP file
   const zip = await JSZip.loadAsync(uploadedFile.file);
 
-  // First check for combined insulin file (insulin_data_*.csv with daily totals)
-  const insulinFile = uploadedFile.zipMetadata.csvFiles.find(f => f.name === 'insulin');
-  if (insulinFile) {
-    // This is a combined insulin file with daily totals - we need to convert it differently
-    // For now, return empty to avoid confusion - will handle this in aggregateInsulinByDate
-    return [];
-  }
+  // Note: Skip the combined 'insulin' file (manual insulin entries like Lantus)
+  // as it's not pump data. We want to extract basal and bolus pump data instead.
 
   let allReadings: InsulinReading[] = [];
 
