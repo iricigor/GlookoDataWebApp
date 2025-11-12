@@ -17,11 +17,13 @@ export class HomePage extends BasePage {
     super(page);
     
     // Define locators for home page elements
-    this.welcomeHeading = page.locator('h1', { hasText: 'Welcome to GlookoDataWebApp' });
-    this.uploadButton = page.getByRole('link', { name: /data upload/i });
-    this.reportsButton = page.getByRole('link', { name: /reports/i });
-    this.aiAnalysisButton = page.getByRole('link', { name: /ai analysis/i });
-    this.settingsButton = page.getByRole('link', { name: /settings/i });
+    // Note: The actual heading is "Glooko Insights" and uses a Text/span component, not h1
+    this.welcomeHeading = page.locator('span').filter({ hasText: 'Glooko Insights' }).first();
+    // Note: Navigation items are Cards, not links - we need to find them by text within cards
+    this.uploadButton = page.locator('[class*="navigationCard"]').filter({ hasText: 'Data Upload' });
+    this.reportsButton = page.locator('[class*="navigationCard"]').filter({ hasText: 'Comprehensive Reports' });
+    this.aiAnalysisButton = page.locator('[class*="navigationCard"]').filter({ hasText: 'AI Analysis' });
+    this.settingsButton = page.locator('[class*="navigationCard"]').filter({ hasText: 'Settings' });
   }
 
   /**
