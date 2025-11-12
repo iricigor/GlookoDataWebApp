@@ -17,6 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
+- [#TBD](../../pull/TBD) Add BG Values graph to Reports page
+  - New "BG Values" tab displaying daily glucose readings with interactive visualization
+  - Line chart showing glucose values throughout the day (00:00-24:00) using Recharts
+  - Date navigation with previous/next arrows and formatted date display (e.g., "Monday, 17-11-2025")
+  - Navigation arrows automatically disabled when no data available for that direction
+  - Toggle switch to change Y-axis maximum between 16.0 and 22.0 mmol/L
+  - Glucose values above chart maximum are clamped to max value for display
+  - Daily statistics panel showing: Below Range, In Range, Above Range percentages and counts
+  - Reference lines for low (3.9) and high (10.0) glucose thresholds
+  - Defaults to last available date in dataset
+  - Follows existing patterns from AGPGraph and InRangeReport components
 - [#TBD](../../pull/TBD) Simplify Glucose & Insulin AI prompt by removing correlation analysis
   - Remove complex correlation analysis from AI prompt in favor of simpler tiering approach
   - Replace "Insulin Efficacy Correlation" section with "Insulin Efficacy Tiers (Simplified and Actionable)"
