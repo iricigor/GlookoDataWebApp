@@ -32,7 +32,7 @@ import { extractDailyInsulinSummaries, extractInsulinReadings } from '../utils/i
 import { calculateGlucoseRangeStats, calculatePercentage, groupByDate } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { generateTimeInRangePrompt, generateGlucoseInsulinPrompt, generateMealTimingPrompt, base64Encode } from '../utils/perplexityApi';
-import { callAIApi, determineActiveProvider } from '../utils/aiApi';
+import { callAIApi, determineActiveProvider, getProviderDisplayName } from '../utils/aiApi';
 import { convertDailyReportsToCSV, convertGlucoseReadingsToCSV, convertBolusReadingsToCSV, convertBasalReadingsToCSV } from '../utils/csvUtils';
 
 const useStyles = makeStyles({
@@ -615,15 +615,19 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
                     : 'Analyze with AI'}
                 </Button>
                 
-                {!analyzing && !aiResponse && !error && !cooldownActive && (
-                  <Text className={styles.helperText}>
-                    Click Analyze to get AI-powered analysis
-                  </Text>
-                )}
-                {aiResponse && !readyForNewAnalysis && !cooldownActive && !analyzing && (
-                  <Text className={styles.helperText}>
-                    Click the button above to request a new analysis
-                  </Text>
+                {!analyzing && !cooldownActive && (
+                  <>
+                    {(!aiResponse || readyForNewAnalysis) && (
+                      <Text className={styles.helperText}>
+                        Click Analyze to get AI-powered analysis{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}
+                      </Text>
+                    )}
+                    {aiResponse && !readyForNewAnalysis && (
+                      <Text className={styles.helperText}>
+                        Click the button above to request a new analysis
+                      </Text>
+                    )}
+                  </>
                 )}
                 
                 {cooldownActive && cooldownSeconds > 0 && (
@@ -716,15 +720,19 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
                     : 'Analyze with AI'}
                 </Button>
                 
-                {!analyzingSecondPrompt && !secondPromptResponse && !secondPromptError && !secondPromptCooldownActive && (
-                  <Text className={styles.helperText}>
-                    Click Analyze to get AI-powered correlation analysis
-                  </Text>
-                )}
-                {secondPromptResponse && !secondPromptReady && !secondPromptCooldownActive && !analyzingSecondPrompt && (
-                  <Text className={styles.helperText}>
-                    Click the button above to request a new analysis
-                  </Text>
+                {!analyzingSecondPrompt && !secondPromptCooldownActive && (
+                  <>
+                    {(!secondPromptResponse || secondPromptReady) && (
+                      <Text className={styles.helperText}>
+                        Click Analyze to get AI-powered correlation analysis{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}
+                      </Text>
+                    )}
+                    {secondPromptResponse && !secondPromptReady && (
+                      <Text className={styles.helperText}>
+                        Click the button above to request a new analysis
+                      </Text>
+                    )}
+                  </>
                 )}
                 
                 {secondPromptCooldownActive && secondPromptCooldownSeconds > 0 && (
@@ -865,15 +873,19 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
                     : 'Analyze with AI'}
                 </Button>
                 
-                {!analyzingMealTiming && !mealTimingResponse && !mealTimingError && !mealTimingCooldownActive && (
-                  <Text className={styles.helperText}>
-                    Click Analyze to get AI-powered meal timing analysis with day-of-week and meal-specific recommendations
-                  </Text>
-                )}
-                {mealTimingResponse && !mealTimingReady && !mealTimingCooldownActive && !analyzingMealTiming && (
-                  <Text className={styles.helperText}>
-                    Click the button above to request a new analysis
-                  </Text>
+                {!analyzingMealTiming && !mealTimingCooldownActive && (
+                  <>
+                    {(!mealTimingResponse || mealTimingReady) && (
+                      <Text className={styles.helperText}>
+                        Click Analyze to get AI-powered meal timing analysis with day-of-week and meal-specific recommendations{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}
+                      </Text>
+                    )}
+                    {mealTimingResponse && !mealTimingReady && (
+                      <Text className={styles.helperText}>
+                        Click the button above to request a new analysis
+                      </Text>
+                    )}
+                  </>
                 )}
                 
                 {mealTimingCooldownActive && mealTimingCooldownSeconds > 0 && (
