@@ -17,6 +17,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
+- [#TBD](../../pull/TBD) Implement comprehensive Playwright E2E testing suite
+  - Add Playwright testing framework with configuration for Chromium, Firefox, and WebKit browsers
+  - Implement Page Object Model (POM) pattern for maintainable test architecture
+  - Create page objects for all main pages (Home, Data Upload, Reports, Settings, Navigation)
+  - Add 40 comprehensive E2E tests covering critical user journeys
+  - Implement smoke tests for critical paths and application startup
+  - Add navigation tests for all page transitions and routing
+  - Add page-specific tests for Home, Data Upload, Reports, and Settings pages
+  - Configure CI/CD integration with GitHub Actions for automated test execution
+  - Add test fixtures for common setup and teardown operations
+  - Include test utilities and constants for consistent test configuration
+  - Add comprehensive E2E testing documentation and guidelines
+  - Configure automatic artifact collection (traces, screenshots, videos) for failed tests
+  - Support parallel test execution and cross-browser testing
 - [#TBD](../../pull/TBD) Add BG Values graph to Reports page
   - New "BG Values" tab displaying daily glucose readings with interactive visualization
   - Line chart showing glucose values throughout the day (00:00-24:00) using Recharts

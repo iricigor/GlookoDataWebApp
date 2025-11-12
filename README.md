@@ -59,6 +59,7 @@ Comprehensive documentation is available to help you get started:
 - **[Settings Guide](docs/SETTINGS.md)** - Configure themes and glucose thresholds
 - **[Screenshots](docs/SCREENSHOTS.md)** - View all application screenshots
 - **[Contributing Guide](CONTRIBUTING.md)** - Learn how to contribute to the project
+- **[E2E Testing Guide](docs/E2E_TESTING.md)** - End-to-end testing with Playwright
 - **[Changelog](CHANGELOG.md)** - See what's new in each version
 
 ## 🛠️ Tech Stack
@@ -70,6 +71,7 @@ This project is built with modern web technologies:
 - ⚡ **Vite** - Next-generation frontend build tool
 - 🎨 **Fluent UI React** - Microsoft's official React component library
 - 🧪 **Vitest** - Fast unit testing framework
+- 🎭 **Playwright** - End-to-end testing framework
 
 ## 🤝 Contributing
 
