@@ -197,7 +197,7 @@ export function base64Encode(data: string): string {
 }
 
 /**
- * Generate AI prompt for glucose and insulin correlation analysis
+ * Generate AI prompt for glucose and insulin analysis with tiering
  * 
  * @param base64CsvData - Base64 encoded CSV data containing date, day of week, BG ranges, and insulin doses
  * @returns Formatted prompt for AI analysis
@@ -206,26 +206,26 @@ export function generateGlucoseInsulinPrompt(base64CsvData: string): string {
   const csvData = base64Decode(base64CsvData);
   
   return `**Role and Goal**
-You are an expert Data Analyst and Diabetes Management Specialist. Your goal is to analyze the provided daily blood glucose (BG) and insulin data over the specified period and identify actionable correlations, trends, and anomalies to help optimize diabetes control. The analysis must be clear, concise, and focus on practical recommendations.
+You are an expert Data Analyst and Diabetes Management Specialist. Your goal is to analyze the provided daily blood glucose (BG) and insulin data over the specified period and identify actionable trends and anomalies to help optimize diabetes control. The analysis must be clear, concise, and focus on practical recommendations.
 
-**Required Analysis and Correlations**
+**Required Analysis**
 Perform the following specific analyses on provided data set and report the findings:
 
 1. Temporal Trends (Day of Week & Time):
 - Identify the best and worst days of the week based on the average BG In Range (%).
-- Highlight any significant multi-day patterns (e.g., performance dips every 3 days, or weekend vs. weekday differences).
+- Highlight any significant multi-day patterns (e.g., weekend vs. weekday differences).
 
-2. Insulin Efficacy Correlation:
-- Determine the correlation between Total Insulin (Units) and BG In Range (%). Is higher total insulin associated with better or worse time-in-range?
-- Analyze the separate correlations for Basal and Bolus insulin against the BG In Range (%) and BG Above (%). Does a higher bolus dose correlate with reduced time above range?
+2. Insulin Efficacy Tiers (Simplified and Actionable):
+- Total Dose Tiering: Group all days into Low, Medium, and High Total Insulin tiers. Report the average BG In Range (%) for each tier.
+- Bolus Ratio Impact: Calculate the average BG Above (%) for days where the Bolus-to-Total-Insulin Ratio is above the dataset median and compare it to days below the median.
 
 3. Anomalies and Key Events:
-- Identify the 3 best days (highest BG In Range %) and the 3 worst days (lowest BG In Range %) in the entire dataset.
-- For these 6 outlier days, report the corresponding Basal and Bolus doses. (This is for the user to manually correlate with diet/activity on those specific dates).
+- Identify the 3 best days (highest BG In Range %) and the 3 worst days (lowest BG In Range %).
+- Report the average Basal dose and average Bolus dose for the 3 best days and for the 3 worst days, and note the key difference between these two averages.
 
-4. Actionable Summary
+4. Actionable Summary:
 - Provide a 3-point summary of the most significant findings.
-- Offer 2-3 specific, actionable recommendations based on the correlation data (e.g., 'Consider reducing basal on Sundays,' or 'Your BG Above % appears to spike on days where your total insulin is less than X units').
+- Offer 2-3 specific, actionable recommendations based on the tier and outlier data (e.g., 'Days with a high bolus ratio show significantly less time above range; consider an increase in your meal-time insulin-to-carb ratio').
 
 **Dataset (CSV format)**
 \`\`\`csv

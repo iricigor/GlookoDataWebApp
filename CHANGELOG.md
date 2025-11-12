@@ -16,16 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.x] - Current Development
 
-### Documentation
-- [#TBD](../../pull/TBD) Add comprehensive documentation for creating new AI analysis prompts
-  - Complete step-by-step guide in copilot-instructions.md for adding new prompts/tabs to AI Analysis page
-  - Documents the 8-step process: state management, cooldown timer, data preparation, prompt generation, handler function, tab registration, UI rendering, and testing
-  - Includes detailed patterns for state management (6 variables per prompt), cooldown mechanism, error handling, and data preparation
-  - Provides two complete examples: simple text-based prompts and complex dataset prompts with CSV/base64 encoding
-  - Lists common mistakes to avoid and testing checklist
-  - Based on analysis of existing "Time in Range" and "Glucose & Insulin" prompt implementations
-
 ### New Features
+- [#TBD](../../pull/TBD) Simplify Glucose & Insulin AI prompt by removing correlation analysis
+  - Remove complex correlation analysis from AI prompt in favor of simpler tiering approach
+  - Replace "Insulin Efficacy Correlation" section with "Insulin Efficacy Tiers (Simplified and Actionable)"
+  - New tiering analysis: Group days into Low/Medium/High Total Insulin tiers with average BG In Range (%) for each
+  - New bolus ratio impact: Compare average BG Above (%) for days with bolus ratio above vs below median
+  - Enhanced anomalies section: Report average Basal and Bolus doses for 3 best and 3 worst days with key differences
+  - Updated actionable summary to provide recommendations based on tier and outlier data instead of correlations
+  - Keep temporal trends section unchanged (best/worst days, multi-day patterns)
+  - Updated unit tests to validate new prompt structure and content
 - [#TBD](../../pull/TBD) Add Grok AI provider support
   - Add xAI Grok API integration using grok-beta model
   - New Grok AI API key input in Settings > Data & AI tab
