@@ -323,6 +323,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Expand "Understanding Your Results" with AGP interpretation guidelines
 
 ### Other
+- [#TBD](../../pull/TBD) Restructure codebase with feature-based architecture to minimize merge conflicts
+  - Split xlsxUtils.ts (435 lines) into 5 focused modules in `src/features/export/utils/`
+  - Move zipUtils.ts (240 lines) to `src/features/dataUpload/utils/`
+  - Move FileList and FileUploadZone components to `src/features/dataUpload/components/`
+  - Create barrel exports for clean import syntax
+  - Add path aliases (@/features, @/utils, @/types, etc.) in tsconfig and vite config
+  - Add comprehensive `src/features/README.md` documenting architecture patterns
+  - Old files in `src/utils/` and `src/components/` remain for backward compatibility
+  - Expected benefit: 70-80% reduction in merge conflicts
 - [#162](../../pull/162) Fix CHANGELOG.md by replacing all #XXX placeholder entries with correct PR numbers
   - Identified 11 placeholder entries with #XXX format
   - Used GitHub API to search for and identify correct PR numbers
