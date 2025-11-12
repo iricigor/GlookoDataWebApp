@@ -26,14 +26,14 @@ import {
 import { BrainCircuitRegular, CheckmarkCircleRegular, ErrorCircleRegular } from '@fluentui/react-icons';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { MarkdownRenderer } from '../components/MarkdownRenderer';
-import type { UploadedFile, AIAnalysisResult, DailyReport } from '../types';
+import type { UploadedFile, AIAnalysisResult, DailyReport, GlucoseReading, InsulinReading } from '../types';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
-import { extractDailyInsulinSummaries } from '../utils/insulinDataUtils';
+import { extractDailyInsulinSummaries, extractInsulinReadings } from '../utils/insulinDataUtils';
 import { calculateGlucoseRangeStats, calculatePercentage, groupByDate } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
-import { generateTimeInRangePrompt, generateGlucoseInsulinPrompt, base64Encode } from '../utils/perplexityApi';
+import { generateTimeInRangePrompt, generateGlucoseInsulinPrompt, generateMealTimingPrompt, base64Encode } from '../utils/perplexityApi';
 import { callAIApi, determineActiveProvider } from '../utils/aiApi';
-import { convertDailyReportsToCSV } from '../utils/csvUtils';
+import { convertDailyReportsToCSV, convertGlucoseReadingsToCSV, convertBolusReadingsToCSV, convertBasalReadingsToCSV } from '../utils/csvUtils';
 
 const useStyles = makeStyles({
   container: {
@@ -240,6 +240,19 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
   const [secondPromptCooldownSeconds, setSecondPromptCooldownSeconds] = useState(0);
   const [secondPromptReady, setSecondPromptReady] = useState(false);
 
+  // Meal timing prompt state
+  const [analyzingMealTiming, setAnalyzingMealTiming] = useState(false);
+  const [mealTimingResponse, setMealTimingResponse] = useState<string | null>(null);
+  const [mealTimingError, setMealTimingError] = useState<string | null>(null);
+  const [mealTimingCooldownActive, setMealTimingCooldownActive] = useState(false);
+  const [mealTimingCooldownSeconds, setMealTimingCooldownSeconds] = useState(0);
+  const [mealTimingReady, setMealTimingReady] = useState(false);
+  const [mealTimingDatasets, setMealTimingDatasets] = useState<{
+    cgmReadings: GlucoseReading[];
+    bolusReadings: InsulinReading[];
+    basalReadings: InsulinReading[];
+  }>({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
+
   // Determine which AI provider to use
   const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey);
   const hasApiKey = activeProvider !== null;
@@ -263,6 +276,10 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
       setSecondPromptResponse(null);
       setSecondPromptError(null);
       setSecondPromptReady(false);
+      setMealTimingDatasets({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
+      setMealTimingResponse(null);
+      setMealTimingError(null);
+      setMealTimingReady(false);
       return;
     }
 
@@ -280,6 +297,9 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
       setSecondPromptResponse(null);
       setSecondPromptError(null);
       setSecondPromptReady(false);
+      setMealTimingResponse(null);
+      setMealTimingError(null);
+      setMealTimingReady(false);
       try {
         // Extract CGM readings (default data source)
         const readings = await extractGlucoseReadings(selectedFile, 'cgm');
@@ -313,14 +333,31 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
             console.warn('Failed to extract insulin data:', insulinErr);
             setCombinedDataset(dailyGlucoseReports);
           }
+
+          // Extract detailed insulin readings for meal timing analysis
+          try {
+            const insulinReadings = await extractInsulinReadings(selectedFile);
+            const bolusReadings = insulinReadings.filter(r => r.insulinType === 'bolus');
+            const basalReadings = insulinReadings.filter(r => r.insulinType === 'basal');
+            setMealTimingDatasets({
+              cgmReadings: readings,
+              bolusReadings,
+              basalReadings,
+            });
+          } catch (mealTimingErr) {
+            console.warn('Failed to extract meal timing data:', mealTimingErr);
+            setMealTimingDatasets({ cgmReadings: readings, bolusReadings: [], basalReadings: [] });
+          }
         } else {
           setInRangePercentage(null);
           setCombinedDataset([]);
+          setMealTimingDatasets({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
         }
       } catch (error) {
         console.error('Failed to calculate in-range percentage:', error);
         setInRangePercentage(null);
         setCombinedDataset([]);
+        setMealTimingDatasets({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
       } finally {
         setLoading(false);
       }
@@ -354,6 +391,19 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
       setSecondPromptReady(true);
     }
   }, [secondPromptCooldownSeconds, secondPromptCooldownActive]);
+
+  // Handle cooldown timer for meal timing prompt
+  useEffect(() => {
+    if (mealTimingCooldownSeconds > 0) {
+      const timer = setTimeout(() => {
+        setMealTimingCooldownSeconds(prev => prev - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (mealTimingCooldownActive && mealTimingCooldownSeconds === 0) {
+      setMealTimingCooldownActive(false);
+      setMealTimingReady(true);
+    }
+  }, [mealTimingCooldownSeconds, mealTimingCooldownActive]);
 
   const handleAnalyzeClick = async () => {
     if (!activeProvider || !hasApiKey || inRangePercentage === null) {
@@ -466,6 +516,69 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
       }
     } finally {
       setAnalyzingSecondPrompt(false);
+    }
+  };
+
+  const handleMealTimingClick = async () => {
+    const { cgmReadings, bolusReadings, basalReadings } = mealTimingDatasets;
+    if (!activeProvider || !hasApiKey || cgmReadings.length === 0 || bolusReadings.length === 0) {
+      return;
+    }
+
+    // If there's already a response, start cooldown before allowing new analysis
+    if (mealTimingResponse && !mealTimingCooldownActive && !mealTimingReady) {
+      setMealTimingCooldownActive(true);
+      setMealTimingCooldownSeconds(3);
+      return;
+    }
+
+    // Don't analyze if cooldown is active
+    if (mealTimingCooldownActive) {
+      return;
+    }
+
+    setAnalyzingMealTiming(true);
+    setMealTimingError(null);
+    setMealTimingReady(false); // Reset the flag when starting new analysis
+    const previousResponse = mealTimingResponse; // Keep previous response in case of error
+
+    try {
+      // Convert datasets to CSV format
+      const cgmCsv = convertGlucoseReadingsToCSV(cgmReadings);
+      const bolusCsv = convertBolusReadingsToCSV(bolusReadings);
+      const basalCsv = convertBasalReadingsToCSV(basalReadings);
+      
+      // Base64 encode the CSV data
+      const base64CgmData = base64Encode(cgmCsv);
+      const base64BolusData = base64Encode(bolusCsv);
+      const base64BasalData = base64Encode(basalCsv);
+
+      // Generate the prompt with the base64 CSV data
+      const prompt = generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData);
+
+      // Get the appropriate API key for the active provider
+      const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : geminiApiKey;
+
+      // Call the AI API using the selected provider
+      const result = await callAIApi(activeProvider, apiKey, prompt);
+
+      if (result.success && result.content) {
+        setMealTimingResponse(result.content);
+      } else {
+        // On error, keep the previous response if it exists
+        setMealTimingError(result.error || 'Failed to get AI response');
+        if (previousResponse) {
+          setMealTimingResponse(previousResponse);
+        }
+      }
+    } catch (err) {
+      // On error, keep the previous response if it exists
+      setMealTimingError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      if (previousResponse) {
+        setMealTimingResponse(previousResponse);
+      }
+    } finally {
+      setAnalyzingMealTiming(false);
     }
   };
 
@@ -724,11 +837,138 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
         </div>
       );
     } else if (selectedTab === 'mealTiming') {
+      const { cgmReadings, bolusReadings, basalReadings } = mealTimingDatasets;
+      const hasData = cgmReadings.length > 0 && bolusReadings.length > 0;
+      
       return (
         <div className={styles.promptContent}>
-          <Text className={styles.helperText}>
-            Meal timing analysis - To be implemented
-          </Text>
+          {loading ? (
+            <Text className={styles.helperText}>Loading data...</Text>
+          ) : hasData ? (
+            <>
+              {/* Button container */}
+              <div className={styles.buttonContainer}>
+                <Button
+                  appearance="primary"
+                  disabled={!hasApiKey || analyzingMealTiming || (mealTimingCooldownActive && mealTimingCooldownSeconds > 0)}
+                  onClick={handleMealTimingClick}
+                  icon={analyzingMealTiming ? <Spinner size="tiny" /> : undefined}
+                >
+                  {analyzingMealTiming
+                    ? 'Analyzing...'
+                    : mealTimingResponse && !mealTimingReady
+                    ? 'Click to enable new analysis'
+                    : 'Analyze with AI'}
+                </Button>
+                
+                {!analyzingMealTiming && !mealTimingResponse && !mealTimingError && !mealTimingCooldownActive && (
+                  <Text className={styles.helperText}>
+                    Click Analyze to get AI-powered meal timing analysis with day-of-week and meal-specific recommendations
+                  </Text>
+                )}
+                {mealTimingResponse && !mealTimingReady && !mealTimingCooldownActive && !analyzingMealTiming && (
+                  <Text className={styles.helperText}>
+                    Click the button above to request a new analysis
+                  </Text>
+                )}
+                
+                {mealTimingCooldownActive && mealTimingCooldownSeconds > 0 && (
+                  <div className={styles.cooldownContainer}>
+                    <Text className={styles.cooldownText}>
+                      Please wait {mealTimingCooldownSeconds} second{mealTimingCooldownSeconds !== 1 ? 's' : ''} before requesting new analysis...
+                    </Text>
+                    <ProgressBar 
+                      value={(3 - mealTimingCooldownSeconds) / 3} 
+                      thickness="large"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Accordion to show prompt text */}
+              <Accordion collapsible style={{ marginTop: '16px' }}>
+                <AccordionItem value="promptText">
+                  <AccordionHeader>View AI Prompt</AccordionHeader>
+                  <AccordionPanel>
+                    <div className={styles.promptTextContainer}>
+                      {(() => {
+                        const cgmCsv = convertGlucoseReadingsToCSV(cgmReadings);
+                        const bolusCsv = convertBolusReadingsToCSV(bolusReadings);
+                        const basalCsv = convertBasalReadingsToCSV(basalReadings);
+                        const base64CgmData = base64Encode(cgmCsv);
+                        const base64BolusData = base64Encode(bolusCsv);
+                        const base64BasalData = base64Encode(basalCsv);
+                        return generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData);
+                      })()}
+                    </div>
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
+
+              {/* Accordion for dataset summaries */}
+              <Accordion collapsible style={{ marginTop: '16px' }}>
+                <AccordionItem value="datasetSummary">
+                  <AccordionHeader>Dataset Summary</AccordionHeader>
+                  <AccordionPanel>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <Text>
+                        <strong>CGM Readings:</strong> {cgmReadings.length} readings
+                      </Text>
+                      <Text>
+                        <strong>Bolus Events:</strong> {bolusReadings.length} injections
+                      </Text>
+                      <Text>
+                        <strong>Basal Events:</strong> {basalReadings.length} entries
+                      </Text>
+                      {cgmReadings.length > 0 && (
+                        <>
+                          <Text>
+                            <strong>Date Range:</strong> {cgmReadings[0].timestamp.toLocaleDateString()} - {cgmReadings[cgmReadings.length - 1].timestamp.toLocaleDateString()}
+                          </Text>
+                        </>
+                      )}
+                    </div>
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
+
+              {analyzingMealTiming && (
+                <div className={styles.loadingContainer}>
+                  <Spinner size="medium" />
+                  <Text className={styles.helperText}>
+                    Getting AI analysis... This may take a few seconds.
+                  </Text>
+                </div>
+              )}
+
+              {mealTimingError && (
+                <div className={styles.errorContainer}>
+                  <MessageBar intent="error" icon={<ErrorCircleRegular className={styles.errorIcon} />}>
+                    <MessageBarBody>
+                      <strong>Error:</strong> {mealTimingError}
+                    </MessageBarBody>
+                  </MessageBar>
+                </div>
+              )}
+
+              {mealTimingResponse && (
+                <>
+                  <MessageBar intent="success" icon={<CheckmarkCircleRegular className={styles.successIcon} />}>
+                    <MessageBarBody>
+                      AI analysis completed successfully
+                    </MessageBarBody>
+                  </MessageBar>
+                  <div className={styles.aiResponseContainer}>
+                    <MarkdownRenderer content={mealTimingResponse} />
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <Text className={styles.helperText}>
+              No CGM or bolus data available for meal timing analysis. Please ensure your data file contains both CGM readings and bolus insulin data.
+            </Text>
+          )}
         </div>
       );
     }
