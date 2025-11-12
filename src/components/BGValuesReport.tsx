@@ -12,6 +12,8 @@ import {
   Card,
   TabList,
   Tab,
+  Dropdown,
+  Option,
 } from '@fluentui/react-components';
 import {
   LineChart,
@@ -32,6 +34,9 @@ import {
 } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { DayNavigator } from './DayNavigator';
+import { useBGColorScheme } from '../hooks/useBGColorScheme';
+import { getGlucoseColor, isDynamicColorScheme, COLOR_SCHEME_DESCRIPTORS } from '../utils/bgColorUtils';
+import type { BGColorScheme } from '../hooks/useBGColorScheme';
 
 const useStyles = makeStyles({
   container: {
@@ -93,6 +98,14 @@ const useStyles = makeStyles({
     alignItems: 'center',
     ...shorthands.gap('12px'),
   },
+  colorSchemeContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+  },
+  colorSchemeDropdown: {
+    minWidth: '200px',
+  },
   statsCard: {
     ...shorthands.padding('24px'),
     backgroundColor: tokens.colorNeutralBackground2,
@@ -145,6 +158,7 @@ interface BGValuesReportProps {
 export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
+  const { colorScheme, setColorScheme } = useBGColorScheme();
   
   const [loading, setLoading] = useState(false);
   const [dateChanging, setDateChanging] = useState(false);
@@ -213,6 +227,7 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
         timeMinutes: hours * 60 + minutes, // For sorting
         value: clampedValue,
         originalValue: reading.value, // Keep original for tooltip
+        color: getGlucoseColor(reading.value, colorScheme), // Calculate color based on scheme
       };
     })
     .sort((a, b) => a.timeMinutes - b.timeMinutes);
@@ -246,7 +261,7 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   };
 
   // Custom tooltip with Fluent UI styling
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string; value: number; originalValue: number } }> }) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string; value: number; originalValue: number; color: string } }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       const displayValue = data.originalValue > maxGlucose 
@@ -277,6 +292,21 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
       );
     }
     return null;
+  };
+
+  // Custom dot renderer for colored glucose values
+  const renderColoredDot = (props: { cx?: number; cy?: number; payload?: { color: string } }): React.ReactElement | null => {
+    if (props.cx === undefined || props.cy === undefined || !props.payload) return <></>;
+    return (
+      <circle
+        cx={props.cx}
+        cy={props.cy}
+        r={3}
+        fill={props.payload.color}
+        stroke={tokens.colorNeutralBackground1}
+        strokeWidth={1}
+      />
+    );
   };
 
   // Format X-axis labels (show only key times)
@@ -385,22 +415,45 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
           }}>
             Glucose Values Throughout the Day
           </Text>
-          <div className={styles.maxValueContainer}>
-            <Text style={{ 
-              fontSize: tokens.fontSizeBase300,
-              fontFamily: tokens.fontFamilyBase,
-              color: tokens.colorNeutralForeground2,
-            }}>
-              Max: {maxGlucose.toFixed(1)} mmol/L
-            </Text>
-            <TabList
-              selectedValue={maxGlucose === 16.0 ? '16.0' : '22.0'}
-              onTabSelect={(_, data) => setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0)}
-              size="small"
-            >
-              <Tab value="16.0">16.0</Tab>
-              <Tab value="22.0">22.0</Tab>
-            </TabList>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <div className={styles.colorSchemeContainer}>
+              <Text style={{ 
+                fontSize: tokens.fontSizeBase300,
+                fontFamily: tokens.fontFamilyBase,
+                color: tokens.colorNeutralForeground2,
+              }}>
+                Color Scheme:
+              </Text>
+              <Dropdown
+                value={COLOR_SCHEME_DESCRIPTORS[colorScheme].name}
+                selectedOptions={[colorScheme]}
+                onOptionSelect={(_, data) => setColorScheme(data.optionValue as BGColorScheme)}
+                className={styles.colorSchemeDropdown}
+                size="small"
+              >
+                <Option value="monochrome">{COLOR_SCHEME_DESCRIPTORS.monochrome.name}</Option>
+                <Option value="basic">{COLOR_SCHEME_DESCRIPTORS.basic.name}</Option>
+                <Option value="hsv">{COLOR_SCHEME_DESCRIPTORS.hsv.name}</Option>
+                <Option value="clinical">{COLOR_SCHEME_DESCRIPTORS.clinical.name}</Option>
+              </Dropdown>
+            </div>
+            <div className={styles.maxValueContainer}>
+              <Text style={{ 
+                fontSize: tokens.fontSizeBase300,
+                fontFamily: tokens.fontFamilyBase,
+                color: tokens.colorNeutralForeground2,
+              }}>
+                Max: {maxGlucose.toFixed(1)} mmol/L
+              </Text>
+              <TabList
+                selectedValue={maxGlucose === 16.0 ? '16.0' : '22.0'}
+                onTabSelect={(_, data) => setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0)}
+                size="small"
+              >
+                <Tab value="16.0">16.0</Tab>
+                <Tab value="22.0">22.0</Tab>
+              </TabList>
+            </div>
           </div>
         </div>
         
@@ -479,18 +532,18 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
                 }}
               />
               
-              {/* Glucose values line with Fluent UI brand color and smooth curve */}
+              {/* Glucose values line with dynamic or monochrome coloring */}
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke={tokens.colorBrandForeground1}
-                strokeWidth={2}
-                dot={false}
+                stroke={isDynamicColorScheme(colorScheme) ? tokens.colorNeutralStroke2 : tokens.colorBrandForeground1}
+                strokeWidth={isDynamicColorScheme(colorScheme) ? 1 : 2}
+                dot={isDynamicColorScheme(colorScheme) ? (renderColoredDot as unknown as boolean) : false}
                 activeDot={{ 
                   r: 4, 
                   strokeWidth: 2,
                   stroke: tokens.colorNeutralBackground1,
-                  fill: tokens.colorBrandForeground1,
+                  fill: isDynamicColorScheme(colorScheme) ? undefined : tokens.colorBrandForeground1,
                 }}
               />
             </LineChart>
