@@ -3,7 +3,14 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { callPerplexityApi, generateTimeInRangePrompt, generateGlucoseInsulinPrompt, base64Encode, base64Decode } from './perplexityApi';
+import { 
+  callPerplexityApi, 
+  generateTimeInRangePrompt, 
+  generateGlucoseInsulinPrompt,
+  generateMealTimingPrompt,
+  base64Encode, 
+  base64Decode 
+} from './perplexityApi';
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -427,6 +434,119 @@ describe('perplexityApi', () => {
       expect(body.model).toBe('sonar');
       expect(body.temperature).toBe(0.2);
       expect(body.max_tokens).toBe(1000);
+    });
+  });
+
+  describe('generateMealTimingPrompt', () => {
+    it('should generate a valid prompt with all three datasets', () => {
+      const cgmData = 'Timestamp,CGM Glucose Value (mmol/L)\n2024-01-01T08:00:00Z,6.5\n2024-01-01T08:05:00Z,7.2';
+      const bolusData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T08:00:00Z,5.0\n2024-01-01T12:00:00Z,6.5';
+      const basalData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T00:00:00Z,1.0\n2024-01-01T01:00:00Z,1.2';
+      
+      const base64Cgm = base64Encode(cgmData);
+      const base64Bolus = base64Encode(bolusData);
+      const base64Basal = base64Encode(basalData);
+      
+      const prompt = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(prompt).toBeTruthy();
+      expect(prompt).toContain('Role and Goal');
+      expect(prompt).toContain('Data Analyst and Diabetes Management Specialist');
+      expect(prompt).toContain('mmol/L');
+      expect(prompt).toContain('you/your');
+      expect(prompt).toContain('Dataset 1: CGM Data');
+      expect(prompt).toContain('Dataset 2: Bolus Data');
+      expect(prompt).toContain('Dataset 3: Basal Data');
+      expect(prompt).toContain(cgmData);
+      expect(prompt).toContain(bolusData);
+      expect(prompt).toContain(basalData);
+    });
+
+    it('should include all required analysis sections', () => {
+      const cgmData = 'Timestamp,CGM Glucose Value (mmol/L)\n2024-01-01T08:00:00Z,6.5';
+      const bolusData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T08:00:00Z,5.0';
+      const basalData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T00:00:00Z,1.0';
+      
+      const prompt = generateMealTimingPrompt(
+        base64Encode(cgmData),
+        base64Encode(bolusData),
+        base64Encode(basalData)
+      );
+      
+      expect(prompt).toContain('Temporal Trends');
+      expect(prompt).toContain('Insulin Efficacy Tiering');
+      expect(prompt).toContain('Post-Meal Timing Efficacy');
+      expect(prompt).toContain('Nocturnal Basal Efficacy');
+      expect(prompt).toContain('Actionable Summary and Recommendations');
+      expect(prompt).toContain('3-Point Summary');
+    });
+
+    it('should include specific analysis requirements', () => {
+      const cgmData = 'Timestamp,CGM Glucose Value (mmol/L)\n2024-01-01T08:00:00Z,6.5';
+      const bolusData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T08:00:00Z,5.0';
+      const basalData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T00:00:00Z,1.0';
+      
+      const prompt = generateMealTimingPrompt(
+        base64Encode(cgmData),
+        base64Encode(bolusData),
+        base64Encode(basalData)
+      );
+      
+      expect(prompt).toContain('BG Control Ranking');
+      expect(prompt).toContain('Workdays (Mon-Fri)');
+      expect(prompt).toContain('Weekends (Sat-Sun)');
+      expect(prompt).toContain('Low, Medium, and High Total Daily Insulin');
+      expect(prompt).toContain('Breakfast, Lunch, and Dinner');
+      expect(prompt).toContain('Spike Rate');
+      expect(prompt).toContain('Time to Peak BG');
+      expect(prompt).toContain('Dawn Phenomenon');
+      expect(prompt).toContain('03:00 AM');
+    });
+
+    it('should decode base64 data correctly in the prompt', () => {
+      const cgmData = 'Test CGM Data';
+      const bolusData = 'Test Bolus Data';
+      const basalData = 'Test Basal Data';
+      
+      const prompt = generateMealTimingPrompt(
+        base64Encode(cgmData),
+        base64Encode(bolusData),
+        base64Encode(basalData)
+      );
+      
+      expect(prompt).toContain(cgmData);
+      expect(prompt).toContain(bolusData);
+      expect(prompt).toContain(basalData);
+    });
+
+    it('should use mmol/L units consistently', () => {
+      const cgmData = 'Timestamp,CGM Glucose Value (mmol/L)\n2024-01-01T08:00:00Z,6.5';
+      const bolusData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T08:00:00Z,5.0';
+      const basalData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T00:00:00Z,1.0';
+      
+      const prompt = generateMealTimingPrompt(
+        base64Encode(cgmData),
+        base64Encode(bolusData),
+        base64Encode(basalData)
+      );
+      
+      expect(prompt).toContain('mmol/L');
+      expect(prompt).toContain('not mg/dL'); // Contains warning about not using mg/dL
+      expect(prompt).toContain('3.9-10.0 mmol/L');
+    });
+
+    it('should use second person language', () => {
+      const cgmData = 'Timestamp,CGM Glucose Value (mmol/L)\n2024-01-01T08:00:00Z,6.5';
+      const bolusData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T08:00:00Z,5.0';
+      const basalData = 'Timestamp,Insulin Delivered (U)\n2024-01-01T00:00:00Z,1.0';
+      
+      const prompt = generateMealTimingPrompt(
+        base64Encode(cgmData),
+        base64Encode(bolusData),
+        base64Encode(basalData)
+      );
+      
+      expect(prompt).toContain('you/your');
     });
   });
 });
