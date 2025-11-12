@@ -33,7 +33,7 @@ import { calculateGlucoseRangeStats, calculatePercentage, groupByDate } from '..
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { generateTimeInRangePrompt, generateGlucoseInsulinPrompt, generateMealTimingPrompt, base64Encode } from '../utils/perplexityApi';
 import { callAIApi, determineActiveProvider, getProviderDisplayName } from '../utils/aiApi';
-import { convertDailyReportsToCSV, convertGlucoseReadingsToCSV, convertBolusReadingsToCSV, convertBasalReadingsToCSV } from '../utils/csvUtils';
+import { convertDailyReportsToCSV, convertGlucoseReadingsToCSV, convertBolusReadingsToCSV, convertBasalReadingsToCSV, filterGlucoseReadingsToLastDays, filterInsulinReadingsToLastDays } from '../utils/csvUtils';
 
 const useStyles = makeStyles({
   container: {
@@ -406,6 +406,27 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
     }
   }, [mealTimingCooldownSeconds, mealTimingCooldownActive]);
 
+  /**
+   * Helper function to detect if an error is related to request size being too large
+   * @param errorMessage - The error message from the API
+   * @returns true if the error is related to request size
+   */
+  const isRequestTooLargeError = (errorMessage: string | undefined): boolean => {
+    if (!errorMessage) return false;
+    
+    const lowerMessage = errorMessage.toLowerCase();
+    return (
+      lowerMessage.includes('too large') ||
+      lowerMessage.includes('too long') ||
+      lowerMessage.includes('exceeds') ||
+      lowerMessage.includes('maximum') ||
+      lowerMessage.includes('limit') ||
+      lowerMessage.includes('token') && (lowerMessage.includes('limit') || lowerMessage.includes('exceed')) ||
+      lowerMessage.includes('payload') && lowerMessage.includes('large') ||
+      lowerMessage.includes('request') && lowerMessage.includes('size')
+    );
+  };
+
   const handleAnalyzeClick = async () => {
     if (!activeProvider || !hasApiKey || inRangePercentage === null) {
       return;
@@ -545,11 +566,16 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
     setMealTimingReady(false); // Reset the flag when starting new analysis
     const previousResponse = mealTimingResponse; // Keep previous response in case of error
 
-    try {
+    // Helper function to try analysis with given datasets
+    const tryAnalysis = async (
+      cgm: typeof cgmReadings,
+      bolus: typeof bolusReadings,
+      basal: typeof basalReadings
+    ) => {
       // Convert datasets to CSV format
-      const cgmCsv = convertGlucoseReadingsToCSV(cgmReadings);
-      const bolusCsv = convertBolusReadingsToCSV(bolusReadings);
-      const basalCsv = convertBasalReadingsToCSV(basalReadings);
+      const cgmCsv = convertGlucoseReadingsToCSV(cgm);
+      const bolusCsv = convertBolusReadingsToCSV(bolus);
+      const basalCsv = convertBasalReadingsToCSV(basal);
       
       // Base64 encode the CSV data
       const base64CgmData = base64Encode(cgmCsv);
@@ -564,7 +590,31 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
                       activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
       // Call the AI API using the selected provider
-      const result = await callAIApi(activeProvider, apiKey, prompt);
+      return await callAIApi(activeProvider, apiKey, prompt);
+    };
+
+    try {
+      // First attempt: try with full dataset
+      let result = await tryAnalysis(cgmReadings, bolusReadings, basalReadings);
+
+      // If request was too large, try with smaller dataset (last 28 days)
+      if (!result.success && isRequestTooLargeError(result.error)) {
+        // Filter datasets to last 28 days
+        const filteredCgm = filterGlucoseReadingsToLastDays(cgmReadings, 28);
+        const filteredBolus = filterInsulinReadingsToLastDays(bolusReadings, 28);
+        const filteredBasal = filterInsulinReadingsToLastDays(basalReadings, 28);
+
+        // Verify we still have data after filtering
+        if (filteredCgm.length > 0 && filteredBolus.length > 0) {
+          // Second attempt: try with filtered dataset
+          result = await tryAnalysis(filteredCgm, filteredBolus, filteredBasal);
+          
+          // If successful with smaller dataset, add a note to the response
+          if (result.success && result.content) {
+            result.content = `**Note:** Analysis based on the last 28 days of data due to dataset size constraints.\n\n${result.content}`;
+          }
+        }
+      }
 
       if (result.success && result.content) {
         setMealTimingResponse(result.content);
