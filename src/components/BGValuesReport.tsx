@@ -9,16 +9,10 @@ import {
   Text,
   tokens,
   shorthands,
-  Button,
   Card,
   TabList,
   Tab,
-  Spinner,
 } from '@fluentui/react-components';
-import {
-  ChevronLeftRegular,
-  ChevronRightRegular,
-} from '@fluentui/react-icons';
 import {
   LineChart,
   Line,
@@ -30,14 +24,14 @@ import {
 } from 'recharts';
 import type { UploadedFile, GlucoseReading, GlucoseDataSource } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
-import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
+import { extractGlucoseReadings, smoothGlucoseValues } from '../utils/glucoseDataUtils';
 import { 
   getUniqueDates, 
   filterReadingsByDate, 
-  formatDateDisplay,
   calculateGlucoseRangeStats,
 } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
+import { DayNavigator } from './DayNavigator';
 
 const useStyles = makeStyles({
   container: {
@@ -49,25 +43,6 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase500,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
-  },
-  dateNavigationCard: {
-    ...shorthands.padding('20px'),
-    backgroundColor: tokens.colorNeutralBackground2,
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    boxShadow: tokens.shadow2,
-  },
-  dateRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shorthands.gap('16px'),
-  },
-  dateDisplay: {
-    fontSize: tokens.fontSizeBase500,
-    fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground1,
-    minWidth: '300px',
-    textAlign: 'center',
   },
   chartCard: {
     ...shorthands.padding('24px'),
@@ -132,16 +107,6 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
     fontSize: tokens.fontSizeBase400,
   },
-  loadingIndicator: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shorthands.gap('12px'),
-    ...shorthands.padding('16px'),
-    backgroundColor: tokens.colorNeutralBackground2,
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    marginBottom: '16px',
-  },
 });
 
 interface BGValuesReportProps {
@@ -201,8 +166,11 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   // Filter readings for current date
   const currentReadings = currentDate ? filterReadingsByDate(allReadings, currentDate) : [];
 
+  // Apply smoothing to glucose values
+  const smoothedReadings = smoothGlucoseValues(currentReadings);
+
   // Prepare chart data
-  const chartData = currentReadings
+  const chartData = smoothedReadings
     .map(reading => {
       const time = reading.timestamp;
       const hours = time.getHours();
@@ -234,20 +202,18 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   const handlePreviousDate = () => {
     if (currentDateIndex > 0) {
       setDateChanging(true);
-      setTimeout(() => {
-        setCurrentDateIndex(currentDateIndex - 1);
-        setDateChanging(false);
-      }, 50);
+      setCurrentDateIndex(currentDateIndex - 1);
+      // Clear loading state after a brief moment
+      setTimeout(() => setDateChanging(false), 100);
     }
   };
 
   const handleNextDate = () => {
     if (currentDateIndex < availableDates.length - 1) {
       setDateChanging(true);
-      setTimeout(() => {
-        setCurrentDateIndex(currentDateIndex + 1);
-        setDateChanging(false);
-      }, 50);
+      setCurrentDateIndex(currentDateIndex + 1);
+      // Clear loading state after a brief moment
+      setTimeout(() => setDateChanging(false), 100);
     }
   };
 
@@ -326,37 +292,14 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
       <Text className={styles.reportTitle}>Detailed CGM</Text>
 
       {/* Date Navigation */}
-      <Card className={styles.dateNavigationCard}>
-        <div className={styles.dateRow}>
-          <Button
-            appearance="subtle"
-            icon={<ChevronLeftRegular />}
-            onClick={handlePreviousDate}
-            disabled={currentDateIndex === 0 || dateChanging}
-            title="Previous date"
-          />
-          <Text className={styles.dateDisplay}>
-            {formatDateDisplay(currentDate)}
-          </Text>
-          <Button
-            appearance="subtle"
-            icon={<ChevronRightRegular />}
-            onClick={handleNextDate}
-            disabled={currentDateIndex === availableDates.length - 1 || dateChanging}
-            title="Next date"
-          />
-        </div>
-      </Card>
-
-      {/* Loading indicator for date changes */}
-      {dateChanging && (
-        <div className={styles.loadingIndicator}>
-          <Spinner size="tiny" />
-          <Text style={{ fontSize: tokens.fontSizeBase300, color: tokens.colorNeutralForeground2 }}>
-            Loading data...
-          </Text>
-        </div>
-      )}
+      <DayNavigator
+        currentDate={currentDate}
+        onPreviousDay={handlePreviousDate}
+        onNextDay={handleNextDate}
+        canGoPrevious={currentDateIndex > 0}
+        canGoNext={currentDateIndex < availableDates.length - 1}
+        loading={dateChanging}
+      />
 
       {/* Chart */}
       <Card className={styles.chartCard}>
@@ -417,14 +360,14 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
                 label={{ value: `High (${thresholds.high})`, position: 'insideTopLeft', style: { fontSize: '11px' } }}
               />
               
-              {/* Glucose values line */}
+              {/* Glucose values line - reduced dot size */}
               <Line
                 type="monotone"
                 dataKey="value"
                 stroke="#1976D2"
                 strokeWidth={2}
-                dot={{ fill: '#1976D2', r: 3 }}
-                activeDot={{ r: 5 }}
+                dot={{ fill: '#1976D2', r: 2 }}
+                activeDot={{ r: 4 }}
               />
             </LineChart>
           </ResponsiveContainer>
