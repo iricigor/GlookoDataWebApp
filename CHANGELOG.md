@@ -283,6 +283,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Other
 <details>
+<summary>236 Fix CHANGELOG: Add collapsible format, document it, and automate updates via workflow</summary>
+
+[#236](../../pull/236) Fix CHANGELOG: Add collapsible format, document it, and automate updates via workflow
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>221 Automate README updates on main branch after PR merges</summary>
 
 [#221](../../pull/221) Automate README updates on main branch after PR merges
