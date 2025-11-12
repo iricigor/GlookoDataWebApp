@@ -4,11 +4,9 @@ import {
   tokens,
   shorthands,
 } from '@fluentui/react-components';
-import { FileUploadZone } from '../components/FileUploadZone';
-import { FileList } from '../components/FileList';
+import { FileUploadZone, FileList, extractZipMetadata } from '../features/dataUpload';
 import type { UploadedFile } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
-import { extractZipMetadata } from '../utils/zipUtils';
 
 const useStyles = makeStyles({
   container: {

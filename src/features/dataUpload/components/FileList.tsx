@@ -14,10 +14,10 @@ import {
   Radio,
 } from '@fluentui/react-components';
 import { DeleteRegular, ChevronRightRegular, ChevronDownRegular, ArrowDownloadRegular } from '@fluentui/react-icons';
-import type { UploadedFile } from '../types';
-import type { ExportFormat } from '../hooks/useExportFormat';
-import { convertZipToXlsx, downloadXlsx } from '../features/export/utils';
-import { CopyToCsvButton } from './CopyToCsvButton';
+import type { UploadedFile } from '../../../types';
+import type { ExportFormat } from '../../../hooks/useExportFormat';
+import { convertZipToXlsx, downloadXlsx } from '../../export/utils';
+import { CopyToCsvButton } from '../../../components/CopyToCsvButton';
 
 const useStyles = makeStyles({
   container: {

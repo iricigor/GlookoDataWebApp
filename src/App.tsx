@@ -15,7 +15,7 @@ import { useGeminiApiKey } from './hooks/useGeminiApiKey'
 import { useGrokApiKey } from './hooks/useGrokApiKey'
 import { useSwipeGesture } from './hooks/useSwipeGesture'
 import type { UploadedFile, AIAnalysisResult } from './types'
-import { extractZipMetadata } from './utils/zipUtils'
+import { extractZipMetadata } from './features/dataUpload/utils'
 
 // Page navigation order for swipe gestures
 const PAGE_ORDER = ['home', 'upload', 'reports', 'ai', 'settings'] as const
