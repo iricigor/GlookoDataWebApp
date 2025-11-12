@@ -64,11 +64,11 @@ Comprehensive documentation is available to help you get started:
 
 ## 📋 Recent Updates
 
+- 🔧 **PR #241**: Refactor: Extract AI prompts to dedicated files
 - 🔧 **PR #231**: Improve Detailed CGM report: smooth glucose line, Fluent UI design system, modern navigation, clean layout
 - 🔧 **PR #238**: Change runner to ubuntu-latest for e2e tests
 - 🔧 **PR #229**: Optimize E2E test execution: 29min → 4min via parallelization and wait strategy improvements
 - 🔧 **PR #225**: Add data privacy warning and best practices for AI analysis features
-- 🔧 **PR #227**: Add detailed last-3-days meal analysis to AI meal timing prompt
 
 ## 🛠️ Tech Stack
 
