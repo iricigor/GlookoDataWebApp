@@ -360,14 +360,14 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
                 label={{ value: `High (${thresholds.high})`, position: 'insideTopLeft', style: { fontSize: '11px' } }}
               />
               
-              {/* Glucose values line - reduced dot size */}
+              {/* Glucose values line - minimal dots */}
               <Line
                 type="monotone"
                 dataKey="value"
                 stroke="#1976D2"
                 strokeWidth={2}
-                dot={{ fill: '#1976D2', r: 2 }}
-                activeDot={{ r: 4 }}
+                dot={{ fill: '#1976D2', r: 1 }}
+                activeDot={{ r: 3, strokeWidth: 1 }}
               />
             </LineChart>
           </ResponsiveContainer>
