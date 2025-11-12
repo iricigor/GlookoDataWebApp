@@ -8,7 +8,7 @@ import { FileUploadZone } from '../components/FileUploadZone';
 import { FileList } from '../components/FileList';
 import type { UploadedFile } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
-import { extractZipMetadata } from '../utils/zipUtils';
+import { extractZipMetadata } from '../features/dataUpload/utils';
 
 const useStyles = makeStyles({
   container: {
