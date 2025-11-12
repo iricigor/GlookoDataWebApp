@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
-- [#213](../../pull/213) Enable smaller data set for "Meal Timing" analysis
+[#213](../../pull/213) Enable smaller data set for "Meal Timing" analysis
 <details>
 <summary>Details</summary>
 
@@ -28,7 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - If filtered dataset still fails, error is returned to user
   - 16 comprehensive unit tests for filtering functions covering various scenarios
 </details>
-- [#217](../../pull/217) Implement comprehensive Playwright E2E testing suite by @oguzc
+
+[#217](../../pull/217) Implement comprehensive Playwright E2E testing suite by @oguzc
 <details>
 <summary>Details</summary>
 
@@ -46,7 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Configure automatic artifact collection (traces, screenshots, videos) for failed tests
   - Support parallel test execution and cross-browser testing
 </details>
-- [#208](../../pull/208) Add BG Values graph to Reports page
+
+[#208](../../pull/208) Add BG Values graph to Reports page
 <details>
 <summary>Details</summary>
 
@@ -61,7 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Defaults to last available date in dataset
   - Follows existing patterns from AGPGraph and InRangeReport components
 </details>
-- [#206](../../pull/206) Simplify Glucose & Insulin AI prompt by removing correlation analysis
+
+[#206](../../pull/206) Simplify Glucose & Insulin AI prompt by removing correlation analysis
 <details>
 <summary>Details</summary>
 
@@ -74,7 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Keep temporal trends section unchanged (best/worst days, multi-day patterns)
   - Updated unit tests to validate new prompt structure and content
 </details>
-- [#207](../../pull/207) Add Grok AI provider support
+
+[#207](../../pull/207) Add Grok AI provider support
 <details>
 <summary>Details</summary>
 
@@ -85,7 +89,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Cookie-based persistence for Grok API key (1-year expiry)
   - Comprehensive test coverage for Grok API integration
 </details>
-- [#209](../../pull/209) Add comprehensive meal timing analysis
+
+[#209](../../pull/209) Add comprehensive meal timing analysis
 <details>
 <summary>Details</summary>
 
@@ -104,7 +109,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Loading spinner, success messages, and error handling for AI analysis
   - 12 comprehensive unit tests for new CSV conversion utilities and prompt generation
 </details>
-- [#202](../../pull/202) UI refinements and enablements
+
+[#202](../../pull/202) UI refinements and enablements
 <details>
 <summary>Details</summary>
 
@@ -113,7 +119,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add "Detailed CGM" and "Detailed Insulin" tabs to Reports page with placeholder texts for future implementation
   - Improve Data & AI tab layout in Settings page with better vertical spacing and organization
 </details>
-- [#192](../../pull/192) Align UI pages with consistent width and vertical tabs
+
+[#192](../../pull/192) Align UI pages with consistent width and vertical tabs
 <details>
 <summary>Details</summary>
 
@@ -123,7 +130,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Refactor AI Analysis page to use vertical tabs on the left instead of top-level accordions (2 tabs: Time in Range, Glucose & Insulin)
   - Maintain all existing functionality while improving navigation and visual consistency
 </details>
-- Finalize second AI prompt with glucose and insulin correlation analysis
+
+Finalize second AI prompt with glucose and insulin correlation analysis
 <details>
 <summary>Details</summary>
 
@@ -142,7 +150,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 22 comprehensive unit tests for CSV conversion, base64 encoding, and prompt generation
   - Remove AI provider name (e.g., "Using Perplexity") from accordion headers for cleaner UI
 </details>
-- Enhance daily glucose reports with insulin data
+
+Enhance daily glucose reports with insulin data
 <details>
 <summary>Details</summary>
 
@@ -151,7 +160,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Insulin data automatically merged with glucose data by date
   - Missing insulin data displayed as "-" for dates without insulin records
 </details>
-- [#171](../../pull/171) Align Reports page with Fluent UI design standards
+
+[#171](../../pull/171) Align Reports page with Fluent UI design standards
 <details>
 <summary>Details</summary>
 
@@ -160,7 +170,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add rounded corners and subtle elevation to main content container for improved visual hierarchy
   - Standardize all interactive elements with consistent Fluent UI styling
 </details>
-- Add Google Gemini AI integration alongside Perplexity AI
+
+Add Google Gemini AI integration alongside Perplexity AI
 <details>
 <summary>Details</summary>
 
@@ -177,7 +188,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated security documentation to cover both AI providers
   - Links to both Perplexity Settings and Google AI Studio for API key creation
 </details>
-- [#166](../../pull/166) Implement markdown rendering for AI responses
+
+[#166](../../pull/166) Implement markdown rendering for AI responses
 <details>
 <summary>Details</summary>
 
@@ -187,7 +199,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive styling for all markdown elements (headings, lists, code, tables, blockquotes, links)
   - 10 unit tests covering various markdown rendering scenarios
 </details>
-- Implement Perplexity AI integration for time-in-range glucose analysis
+
+Implement Perplexity AI integration for time-in-range glucose analysis
 <details>
 <summary>Details</summary>
 
@@ -203,8 +216,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Privacy: All AI communication happens directly from browser, no server intermediary
 </details>
 
+
 ### Fixes
-- [#184](../../pull/184) Fix Grok API key not recognized in Meal Timing analysis
+[#184](../../pull/184) Fix Grok API key not recognized in Meal Timing analysis
 <details>
 <summary>Details</summary>
 
@@ -213,7 +227,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added unit tests to verify correct API key is used for each provider (Perplexity, Grok, Gemini)
   - Meal Timing analysis now works correctly with all three AI providers
 </details>
-- [#212](../../pull/212) Fix AI analysis helper text and provider display issues
+
+[#212](../../pull/212) Fix AI analysis helper text and provider display issues
 <details>
 <summary>Details</summary>
 
@@ -225,7 +240,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed Meal Timing tab to properly extract bolus insulin data by improving column matching logic to include "delivered" pattern
   - Fixed insulin data extraction to process basal and bolus files even when manual insulin file is present in ZIP
 </details>
-- [#181](../../pull/181) Fix BG Values graph UI issues and improve Detailed CGM report
+
+[#181](../../pull/181) Fix BG Values graph UI issues and improve Detailed CGM report
 <details>
 <summary>Details</summary>
 
@@ -239,7 +255,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved date selector styling with disabled state during date transitions
   - All changes follow Fluent UI design standards for consistency
 </details>
-- [#191](../../pull/191) Simplify XLSX export to use metadata-based approach
+
+[#191](../../pull/191) Simplify XLSX export to use metadata-based approach
 <details>
 <summary>Details</summary>
 
@@ -250,7 +267,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ensures "For each line in summary page, we need to have one sheet in excel" as requested
   - All 20 unit tests passing including edge cases with missing files and merged datasets
 </details>
-- Fix missing tabs in Excel export for single-file datasets
+
+Fix missing tabs in Excel export for single-file datasets
 <details>
 <summary>Details</summary>
 
@@ -260,7 +278,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixes missing tabs for: basal, bolus, exercise, food, manual_insulin, medication, notes
   - Added comprehensive test reproducing the bug with 12 datasets
 </details>
-- Fix insulin dataset being exported with wrong column headers from manual_insulin
+
+Fix insulin dataset being exported with wrong column headers from manual_insulin
 <details>
 <summary>Details</summary>
 
@@ -269,7 +288,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Insulin data now exports correctly with proper columns: Timestamp, Total Bolus (U), Total Insulin (U), Total Basal (U), Serial Number
   - Added comprehensive bug reproduction tests
 </details>
-- [#173](../../pull/173) Fix AI analysis button not returning to initial state after cooldown
+
+[#173](../../pull/173) Fix AI analysis button not returning to initial state after cooldown
 <details>
 <summary>Details</summary>
 
@@ -280,7 +300,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added ResizeObserver mock for test environment
   - Added new test to verify button state after cooldown completion
 </details>
-- Fix AI analysis response persistence and button state management
+
+Fix AI analysis response persistence and button state management
 <details>
 <summary>Details</summary>
 
@@ -294,8 +315,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Prevents users from spamming the analyze button
 </details>
 
+
 ### Other
-- [#221](../../pull/221) Automate README updates on main branch after PR merges
+[#221](../../pull/221) Automate README updates on main branch after PR merges
 <details>
 <summary>Details</summary>
 
@@ -309,12 +331,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updates `.github/scripts/README.md` with automation details
 </details>
 
+
 ---
 
 ## [1.1.x] - Released
 
 ### New Features
-- [#144](../../pull/144) Add swipe gesture navigation for mobile devices
+[#144](../../pull/144) Add swipe gesture navigation for mobile devices
 <details>
 <summary>Details</summary>
 
@@ -324,7 +347,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Works on both touch devices (mobile) and mouse (desktop testing)
   - Prevents accidental triggers with vertical scroll detection
 </details>
-- [#148](../../pull/148) Add bug report and feature request links to Settings page
+
+[#148](../../pull/148) Add bug report and feature request links to Settings page
 <details>
 <summary>Details</summary>
 
@@ -334,7 +358,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Feature request button links to feature_request.yml template
   - Opens in new tab with proper security attributes (noopener noreferrer)
 </details>
-- [#142](../../pull/142) Add first AI analysis prompts to AI Analysis page
+
+[#142](../../pull/142) Add first AI analysis prompts to AI Analysis page
 <details>
 <summary>Details</summary>
 
@@ -345,7 +370,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Second prompt: "Additional Analysis" placeholder with "To be added soon" message
   - UI setup for future AI functionality integration
 </details>
-- [#138](../../pull/138) Add AGP report filters and CSV export
+
+[#138](../../pull/138) Add AGP report filters and CSV export
 <details>
 <summary>Details</summary>
 
@@ -353,7 +379,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Time range filters (start/end) to analyze specific hours of the day
   - CSV export button for AGP statistics table with hover effect
 </details>
-- Add AI settings configuration in Settings page
+
+Add AI settings configuration in Settings page
 <details>
 <summary>Details</summary>
 
@@ -362,7 +389,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - AI Analysis page displays helpful message with link to Settings when API key is not configured
   - Follows existing settings patterns with Fluent UI components for consistency
 </details>
-- [#140](../../pull/140) Enhanced API key input with inline label layout and comprehensive security explanation
+
+[#140](../../pull/140) Enhanced API key input with inline label layout and comprehensive security explanation
 <details>
 <summary>Details</summary>
 
@@ -373,7 +401,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Risk warning about session compromise with mitigation strategies
   - Link to GitHub repository for open source transparency
 </details>
-- [#122](../../pull/122) Add CSV export functionality to all data tables
+
+[#122](../../pull/122) Add CSV export functionality to all data tables
 <details>
 <summary>Details</summary>
 
@@ -383,15 +412,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Proper CSV formatting with comma escaping and quote handling
   - Visual feedback with checkmark icon after successful copy
 </details>
+
 - Add realistic demo data for John Doe (two weeks of diabetes data) that automatically loads on app startup
-- [#114](../../pull/114) Optimize Reports page with collapsible sections for better organization and scalability
+[#114](../../pull/114) Optimize Reports page with collapsible sections for better organization and scalability
 <details>
 <summary>Details</summary>
 
   - Selected Data Package section now shows filename, patient name, and metadata in header, details collapsed by default
   - In Range report displays header with summary bar and legend inside collapsed section
 </details>
-- AGP (Ambulatory Glucose Profile) report with statistical analysis
+
+AGP (Ambulatory Glucose Profile) report with statistical analysis
 <details>
 <summary>Details</summary>
 
@@ -404,6 +435,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Supports both CGM and BG data sources
   - Includes comprehensive unit tests for AGP calculations
 </details>
+
 - In-Range Report feature with glucose range analysis by day of week and by date
 - Add weekly grouping report showing glucose ranges by week (e.g., "Oct 6-12")
 - Add summary section with horizontal colored bar chart showing overall glucose distribution
@@ -416,7 +448,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved value display format showing "percentage (count)" instead of "count (percentage)"
 
 ### Fixes
-- Fix black screen overlay when clicking hamburger menu on mobile devices
+Fix black screen overlay when clicking hamburger menu on mobile devices
 <details>
 <summary>Details</summary>
 
@@ -424,7 +456,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Prevents modal backdrop from covering the screen when menu is open
   - Similar fix to the dropdown issue that was previously resolved on Reports page
 </details>
-- Make version footer visible without scrolling on all pages
+
+Make version footer visible without scrolling on all pages
 <details>
 <summary>Details</summary>
 
@@ -433,7 +466,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed minHeight constraints from all page components (DataUpload, Reports, AIAnalysis, Settings)
   - Footer now always remains visible at bottom of viewport, content scrolls within main area
 </details>
-- Fix AI response to use European glucose units (mmol/L) and direct second-person language
+
+Fix AI response to use European glucose units (mmol/L) and direct second-person language
 <details>
 <summary>Details</summary>
 
@@ -443,7 +477,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Instructed AI to communicate directly without assuming healthcare provider intermediary
   - Added comprehensive unit tests for new prompt content
 </details>
-- [#157](../../pull/157) Make version footer visible without scrolling on home page
+
+[#157](../../pull/157) Make version footer visible without scrolling on home page
 <details>
 <summary>Details</summary>
 
@@ -454,7 +489,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Reduced navigation card minimum height from 200px to 190px
   - Footer now fits within viewport on standard screen sizes
 </details>
-- [#151](../../pull/151) Fix CHANGELOG entry format instructions to prevent HTML anchor tags
+
+[#151](../../pull/151) Fix CHANGELOG entry format instructions to prevent HTML anchor tags
 <details>
 <summary>Details</summary>
 
@@ -464,7 +500,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated CHANGELOG.md instructions to match copilot instructions
   - Fixed current version reference from 1.0.x to 1.1.x
 </details>
-- [#146](../../pull/146) Improve AI settings text clarity by restructuring into separate paragraphs
+
+[#146](../../pull/146) Improve AI settings text clarity by restructuring into separate paragraphs
 <details>
 <summary>Details</summary>
 
@@ -473,12 +510,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add proper spacing between paragraphs with marginBottom style
   - Text now matches the clean, readable style of other settings sections
 </details>
+
 - Center-align all column headers and data cells in AGP report table for improved readability
 - Update demo CGM data to have realistic glucose variability matching clinical distribution (1% very low, 2% low, 71% in range, 19% high, 7% very high)
 
 ### Documentation
 - [#159](../../pull/159) Add link to published app (https://glooko.iric.online) in README Quick Start section
-- Simplify README by keeping only one screenshot and essential information
+Simplify README by keeping only one screenshot and essential information
 <details>
 <summary>Details</summary>
 
@@ -487,9 +525,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Move developer-specific content (Available Scripts, Project Structure) to CONTRIBUTING.md
   - Improve README organization and readability
 </details>
+
 - Add docs/REPORTS.md with comprehensive feature documentation and screenshots
 - Document alternative visualization options for future implementation
-- Update docs/REPORTS.md with AGP Report screenshots and enhanced descriptions
+Update docs/REPORTS.md with AGP Report screenshots and enhanced descriptions
 <details>
 <summary>Details</summary>
 
@@ -500,8 +539,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Expand "Understanding Your Results" with AGP interpretation guidelines
 </details>
 
+
 ### Other
-- [#220](../../pull/220) Restructure codebase with feature-based architecture to minimize merge conflicts
+[#220](../../pull/220) Restructure codebase with feature-based architecture to minimize merge conflicts
 <details>
 <summary>Details</summary>
 
@@ -514,7 +554,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Old files in `src/utils/` and `src/components/` remain for backward compatibility
   - Expected benefit: 70-80% reduction in merge conflicts
 </details>
-- [#162](../../pull/162) Fix CHANGELOG.md by replacing all #XXX placeholder entries with correct PR numbers
+
+[#162](../../pull/162) Fix CHANGELOG.md by replacing all #XXX placeholder entries with correct PR numbers
 <details>
 <summary>Details</summary>
 
@@ -522,7 +563,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Used GitHub API to search for and identify correct PR numbers
   - All PR links now point to their correct pull requests
 </details>
-- [#161](../../pull/161) Optimize test execution performance with parallel test running
+
+[#161](../../pull/161) Optimize test execution performance with parallel test running
 <details>
 <summary>Details</summary>
 
@@ -531,6 +573,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Eliminate duplicate test run in CI workflow (previously ran tests twice)
   - Expected improvement: 50% reduction in CI test execution time
 </details>
+
 
 ---
 
