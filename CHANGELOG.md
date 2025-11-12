@@ -135,6 +135,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Applied consistent logic across all three AI analysis tabs
   - Fixed Meal Timing tab to properly extract bolus insulin data by improving column matching logic to include "delivered" pattern
   - Fixed insulin data extraction to process basal and bolus files even when manual insulin file is present in ZIP
+- [#181](../../pull/181) Fix BG Values graph UI issues and improve Detailed CGM report
+  - Removed vertical dotted grid lines (CartesianGrid) from the glucose chart for cleaner visualization
+  - Replaced Switch with Fluent UI TabList for max value selector (16.0/22.0 mmol/L) following Time in Range report pattern
+  - Renamed "BG Values" report to "Detailed CGM" throughout the application (removed duplicate naming)
+  - Updated navigation tab from "BG Values" to "Detailed CGM"
+  - Updated report title and all user-facing text to use "Detailed CGM"
+  - Updated "Detailed Insulin" placeholder text to "Detailed analysis about basal, bolus and total insulin intake"
+  - Added loading state indicator (spinner) when switching between dates
+  - Improved date selector styling with disabled state during date transitions
+  - All changes follow Fluent UI design standards for consistency
 - [#TODO](../../pull/TODO) Simplify XLSX export to use metadata-based approach
   - Removed `findCSVFileName` fallback function that tried to guess file names based on patterns
   - XLSX export now always uses `sourceFiles` array from metadata (populated by `groupCsvFiles`)
