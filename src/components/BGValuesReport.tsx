@@ -10,8 +10,10 @@ import {
   tokens,
   shorthands,
   Button,
-  Switch,
   Card,
+  TabList,
+  Tab,
+  Spinner,
 } from '@fluentui/react-components';
 import {
   ChevronLeftRegular,
@@ -22,7 +24,6 @@ import {
   Line,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
@@ -86,7 +87,7 @@ const useStyles = makeStyles({
     justifyContent: 'space-between',
     marginBottom: '16px',
   },
-  switchContainer: {
+  maxValueContainer: {
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('12px'),
@@ -131,6 +132,16 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
     fontSize: tokens.fontSizeBase400,
   },
+  loadingIndicator: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shorthands.gap('12px'),
+    ...shorthands.padding('16px'),
+    backgroundColor: tokens.colorNeutralBackground2,
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    marginBottom: '16px',
+  },
 });
 
 interface BGValuesReportProps {
@@ -143,6 +154,7 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   const { thresholds } = useGlucoseThresholds();
   
   const [loading, setLoading] = useState(false);
+  const [dateChanging, setDateChanging] = useState(false);
   const [allReadings, setAllReadings] = useState<GlucoseReading[]>([]);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [currentDateIndex, setCurrentDateIndex] = useState<number>(0);
@@ -221,13 +233,21 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   // Navigation handlers
   const handlePreviousDate = () => {
     if (currentDateIndex > 0) {
-      setCurrentDateIndex(currentDateIndex - 1);
+      setDateChanging(true);
+      setTimeout(() => {
+        setCurrentDateIndex(currentDateIndex - 1);
+        setDateChanging(false);
+      }, 50);
     }
   };
 
   const handleNextDate = () => {
     if (currentDateIndex < availableDates.length - 1) {
-      setCurrentDateIndex(currentDateIndex + 1);
+      setDateChanging(true);
+      setTimeout(() => {
+        setCurrentDateIndex(currentDateIndex + 1);
+        setDateChanging(false);
+      }, 50);
     }
   };
 
@@ -271,9 +291,9 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   if (!selectedFile) {
     return (
       <div className={styles.container}>
-        <Text className={styles.reportTitle}>BG Values</Text>
+        <Text className={styles.reportTitle}>Detailed CGM</Text>
         <Text className={styles.noDataMessage}>
-          Please select a file to view blood glucose values
+          Please select a file to view continuous glucose monitoring values
         </Text>
       </div>
     );
@@ -282,7 +302,7 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   if (loading) {
     return (
       <div className={styles.container}>
-        <Text className={styles.reportTitle}>BG Values</Text>
+        <Text className={styles.reportTitle}>Detailed CGM</Text>
         <Text className={styles.noDataMessage}>
           Loading data...
         </Text>
@@ -293,7 +313,7 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   if (availableDates.length === 0) {
     return (
       <div className={styles.container}>
-        <Text className={styles.reportTitle}>BG Values</Text>
+        <Text className={styles.reportTitle}>Detailed CGM</Text>
         <Text className={styles.noDataMessage}>
           No glucose data available
         </Text>
@@ -303,7 +323,7 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
 
   return (
     <div className={styles.container}>
-      <Text className={styles.reportTitle}>BG Values</Text>
+      <Text className={styles.reportTitle}>Detailed CGM</Text>
 
       {/* Date Navigation */}
       <Card className={styles.dateNavigationCard}>
@@ -312,7 +332,7 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
             appearance="subtle"
             icon={<ChevronLeftRegular />}
             onClick={handlePreviousDate}
-            disabled={currentDateIndex === 0}
+            disabled={currentDateIndex === 0 || dateChanging}
             title="Previous date"
           />
           <Text className={styles.dateDisplay}>
@@ -322,11 +342,21 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
             appearance="subtle"
             icon={<ChevronRightRegular />}
             onClick={handleNextDate}
-            disabled={currentDateIndex === availableDates.length - 1}
+            disabled={currentDateIndex === availableDates.length - 1 || dateChanging}
             title="Next date"
           />
         </div>
       </Card>
+
+      {/* Loading indicator for date changes */}
+      {dateChanging && (
+        <div className={styles.loadingIndicator}>
+          <Spinner size="tiny" />
+          <Text style={{ fontSize: tokens.fontSizeBase300, color: tokens.colorNeutralForeground2 }}>
+            Loading data...
+          </Text>
+        </div>
+      )}
 
       {/* Chart */}
       <Card className={styles.chartCard}>
@@ -334,22 +364,25 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
           <Text style={{ fontSize: tokens.fontSizeBase400, fontWeight: tokens.fontWeightSemibold }}>
             Glucose Values Throughout the Day
           </Text>
-          <div className={styles.switchContainer}>
+          <div className={styles.maxValueContainer}>
             <Text style={{ fontSize: tokens.fontSizeBase300 }}>
               Max: {maxGlucose.toFixed(1)} mmol/L
             </Text>
-            <Switch
-              checked={maxGlucose === 16.0}
-              onChange={(_, data) => setMaxGlucose(data.checked ? 16.0 : 22.0)}
-              label={maxGlucose === 16.0 ? '16.0' : '22.0'}
-            />
+            <TabList
+              selectedValue={maxGlucose === 16.0 ? '16.0' : '22.0'}
+              onTabSelect={(_, data) => setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0)}
+              size="small"
+            >
+              <Tab value="16.0">16.0</Tab>
+              <Tab value="22.0">22.0</Tab>
+            </TabList>
           </div>
         </div>
         
         <div className={styles.chartContainer}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
+              {/* Remove CartesianGrid to eliminate vertical dotted lines */}
               
               <XAxis
                 dataKey="time"

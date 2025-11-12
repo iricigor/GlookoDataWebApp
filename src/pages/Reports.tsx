@@ -80,21 +80,16 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
         return <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} />;
       case 'agp':
         return <AGPReport selectedFile={selectedFile} exportFormat={exportFormat} />;
-      case 'bgValues':
-        return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} />;
       case 'detailedCgm':
-        return (
-          <div style={{ padding: '24px' }}>
-            <Text style={{ fontSize: tokens.fontSizeBase400, color: tokens.colorNeutralForeground2 }}>
-              Detailed CGM analysis - To be implemented
-            </Text>
-          </div>
-        );
+        return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} />;
       case 'detailedInsulin':
         return (
           <div style={{ padding: '24px' }}>
+            <Text style={{ fontSize: tokens.fontSizeBase500, fontWeight: tokens.fontWeightSemibold, color: tokens.colorNeutralForeground1, marginBottom: '12px' }}>
+              Detailed Insulin
+            </Text>
             <Text style={{ fontSize: tokens.fontSizeBase400, color: tokens.colorNeutralForeground2 }}>
-              Detailed Insulin analysis - To be implemented
+              Detailed analysis about basal, bolus and total insulin intake - To be implemented
             </Text>
           </div>
         );
@@ -123,7 +118,6 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
           <Tab value="fileInfo">File Info</Tab>
           <Tab value="inRange">Time in Range</Tab>
           <Tab value="agp">AGP Data</Tab>
-          <Tab value="bgValues">BG Values</Tab>
           <Tab value="detailedCgm">Detailed CGM</Tab>
           <Tab value="detailedInsulin">Detailed Insulin</Tab>
         </TabList>
