@@ -62,6 +62,10 @@ Comprehensive documentation is available to help you get started:
 - **[E2E Testing Guide](docs/E2E_TESTING.md)** - End-to-end testing with Playwright
 - **[Changelog](CHANGELOG.md)** - See what's new in each version
 
+## 📋 Recent Updates
+
+- 🔧 **PR #221**: Automate README updates on main branch after PR merges
+
 ## 🛠️ Tech Stack
 
 This project is built with modern web technologies:
