@@ -199,6 +199,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added comprehensive unit tests for new behavior (7 new tests)
   - Prevents users from spamming the analyze button
 
+### Other
+- [#TBD](../../pull/TBD) Automate README updates on main branch after PR merges
+  - New GitHub Actions workflow triggers when PRs are merged to main
+  - Automatically updates "Recent Updates" section in README.md
+  - Maps PR labels to emojis (Feature→✨, Bug→🐛, Documentation→📚, Performance→⚡)
+  - Keeps only the 5 most recent updates in README
+  - Prevents feature branch conflicts by only updating main branch
+  - Includes comprehensive test suite (`test-update-readme.cjs`)
+  - Adds `docs/README_AUTOMATION.md` with full documentation
+  - Updates `.github/scripts/README.md` with automation details
+
 ---
 
 ## [1.1.x] - Released
