@@ -19,6 +19,7 @@ type TestFixtures = {
   navigation: NavigationComponent;
 };
 
+/* eslint-disable react-hooks/rules-of-hooks */
 export const test = base.extend<TestFixtures>({
   homePage: async ({ page }, use) => {
     const homePage = new HomePage(page);
@@ -45,5 +46,6 @@ export const test = base.extend<TestFixtures>({
     await use(navigation);
   },
 });
+/* eslint-enable react-hooks/rules-of-hooks */
 
 export { expect } from '@playwright/test';

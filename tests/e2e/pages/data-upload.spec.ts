@@ -1,5 +1,4 @@
 import { test, expect } from '../../fixtures/base.fixture';
-import { DEMO_FILE_NAME } from '../../utils/constants';
 
 /**
  * Data Upload Page Tests
