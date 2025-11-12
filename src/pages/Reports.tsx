@@ -49,10 +49,6 @@ const useStyles = makeStyles({
   tabList: {
     flexShrink: 0,
     width: '200px',
-    ...shorthands.padding('12px'),
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     '@media (max-width: 768px)': {
       width: '100%',
     },
@@ -103,6 +99,7 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
           selectedValue={selectedTab}
           onTabSelect={(_, data) => setSelectedTab(data.value as string)}
           className={styles.tabList}
+          appearance="subtle"
         >
           <Tab value="fileInfo">File Info</Tab>
           <Tab value="inRange">Time in Range</Tab>

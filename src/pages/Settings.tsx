@@ -15,7 +15,7 @@ import {
   Tab,
 } from '@fluentui/react-components';
 import { useState } from 'react';
-import { BugRegular, LightbulbRegular } from '@fluentui/react-icons';
+import { BugRegular, LightbulbRegular, CodeRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
@@ -58,10 +58,6 @@ const useStyles = makeStyles({
   tabList: {
     flexShrink: 0,
     width: '200px',
-    ...shorthands.padding('12px'),
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     '@media (max-width: 768px)': {
       width: '100%',
     },
@@ -193,6 +189,132 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
         return (
           <>
             <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>Theme</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Choose your preferred color theme. System option follows your operating system settings.
+              </Text>
+              <RadioGroup
+                value={themeMode}
+                onChange={(_, data) => onThemeChange(data.value as ThemeMode)}
+              >
+                <Radio value="light" label="Light" />
+                <Radio value="dark" label="Dark" />
+                <Radio value="system" label="System (recommended)" />
+              </RadioGroup>
+            </div>
+
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>Export Format</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Choose the format for exporting table data to clipboard (CSV or TSV).
+              </Text>
+              <RadioGroup
+                value={exportFormat}
+                onChange={(_, data) => onExportFormatChange(data.value as ExportFormat)}
+              >
+                <Radio value="csv" label="CSV (Comma-Separated Values)" />
+                <Radio value="tsv" label="TSV (Tab-Separated Values)" />
+              </RadioGroup>
+            </div>
+
+            <GlucoseThresholdsSection
+              thresholds={thresholds}
+              onUpdateThreshold={updateThreshold}
+              isValid={isValid}
+              validationError={validationError}
+            />
+          </>
+        );
+      
+      case 'data':
+        return (
+          <>
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>AI Configuration</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Configure your AI settings for intelligent analysis. {activeProvider && (
+                  <strong style={{ color: tokens.colorBrandForeground1 }}>
+                    Currently using: {activeProvider === 'perplexity' ? 'Perplexity' : 'Google Gemini'}
+                  </strong>
+                )}
+              </Text>
+              <div className={styles.apiKeyRow}>
+                <Label htmlFor="perplexity-api-key" className={styles.apiKeyLabel}>
+                  Perplexity API Key
+                </Label>
+                <Input
+                  id="perplexity-api-key"
+                  type="password"
+                  value={perplexityApiKey}
+                  onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
+                  placeholder="Enter your Perplexity API key"
+                  contentAfter={perplexityApiKey ? (activeProvider === 'perplexity' ? '✓ Selected' : '✓') : undefined}
+                  className={styles.apiKeyInput}
+                />
+              </div>
+              <div className={styles.apiKeyRow}>
+                <Label htmlFor="gemini-api-key" className={styles.apiKeyLabel}>
+                  Google Gemini API Key
+                </Label>
+                <Input
+                  id="gemini-api-key"
+                  type="password"
+                  value={geminiApiKey}
+                  onChange={(_, data) => onGeminiApiKeyChange(data.value)}
+                  placeholder="Enter your Google Gemini API key"
+                  contentAfter={geminiApiKey ? (activeProvider === 'gemini' ? '✓ Selected' : '✓') : undefined}
+                  className={styles.apiKeyInput}
+                />
+              </div>
+              <div className={styles.securityExplanation}>
+                <Text as="p" style={{ marginBottom: '12px' }}>
+                  <strong>Security & Privacy:</strong> Your API keys are stored locally in your browser's cookies (expires after 1 year) 
+                  and are never transmitted to our servers or any third party. All AI analysis happens directly between your browser 
+                  and the selected AI provider's API. This application is fully open source—you can{' '}
+                  <a href="https://github.com/iricigor/GlookoDataWebApp" target="_blank" rel="noopener noreferrer">
+                    review the code on GitHub
+                  </a>{' '}
+                  or deploy your own instance for complete control.
+                </Text>
+                <Text as="p" style={{ marginBottom: '12px' }}>
+                  <strong>Best Practices:</strong> For maximum security, create API keys with minimal permissions at{' '}
+                  <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
+                    Perplexity Settings
+                  </a> or{' '}
+                  <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
+                    Google AI Studio
+                  </a>. 
+                  Use keys designated for client-side applications and set spending limits to protect against unauthorized usage.
+                </Text>
+                <Text as="p" style={{ marginBottom: '12px' }}>
+                  <strong>Provider Selection:</strong> If both API keys are configured, Perplexity will be used by default. 
+                  To use Google Gemini, remove the Perplexity API key.
+                </Text>
+                <Text as="p">
+                  <strong>Risk Warning:</strong> If someone gains access to your browser session or computer, they could potentially 
+                  access your stored API key. To mitigate this risk: (1) log out from shared computers, (2) use browser privacy features, 
+                  (3) regularly rotate your API keys, and (4) monitor your API usage in Perplexity's dashboard.
+                </Text>
+              </div>
+            </div>
+
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>Data Privacy</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Your data is stored locally with configurable persistence options. All processing happens in your browser.
+              </Text>
+            </div>
+          </>
+        );
+      
+      case 'about':
+        return (
+          <>
+            <div className={styles.settingSection}>
               <Title3 className={styles.sectionTitle}>Support</Title3>
               <Divider className={styles.divider} />
               <Text className={styles.settingDescription}>
@@ -223,157 +345,42 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                     Request a Feature
                   </Button>
                 </Link>
+                <Link 
+                  href="https://github.com/iricigor/GlookoDataWebApp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button 
+                    appearance="secondary" 
+                    icon={<CodeRegular />}
+                  >
+                    View on GitHub
+                  </Button>
+                </Link>
               </div>
             </div>
 
             <div className={styles.settingSection}>
-              <Title3 className={styles.sectionTitle}>Theme</Title3>
+              <Title3 className={styles.sectionTitle}>Version Information</Title3>
               <Divider className={styles.divider} />
-              <Text className={styles.settingDescription}>
-                Choose your preferred color theme. System option follows your operating system settings.
-              </Text>
-              <RadioGroup
-                value={themeMode}
-                onChange={(_, data) => onThemeChange(data.value as ThemeMode)}
-              >
-                <Radio value="light" label="Light" />
-                <Radio value="dark" label="Dark" />
-                <Radio value="system" label="System (recommended)" />
-              </RadioGroup>
-            </div>
-
-            <div className={styles.settingSection}>
-              <Title3 className={styles.sectionTitle}>Export Format</Title3>
-              <Divider className={styles.divider} />
-              <Text className={styles.settingDescription}>
-                Choose the format for exporting table data to clipboard (CSV or TSV).
-              </Text>
-              <RadioGroup
-                value={exportFormat}
-                onChange={(_, data) => onExportFormatChange(data.value as ExportFormat)}
-              >
-                <Radio value="csv" label="CSV (Comma-Separated Values)" />
-                <Radio value="tsv" label="TSV (Tab-Separated Values)" />
-              </RadioGroup>
+              <div className={styles.versionItem}>
+                <Text className={styles.versionLabel}>Version:</Text>
+                <Text className={styles.versionValue}>{versionInfo.version}</Text>
+              </div>
+              <div className={styles.versionItem}>
+                <Text className={styles.versionLabel}>Build ID:</Text>
+                <Text className={styles.versionValue}>{versionInfo.buildId}</Text>
+              </div>
+              <div className={styles.versionItem}>
+                <Text className={styles.versionLabel}>Build Date:</Text>
+                <Text className={styles.versionValue}>{formatBuildDate(versionInfo.buildDate)}</Text>
+              </div>
+              <div className={styles.versionItem}>
+                <Text className={styles.versionLabel}>Full Version:</Text>
+                <Text className={styles.versionValue}>{versionInfo.fullVersion}</Text>
+              </div>
             </div>
           </>
-        );
-      
-      case 'data':
-        return (
-          <>
-            <GlucoseThresholdsSection
-              thresholds={thresholds}
-              onUpdateThreshold={updateThreshold}
-              isValid={isValid}
-              validationError={validationError}
-            />
-
-            <div className={styles.settingSection}>
-              <Title3 className={styles.sectionTitle}>Data Privacy</Title3>
-              <Divider className={styles.divider} />
-              <Text className={styles.settingDescription}>
-                Your data is stored locally with configurable persistence options. All processing happens in your browser.
-              </Text>
-            </div>
-          </>
-        );
-      
-      case 'ai':
-        return (
-          <div className={styles.settingSection}>
-            <Title3 className={styles.sectionTitle}>AI Configuration</Title3>
-            <Divider className={styles.divider} />
-            <Text className={styles.settingDescription}>
-              Configure your AI settings for intelligent analysis. {activeProvider && (
-                <strong style={{ color: tokens.colorBrandForeground1 }}>
-                  Currently using: {activeProvider === 'perplexity' ? 'Perplexity' : 'Google Gemini'}
-                </strong>
-              )}
-            </Text>
-            <div className={styles.apiKeyRow}>
-              <Label htmlFor="perplexity-api-key" className={styles.apiKeyLabel}>
-                Perplexity API Key
-              </Label>
-              <Input
-                id="perplexity-api-key"
-                type="password"
-                value={perplexityApiKey}
-                onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
-                placeholder="Enter your Perplexity API key"
-                contentAfter={perplexityApiKey ? (activeProvider === 'perplexity' ? '✓ Selected' : '✓') : undefined}
-                className={styles.apiKeyInput}
-              />
-            </div>
-            <div className={styles.apiKeyRow}>
-              <Label htmlFor="gemini-api-key" className={styles.apiKeyLabel}>
-                Google Gemini API Key
-              </Label>
-              <Input
-                id="gemini-api-key"
-                type="password"
-                value={geminiApiKey}
-                onChange={(_, data) => onGeminiApiKeyChange(data.value)}
-                placeholder="Enter your Google Gemini API key"
-                contentAfter={geminiApiKey ? (activeProvider === 'gemini' ? '✓ Selected' : '✓') : undefined}
-                className={styles.apiKeyInput}
-              />
-            </div>
-            <div className={styles.securityExplanation}>
-              <Text as="p" style={{ marginBottom: '12px' }}>
-                <strong>Security & Privacy:</strong> Your API keys are stored locally in your browser's cookies (expires after 1 year) 
-                and are never transmitted to our servers or any third party. All AI analysis happens directly between your browser 
-                and the selected AI provider's API. This application is fully open source—you can{' '}
-                <a href="https://github.com/iricigor/GlookoDataWebApp" target="_blank" rel="noopener noreferrer">
-                  review the code on GitHub
-                </a>{' '}
-                or deploy your own instance for complete control.
-              </Text>
-              <Text as="p" style={{ marginBottom: '12px' }}>
-                <strong>Best Practices:</strong> For maximum security, create API keys with minimal permissions at{' '}
-                <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
-                  Perplexity Settings
-                </a> or{' '}
-                <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
-                  Google AI Studio
-                </a>. 
-                Use keys designated for client-side applications and set spending limits to protect against unauthorized usage.
-              </Text>
-              <Text as="p" style={{ marginBottom: '12px' }}>
-                <strong>Provider Selection:</strong> If both API keys are configured, Perplexity will be used by default. 
-                To use Google Gemini, remove the Perplexity API key.
-              </Text>
-              <Text as="p">
-                <strong>Risk Warning:</strong> If someone gains access to your browser session or computer, they could potentially 
-                access your stored API key. To mitigate this risk: (1) log out from shared computers, (2) use browser privacy features, 
-                (3) regularly rotate your API keys, and (4) monitor your API usage in Perplexity's dashboard.
-              </Text>
-            </div>
-          </div>
-        );
-      
-      case 'about':
-        return (
-          <div className={styles.settingSection}>
-            <Title3 className={styles.sectionTitle}>Version Information</Title3>
-            <Divider className={styles.divider} />
-            <div className={styles.versionItem}>
-              <Text className={styles.versionLabel}>Version:</Text>
-              <Text className={styles.versionValue}>{versionInfo.version}</Text>
-            </div>
-            <div className={styles.versionItem}>
-              <Text className={styles.versionLabel}>Build ID:</Text>
-              <Text className={styles.versionValue}>{versionInfo.buildId}</Text>
-            </div>
-            <div className={styles.versionItem}>
-              <Text className={styles.versionLabel}>Build Date:</Text>
-              <Text className={styles.versionValue}>{formatBuildDate(versionInfo.buildDate)}</Text>
-            </div>
-            <div className={styles.versionItem}>
-              <Text className={styles.versionLabel}>Full Version:</Text>
-              <Text className={styles.versionValue}>{versionInfo.fullVersion}</Text>
-            </div>
-          </div>
         );
       
       default:
@@ -396,10 +403,10 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
           selectedValue={selectedTab}
           onTabSelect={(_, data) => setSelectedTab(data.value as string)}
           className={styles.tabList}
+          appearance="subtle"
         >
           <Tab value="general">General</Tab>
-          <Tab value="data">Data</Tab>
-          <Tab value="ai">AI</Tab>
+          <Tab value="data">Data & AI</Tab>
           <Tab value="about">About</Tab>
         </TabList>
 

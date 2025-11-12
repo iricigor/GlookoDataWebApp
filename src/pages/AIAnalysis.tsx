@@ -74,10 +74,6 @@ const useStyles = makeStyles({
   tabList: {
     flexShrink: 0,
     width: '200px',
-    ...shorthands.padding('12px'),
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     '@media (max-width: 768px)': {
       width: '100%',
     },
@@ -224,7 +220,7 @@ interface AIAnalysisProps {
 export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, existingAnalysis, onAnalysisComplete }: AIAnalysisProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
-  const [selectedTab, setSelectedTab] = useState<string>('timeInRange');
+  const [selectedTab, setSelectedTab] = useState<string>('fileInfo');
   
   const [inRangePercentage, setInRangePercentage] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -474,17 +470,19 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
   };
 
   const renderTabContent = () => {
-    if (selectedTab === 'timeInRange') {
+    if (selectedTab === 'fileInfo') {
+      return (
+        <div className={styles.promptContent}>
+          <SelectedFileMetadata selectedFile={selectedFile} />
+        </div>
+      );
+    } else if (selectedTab === 'timeInRange') {
       return (
         <div className={styles.promptContent}>
           {loading ? (
             <Text className={styles.helperText}>Loading glucose data...</Text>
           ) : inRangePercentage !== null ? (
             <>
-              <Text className={styles.statementText}>
-                Your glucose is {inRangePercentage}% of time in range.
-              </Text>
-              
               {/* Button container */}
               <div className={styles.buttonContainer}>
                 <Button
@@ -535,6 +533,10 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
                   </AccordionPanel>
                 </AccordionItem>
               </Accordion>
+
+              <Text className={styles.statementText} style={{ marginTop: '16px' }}>
+                Your glucose is {inRangePercentage}% of time in range.
+              </Text>
 
               {analyzing && (
                 <div className={styles.loadingContainer}>
@@ -734,10 +736,6 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
         </Text>
       </div>
 
-      <div className={styles.fileMetadata}>
-        <SelectedFileMetadata selectedFile={selectedFile} />
-      </div>
-
       {!selectedFile ? (
         <div className={styles.placeholderContainer}>
           <div className={styles.icon}>
@@ -767,7 +765,9 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
             selectedValue={selectedTab}
             onTabSelect={(_, data) => setSelectedTab(data.value as string)}
             className={styles.tabList}
+            appearance="subtle"
           >
+            <Tab value="fileInfo">File Info</Tab>
             <Tab value="timeInRange">Time in Range</Tab>
             <Tab value="glucoseInsulin">Glucose & Insulin</Tab>
           </TabList>
