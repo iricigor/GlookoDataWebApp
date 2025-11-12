@@ -45,6 +45,31 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground1,
     fontFamily: tokens.fontFamilyBase,
   },
+  summarySection: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    ...shorthands.gap('16px'),
+  },
+  summaryCard: {
+    ...shorthands.padding('16px'),
+  },
+  summaryLabel: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    fontFamily: tokens.fontFamilyBase,
+    marginBottom: '4px',
+  },
+  summaryValue: {
+    fontSize: tokens.fontSizeHero700,
+    fontWeight: tokens.fontWeightSemibold,
+    fontFamily: tokens.fontFamilyBase,
+  },
+  summarySubtext: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+    fontFamily: tokens.fontFamilyBase,
+    marginTop: '4px',
+  },
   chartCard: {
     ...shorthands.padding('24px'),
     backgroundColor: tokens.colorNeutralBackground1,
@@ -268,7 +293,6 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   if (!selectedFile) {
     return (
       <div className={styles.container}>
-        <Text className={styles.reportTitle}>Detailed CGM</Text>
         <Text className={styles.noDataMessage}>
           Please select a file to view continuous glucose monitoring values
         </Text>
@@ -279,7 +303,6 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   if (loading) {
     return (
       <div className={styles.container}>
-        <Text className={styles.reportTitle}>Detailed CGM</Text>
         <Text className={styles.noDataMessage}>
           Loading data...
         </Text>
@@ -290,7 +313,6 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   if (availableDates.length === 0) {
     return (
       <div className={styles.container}>
-        <Text className={styles.reportTitle}>Detailed CGM</Text>
         <Text className={styles.noDataMessage}>
           No glucose data available
         </Text>
@@ -300,8 +322,6 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
 
   return (
     <div className={styles.container}>
-      <Text className={styles.reportTitle}>Detailed CGM</Text>
-
       {/* Date Navigation */}
       <DayNavigator
         currentDate={currentDate}
@@ -311,6 +331,48 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
         canGoNext={currentDateIndex < availableDates.length - 1}
         loading={dateChanging}
       />
+
+      {/* Daily Statistics - moved above chart, styled like Insulin page */}
+      <div className={styles.summarySection}>
+        <Card className={styles.summaryCard}>
+          <Text className={styles.summaryLabel}>Below Range</Text>
+          <div>
+            <Text className={`${styles.summaryValue} ${styles.statValueBelow}`}>
+              {belowPercentage}%
+            </Text>
+          </div>
+          <Text className={styles.summarySubtext}>({stats.low} readings)</Text>
+        </Card>
+
+        <Card className={styles.summaryCard}>
+          <Text className={styles.summaryLabel}>In Range</Text>
+          <div>
+            <Text className={`${styles.summaryValue} ${styles.statValueInRange}`}>
+              {inRangePercentage}%
+            </Text>
+          </div>
+          <Text className={styles.summarySubtext}>({stats.inRange} readings)</Text>
+        </Card>
+
+        <Card className={styles.summaryCard}>
+          <Text className={styles.summaryLabel}>Above Range</Text>
+          <div>
+            <Text className={`${styles.summaryValue} ${styles.statValueAbove}`}>
+              {abovePercentage}%
+            </Text>
+          </div>
+          <Text className={styles.summarySubtext}>({stats.high} readings)</Text>
+        </Card>
+
+        <Card className={styles.summaryCard}>
+          <Text className={styles.summaryLabel}>Total Readings</Text>
+          <div>
+            <Text className={styles.summaryValue} style={{ color: tokens.colorNeutralForeground1 }}>
+              {stats.total}
+            </Text>
+          </div>
+        </Card>
+      </div>
 
       {/* Chart */}
       <Card className={styles.chartCard}>
@@ -433,47 +495,6 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
-      </Card>
-
-      {/* Daily Statistics */}
-      <Card className={styles.statsCard}>
-        <Text style={{ 
-          fontSize: tokens.fontSizeBase500, 
-          fontWeight: tokens.fontWeightSemibold,
-          fontFamily: tokens.fontFamilyBase,
-          color: tokens.colorNeutralForeground1,
-        }}>
-          Daily Statistics
-        </Text>
-        <div className={styles.statsGrid}>
-          <div className={styles.statItem}>
-            <Text className={styles.statLabel}>Below Range</Text>
-            <Text className={`${styles.statValue} ${styles.statValueBelow}`}>
-              {belowPercentage}%
-            </Text>
-            <Text className={styles.statLabel}>({stats.low} readings)</Text>
-          </div>
-          <div className={styles.statItem}>
-            <Text className={styles.statLabel}>In Range</Text>
-            <Text className={`${styles.statValue} ${styles.statValueInRange}`}>
-              {inRangePercentage}%
-            </Text>
-            <Text className={styles.statLabel}>({stats.inRange} readings)</Text>
-          </div>
-          <div className={styles.statItem}>
-            <Text className={styles.statLabel}>Above Range</Text>
-            <Text className={`${styles.statValue} ${styles.statValueAbove}`}>
-              {abovePercentage}%
-            </Text>
-            <Text className={styles.statLabel}>({stats.high} readings)</Text>
-          </div>
-          <div className={styles.statItem}>
-            <Text className={styles.statLabel}>Total Readings</Text>
-            <Text className={styles.statValue} style={{ color: tokens.colorNeutralForeground1 }}>
-              {stats.total}
-            </Text>
-          </div>
         </div>
       </Card>
     </div>
