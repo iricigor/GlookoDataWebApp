@@ -4,8 +4,8 @@
 
 import { describe, it, expect } from 'vitest';
 import JSZip from 'jszip';
-import { extractGlucoseReadings } from './glucoseDataUtils';
-import type { UploadedFile } from '../types';
+import { extractGlucoseReadings, smoothGlucoseValues } from './glucoseDataUtils';
+import type { UploadedFile, GlucoseReading } from '../types';
 
 /**
  * Helper function to create a mock uploaded file for testing
@@ -150,5 +150,85 @@ describe('glucoseDataUtils', () => {
       expect(readings).toHaveLength(1);
       expect(readings[0].value).toBe(5.5); // Input is in mmol/L
     });
+  });
+});
+
+describe('smoothGlucoseValues', () => {
+  it('should return original readings if less than 3 data points', () => {
+    const readings: GlucoseReading[] = [
+      { timestamp: new Date('2025-01-01T10:00:00'), value: 5.5 },
+      { timestamp: new Date('2025-01-01T10:05:00'), value: 6.0 },
+    ];
+    
+    const smoothed = smoothGlucoseValues(readings);
+    
+    expect(smoothed).toEqual(readings);
+  });
+
+  it('should smooth values using moving average for middle points', () => {
+    const readings: GlucoseReading[] = [
+      { timestamp: new Date('2025-01-01T10:00:00'), value: 6.0 },
+      { timestamp: new Date('2025-01-01T10:05:00'), value: 9.0 },
+      { timestamp: new Date('2025-01-01T10:10:00'), value: 6.0 },
+    ];
+    
+    const smoothed = smoothGlucoseValues(readings);
+    
+    expect(smoothed).toHaveLength(3);
+    // First value: average of 6.0 and 9.0 = 7.5
+    expect(smoothed[0].value).toBe(7.5);
+    // Middle value: average of 6.0, 9.0, and 6.0 = 7.0
+    expect(smoothed[1].value).toBe(7.0);
+    // Last value: average of 9.0 and 6.0 = 7.5
+    expect(smoothed[2].value).toBe(7.5);
+  });
+
+  it('should preserve timestamps while smoothing values', () => {
+    const readings: GlucoseReading[] = [
+      { timestamp: new Date('2025-01-01T10:00:00'), value: 5.0 },
+      { timestamp: new Date('2025-01-01T10:05:00'), value: 7.0 },
+      { timestamp: new Date('2025-01-01T10:10:00'), value: 9.0 },
+      { timestamp: new Date('2025-01-01T10:15:00'), value: 6.0 },
+    ];
+    
+    const smoothed = smoothGlucoseValues(readings);
+    
+    expect(smoothed).toHaveLength(4);
+    expect(smoothed[0].timestamp).toEqual(readings[0].timestamp);
+    expect(smoothed[1].timestamp).toEqual(readings[1].timestamp);
+    expect(smoothed[2].timestamp).toEqual(readings[2].timestamp);
+    expect(smoothed[3].timestamp).toEqual(readings[3].timestamp);
+  });
+
+  it('should handle larger dataset correctly', () => {
+    const readings: GlucoseReading[] = [
+      { timestamp: new Date('2025-01-01T10:00:00'), value: 5.0 },
+      { timestamp: new Date('2025-01-01T10:05:00'), value: 6.0 },
+      { timestamp: new Date('2025-01-01T10:10:00'), value: 7.0 },
+      { timestamp: new Date('2025-01-01T10:15:00'), value: 8.0 },
+      { timestamp: new Date('2025-01-01T10:20:00'), value: 9.0 },
+    ];
+    
+    const smoothed = smoothGlucoseValues(readings);
+    
+    expect(smoothed).toHaveLength(5);
+    // First: (5.0 + 6.0) / 2 = 5.5
+    expect(smoothed[0].value).toBe(5.5);
+    // Second: (5.0 + 6.0 + 7.0) / 3 = 6.0
+    expect(smoothed[1].value).toBe(6.0);
+    // Third: (6.0 + 7.0 + 8.0) / 3 = 7.0
+    expect(smoothed[2].value).toBe(7.0);
+    // Fourth: (7.0 + 8.0 + 9.0) / 3 = 8.0
+    expect(smoothed[3].value).toBe(8.0);
+    // Last: (8.0 + 9.0) / 2 = 8.5
+    expect(smoothed[4].value).toBe(8.5);
+  });
+
+  it('should handle empty array', () => {
+    const readings: GlucoseReading[] = [];
+    
+    const smoothed = smoothGlucoseValues(readings);
+    
+    expect(smoothed).toEqual([]);
   });
 });
