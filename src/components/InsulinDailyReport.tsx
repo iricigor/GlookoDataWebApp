@@ -6,20 +6,16 @@
 import {
   makeStyles,
   Text,
-  Button,
   tokens,
   shorthands,
-  Card,
   Spinner,
 } from '@fluentui/react-components';
-import {
-  ChevronLeftRegular,
-  ChevronRightRegular,
-} from '@fluentui/react-icons';
 import { useState, useEffect } from 'react';
 import type { UploadedFile, InsulinReading } from '../types';
 import { extractInsulinReadings, prepareInsulinTimelineData } from '../utils/insulinDataUtils';
 import { InsulinTimeline } from './InsulinTimeline';
+import { InsulinDayNavigator } from './InsulinDayNavigator';
+import { InsulinSummaryCards } from './InsulinSummaryCards';
 
 const useStyles = makeStyles({
   container: {
@@ -27,46 +23,6 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     ...shorthands.gap('24px'),
     ...shorthands.padding('24px'),
-  },
-  navigationBar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    ...shorthands.padding('16px'),
-    backgroundColor: tokens.colorNeutralBackground2,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-  },
-  navigationButtons: {
-    display: 'flex',
-    ...shorthands.gap('8px'),
-  },
-  dateDisplay: {
-    fontSize: tokens.fontSizeBase500,
-    fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground1,
-  },
-  summarySection: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    ...shorthands.gap('16px'),
-  },
-  summaryCard: {
-    ...shorthands.padding('16px'),
-  },
-  summaryLabel: {
-    fontSize: tokens.fontSizeBase300,
-    color: tokens.colorNeutralForeground2,
-    marginBottom: '4px',
-  },
-  summaryValue: {
-    fontSize: tokens.fontSizeHero700,
-    fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground1,
-  },
-  summaryUnit: {
-    fontSize: tokens.fontSizeBase400,
-    color: tokens.colorNeutralForeground2,
-    marginLeft: '4px',
   },
   loadingContainer: {
     display: 'flex',
@@ -167,16 +123,6 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
   // Calculate daily summaries
   const getDailySummary = () => {
     if (availableDates.length === 0 || timelineData.length === 0) {
@@ -228,61 +174,20 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
   return (
     <div className={styles.container}>
       {/* Navigation Bar */}
-      <div className={styles.navigationBar}>
-        <div className={styles.navigationButtons}>
-          <Button
-            appearance="subtle"
-            icon={<ChevronLeftRegular />}
-            onClick={handlePreviousDay}
-            disabled={currentDateIndex === 0}
-          >
-            Previous Day
-          </Button>
-        </div>
-        
-        <Text className={styles.dateDisplay}>
-          {formatDate(currentDate)}
-        </Text>
-        
-        <div className={styles.navigationButtons}>
-          <Button
-            appearance="subtle"
-            icon={<ChevronRightRegular />}
-            iconPosition="after"
-            onClick={handleNextDay}
-            disabled={currentDateIndex === availableDates.length - 1}
-          >
-            Next Day
-          </Button>
-        </div>
-      </div>
+      <InsulinDayNavigator
+        currentDate={currentDate}
+        onPreviousDay={handlePreviousDay}
+        onNextDay={handleNextDay}
+        canGoPrevious={currentDateIndex > 0}
+        canGoNext={currentDateIndex < availableDates.length - 1}
+      />
 
       {/* Summary Cards */}
-      <div className={styles.summarySection}>
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Total Basal</Text>
-          <div>
-            <Text className={styles.summaryValue}>{summary.basalTotal}</Text>
-            <Text className={styles.summaryUnit}>units</Text>
-          </div>
-        </Card>
-
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Total Bolus</Text>
-          <div>
-            <Text className={styles.summaryValue}>{summary.bolusTotal}</Text>
-            <Text className={styles.summaryUnit}>units</Text>
-          </div>
-        </Card>
-
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Total Insulin</Text>
-          <div>
-            <Text className={styles.summaryValue}>{summary.totalInsulin}</Text>
-            <Text className={styles.summaryUnit}>units</Text>
-          </div>
-        </Card>
-      </div>
+      <InsulinSummaryCards
+        basalTotal={summary.basalTotal}
+        bolusTotal={summary.bolusTotal}
+        totalInsulin={summary.totalInsulin}
+      />
 
       {/* Timeline Chart */}
       <InsulinTimeline data={timelineData} />
