@@ -381,11 +381,15 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
   - CSV export button for AGP statistics table with hover effect
 </details>
 
-- Add AI settings configuration in Settings page
+<details>
+<summary>131 Add AI settings configuration in Settings page</summary>
+
+[#131](../../pull/131) Add AI settings with Perplexity API key configuration
   - Password-type input field for Perplexity API key with visual confirmation checkmark
   - API key stored securely in browser cookies with persistent storage
   - AI Analysis page displays helpful message with link to Settings when API key is not configured
   - Follows existing settings patterns with Fluent UI components for consistency
+</details>
 <details>
 <summary>140 Enhanced API key input with inline label layout and comprehensive security explanation</summary>
 
