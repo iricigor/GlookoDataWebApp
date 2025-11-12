@@ -127,6 +127,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Privacy: All AI communication happens directly from browser, no server intermediary
 
 ### Fixes
+- [#TBD](../../pull/TBD) Fix AI analysis helper text and provider display issues
+  - Helper text now correctly reappears after cooldown completes and button returns to "Analyze with AI"
+  - All three AI tabs (Time in Range, Glucose & Insulin, Meal Timing) now display active AI provider name in helper text
+  - Helper text now shows "Click Analyze to get AI-powered analysis (using Perplexity)" or similar based on active provider
+  - Fixed conditional logic to show appropriate helper text in all states (initial, analyzing, cooldown, ready for new analysis)
+  - Applied consistent logic across all three AI analysis tabs
 - [#TODO](../../pull/TODO) Simplify XLSX export to use metadata-based approach
   - Removed `findCSVFileName` fallback function that tried to guess file names based on patterns
   - XLSX export now always uses `sourceFiles` array from metadata (populated by `groupCsvFiles`)
