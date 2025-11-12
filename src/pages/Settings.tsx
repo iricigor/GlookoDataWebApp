@@ -13,9 +13,11 @@ import {
   Button,
   TabList,
   Tab,
+  MessageBar,
+  MessageBarBody,
 } from '@fluentui/react-components';
 import { useState } from 'react';
-import { BugRegular, LightbulbRegular, CodeRegular } from '@fluentui/react-icons';
+import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
@@ -162,6 +164,14 @@ const useStyles = makeStyles({
     ...shorthands.gap('12px'),
     flexWrap: 'wrap',
   },
+  dataWarning: {
+    marginBottom: '16px',
+  },
+  dataWarningTitle: {
+    fontWeight: tokens.fontWeightSemibold,
+    fontSize: tokens.fontSizeBase400,
+    marginBottom: '4px',
+  },
 });
 
 interface SettingsProps {
@@ -294,6 +304,21 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                   />
                 </div>
               </div>
+              
+              <MessageBar
+                intent="warning"
+                icon={<WarningRegular />}
+                className={styles.dataWarning}
+              >
+                <MessageBarBody>
+                  <Text className={styles.dataWarningTitle}>Attention!</Text>
+                  <Text>
+                    When you use AI analysis features, your sensitive health data will be sent to the selected AI provider 
+                    ({activeProvider === 'perplexity' ? 'Perplexity' : activeProvider === 'grok' ? 'Grok AI' : activeProvider ? 'Google Gemini' : 'the configured AI service'}). 
+                    You are responsible for the security of this information and use of it in accordance with all applicable data protection rules and regulations.
+                  </Text>
+                </MessageBarBody>
+              </MessageBar>
               
               <div className={styles.securityExplanation}>
                 <Text as="p" style={{ marginBottom: '12px' }}>
