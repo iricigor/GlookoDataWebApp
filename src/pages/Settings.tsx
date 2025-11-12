@@ -174,6 +174,15 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     fontFamily: 'monospace',
   },
+  versionLink: {
+    fontSize: tokens.fontSizeBase300,
+    fontFamily: 'monospace',
+    color: tokens.colorBrandForeground1,
+    textDecoration: 'none',
+    '&:hover': {
+      textDecoration: 'underline',
+    },
+  },
   supportButtons: {
     display: 'flex',
     ...shorthands.gap('12px'),
@@ -472,7 +481,18 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
               <Divider className={styles.divider} />
               <div className={styles.versionItem}>
                 <Text className={styles.versionLabel}>Version:</Text>
-                <Text className={styles.versionValue}>{versionInfo.version}</Text>
+                {versionInfo.releaseUrl ? (
+                  <Link 
+                    href={versionInfo.releaseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.versionLink}
+                  >
+                    {versionInfo.version}
+                  </Link>
+                ) : (
+                  <Text className={styles.versionValue}>{versionInfo.version}</Text>
+                )}
               </div>
               <div className={styles.versionItem}>
                 <Text className={styles.versionLabel}>Build ID:</Text>
@@ -484,7 +504,18 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
               </div>
               <div className={styles.versionItem}>
                 <Text className={styles.versionLabel}>Full Version:</Text>
-                <Text className={styles.versionValue}>{versionInfo.fullVersion}</Text>
+                {versionInfo.releaseUrl ? (
+                  <Link 
+                    href={versionInfo.releaseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.versionLink}
+                  >
+                    {versionInfo.fullVersion}
+                  </Link>
+                ) : (
+                  <Text className={styles.versionValue}>{versionInfo.fullVersion}</Text>
+                )}
               </div>
             </div>
           </>
