@@ -127,6 +127,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Privacy: All AI communication happens directly from browser, no server intermediary
 
 ### Fixes
+- [#184](../../pull/184) Fix Grok API key not recognized in Meal Timing analysis
+  - Fixed bug where Grok API key was not being passed to AI API in Meal Timing analysis
+  - Updated `handleMealTimingClick` to include Grok in API key selection (matching pattern from other handlers)
+  - Added unit tests to verify correct API key is used for each provider (Perplexity, Grok, Gemini)
+  - Meal Timing analysis now works correctly with all three AI providers
 - [#TBD](../../pull/TBD) Fix AI analysis helper text and provider display issues
   - Helper text now correctly reappears after cooldown completes and button returns to "Analyze with AI"
   - All three AI tabs (Time in Range, Glucose & Insulin, Meal Timing) now display active AI provider name in helper text

@@ -560,7 +560,8 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
       const prompt = generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData);
 
       // Get the appropriate API key for the active provider
-      const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : geminiApiKey;
+      const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
+                      activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
       // Call the AI API using the selected provider
       const result = await callAIApi(activeProvider, apiKey, prompt);

@@ -325,4 +325,129 @@ describe('AIAnalysis', () => {
       );
     });
   });
+
+  it('should use Grok API key when Grok is the active provider', async () => {
+    const mockResponse = {
+      success: true,
+      content: 'Grok AI response',
+    };
+    vi.mocked(aiApi.callAIApi).mockResolvedValue(mockResponse);
+    vi.mocked(aiApi.determineActiveProvider).mockReturnValue('grok');
+
+    render(
+      <AIAnalysis
+        selectedFile={mockFile}
+        perplexityApiKey=""
+        geminiApiKey=""
+        grokApiKey="test-grok-key"
+        onAnalysisComplete={mockAnalysisComplete}
+      />
+    );
+
+    // Wait for the button to be available
+    await waitFor(() => {
+      expect(getFirstAnalyzeButton()).toBeInTheDocument();
+    }, { timeout: 2000 });
+
+    // Click analyze
+    fireEvent.click(getFirstAnalyzeButton());
+
+    // Verify callAIApi was called with correct provider and API key
+    await waitFor(() => {
+      expect(aiApi.callAIApi).toHaveBeenCalledWith(
+        'grok',
+        'test-grok-key',
+        expect.any(String)
+      );
+    });
+  });
+
+  it('should use correct API key for each provider in Meal Timing analysis', async () => {
+    const mockResponse = {
+      success: true,
+      content: 'Meal timing analysis',
+    };
+    vi.mocked(aiApi.callAIApi).mockResolvedValue(mockResponse);
+    
+    // Mock insulin readings for meal timing
+    vi.mocked(insulinDataUtils.extractInsulinReadings).mockResolvedValue([
+      { timestamp: new Date(), dose: 5.0, insulinType: 'bolus' },
+    ]);
+
+    // Test with Grok
+    vi.mocked(aiApi.determineActiveProvider).mockReturnValue('grok');
+    const { rerender } = render(
+      <AIAnalysis
+        selectedFile={mockFile}
+        perplexityApiKey=""
+        geminiApiKey=""
+        grokApiKey="test-grok-key"
+        onAnalysisComplete={mockAnalysisComplete}
+      />
+    );
+
+    // Switch to Meal Timing tab
+    await waitFor(() => {
+      expect(screen.getByText('Meal Timing')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Meal Timing'));
+
+    // Wait for the Analyze button on Meal Timing tab
+    await waitFor(() => {
+      const analyzeButtons = screen.getAllByText('Analyze with AI');
+      expect(analyzeButtons.length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
+
+    // Click the last analyze button (Meal Timing tab)
+    const analyzeButtons = screen.getAllByText('Analyze with AI');
+    fireEvent.click(analyzeButtons[analyzeButtons.length - 1]);
+
+    // Verify callAIApi was called with Grok provider and key
+    await waitFor(() => {
+      expect(aiApi.callAIApi).toHaveBeenCalledWith(
+        'grok',
+        'test-grok-key',
+        expect.any(String)
+      );
+    }, { timeout: 2000 });
+
+    // Clear mocks for next test
+    vi.clearAllMocks();
+    vi.mocked(aiApi.callAIApi).mockResolvedValue(mockResponse);
+
+    // Test with Perplexity
+    vi.mocked(aiApi.determineActiveProvider).mockReturnValue('perplexity');
+    rerender(
+      <AIAnalysis
+        selectedFile={mockFile}
+        perplexityApiKey="test-perplexity-key"
+        geminiApiKey=""
+        grokApiKey=""
+        onAnalysisComplete={mockAnalysisComplete}
+      />
+    );
+
+    // Switch back to Meal Timing tab
+    await waitFor(() => {
+      expect(screen.getByText('Meal Timing')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('Meal Timing'));
+
+    await waitFor(() => {
+      const analyzeButtons = screen.getAllByText('Analyze with AI');
+      expect(analyzeButtons.length).toBeGreaterThan(0);
+    }, { timeout: 2000 });
+
+    const analyzeButtons2 = screen.getAllByText('Analyze with AI');
+    fireEvent.click(analyzeButtons2[analyzeButtons2.length - 1]);
+
+    // Verify callAIApi was called with Perplexity provider and key
+    await waitFor(() => {
+      expect(aiApi.callAIApi).toHaveBeenCalledWith(
+        'perplexity',
+        'test-perplexity-key',
+        expect.any(String)
+      );
+    }, { timeout: 2000 });
+  }, 15000); // Longer timeout for complex test
 });
