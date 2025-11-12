@@ -17,14 +17,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
-- [#213](../../pull/213) Enable smaller data set for "Meal Timing" analysis
+<details>
+<summary>213 Enable smaller data set for "Meal Timing" analysis</summary>
+
+[#213](../../pull/213) Enable smaller data set for "Meal Timing" analysis
   - Add automatic fallback to last 28 days when AI API returns "request too large" error
   - New utility functions: `filterGlucoseReadingsToLastDays()` and `filterInsulinReadingsToLastDays()`
   - Enhanced error detection for request size limitations (checks for "too large", "exceeds", "maximum", "limit", "token limit", "payload large", "request size")
   - Filtered dataset automatically includes note indicating "Analysis based on the last 28 days of data"
   - If filtered dataset still fails, error is returned to user
   - 16 comprehensive unit tests for filtering functions covering various scenarios
-- [#TBD](../../pull/TBD) Implement comprehensive Playwright E2E testing suite
+</details>
+
+<details>
+<summary>217 Implement comprehensive Playwright E2E testing suite by @oguzc</summary>
+
+[#217](../../pull/217) Implement comprehensive Playwright E2E testing suite by @oguzc
   - Add Playwright testing framework with configuration for Chromium, Firefox, and WebKit browsers
   - Implement Page Object Model (POM) pattern for maintainable test architecture
   - Create page objects for all main pages (Home, Data Upload, Reports, Settings, Navigation)
@@ -38,7 +46,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add comprehensive E2E testing documentation and guidelines
   - Configure automatic artifact collection (traces, screenshots, videos) for failed tests
   - Support parallel test execution and cross-browser testing
-- [#TBD](../../pull/TBD) Add BG Values graph to Reports page
+</details>
+
+<details>
+<summary>208 Add BG Values graph to Reports page</summary>
+
+[#208](../../pull/208) Add BG Values graph to Reports page
   - New "BG Values" tab displaying daily glucose readings with interactive visualization
   - Line chart showing glucose values throughout the day (00:00-24:00) using Recharts
   - Date navigation with previous/next arrows and formatted date display (e.g., "Monday, 17-11-2025")
@@ -49,7 +62,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Reference lines for low (3.9) and high (10.0) glucose thresholds
   - Defaults to last available date in dataset
   - Follows existing patterns from AGPGraph and InRangeReport components
-- [#TBD](../../pull/TBD) Simplify Glucose & Insulin AI prompt by removing correlation analysis
+</details>
+
+<details>
+<summary>206 Simplify Glucose & Insulin AI prompt by removing correlation analysis</summary>
+
+[#206](../../pull/206) Simplify Glucose & Insulin AI prompt by removing correlation analysis
   - Remove complex correlation analysis from AI prompt in favor of simpler tiering approach
   - Replace "Insulin Efficacy Correlation" section with "Insulin Efficacy Tiers (Simplified and Actionable)"
   - New tiering analysis: Group days into Low/Medium/High Total Insulin tiers with average BG In Range (%) for each
@@ -58,14 +76,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated actionable summary to provide recommendations based on tier and outlier data instead of correlations
   - Keep temporal trends section unchanged (best/worst days, multi-day patterns)
   - Updated unit tests to validate new prompt structure and content
-- [#TBD](../../pull/TBD) Add Grok AI provider support
+</details>
+
+<details>
+<summary>207 Add Grok AI provider support</summary>
+
+[#207](../../pull/207) Add Grok AI provider support
   - Add xAI Grok API integration using grok-beta model
   - New Grok AI API key input in Settings > Data & AI tab
   - Priority order for AI providers: Perplexity > Grok AI > Google Gemini
   - Full support for all AI analysis features (Time in Range, Glucose & Insulin)
   - Cookie-based persistence for Grok API key (1-year expiry)
   - Comprehensive test coverage for Grok API integration
-- [#TBD](../../pull/TBD) Add comprehensive meal timing analysis
+</details>
+
+<details>
+<summary>209 Add comprehensive meal timing analysis</summary>
+
+[#209](../../pull/209) Add comprehensive meal timing analysis
   - New "Meal Timing" tab in AI Analysis page for detailed meal-specific optimization
   - Analyzes CGM, basal, and bolus data to provide day-of-week specific and meal-specific recommendations
   - **Temporal Trends**: Day-of-week BG control ranking, workday vs weekend comparison
@@ -80,17 +108,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Cooldown mechanism (3 seconds) to prevent excessive API calls with progress bar
   - Loading spinner, success messages, and error handling for AI analysis
   - 12 comprehensive unit tests for new CSV conversion utilities and prompt generation
-- [#TBD](../../pull/TBD) UI refinements and enablements
+</details>
+
+<details>
+<summary>202 UI refinements and enablements</summary>
+
+[#202](../../pull/202) UI refinements and enablements
   - Remove accordion from file info display in Reports and AI Analysis pages (since we now use tabs)
   - Add "Meal Timing" tab to AI Analysis page with placeholder text for future implementation
   - Add "Detailed CGM" and "Detailed Insulin" tabs to Reports page with placeholder texts for future implementation
   - Improve Data & AI tab layout in Settings page with better vertical spacing and organization
-- [#TBD](../../pull/TBD) Align UI pages with consistent width and vertical tabs
+</details>
+
+<details>
+<summary>192 Align UI pages with consistent width and vertical tabs</summary>
+
+[#192](../../pull/192) Align UI pages with consistent width and vertical tabs
   - Standardize all page widths to 1200px for visual consistency (Home, Settings, DataUpload, Reports, AI Analysis)
   - Refactor Settings page to use vertical tabs on the left instead of stacked sections (7 tabs: Support, Theme, Export Format, Glucose Thresholds, AI, Data Privacy, Version Info)
   - Refactor Reports page to use vertical tabs on the left instead of top-level accordions (2 tabs: Time in Range, AGP Data)
   - Refactor AI Analysis page to use vertical tabs on the left instead of top-level accordions (2 tabs: Time in Range, Glucose & Insulin)
   - Maintain all existing functionality while improving navigation and visual consistency
+</details>
+
 - Finalize second AI prompt with glucose and insulin correlation analysis
   - New "Glucose and Insulin Analysis" section on AI Analysis page
   - Displays comprehensive dataset combining glucose ranges and insulin doses by date
@@ -111,11 +151,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add three new columns: Basal Insulin (Units), Bolus Insulin (Units), Total Insulin (Units)
   - Insulin data automatically merged with glucose data by date
   - Missing insulin data displayed as "-" for dates without insulin records
-- [#171](../../pull/171) Align Reports page with Fluent UI design standards
+<details>
+<summary>171 Align Reports page with Fluent UI design standards</summary>
+
+[#171](../../pull/171) Align Reports page with Fluent UI design standards
   - Wrap In Range summary data in Fluent UI Card component for better visual organization
   - Replace button groups with Fluent UI TabList for Data Source (CGM/BG) and Categories (3/5) selectors
   - Add rounded corners and subtle elevation to main content container for improved visual hierarchy
   - Standardize all interactive elements with consistent Fluent UI styling
+</details>
+
 - Add Google Gemini AI integration alongside Perplexity AI
   - Support for Google Gemini API (using gemini-2.0-flash-exp model)
   - Unified AI API interface that routes to appropriate provider (Perplexity or Gemini)
@@ -129,12 +174,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive unit tests (35 new tests added for Gemini and unified API)
   - Updated security documentation to cover both AI providers
   - Links to both Perplexity Settings and Google AI Studio for API key creation
-- [#166](../../pull/166) Implement markdown rendering for AI responses
+<details>
+<summary>166 Implement markdown rendering for AI responses</summary>
+
+[#166](../../pull/166) Implement markdown rendering for AI responses
   - Add react-markdown library for proper markdown formatting
   - Create MarkdownRenderer component with Fluent UI styling
   - Display AI responses with proper headers, bold text, lists, and other markdown features
   - Comprehensive styling for all markdown elements (headings, lists, code, tables, blockquotes, links)
   - 10 unit tests covering various markdown rendering scenarios
+</details>
+
 - Implement Perplexity AI integration for time-in-range glucose analysis
   - Real AI-powered analysis using Perplexity API (sonar model with 127K context window)
   - Complete prompt: "Given a patient's percent time-in-range (TIR) from continuous glucose monitoring is X%, provide a brief clinical assessment and 2-3 specific, actionable recommendations"
@@ -148,12 +198,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Privacy: All AI communication happens directly from browser, no server intermediary
 
 ### Fixes
-- [#184](../../pull/184) Fix Grok API key not recognized in Meal Timing analysis
+<details>
+<summary>184 Fix Grok API key not recognized in Meal Timing analysis</summary>
+
+[#184](../../pull/184) Fix Grok API key not recognized in Meal Timing analysis
   - Fixed bug where Grok API key was not being passed to AI API in Meal Timing analysis
   - Updated `handleMealTimingClick` to include Grok in API key selection (matching pattern from other handlers)
   - Added unit tests to verify correct API key is used for each provider (Perplexity, Grok, Gemini)
   - Meal Timing analysis now works correctly with all three AI providers
-- [#TBD](../../pull/TBD) Fix AI analysis helper text and provider display issues
+</details>
+
+<details>
+<summary>212 Fix AI analysis helper text and provider display issues</summary>
+
+[#212](../../pull/212) Fix AI analysis helper text and provider display issues
   - Helper text now correctly reappears after cooldown completes and button returns to "Analyze with AI"
   - All three AI tabs (Time in Range, Glucose & Insulin, Meal Timing) now display active AI provider name in helper text
   - Helper text now shows "Click Analyze to get AI-powered analysis (using Perplexity)" or similar based on active provider
@@ -161,7 +219,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Applied consistent logic across all three AI analysis tabs
   - Fixed Meal Timing tab to properly extract bolus insulin data by improving column matching logic to include "delivered" pattern
   - Fixed insulin data extraction to process basal and bolus files even when manual insulin file is present in ZIP
-- [#181](../../pull/181) Fix BG Values graph UI issues and improve Detailed CGM report
+</details>
+
+<details>
+<summary>181 Fix BG Values graph UI issues and improve Detailed CGM report</summary>
+
+[#181](../../pull/181) Fix BG Values graph UI issues and improve Detailed CGM report
   - Removed vertical dotted grid lines (CartesianGrid) from the glucose chart for cleaner visualization
   - Replaced Switch with Fluent UI TabList for max value selector (16.0/22.0 mmol/L) following Time in Range report pattern
   - Renamed "BG Values" report to "Detailed CGM" throughout the application (removed duplicate naming)
@@ -171,13 +234,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added loading state indicator (spinner) when switching between dates
   - Improved date selector styling with disabled state during date transitions
   - All changes follow Fluent UI design standards for consistency
-- [#TODO](../../pull/TODO) Simplify XLSX export to use metadata-based approach
+</details>
+
+<details>
+<summary>191 Simplify XLSX export to use metadata-based approach</summary>
+
+[#191](../../pull/191) Simplify XLSX export to use metadata-based approach
   - Removed `findCSVFileName` fallback function that tried to guess file names based on patterns
   - XLSX export now always uses `sourceFiles` array from metadata (populated by `groupCsvFiles`)
   - Eliminates inconsistency between Summary sheet (which shows all datasets) and actual exported sheets
   - Added warning messages when source files are not found in ZIP
   - Ensures "For each line in summary page, we need to have one sheet in excel" as requested
   - All 20 unit tests passing including edge cases with missing files and merged datasets
+</details>
+
 - Fix missing tabs in Excel export for single-file datasets
   - Fixed `groupCsvFiles` function in zipUtils.ts to preserve original file names in `sourceFiles` field
   - Previously, only merged datasets had their source files tracked, causing single-file datasets to be missing from Excel exports
@@ -189,13 +259,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Prevents "insulin" search from incorrectly matching "manual_insulin_data_1.csv"
   - Insulin data now exports correctly with proper columns: Timestamp, Total Bolus (U), Total Insulin (U), Total Basal (U), Serial Number
   - Added comprehensive bug reproduction tests
-- [#173](../../pull/173) Fix AI analysis button not returning to initial state after cooldown
+<details>
+<summary>173 Fix AI analysis button not returning to initial state after cooldown</summary>
+
+[#173](../../pull/173) Fix AI analysis button not returning to initial state after cooldown
   - Button now correctly returns to "Analyze with AI" after 3-second cooldown completes
   - Previous behavior: button stayed as "Click to enable new analysis" indefinitely
   - Added `readyForNewAnalysis` state to track post-cooldown status
   - Accordion now opens by default for better user experience
   - Added ResizeObserver mock for test environment
   - Added new test to verify button state after cooldown completion
+</details>
+
 - Fix AI analysis response persistence and button state management
   - AI responses now persist when navigating to other pages and returning
   - AI responses preserved even after failed API calls
@@ -207,7 +282,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Prevents users from spamming the analyze button
 
 ### Other
-- [#TBD](../../pull/TBD) Automate README updates on main branch after PR merges
+<details>
+<summary>221 Automate README updates on main branch after PR merges</summary>
+
+[#221](../../pull/221) Automate README updates on main branch after PR merges
   - New GitHub Actions workflow triggers when PRs are merged to main
   - Automatically updates "Recent Updates" section in README.md
   - Maps PR labels to emojis (Feature→✨, Bug→🐛, Documentation→📚, Performance→⚡)
@@ -216,57 +294,94 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Includes comprehensive test suite (`test-update-readme.cjs`)
   - Adds `docs/README_AUTOMATION.md` with full documentation
   - Updates `.github/scripts/README.md` with automation details
+</details>
+
 
 ---
 
 ## [1.1.x] - Released
 
 ### New Features
-- [#144](../../pull/144) Add swipe gesture navigation for mobile devices
+<details>
+<summary>144 Add swipe gesture navigation for mobile devices</summary>
+
+[#144](../../pull/144) Add swipe gesture navigation for mobile devices
   - Horizontal swipe left/right to navigate between pages
   - Page order: Home → Data Upload → Reports → AI Analysis → Settings
   - Custom `useSwipeGesture` hook with configurable sensitivity
   - Works on both touch devices (mobile) and mouse (desktop testing)
   - Prevents accidental triggers with vertical scroll detection
-- [#148](../../pull/148) Add bug report and feature request links to Settings page
+</details>
+
+<details>
+<summary>148 Add bug report and feature request links to Settings page</summary>
+
+[#148](../../pull/148) Add bug report and feature request links to Settings page
   - New "Support" section at the top of Settings page
   - Quick access buttons to create GitHub issues directly from the app
   - Bug report button links to bug_report.yml template
   - Feature request button links to feature_request.yml template
   - Opens in new tab with proper security attributes (noopener noreferrer)
-- [#142](../../pull/142) Add first AI analysis prompts to AI Analysis page
+</details>
+
+<details>
+<summary>142 Add first AI analysis prompts to AI Analysis page</summary>
+
+[#142](../../pull/142) Add first AI analysis prompts to AI Analysis page
   - Two collapsible accordion sections (both collapsed by default)
   - First prompt: "Time in Range Analysis" displays calculated glucose percentage in range
   - "Analyze with AI" button (enabled only when API key is configured)
   - Button shows helper text before clicking, changes to "AI analysis not implemented yet" after click
   - Second prompt: "Additional Analysis" placeholder with "To be added soon" message
   - UI setup for future AI functionality integration
-- [#138](../../pull/138) Add AGP report filters and CSV export
+</details>
+
+<details>
+<summary>138 Add AGP report filters and CSV export</summary>
+
+[#138](../../pull/138) Add AGP report filters and CSV export
   - Day-of-week filter dropdown with options: All Days, Mon-Sun, Workdays, Weekends
   - Time range filters (start/end) to analyze specific hours of the day
   - CSV export button for AGP statistics table with hover effect
+</details>
+
 - Add AI settings configuration in Settings page
   - Password-type input field for Perplexity API key with visual confirmation checkmark
   - API key stored securely in browser cookies with persistent storage
   - AI Analysis page displays helpful message with link to Settings when API key is not configured
   - Follows existing settings patterns with Fluent UI components for consistency
-- [#140](../../pull/140) Enhanced API key input with inline label layout and comprehensive security explanation
+<details>
+<summary>140 Enhanced API key input with inline label layout and comprehensive security explanation</summary>
+
+[#140](../../pull/140) Enhanced API key input with inline label layout and comprehensive security explanation
   - Label and input field now displayed in the same row for improved visual organization
   - Detailed security explanation covering storage mechanism (browser cookies, 1-year expiry)
   - Privacy transparency: explains no server transmission, client-side only processing
   - Best practices guidance with links to Perplexity API settings for minimal permissions
   - Risk warning about session compromise with mitigation strategies
   - Link to GitHub repository for open source transparency
-- [#122](../../pull/122) Add CSV export functionality to all data tables
+</details>
+
+<details>
+<summary>122 Add CSV export functionality to all data tables</summary>
+
+[#122](../../pull/122) Add CSV export functionality to all data tables
   - Copy icon appears in top-right corner on table hover with "Copy As CSV" tooltip
   - Export FileList table showing uploaded files with metadata
   - Export In Range reports (Day of Week, Weekly, Daily tables)
   - Proper CSV formatting with comma escaping and quote handling
   - Visual feedback with checkmark icon after successful copy
+</details>
+
 - Add realistic demo data for John Doe (two weeks of diabetes data) that automatically loads on app startup
-- [#114](../../pull/114) Optimize Reports page with collapsible sections for better organization and scalability
+<details>
+<summary>114 Optimize Reports page with collapsible sections for better organization and scalability</summary>
+
+[#114](../../pull/114) Optimize Reports page with collapsible sections for better organization and scalability
   - Selected Data Package section now shows filename, patient name, and metadata in header, details collapsed by default
   - In Range report displays header with summary bar and legend inside collapsed section
+</details>
+
 - AGP (Ambulatory Glucose Profile) report with statistical analysis
   - Interactive AGP graph visualization showing glucose patterns over 24-hour period
   - Percentile bands (10-90% and 25-75%) with median line for easy trend identification
@@ -303,30 +418,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added explicit reminder that glucose values are in mmol/L (not mg/dL)
   - Instructed AI to communicate directly without assuming healthcare provider intermediary
   - Added comprehensive unit tests for new prompt content
-- [#157](../../pull/157) Make version footer visible without scrolling on home page
+<details>
+<summary>157 Make version footer visible without scrolling on home page</summary>
+
+[#157](../../pull/157) Make version footer visible without scrolling on home page
   - Reduced container top/bottom padding from 40px to 24px
   - Reduced header margin-bottom from 40px to 24px
   - Reduced title margin-bottom from 16px to 12px
   - Reduced cards grid gap from 24px to 16px
   - Reduced navigation card minimum height from 200px to 190px
   - Footer now fits within viewport on standard screen sizes
-- [#151](../../pull/151) Fix CHANGELOG entry format instructions to prevent HTML anchor tags
+</details>
+
+<details>
+<summary>151 Fix CHANGELOG entry format instructions to prevent HTML anchor tags</summary>
+
+[#151](../../pull/151) Fix CHANGELOG entry format instructions to prevent HTML anchor tags
   - Updated copilot instructions to explicitly require markdown link format
   - Added clear examples and warnings against using HTML anchor tags
   - Clarified that relative paths must always be used for PR/issue links
   - Updated CHANGELOG.md instructions to match copilot instructions
   - Fixed current version reference from 1.0.x to 1.1.x
-- [#146](../../pull/146) Improve AI settings text clarity by restructuring into separate paragraphs
+</details>
+
+<details>
+<summary>146 Improve AI settings text clarity by restructuring into separate paragraphs</summary>
+
+[#146](../../pull/146) Improve AI settings text clarity by restructuring into separate paragraphs
   - Replace inline `<br/>` tags with proper paragraph structure using `<Text as="p">` components
   - Increase font size from Base200 to Base300 and adjust line height for better readability
   - Add proper spacing between paragraphs with marginBottom style
   - Text now matches the clean, readable style of other settings sections
+</details>
+
 - Center-align all column headers and data cells in AGP report table for improved readability
 - Update demo CGM data to have realistic glucose variability matching clinical distribution (1% very low, 2% low, 71% in range, 19% high, 7% very high)
 
 ### Documentation
 - [#159](../../pull/159) Add link to published app (https://glooko.iric.online) in README Quick Start section
-- Simplify README by keeping only one screenshot and essential information
   - Move all additional screenshots to new docs/SCREENSHOTS.md page
   - Add comprehensive documentation links section in README
   - Move developer-specific content (Available Scripts, Project Structure) to CONTRIBUTING.md
@@ -341,7 +470,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Expand "Understanding Your Results" with AGP interpretation guidelines
 
 ### Other
-- [#TBD](../../pull/TBD) Restructure codebase with feature-based architecture to minimize merge conflicts
+<details>
+<summary>220 Restructure codebase with feature-based architecture to minimize merge conflicts</summary>
+
+[#220](../../pull/220) Restructure codebase with feature-based architecture to minimize merge conflicts
   - Split xlsxUtils.ts (435 lines) into 5 focused modules in `src/features/export/utils/`
   - Move zipUtils.ts (240 lines) to `src/features/dataUpload/utils/`
   - Move FileList and FileUploadZone components to `src/features/dataUpload/components/`
@@ -350,15 +482,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add comprehensive `src/features/README.md` documenting architecture patterns
   - Old files in `src/utils/` and `src/components/` remain for backward compatibility
   - Expected benefit: 70-80% reduction in merge conflicts
-- [#162](../../pull/162) Fix CHANGELOG.md by replacing all #XXX placeholder entries with correct PR numbers
+</details>
+
+<details>
+<summary>162 Fix CHANGELOG.md by replacing all #XXX placeholder entries with correct PR numbers</summary>
+
+[#162](../../pull/162) Fix CHANGELOG.md by replacing all #XXX placeholder entries with correct PR numbers
   - Identified 11 placeholder entries with #XXX format
   - Used GitHub API to search for and identify correct PR numbers
   - All PR links now point to their correct pull requests
-- [#161](../../pull/161) Optimize test execution performance with parallel test running
+</details>
+
+<details>
+<summary>161 Optimize test execution performance with parallel test running</summary>
+
+[#161](../../pull/161) Optimize test execution performance with parallel test running
   - Enable parallel test execution in Vitest configuration using thread pool
   - Run tests once with JSON reporter to extract statistics immediately
   - Eliminate duplicate test run in CI workflow (previously ran tests twice)
   - Expected improvement: 50% reduction in CI test execution time
+</details>
+
 
 ---
 
@@ -397,16 +541,28 @@ Versions follow the format: `major.minor.buildId`
 ## How to Update This File
 
 When creating a pull request:
-1. Add an entry under the appropriate version section (current: 1.1.x)
+1. Add an entry under the appropriate version section (current: 1.2.x)
 2. Place the entry in the correct category based on the PR/issue label:
    - **New Features** - for ✨ Feature label
    - **Fixes** - for 🪲 Bug label
    - **Documentation** - for 📚 Documentation label
    - **Other** - for other changes
-3. **Entry format - Use markdown links (NOT HTML):**
-   - Each entry must start with a markdown link like `[#152](../../pull/152)` followed by the description
+3. **Entry format - Use collapsible details with plain text summary:**
+   ```markdown
+   <details>
+   <summary>213 Enable smaller data set for "Meal Timing" analysis</summary>
+   
+   [#213](../../pull/213) Enable smaller data set for "Meal Timing" analysis
+     - Add automatic fallback to last 28 days when AI API returns "request too large" error
+     - New utility functions: `filterGlucoseReadingsToLastDays()` and `filterInsulinReadingsToLastDays()`
+     - Enhanced error detection for request size limitations
+     - [... more sub-bullets as needed ...]
+   </details>
+   ```
+   - **Summary tag**: Plain PR number (no `#`) + title (no hyperlink)
+   - **First line in details**: Full hyperlinked version with `#` symbol: `[#213](../../pull/213) Title`
    - **Always use relative paths:** `../../pull/PR_NUMBER` or `../../issues/ISSUE_NUMBER`
-   - **Example:** `- [#152](../../pull/152) Add new feature description`
-   - **For issues without PRs:** `- [Issue #100](../../issues/100) Description`
+   - **Sub-bullets**: List all changes as indented bullet points (2 spaces + dash)
    - **Never use HTML anchor tags** like `<a href="...">` - only use markdown format
+   - **For issues without PRs:** `[Issue #100](../../issues/100) Description`
 4. Entries within each category should be sorted by PR/issue number (descending - highest first)
