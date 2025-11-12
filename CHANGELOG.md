@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
+- [#TBD](../../pull/TBD) UI refinements and enablements
+  - Remove accordion from file info display in Reports and AI Analysis pages (since we now use tabs)
+  - Add "Meal Timing" tab to AI Analysis page with placeholder text for future implementation
+  - Add "Detailed CGM" and "Detailed Insulin" tabs to Reports page with placeholder texts for future implementation
+  - Improve Data & AI tab layout in Settings page with better vertical spacing and organization
 - [#TBD](../../pull/TBD) Align UI pages with consistent width and vertical tabs
   - Standardize all page widths to 1200px for visual consistency (Home, Settings, DataUpload, Reports, AI Analysis)
   - Refactor Settings page to use vertical tabs on the left instead of stacked sections (7 tabs: Support, Theme, Export Format, Glucose Thresholds, AI, Data Privacy, Version Info)

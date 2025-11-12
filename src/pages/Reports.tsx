@@ -79,6 +79,22 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
         return <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} />;
       case 'agp':
         return <AGPReport selectedFile={selectedFile} exportFormat={exportFormat} />;
+      case 'detailedCgm':
+        return (
+          <div style={{ padding: '24px' }}>
+            <Text style={{ fontSize: tokens.fontSizeBase400, color: tokens.colorNeutralForeground2 }}>
+              Detailed CGM analysis - To be implemented
+            </Text>
+          </div>
+        );
+      case 'detailedInsulin':
+        return (
+          <div style={{ padding: '24px' }}>
+            <Text style={{ fontSize: tokens.fontSizeBase400, color: tokens.colorNeutralForeground2 }}>
+              Detailed Insulin analysis - To be implemented
+            </Text>
+          </div>
+        );
       default:
         return null;
     }
@@ -104,6 +120,8 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
           <Tab value="fileInfo">File Info</Tab>
           <Tab value="inRange">Time in Range</Tab>
           <Tab value="agp">AGP Data</Tab>
+          <Tab value="detailedCgm">Detailed CGM</Tab>
+          <Tab value="detailedInsulin">Detailed Insulin</Tab>
         </TabList>
 
         <div className={styles.contentArea}>
