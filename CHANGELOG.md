@@ -26,6 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Based on analysis of existing "Time in Range" and "Glucose & Insulin" prompt implementations
 
 ### New Features
+- [#TBD](../../pull/TBD) Add Grok AI provider support
+  - Add xAI Grok API integration using grok-beta model
+  - New Grok AI API key input in Settings > Data & AI tab
+  - Priority order for AI providers: Perplexity > Grok AI > Google Gemini
+  - Full support for all AI analysis features (Time in Range, Glucose & Insulin)
+  - Cookie-based persistence for Grok API key (1-year expiry)
+  - Comprehensive test coverage for Grok API integration
 - [#TBD](../../pull/TBD) Add comprehensive meal timing analysis
   - New "Meal Timing" tab in AI Analysis page for detailed meal-specific optimization
   - Analyzes CGM, basal, and bolus data to provide day-of-week specific and meal-specific recommendations

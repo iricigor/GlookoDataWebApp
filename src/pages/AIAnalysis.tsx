@@ -213,11 +213,12 @@ interface AIAnalysisProps {
   selectedFile?: UploadedFile;
   perplexityApiKey: string;
   geminiApiKey: string;
+  grokApiKey: string;
   existingAnalysis?: AIAnalysisResult;
   onAnalysisComplete: (fileId: string, response: string, inRangePercentage: number) => void;
 }
 
-export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, existingAnalysis, onAnalysisComplete }: AIAnalysisProps) {
+export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokApiKey, existingAnalysis, onAnalysisComplete }: AIAnalysisProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
   const [selectedTab, setSelectedTab] = useState<string>('fileInfo');
@@ -254,7 +255,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
   }>({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
 
   // Determine which AI provider to use
-  const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey);
+  const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey, grokApiKey);
   const hasApiKey = activeProvider !== null;
 
   // Load existing analysis when component mounts or file changes
@@ -432,7 +433,8 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
       const prompt = generateTimeInRangePrompt(inRangePercentage);
 
       // Get the appropriate API key for the active provider
-      const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : geminiApiKey;
+      const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
+                      activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
       // Call the AI API using the selected provider
       const result = await callAIApi(activeProvider, apiKey, prompt);
@@ -494,7 +496,8 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
       const prompt = generateGlucoseInsulinPrompt(base64CsvData);
 
       // Get the appropriate API key for the active provider
-      const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : geminiApiKey;
+      const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
+                      activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
       // Call the AI API using the selected provider
       const result = await callAIApi(activeProvider, apiKey, prompt);
