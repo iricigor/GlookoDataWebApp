@@ -64,6 +64,7 @@ Comprehensive documentation is available to help you get started:
 
 ## 📋 Recent Updates
 
+- 🔧 **PR #225**: Add data privacy warning and best practices for AI analysis features
 - 🔧 **PR #227**: Add detailed last-3-days meal analysis to AI meal timing prompt
 - 🔧 **PR #222**: Add support for smaller data set in meal timing analysis
 - 🔧 **PR #223**: Add daily insulin timeline report with basal line and bolus bars
