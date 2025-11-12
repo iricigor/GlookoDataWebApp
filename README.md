@@ -62,14 +62,6 @@ Comprehensive documentation is available to help you get started:
 - **[E2E Testing Guide](docs/E2E_TESTING.md)** - End-to-end testing with Playwright
 - **[Changelog](CHANGELOG.md)** - See what's new in each version
 
-## 📋 Recent Updates
-
-- 🔧 **PR #225**: Add data privacy warning and best practices for AI analysis features
-- 🔧 **PR #227**: Add detailed last-3-days meal analysis to AI meal timing prompt
-- 🔧 **PR #222**: Add support for smaller data set in meal timing analysis
-- 🔧 **PR #223**: Add daily insulin timeline report with basal line and bolus bars
-- 🔧 **PR #221**: Automate README updates on main branch after PR merges
-
 ## 🛠️ Tech Stack
 
 This project is built with modern web technologies:
