@@ -75,7 +75,7 @@ describe('perplexityApi', () => {
       expect(prompt).toContain('Date,Day,BG');
       expect(prompt).toContain('2024-01-01,Monday,85');
       expect(prompt).toContain('Temporal Trends');
-      expect(prompt).toContain('Insulin Efficacy Correlation');
+      expect(prompt).toContain('Insulin Efficacy Tiers');
       expect(prompt).toContain('Anomalies and Key Events');
       expect(prompt).toContain('Actionable Summary');
     });
@@ -117,13 +117,29 @@ describe('perplexityApi', () => {
       expect(prompt).toContain('lowest BG In Range');
     });
 
-    it('should request correlation analysis', () => {
+    it('should request tiering analysis instead of correlation', () => {
       const csvData = 'Date,Day\n2024-01-01,Monday';
       const base64Data = base64Encode(csvData);
       const prompt = generateGlucoseInsulinPrompt(base64Data);
       
-      expect(prompt).toContain('correlation between Total Insulin');
-      expect(prompt).toContain('Basal and Bolus insulin');
+      expect(prompt).toContain('Total Dose Tiering');
+      expect(prompt).toContain('Low, Medium, and High Total Insulin tiers');
+      expect(prompt).toContain('Bolus Ratio Impact');
+      expect(prompt).toContain('Bolus-to-Total-Insulin Ratio');
+      // Should NOT contain correlation language
+      expect(prompt).not.toContain('correlation between Total Insulin');
+    });
+
+    it('should request insulin dose averages for best and worst days', () => {
+      const csvData = 'Date,Day\n2024-01-01,Monday';
+      const base64Data = base64Encode(csvData);
+      const prompt = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(prompt).toContain('average Basal dose');
+      expect(prompt).toContain('average Bolus dose');
+      expect(prompt).toContain('3 best days');
+      expect(prompt).toContain('3 worst days');
+      expect(prompt).toContain('key difference');
     });
 
     it('should request actionable recommendations', () => {
@@ -133,6 +149,7 @@ describe('perplexityApi', () => {
       
       expect(prompt).toContain('3-point summary');
       expect(prompt).toContain('2-3 specific, actionable recommendations');
+      expect(prompt).toContain('tier and outlier data');
     });
   });
 
