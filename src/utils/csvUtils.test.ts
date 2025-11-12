@@ -8,7 +8,9 @@ import {
   convertDailyReportsToCSV,
   convertGlucoseReadingsToCSV,
   convertBolusReadingsToCSV,
-  convertBasalReadingsToCSV
+  convertBasalReadingsToCSV,
+  filterGlucoseReadingsToLastDays,
+  filterInsulinReadingsToLastDays
 } from './csvUtils';
 import type { DailyReport, GlucoseReading, InsulinReading } from '../types';
 
@@ -339,6 +341,151 @@ describe('csvUtils', () => {
       const result = convertBasalReadingsToCSV(readings);
       
       expect(result).toContain('1.12');
+    });
+  });
+
+  describe('filterGlucoseReadingsToLastDays', () => {
+    it('should filter glucose readings to last 28 days by default', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00Z'), value: 6.5 },
+        { timestamp: new Date('2024-01-15T08:00:00Z'), value: 7.2 },
+        { timestamp: new Date('2024-02-01T08:00:00Z'), value: 8.1 },
+        { timestamp: new Date('2024-02-15T08:00:00Z'), value: 7.5 },
+        { timestamp: new Date('2024-02-20T08:00:00Z'), value: 6.8 }, // Most recent
+      ];
+
+      const result = filterGlucoseReadingsToLastDays(readings);
+      
+      // Should only include readings from last 28 days (after Jan 23)
+      expect(result.length).toBe(3);
+      expect(result[0].timestamp.toISOString()).toBe('2024-02-01T08:00:00.000Z');
+      expect(result[1].timestamp.toISOString()).toBe('2024-02-15T08:00:00.000Z');
+      expect(result[2].timestamp.toISOString()).toBe('2024-02-20T08:00:00.000Z');
+    });
+
+    it('should filter glucose readings to specified number of days', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00Z'), value: 6.5 },
+        { timestamp: new Date('2024-01-05T08:00:00Z'), value: 7.2 },
+        { timestamp: new Date('2024-01-08T08:00:00Z'), value: 8.1 },
+        { timestamp: new Date('2024-01-10T08:00:00Z'), value: 7.5 }, // Most recent
+      ];
+
+      const result = filterGlucoseReadingsToLastDays(readings, 7);
+      
+      // Should only include readings from last 7 days (after Jan 3)
+      expect(result.length).toBe(3);
+      expect(result[0].timestamp.toISOString()).toBe('2024-01-05T08:00:00.000Z');
+    });
+
+    it('should return all readings if within the specified days', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-02-01T08:00:00Z'), value: 6.5 },
+        { timestamp: new Date('2024-02-05T08:00:00Z'), value: 7.2 },
+        { timestamp: new Date('2024-02-10T08:00:00Z'), value: 8.1 }, // Most recent
+      ];
+
+      const result = filterGlucoseReadingsToLastDays(readings, 28);
+      
+      // All readings are within 28 days
+      expect(result.length).toBe(3);
+    });
+
+    it('should handle empty array', () => {
+      const result = filterGlucoseReadingsToLastDays([]);
+      expect(result).toEqual([]);
+    });
+
+    it('should handle single reading', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00Z'), value: 6.5 },
+      ];
+
+      const result = filterGlucoseReadingsToLastDays(readings, 28);
+      
+      expect(result.length).toBe(1);
+      expect(result[0]).toEqual(readings[0]);
+    });
+  });
+
+  describe('filterInsulinReadingsToLastDays', () => {
+    it('should filter insulin readings to last 28 days by default', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00Z'), dose: 5.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-01-15T08:00:00Z'), dose: 6.5, insulinType: 'bolus' },
+        { timestamp: new Date('2024-02-01T08:00:00Z'), dose: 7.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-02-15T08:00:00Z'), dose: 8.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-02-20T08:00:00Z'), dose: 6.0, insulinType: 'bolus' }, // Most recent
+      ];
+
+      const result = filterInsulinReadingsToLastDays(readings);
+      
+      // Should only include readings from last 28 days (after Jan 23)
+      expect(result.length).toBe(3);
+      expect(result[0].timestamp.toISOString()).toBe('2024-02-01T08:00:00.000Z');
+      expect(result[1].timestamp.toISOString()).toBe('2024-02-15T08:00:00.000Z');
+      expect(result[2].timestamp.toISOString()).toBe('2024-02-20T08:00:00.000Z');
+    });
+
+    it('should filter insulin readings to specified number of days', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00Z'), dose: 5.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-01-05T08:00:00Z'), dose: 6.5, insulinType: 'bolus' },
+        { timestamp: new Date('2024-01-08T08:00:00Z'), dose: 7.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-01-10T08:00:00Z'), dose: 8.0, insulinType: 'bolus' }, // Most recent
+      ];
+
+      const result = filterInsulinReadingsToLastDays(readings, 7);
+      
+      // Should only include readings from last 7 days (after Jan 3)
+      expect(result.length).toBe(3);
+      expect(result[0].timestamp.toISOString()).toBe('2024-01-05T08:00:00.000Z');
+    });
+
+    it('should return all readings if within the specified days', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-02-01T08:00:00Z'), dose: 5.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-02-05T08:00:00Z'), dose: 6.5, insulinType: 'bolus' },
+        { timestamp: new Date('2024-02-10T08:00:00Z'), dose: 7.0, insulinType: 'bolus' }, // Most recent
+      ];
+
+      const result = filterInsulinReadingsToLastDays(readings, 28);
+      
+      // All readings are within 28 days
+      expect(result.length).toBe(3);
+    });
+
+    it('should handle empty array', () => {
+      const result = filterInsulinReadingsToLastDays([]);
+      expect(result).toEqual([]);
+    });
+
+    it('should handle single reading', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00Z'), dose: 5.0, insulinType: 'bolus' },
+      ];
+
+      const result = filterInsulinReadingsToLastDays(readings, 28);
+      
+      expect(result.length).toBe(1);
+      expect(result[0]).toEqual(readings[0]);
+    });
+
+    it('should work with mixed insulin types', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00Z'), dose: 5.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-01-15T08:00:00Z'), dose: 1.0, insulinType: 'basal' },
+        { timestamp: new Date('2024-02-01T08:00:00Z'), dose: 7.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-02-15T08:00:00Z'), dose: 1.2, insulinType: 'basal' },
+        { timestamp: new Date('2024-02-20T08:00:00Z'), dose: 6.0, insulinType: 'bolus' }, // Most recent
+      ];
+
+      const result = filterInsulinReadingsToLastDays(readings, 28);
+      
+      // Should filter all types correctly
+      expect(result.length).toBe(3);
+      expect(result.some(r => r.insulinType === 'bolus')).toBe(true);
+      expect(result.some(r => r.insulinType === 'basal')).toBe(true);
     });
   });
 });

@@ -208,3 +208,43 @@ export function convertBasalReadingsToCSV(readings: InsulinReading[]): string {
 
   return convertToDelimitedFormat(rows, 'csv');
 }
+
+/**
+ * Filter glucose readings to the last N days from the most recent reading
+ * @param readings - Array of glucose readings to filter
+ * @param days - Number of days to include (default 28)
+ * @returns Filtered array of glucose readings
+ */
+export function filterGlucoseReadingsToLastDays(readings: GlucoseReading[], days: number = 28): GlucoseReading[] {
+  if (!readings || readings.length === 0) {
+    return [];
+  }
+
+  // Find the most recent timestamp
+  const maxTimestamp = Math.max(...readings.map(r => r.timestamp.getTime()));
+  const cutoffDate = new Date(maxTimestamp);
+  cutoffDate.setDate(cutoffDate.getDate() - days);
+
+  // Filter readings after the cutoff date
+  return readings.filter(r => r.timestamp >= cutoffDate);
+}
+
+/**
+ * Filter insulin readings to the last N days from the most recent reading
+ * @param readings - Array of insulin readings to filter
+ * @param days - Number of days to include (default 28)
+ * @returns Filtered array of insulin readings
+ */
+export function filterInsulinReadingsToLastDays(readings: InsulinReading[], days: number = 28): InsulinReading[] {
+  if (!readings || readings.length === 0) {
+    return [];
+  }
+
+  // Find the most recent timestamp
+  const maxTimestamp = Math.max(...readings.map(r => r.timestamp.getTime()));
+  const cutoffDate = new Date(maxTimestamp);
+  cutoffDate.setDate(cutoffDate.getDate() - days);
+
+  // Filter readings after the cutoff date
+  return readings.filter(r => r.timestamp >= cutoffDate);
+}

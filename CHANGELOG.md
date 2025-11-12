@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
+- [#213](../../pull/213) Enable smaller data set for "Meal Timing" analysis
+  - Add automatic fallback to last 28 days when AI API returns "request too large" error
+  - New utility functions: `filterGlucoseReadingsToLastDays()` and `filterInsulinReadingsToLastDays()`
+  - Enhanced error detection for request size limitations (checks for "too large", "exceeds", "maximum", "limit", "token limit", "payload large", "request size")
+  - Filtered dataset automatically includes note indicating "Analysis based on the last 28 days of data"
+  - If filtered dataset still fails, error is returned to user
+  - 16 comprehensive unit tests for filtering functions covering various scenarios
 - [#TBD](../../pull/TBD) Implement comprehensive Playwright E2E testing suite
   - Add Playwright testing framework with configuration for Chromium, Firefox, and WebKit browsers
   - Implement Page Object Model (POM) pattern for maintainable test architecture
