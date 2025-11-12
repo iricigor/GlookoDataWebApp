@@ -64,6 +64,7 @@ Comprehensive documentation is available to help you get started:
 
 ## 📋 Recent Updates
 
+- 🔧 **PR #223**: Add daily insulin timeline report with basal line and bolus bars
 - 🔧 **PR #221**: Automate README updates on main branch after PR merges
 
 ## 🛠️ Tech Stack
