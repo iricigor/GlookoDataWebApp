@@ -513,18 +513,9 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
   if (!selectedFile) {
     return (
       <div className={styles.reportContainer}>
-        <Accordion collapsible>
-          <AccordionItem value="inRange">
-            <AccordionHeader>
-              <Text className={styles.reportTitle}>In Range</Text>
-            </AccordionHeader>
-            <AccordionPanel>
-              <Text className={styles.noData}>
-                No data package selected. Please select a valid ZIP file from the Data Upload page.
-              </Text>
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
+        <Text className={styles.noData}>
+          No data package selected. Please select a valid ZIP file from the Data Upload page.
+        </Text>
       </div>
     );
   }
@@ -534,19 +525,11 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
   
   return (
     <div className={styles.reportContainer}>
-      <Accordion collapsible>
-        <AccordionItem value="inRange">
-          <AccordionHeader>
-            <div className={styles.reportHeader}>
-              <Text className={styles.reportTitle}>In Range</Text>
-            </div>
-          </AccordionHeader>
-          <AccordionPanel>
-            {/* Loading/Error states */}
-            {loading && <Text className={styles.loading}>Loading glucose data...</Text>}
-            {error && <Text className={styles.error}>{error}</Text>}
-            
-            <div className={styles.container}>
+      {/* Loading/Error states */}
+      {loading && <Text className={styles.loading}>Loading glucose data...</Text>}
+      {error && <Text className={styles.error}>{error}</Text>}
+      
+      <div className={styles.container}>
               {/* Summary bar and legend in Card */}
               {!loading && !error && dayOfWeekReports.length > 0 && (
                 <Card className={styles.summaryCard}>
@@ -825,9 +808,6 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
                 </Accordion>
               )}
             </div>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
     </div>
   );
 }

@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.x] - Current Development
 
 ### New Features
+- [#TBD](../../pull/TBD) Align UI pages with consistent width and vertical tabs
+  - Standardize all page widths to 1200px for visual consistency (Home, Settings, DataUpload, Reports, AI Analysis)
+  - Refactor Settings page to use vertical tabs on the left instead of stacked sections (7 tabs: Support, Theme, Export Format, Glucose Thresholds, AI, Data Privacy, Version Info)
+  - Refactor Reports page to use vertical tabs on the left instead of top-level accordions (2 tabs: Time in Range, AGP Data)
+  - Refactor AI Analysis page to use vertical tabs on the left instead of top-level accordions (2 tabs: Time in Range, Glucose & Insulin)
+  - Maintain all existing functionality while improving navigation and visual consistency
 - Finalize second AI prompt with glucose and insulin correlation analysis
   - New "Glucose and Insulin Analysis" section on AI Analysis page
   - Displays comprehensive dataset combining glucose ranges and insulin doses by date

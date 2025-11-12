@@ -15,10 +15,6 @@ import {
   TableHeaderCell,
   TableBody,
   TableCell,
-  Accordion,
-  AccordionItem,
-  AccordionHeader,
-  AccordionPanel,
   Dropdown,
   Option,
   TabList,
@@ -317,32 +313,17 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
   if (!selectedFile) {
     return (
       <div className={styles.reportContainer}>
-        <Accordion collapsible>
-          <AccordionItem value="agp">
-            <AccordionHeader>
-              <Text className={styles.reportTitle}>AGP Data</Text>
-            </AccordionHeader>
-            <AccordionPanel>
-              <Text className={styles.noData}>
-                No data package selected. Please select a valid ZIP file from the Data Upload page.
-              </Text>
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
+        <Text className={styles.noData}>
+          No data package selected. Please select a valid ZIP file from the Data Upload page.
+        </Text>
       </div>
     );
   }
 
   return (
     <div className={styles.reportContainer}>
-      <Accordion collapsible>
-        <AccordionItem value="agp">
-          <AccordionHeader>
-            <Text className={styles.reportTitle}>AGP Data</Text>
-          </AccordionHeader>
-          <AccordionPanel>
-            {loading && <Text className={styles.loading}>Loading glucose data...</Text>}
-            {error && <Text className={styles.error}>{error}</Text>}
+      {loading && <Text className={styles.loading}>Loading glucose data...</Text>}
+      {error && <Text className={styles.error}>{error}</Text>}
 
             <div className={styles.container}>
               {/* Controls */}
@@ -462,9 +443,6 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
                 </Text>
               )}
             </div>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
     </div>
   );
 }

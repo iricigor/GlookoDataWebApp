@@ -51,7 +51,7 @@ const useStyles = makeStyles({
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
     gap: '16px',
-    maxWidth: '1000px',
+    maxWidth: '1200px',
     width: '100%',
     ...shorthands.padding('0', '24px'),
     '@media (max-width: 768px)': {
