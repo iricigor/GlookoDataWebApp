@@ -173,9 +173,11 @@ interface SettingsProps {
   onPerplexityApiKeyChange: (key: string) => void;
   geminiApiKey: string;
   onGeminiApiKeyChange: (key: string) => void;
+  grokApiKey: string;
+  onGrokApiKeyChange: (key: string) => void;
 }
 
-export function Settings({ themeMode, onThemeChange, exportFormat, onExportFormatChange, perplexityApiKey, onPerplexityApiKeyChange, geminiApiKey, onGeminiApiKeyChange }: SettingsProps) {
+export function Settings({ themeMode, onThemeChange, exportFormat, onExportFormatChange, perplexityApiKey, onPerplexityApiKeyChange, geminiApiKey, onGeminiApiKeyChange, grokApiKey, onGrokApiKeyChange }: SettingsProps) {
   const styles = useStyles();
   const { thresholds, updateThreshold, validateThresholds, isValid } = useGlucoseThresholds();
   const validationError = validateThresholds(thresholds);
@@ -183,8 +185,8 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
   const [selectedTab, setSelectedTab] = useState<string>('general');
 
   // Determine which provider is active based on available keys
-  // Priority: Perplexity > Gemini
-  const activeProvider = perplexityApiKey ? 'perplexity' : (geminiApiKey ? 'gemini' : null);
+  // Priority: Perplexity > Grok > Gemini
+  const activeProvider = perplexityApiKey ? 'perplexity' : (grokApiKey ? 'grok' : (geminiApiKey ? 'gemini' : null));
 
   const renderTabContent = () => {
     switch (selectedTab) {
@@ -242,7 +244,7 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
               </Text>
               {activeProvider && (
                 <Text className={styles.settingDescription} style={{ color: tokens.colorBrandForeground1, fontWeight: tokens.fontWeightSemibold }}>
-                  Currently using: {activeProvider === 'perplexity' ? 'Perplexity' : 'Google Gemini'}
+                  Currently using: {activeProvider === 'perplexity' ? 'Perplexity' : activeProvider === 'grok' ? 'Grok AI' : 'Google Gemini'}
                 </Text>
               )}
               
@@ -258,6 +260,21 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                     onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
                     placeholder="Enter your Perplexity API key"
                     contentAfter={perplexityApiKey ? (activeProvider === 'perplexity' ? '✓ Selected' : '✓') : undefined}
+                    className={styles.apiKeyInput}
+                  />
+                </div>
+                
+                <div className={styles.apiKeyRow}>
+                  <Label htmlFor="grok-api-key" className={styles.apiKeyLabel}>
+                    Grok AI API Key
+                  </Label>
+                  <Input
+                    id="grok-api-key"
+                    type="password"
+                    value={grokApiKey}
+                    onChange={(_, data) => onGrokApiKeyChange(data.value)}
+                    placeholder="Enter your Grok AI API key"
+                    contentAfter={grokApiKey ? (activeProvider === 'grok' ? '✓ Selected' : '✓') : undefined}
                     className={styles.apiKeyInput}
                   />
                 </div>
@@ -292,15 +309,19 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                   <strong>Best Practices:</strong> For maximum security, create API keys with minimal permissions at{' '}
                   <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
                     Perplexity Settings
-                  </a> or{' '}
+                  </a>,{' '}
+                  <a href="https://console.x.ai/" target="_blank" rel="noopener noreferrer">
+                    xAI Console
+                  </a>, or{' '}
                   <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
                     Google AI Studio
                   </a>. 
                   Use keys designated for client-side applications and set spending limits to protect against unauthorized usage.
                 </Text>
                 <Text as="p" style={{ marginBottom: '12px' }}>
-                  <strong>Provider Selection:</strong> If both API keys are configured, Perplexity will be used by default. 
-                  To use Google Gemini, remove the Perplexity API key.
+                  <strong>Provider Selection:</strong> If multiple API keys are configured, Perplexity will be used by default. 
+                  If Perplexity is not available, Grok AI will be used next, followed by Google Gemini. 
+                  To use a different provider, remove the API keys with higher priority.
                 </Text>
                 <Text as="p">
                   <strong>Risk Warning:</strong> If someone gains access to your browser session or computer, they could potentially 

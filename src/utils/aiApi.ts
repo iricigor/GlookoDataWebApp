@@ -7,21 +7,22 @@
 
 import { callPerplexityApi, type PerplexityResult } from './perplexityApi';
 import { callGeminiApi, type GeminiResult } from './geminiApi';
+import { callGrokApi, type GrokResult } from './grokApi';
 
 /**
  * Supported AI providers
  */
-export type AIProvider = 'perplexity' | 'gemini';
+export type AIProvider = 'perplexity' | 'gemini' | 'grok';
 
 /**
  * Unified AI result type
  */
-export type AIResult = PerplexityResult | GeminiResult;
+export type AIResult = PerplexityResult | GeminiResult | GrokResult;
 
 /**
  * Call the appropriate AI API based on provider selection
  * 
- * @param provider - The AI provider to use ('perplexity' or 'gemini')
+ * @param provider - The AI provider to use ('perplexity', 'gemini', or 'grok')
  * @param apiKey - The API key for the selected provider
  * @param prompt - The prompt to send to the AI
  * @returns Promise with the result containing success status and content or error
@@ -36,6 +37,8 @@ export async function callAIApi(
       return callPerplexityApi(apiKey, prompt);
     case 'gemini':
       return callGeminiApi(apiKey, prompt);
+    case 'grok':
+      return callGrokApi(apiKey, prompt);
     default:
       return {
         success: false,
@@ -57,6 +60,8 @@ export function getProviderDisplayName(provider: AIProvider): string {
       return 'Perplexity';
     case 'gemini':
       return 'Google Gemini';
+    case 'grok':
+      return 'Grok AI';
     default:
       return provider;
   }
@@ -67,15 +72,20 @@ export function getProviderDisplayName(provider: AIProvider): string {
  * 
  * @param perplexityKey - Perplexity API key
  * @param geminiKey - Google Gemini API key
+ * @param grokKey - Grok AI API key
  * @returns The provider to use, or null if no keys are available
  */
 export function determineActiveProvider(
   perplexityKey: string,
-  geminiKey: string
+  geminiKey: string,
+  grokKey: string
 ): AIProvider | null {
-  // Prioritize Perplexity if both are available
+  // Priority order: Perplexity > Grok > Gemini
   if (perplexityKey && perplexityKey.trim() !== '') {
     return 'perplexity';
+  }
+  if (grokKey && grokKey.trim() !== '') {
+    return 'grok';
   }
   if (geminiKey && geminiKey.trim() !== '') {
     return 'gemini';
