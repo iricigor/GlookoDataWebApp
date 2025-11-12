@@ -12,6 +12,7 @@ import { useTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
 import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
 import { useGeminiApiKey } from './hooks/useGeminiApiKey'
+import { useGrokApiKey } from './hooks/useGrokApiKey'
 import { useSwipeGesture } from './hooks/useSwipeGesture'
 import type { UploadedFile, AIAnalysisResult } from './types'
 import { extractZipMetadata } from './utils/zipUtils'
@@ -25,6 +26,7 @@ function App() {
   const { exportFormat, setExportFormat } = useExportFormat()
   const { apiKey: perplexityApiKey, setApiKey: setPerplexityApiKey } = usePerplexityApiKey()
   const { apiKey: geminiApiKey, setApiKey: setGeminiApiKey } = useGeminiApiKey()
+  const { apiKey: grokApiKey, setApiKey: setGrokApiKey } = useGrokApiKey()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
   const [aiAnalysisResults, setAiAnalysisResults] = useState<Record<string, AIAnalysisResult>>({})
@@ -186,12 +188,13 @@ function App() {
             selectedFile={selectedFile} 
             perplexityApiKey={perplexityApiKey} 
             geminiApiKey={geminiApiKey}
+            grokApiKey={grokApiKey}
             existingAnalysis={currentAIAnalysis}
             onAnalysisComplete={handleAIAnalysisComplete}
           />
         )
       case 'settings':
-        return <Settings themeMode={themeMode} onThemeChange={setThemeMode} exportFormat={exportFormat} onExportFormatChange={setExportFormat} perplexityApiKey={perplexityApiKey} onPerplexityApiKeyChange={setPerplexityApiKey} geminiApiKey={geminiApiKey} onGeminiApiKeyChange={setGeminiApiKey} />
+        return <Settings themeMode={themeMode} onThemeChange={setThemeMode} exportFormat={exportFormat} onExportFormatChange={setExportFormat} perplexityApiKey={perplexityApiKey} onPerplexityApiKeyChange={setPerplexityApiKey} geminiApiKey={geminiApiKey} onGeminiApiKeyChange={setGeminiApiKey} grokApiKey={grokApiKey} onGrokApiKeyChange={setGrokApiKey} />
       default:
         return <Home onNavigate={handleNavigate} />
     }

@@ -62,6 +62,7 @@ describe('AIAnalysis', () => {
         selectedFile={mockFile}
         perplexityApiKey=""
         geminiApiKey="test-key"
+        grokApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -83,6 +84,7 @@ describe('AIAnalysis', () => {
         selectedFile={mockFile}
         perplexityApiKey=""
         geminiApiKey="test-key"
+        grokApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -119,6 +121,7 @@ describe('AIAnalysis', () => {
         selectedFile={mockFile}
         perplexityApiKey=""
         geminiApiKey="test-key"
+        grokApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -172,6 +175,7 @@ describe('AIAnalysis', () => {
         selectedFile={mockFile}
         perplexityApiKey=""
         geminiApiKey="test-key"
+        grokApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -209,6 +213,7 @@ describe('AIAnalysis', () => {
         selectedFile={mockFile}
         perplexityApiKey=""
         geminiApiKey="test-key"
+        grokApiKey=""
         existingAnalysis={existingAnalysis}
         onAnalysisComplete={mockAnalysisComplete}
       />
@@ -238,6 +243,7 @@ describe('AIAnalysis', () => {
         selectedFile={mockFile}
         perplexityApiKey=""
         geminiApiKey="test-key"
+        grokApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -300,6 +306,7 @@ describe('AIAnalysis', () => {
         selectedFile={mockFile}
         perplexityApiKey=""
         geminiApiKey="test-key"
+        grokApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );

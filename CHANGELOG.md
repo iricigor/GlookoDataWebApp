@@ -16,15 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.x] - Current Development
 
-### Documentation
-- [#TBD](../../pull/TBD) Add comprehensive documentation for creating new AI analysis prompts
-  - Complete step-by-step guide in copilot-instructions.md for adding new prompts/tabs to AI Analysis page
-  - Documents the 8-step process: state management, cooldown timer, data preparation, prompt generation, handler function, tab registration, UI rendering, and testing
-  - Includes detailed patterns for state management (6 variables per prompt), cooldown mechanism, error handling, and data preparation
-  - Provides two complete examples: simple text-based prompts and complex dataset prompts with CSV/base64 encoding
-  - Lists common mistakes to avoid and testing checklist
-  - Based on analysis of existing "Time in Range" and "Glucose & Insulin" prompt implementations
-
 ### New Features
 - [#TBD](../../pull/TBD) Add BG Values graph to Reports page
   - New "BG Values" tab displaying daily glucose readings with interactive visualization
@@ -37,6 +28,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Reference lines for low (3.9) and high (10.0) glucose thresholds
   - Defaults to last available date in dataset
   - Follows existing patterns from AGPGraph and InRangeReport components
+- [#TBD](../../pull/TBD) Simplify Glucose & Insulin AI prompt by removing correlation analysis
+  - Remove complex correlation analysis from AI prompt in favor of simpler tiering approach
+  - Replace "Insulin Efficacy Correlation" section with "Insulin Efficacy Tiers (Simplified and Actionable)"
+  - New tiering analysis: Group days into Low/Medium/High Total Insulin tiers with average BG In Range (%) for each
+  - New bolus ratio impact: Compare average BG Above (%) for days with bolus ratio above vs below median
+  - Enhanced anomalies section: Report average Basal and Bolus doses for 3 best and 3 worst days with key differences
+  - Updated actionable summary to provide recommendations based on tier and outlier data instead of correlations
+  - Keep temporal trends section unchanged (best/worst days, multi-day patterns)
+  - Updated unit tests to validate new prompt structure and content
+- [#TBD](../../pull/TBD) Add Grok AI provider support
+  - Add xAI Grok API integration using grok-beta model
+  - New Grok AI API key input in Settings > Data & AI tab
+  - Priority order for AI providers: Perplexity > Grok AI > Google Gemini
+  - Full support for all AI analysis features (Time in Range, Glucose & Insulin)
+  - Cookie-based persistence for Grok API key (1-year expiry)
+  - Comprehensive test coverage for Grok API integration
+- [#TBD](../../pull/TBD) Add comprehensive meal timing analysis
+  - New "Meal Timing" tab in AI Analysis page for detailed meal-specific optimization
+  - Analyzes CGM, basal, and bolus data to provide day-of-week specific and meal-specific recommendations
+  - **Temporal Trends**: Day-of-week BG control ranking, workday vs weekend comparison
+  - **Insulin Efficacy Tiering**: Correlation analysis between insulin dosing and time-in-range
+  - **Post-Meal Timing Efficacy**: Pre-bolus timing analysis, spike rates, time to peak BG for each meal (Breakfast, Lunch, Dinner)
+  - **Nocturnal Basal Efficacy**: Overnight BG drift analysis to identify Dawn Phenomenon timing
+  - **Actionable Recommendations**: 3-point summary with 3-4 specific recommendations for timing, basal, and dosing adjustments
+  - Extracts detailed insulin readings (bolus events with timestamps) for meal correlation analysis
+  - New CSV conversion utilities: `convertGlucoseReadingsToCSV()`, `convertBolusReadingsToCSV()`, `convertBasalReadingsToCSV()`
+  - New prompt generation function: `generateMealTimingPrompt()` with comprehensive analysis requirements
+  - Dataset summary shows CGM readings count, bolus events count, basal events count, and date range
+  - Cooldown mechanism (3 seconds) to prevent excessive API calls with progress bar
+  - Loading spinner, success messages, and error handling for AI analysis
+  - 12 comprehensive unit tests for new CSV conversion utilities and prompt generation
 - [#TBD](../../pull/TBD) UI refinements and enablements
   - Remove accordion from file info display in Reports and AI Analysis pages (since we now use tabs)
   - Add "Meal Timing" tab to AI Analysis page with placeholder text for future implementation
