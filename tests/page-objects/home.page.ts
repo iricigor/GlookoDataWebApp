@@ -20,11 +20,12 @@ export class HomePage extends BasePage {
     // Note: The actual heading is "Glooko Insights" and uses a Text/span component, not h1
     this.welcomeHeading = page.locator('span').filter({ hasText: 'Glooko Insights' }).first();
     // Note: Navigation items are Cards with onClick handlers
-    // Find the Card element that contains the specific title text using filter
-    this.uploadButton = page.locator('[class*="navigationCard"]').filter({ hasText: 'Data Upload' });
-    this.reportsButton = page.locator('[class*="navigationCard"]').filter({ hasText: 'Comprehensive Reports' });
-    this.aiAnalysisButton = page.locator('[class*="navigationCard"]').filter({ hasText: 'AI Analysis' });
-    this.settingsButton = page.locator('[class*="navigationCard"]').filter({ hasText: 'Settings' });
+    // Use a simpler approach - find by role or data attribute, or just by text and parent selector
+    // Cards are in a grid with cardsGrid class
+    this.uploadButton = page.locator('[class*="cardsGrid"]').getByText('Data Upload', { exact: true });
+    this.reportsButton = page.locator('[class*="cardsGrid"]').getByText('Comprehensive Reports', { exact: true });
+    this.aiAnalysisButton = page.locator('[class*="cardsGrid"]').getByText('AI Analysis', { exact: true });
+    this.settingsButton = page.locator('[class*="cardsGrid"]').getByText('Settings', { exact: true });
   }
 
   /**
