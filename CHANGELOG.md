@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.x] - Current Development
 
+### Documentation
+- [#TBD](../../pull/TBD) Add comprehensive documentation for creating new AI analysis prompts
+  - Complete step-by-step guide in copilot-instructions.md for adding new prompts/tabs to AI Analysis page
+  - Documents the 8-step process: state management, cooldown timer, data preparation, prompt generation, handler function, tab registration, UI rendering, and testing
+  - Includes detailed patterns for state management (6 variables per prompt), cooldown mechanism, error handling, and data preparation
+  - Provides two complete examples: simple text-based prompts and complex dataset prompts with CSV/base64 encoding
+  - Lists common mistakes to avoid and testing checklist
+  - Based on analysis of existing "Time in Range" and "Glucose & Insulin" prompt implementations
+
 ### New Features
 - [#TBD](../../pull/TBD) UI refinements and enablements
   - Remove accordion from file info display in Reports and AI Analysis pages (since we now use tabs)
