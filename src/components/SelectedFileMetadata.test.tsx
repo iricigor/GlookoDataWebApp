@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { SelectedFileMetadata } from './SelectedFileMetadata';
 import type { UploadedFile } from '../types';
 
@@ -31,37 +31,27 @@ describe('SelectedFileMetadata', () => {
   it('should render no selection message when no file is selected', () => {
     render(<SelectedFileMetadata />);
     
-    // Should show accordion header
-    expect(screen.getByText('Selected Data Package')).toBeInTheDocument();
-    
-    // Expand accordion to see message
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Should show no selection message directly (no accordion)
     expect(screen.getByText(/No data package selected/)).toBeInTheDocument();
   });
 
   it('should render file metadata when file is selected', () => {
     render(<SelectedFileMetadata selectedFile={mockFile} />);
     
-    // File name should be in header
-    expect(screen.getByText('test-data.zip')).toBeInTheDocument();
-    expect(screen.getByText(/2.5 MB/)).toBeInTheDocument();
+    // File name and size should be in header and metadata
+    const fileNameElements = screen.getAllByText('test-data.zip');
+    expect(fileNameElements.length).toBeGreaterThan(0);
+    const fileSizeElements = screen.getAllByText(/2.5 MB/);
+    expect(fileSizeElements.length).toBeGreaterThan(0);
     
-    // Expand accordion to see detailed metadata
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Metadata should be visible directly (no accordion)
     expect(screen.getByText('File Name:')).toBeInTheDocument();
   });
 
   it('should display correct number of data sets', () => {
     render(<SelectedFileMetadata selectedFile={mockFile} />);
     
-    // Expand accordion
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Metadata should be visible directly (no accordion)
     expect(screen.getByText('Data Sets:')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
   });
@@ -69,10 +59,7 @@ describe('SelectedFileMetadata', () => {
   it('should display total rows correctly', () => {
     render(<SelectedFileMetadata selectedFile={mockFile} />);
     
-    // Expand accordion
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Metadata should be visible directly (no accordion)
     expect(screen.getByText('Total Rows:')).toBeInTheDocument();
     expect(screen.getByText('150')).toBeInTheDocument();
   });
@@ -80,10 +67,7 @@ describe('SelectedFileMetadata', () => {
   it('should display metadata line when available', () => {
     render(<SelectedFileMetadata selectedFile={mockFile} />);
     
-    // Expand accordion
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Metadata should be visible directly (no accordion)
     expect(screen.getByText('Raw Metadata:')).toBeInTheDocument();
     expect(screen.getByText('Test metadata line')).toBeInTheDocument();
   });
@@ -100,10 +84,7 @@ describe('SelectedFileMetadata', () => {
 
     render(<SelectedFileMetadata selectedFile={invalidFile} />);
     
-    // Expand accordion
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Metadata should be visible directly (no accordion)
     expect(screen.queryByText('Data Sets:')).not.toBeInTheDocument();
     expect(screen.queryByText('Total Rows:')).not.toBeInTheDocument();
   });
@@ -119,10 +100,7 @@ describe('SelectedFileMetadata', () => {
 
     render(<SelectedFileMetadata selectedFile={fileWithoutMetadata} />);
     
-    // Expand accordion
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Metadata should be visible directly (no accordion)
     expect(screen.queryByText('Raw Metadata:')).not.toBeInTheDocument();
   });
 
@@ -133,7 +111,9 @@ describe('SelectedFileMetadata', () => {
     };
 
     render(<SelectedFileMetadata selectedFile={smallFile} />);
-    expect(screen.getByText(/512 Bytes/)).toBeInTheDocument();
+    // Use getAllByText since "512 Bytes" appears in both header and File Size value
+    const elements = screen.getAllByText(/512 Bytes/);
+    expect(elements.length).toBeGreaterThan(0);
   });
 
   it('should calculate total rows from multiple CSV files', () => {
@@ -151,10 +131,7 @@ describe('SelectedFileMetadata', () => {
 
     render(<SelectedFileMetadata selectedFile={multiFileData} />);
     
-    // Expand accordion
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Metadata should be visible directly (no accordion)
     expect(screen.getByText('600')).toBeInTheDocument();
   });
 
@@ -174,10 +151,7 @@ describe('SelectedFileMetadata', () => {
 
     render(<SelectedFileMetadata selectedFile={fileWithParsedMetadata} />);
     
-    // Expand accordion
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Metadata should be visible directly (no accordion)
     expect(screen.getByText('Patient Name:')).toBeInTheDocument();
     expect(screen.getByText('John Doe')).toBeInTheDocument();
   });
@@ -198,10 +172,7 @@ describe('SelectedFileMetadata', () => {
 
     render(<SelectedFileMetadata selectedFile={fileWithParsedMetadata} />);
     
-    // Expand accordion
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Metadata should be visible directly (no accordion)
     expect(screen.getByText('Date Range:')).toBeInTheDocument();
     expect(screen.getByText('2025-01-01 - 2025-01-31')).toBeInTheDocument();
   });
@@ -221,10 +192,7 @@ describe('SelectedFileMetadata', () => {
 
     render(<SelectedFileMetadata selectedFile={fileWithParsedMetadata} />);
     
-    // Expand accordion
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Metadata should be visible directly (no accordion)
     expect(screen.getByText('Raw Metadata:')).toBeInTheDocument();
   });
 
@@ -241,10 +209,7 @@ describe('SelectedFileMetadata', () => {
 
     render(<SelectedFileMetadata selectedFile={fileWithPartialMetadata} />);
     
-    // Expand accordion
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Metadata should be visible directly (no accordion)
     expect(screen.getByText('Patient Name:')).toBeInTheDocument();
     expect(screen.getByText('Jane Smith')).toBeInTheDocument();
     expect(screen.queryByText('Date Range:')).not.toBeInTheDocument();
@@ -263,13 +228,11 @@ describe('SelectedFileMetadata', () => {
 
     render(<SelectedFileMetadata selectedFile={fileWithPartialMetadata} />);
     
-    // Date range should be in header
-    expect(screen.getByText(/2025-02-01 - 2025-02-28/)).toBeInTheDocument();
+    // Date range should be in header and in metadata grid
+    const elements = screen.getAllByText(/2025-02-01 - 2025-02-28/);
+    expect(elements.length).toBeGreaterThan(0);
     
-    // Expand accordion
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    
+    // Metadata should be visible directly (no accordion)
     expect(screen.queryByText('Patient Name:')).not.toBeInTheDocument();
     expect(screen.getByText('Date Range:')).toBeInTheDocument();
   });

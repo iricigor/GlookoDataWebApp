@@ -723,6 +723,14 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
           )}
         </div>
       );
+    } else if (selectedTab === 'mealTiming') {
+      return (
+        <div className={styles.promptContent}>
+          <Text className={styles.helperText}>
+            Meal timing analysis - To be implemented
+          </Text>
+        </div>
+      );
     }
     return null;
   };
@@ -770,6 +778,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, exist
             <Tab value="fileInfo">File Info</Tab>
             <Tab value="timeInRange">Time in Range</Tab>
             <Tab value="glucoseInsulin">Glucose & Insulin</Tab>
+            <Tab value="mealTiming">Meal Timing</Tab>
           </TabList>
 
           <div className={styles.contentArea}>

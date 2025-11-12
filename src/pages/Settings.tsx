@@ -99,21 +99,24 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     marginBottom: '12px',
   },
+  apiKeyContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('16px'),
+    marginBottom: '16px',
+  },
   apiKeyRow: {
     display: 'flex',
-    alignItems: 'center',
-    ...shorthands.gap('12px'),
-    marginBottom: '12px',
+    flexDirection: 'column',
+    ...shorthands.gap('8px'),
   },
   apiKeyLabel: {
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
-    minWidth: '150px',
-    flexShrink: 0,
   },
   apiKeyInput: {
-    flexGrow: 1,
+    width: '100%',
   },
   securityExplanation: {
     fontSize: tokens.fontSizeBase300,
@@ -235,40 +238,46 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
               <Title3 className={styles.sectionTitle}>AI Configuration</Title3>
               <Divider className={styles.divider} />
               <Text className={styles.settingDescription}>
-                Configure your AI settings for intelligent analysis. {activeProvider && (
-                  <strong style={{ color: tokens.colorBrandForeground1 }}>
-                    Currently using: {activeProvider === 'perplexity' ? 'Perplexity' : 'Google Gemini'}
-                  </strong>
-                )}
+                Configure your AI settings for intelligent analysis.
               </Text>
-              <div className={styles.apiKeyRow}>
-                <Label htmlFor="perplexity-api-key" className={styles.apiKeyLabel}>
-                  Perplexity API Key
-                </Label>
-                <Input
-                  id="perplexity-api-key"
-                  type="password"
-                  value={perplexityApiKey}
-                  onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
-                  placeholder="Enter your Perplexity API key"
-                  contentAfter={perplexityApiKey ? (activeProvider === 'perplexity' ? '✓ Selected' : '✓') : undefined}
-                  className={styles.apiKeyInput}
-                />
+              {activeProvider && (
+                <Text className={styles.settingDescription} style={{ color: tokens.colorBrandForeground1, fontWeight: tokens.fontWeightSemibold }}>
+                  Currently using: {activeProvider === 'perplexity' ? 'Perplexity' : 'Google Gemini'}
+                </Text>
+              )}
+              
+              <div className={styles.apiKeyContainer}>
+                <div className={styles.apiKeyRow}>
+                  <Label htmlFor="perplexity-api-key" className={styles.apiKeyLabel}>
+                    Perplexity API Key
+                  </Label>
+                  <Input
+                    id="perplexity-api-key"
+                    type="password"
+                    value={perplexityApiKey}
+                    onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
+                    placeholder="Enter your Perplexity API key"
+                    contentAfter={perplexityApiKey ? (activeProvider === 'perplexity' ? '✓ Selected' : '✓') : undefined}
+                    className={styles.apiKeyInput}
+                  />
+                </div>
+                
+                <div className={styles.apiKeyRow}>
+                  <Label htmlFor="gemini-api-key" className={styles.apiKeyLabel}>
+                    Google Gemini API Key
+                  </Label>
+                  <Input
+                    id="gemini-api-key"
+                    type="password"
+                    value={geminiApiKey}
+                    onChange={(_, data) => onGeminiApiKeyChange(data.value)}
+                    placeholder="Enter your Google Gemini API key"
+                    contentAfter={geminiApiKey ? (activeProvider === 'gemini' ? '✓ Selected' : '✓') : undefined}
+                    className={styles.apiKeyInput}
+                  />
+                </div>
               </div>
-              <div className={styles.apiKeyRow}>
-                <Label htmlFor="gemini-api-key" className={styles.apiKeyLabel}>
-                  Google Gemini API Key
-                </Label>
-                <Input
-                  id="gemini-api-key"
-                  type="password"
-                  value={geminiApiKey}
-                  onChange={(_, data) => onGeminiApiKeyChange(data.value)}
-                  placeholder="Enter your Google Gemini API key"
-                  contentAfter={geminiApiKey ? (activeProvider === 'gemini' ? '✓ Selected' : '✓') : undefined}
-                  className={styles.apiKeyInput}
-                />
-              </div>
+              
               <div className={styles.securityExplanation}>
                 <Text as="p" style={{ marginBottom: '12px' }}>
                   <strong>Security & Privacy:</strong> Your API keys are stored locally in your browser's cookies (expires after 1 year) 
