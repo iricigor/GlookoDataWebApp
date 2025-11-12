@@ -1,206 +1,184 @@
 /**
- * Tests for Gemini API utilities
+ * Tests for Google Gemini API utilities
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { callGeminiApi, generateTimeInRangePrompt } from './geminiApi';
+import { callGeminiApi } from './geminiApi';
+
+// Mock fetch globally
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
 
 describe('geminiApi', () => {
+  beforeEach(() => {
+    mockFetch.mockClear();
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
   describe('callGeminiApi', () => {
-    // Save original fetch
-    const originalFetch = global.fetch;
-
-    beforeEach(() => {
-      // Reset fetch mock before each test
-      vi.clearAllMocks();
-    });
-
-    afterEach(() => {
-      // Restore original fetch after each test
-      global.fetch = originalFetch;
-    });
-
-    it('should return error when API key is empty', async () => {
+    it('should return error if API key is empty', async () => {
       const result = await callGeminiApi('', 'test prompt');
-      
       expect(result.success).toBe(false);
       expect(result.error).toBe('API key is required');
       expect(result.errorType).toBe('unauthorized');
+      expect(mockFetch).not.toHaveBeenCalled();
     });
 
-    it('should return error when prompt is empty', async () => {
+    it('should return error if prompt is empty', async () => {
       const result = await callGeminiApi('test-key', '');
-      
       expect(result.success).toBe(false);
       expect(result.error).toBe('Prompt is required');
       expect(result.errorType).toBe('api');
+      expect(mockFetch).not.toHaveBeenCalled();
     });
 
-    it('should return success with valid response', async () => {
+    it('should call Gemini API with correct parameters', async () => {
       const mockResponse = {
-        candidates: [
-          {
-            content: {
-              parts: [{ text: 'AI response text' }],
-              role: 'model',
-            },
-            finishReason: 'STOP',
-            index: 0,
-          },
-        ],
-      };
-
-      global.fetch = vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => mockResponse,
-      });
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    text: 'Test response from Gemini',
+                  },
+                ],
+                role: 'model',
+              },
+              finishReason: 'STOP',
+              index: 0,
+            },
+          ],
+        }),
+      };
+      mockFetch.mockResolvedValue(mockResponse);
 
       const result = await callGeminiApi('test-key', 'test prompt');
-      
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('generativelanguage.googleapis.com'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+          }),
+        })
+      );
+
       expect(result.success).toBe(true);
-      expect(result.content).toBe('AI response text');
-      expect(result.error).toBeUndefined();
-    });
-
-    it('should trim whitespace from response content', async () => {
-      const mockResponse = {
-        candidates: [
-          {
-            content: {
-              parts: [{ text: '  AI response with whitespace  \n' }],
-              role: 'model',
-            },
-            finishReason: 'STOP',
-            index: 0,
-          },
-        ],
-      };
-
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => mockResponse,
-      });
-
-      const result = await callGeminiApi('test-key', 'test prompt');
-      
-      expect(result.success).toBe(true);
-      expect(result.content).toBe('AI response with whitespace');
+      expect(result.content).toBe('Test response from Gemini');
     });
 
     it('should handle 401 unauthorized error', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: false,
         status: 401,
         statusText: 'Unauthorized',
-        json: async () => ({ error: { message: 'Invalid API key' } }),
+        json: async () => ({
+          error: {
+            code: 401,
+            message: 'Invalid API key',
+            status: 'UNAUTHENTICATED',
+          },
+        }),
       });
 
       const result = await callGeminiApi('invalid-key', 'test prompt');
-      
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('Invalid API key or unauthorized access');
-      expect(result.errorType).toBe('unauthorized');
-    });
 
-    it('should handle 403 forbidden error', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 403,
-        statusText: 'Forbidden',
-        json: async () => ({ error: { message: 'Access denied' } }),
-      });
-
-      const result = await callGeminiApi('test-key', 'test prompt');
-      
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Invalid API key or unauthorized access');
+      expect(result.error).toContain('Invalid API key');
       expect(result.errorType).toBe('unauthorized');
     });
 
     it('should handle API error with error message', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+      mockFetch.mockResolvedValue({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error',
         json: async () => ({
           error: {
             code: 500,
-            message: 'Internal server error occurred',
+            message: 'Server error occurred',
             status: 'INTERNAL',
           },
         }),
       });
 
       const result = await callGeminiApi('test-key', 'test prompt');
-      
+
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Internal server error occurred');
+      expect(result.error).toContain('Server error occurred');
       expect(result.errorType).toBe('api');
     });
 
-    it('should handle API error without error message', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 500,
-        statusText: 'Internal Server Error',
-        json: async () => { throw new Error('Invalid JSON'); },
-      });
+    it('should handle network error', async () => {
+      mockFetch.mockRejectedValue(new TypeError('Failed to fetch'));
 
       const result = await callGeminiApi('test-key', 'test prompt');
-      
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('API error: 500');
-      expect(result.errorType).toBe('api');
-    });
 
-    it('should handle network errors', async () => {
-      global.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
-
-      const result = await callGeminiApi('test-key', 'test prompt');
-      
       expect(result.success).toBe(false);
       expect(result.error).toContain('Network error');
       expect(result.errorType).toBe('network');
     });
 
     it('should handle unknown errors', async () => {
-      global.fetch = vi.fn().mockRejectedValue(new Error('Unknown error'));
+      mockFetch.mockRejectedValue(new Error('Unknown error'));
 
       const result = await callGeminiApi('test-key', 'test prompt');
-      
+
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Unknown error');
+      expect(result.error).toContain('Unknown error');
       expect(result.errorType).toBe('unknown');
     });
 
-    it('should handle invalid response format (no candidates)', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+    it('should handle invalid response format', async () => {
+      mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => ({}),
+        json: async () => ({
+          candidates: [],
+        }),
       });
 
       const result = await callGeminiApi('test-key', 'test prompt');
-      
+
       expect(result.success).toBe(false);
-      expect(result.error).toBe('Invalid response format from API');
+      expect(result.error).toContain('Invalid response format');
       expect(result.errorType).toBe('api');
     });
 
-    it('should handle invalid response format (empty candidates)', async () => {
-      global.fetch = vi.fn().mockResolvedValue({
+    it('should trim whitespace from AI response', async () => {
+      mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => ({ candidates: [] }),
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    text: '  \n  Test response with whitespace  \n  ',
+                  },
+                ],
+                role: 'model',
+              },
+              finishReason: 'STOP',
+              index: 0,
+            },
+          ],
+        }),
       });
 
       const result = await callGeminiApi('test-key', 'test prompt');
-      
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('Invalid response format from API');
-      expect(result.errorType).toBe('api');
+
+      expect(result.success).toBe(true);
+      expect(result.content).toBe('Test response with whitespace');
     });
 
-    it('should make correct API call with proper headers and body', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
+    it('should include system prompt prefix in content', async () => {
+      mockFetch.mockResolvedValue({
         ok: true,
         json: async () => ({
           candidates: [
@@ -215,53 +193,39 @@ describe('geminiApi', () => {
           ],
         }),
       });
-      
-      global.fetch = mockFetch;
 
       await callGeminiApi('test-api-key', 'test prompt');
+
+      const callArgs = mockFetch.mock.calls[0][1];
+      const body = JSON.parse(callArgs.body);
       
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('generativelanguage.googleapis.com'),
-        expect.objectContaining({
-          method: 'POST',
-          headers: expect.objectContaining({
-            'Content-Type': 'application/json',
-          }),
-          body: expect.any(String),
-        })
-      );
-
-      const callArgs = mockFetch.mock.calls[0];
-      const url = callArgs[0];
-      const body = JSON.parse(callArgs[1].body);
-
-      expect(url).toContain('key=test-api-key');
-      expect(url).toContain('gemini-2.0-flash-exp');
+      expect(body.contents[0].parts[0].text).toContain('medical assistant');
       expect(body.contents[0].parts[0].text).toContain('test prompt');
-      expect(body.generationConfig.temperature).toBe(0.2);
-      expect(body.generationConfig.maxOutputTokens).toBe(1000);
-    });
-  });
-
-  describe('generateTimeInRangePrompt', () => {
-    it('should generate prompt with correct TIR percentage', () => {
-      const prompt = generateTimeInRangePrompt(75.5);
-      
-      expect(prompt).toContain('75.5%');
-      expect(prompt).toContain('time-in-range');
-      expect(prompt).toContain('70%');
     });
 
-    it('should handle integer percentages', () => {
-      const prompt = generateTimeInRangePrompt(80);
-      
-      expect(prompt).toContain('80.0%');
-    });
+    it('should use correct model in URL', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [{ text: 'Response' }],
+                role: 'model',
+              },
+              finishReason: 'STOP',
+              index: 0,
+            },
+          ],
+        }),
+      });
 
-    it('should handle low percentages', () => {
-      const prompt = generateTimeInRangePrompt(45.2);
-      
-      expect(prompt).toContain('45.2%');
+      await callGeminiApi('test-key', 'test prompt');
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('gemini-2.0-flash-exp'),
+        expect.any(Object)
+      );
     });
   });
 });

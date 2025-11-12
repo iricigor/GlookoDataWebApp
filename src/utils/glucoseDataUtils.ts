@@ -158,3 +158,37 @@ function findCSVFileName(fileNames: string[], datasetName: string): string | und
     name.toLowerCase().endsWith('.csv')
   );
 }
+
+/**
+ * Smooth glucose values using a simple moving average
+ * Takes the average of the current value, the previous value, and the next value
+ * 
+ * @param readings - Array of glucose readings sorted by time
+ * @returns Array of smoothed glucose readings
+ */
+export function smoothGlucoseValues(readings: GlucoseReading[]): GlucoseReading[] {
+  if (readings.length < 3) {
+    // Not enough data points to smooth, return as is
+    return readings;
+  }
+
+  const smoothed: GlucoseReading[] = [];
+
+  for (let i = 0; i < readings.length; i++) {
+    if (i === 0) {
+      // First value: average of current and next
+      const avgValue = (readings[i].value + readings[i + 1].value) / 2;
+      smoothed.push({ ...readings[i], value: avgValue });
+    } else if (i === readings.length - 1) {
+      // Last value: average of previous and current
+      const avgValue = (readings[i - 1].value + readings[i].value) / 2;
+      smoothed.push({ ...readings[i], value: avgValue });
+    } else {
+      // Middle values: average of previous, current, and next
+      const avgValue = (readings[i - 1].value + readings[i].value + readings[i + 1].value) / 3;
+      smoothed.push({ ...readings[i], value: avgValue });
+    }
+  }
+
+  return smoothed;
+}

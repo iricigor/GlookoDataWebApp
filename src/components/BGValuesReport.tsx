@@ -9,16 +9,10 @@ import {
   Text,
   tokens,
   shorthands,
-  Button,
   Card,
   TabList,
   Tab,
-  Spinner,
 } from '@fluentui/react-components';
-import {
-  ChevronLeftRegular,
-  ChevronRightRegular,
-} from '@fluentui/react-icons';
 import {
   LineChart,
   Line,
@@ -30,14 +24,14 @@ import {
 } from 'recharts';
 import type { UploadedFile, GlucoseReading, GlucoseDataSource } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
-import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
+import { extractGlucoseReadings, smoothGlucoseValues } from '../utils/glucoseDataUtils';
 import { 
   getUniqueDates, 
   filterReadingsByDate, 
-  formatDateDisplay,
   calculateGlucoseRangeStats,
 } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
+import { DayNavigator } from './DayNavigator';
 
 const useStyles = makeStyles({
   container: {
@@ -46,35 +40,42 @@ const useStyles = makeStyles({
     ...shorthands.gap('24px'),
   },
   reportTitle: {
-    fontSize: tokens.fontSizeBase500,
+    fontSize: tokens.fontSizeHero700,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
+    fontFamily: tokens.fontFamilyBase,
   },
-  dateNavigationCard: {
-    ...shorthands.padding('20px'),
-    backgroundColor: tokens.colorNeutralBackground2,
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    boxShadow: tokens.shadow2,
-  },
-  dateRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+  summarySection: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
     ...shorthands.gap('16px'),
   },
-  dateDisplay: {
-    fontSize: tokens.fontSizeBase500,
+  summaryCard: {
+    ...shorthands.padding('16px'),
+  },
+  summaryLabel: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    fontFamily: tokens.fontFamilyBase,
+    marginBottom: '4px',
+  },
+  summaryValue: {
+    fontSize: tokens.fontSizeHero700,
     fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground1,
-    minWidth: '300px',
-    textAlign: 'center',
+    fontFamily: tokens.fontFamilyBase,
+  },
+  summarySubtext: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+    fontFamily: tokens.fontFamilyBase,
+    marginTop: '4px',
   },
   chartCard: {
     ...shorthands.padding('24px'),
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    boxShadow: tokens.shadow2,
+    boxShadow: tokens.shadow4,
   },
   chartContainer: {
     width: '100%',
@@ -93,10 +94,10 @@ const useStyles = makeStyles({
     ...shorthands.gap('12px'),
   },
   statsCard: {
-    ...shorthands.padding('20px'),
+    ...shorthands.padding('24px'),
     backgroundColor: tokens.colorNeutralBackground2,
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    boxShadow: tokens.shadow2,
+    boxShadow: tokens.shadow4,
   },
   statsGrid: {
     display: 'grid',
@@ -112,35 +113,27 @@ const useStyles = makeStyles({
   statLabel: {
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
+    fontFamily: tokens.fontFamilyBase,
   },
   statValue: {
     fontSize: tokens.fontSizeHero800,
     fontWeight: tokens.fontWeightSemibold,
+    fontFamily: tokens.fontFamilyBase,
   },
   statValueBelow: {
-    color: '#d32f2f', // Red for below range
+    color: tokens.colorPaletteRedForeground1,
   },
   statValueInRange: {
-    color: '#4CAF50', // Green for in range
+    color: tokens.colorPaletteGreenForeground1,
   },
   statValueAbove: {
-    color: '#ff9800', // Orange for above range
+    color: tokens.colorPaletteMarigoldForeground1,
   },
   noDataMessage: {
     textAlign: 'center',
     padding: '40px',
     color: tokens.colorNeutralForeground3,
     fontSize: tokens.fontSizeBase400,
-  },
-  loadingIndicator: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shorthands.gap('12px'),
-    ...shorthands.padding('16px'),
-    backgroundColor: tokens.colorNeutralBackground2,
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    marginBottom: '16px',
   },
 });
 
@@ -201,8 +194,11 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   // Filter readings for current date
   const currentReadings = currentDate ? filterReadingsByDate(allReadings, currentDate) : [];
 
+  // Apply smoothing to glucose values
+  const smoothedReadings = smoothGlucoseValues(currentReadings);
+
   // Prepare chart data
-  const chartData = currentReadings
+  const chartData = smoothedReadings
     .map(reading => {
       const time = reading.timestamp;
       const hours = time.getHours();
@@ -234,24 +230,22 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   const handlePreviousDate = () => {
     if (currentDateIndex > 0) {
       setDateChanging(true);
-      setTimeout(() => {
-        setCurrentDateIndex(currentDateIndex - 1);
-        setDateChanging(false);
-      }, 50);
+      setCurrentDateIndex(currentDateIndex - 1);
+      // Clear loading state after a brief moment
+      setTimeout(() => setDateChanging(false), 100);
     }
   };
 
   const handleNextDate = () => {
     if (currentDateIndex < availableDates.length - 1) {
       setDateChanging(true);
-      setTimeout(() => {
-        setCurrentDateIndex(currentDateIndex + 1);
-        setDateChanging(false);
-      }, 50);
+      setCurrentDateIndex(currentDateIndex + 1);
+      // Clear loading state after a brief moment
+      setTimeout(() => setDateChanging(false), 100);
     }
   };
 
-  // Custom tooltip
+  // Custom tooltip with Fluent UI styling
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string; value: number; originalValue: number } }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -265,12 +259,20 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
           padding: '12px',
           border: `1px solid ${tokens.colorNeutralStroke1}`,
           borderRadius: tokens.borderRadiusMedium,
-          fontSize: tokens.fontSizeBase200,
+          fontSize: tokens.fontSizeBase300,
+          fontFamily: tokens.fontFamilyBase,
+          boxShadow: tokens.shadow8,
         }}>
-          <div style={{ fontWeight: tokens.fontWeightSemibold }}>
+          <div style={{ 
+            fontWeight: tokens.fontWeightSemibold,
+            marginBottom: '4px',
+            color: tokens.colorNeutralForeground1,
+          }}>
             {data.time}
           </div>
-          <div>Glucose: {displayValue} mmol/L</div>
+          <div style={{ color: tokens.colorNeutralForeground2 }}>
+            Glucose: {displayValue} mmol/L
+          </div>
         </div>
       );
     }
@@ -291,7 +293,6 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   if (!selectedFile) {
     return (
       <div className={styles.container}>
-        <Text className={styles.reportTitle}>Detailed CGM</Text>
         <Text className={styles.noDataMessage}>
           Please select a file to view continuous glucose monitoring values
         </Text>
@@ -302,7 +303,6 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   if (loading) {
     return (
       <div className={styles.container}>
-        <Text className={styles.reportTitle}>Detailed CGM</Text>
         <Text className={styles.noDataMessage}>
           Loading data...
         </Text>
@@ -313,7 +313,6 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   if (availableDates.length === 0) {
     return (
       <div className={styles.container}>
-        <Text className={styles.reportTitle}>Detailed CGM</Text>
         <Text className={styles.noDataMessage}>
           No glucose data available
         </Text>
@@ -323,49 +322,75 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
 
   return (
     <div className={styles.container}>
-      <Text className={styles.reportTitle}>Detailed CGM</Text>
-
       {/* Date Navigation */}
-      <Card className={styles.dateNavigationCard}>
-        <div className={styles.dateRow}>
-          <Button
-            appearance="subtle"
-            icon={<ChevronLeftRegular />}
-            onClick={handlePreviousDate}
-            disabled={currentDateIndex === 0 || dateChanging}
-            title="Previous date"
-          />
-          <Text className={styles.dateDisplay}>
-            {formatDateDisplay(currentDate)}
-          </Text>
-          <Button
-            appearance="subtle"
-            icon={<ChevronRightRegular />}
-            onClick={handleNextDate}
-            disabled={currentDateIndex === availableDates.length - 1 || dateChanging}
-            title="Next date"
-          />
-        </div>
-      </Card>
+      <DayNavigator
+        currentDate={currentDate}
+        onPreviousDay={handlePreviousDate}
+        onNextDay={handleNextDate}
+        canGoPrevious={currentDateIndex > 0}
+        canGoNext={currentDateIndex < availableDates.length - 1}
+        loading={dateChanging}
+      />
 
-      {/* Loading indicator for date changes */}
-      {dateChanging && (
-        <div className={styles.loadingIndicator}>
-          <Spinner size="tiny" />
-          <Text style={{ fontSize: tokens.fontSizeBase300, color: tokens.colorNeutralForeground2 }}>
-            Loading data...
-          </Text>
-        </div>
-      )}
+      {/* Daily Statistics - moved above chart, styled like Insulin page */}
+      <div className={styles.summarySection}>
+        <Card className={styles.summaryCard}>
+          <Text className={styles.summaryLabel}>Below Range</Text>
+          <div>
+            <Text className={`${styles.summaryValue} ${styles.statValueBelow}`}>
+              {belowPercentage}%
+            </Text>
+          </div>
+          <Text className={styles.summarySubtext}>({stats.low} readings)</Text>
+        </Card>
+
+        <Card className={styles.summaryCard}>
+          <Text className={styles.summaryLabel}>In Range</Text>
+          <div>
+            <Text className={`${styles.summaryValue} ${styles.statValueInRange}`}>
+              {inRangePercentage}%
+            </Text>
+          </div>
+          <Text className={styles.summarySubtext}>({stats.inRange} readings)</Text>
+        </Card>
+
+        <Card className={styles.summaryCard}>
+          <Text className={styles.summaryLabel}>Above Range</Text>
+          <div>
+            <Text className={`${styles.summaryValue} ${styles.statValueAbove}`}>
+              {abovePercentage}%
+            </Text>
+          </div>
+          <Text className={styles.summarySubtext}>({stats.high} readings)</Text>
+        </Card>
+
+        <Card className={styles.summaryCard}>
+          <Text className={styles.summaryLabel}>Total Readings</Text>
+          <div>
+            <Text className={styles.summaryValue} style={{ color: tokens.colorNeutralForeground1 }}>
+              {stats.total}
+            </Text>
+          </div>
+        </Card>
+      </div>
 
       {/* Chart */}
       <Card className={styles.chartCard}>
         <div className={styles.controlsRow}>
-          <Text style={{ fontSize: tokens.fontSizeBase400, fontWeight: tokens.fontWeightSemibold }}>
+          <Text style={{ 
+            fontSize: tokens.fontSizeBase500, 
+            fontWeight: tokens.fontWeightSemibold,
+            fontFamily: tokens.fontFamilyBase,
+            color: tokens.colorNeutralForeground1,
+          }}>
             Glucose Values Throughout the Day
           </Text>
           <div className={styles.maxValueContainer}>
-            <Text style={{ fontSize: tokens.fontSizeBase300 }}>
+            <Text style={{ 
+              fontSize: tokens.fontSizeBase300,
+              fontFamily: tokens.fontFamilyBase,
+              color: tokens.colorNeutralForeground2,
+            }}>
               Max: {maxGlucose.toFixed(1)} mmol/L
             </Text>
             <TabList
@@ -382,88 +407,94 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
         <div className={styles.chartContainer}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              {/* Remove CartesianGrid to eliminate vertical dotted lines */}
+              {/* No CartesianGrid for clean Fluent UI look */}
               
               <XAxis
                 dataKey="time"
                 domain={['00:00', '23:59']}
                 tickFormatter={formatXAxis}
-                stroke={tokens.colorNeutralForeground2}
-                style={{ fontSize: tokens.fontSizeBase200 }}
+                stroke={tokens.colorNeutralStroke1}
+                tick={{ 
+                  fill: tokens.colorNeutralForeground2,
+                  fontSize: tokens.fontSizeBase200,
+                  fontFamily: tokens.fontFamilyBase,
+                }}
+                axisLine={{ strokeWidth: 1 }}
+                tickLine={false}
               />
               
               <YAxis
                 domain={[0, maxGlucose]}
-                label={{ value: 'Glucose (mmol/L)', angle: -90, position: 'insideLeft', style: { fontSize: tokens.fontSizeBase200 } }}
-                stroke={tokens.colorNeutralForeground2}
-                style={{ fontSize: tokens.fontSizeBase200 }}
+                label={{ 
+                  value: 'Glucose (mmol/L)', 
+                  angle: -90, 
+                  position: 'insideLeft', 
+                  style: { 
+                    fontSize: tokens.fontSizeBase200,
+                    fontFamily: tokens.fontFamilyBase,
+                    fill: tokens.colorNeutralForeground2,
+                  } 
+                }}
+                stroke={tokens.colorNeutralStroke1}
+                tick={{ 
+                  fill: tokens.colorNeutralForeground2,
+                  fontSize: tokens.fontSizeBase200,
+                  fontFamily: tokens.fontFamilyBase,
+                }}
+                axisLine={{ strokeWidth: 1 }}
+                tickLine={false}
               />
               
               <Tooltip content={<CustomTooltip />} />
               
-              {/* Target range reference lines */}
+              {/* Target range reference lines with Fluent UI semantic colors */}
               <ReferenceLine 
                 y={thresholds.low} 
-                stroke="#d32f2f" 
+                stroke={tokens.colorPaletteRedBorder1}
                 strokeDasharray="5 5" 
                 strokeWidth={1.5}
-                label={{ value: `Low (${thresholds.low})`, position: 'insideTopLeft', style: { fontSize: '11px' } }}
+                label={{ 
+                  value: `Low (${thresholds.low})`, 
+                  position: 'insideTopLeft', 
+                  style: { 
+                    fontSize: tokens.fontSizeBase200,
+                    fontFamily: tokens.fontFamilyBase,
+                    fill: tokens.colorPaletteRedForeground1,
+                  } 
+                }}
               />
               <ReferenceLine 
                 y={thresholds.high} 
-                stroke="#ff9800" 
+                stroke={tokens.colorPaletteMarigoldBorder1}
                 strokeDasharray="5 5" 
                 strokeWidth={1.5}
-                label={{ value: `High (${thresholds.high})`, position: 'insideTopLeft', style: { fontSize: '11px' } }}
+                label={{ 
+                  value: `High (${thresholds.high})`, 
+                  position: 'insideTopLeft', 
+                  style: { 
+                    fontSize: tokens.fontSizeBase200,
+                    fontFamily: tokens.fontFamilyBase,
+                    fill: tokens.colorPaletteMarigoldForeground1,
+                  } 
+                }}
               />
               
-              {/* Glucose values line */}
+              {/* Glucose values line with Fluent UI brand color and smooth curve */}
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#1976D2"
+                stroke={tokens.colorBrandForeground1}
                 strokeWidth={2}
-                dot={{ fill: '#1976D2', r: 3 }}
-                activeDot={{ r: 5 }}
+                dot={false}
+                activeDot={{ 
+                  r: 4, 
+                  strokeWidth: 2,
+                  stroke: tokens.colorNeutralBackground1,
+                  fill: tokens.colorBrandForeground1,
+                }}
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
-      </Card>
-
-      {/* Daily Statistics */}
-      <Card className={styles.statsCard}>
-        <Text style={{ fontSize: tokens.fontSizeBase400, fontWeight: tokens.fontWeightSemibold }}>
-          Daily Statistics
-        </Text>
-        <div className={styles.statsGrid}>
-          <div className={styles.statItem}>
-            <Text className={styles.statLabel}>Below Range</Text>
-            <Text className={`${styles.statValue} ${styles.statValueBelow}`}>
-              {belowPercentage}%
-            </Text>
-            <Text className={styles.statLabel}>({stats.low} readings)</Text>
-          </div>
-          <div className={styles.statItem}>
-            <Text className={styles.statLabel}>In Range</Text>
-            <Text className={`${styles.statValue} ${styles.statValueInRange}`}>
-              {inRangePercentage}%
-            </Text>
-            <Text className={styles.statLabel}>({stats.inRange} readings)</Text>
-          </div>
-          <div className={styles.statItem}>
-            <Text className={styles.statLabel}>Above Range</Text>
-            <Text className={`${styles.statValue} ${styles.statValueAbove}`}>
-              {abovePercentage}%
-            </Text>
-            <Text className={styles.statLabel}>({stats.high} readings)</Text>
-          </div>
-          <div className={styles.statItem}>
-            <Text className={styles.statLabel}>Total Readings</Text>
-            <Text className={styles.statValue} style={{ color: tokens.colorNeutralForeground1 }}>
-              {stats.total}
-            </Text>
-          </div>
         </div>
       </Card>
     </div>

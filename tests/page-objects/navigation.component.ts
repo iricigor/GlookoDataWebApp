@@ -16,12 +16,12 @@ export class NavigationComponent extends BasePage {
   constructor(page: Page) {
     super(page);
     
-    // Define navigation locators
-    this.homeLink = page.getByRole('link', { name: /home/i });
-    this.uploadLink = page.getByRole('link', { name: /data upload/i });
-    this.reportsLink = page.getByRole('link', { name: /reports/i });
-    this.aiAnalysisLink = page.getByRole('link', { name: /ai analysis/i });
-    this.settingsLink = page.getByRole('link', { name: /settings/i });
+    // Define navigation locators - Navigation uses buttons, not links
+    this.homeLink = page.getByRole('button', { name: /home/i });
+    this.uploadLink = page.getByRole('button', { name: /data upload/i });
+    this.reportsLink = page.getByRole('button', { name: /reports/i });
+    this.aiAnalysisLink = page.getByRole('button', { name: /ai analysis/i });
+    this.settingsLink = page.getByRole('button', { name: /settings/i });
   }
 
   /**

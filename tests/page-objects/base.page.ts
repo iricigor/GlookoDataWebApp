@@ -16,16 +16,17 @@ export class BasePage {
    */
   async goto(hash: string = '') {
     const url = hash ? `/#${hash}` : '/';
-    await this.page.goto(url);
-    // Wait for page to be fully loaded
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto(url, { waitUntil: 'load' });
   }
 
   /**
    * Wait for navigation to complete
+   * For hash-based routing in React apps, wait for React to render
    */
   async waitForNavigation() {
-    await this.page.waitForLoadState('networkidle');
+    // For hash navigation, wait for React to render the new content
+    // This is still much faster than networkidle
+    await this.page.waitForTimeout(1000);
   }
 
   /**
