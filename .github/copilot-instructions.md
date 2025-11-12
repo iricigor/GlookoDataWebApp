@@ -82,6 +82,8 @@ GlookoDataWebApp is a modern web application for importing, visualizing, and ana
    - Each component should do one thing well
    - Extract reusable logic into custom hooks in `src/hooks/`
    - Split large components into smaller, composable ones
+   - **Component size guideline:** Keep component files under 200 lines when possible to minimize merge conflicts
+   - Extract UI sections (navigation bars, summary cards, etc.) into separate components for better maintainability
 
 3. **Use Fluent UI components** - Never recreate existing UI components
    ```tsx
@@ -269,19 +271,10 @@ GlookoDataWebApp/
 
 ### Before Committing
 
-1. **Update the CHANGELOG.md**
-   - Add an entry under the current version section (e.g., `[1.0.x]`)
-   - Place it in the correct category based on your PR/issue label:
-     - **New Features** - for ✨ Feature label
-     - **Fixes** - for 🪲 Bug label
-     - **Documentation** - for 📚 Documentation label
-     - **Other** - for other changes
-   - **Use markdown link format (NOT HTML):** Each entry must start with a markdown link like `[#152](../../pull/152)` followed by the description
-   - **Always use relative paths** for links: `../../pull/PR_NUMBER` or `../../issues/ISSUE_NUMBER`
-   - **Example entry:** `- [#152](../../pull/152) Add new feature description`
-   - For issues without PRs: `- [Issue #100](../../issues/100) Description`
-   - **Never use HTML anchor tags** like `<a href="...">` - only use markdown format
-   - Keep entries within each category sorted by PR/issue number (descending - highest first)
+1. **Do NOT update CHANGELOG.md manually**
+   - CHANGELOG updates are handled automatically by a dedicated pipeline AFTER the PR is merged
+   - Do not add, modify, or remove entries from CHANGELOG.md in your PR
+   - The automated system will generate the changelog entry based on your PR title and description
 
 2. **Run tests**
    ```bash
@@ -961,7 +954,6 @@ When adding a new AI prompt tab, ensure you have:
 - [ ] Added tab content rendering with all UI states
 - [ ] Wrote unit tests for prompt generation
 - [ ] Tested all states (loading, success, error, cooldown)
-- [ ] Updated CHANGELOG.md with your changes
 - [ ] Ran `npm run lint` and `npm test -- --run`
 - [ ] Manually tested in browser
 

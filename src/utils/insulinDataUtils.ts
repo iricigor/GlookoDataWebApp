@@ -345,3 +345,60 @@ export function aggregateInsulinByDate(readings: InsulinReading[]): DailyInsulin
 
   return summaries;
 }
+
+/**
+ * Prepare insulin timeline data for a specific date
+ * Groups insulin readings by hour for visualization
+ * 
+ * @param readings - Array of insulin readings
+ * @param date - Date to filter readings (YYYY-MM-DD format)
+ * @returns Array of hourly insulin data points (24 hours)
+ */
+export function prepareInsulinTimelineData(readings: InsulinReading[], date: string): Array<{
+  hour: number;
+  timeLabel: string;
+  basalRate: number;
+  bolusTotal: number;
+}> {
+  // Filter readings for the specified date
+  const dateReadings = readings.filter(reading => {
+    const readingDate = formatDate(reading.timestamp);
+    return readingDate === date;
+  });
+
+  // Initialize hourly data points (0-23)
+  const hourlyData: Array<{
+    hour: number;
+    timeLabel: string;
+    basalRate: number;
+    bolusTotal: number;
+  }> = [];
+
+  for (let hour = 0; hour < 24; hour++) {
+    const timeLabel = `${String(hour).padStart(2, '0')}:00`;
+    
+    // Filter readings for this hour
+    const hourReadings = dateReadings.filter(reading => {
+      return reading.timestamp.getHours() === hour;
+    });
+
+    // Calculate basal rate (average for the hour)
+    const basalReadings = hourReadings.filter(r => r.insulinType === 'basal');
+    const basalRate = basalReadings.length > 0
+      ? basalReadings.reduce((sum, r) => sum + r.dose, 0) / basalReadings.length
+      : 0;
+
+    // Calculate bolus total for the hour
+    const bolusReadings = hourReadings.filter(r => r.insulinType === 'bolus');
+    const bolusTotal = bolusReadings.reduce((sum, r) => sum + r.dose, 0);
+
+    hourlyData.push({
+      hour,
+      timeLabel,
+      basalRate: Math.round(basalRate * 100) / 100, // Round to 2 decimals
+      bolusTotal: Math.round(bolusTotal * 10) / 10,  // Round to 1 decimal
+    });
+  }
+
+  return hourlyData;
+}
