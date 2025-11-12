@@ -2,7 +2,7 @@
  * CSV/TSV utility functions for exporting table data
  */
 
-import type { DailyReport } from '../types';
+import type { DailyReport, GlucoseReading, InsulinReading } from '../types';
 import { calculatePercentage } from './glucoseRangeUtils';
 
 export type ExportFormat = 'csv' | 'tsv';
@@ -122,6 +122,87 @@ export function convertDailyReportsToCSV(reports: DailyReport[]): string {
       report.totalInsulin !== undefined ? report.totalInsulin.toFixed(2) : ''
     ];
     
+    rows.push(row);
+  });
+
+  return convertToDelimitedFormat(rows, 'csv');
+}
+
+/**
+ * Convert GlucoseReading array to CSV format for meal timing analysis
+ * @param readings - Array of glucose readings with timestamp and value
+ * @returns CSV formatted string with headers (Timestamp, CGM Glucose Value (mmol/L))
+ */
+export function convertGlucoseReadingsToCSV(readings: GlucoseReading[]): string {
+  if (!readings || readings.length === 0) {
+    return '';
+  }
+
+  // Define headers matching the required format
+  const headers = ['Timestamp', 'CGM Glucose Value (mmol/L)'];
+
+  // Convert readings to rows
+  const rows: (string | number)[][] = [headers];
+  
+  readings.forEach(reading => {
+    const row = [
+      reading.timestamp.toISOString(),
+      reading.value.toFixed(1)
+    ];
+    rows.push(row);
+  });
+
+  return convertToDelimitedFormat(rows, 'csv');
+}
+
+/**
+ * Convert InsulinReading array to CSV format for meal timing analysis (bolus data)
+ * @param readings - Array of bolus insulin readings with timestamp and dose
+ * @returns CSV formatted string with headers (Timestamp, Insulin Delivered (U))
+ */
+export function convertBolusReadingsToCSV(readings: InsulinReading[]): string {
+  if (!readings || readings.length === 0) {
+    return '';
+  }
+
+  // Define headers matching the required format
+  const headers = ['Timestamp', 'Insulin Delivered (U)'];
+
+  // Convert readings to rows
+  const rows: (string | number)[][] = [headers];
+  
+  readings.forEach(reading => {
+    const row = [
+      reading.timestamp.toISOString(),
+      reading.dose.toFixed(2)
+    ];
+    rows.push(row);
+  });
+
+  return convertToDelimitedFormat(rows, 'csv');
+}
+
+/**
+ * Convert InsulinReading array to CSV format for meal timing analysis (basal data)
+ * @param readings - Array of basal insulin readings with timestamp and dose/rate
+ * @returns CSV formatted string with headers (Timestamp, Insulin Delivered (U))
+ */
+export function convertBasalReadingsToCSV(readings: InsulinReading[]): string {
+  if (!readings || readings.length === 0) {
+    return '';
+  }
+
+  // Define headers matching the required format
+  const headers = ['Timestamp', 'Insulin Delivered (U)'];
+
+  // Convert readings to rows
+  const rows: (string | number)[][] = [headers];
+  
+  readings.forEach(reading => {
+    const row = [
+      reading.timestamp.toISOString(),
+      reading.dose.toFixed(2)
+    ];
     rows.push(row);
   });
 

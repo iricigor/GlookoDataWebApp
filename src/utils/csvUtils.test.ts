@@ -3,8 +3,14 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { convertToCSV, convertDailyReportsToCSV } from './csvUtils';
-import type { DailyReport } from '../types';
+import { 
+  convertToCSV, 
+  convertDailyReportsToCSV,
+  convertGlucoseReadingsToCSV,
+  convertBolusReadingsToCSV,
+  convertBasalReadingsToCSV
+} from './csvUtils';
+import type { DailyReport, GlucoseReading, InsulinReading } from '../types';
 
 describe('csvUtils', () => {
   describe('convertToCSV', () => {
@@ -162,7 +168,7 @@ describe('csvUtils', () => {
       
       // Check headers
       expect(result).toContain('Date,Day of Week,BG Below (%),BG In Range (%),BG Above (%)');
-      expect(result).toContain('Basal Insulin (Units),Bolus Insulin (Units),Total Insulin (Units)');
+      expect(result).toContain('Basal Insulin,Bolus Insulin,Total Insulin');
       
       // Check data rows
       expect(result).toContain('2024-01-01,Monday,10,85,5,20.50,15.30,35.80');
@@ -237,6 +243,102 @@ describe('csvUtils', () => {
       const result = convertDailyReportsToCSV(reports);
       
       expect(result).toContain('20.12,15.99,36.11');
+    });
+  });
+
+  describe('convertGlucoseReadingsToCSV', () => {
+    it('should convert glucose readings to CSV with headers', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00Z'), value: 6.5 },
+        { timestamp: new Date('2024-01-01T08:05:00Z'), value: 7.2 },
+        { timestamp: new Date('2024-01-01T08:10:00Z'), value: 8.1 },
+      ];
+
+      const result = convertGlucoseReadingsToCSV(readings);
+      
+      expect(result).toContain('Timestamp,CGM Glucose Value (mmol/L)');
+      expect(result).toContain('2024-01-01T08:00:00.000Z,6.5');
+      expect(result).toContain('2024-01-01T08:05:00.000Z,7.2');
+      expect(result).toContain('2024-01-01T08:10:00.000Z,8.1');
+    });
+
+    it('should handle empty array', () => {
+      const result = convertGlucoseReadingsToCSV([]);
+      expect(result).toBe('');
+    });
+
+    it('should format glucose values with 1 decimal place', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00Z'), value: 6.123456 },
+      ];
+
+      const result = convertGlucoseReadingsToCSV(readings);
+      
+      expect(result).toContain('6.1');
+    });
+  });
+
+  describe('convertBolusReadingsToCSV', () => {
+    it('should convert bolus readings to CSV with headers', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00Z'), dose: 5.0, insulinType: 'bolus' },
+        { timestamp: new Date('2024-01-01T12:00:00Z'), dose: 6.5, insulinType: 'bolus' },
+        { timestamp: new Date('2024-01-01T18:00:00Z'), dose: 8.0, insulinType: 'bolus' },
+      ];
+
+      const result = convertBolusReadingsToCSV(readings);
+      
+      expect(result).toContain('Timestamp,Insulin Delivered (U)');
+      expect(result).toContain('2024-01-01T08:00:00.000Z,5.00');
+      expect(result).toContain('2024-01-01T12:00:00.000Z,6.50');
+      expect(result).toContain('2024-01-01T18:00:00.000Z,8.00');
+    });
+
+    it('should handle empty array', () => {
+      const result = convertBolusReadingsToCSV([]);
+      expect(result).toBe('');
+    });
+
+    it('should format dose values with 2 decimal places', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00Z'), dose: 5.123456, insulinType: 'bolus' },
+      ];
+
+      const result = convertBolusReadingsToCSV(readings);
+      
+      expect(result).toContain('5.12');
+    });
+  });
+
+  describe('convertBasalReadingsToCSV', () => {
+    it('should convert basal readings to CSV with headers', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T00:00:00Z'), dose: 1.0, insulinType: 'basal' },
+        { timestamp: new Date('2024-01-01T01:00:00Z'), dose: 1.2, insulinType: 'basal' },
+        { timestamp: new Date('2024-01-01T02:00:00Z'), dose: 0.9, insulinType: 'basal' },
+      ];
+
+      const result = convertBasalReadingsToCSV(readings);
+      
+      expect(result).toContain('Timestamp,Insulin Delivered (U)');
+      expect(result).toContain('2024-01-01T00:00:00.000Z,1.00');
+      expect(result).toContain('2024-01-01T01:00:00.000Z,1.20');
+      expect(result).toContain('2024-01-01T02:00:00.000Z,0.90');
+    });
+
+    it('should handle empty array', () => {
+      const result = convertBasalReadingsToCSV([]);
+      expect(result).toBe('');
+    });
+
+    it('should format dose values with 2 decimal places', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T00:00:00Z'), dose: 1.123456, insulinType: 'basal' },
+      ];
+
+      const result = convertBasalReadingsToCSV(readings);
+      
+      expect(result).toContain('1.12');
     });
   });
 });
