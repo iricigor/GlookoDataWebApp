@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.x] - Current Development
 
+<details>
+<summary><strong>View all version 1.2.x changes</strong></summary>
+
 ### New Features
 - [#213](../../pull/213) Enable smaller data set for "Meal Timing" analysis
   - Add automatic fallback to last 28 days when AI API returns "request too large" error
@@ -24,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Filtered dataset automatically includes note indicating "Analysis based on the last 28 days of data"
   - If filtered dataset still fails, error is returned to user
   - 16 comprehensive unit tests for filtering functions covering various scenarios
-- [#TBD](../../pull/TBD) Implement comprehensive Playwright E2E testing suite
+- [#217](../../pull/217) Implement comprehensive Playwright E2E testing suite
   - Add Playwright testing framework with configuration for Chromium, Firefox, and WebKit browsers
   - Implement Page Object Model (POM) pattern for maintainable test architecture
   - Create page objects for all main pages (Home, Data Upload, Reports, Settings, Navigation)
@@ -38,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add comprehensive E2E testing documentation and guidelines
   - Configure automatic artifact collection (traces, screenshots, videos) for failed tests
   - Support parallel test execution and cross-browser testing
-- [#TBD](../../pull/TBD) Add BG Values graph to Reports page
+- [#208](../../pull/208) Add BG Values graph to Reports page
   - New "BG Values" tab displaying daily glucose readings with interactive visualization
   - Line chart showing glucose values throughout the day (00:00-24:00) using Recharts
   - Date navigation with previous/next arrows and formatted date display (e.g., "Monday, 17-11-2025")
@@ -49,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Reference lines for low (3.9) and high (10.0) glucose thresholds
   - Defaults to last available date in dataset
   - Follows existing patterns from AGPGraph and InRangeReport components
-- [#TBD](../../pull/TBD) Simplify Glucose & Insulin AI prompt by removing correlation analysis
+- [#206](../../pull/206) Simplify Glucose & Insulin AI prompt by removing correlation analysis
   - Remove complex correlation analysis from AI prompt in favor of simpler tiering approach
   - Replace "Insulin Efficacy Correlation" section with "Insulin Efficacy Tiers (Simplified and Actionable)"
   - New tiering analysis: Group days into Low/Medium/High Total Insulin tiers with average BG In Range (%) for each
@@ -58,14 +61,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated actionable summary to provide recommendations based on tier and outlier data instead of correlations
   - Keep temporal trends section unchanged (best/worst days, multi-day patterns)
   - Updated unit tests to validate new prompt structure and content
-- [#TBD](../../pull/TBD) Add Grok AI provider support
+- [#207](../../pull/207) Add Grok AI provider support
   - Add xAI Grok API integration using grok-beta model
   - New Grok AI API key input in Settings > Data & AI tab
   - Priority order for AI providers: Perplexity > Grok AI > Google Gemini
   - Full support for all AI analysis features (Time in Range, Glucose & Insulin)
   - Cookie-based persistence for Grok API key (1-year expiry)
   - Comprehensive test coverage for Grok API integration
-- [#TBD](../../pull/TBD) Add comprehensive meal timing analysis
+- [#209](../../pull/209) Add comprehensive meal timing analysis
   - New "Meal Timing" tab in AI Analysis page for detailed meal-specific optimization
   - Analyzes CGM, basal, and bolus data to provide day-of-week specific and meal-specific recommendations
   - **Temporal Trends**: Day-of-week BG control ranking, workday vs weekend comparison
@@ -80,12 +83,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Cooldown mechanism (3 seconds) to prevent excessive API calls with progress bar
   - Loading spinner, success messages, and error handling for AI analysis
   - 12 comprehensive unit tests for new CSV conversion utilities and prompt generation
-- [#TBD](../../pull/TBD) UI refinements and enablements
+- [#202](../../pull/202) UI refinements and enablements
   - Remove accordion from file info display in Reports and AI Analysis pages (since we now use tabs)
   - Add "Meal Timing" tab to AI Analysis page with placeholder text for future implementation
   - Add "Detailed CGM" and "Detailed Insulin" tabs to Reports page with placeholder texts for future implementation
   - Improve Data & AI tab layout in Settings page with better vertical spacing and organization
-- [#TBD](../../pull/TBD) Align UI pages with consistent width and vertical tabs
+- [#192](../../pull/192) Align UI pages with consistent width and vertical tabs
   - Standardize all page widths to 1200px for visual consistency (Home, Settings, DataUpload, Reports, AI Analysis)
   - Refactor Settings page to use vertical tabs on the left instead of stacked sections (7 tabs: Support, Theme, Export Format, Glucose Thresholds, AI, Data Privacy, Version Info)
   - Refactor Reports page to use vertical tabs on the left instead of top-level accordions (2 tabs: Time in Range, AGP Data)
@@ -153,7 +156,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated `handleMealTimingClick` to include Grok in API key selection (matching pattern from other handlers)
   - Added unit tests to verify correct API key is used for each provider (Perplexity, Grok, Gemini)
   - Meal Timing analysis now works correctly with all three AI providers
-- [#TBD](../../pull/TBD) Fix AI analysis helper text and provider display issues
+- [#212](../../pull/212) Fix AI analysis helper text and provider display issues
   - Helper text now correctly reappears after cooldown completes and button returns to "Analyze with AI"
   - All three AI tabs (Time in Range, Glucose & Insulin, Meal Timing) now display active AI provider name in helper text
   - Helper text now shows "Click Analyze to get AI-powered analysis (using Perplexity)" or similar based on active provider
@@ -171,7 +174,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added loading state indicator (spinner) when switching between dates
   - Improved date selector styling with disabled state during date transitions
   - All changes follow Fluent UI design standards for consistency
-- [#TODO](../../pull/TODO) Simplify XLSX export to use metadata-based approach
+- [#191](../../pull/191) Simplify XLSX export to use metadata-based approach
   - Removed `findCSVFileName` fallback function that tried to guess file names based on patterns
   - XLSX export now always uses `sourceFiles` array from metadata (populated by `groupCsvFiles`)
   - Eliminates inconsistency between Summary sheet (which shows all datasets) and actual exported sheets
@@ -207,7 +210,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Prevents users from spamming the analyze button
 
 ### Other
-- [#TBD](../../pull/TBD) Automate README updates on main branch after PR merges
+- [#221](../../pull/221) Automate README updates on main branch after PR merges
   - New GitHub Actions workflow triggers when PRs are merged to main
   - Automatically updates "Recent Updates" section in README.md
   - Maps PR labels to emojis (Feature→✨, Bug→🐛, Documentation→📚, Performance→⚡)
@@ -217,9 +220,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Adds `docs/README_AUTOMATION.md` with full documentation
   - Updates `.github/scripts/README.md` with automation details
 
+</details>
+
 ---
 
 ## [1.1.x] - Released
+
+<details>
+<summary><strong>View all version 1.1.x changes</strong></summary>
 
 ### New Features
 - [#144](../../pull/144) Add swipe gesture navigation for mobile devices
@@ -341,7 +349,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Expand "Understanding Your Results" with AGP interpretation guidelines
 
 ### Other
-- [#TBD](../../pull/TBD) Restructure codebase with feature-based architecture to minimize merge conflicts
+- [#220](../../pull/220) Restructure codebase with feature-based architecture to minimize merge conflicts
   - Split xlsxUtils.ts (435 lines) into 5 focused modules in `src/features/export/utils/`
   - Move zipUtils.ts (240 lines) to `src/features/dataUpload/utils/`
   - Move FileList and FileUploadZone components to `src/features/dataUpload/components/`
@@ -359,6 +367,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Run tests once with JSON reporter to extract statistics immediately
   - Eliminate duplicate test run in CI workflow (previously ran tests twice)
   - Expected improvement: 50% reduction in CI test execution time
+
+</details>
 
 ---
 
