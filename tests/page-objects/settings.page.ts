@@ -22,13 +22,12 @@ export class SettingsPage extends BasePage {
     // Define locators for settings page elements
     // Note: The actual heading is "Settings" (using Text component, not h1)
     this.pageHeading = page.locator('span').filter({ hasText: 'Settings' }).first();
-    // Note: Use Title3 locator to avoid strict mode violation (multiple "Theme" text elements)
-    // Title3 from Fluent UI may render with various class names, so we use a more flexible selector
-    this.themeSection = page.locator('[class*="sectionTitle"]').filter({ hasText: 'Theme' });
+    // Note: Title3 elements with specific text - use text content directly
+    this.themeSection = page.getByText('Theme', { exact: true });
     this.lightThemeButton = page.getByRole('radio', { name: /^light$/i });
     this.darkThemeButton = page.getByRole('radio', { name: /^dark$/i });
     this.systemThemeButton = page.getByRole('radio', { name: /system/i });
-    this.exportFormatSection = page.locator('[class*="sectionTitle"]').filter({ hasText: 'Export Format' });
+    this.exportFormatSection = page.getByText('Export Format', { exact: true });
     // Note: Actual formats are CSV and TSV, not XLSX
     this.csvFormatButton = page.getByRole('radio', { name: /csv.*comma/i });
     this.xlsxFormatButton = page.getByRole('radio', { name: /tsv.*tab/i });

@@ -19,7 +19,8 @@ export class HomePage extends BasePage {
     // Define locators for home page elements
     // Note: The actual heading is "Glooko Insights" and uses a Text/span component, not h1
     this.welcomeHeading = page.locator('span').filter({ hasText: 'Glooko Insights' }).first();
-    // Note: Navigation items are Cards, not links - we need to find them by text within cards
+    // Note: Navigation items are Cards with onClick handlers
+    // Find the Card element that contains the specific title text using filter
     this.uploadButton = page.locator('[class*="navigationCard"]').filter({ hasText: 'Data Upload' });
     this.reportsButton = page.locator('[class*="navigationCard"]').filter({ hasText: 'Comprehensive Reports' });
     this.aiAnalysisButton = page.locator('[class*="navigationCard"]').filter({ hasText: 'AI Analysis' });
