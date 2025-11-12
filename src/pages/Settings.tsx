@@ -13,14 +13,17 @@ import {
   Button,
   TabList,
   Tab,
+  MessageBar,
+  MessageBarBody,
 } from '@fluentui/react-components';
 import { useState } from 'react';
-import { BugRegular, LightbulbRegular, CodeRegular } from '@fluentui/react-icons';
+import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { GlucoseThresholdsSection } from '../components/GlucoseThresholdsSection';
 import { getVersionInfo, formatBuildDate } from '../utils/version';
+import { getProviderDisplayName, determineActiveProvider } from '../utils/aiApi';
 
 const useStyles = makeStyles({
   container: {
@@ -115,6 +118,20 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
   },
+  apiKeyLabelRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    ...shorthands.gap('8px'),
+  },
+  privacyLink: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorBrandForeground1,
+    textDecoration: 'none',
+    '&:hover': {
+      textDecoration: 'underline',
+    },
+  },
   apiKeyInput: {
     width: '100%',
   },
@@ -162,6 +179,14 @@ const useStyles = makeStyles({
     ...shorthands.gap('12px'),
     flexWrap: 'wrap',
   },
+  dataWarning: {
+    marginBottom: '16px',
+  },
+  dataWarningTitle: {
+    fontWeight: tokens.fontWeightSemibold,
+    fontSize: tokens.fontSizeBase400,
+    marginBottom: '4px',
+  },
 });
 
 interface SettingsProps {
@@ -186,7 +211,7 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
 
   // Determine which provider is active based on available keys
   // Priority: Perplexity > Grok > Gemini
-  const activeProvider = perplexityApiKey ? 'perplexity' : (grokApiKey ? 'grok' : (geminiApiKey ? 'gemini' : null));
+  const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey, grokApiKey);
 
   const renderTabContent = () => {
     switch (selectedTab) {
@@ -244,15 +269,25 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
               </Text>
               {activeProvider && (
                 <Text className={styles.settingDescription} style={{ color: tokens.colorBrandForeground1, fontWeight: tokens.fontWeightSemibold }}>
-                  Currently using: {activeProvider === 'perplexity' ? 'Perplexity' : activeProvider === 'grok' ? 'Grok AI' : 'Google Gemini'}
+                  Currently using: {getProviderDisplayName(activeProvider)}
                 </Text>
               )}
               
               <div className={styles.apiKeyContainer}>
                 <div className={styles.apiKeyRow}>
-                  <Label htmlFor="perplexity-api-key" className={styles.apiKeyLabel}>
-                    Perplexity API Key
-                  </Label>
+                  <div className={styles.apiKeyLabelRow}>
+                    <Label htmlFor="perplexity-api-key" className={styles.apiKeyLabel}>
+                      Perplexity API Key
+                    </Label>
+                    <Link 
+                      href="https://www.perplexity.ai/hub/faq/privacy-and-security" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={styles.privacyLink}
+                    >
+                      Privacy Policy
+                    </Link>
+                  </div>
                   <Input
                     id="perplexity-api-key"
                     type="password"
@@ -265,9 +300,19 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                 </div>
                 
                 <div className={styles.apiKeyRow}>
-                  <Label htmlFor="grok-api-key" className={styles.apiKeyLabel}>
-                    Grok AI API Key
-                  </Label>
+                  <div className={styles.apiKeyLabelRow}>
+                    <Label htmlFor="grok-api-key" className={styles.apiKeyLabel}>
+                      Grok AI API Key
+                    </Label>
+                    <Link 
+                      href="https://x.ai/legal/privacy-policy" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={styles.privacyLink}
+                    >
+                      Privacy Policy
+                    </Link>
+                  </div>
                   <Input
                     id="grok-api-key"
                     type="password"
@@ -280,9 +325,19 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                 </div>
                 
                 <div className={styles.apiKeyRow}>
-                  <Label htmlFor="gemini-api-key" className={styles.apiKeyLabel}>
-                    Google Gemini API Key
-                  </Label>
+                  <div className={styles.apiKeyLabelRow}>
+                    <Label htmlFor="gemini-api-key" className={styles.apiKeyLabel}>
+                      Google Gemini API Key
+                    </Label>
+                    <Link 
+                      href="https://policies.google.com/privacy" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={styles.privacyLink}
+                    >
+                      Privacy Policy
+                    </Link>
+                  </div>
                   <Input
                     id="gemini-api-key"
                     type="password"
@@ -294,6 +349,28 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                   />
                 </div>
               </div>
+              
+              <MessageBar
+                intent="warning"
+                icon={<WarningRegular />}
+                className={styles.dataWarning}
+              >
+                <MessageBarBody>
+                  <Text className={styles.dataWarningTitle}>Attention!</Text>
+                  <Text>
+                    When you use AI analysis features, your sensitive health data will be sent to the selected AI provider 
+                    ({activeProvider ? getProviderDisplayName(activeProvider) : 'the configured AI service'}). 
+                    The data is sent without personally identifiable information (such as your name or email), but the AI provider 
+                    may be able to connect your API key with the health data you send. You are responsible for the security of this 
+                    information and use of it in accordance with all applicable data protection rules and regulations.
+                  </Text>
+                  <Text style={{ marginTop: '12px' }}>
+                    <strong>Best Practices:</strong> Monitor your API key usage regularly through your provider's dashboard, 
+                    apply least privilege access permissions when creating API keys, and set daily spending limits to prevent 
+                    unexpected charges and unauthorized usage.
+                  </Text>
+                </MessageBarBody>
+              </MessageBar>
               
               <div className={styles.securityExplanation}>
                 <Text as="p" style={{ marginBottom: '12px' }}>
