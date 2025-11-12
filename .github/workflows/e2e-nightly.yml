@@ -30,7 +30,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run Playwright tests
-        run: npm run test:e2e -- --project=chromium --workers=4
+        run: npm run test:e2e -- --project=chromium --workers=2
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
