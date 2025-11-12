@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { InRangeReport } from '../components/InRangeReport';
 import { AGPReport } from '../components/AGPReport';
+import { BGValuesReport } from '../components/BGValuesReport';
 import type { UploadedFile } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 
@@ -79,6 +80,8 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
         return <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} />;
       case 'agp':
         return <AGPReport selectedFile={selectedFile} exportFormat={exportFormat} />;
+      case 'bgValues':
+        return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} />;
       case 'detailedCgm':
         return (
           <div style={{ padding: '24px' }}>
@@ -120,6 +123,7 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
           <Tab value="fileInfo">File Info</Tab>
           <Tab value="inRange">Time in Range</Tab>
           <Tab value="agp">AGP Data</Tab>
+          <Tab value="bgValues">BG Values</Tab>
           <Tab value="detailedCgm">Detailed CGM</Tab>
           <Tab value="detailedInsulin">Detailed Insulin</Tab>
         </TabList>

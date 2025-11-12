@@ -26,6 +26,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Based on analysis of existing "Time in Range" and "Glucose & Insulin" prompt implementations
 
 ### New Features
+- [#TBD](../../pull/TBD) Add BG Values graph to Reports page
+  - New "BG Values" tab displaying daily glucose readings with interactive visualization
+  - Line chart showing glucose values throughout the day (00:00-24:00) using Recharts
+  - Date navigation with previous/next arrows and formatted date display (e.g., "Monday, 17-11-2025")
+  - Navigation arrows automatically disabled when no data available for that direction
+  - Toggle switch to change Y-axis maximum between 16.0 and 22.0 mmol/L
+  - Glucose values above chart maximum are clamped to max value for display
+  - Daily statistics panel showing: Below Range, In Range, Above Range percentages and counts
+  - Reference lines for low (3.9) and high (10.0) glucose thresholds
+  - Defaults to last available date in dataset
+  - Follows existing patterns from AGPGraph and InRangeReport components
 - [#TBD](../../pull/TBD) UI refinements and enablements
   - Remove accordion from file info display in Reports and AI Analysis pages (since we now use tabs)
   - Add "Meal Timing" tab to AI Analysis page with placeholder text for future implementation

@@ -324,3 +324,47 @@ export function calculatePercentage(count: number, total: number): number {
   if (total === 0) return 0;
   return Math.round((count / total) * 1000) / 10; // Round to 1 decimal place
 }
+
+/**
+ * Get all unique dates from glucose readings, sorted chronologically
+ * 
+ * @param readings - Array of glucose readings
+ * @returns Array of date strings in YYYY-MM-DD format, sorted from oldest to newest
+ */
+export function getUniqueDates(readings: GlucoseReading[]): string[] {
+  const dateSet = new Set<string>();
+  
+  readings.forEach(reading => {
+    const dateKey = formatDate(reading.timestamp);
+    dateSet.add(dateKey);
+  });
+  
+  return Array.from(dateSet).sort();
+}
+
+/**
+ * Filter glucose readings for a specific date
+ * 
+ * @param readings - Array of glucose readings
+ * @param dateString - Date string in YYYY-MM-DD format
+ * @returns Array of readings for that date
+ */
+export function filterReadingsByDate(readings: GlucoseReading[], dateString: string): GlucoseReading[] {
+  return readings.filter(reading => {
+    const readingDate = formatDate(reading.timestamp);
+    return readingDate === dateString;
+  });
+}
+
+/**
+ * Format date for display (e.g., "Monday, 17-11-2025")
+ * 
+ * @param dateString - Date string in YYYY-MM-DD format
+ * @returns Formatted date string with day of week
+ */
+export function formatDateDisplay(dateString: string): string {
+  const date = new Date(dateString + 'T00:00:00'); // Add time to avoid timezone issues
+  const dayOfWeek = getDayOfWeek(date);
+  const [year, month, day] = dateString.split('-');
+  return `${dayOfWeek}, ${day}-${month}-${year}`;
+}

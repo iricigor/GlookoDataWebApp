@@ -16,6 +16,9 @@ import {
   formatWeekRange,
   groupByWeek,
   calculatePercentage,
+  getUniqueDates,
+  filterReadingsByDate,
+  formatDateDisplay,
 } from './glucoseRangeUtils';
 import type { GlucoseReading, GlucoseThresholds } from '../types';
 
@@ -377,6 +380,82 @@ describe('glucoseRangeUtils', () => {
       expect(reports[0].stats.high).toBe(1);
       expect(reports[0].stats.veryHigh).toBe(1);
       expect(reports[0].stats.total).toBe(5);
+    });
+  });
+
+  describe('getUniqueDates', () => {
+    it('should return empty array for no readings', () => {
+      const dates = getUniqueDates([]);
+      expect(dates).toEqual([]);
+    });
+
+    it('should return unique dates sorted chronologically', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T14:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-16T09:00:00'), value: 5.8 },
+        { timestamp: new Date('2024-01-14T12:00:00'), value: 6.2 },
+        { timestamp: new Date('2024-01-15T18:00:00'), value: 5.9 },
+      ];
+
+      const dates = getUniqueDates(readings);
+
+      expect(dates).toEqual(['2024-01-14', '2024-01-15', '2024-01-16']);
+    });
+
+    it('should handle single date', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T14:00:00'), value: 6.0 },
+      ];
+
+      const dates = getUniqueDates(readings);
+
+      expect(dates).toEqual(['2024-01-15']);
+    });
+  });
+
+  describe('filterReadingsByDate', () => {
+    it('should filter readings for specific date', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T14:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-16T09:00:00'), value: 5.8 },
+        { timestamp: new Date('2024-01-14T12:00:00'), value: 6.2 },
+      ];
+
+      const filtered = filterReadingsByDate(readings, '2024-01-15');
+
+      expect(filtered).toHaveLength(2);
+      expect(filtered[0].value).toBe(5.5);
+      expect(filtered[1].value).toBe(6.0);
+    });
+
+    it('should return empty array for date with no readings', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+      ];
+
+      const filtered = filterReadingsByDate(readings, '2024-01-20');
+
+      expect(filtered).toEqual([]);
+    });
+  });
+
+  describe('formatDateDisplay', () => {
+    it('should format date with day of week', () => {
+      // 2024-01-15 is a Monday
+      expect(formatDateDisplay('2024-01-15')).toBe('Monday, 15-01-2024');
+      
+      // 2024-01-20 is a Saturday
+      expect(formatDateDisplay('2024-01-20')).toBe('Saturday, 20-01-2024');
+      
+      // 2024-01-21 is a Sunday
+      expect(formatDateDisplay('2024-01-21')).toBe('Sunday, 21-01-2024');
+    });
+
+    it('should handle dates with leading zeros', () => {
+      expect(formatDateDisplay('2024-01-05')).toBe('Friday, 05-01-2024');
     });
   });
 });
