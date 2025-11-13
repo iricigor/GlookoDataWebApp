@@ -19,10 +19,11 @@ export class DataUploadPage extends BasePage {
     // Define locators for data upload page elements
     // Note: The actual heading is "Data Upload" (using Text component, not h1)
     this.pageHeading = page.locator('span').filter({ hasText: 'Data Upload' }).first();
-    // Note: The upload zone uses 'dropzone' class, not 'uploadZone'
-    this.uploadZone = page.locator('[class*="dropzone"]').first();
+    // Note: The upload zone uses 'dropzone' class, but with CSS-in-JS hashing
+    // Use unique text content to identify it
+    this.uploadZone = page.locator('text=Drop ZIP files here or click to browse').locator('..');
     // Note: The file list container doesn't have a specific fileList class
-    this.fileList = page.locator('[class*="container"]').filter({ has: page.locator('table') });
+    this.fileList = page.locator('table').first();
     this.demoDataItem = page.locator('text=demo-data.zip');
     this.clearAllButton = page.getByRole('button', { name: /clear all/i });
   }
@@ -53,8 +54,9 @@ export class DataUploadPage extends BasePage {
    */
   async getFileCount(): Promise<number> {
     try {
-      const items = await this.fileList.locator('[class*="fileItem"]').count();
-      return items;
+      // Look for table rows (excluding header row)
+      const rows = await this.page.locator('table tbody tr').count();
+      return rows;
     } catch {
       return 0;
     }

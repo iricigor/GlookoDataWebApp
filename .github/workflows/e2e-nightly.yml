@@ -2,8 +2,8 @@ name: 🧪 Nightly E2E Tests
 
 on:
   schedule:
-    # Run every night at 23:00 UTC (midnight CET during winter, 1 AM CEST during summer)
-    - cron: '0 23 * * *'
+    # Run every night at 02:00 UTC (3 AM CET during winter, 4 AM CEST during summer)
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 jobs:

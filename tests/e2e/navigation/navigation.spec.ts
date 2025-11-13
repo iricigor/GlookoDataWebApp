@@ -26,8 +26,8 @@ test.describe('Navigation', () => {
     // Verify URL changed
     await expect(page).toHaveURL(/#upload/);
     
-    // Verify page content loaded
-    await expect(page.locator('h1')).toContainText(/data upload/i);
+    // Verify page content loaded - look for the page title Text component
+    await expect(page.locator('span').filter({ hasText: 'Data Upload' })).toBeVisible();
   });
 
   test('should navigate to Reports page', async ({ navigation, page }) => {
@@ -36,8 +36,8 @@ test.describe('Navigation', () => {
     // Verify URL changed
     await expect(page).toHaveURL(/#reports/);
     
-    // Verify page content loaded
-    await expect(page.locator('h1')).toContainText(/reports/i);
+    // Verify page content loaded - look for the page title Text component
+    await expect(page.locator('span').filter({ hasText: 'Comprehensive Reports' })).toBeVisible();
   });
 
   test('should navigate to AI Analysis page', async ({ navigation, page }) => {
@@ -46,8 +46,8 @@ test.describe('Navigation', () => {
     // Verify URL changed
     await expect(page).toHaveURL(/#ai/);
     
-    // Verify page content loaded
-    await expect(page.locator('h1')).toContainText(/ai analysis/i);
+    // Verify page content loaded - look for the page title Text component
+    await expect(page.locator('span').filter({ hasText: 'AI-Powered Analysis' })).toBeVisible();
   });
 
   test('should navigate to Settings page', async ({ navigation, page }) => {
@@ -56,8 +56,8 @@ test.describe('Navigation', () => {
     // Verify URL changed
     await expect(page).toHaveURL(/#settings/);
     
-    // Verify page content loaded
-    await expect(page.locator('h1')).toContainText(/settings/i);
+    // Verify page content loaded - look for the page title Text component
+    await expect(page.locator('span').filter({ hasText: 'Settings' }).first()).toBeVisible();
   });
 
   test('should navigate back to Home page from any page', async ({ navigation, page }) => {
@@ -69,8 +69,8 @@ test.describe('Navigation', () => {
     await navigation.navigateToHome();
     await expect(page).toHaveURL(/#home/);
     
-    // Verify home page content
-    await expect(page.locator('h1')).toContainText(/welcome/i);
+    // Verify home page content - look for the main title (using first to avoid ambiguity)
+    await expect(page.locator('span').filter({ hasText: 'Glooko Insights' }).first()).toBeVisible();
   });
 
   test('should maintain navigation state when navigating between pages', async ({ navigation, page }) => {
@@ -92,11 +92,11 @@ test.describe('Navigation', () => {
     // Navigate directly to reports via hash
     await page.goto('/#reports');
     await expect(page).toHaveURL(/#reports/);
-    await expect(page.locator('h1')).toContainText(/reports/i);
+    await expect(page.locator('span').filter({ hasText: 'Comprehensive Reports' })).toBeVisible();
     
     // Navigate directly to settings via hash
     await page.goto('/#settings');
     await expect(page).toHaveURL(/#settings/);
-    await expect(page.locator('h1')).toContainText(/settings/i);
+    await expect(page.locator('span').filter({ hasText: 'Settings' }).first()).toBeVisible();
   });
 });
