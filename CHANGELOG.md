@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>251 Fix color scheme dropdown overlay hiding page in Detailed CGM report</summary>
+
+[#251](../../pull/251) Fix color scheme dropdown overlay hiding page in Detailed CGM report
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>247 Add DeepSeek AI provider support</summary>
 
 [#247](../../pull/247) Add DeepSeek AI provider support
