@@ -155,9 +155,19 @@ export async function callGeminiApi(
     }
 
     // Parse successful response
-    const data = await response.json() as GeminiResponse;
+    const data = await response.json() as GeminiResponse | GeminiError;
     
-    if (data.candidates && data.candidates.length > 0 && 
+    // Check if response contains an error (Gemini can return errors with HTTP 200)
+    if ('error' in data && data.error) {
+      return {
+        success: false,
+        error: data.error.message || 'Unknown error from API',
+        errorType: 'api',
+      };
+    }
+    
+    // Type guard to check if data is a GeminiResponse
+    if ('candidates' in data && data.candidates && data.candidates.length > 0 && 
         data.candidates[0].content && data.candidates[0].content.parts && 
         data.candidates[0].content.parts.length > 0) {
       const content = data.candidates[0].content.parts[0].text;

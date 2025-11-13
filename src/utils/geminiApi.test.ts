@@ -227,5 +227,45 @@ describe('geminiApi', () => {
         expect.any(Object)
       );
     });
+
+    it('should handle token limit error in HTTP 200 response', async () => {
+      // Gemini API can return HTTP 200 with an error object for token limit errors
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          error: {
+            code: 400,
+            message: 'Messages have 330258 tokens, which exceeds the max limit of 131072 tokens.',
+            status: 'INVALID_ARGUMENT',
+          },
+        }),
+      });
+
+      const result = await callGeminiApi('test-key', 'test prompt');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('330258 tokens');
+      expect(result.error).toContain('exceeds');
+      expect(result.errorType).toBe('api');
+    });
+
+    it('should handle other errors in HTTP 200 response', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          error: {
+            code: 429,
+            message: 'Rate limit exceeded',
+            status: 'RESOURCE_EXHAUSTED',
+          },
+        }),
+      });
+
+      const result = await callGeminiApi('test-key', 'test prompt');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Rate limit exceeded');
+      expect(result.errorType).toBe('api');
+    });
   });
 });

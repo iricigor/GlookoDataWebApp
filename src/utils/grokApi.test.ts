@@ -254,5 +254,46 @@ describe('grokApi', () => {
       expect(body.temperature).toBe(0.2);
       expect(body.max_tokens).toBe(1000);
     });
+
+    it('should handle token limit error in HTTP 200 response', async () => {
+      // Some APIs can return HTTP 200 with an error object for token limit errors
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          error: {
+            message: 'Messages have 330258 tokens, which exceeds the max limit of 131072 tokens.',
+            type: 'invalid_request_error',
+            code: 'context_length_exceeded',
+          },
+        }),
+      });
+      global.fetch = mockFetch;
+
+      const result = await callGrokApi('test-key', 'test prompt');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('330258 tokens');
+      expect(result.error).toContain('exceeds');
+      expect(result.errorType).toBe('api');
+    });
+
+    it('should handle other errors in HTTP 200 response', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          error: {
+            message: 'Rate limit exceeded',
+            type: 'rate_limit_error',
+          },
+        }),
+      });
+      global.fetch = mockFetch;
+
+      const result = await callGrokApi('test-key', 'test prompt');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Rate limit exceeded');
+      expect(result.errorType).toBe('api');
+    });
   });
 });
