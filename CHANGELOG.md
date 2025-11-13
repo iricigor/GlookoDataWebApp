@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>245 Add color scheme selector to BG Values graph</summary>
+
+[#245](../../pull/245) Add color scheme selector to BG Values graph
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>244 Fix CHANGELOG: wrap unnamed issues in collapsible details format</summary>
 
 [#244](../../pull/244) Fix CHANGELOG: wrap unnamed issues in collapsible details format
