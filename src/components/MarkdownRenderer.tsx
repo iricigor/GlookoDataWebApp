@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { makeStyles, tokens, shorthands } from '@fluentui/react-components';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -14,13 +13,8 @@ const useStyles = makeStyles({
     right: 0,
     display: 'flex',
     justifyContent: 'flex-end',
-    opacity: 0,
-    transition: 'opacity 0.2s ease-in-out',
-    pointerEvents: 'none', // Prevent button from interfering with hover detection when hidden
-  },
-  copyButtonVisible: {
-    opacity: 1,
-    pointerEvents: 'auto', // Allow button to be clicked when visible
+    zIndex: 10,
+    // Always visible, no opacity transitions or hover effects to prevent screen blinking
   },
   markdown: {
     fontSize: tokens.fontSizeBase400,
@@ -139,21 +133,16 @@ interface MarkdownRendererProps {
 /**
  * Renders markdown content with syntax highlighting and copy-to-clipboard functionality.
  * @param content - The markdown string to render.
- * @param showCopyButton - Whether to show the copy-to-clipboard button on hover (default: true).
+ * @param showCopyButton - Whether to show the copy-to-clipboard button (default: true).
  * @returns Rendered markdown with optional copy button.
  */
 export function MarkdownRenderer({ content, showCopyButton = true }: MarkdownRendererProps) {
   const styles = useStyles();
-  const [isHovered, setIsHovered] = useState(false);
   
   return (
-    <div 
-      className={styles.container}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className={styles.container}>
       {showCopyButton && (
-        <div className={`${styles.copyButtonWrapper} ${isHovered ? styles.copyButtonVisible : ''}`}>
+        <div className={styles.copyButtonWrapper}>
           <CopyAIResponseButton content={content} />
         </div>
       )}

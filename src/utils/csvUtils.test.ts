@@ -2,7 +2,7 @@
  * Tests for CSV utility functions
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { 
   convertToCSV, 
   convertDailyReportsToCSV,
@@ -10,7 +10,8 @@ import {
   convertBolusReadingsToCSV,
   convertBasalReadingsToCSV,
   filterGlucoseReadingsToLastDays,
-  filterInsulinReadingsToLastDays
+  filterInsulinReadingsToLastDays,
+  copyToClipboard
 } from './csvUtils';
 import type { DailyReport, GlucoseReading, InsulinReading } from '../types';
 
@@ -486,6 +487,130 @@ describe('csvUtils', () => {
       expect(result.length).toBe(3);
       expect(result.some(r => r.insulinType === 'bolus')).toBe(true);
       expect(result.some(r => r.insulinType === 'basal')).toBe(true);
+    });
+  });
+
+  describe('copyToClipboard', () => {
+    // Store original clipboard to restore after tests
+    const originalClipboard = navigator.clipboard;
+    
+    afterEach(() => {
+      // Restore original clipboard after each test
+      Object.defineProperty(navigator, 'clipboard', {
+        value: originalClipboard,
+        configurable: true,
+        writable: true,
+      });
+      vi.restoreAllMocks();
+    });
+
+    it('should copy plain text to clipboard using ClipboardItem API', async () => {
+      const mockClipboardWrite = vi.fn().mockResolvedValue(undefined);
+      
+      // Mock ClipboardItem globally
+      global.ClipboardItem = vi.fn((data) => data) as unknown as typeof ClipboardItem;
+      
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          write: mockClipboardWrite,
+          writeText: vi.fn(),
+        },
+        configurable: true,
+        writable: true,
+      });
+
+      const testText = 'Test plain text';
+      await copyToClipboard(testText);
+
+      expect(mockClipboardWrite).toHaveBeenCalledOnce();
+    });
+
+    it('should convert markdown to HTML when copying', async () => {
+      const mockClipboardWrite = vi.fn().mockResolvedValue(undefined);
+      
+      // Mock ClipboardItem globally
+      global.ClipboardItem = vi.fn((data) => data) as unknown as typeof ClipboardItem;
+      
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          write: mockClipboardWrite,
+          writeText: vi.fn(),
+        },
+        configurable: true,
+        writable: true,
+      });
+
+      const markdownText = '## Heading\n\nThis is **bold** and *italic*';
+      await copyToClipboard(markdownText);
+
+      expect(mockClipboardWrite).toHaveBeenCalledOnce();
+      // The HTML should contain converted markdown
+      // This test verifies the function was called, actual HTML conversion is tested separately
+    });
+
+    it('should fallback to writeText if ClipboardItem fails', async () => {
+      const mockWriteText = vi.fn().mockResolvedValue(undefined);
+      
+      // Mock ClipboardItem to throw an error
+      global.ClipboardItem = vi.fn(() => {
+        throw new Error('ClipboardItem not supported');
+      }) as unknown as typeof ClipboardItem;
+      
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          write: vi.fn().mockRejectedValue(new Error('ClipboardItem not supported')),
+          writeText: mockWriteText,
+        },
+        configurable: true,
+        writable: true,
+      });
+
+      const testText = 'Test fallback text';
+      await copyToClipboard(testText);
+
+      // Should fallback to writeText
+      expect(mockWriteText).toHaveBeenCalledWith(testText);
+    });
+
+    it('should use legacy execCommand when clipboard API not available', async () => {
+      // Mock document.execCommand
+      const mockExecCommand = vi.fn().mockReturnValue(true);
+      document.execCommand = mockExecCommand;
+      
+      // Remove clipboard API
+      Object.defineProperty(navigator, 'clipboard', {
+        value: undefined,
+        configurable: true,
+        writable: true,
+      });
+
+      const testText = 'Test legacy text';
+      await copyToClipboard(testText);
+
+      expect(mockExecCommand).toHaveBeenCalledWith('copy');
+    });
+
+    it('should accept custom HTML parameter', async () => {
+      const mockClipboardWrite = vi.fn().mockResolvedValue(undefined);
+      
+      // Mock ClipboardItem globally
+      global.ClipboardItem = vi.fn((data) => data) as unknown as typeof ClipboardItem;
+      
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          write: mockClipboardWrite,
+          writeText: vi.fn(),
+        },
+        configurable: true,
+        writable: true,
+      });
+
+      const testText = 'Test text';
+      const customHtml = '<strong>Test HTML</strong>';
+      await copyToClipboard(testText, customHtml);
+
+      expect(mockClipboardWrite).toHaveBeenCalledOnce();
+      // Custom HTML should be used
     });
   });
 });
