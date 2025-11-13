@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>270 [WIP] Fix nine failing tests in the test suite</summary>
+
+[#270](../../pull/270) [WIP] Fix nine failing tests in the test suite
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>268 Add Pump Settings Verification AI Analysis Tab</summary>
 
 [#268](../../pull/268) Add Pump Settings Verification AI Analysis Tab
