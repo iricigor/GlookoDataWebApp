@@ -673,7 +673,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
                   <>
                     {(!aiResponse || readyForNewAnalysis) && (
                       <Text className={styles.helperText}>
-                        Click Analyze to get AI-powered analysis{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}
+                        Click Analyze to get AI-powered insights on your Time in Range percentage. The analysis will provide personalized feedback and recommendations based on your glucose data{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}.
                       </Text>
                     )}
                     {aiResponse && !readyForNewAnalysis && (
@@ -778,7 +778,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
                   <>
                     {(!secondPromptResponse || secondPromptReady) && (
                       <Text className={styles.helperText}>
-                        Click Analyze to get AI-powered correlation analysis{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}
+                        Click Analyze to get AI-powered correlation analysis between glucose ranges and insulin doses. The analysis will identify patterns and relationships in your daily data{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}.
                       </Text>
                     )}
                     {secondPromptResponse && !secondPromptReady && (
@@ -931,7 +931,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
                   <>
                     {(!mealTimingResponse || mealTimingReady) && (
                       <Text className={styles.helperText}>
-                        Click Analyze to get AI-powered meal timing analysis with day-of-week and meal-specific recommendations{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}
+                        Click Analyze to get AI-powered meal timing analysis with day-of-week patterns. The analysis will provide meal-specific recommendations based on your glucose and insulin data{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}.
                       </Text>
                     )}
                     {mealTimingResponse && !mealTimingReady && (
