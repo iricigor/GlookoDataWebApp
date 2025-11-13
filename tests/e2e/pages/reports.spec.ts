@@ -15,7 +15,7 @@ test.describe('Reports Page', () => {
     await expect(reportsPage.pageHeading).toBeVisible();
   });
 
-  test('should display report content with demo data', async ({ reportsPage, page }) => {
+  test('should display report content with demo data', async ({ page }) => {
     // Wait a bit for page to load and render
     await page.waitForTimeout(1500);
     
@@ -24,7 +24,7 @@ test.describe('Reports Page', () => {
     await expect(tabList).toBeVisible({ timeout: 10000 });
   });
 
-  test('should have export functionality available when data is present', async ({ reportsPage, page }) => {
+  test('should have export functionality available when data is present', async ({ page }) => {
     // Wait a bit for page to load and render
     await page.waitForTimeout(1500);
     
