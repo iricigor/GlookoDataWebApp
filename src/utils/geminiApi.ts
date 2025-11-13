@@ -5,6 +5,8 @@
  * for AI-powered analysis of glucose data.
  */
 
+import { AI_SYSTEM_PROMPT } from './aiPrompts';
+
 /**
  * Gemini API response structure
  */
@@ -93,7 +95,7 @@ export async function callGeminiApi(
           {
             parts: [
               {
-                text: `You are a helpful medical assistant specializing in diabetes care and continuous glucose monitoring analysis. Provide clear, actionable, and evidence-based recommendations.\n\n${prompt}`,
+                text: `${AI_SYSTEM_PROMPT}\n\n${prompt}`,
               },
             ],
           },

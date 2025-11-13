@@ -5,6 +5,8 @@
  * for AI-powered analysis of glucose data.
  */
 
+import { AI_SYSTEM_PROMPT } from './aiPrompts';
+
 /**
  * DeepSeek API response structure (OpenAI-compatible)
  */
@@ -89,7 +91,7 @@ export async function callDeepSeekApi(
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful medical assistant specializing in diabetes care and continuous glucose monitoring analysis. Provide clear, actionable, and evidence-based recommendations. IMPORTANT: All glucose measurements are in mmol/L (European standard). Communicate directly with the user in second person (use "you/your" instead of "patient"). Do not assume there is a healthcare provider intermediary.',
+            content: AI_SYSTEM_PROMPT,
           },
           {
             role: 'user',
