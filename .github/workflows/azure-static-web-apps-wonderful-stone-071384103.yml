@@ -40,12 +40,10 @@ jobs:
           ###### End of Repository/Build Configurations ######
       
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
-          release_name: Release v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
           body: |
             ## Release v${{ steps.version.outputs.version }}
             
@@ -60,6 +58,7 @@ jobs:
             See commit history for details.
           draft: false
           prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   close_pull_request_job:
     if: false # Disabled as workflow is manual only
