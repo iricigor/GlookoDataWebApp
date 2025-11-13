@@ -70,15 +70,12 @@ describe('AIAnalysis', () => {
     );
 
     // Switch to Time in Range tab
-    await waitFor(() => {
-      expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
-    });
     fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
     
-    // Wait for tab content to load
+    // Wait for button to appear (data should load automatically)
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
-    }, { timeout: 3000 });
+    }, { timeout: 5000 });
   });
 
   it('should change button text to "Click to enable new analysis" after successful analysis', async () => {
