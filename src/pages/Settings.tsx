@@ -25,7 +25,7 @@ import type { ExportFormat } from '../hooks/useExportFormat';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { GlucoseThresholdsSection } from '../components/GlucoseThresholdsSection';
 import { getVersionInfo, formatBuildDate } from '../utils/version';
-import { getProviderDisplayName, determineActiveProvider } from '../utils/aiApi';
+import { getProviderDisplayName, getActiveProvider, getAvailableProviders, type AIProvider } from '../utils/aiApi';
 
 const useStyles = makeStyles({
   container: {
@@ -240,18 +240,35 @@ interface SettingsProps {
   onGrokApiKeyChange: (key: string) => void;
   deepseekApiKey: string;
   onDeepSeekApiKeyChange: (key: string) => void;
+  selectedProvider: AIProvider | null;
+  onSelectedProviderChange: (provider: AIProvider | null) => void;
 }
 
-export function Settings({ themeMode, onThemeChange, exportFormat, onExportFormatChange, perplexityApiKey, onPerplexityApiKeyChange, geminiApiKey, onGeminiApiKeyChange, grokApiKey, onGrokApiKeyChange, deepseekApiKey, onDeepSeekApiKeyChange }: SettingsProps) {
+export function Settings({ 
+  themeMode, 
+  onThemeChange, 
+  exportFormat, 
+  onExportFormatChange, 
+  perplexityApiKey, 
+  onPerplexityApiKeyChange, 
+  geminiApiKey, 
+  onGeminiApiKeyChange, 
+  grokApiKey, 
+  onGrokApiKeyChange, 
+  deepseekApiKey, 
+  onDeepSeekApiKeyChange,
+  selectedProvider,
+  onSelectedProviderChange,
+}: SettingsProps) {
   const styles = useStyles();
   const { thresholds, updateThreshold, validateThresholds, isValid } = useGlucoseThresholds();
   const validationError = validateThresholds(thresholds);
   const versionInfo = getVersionInfo();
   const [selectedTab, setSelectedTab] = useState<string>('general');
 
-  // Determine which provider is active based on available keys
-  // Priority: Perplexity > Grok > DeepSeek > Gemini
-  const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
+  // Get available providers and determine active one
+  const availableProviders = getAvailableProviders(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
+  const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
 
   const renderTabContent = () => {
     switch (selectedTab) {
@@ -311,6 +328,39 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                 <Text className={styles.settingDescription} style={{ color: tokens.colorBrandForeground1, fontWeight: tokens.fontWeightSemibold }}>
                   Currently using: {getProviderDisplayName(activeProvider)}
                 </Text>
+              )}
+              
+              {/* Provider Selection - Only show if multiple providers are available */}
+              {availableProviders.length > 1 && (
+                <div style={{ marginTop: '16px', marginBottom: '24px' }}>
+                  <Label className={styles.settingLabel}>AI Provider Selection</Label>
+                  <Text className={styles.settingDescription} style={{ marginBottom: '12px' }}>
+                    Choose which AI provider to use for analysis when multiple API keys are configured.
+                  </Text>
+                  <RadioGroup
+                    value={selectedProvider || 'auto'}
+                    onChange={(_, data) => {
+                      const value = data.value;
+                      if (value === 'auto') {
+                        onSelectedProviderChange(null);
+                      } else {
+                        onSelectedProviderChange(value as AIProvider);
+                      }
+                    }}
+                  >
+                    <Radio 
+                      value="auto" 
+                      label="Automatic (Priority: Perplexity > Grok > DeepSeek > Gemini)" 
+                    />
+                    {availableProviders.map(provider => (
+                      <Radio 
+                        key={provider}
+                        value={provider} 
+                        label={getProviderDisplayName(provider)} 
+                      />
+                    ))}
+                  </RadioGroup>
+                </div>
               )}
               
               <div className={styles.apiKeyContainer}>

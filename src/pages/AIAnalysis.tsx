@@ -35,7 +35,7 @@ import { generateTimeInRangePrompt } from '../prompts/timeInRangePrompt';
 import { generateGlucoseInsulinPrompt } from '../prompts/glucoseInsulinPrompt';
 import { generateMealTimingPrompt } from '../prompts/mealTimingPrompt';
 import { base64Encode } from '../utils/base64Utils';
-import { callAIApi, determineActiveProvider, getProviderDisplayName } from '../utils/aiApi';
+import { callAIApi, getActiveProvider, getProviderDisplayName, type AIProvider } from '../utils/aiApi';
 import { convertDailyReportsToCSV, convertGlucoseReadingsToCSV, convertBolusReadingsToCSV, convertBasalReadingsToCSV, filterGlucoseReadingsToLastDays, filterInsulinReadingsToLastDays } from '../utils/csvUtils';
 
 const useStyles = makeStyles({
@@ -218,11 +218,21 @@ interface AIAnalysisProps {
   geminiApiKey: string;
   grokApiKey: string;
   deepseekApiKey: string;
+  selectedProvider: AIProvider | null;
   existingAnalysis?: AIAnalysisResult;
   onAnalysisComplete: (fileId: string, response: string, inRangePercentage: number) => void;
 }
 
-export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey, existingAnalysis, onAnalysisComplete }: AIAnalysisProps) {
+export function AIAnalysis({ 
+  selectedFile, 
+  perplexityApiKey, 
+  geminiApiKey, 
+  grokApiKey, 
+  deepseekApiKey, 
+  selectedProvider,
+  existingAnalysis, 
+  onAnalysisComplete 
+}: AIAnalysisProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
   const [selectedTab, setSelectedTab] = useState<string>('fileInfo');
@@ -258,8 +268,8 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
     basalReadings: InsulinReading[];
   }>({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
 
-  // Determine which AI provider to use
-  const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
+  // Determine which AI provider to use (respecting manual selection)
+  const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
   const hasApiKey = activeProvider !== null;
 
   // Load existing analysis when component mounts or file changes
