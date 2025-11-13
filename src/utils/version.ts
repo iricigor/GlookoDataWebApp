@@ -7,11 +7,12 @@ export interface VersionInfo {
   buildId: string;
   buildDate: string;
   fullVersion: string;
+  releaseUrl: string | null;
 }
 
 /**
  * Get the application version information
- * @returns VersionInfo object containing version, build ID, build date, and full version
+ * @returns VersionInfo object containing version, build ID, build date, full version, and release URL
  */
 export function getVersionInfo(): VersionInfo {
   const version = __APP_VERSION__;
@@ -22,12 +23,27 @@ export function getVersionInfo(): VersionInfo {
   // For dev builds, use version as-is
   const fullVersion = buildId === 'dev' ? `${version}-dev` : `${version}.${buildId}`;
   
+  // Generate GitHub release URL for production builds
+  const releaseUrl = buildId !== 'dev' ? getGitHubReleaseUrl(version) : null;
+  
   return {
     version,
     buildId,
     buildDate,
     fullVersion,
+    releaseUrl,
   };
+}
+
+/**
+ * Generate GitHub release URL for a given version
+ * @param version - The version number (e.g., "1.2.1")
+ * @returns GitHub release URL
+ */
+export function getGitHubReleaseUrl(version: string): string {
+  const owner = 'iricigor';
+  const repo = 'GlookoDataWebApp';
+  return `https://github.com/${owner}/${repo}/releases/tag/v${version}`;
 }
 
 /**

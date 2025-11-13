@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getVersionInfo, formatBuildDate } from './version';
+import { getVersionInfo, formatBuildDate, getGitHubReleaseUrl } from './version';
 
 // Mock the global constants
 vi.stubGlobal('__APP_VERSION__', '1.0.0');
@@ -21,6 +21,7 @@ describe('version', () => {
       expect(info.buildId).toBe('123');
       expect(info.buildDate).toBe('2025-11-09T12:00:00.000Z');
       expect(info.fullVersion).toBe('1.0.0.123');
+      expect(info.releaseUrl).toBe('https://github.com/iricigor/GlookoDataWebApp/releases/tag/v1.0.0');
     });
 
     it('should return version info with dev build ID', () => {
@@ -31,6 +32,7 @@ describe('version', () => {
       expect(info.version).toBe('1.0.0');
       expect(info.buildId).toBe('dev');
       expect(info.fullVersion).toBe('1.0.0-dev');
+      expect(info.releaseUrl).toBeNull();
     });
 
     it('should handle all properties correctly', () => {
@@ -40,6 +42,7 @@ describe('version', () => {
       expect(info).toHaveProperty('buildId');
       expect(info).toHaveProperty('buildDate');
       expect(info).toHaveProperty('fullVersion');
+      expect(info).toHaveProperty('releaseUrl');
     });
   });
 
@@ -67,6 +70,19 @@ describe('version', () => {
       
       expect(typeof formatted).toBe('string');
       expect(formatted.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('getGitHubReleaseUrl', () => {
+    it('should generate correct GitHub release URL', () => {
+      const url = getGitHubReleaseUrl('1.2.1');
+      expect(url).toBe('https://github.com/iricigor/GlookoDataWebApp/releases/tag/v1.2.1');
+    });
+
+    it('should handle different version formats', () => {
+      expect(getGitHubReleaseUrl('2.0.0')).toBe('https://github.com/iricigor/GlookoDataWebApp/releases/tag/v2.0.0');
+      expect(getGitHubReleaseUrl('1.0.0')).toBe('https://github.com/iricigor/GlookoDataWebApp/releases/tag/v1.0.0');
+      expect(getGitHubReleaseUrl('0.1.0')).toBe('https://github.com/iricigor/GlookoDataWebApp/releases/tag/v0.1.0');
     });
   });
 });

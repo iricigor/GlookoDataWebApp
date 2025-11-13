@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     permissions:
-      contents: read
+      contents: write  # Changed from read to write for creating releases
       pull-requests: write
     steps:
       - uses: actions/checkout@v3
@@ -19,6 +19,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Get version from package.json
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+      
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -34,6 +38,27 @@ jobs:
           api_location: "" # Api source code path - optional
           output_location: "dist" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ## Release v${{ steps.version.outputs.version }}
+            
+            This release was automatically deployed to Azure Static Web Apps.
+            
+            **Deployment Details:**
+            - Workflow Run: ${{ github.run_number }}
+            - Commit: ${{ github.sha }}
+            - Deployed: ${{ github.event.head_commit.timestamp }}
+            
+            **Changes:**
+            See commit history for details.
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   close_pull_request_job:
     if: false # Disabled as workflow is manual only
