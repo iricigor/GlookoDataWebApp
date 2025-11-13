@@ -15,6 +15,10 @@ import {
   Tab,
   MessageBar,
   MessageBarBody,
+  Accordion,
+  AccordionItem,
+  AccordionHeader,
+  AccordionPanel,
 } from '@fluentui/react-components';
 import { useState } from 'react';
 import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular } from '@fluentui/react-icons';
@@ -135,29 +139,6 @@ const useStyles = makeStyles({
   apiKeyInput: {
     width: '100%',
   },
-  securityExplanation: {
-    fontSize: tokens.fontSizeBase300,
-    color: tokens.colorNeutralForeground2,
-    lineHeight: tokens.lineHeightBase300,
-    ...shorthands.padding('16px'),
-    backgroundColor: tokens.colorNeutralBackground3,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    '& p': {
-      margin: '0',
-      fontSize: tokens.fontSizeBase300,
-    },
-    '& strong': {
-      color: tokens.colorNeutralForeground1,
-      fontWeight: tokens.fontWeightSemibold,
-    },
-    '& a': {
-      color: tokens.colorBrandForeground1,
-      textDecoration: 'none',
-      '&:hover': {
-        textDecoration: 'underline',
-      },
-    },
-  },
   versionItem: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -195,6 +176,54 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     fontSize: tokens.fontSizeBase400,
     marginBottom: '4px',
+  },
+  securitySection: {
+    marginTop: '16px',
+    ...shorthands.padding('16px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+  },
+  securitySummary: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    lineHeight: tokens.lineHeightBase400,
+    marginBottom: '8px',
+    display: 'block',
+  },
+  securityTitle: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    marginBottom: '8px',
+  },
+  accordionContent: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    lineHeight: tokens.lineHeightBase400,
+    '& p': {
+      margin: '0 0 12px 0',
+      '&:last-child': {
+        marginBottom: '0',
+      },
+    },
+    '& strong': {
+      color: tokens.colorNeutralForeground1,
+      fontWeight: tokens.fontWeightSemibold,
+    },
+    '& a': {
+      color: tokens.colorBrandForeground1,
+      textDecoration: 'none',
+      '&:hover': {
+        textDecoration: 'underline',
+      },
+    },
+    '& ul': {
+      margin: '8px 0',
+      paddingLeft: '24px',
+    },
+    '& li': {
+      marginBottom: '4px',
+    },
   },
 });
 
@@ -408,42 +437,118 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                 </MessageBarBody>
               </MessageBar>
               
-              <div className={styles.securityExplanation}>
-                <Text as="p" style={{ marginBottom: '12px' }}>
-                  <strong>Security & Privacy:</strong> Your API keys are stored locally in your browser's cookies (expires after 1 year) 
-                  and are never transmitted to our servers or any third party. All AI analysis happens directly between your browser 
-                  and the selected AI provider's API. This application is fully open source—you can{' '}
-                  <a href="https://github.com/iricigor/GlookoDataWebApp" target="_blank" rel="noopener noreferrer">
-                    review the code on GitHub
-                  </a>{' '}
-                  or deploy your own instance for complete control.
-                </Text>
-                <Text as="p" style={{ marginBottom: '12px' }}>
-                  <strong>Best Practices:</strong> For maximum security, create API keys with minimal permissions at{' '}
-                  <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
-                    Perplexity Settings
-                  </a>,{' '}
-                  <a href="https://console.x.ai/" target="_blank" rel="noopener noreferrer">
-                    xAI Console
-                  </a>,{' '}
-                  <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">
-                    DeepSeek Platform
-                  </a>, or{' '}
-                  <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
-                    Google AI Studio
-                  </a>. 
-                  Use keys designated for client-side applications and set spending limits to protect against unauthorized usage.
-                </Text>
-                <Text as="p" style={{ marginBottom: '12px' }}>
-                  <strong>Provider Selection:</strong> If multiple API keys are configured, Perplexity will be used by default. 
-                  If Perplexity is not available, Grok AI will be used next, followed by DeepSeek, and finally Google Gemini. 
-                  To use a different provider, remove the API keys with higher priority.
-                </Text>
-                <Text as="p">
-                  <strong>Risk Warning:</strong> If someone gains access to your browser session or computer, they could potentially 
-                  access your stored API key. To mitigate this risk: (1) log out from shared computers, (2) use browser privacy features, 
-                  (3) regularly rotate your API keys, and (4) monitor your API usage in Perplexity's dashboard.
-                </Text>
+              <div className={styles.securitySection}>
+                <Text className={styles.securityTitle}>Security & Privacy Information</Text>
+                
+                <Accordion collapsible multiple>
+                  <AccordionItem value="storage">
+                    <AccordionHeader>
+                      <Text className={styles.securitySummary}>
+                        <strong>API Key Storage:</strong> Your API keys are stored locally in your browser and never sent to our servers.
+                      </Text>
+                    </AccordionHeader>
+                    <AccordionPanel>
+                      <div className={styles.accordionContent}>
+                        <p>
+                          Your API keys are stored locally in your browser's local storage (not cookies) and persist until you manually 
+                          clear them or clear your browser data. The keys are never transmitted to our servers or any third party.
+                        </p>
+                        <p>
+                          <strong>Technical Details:</strong> We use browser local storage API, which provides persistent storage 
+                          that remains available across browser sessions. This data is stored only on your device and is accessible 
+                          only by this web application from the same domain.
+                        </p>
+                        <p>
+                          <strong>Open Source:</strong> This application is fully open source—you can{' '}
+                          <a href="https://github.com/iricigor/GlookoDataWebApp" target="_blank" rel="noopener noreferrer">
+                            review the code on GitHub
+                          </a>{' '}
+                          or deploy your own instance for complete control.
+                        </p>
+                      </div>
+                    </AccordionPanel>
+                  </AccordionItem>
+
+                  <AccordionItem value="communication">
+                    <AccordionHeader>
+                      <Text className={styles.securitySummary}>
+                        <strong>AI Communication:</strong> All AI analysis happens directly between your browser and the AI provider—no intermediary servers.
+                      </Text>
+                    </AccordionHeader>
+                    <AccordionPanel>
+                      <div className={styles.accordionContent}>
+                        <p>
+                          When you request AI analysis, your browser sends the request directly to the selected AI provider's API 
+                          ({activeProvider ? getProviderDisplayName(activeProvider) : 'the configured AI service'}). 
+                          Our application does not act as an intermediary—the communication goes straight from your browser 
+                          to the AI provider.
+                        </p>
+                        <p>
+                          <strong>Provider Priority:</strong> If multiple API keys are configured, they are used in this order: 
+                          Perplexity → Grok AI → DeepSeek → Google Gemini. To use a different provider, remove the API keys 
+                          with higher priority.
+                        </p>
+                        <p>
+                          <strong>Data Handling:</strong> Your health data is sent to the AI provider without personally identifiable 
+                          information (such as your name or email). However, the AI provider may be able to associate your API key 
+                          with the health data you send. Please review the privacy policies of your chosen AI provider.
+                        </p>
+                      </div>
+                    </AccordionPanel>
+                  </AccordionItem>
+
+                  <AccordionItem value="bestpractices">
+                    <AccordionHeader>
+                      <Text className={styles.securitySummary}>
+                        <strong>Security Best Practices:</strong> Follow these recommendations to keep your API keys and data secure.
+                      </Text>
+                    </AccordionHeader>
+                    <AccordionPanel>
+                      <div className={styles.accordionContent}>
+                        <p>
+                          <strong>Create Secure API Keys:</strong> Use minimal permissions when creating API keys at:
+                        </p>
+                        <ul>
+                          <li>
+                            <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
+                              Perplexity Settings
+                            </a>
+                          </li>
+                          <li>
+                            <a href="https://console.x.ai/" target="_blank" rel="noopener noreferrer">
+                              xAI Console
+                            </a> (for Grok AI)
+                          </li>
+                          <li>
+                            <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">
+                              DeepSeek Platform
+                            </a>
+                          </li>
+                          <li>
+                            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
+                              Google AI Studio
+                            </a>
+                          </li>
+                        </ul>
+                        <p>
+                          <strong>Protect Your Keys:</strong> Choose keys designated for client-side applications and set spending 
+                          limits to prevent unexpected charges. Monitor your API key usage regularly through your provider's dashboard.
+                        </p>
+                        <p>
+                          <strong>Risk Mitigation:</strong> If someone gains access to your browser session or computer, they could 
+                          potentially access your stored API key. To reduce this risk:
+                        </p>
+                        <ul>
+                          <li>Log out from shared computers</li>
+                          <li>Use browser privacy features (private/incognito mode when appropriate)</li>
+                          <li>Regularly rotate your API keys</li>
+                          <li>Monitor your API usage in your provider's dashboard</li>
+                          <li>Clear browser data when using public computers</li>
+                        </ul>
+                      </div>
+                    </AccordionPanel>
+                  </AccordionItem>
+                </Accordion>
               </div>
             </div>
 
