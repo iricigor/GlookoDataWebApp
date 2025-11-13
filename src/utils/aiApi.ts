@@ -128,13 +128,13 @@ export function getActiveProvider(
     const hasKey = (provider: AIProvider): boolean => {
       switch (provider) {
         case 'perplexity':
-          return perplexityKey.trim() !== '';
+          return !!(perplexityKey && perplexityKey.trim() !== '');
         case 'grok':
-          return grokKey.trim() !== '';
+          return !!(grokKey && grokKey.trim() !== '');
         case 'deepseek':
-          return deepseekKey.trim() !== '';
+          return !!(deepseekKey && deepseekKey.trim() !== '');
         case 'gemini':
-          return geminiKey.trim() !== '';
+          return !!(geminiKey && geminiKey.trim() !== '');
         default:
           return false;
       }

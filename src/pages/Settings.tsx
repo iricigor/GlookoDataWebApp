@@ -270,6 +270,34 @@ export function Settings({
   const availableProviders = getAvailableProviders(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
   const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
 
+  // Helper function to render the inline selection UI for each API key field
+  const renderKeyStatus = (provider: AIProvider, hasKey: boolean) => {
+    if (!hasKey) return undefined;
+    
+    const isActive = activeProvider === provider;
+    const hasMultipleKeys = availableProviders.length > 1;
+    
+    if (isActive) {
+      // Show "✓ Selected" for the active provider
+      return <Text style={{ color: tokens.colorBrandForeground1, fontWeight: tokens.fontWeightSemibold }}>✓ Selected</Text>;
+    } else if (hasMultipleKeys) {
+      // Show "Select" button for non-active providers when multiple keys exist
+      return (
+        <Button
+          appearance="subtle"
+          size="small"
+          onClick={() => onSelectedProviderChange(provider)}
+          style={{ minWidth: 'auto' }}
+        >
+          Select
+        </Button>
+      );
+    } else {
+      // Single key configured - just show checkmark
+      return '✓';
+    }
+  };
+
   const renderTabContent = () => {
     switch (selectedTab) {
       case 'general':
@@ -330,37 +358,11 @@ export function Settings({
                 </Text>
               )}
               
-              {/* Provider Selection - Only show if multiple providers are available */}
+              {/* Helper text for multiple keys */}
               {availableProviders.length > 1 && (
-                <div style={{ marginTop: '16px', marginBottom: '24px' }}>
-                  <Label className={styles.settingLabel}>AI Provider Selection</Label>
-                  <Text className={styles.settingDescription} style={{ marginBottom: '12px' }}>
-                    Choose which AI provider to use for analysis when multiple API keys are configured.
-                  </Text>
-                  <RadioGroup
-                    value={selectedProvider || 'auto'}
-                    onChange={(_, data) => {
-                      const value = data.value;
-                      if (value === 'auto') {
-                        onSelectedProviderChange(null);
-                      } else {
-                        onSelectedProviderChange(value as AIProvider);
-                      }
-                    }}
-                  >
-                    <Radio 
-                      value="auto" 
-                      label="Automatic (Priority: Perplexity > Grok > DeepSeek > Gemini)" 
-                    />
-                    {availableProviders.map(provider => (
-                      <Radio 
-                        key={provider}
-                        value={provider} 
-                        label={getProviderDisplayName(provider)} 
-                      />
-                    ))}
-                  </RadioGroup>
-                </div>
+                <Text className={styles.settingDescription} style={{ marginTop: '12px', marginBottom: '12px' }}>
+                  Click "Select" next to any configured API key to switch providers.
+                </Text>
               )}
               
               <div className={styles.apiKeyContainer}>
@@ -384,7 +386,7 @@ export function Settings({
                     value={perplexityApiKey}
                     onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
                     placeholder="Enter your Perplexity API key"
-                    contentAfter={perplexityApiKey ? (activeProvider === 'perplexity' ? '✓ Selected' : '✓') : undefined}
+                    contentAfter={renderKeyStatus('perplexity', !!perplexityApiKey)}
                     className={styles.apiKeyInput}
                   />
                 </div>
@@ -409,7 +411,7 @@ export function Settings({
                     value={grokApiKey}
                     onChange={(_, data) => onGrokApiKeyChange(data.value)}
                     placeholder="Enter your Grok AI API key"
-                    contentAfter={grokApiKey ? (activeProvider === 'grok' ? '✓ Selected' : '✓') : undefined}
+                    contentAfter={renderKeyStatus('grok', !!grokApiKey)}
                     className={styles.apiKeyInput}
                   />
                 </div>
@@ -434,7 +436,7 @@ export function Settings({
                     value={deepseekApiKey}
                     onChange={(_, data) => onDeepSeekApiKeyChange(data.value)}
                     placeholder="Enter your DeepSeek API key"
-                    contentAfter={deepseekApiKey ? (activeProvider === 'deepseek' ? '✓ Selected' : '✓') : undefined}
+                    contentAfter={renderKeyStatus('deepseek', !!deepseekApiKey)}
                     className={styles.apiKeyInput}
                   />
                 </div>
@@ -459,7 +461,7 @@ export function Settings({
                     value={geminiApiKey}
                     onChange={(_, data) => onGeminiApiKeyChange(data.value)}
                     placeholder="Enter your Google Gemini API key"
-                    contentAfter={geminiApiKey ? (activeProvider === 'gemini' ? '✓ Selected' : '✓') : undefined}
+                    contentAfter={renderKeyStatus('gemini', !!geminiApiKey)}
                     className={styles.apiKeyInput}
                   />
                 </div>
