@@ -18,7 +18,7 @@ import {
   AccordionHeader,
   AccordionPanel,
 } from '@fluentui/react-components';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
@@ -277,82 +277,97 @@ export function Settings({
   const versionInfo = getVersionInfo();
   const [selectedTab, setSelectedTab] = useState<string>('general');
 
+  // Track previous key states for auto-selection logic
+  const prevKeysRef = useRef({
+    perplexity: perplexityApiKey,
+    grok: grokApiKey,
+    deepseek: deepseekApiKey,
+    gemini: geminiApiKey,
+  });
+
   // Get available providers and determine active one
   const availableProviders = getAvailableProviders(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
   const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
 
-  // Wrapper functions to handle key changes with auto-selection logic
-  const handlePerplexityKeyChange = (key: string) => {
-    const wasEmpty = !perplexityApiKey || perplexityApiKey.trim() === '';
-    const isNowEmpty = !key || key.trim() === '';
-    const isNowFilled = key && key.trim() !== '';
+  // Handle auto-selection when keys change
+  useEffect(() => {
+    const prevKeys = prevKeysRef.current;
     
-    onPerplexityApiKeyChange(key);
-    
-    // Auto-select this provider if a new key was just entered
-    if (wasEmpty && isNowFilled) {
-      setTimeout(() => onSelectedProviderChange('perplexity'), 0);
-    }
-    // If the active provider's key was deleted, select first available provider
-    else if (!wasEmpty && isNowEmpty && activeProvider === 'perplexity') {
-      const remaining = getAvailableProviders('', geminiApiKey, grokApiKey, deepseekApiKey);
-      setTimeout(() => onSelectedProviderChange(remaining[0] || null), 0);
-    }
-  };
+    // Check each provider for empty->filled or filled->empty transitions
+    const checkProvider = (
+      provider: AIProvider,
+      currentKey: string,
+      prevKey: string,
+      otherKeys: { perplexityKey: string; grokKey: string; deepseekKey: string; geminiKey: string }
+    ) => {
+      const wasEmpty = !prevKey || prevKey.trim() === '';
+      const isNowEmpty = !currentKey || currentKey.trim() === '';
+      const isNowFilled = currentKey && currentKey.trim() !== '';
+      
+      // Auto-select when new key is entered
+      if (wasEmpty && isNowFilled) {
+        onSelectedProviderChange(provider);
+      }
+      // If the active provider's key was deleted, select first available provider
+      else if (!wasEmpty && isNowEmpty && activeProvider === provider) {
+        const remaining = getAvailableProviders(
+          otherKeys.perplexityKey,
+          otherKeys.geminiKey,
+          otherKeys.grokKey,
+          otherKeys.deepseekKey
+        );
+        onSelectedProviderChange(remaining[0] || null);
+      }
+    };
 
-  const handleGrokKeyChange = (key: string) => {
-    const wasEmpty = !grokApiKey || grokApiKey.trim() === '';
-    const isNowEmpty = !key || key.trim() === '';
-    const isNowFilled = key && key.trim() !== '';
-    
-    onGrokApiKeyChange(key);
-    
-    // Auto-select this provider if a new key was just entered
-    if (wasEmpty && isNowFilled) {
-      setTimeout(() => onSelectedProviderChange('grok'), 0);
+    // Check Perplexity
+    if (prevKeys.perplexity !== perplexityApiKey) {
+      checkProvider('perplexity', perplexityApiKey, prevKeys.perplexity, {
+        perplexityKey: '',
+        geminiKey: geminiApiKey,
+        grokKey: grokApiKey,
+        deepseekKey: deepseekApiKey,
+      });
     }
-    // If the active provider's key was deleted, select first available provider
-    else if (!wasEmpty && isNowEmpty && activeProvider === 'grok') {
-      const remaining = getAvailableProviders(perplexityApiKey, geminiApiKey, '', deepseekApiKey);
-      setTimeout(() => onSelectedProviderChange(remaining[0] || null), 0);
-    }
-  };
 
-  const handleDeepSeekKeyChange = (key: string) => {
-    const wasEmpty = !deepseekApiKey || deepseekApiKey.trim() === '';
-    const isNowEmpty = !key || key.trim() === '';
-    const isNowFilled = key && key.trim() !== '';
-    
-    onDeepSeekApiKeyChange(key);
-    
-    // Auto-select this provider if a new key was just entered
-    if (wasEmpty && isNowFilled) {
-      setTimeout(() => onSelectedProviderChange('deepseek'), 0);
+    // Check Grok
+    if (prevKeys.grok !== grokApiKey) {
+      checkProvider('grok', grokApiKey, prevKeys.grok, {
+        perplexityKey: perplexityApiKey,
+        geminiKey: geminiApiKey,
+        grokKey: '',
+        deepseekKey: deepseekApiKey,
+      });
     }
-    // If the active provider's key was deleted, select first available provider
-    else if (!wasEmpty && isNowEmpty && activeProvider === 'deepseek') {
-      const remaining = getAvailableProviders(perplexityApiKey, geminiApiKey, grokApiKey, '');
-      setTimeout(() => onSelectedProviderChange(remaining[0] || null), 0);
-    }
-  };
 
-  const handleGeminiKeyChange = (key: string) => {
-    const wasEmpty = !geminiApiKey || geminiApiKey.trim() === '';
-    const isNowEmpty = !key || key.trim() === '';
-    const isNowFilled = key && key.trim() !== '';
-    
-    onGeminiApiKeyChange(key);
-    
-    // Auto-select this provider if a new key was just entered
-    if (wasEmpty && isNowFilled) {
-      setTimeout(() => onSelectedProviderChange('gemini'), 0);
+    // Check DeepSeek
+    if (prevKeys.deepseek !== deepseekApiKey) {
+      checkProvider('deepseek', deepseekApiKey, prevKeys.deepseek, {
+        perplexityKey: perplexityApiKey,
+        geminiKey: geminiApiKey,
+        grokKey: grokApiKey,
+        deepseekKey: '',
+      });
     }
-    // If the active provider's key was deleted, select first available provider
-    else if (!wasEmpty && isNowEmpty && activeProvider === 'gemini') {
-      const remaining = getAvailableProviders(perplexityApiKey, '', grokApiKey, deepseekApiKey);
-      setTimeout(() => onSelectedProviderChange(remaining[0] || null), 0);
+
+    // Check Gemini
+    if (prevKeys.gemini !== geminiApiKey) {
+      checkProvider('gemini', geminiApiKey, prevKeys.gemini, {
+        perplexityKey: perplexityApiKey,
+        geminiKey: '',
+        grokKey: grokApiKey,
+        deepseekKey: deepseekApiKey,
+      });
     }
-  };
+
+    // Update ref with current keys
+    prevKeysRef.current = {
+      perplexity: perplexityApiKey,
+      grok: grokApiKey,
+      deepseek: deepseekApiKey,
+      gemini: geminiApiKey,
+    };
+  }, [perplexityApiKey, grokApiKey, deepseekApiKey, geminiApiKey, activeProvider, onSelectedProviderChange]);
 
   // Helper function to render the inline selection UI for each API key field
   const renderKeyStatus = (provider: AIProvider, hasKey: boolean) => {
@@ -468,7 +483,7 @@ export function Settings({
                     id="perplexity-api-key"
                     type="password"
                     value={perplexityApiKey}
-                    onChange={(_, data) => handlePerplexityKeyChange(data.value)}
+                    onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
                     placeholder="Enter your Perplexity API key"
                     contentAfter={renderKeyStatus('perplexity', !!perplexityApiKey)}
                     className={styles.apiKeyInput}
@@ -493,7 +508,7 @@ export function Settings({
                     id="grok-api-key"
                     type="password"
                     value={grokApiKey}
-                    onChange={(_, data) => handleGrokKeyChange(data.value)}
+                    onChange={(_, data) => onGrokApiKeyChange(data.value)}
                     placeholder="Enter your Grok AI API key"
                     contentAfter={renderKeyStatus('grok', !!grokApiKey)}
                     className={styles.apiKeyInput}
@@ -518,7 +533,7 @@ export function Settings({
                     id="deepseek-api-key"
                     type="password"
                     value={deepseekApiKey}
-                    onChange={(_, data) => handleDeepSeekKeyChange(data.value)}
+                    onChange={(_, data) => onDeepSeekApiKeyChange(data.value)}
                     placeholder="Enter your DeepSeek API key"
                     contentAfter={renderKeyStatus('deepseek', !!deepseekApiKey)}
                     className={styles.apiKeyInput}
@@ -543,7 +558,7 @@ export function Settings({
                     id="gemini-api-key"
                     type="password"
                     value={geminiApiKey}
-                    onChange={(_, data) => handleGeminiKeyChange(data.value)}
+                    onChange={(_, data) => onGeminiApiKeyChange(data.value)}
                     placeholder="Enter your Google Gemini API key"
                     contentAfter={renderKeyStatus('gemini', !!geminiApiKey)}
                     className={styles.apiKeyInput}
