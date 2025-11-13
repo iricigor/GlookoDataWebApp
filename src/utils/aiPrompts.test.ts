@@ -36,5 +36,10 @@ describe('aiPrompts', () => {
     it('should specify not to assume healthcare provider intermediary', () => {
       expect(AI_SYSTEM_PROMPT).toContain('Do not assume there is a healthcare provider intermediary');
     });
+
+    it('should include completion marker instruction', () => {
+      expect(AI_SYSTEM_PROMPT).toContain('--- END OF ANALYSIS ---');
+      expect(AI_SYSTEM_PROMPT).toContain('end your complete response');
+    });
   });
 });

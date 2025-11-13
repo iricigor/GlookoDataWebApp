@@ -43,5 +43,7 @@ Perform the following specific analyses on provided data set and report the find
 ${csvData}
 \`\`\`
 
-Remember that all glucose values are in mmol/L (not mg/dL). Address me directly using "you/your" language. Keep your response clear and actionable.`;
+Remember that all glucose values are in mmol/L (not mg/dL). Address me directly using "you/your" language. Keep your response clear and actionable.
+
+IMPORTANT: End your response with "--- END OF ANALYSIS ---" on a new line to confirm your analysis is complete.`;
 }

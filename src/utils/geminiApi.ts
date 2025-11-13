@@ -102,7 +102,7 @@ export async function callGeminiApi(
         ],
         generationConfig: {
           temperature: 0.2,
-          maxOutputTokens: 1000,
+          maxOutputTokens: 4000,
           topP: 0.8,
           topK: 40,
         },
