@@ -73,12 +73,12 @@ describe('AIAnalysis', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    const timeInRangeTabs = screen.getAllByText('Time in Range');
-    fireEvent.click(timeInRangeTabs[0]);
-
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+    
+    // Wait for tab content to load
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
   });
 
   it('should change button text to "Click to enable new analysis" after successful analysis', async () => {
@@ -104,8 +104,7 @@ describe('AIAnalysis', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    const timeInRangeTabs = screen.getAllByText('Time in Range');
-    fireEvent.click(timeInRangeTabs[0]);
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
 
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
@@ -149,8 +148,7 @@ describe('AIAnalysis', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    const timeInRangeTabs = screen.getAllByText('Time in Range');
-    fireEvent.click(timeInRangeTabs[0]);
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
 
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
@@ -211,8 +209,7 @@ describe('AIAnalysis', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    const timeInRangeTabs = screen.getAllByText('Time in Range');
-    fireEvent.click(timeInRangeTabs[0]);
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
 
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
@@ -288,8 +285,7 @@ describe('AIAnalysis', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    const timeInRangeTabs = screen.getAllByText('Time in Range');
-    fireEvent.click(timeInRangeTabs[0]);
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
 
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
@@ -358,8 +354,7 @@ describe('AIAnalysis', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    const timeInRangeTabs = screen.getAllByText('Time in Range');
-    fireEvent.click(timeInRangeTabs[0]);
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
 
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
@@ -400,8 +395,7 @@ describe('AIAnalysis', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    const timeInRangeTabs = screen.getAllByText('Time in Range');
-    fireEvent.click(timeInRangeTabs[0]);
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
 
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
@@ -449,8 +443,7 @@ describe('AIAnalysis', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Meal Timing').length).toBeGreaterThan(0);
     });
-    const mealTimingTabs = screen.getAllByText('Meal Timing');
-    fireEvent.click(mealTimingTabs[0]);
+    fireEvent.click(screen.getByRole('tab', { name: /Meal Timing/i }));
 
     // Wait for the Analyze button on Meal Timing tab
     await waitFor(() => {
@@ -492,8 +485,7 @@ describe('AIAnalysis', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Meal Timing').length).toBeGreaterThan(0);
     });
-    const mealTimingTabs2 = screen.getAllByText('Meal Timing');
-    fireEvent.click(mealTimingTabs2[0]);
+    fireEvent.click(screen.getByRole('tab', { name: /Meal Timing/i }));
 
     await waitFor(() => {
       const analyzeButtons = screen.getAllByText('Analyze with AI');
