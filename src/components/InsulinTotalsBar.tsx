@@ -23,6 +23,7 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     width: '100%',
     height: '100%',
+    minHeight: '68px', // Accommodate both minHeights (30px + 30px + 8px padding)
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     overflow: 'hidden',
@@ -73,14 +74,19 @@ export function InsulinTotalsBar({ basalTotal, bolusTotal }: InsulinTotalsBarPro
   const bolusPercent = (bolusTotal / totalInsulin) * 100;
   const basalPercent = (basalTotal / totalInsulin) * 100;
 
+  // Only apply minHeight if the percentage is very small (below 10%)
+  const MIN_HEIGHT_THRESHOLD = 10;
+  const getMinHeight = (percent: number) => percent < MIN_HEIGHT_THRESHOLD ? '30px' : undefined;
+
   return (
-    <div className={styles.container}>
+    <div className={styles.container} role="complementary" aria-label="Daily insulin totals visualization">
       <div className={styles.barContainer}>
         {/* Bolus section (top) */}
         {bolusTotal > 0 && (
           <div
             className={styles.bolusSection}
-            style={{ height: `${bolusPercent}%`, minHeight: '30px' }}
+            style={{ height: `${bolusPercent}%`, minHeight: getMinHeight(bolusPercent) }}
+            aria-label={`Bolus insulin: ${bolusTotal.toFixed(1)} units`}
           >
             <Text>{bolusTotal.toFixed(1)}</Text>
           </div>
@@ -90,7 +96,8 @@ export function InsulinTotalsBar({ basalTotal, bolusTotal }: InsulinTotalsBarPro
         {basalTotal > 0 && (
           <div
             className={styles.basalSection}
-            style={{ height: `${basalPercent}%`, minHeight: '30px' }}
+            style={{ height: `${basalPercent}%`, minHeight: getMinHeight(basalPercent) }}
+            aria-label={`Basal insulin: ${basalTotal.toFixed(1)} units`}
           >
             <Text>{basalTotal.toFixed(1)}</Text>
           </div>

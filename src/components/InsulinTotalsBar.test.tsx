@@ -73,4 +73,41 @@ describe('InsulinTotalsBar', () => {
     expect(screen.getByText('50.5')).toBeInTheDocument();
     expect(screen.getByText('30.3')).toBeInTheDocument();
   });
+
+  it('should apply minHeight only when percentage is below threshold', () => {
+    // Test with very small basal value (50 basal vs 1 bolus = ~2% bolus)
+    const { container } = render(<InsulinTotalsBar basalTotal={50} bolusTotal={1} />);
+    
+    const sections = container.querySelectorAll('[style*="height"]');
+    const bolusSection = sections[0] as HTMLElement;
+    
+    // Bolus is ~2%, which is below 10% threshold, so should have minHeight
+    expect(bolusSection.style.minHeight).toBe('30px');
+  });
+
+  it('should not apply minHeight when percentage is above threshold', () => {
+    // Test with balanced values (both above 10%)
+    const { container } = render(<InsulinTotalsBar basalTotal={20} bolusTotal={30} />);
+    
+    const sections = container.querySelectorAll('[style*="height"]');
+    const bolusSection = sections[0] as HTMLElement;
+    const basalSection = sections[1] as HTMLElement;
+    
+    // Both sections are above 10%, so should not have minHeight set
+    expect(bolusSection.style.minHeight).toBe('');
+    expect(basalSection.style.minHeight).toBe('');
+  });
+
+  it('should have accessibility attributes', () => {
+    const { container } = render(<InsulinTotalsBar basalTotal={10.5} bolusTotal={8.3} />);
+    
+    // Check for role and aria-label on container
+    const mainContainer = container.querySelector('[role="complementary"]');
+    expect(mainContainer).toBeInTheDocument();
+    expect(mainContainer).toHaveAttribute('aria-label', 'Daily insulin totals visualization');
+    
+    // Check for aria-labels on sections
+    const sections = container.querySelectorAll('[aria-label]');
+    expect(sections.length).toBeGreaterThan(0);
+  });
 });
