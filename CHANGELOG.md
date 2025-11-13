@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>247 Add DeepSeek AI provider support</summary>
+
+[#247](../../pull/247) Add DeepSeek AI provider support
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>248 Update version info to link to GitHub Releases</summary>
 
 [#248](../../pull/248) Update version info to link to GitHub Releases
