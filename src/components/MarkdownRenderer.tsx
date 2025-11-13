@@ -16,9 +16,11 @@ const useStyles = makeStyles({
     justifyContent: 'flex-end',
     opacity: 0,
     transition: 'opacity 0.2s ease-in-out',
+    pointerEvents: 'none', // Prevent button from interfering with hover detection when hidden
   },
   copyButtonVisible: {
     opacity: 1,
+    pointerEvents: 'auto', // Allow button to be clicked when visible
   },
   markdown: {
     fontSize: tokens.fontSizeBase400,
