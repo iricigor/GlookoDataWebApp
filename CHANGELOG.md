@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>268 Add Pump Settings Verification AI Analysis Tab</summary>
+
+[#268](../../pull/268) Add Pump Settings Verification AI Analysis Tab
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>260 Add inline AI provider selection with smart auto-selection</summary>
 
 [#260](../../pull/260) Add inline AI provider selection with smart auto-selection
