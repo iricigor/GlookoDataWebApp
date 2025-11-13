@@ -48,6 +48,7 @@ describe('AIAnalysis', () => {
     // Mock insulin data extraction
     vi.mocked(insulinDataUtils.extractInsulinReadings).mockResolvedValue([]);
     vi.mocked(insulinDataUtils.aggregateInsulinByDate).mockReturnValue([]);
+    vi.mocked(insulinDataUtils.extractDailyInsulinSummaries).mockResolvedValue([]);
     // Mock AI provider
     vi.mocked(aiApi.getActiveProvider).mockReturnValue('gemini');
   });
@@ -69,9 +70,13 @@ describe('AIAnalysis', () => {
       />
     );
 
+    // Switch to Time in Range tab
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+    
+    // Wait for button to appear (data should load automatically)
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
-    });
+    }, { timeout: 5000 });
   });
 
   it('should change button text to "Click to enable new analysis" after successful analysis', async () => {
@@ -94,6 +99,12 @@ describe('AIAnalysis', () => {
     );
 
     // Wait for the button to be available (after data loads)
+    // Switch to Time in Range tab
+    await waitFor(() => {
+      expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
+    });
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
     }, { timeout: 2000 });
@@ -133,6 +144,12 @@ describe('AIAnalysis', () => {
     );
 
     // Wait for the button to be available
+    // Switch to Time in Range tab
+    await waitFor(() => {
+      expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
+    });
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
     }, { timeout: 2000 });
@@ -189,6 +206,12 @@ describe('AIAnalysis', () => {
     );
 
     // Wait for the button and click it
+    // Switch to Time in Range tab
+    await waitFor(() => {
+      expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
+    });
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
     }, { timeout: 2000 });
@@ -261,6 +284,12 @@ describe('AIAnalysis', () => {
     );
 
     // First analysis
+    // Switch to Time in Range tab
+    await waitFor(() => {
+      expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
+    });
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
     }, { timeout: 2000 });
@@ -325,6 +354,12 @@ describe('AIAnalysis', () => {
       />
     );
 
+    // Switch to Time in Range tab
+    await waitFor(() => {
+      expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
+    });
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
     });
@@ -361,6 +396,12 @@ describe('AIAnalysis', () => {
     );
 
     // Wait for the button to be available
+    // Switch to Time in Range tab
+    await waitFor(() => {
+      expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
+    });
+    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
     }, { timeout: 2000 });
@@ -406,9 +447,9 @@ describe('AIAnalysis', () => {
 
     // Switch to Meal Timing tab
     await waitFor(() => {
-      expect(screen.getByText('Meal Timing')).toBeInTheDocument();
+      expect(screen.getAllByText('Meal Timing').length).toBeGreaterThan(0);
     });
-    fireEvent.click(screen.getByText('Meal Timing'));
+    fireEvent.click(screen.getByRole('tab', { name: /Meal Timing/i }));
 
     // Wait for the Analyze button on Meal Timing tab
     await waitFor(() => {
@@ -449,9 +490,9 @@ describe('AIAnalysis', () => {
 
     // Switch back to Meal Timing tab
     await waitFor(() => {
-      expect(screen.getByText('Meal Timing')).toBeInTheDocument();
+      expect(screen.getAllByText('Meal Timing').length).toBeGreaterThan(0);
     });
-    fireEvent.click(screen.getByText('Meal Timing'));
+    fireEvent.click(screen.getByRole('tab', { name: /Meal Timing/i }));
 
     await waitFor(() => {
       const analyzeButtons = screen.getAllByText('Analyze with AI');

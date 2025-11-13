@@ -7,6 +7,16 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
+    // Exclude Playwright e2e tests from Vitest
+    exclude: [
+      'node_modules',
+      'dist',
+      '.idea',
+      '.git',
+      '.cache',
+      '**/e2e/**',
+      'tests/e2e/**',
+    ],
     // Enable parallel test execution for better performance
     pool: 'threads',
     poolOptions: {
