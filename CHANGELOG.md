@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>273 Add copy-to-clipboard button for AI analysis responses</summary>
+
+[#273](../../pull/273) Add copy-to-clipboard button for AI analysis responses
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>270 [WIP] Fix nine failing tests in the test suite</summary>
 
 [#270](../../pull/270) [WIP] Fix nine failing tests in the test suite
