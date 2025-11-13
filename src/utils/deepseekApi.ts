@@ -1,52 +1,50 @@
 /**
- * Google Gemini API utility functions
+ * DeepSeek API utility functions
  * 
- * This module provides functions to interact with Google's Gemini API
+ * This module provides functions to interact with DeepSeek's API
  * for AI-powered analysis of glucose data.
  */
 
 import { AI_SYSTEM_PROMPT } from './aiPrompts';
 
 /**
- * Gemini API response structure
+ * DeepSeek API response structure (OpenAI-compatible)
  */
-export interface GeminiResponse {
-  candidates: Array<{
-    content: {
-      parts: Array<{
-        text: string;
-      }>;
-      role: string;
-    };
-    finishReason: string;
+export interface DeepSeekResponse {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  choices: Array<{
     index: number;
-    safetyRatings?: Array<{
-      category: string;
-      probability: string;
-    }>;
+    message: {
+      role: string;
+      content: string;
+    };
+    finish_reason: string;
   }>;
-  usageMetadata?: {
-    promptTokenCount: number;
-    candidatesTokenCount: number;
-    totalTokenCount: number;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
   };
 }
 
 /**
- * Error response from Gemini API
+ * Error response from DeepSeek API
  */
-export interface GeminiError {
+export interface DeepSeekError {
   error: {
-    code: number;
     message: string;
-    status: string;
+    type: string;
+    code?: string;
   };
 }
 
 /**
- * Result of calling Gemini API
+ * Result of calling DeepSeek API
  */
-export interface GeminiResult {
+export interface DeepSeekResult {
   success: boolean;
   content?: string;
   error?: string;
@@ -54,16 +52,16 @@ export interface GeminiResult {
 }
 
 /**
- * Call Google Gemini API with a prompt
+ * Call DeepSeek API with a prompt
  * 
- * @param apiKey - Google Gemini API key
+ * @param apiKey - DeepSeek API key
  * @param prompt - The prompt to send to the AI
  * @returns Promise with the result containing success status and content or error
  */
-export async function callGeminiApi(
+export async function callDeepSeekApi(
   apiKey: string,
   prompt: string
-): Promise<GeminiResult> {
+): Promise<DeepSeekResult> {
   // Validate inputs
   if (!apiKey || apiKey.trim() === '') {
     return {
@@ -82,48 +80,26 @@ export async function callGeminiApi(
   }
 
   try {
-    // Using gemini-2.0-flash-exp model as specified
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
-    
-    const response = await fetch(url, {
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [
+        model: 'deepseek-chat',
+        messages: [
           {
-            parts: [
-              {
-                text: `${AI_SYSTEM_PROMPT}\n\n${prompt}`,
-              },
-            ],
+            role: 'system',
+            content: AI_SYSTEM_PROMPT,
+          },
+          {
+            role: 'user',
+            content: prompt,
           },
         ],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 1000,
-          topP: 0.8,
-          topK: 40,
-        },
-        safetySettings: [
-          {
-            category: 'HARM_CATEGORY_HARASSMENT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-          },
-          {
-            category: 'HARM_CATEGORY_HATE_SPEECH',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-          },
-          {
-            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-          },
-          {
-            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-          },
-        ],
+        temperature: 0.2,
+        max_tokens: 1000,
       }),
     });
 
@@ -139,7 +115,7 @@ export async function callGeminiApi(
 
       // Try to parse error message from response
       try {
-        const errorData = await response.json() as GeminiError;
+        const errorData = await response.json() as DeepSeekError;
         return {
           success: false,
           error: errorData.error?.message || `API error: ${response.status} ${response.statusText}`,
@@ -155,12 +131,10 @@ export async function callGeminiApi(
     }
 
     // Parse successful response
-    const data = await response.json() as GeminiResponse;
+    const data = await response.json() as DeepSeekResponse;
     
-    if (data.candidates && data.candidates.length > 0 && 
-        data.candidates[0].content && data.candidates[0].content.parts && 
-        data.candidates[0].content.parts.length > 0) {
-      const content = data.candidates[0].content.parts[0].text;
+    if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+      const content = data.choices[0].message.content;
       return {
         success: true,
         content: content.trim(),

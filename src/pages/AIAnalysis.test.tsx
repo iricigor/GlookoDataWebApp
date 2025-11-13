@@ -63,6 +63,7 @@ describe('AIAnalysis', () => {
         perplexityApiKey=""
         geminiApiKey="test-key"
         grokApiKey=""
+        deepseekApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -85,6 +86,7 @@ describe('AIAnalysis', () => {
         perplexityApiKey=""
         geminiApiKey="test-key"
         grokApiKey=""
+        deepseekApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -122,6 +124,7 @@ describe('AIAnalysis', () => {
         perplexityApiKey=""
         geminiApiKey="test-key"
         grokApiKey=""
+        deepseekApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -176,6 +179,7 @@ describe('AIAnalysis', () => {
         perplexityApiKey=""
         geminiApiKey="test-key"
         grokApiKey=""
+        deepseekApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -214,6 +218,7 @@ describe('AIAnalysis', () => {
         perplexityApiKey=""
         geminiApiKey="test-key"
         grokApiKey=""
+        deepseekApiKey=""
         existingAnalysis={existingAnalysis}
         onAnalysisComplete={mockAnalysisComplete}
       />
@@ -244,6 +249,7 @@ describe('AIAnalysis', () => {
         perplexityApiKey=""
         geminiApiKey="test-key"
         grokApiKey=""
+        deepseekApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -307,6 +313,7 @@ describe('AIAnalysis', () => {
         perplexityApiKey=""
         geminiApiKey="test-key"
         grokApiKey=""
+        deepseekApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -340,6 +347,7 @@ describe('AIAnalysis', () => {
         perplexityApiKey=""
         geminiApiKey=""
         grokApiKey="test-grok-key"
+        deepseekApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -382,6 +390,7 @@ describe('AIAnalysis', () => {
         perplexityApiKey=""
         geminiApiKey=""
         grokApiKey="test-grok-key"
+        deepseekApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -423,6 +432,7 @@ describe('AIAnalysis', () => {
         perplexityApiKey="test-perplexity-key"
         geminiApiKey=""
         grokApiKey=""
+        deepseekApiKey=""
         onAnalysisComplete={mockAnalysisComplete}
       />
     );

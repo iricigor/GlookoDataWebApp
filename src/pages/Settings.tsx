@@ -209,9 +209,11 @@ interface SettingsProps {
   onGeminiApiKeyChange: (key: string) => void;
   grokApiKey: string;
   onGrokApiKeyChange: (key: string) => void;
+  deepseekApiKey: string;
+  onDeepSeekApiKeyChange: (key: string) => void;
 }
 
-export function Settings({ themeMode, onThemeChange, exportFormat, onExportFormatChange, perplexityApiKey, onPerplexityApiKeyChange, geminiApiKey, onGeminiApiKeyChange, grokApiKey, onGrokApiKeyChange }: SettingsProps) {
+export function Settings({ themeMode, onThemeChange, exportFormat, onExportFormatChange, perplexityApiKey, onPerplexityApiKeyChange, geminiApiKey, onGeminiApiKeyChange, grokApiKey, onGrokApiKeyChange, deepseekApiKey, onDeepSeekApiKeyChange }: SettingsProps) {
   const styles = useStyles();
   const { thresholds, updateThreshold, validateThresholds, isValid } = useGlucoseThresholds();
   const validationError = validateThresholds(thresholds);
@@ -219,8 +221,8 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
   const [selectedTab, setSelectedTab] = useState<string>('general');
 
   // Determine which provider is active based on available keys
-  // Priority: Perplexity > Grok > Gemini
-  const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey, grokApiKey);
+  // Priority: Perplexity > Grok > DeepSeek > Gemini
+  const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
 
   const renderTabContent = () => {
     switch (selectedTab) {
@@ -335,6 +337,31 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                 
                 <div className={styles.apiKeyRow}>
                   <div className={styles.apiKeyLabelRow}>
+                    <Label htmlFor="deepseek-api-key" className={styles.apiKeyLabel}>
+                      DeepSeek API Key
+                    </Label>
+                    <Link 
+                      href="https://www.deepseek.com/en/privacy" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={styles.privacyLink}
+                    >
+                      Privacy Policy
+                    </Link>
+                  </div>
+                  <Input
+                    id="deepseek-api-key"
+                    type="password"
+                    value={deepseekApiKey}
+                    onChange={(_, data) => onDeepSeekApiKeyChange(data.value)}
+                    placeholder="Enter your DeepSeek API key"
+                    contentAfter={deepseekApiKey ? (activeProvider === 'deepseek' ? '✓ Selected' : '✓') : undefined}
+                    className={styles.apiKeyInput}
+                  />
+                </div>
+                
+                <div className={styles.apiKeyRow}>
+                  <div className={styles.apiKeyLabelRow}>
                     <Label htmlFor="gemini-api-key" className={styles.apiKeyLabel}>
                       Google Gemini API Key
                     </Label>
@@ -398,6 +425,9 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                   </a>,{' '}
                   <a href="https://console.x.ai/" target="_blank" rel="noopener noreferrer">
                     xAI Console
+                  </a>,{' '}
+                  <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">
+                    DeepSeek Platform
                   </a>, or{' '}
                   <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
                     Google AI Studio
@@ -406,7 +436,7 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                 </Text>
                 <Text as="p" style={{ marginBottom: '12px' }}>
                   <strong>Provider Selection:</strong> If multiple API keys are configured, Perplexity will be used by default. 
-                  If Perplexity is not available, Grok AI will be used next, followed by Google Gemini. 
+                  If Perplexity is not available, Grok AI will be used next, followed by DeepSeek, and finally Google Gemini. 
                   To use a different provider, remove the API keys with higher priority.
                 </Text>
                 <Text as="p">
