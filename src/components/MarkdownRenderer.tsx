@@ -1,5 +1,6 @@
 import { makeStyles, tokens, shorthands } from '@fluentui/react-components';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const useStyles = makeStyles({
   markdown: {
@@ -119,7 +120,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
   
   return (
     <div className={styles.markdown}>
-      <ReactMarkdown>{content}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
     </div>
   );
 }
