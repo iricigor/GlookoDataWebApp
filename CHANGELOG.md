@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>262 Add vertical summary bar to CGM details graph</summary>
+
+[#262](../../pull/262) Add vertical summary bar to CGM details graph
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>264 Add vertical totals bar to insulin timeline showing basal vs bolus ratio</summary>
 
 [#264](../../pull/264) Add vertical totals bar to insulin timeline showing basal vs bolus ratio
