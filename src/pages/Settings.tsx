@@ -13,8 +13,6 @@ import {
   Button,
   TabList,
   Tab,
-  MessageBar,
-  MessageBarBody,
   Accordion,
   AccordionItem,
   AccordionHeader,
@@ -169,14 +167,6 @@ const useStyles = makeStyles({
     ...shorthands.gap('12px'),
     flexWrap: 'wrap',
   },
-  dataWarning: {
-    marginBottom: '16px',
-  },
-  dataWarningTitle: {
-    fontWeight: tokens.fontWeightSemibold,
-    fontSize: tokens.fontSizeBase400,
-    marginBottom: '4px',
-  },
   securitySection: {
     marginTop: '16px',
     ...shorthands.padding('16px'),
@@ -224,6 +214,16 @@ const useStyles = makeStyles({
     '& li': {
       marginBottom: '4px',
     },
+  },
+  warningHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
+  warningIcon: {
+    fontSize: tokens.fontSizeBase400,
+    color: tokens.colorPaletteYellowForeground1,
+    flexShrink: 0,
   },
 });
 
@@ -415,32 +415,41 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                 </div>
               </div>
               
-              <MessageBar
-                intent="warning"
-                icon={<WarningRegular />}
-                className={styles.dataWarning}
-              >
-                <MessageBarBody>
-                  <Text className={styles.dataWarningTitle}>Attention!</Text>
-                  <Text>
-                    When you use AI analysis features, your sensitive health data will be sent to the selected AI provider 
-                    ({activeProvider ? getProviderDisplayName(activeProvider) : 'the configured AI service'}). 
-                    The data is sent without personally identifiable information (such as your name or email), but the AI provider 
-                    may be able to connect your API key with the health data you send. You are responsible for the security of this 
-                    information and use of it in accordance with all applicable data protection rules and regulations.
-                  </Text>
-                  <Text style={{ marginTop: '12px' }}>
-                    <strong>Best Practices:</strong> Monitor your API key usage regularly through your provider's dashboard, 
-                    apply least privilege access permissions when creating API keys, and set daily spending limits to prevent 
-                    unexpected charges and unauthorized usage.
-                  </Text>
-                </MessageBarBody>
-              </MessageBar>
-              
               <div className={styles.securitySection}>
                 <Text className={styles.securityTitle}>Security & Privacy Information</Text>
                 
                 <Accordion collapsible multiple>
+                  <AccordionItem value="datahandling">
+                    <AccordionHeader>
+                      <div className={styles.warningHeader}>
+                        <WarningRegular className={styles.warningIcon} />
+                        <Text className={styles.securitySummary}>
+                          <strong>Important: Data Handling & Your Responsibility</strong> — Your health data is sent to AI providers when using analysis features.
+                        </Text>
+                      </div>
+                    </AccordionHeader>
+                    <AccordionPanel>
+                      <div className={styles.accordionContent}>
+                        <p>
+                          When you use AI analysis features, your sensitive health data will be sent to the selected AI provider 
+                          ({activeProvider ? getProviderDisplayName(activeProvider) : 'the configured AI service'}). 
+                          The data is sent <strong>without personally identifiable information</strong> (such as your name or email), 
+                          but the AI provider may be able to associate your API key with the health data you send.
+                        </p>
+                        <p>
+                          <strong>Your Responsibility:</strong> You are responsible for the security of this information and its use 
+                          in accordance with all applicable data protection rules and regulations. Review the privacy policies of your 
+                          chosen AI provider before using these features.
+                        </p>
+                        <p>
+                          <strong>Best Practices:</strong> Monitor your API key usage regularly through your provider's dashboard, 
+                          apply least privilege access permissions when creating API keys, and set daily spending limits to prevent 
+                          unexpected charges and unauthorized usage.
+                        </p>
+                      </div>
+                    </AccordionPanel>
+                  </AccordionItem>
+
                   <AccordionItem value="storage">
                     <AccordionHeader>
                       <Text className={styles.securitySummary}>
@@ -478,8 +487,7 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                     <AccordionPanel>
                       <div className={styles.accordionContent}>
                         <p>
-                          When you request AI analysis, your browser sends the request directly to the selected AI provider's API 
-                          ({activeProvider ? getProviderDisplayName(activeProvider) : 'the configured AI service'}). 
+                          When you request AI analysis, your browser sends the request directly to the selected AI provider's API. 
                           Our application does not act as an intermediary—the communication goes straight from your browser 
                           to the AI provider.
                         </p>
@@ -487,11 +495,6 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                           <strong>Provider Priority:</strong> If multiple API keys are configured, they are used in this order: 
                           Perplexity → Grok AI → DeepSeek → Google Gemini. To use a different provider, remove the API keys 
                           with higher priority.
-                        </p>
-                        <p>
-                          <strong>Data Handling:</strong> Your health data is sent to the AI provider without personally identifiable 
-                          information (such as your name or email). However, the AI provider may be able to associate your API key 
-                          with the health data you send. Please review the privacy policies of your chosen AI provider.
                         </p>
                       </div>
                     </AccordionPanel>
