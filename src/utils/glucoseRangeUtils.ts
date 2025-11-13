@@ -14,6 +14,24 @@ import type {
 } from '../types';
 
 /**
+ * Glucose range category colors (matching Glooko style)
+ * These colors are used for visual representation of glucose ranges
+ * in charts and summary bars
+ */
+export const GLUCOSE_RANGE_COLORS = {
+  veryLow: '#8B0000', // Dark red
+  low: '#D32F2F', // Red
+  inRange: '#4CAF50', // Green
+  high: '#FFB300', // Amber/Orange
+  veryHigh: '#FF6F00', // Dark orange
+} as const;
+
+/**
+ * Minimum percentage threshold to display percentage text in summary bars
+ */
+export const MIN_PERCENTAGE_TO_DISPLAY = 5;
+
+/**
  * Categorize a glucose reading based on thresholds
  * 
  * @param value - Glucose value in mmol/L

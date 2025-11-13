@@ -31,6 +31,8 @@ import {
   getUniqueDates, 
   filterReadingsByDate, 
   calculateGlucoseRangeStats,
+  GLUCOSE_RANGE_COLORS,
+  MIN_PERCENTAGE_TO_DISPLAY,
 } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { DayNavigator } from './DayNavigator';
@@ -590,11 +592,13 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
                 className={styles.summaryBarSegment}
                 style={{
                   height: `${abovePercentage}%`,
-                  backgroundColor: '#FFB300', // Amber/Orange for high
+                  backgroundColor: GLUCOSE_RANGE_COLORS.high,
                 }}
                 title={`High: ${abovePercentage}%`}
+                aria-label={`High: ${abovePercentage}%`}
+                role="img"
               >
-                {parseFloat(abovePercentage) >= 5 && `${abovePercentage}%`}
+                {parseFloat(abovePercentage) >= MIN_PERCENTAGE_TO_DISPLAY && `${abovePercentage}%`}
               </div>
             )}
             
@@ -604,11 +608,13 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
                 className={styles.summaryBarSegment}
                 style={{
                   height: `${inRangePercentage}%`,
-                  backgroundColor: '#4CAF50', // Green for in-range
+                  backgroundColor: GLUCOSE_RANGE_COLORS.inRange,
                 }}
                 title={`In Range: ${inRangePercentage}%`}
+                aria-label={`In Range: ${inRangePercentage}%`}
+                role="img"
               >
-                {parseFloat(inRangePercentage) >= 5 && `${inRangePercentage}%`}
+                {parseFloat(inRangePercentage) >= MIN_PERCENTAGE_TO_DISPLAY && `${inRangePercentage}%`}
               </div>
             )}
             
@@ -618,11 +624,13 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
                 className={styles.summaryBarSegment}
                 style={{
                   height: `${belowPercentage}%`,
-                  backgroundColor: '#D32F2F', // Red for low
+                  backgroundColor: GLUCOSE_RANGE_COLORS.low,
                 }}
                 title={`Low: ${belowPercentage}%`}
+                aria-label={`Low: ${belowPercentage}%`}
+                role="img"
               >
-                {parseFloat(belowPercentage) >= 5 && `${belowPercentage}%`}
+                {parseFloat(belowPercentage) >= MIN_PERCENTAGE_TO_DISPLAY && `${belowPercentage}%`}
               </div>
             )}
           </div>
