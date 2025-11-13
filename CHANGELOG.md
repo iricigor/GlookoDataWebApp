@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>258 Fix markdown table rendering in AI responses</summary>
+
+[#258](../../pull/258) Fix markdown table rendering in AI responses
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>256 Fix: Capture token limit errors in HTTP 200 responses from all AI providers</summary>
 
 [#256](../../pull/256) Fix: Capture token limit errors in HTTP 200 responses from all AI providers
