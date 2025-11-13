@@ -270,6 +270,56 @@ export function Settings({
   const availableProviders = getAvailableProviders(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
   const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
 
+  // Wrapper functions to auto-select provider when new key is entered
+  const handlePerplexityKeyChange = (key: string) => {
+    const wasEmpty = !perplexityApiKey || perplexityApiKey.trim() === '';
+    const isNowFilled = key && key.trim() !== '';
+    
+    onPerplexityApiKeyChange(key);
+    
+    // Auto-select this provider if a new key was just entered
+    if (wasEmpty && isNowFilled) {
+      // Use setTimeout to ensure the key change is processed first
+      setTimeout(() => onSelectedProviderChange('perplexity'), 0);
+    }
+  };
+
+  const handleGrokKeyChange = (key: string) => {
+    const wasEmpty = !grokApiKey || grokApiKey.trim() === '';
+    const isNowFilled = key && key.trim() !== '';
+    
+    onGrokApiKeyChange(key);
+    
+    // Auto-select this provider if a new key was just entered
+    if (wasEmpty && isNowFilled) {
+      setTimeout(() => onSelectedProviderChange('grok'), 0);
+    }
+  };
+
+  const handleDeepSeekKeyChange = (key: string) => {
+    const wasEmpty = !deepseekApiKey || deepseekApiKey.trim() === '';
+    const isNowFilled = key && key.trim() !== '';
+    
+    onDeepSeekApiKeyChange(key);
+    
+    // Auto-select this provider if a new key was just entered
+    if (wasEmpty && isNowFilled) {
+      setTimeout(() => onSelectedProviderChange('deepseek'), 0);
+    }
+  };
+
+  const handleGeminiKeyChange = (key: string) => {
+    const wasEmpty = !geminiApiKey || geminiApiKey.trim() === '';
+    const isNowFilled = key && key.trim() !== '';
+    
+    onGeminiApiKeyChange(key);
+    
+    // Auto-select this provider if a new key was just entered
+    if (wasEmpty && isNowFilled) {
+      setTimeout(() => onSelectedProviderChange('gemini'), 0);
+    }
+  };
+
   // Helper function to render the inline selection UI for each API key field
   const renderKeyStatus = (provider: AIProvider, hasKey: boolean) => {
     if (!hasKey) return undefined;
@@ -384,7 +434,7 @@ export function Settings({
                     id="perplexity-api-key"
                     type="password"
                     value={perplexityApiKey}
-                    onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
+                    onChange={(_, data) => handlePerplexityKeyChange(data.value)}
                     placeholder="Enter your Perplexity API key"
                     contentAfter={renderKeyStatus('perplexity', !!perplexityApiKey)}
                     className={styles.apiKeyInput}
@@ -409,7 +459,7 @@ export function Settings({
                     id="grok-api-key"
                     type="password"
                     value={grokApiKey}
-                    onChange={(_, data) => onGrokApiKeyChange(data.value)}
+                    onChange={(_, data) => handleGrokKeyChange(data.value)}
                     placeholder="Enter your Grok AI API key"
                     contentAfter={renderKeyStatus('grok', !!grokApiKey)}
                     className={styles.apiKeyInput}
@@ -434,7 +484,7 @@ export function Settings({
                     id="deepseek-api-key"
                     type="password"
                     value={deepseekApiKey}
-                    onChange={(_, data) => onDeepSeekApiKeyChange(data.value)}
+                    onChange={(_, data) => handleDeepSeekKeyChange(data.value)}
                     placeholder="Enter your DeepSeek API key"
                     contentAfter={renderKeyStatus('deepseek', !!deepseekApiKey)}
                     className={styles.apiKeyInput}
@@ -459,7 +509,7 @@ export function Settings({
                     id="gemini-api-key"
                     type="password"
                     value={geminiApiKey}
-                    onChange={(_, data) => onGeminiApiKeyChange(data.value)}
+                    onChange={(_, data) => handleGeminiKeyChange(data.value)}
                     placeholder="Enter your Google Gemini API key"
                     contentAfter={renderKeyStatus('gemini', !!geminiApiKey)}
                     className={styles.apiKeyInput}
