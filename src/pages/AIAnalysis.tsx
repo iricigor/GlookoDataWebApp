@@ -34,6 +34,7 @@ import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { generateTimeInRangePrompt } from '../prompts/timeInRangePrompt';
 import { generateGlucoseInsulinPrompt } from '../prompts/glucoseInsulinPrompt';
 import { generateMealTimingPrompt } from '../prompts/mealTimingPrompt';
+import { generatePumpSettingsPrompt } from '../prompts/pumpSettingsPrompt';
 import { base64Encode } from '../utils/base64Utils';
 import { callAIApi, determineActiveProvider, getProviderDisplayName } from '../utils/aiApi';
 import { convertDailyReportsToCSV, convertGlucoseReadingsToCSV, convertBolusReadingsToCSV, convertBasalReadingsToCSV, filterGlucoseReadingsToLastDays, filterInsulinReadingsToLastDays } from '../utils/csvUtils';
@@ -258,6 +259,14 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
     basalReadings: InsulinReading[];
   }>({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
 
+  // Pump settings prompt state
+  const [analyzingPumpSettings, setAnalyzingPumpSettings] = useState(false);
+  const [pumpSettingsResponse, setPumpSettingsResponse] = useState<string | null>(null);
+  const [pumpSettingsError, setPumpSettingsError] = useState<string | null>(null);
+  const [pumpSettingsCooldownActive, setPumpSettingsCooldownActive] = useState(false);
+  const [pumpSettingsCooldownSeconds, setPumpSettingsCooldownSeconds] = useState(0);
+  const [pumpSettingsReady, setPumpSettingsReady] = useState(false);
+
   // Determine which AI provider to use
   const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
   const hasApiKey = activeProvider !== null;
@@ -285,6 +294,9 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
       setMealTimingResponse(null);
       setMealTimingError(null);
       setMealTimingReady(false);
+      setPumpSettingsResponse(null);
+      setPumpSettingsError(null);
+      setPumpSettingsReady(false);
       return;
     }
 
@@ -305,6 +317,9 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
       setMealTimingResponse(null);
       setMealTimingError(null);
       setMealTimingReady(false);
+      setPumpSettingsResponse(null);
+      setPumpSettingsError(null);
+      setPumpSettingsReady(false);
       try {
         // Extract CGM readings (default data source)
         const readings = await extractGlucoseReadings(selectedFile, 'cgm');
@@ -409,6 +424,19 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
       setMealTimingReady(true);
     }
   }, [mealTimingCooldownSeconds, mealTimingCooldownActive]);
+
+  // Handle cooldown timer for pump settings prompt
+  useEffect(() => {
+    if (pumpSettingsCooldownSeconds > 0) {
+      const timer = setTimeout(() => {
+        setPumpSettingsCooldownSeconds(prev => prev - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (pumpSettingsCooldownActive && pumpSettingsCooldownSeconds === 0) {
+      setPumpSettingsCooldownActive(false);
+      setPumpSettingsReady(true);
+    }
+  }, [pumpSettingsCooldownSeconds, pumpSettingsCooldownActive]);
 
   /**
    * Helper function to detect if an error is related to request size being too large
@@ -639,6 +667,100 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
       setAnalyzingMealTiming(false);
     }
   };
+
+  const handlePumpSettingsClick = async () => {
+    const { cgmReadings, bolusReadings, basalReadings } = mealTimingDatasets;
+    if (!activeProvider || !hasApiKey || cgmReadings.length === 0 || bolusReadings.length === 0) {
+      return;
+    }
+
+    // If there's already a response, start cooldown before allowing new analysis
+    if (pumpSettingsResponse && !pumpSettingsCooldownActive && !pumpSettingsReady) {
+      setPumpSettingsCooldownActive(true);
+      setPumpSettingsCooldownSeconds(3);
+      return;
+    }
+
+    // Don't analyze if cooldown is active
+    if (pumpSettingsCooldownActive) {
+      return;
+    }
+
+    setAnalyzingPumpSettings(true);
+    setPumpSettingsError(null);
+    setPumpSettingsReady(false); // Reset the flag when starting new analysis
+    const previousResponse = pumpSettingsResponse; // Keep previous response in case of error
+
+    // Helper function to try analysis with given datasets
+    const tryAnalysis = async (
+      cgm: typeof cgmReadings,
+      bolus: typeof bolusReadings,
+      basal: typeof basalReadings
+    ) => {
+      // Convert datasets to CSV format
+      const cgmCsv = convertGlucoseReadingsToCSV(cgm);
+      const bolusCsv = convertBolusReadingsToCSV(bolus);
+      const basalCsv = convertBasalReadingsToCSV(basal);
+      
+      // Base64 encode the CSV data
+      const base64CgmData = base64Encode(cgmCsv);
+      const base64BolusData = base64Encode(bolusCsv);
+      const base64BasalData = base64Encode(basalCsv);
+
+      // Generate the prompt with the base64 CSV data
+      const prompt = generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData);
+
+      // Get the appropriate API key for the active provider
+      const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
+                      activeProvider === 'grok' ? grokApiKey : geminiApiKey;
+
+      // Call the AI API using the selected provider
+      return await callAIApi(activeProvider, apiKey, prompt);
+    };
+
+    try {
+      // First attempt: try with full dataset
+      let result = await tryAnalysis(cgmReadings, bolusReadings, basalReadings);
+
+      // If request was too large, try with smaller dataset (last 28 days)
+      if (!result.success && isRequestTooLargeError(result.error)) {
+        // Filter datasets to last 28 days
+        const filteredCgm = filterGlucoseReadingsToLastDays(cgmReadings, 28);
+        const filteredBolus = filterInsulinReadingsToLastDays(bolusReadings, 28);
+        const filteredBasal = filterInsulinReadingsToLastDays(basalReadings, 28);
+
+        // Verify we still have data after filtering
+        if (filteredCgm.length > 0 && filteredBolus.length > 0) {
+          // Second attempt: try with filtered dataset
+          result = await tryAnalysis(filteredCgm, filteredBolus, filteredBasal);
+          
+          // If successful with smaller dataset, add a note to the response
+          if (result.success && result.content) {
+            result.content = `**Note:** Analysis based on the last 28 days of data due to dataset size constraints.\n\n${result.content}`;
+          }
+        }
+      }
+
+      if (result.success && result.content) {
+        setPumpSettingsResponse(result.content);
+      } else {
+        // On error, keep the previous response if it exists
+        setPumpSettingsError(result.error || 'Failed to get AI response');
+        if (previousResponse) {
+          setPumpSettingsResponse(previousResponse);
+        }
+      }
+    } catch (err) {
+      // On error, keep the previous response if it exists
+      setPumpSettingsError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      if (previousResponse) {
+        setPumpSettingsResponse(previousResponse);
+      }
+    } finally {
+      setAnalyzingPumpSettings(false);
+    }
+  };
+
 
   const renderTabContent = () => {
     if (selectedTab === 'fileInfo') {
@@ -1041,6 +1163,145 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
           )}
         </div>
       );
+    } else if (selectedTab === 'pumpSettings') {
+      const { cgmReadings, bolusReadings, basalReadings } = mealTimingDatasets;
+      const hasData = cgmReadings.length > 0 && bolusReadings.length > 0;
+      
+      return (
+        <div className={styles.promptContent}>
+          {loading ? (
+            <Text className={styles.helperText}>Loading data...</Text>
+          ) : hasData ? (
+            <>
+              {/* Button container */}
+              <div className={styles.buttonContainer}>
+                <Button
+                  appearance="primary"
+                  disabled={!hasApiKey || analyzingPumpSettings || (pumpSettingsCooldownActive && pumpSettingsCooldownSeconds > 0)}
+                  onClick={handlePumpSettingsClick}
+                  icon={analyzingPumpSettings ? <Spinner size="tiny" /> : undefined}
+                >
+                  {analyzingPumpSettings
+                    ? 'Analyzing...'
+                    : pumpSettingsResponse && !pumpSettingsReady
+                    ? 'Click to enable new analysis'
+                    : 'Analyze with AI'}
+                </Button>
+                
+                {!analyzingPumpSettings && !pumpSettingsCooldownActive && (
+                  <>
+                    {(!pumpSettingsResponse || pumpSettingsReady) && (
+                      <Text className={styles.helperText}>
+                        Click Analyze to get AI-powered pump settings verification. The AI will infer your current pump settings, validate them, and provide specific recommendations for basal rates, insulin sensitivity factor (ISF), and carb ratios across different time segments{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}.
+                      </Text>
+                    )}
+                    {pumpSettingsResponse && !pumpSettingsReady && (
+                      <Text className={styles.helperText}>
+                        Click the button above to request a new analysis
+                      </Text>
+                    )}
+                  </>
+                )}
+                
+                {pumpSettingsCooldownActive && pumpSettingsCooldownSeconds > 0 && (
+                  <div className={styles.cooldownContainer}>
+                    <Text className={styles.cooldownText}>
+                      Please wait {pumpSettingsCooldownSeconds} second{pumpSettingsCooldownSeconds !== 1 ? 's' : ''} before requesting new analysis...
+                    </Text>
+                    <ProgressBar 
+                      value={(3 - pumpSettingsCooldownSeconds) / 3} 
+                      thickness="large"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Accordion to show prompt text */}
+              <Accordion collapsible style={{ marginTop: '16px' }}>
+                <AccordionItem value="promptText">
+                  <AccordionHeader>View AI Prompt</AccordionHeader>
+                  <AccordionPanel>
+                    <div className={styles.promptTextContainer}>
+                      {(() => {
+                        const cgmCsv = convertGlucoseReadingsToCSV(cgmReadings);
+                        const bolusCsv = convertBolusReadingsToCSV(bolusReadings);
+                        const basalCsv = convertBasalReadingsToCSV(basalReadings);
+                        const base64CgmData = base64Encode(cgmCsv);
+                        const base64BolusData = base64Encode(bolusCsv);
+                        const base64BasalData = base64Encode(basalCsv);
+                        return generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData);
+                      })()}
+                    </div>
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
+
+              {/* Accordion for dataset summaries */}
+              <Accordion collapsible style={{ marginTop: '16px' }}>
+                <AccordionItem value="datasetSummary">
+                  <AccordionHeader>Dataset Summary</AccordionHeader>
+                  <AccordionPanel>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <Text>
+                        <strong>CGM Readings:</strong> {cgmReadings.length} readings
+                      </Text>
+                      <Text>
+                        <strong>Bolus Events:</strong> {bolusReadings.length} injections
+                      </Text>
+                      <Text>
+                        <strong>Basal Events:</strong> {basalReadings.length} entries
+                      </Text>
+                      {cgmReadings.length > 0 && (
+                        <>
+                          <Text>
+                            <strong>Date Range:</strong> {cgmReadings[0].timestamp.toLocaleDateString()} - {cgmReadings[cgmReadings.length - 1].timestamp.toLocaleDateString()}
+                          </Text>
+                        </>
+                      )}
+                    </div>
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
+
+              {analyzingPumpSettings && (
+                <div className={styles.loadingContainer}>
+                  <Spinner size="medium" />
+                  <Text className={styles.helperText}>
+                    Getting AI analysis... This may take a few seconds.
+                  </Text>
+                </div>
+              )}
+
+              {pumpSettingsError && (
+                <div className={styles.errorContainer}>
+                  <MessageBar intent="error" icon={<ErrorCircleRegular className={styles.errorIcon} />}>
+                    <MessageBarBody>
+                      <strong>Error:</strong> {pumpSettingsError}
+                    </MessageBarBody>
+                  </MessageBar>
+                </div>
+              )}
+
+              {pumpSettingsResponse && (
+                <>
+                  <MessageBar intent="success" icon={<CheckmarkCircleRegular className={styles.successIcon} />}>
+                    <MessageBarBody>
+                      AI analysis completed successfully
+                    </MessageBarBody>
+                  </MessageBar>
+                  <div className={styles.aiResponseContainer}>
+                    <MarkdownRenderer content={pumpSettingsResponse} />
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <Text className={styles.helperText}>
+              No CGM or bolus data available for pump settings analysis. Please ensure your data file contains both CGM readings and bolus insulin data.
+            </Text>
+          )}
+        </div>
+      );
     }
     return null;
   };
@@ -1089,6 +1350,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
             <Tab value="timeInRange">Time in Range</Tab>
             <Tab value="glucoseInsulin">Glucose & Insulin</Tab>
             <Tab value="mealTiming">Meal Timing</Tab>
+            <Tab value="pumpSettings">Pump Settings</Tab>
           </TabList>
 
           <div className={styles.contentArea}>
