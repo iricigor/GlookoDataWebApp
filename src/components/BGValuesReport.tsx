@@ -430,6 +430,8 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
                 onOptionSelect={(_, data) => setColorScheme(data.optionValue as BGColorScheme)}
                 className={styles.colorSchemeDropdown}
                 size="small"
+                positioning="below-start"
+                inlinePopup
               >
                 <Option value="monochrome">{COLOR_SCHEME_DESCRIPTORS.monochrome.name}</Option>
                 <Option value="basic">{COLOR_SCHEME_DESCRIPTORS.basic.name}</Option>
