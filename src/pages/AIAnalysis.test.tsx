@@ -49,7 +49,7 @@ describe('AIAnalysis', () => {
     vi.mocked(insulinDataUtils.extractInsulinReadings).mockResolvedValue([]);
     vi.mocked(insulinDataUtils.aggregateInsulinByDate).mockReturnValue([]);
     // Mock AI provider
-    vi.mocked(aiApi.determineActiveProvider).mockReturnValue('gemini');
+    vi.mocked(aiApi.getActiveProvider).mockReturnValue('gemini');
   });
 
   afterEach(() => {
@@ -64,6 +64,7 @@ describe('AIAnalysis', () => {
         geminiApiKey="test-key"
         grokApiKey=""
         deepseekApiKey=""
+        selectedProvider={null}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -87,6 +88,7 @@ describe('AIAnalysis', () => {
         geminiApiKey="test-key"
         grokApiKey=""
         deepseekApiKey=""
+        selectedProvider={null}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -125,6 +127,7 @@ describe('AIAnalysis', () => {
         geminiApiKey="test-key"
         grokApiKey=""
         deepseekApiKey=""
+        selectedProvider={null}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -180,6 +183,7 @@ describe('AIAnalysis', () => {
         geminiApiKey="test-key"
         grokApiKey=""
         deepseekApiKey=""
+        selectedProvider={null}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -220,6 +224,7 @@ describe('AIAnalysis', () => {
         grokApiKey=""
         deepseekApiKey=""
         existingAnalysis={existingAnalysis}
+        selectedProvider={null}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -250,6 +255,7 @@ describe('AIAnalysis', () => {
         geminiApiKey="test-key"
         grokApiKey=""
         deepseekApiKey=""
+        selectedProvider={null}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -314,6 +320,7 @@ describe('AIAnalysis', () => {
         geminiApiKey="test-key"
         grokApiKey=""
         deepseekApiKey=""
+        selectedProvider={null}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -339,7 +346,7 @@ describe('AIAnalysis', () => {
       content: 'Grok AI response',
     };
     vi.mocked(aiApi.callAIApi).mockResolvedValue(mockResponse);
-    vi.mocked(aiApi.determineActiveProvider).mockReturnValue('grok');
+    vi.mocked(aiApi.getActiveProvider).mockReturnValue('grok');
 
     render(
       <AIAnalysis
@@ -348,6 +355,7 @@ describe('AIAnalysis', () => {
         geminiApiKey=""
         grokApiKey="test-grok-key"
         deepseekApiKey=""
+        selectedProvider={null}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -383,7 +391,7 @@ describe('AIAnalysis', () => {
     ]);
 
     // Test with Grok
-    vi.mocked(aiApi.determineActiveProvider).mockReturnValue('grok');
+    vi.mocked(aiApi.getActiveProvider).mockReturnValue('grok');
     const { rerender } = render(
       <AIAnalysis
         selectedFile={mockFile}
@@ -391,6 +399,7 @@ describe('AIAnalysis', () => {
         geminiApiKey=""
         grokApiKey="test-grok-key"
         deepseekApiKey=""
+        selectedProvider={null}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -425,7 +434,7 @@ describe('AIAnalysis', () => {
     vi.mocked(aiApi.callAIApi).mockResolvedValue(mockResponse);
 
     // Test with Perplexity
-    vi.mocked(aiApi.determineActiveProvider).mockReturnValue('perplexity');
+    vi.mocked(aiApi.getActiveProvider).mockReturnValue('perplexity');
     rerender(
       <AIAnalysis
         selectedFile={mockFile}
@@ -433,6 +442,7 @@ describe('AIAnalysis', () => {
         geminiApiKey=""
         grokApiKey=""
         deepseekApiKey=""
+        selectedProvider={null}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );

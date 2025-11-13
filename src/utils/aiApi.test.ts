@@ -3,7 +3,14 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { callAIApi, getProviderDisplayName, determineActiveProvider, type AIProvider } from './aiApi';
+import { 
+  callAIApi, 
+  getProviderDisplayName, 
+  determineActiveProvider, 
+  getActiveProvider,
+  getAvailableProviders,
+  type AIProvider 
+} from './aiApi';
 import * as perplexityApi from './perplexityApi';
 import * as geminiApi from './geminiApi';
 import * as grokApi from './grokApi';
@@ -157,6 +164,85 @@ describe('aiApi', () => {
     it('should treat whitespace-only Gemini key as empty', () => {
       const result = determineActiveProvider('perplexity-key', '  ', '  ', '  ');
       expect(result).toBe('perplexity');
+    });
+  });
+
+  describe('getActiveProvider', () => {
+    it('should use manually selected provider when it has a key', () => {
+      const result = getActiveProvider('gemini', 'perplexity-key', 'gemini-key', 'grok-key', 'deepseek-key');
+      expect(result).toBe('gemini');
+    });
+
+    it('should use manually selected grok when it has a key', () => {
+      const result = getActiveProvider('grok', 'perplexity-key', 'gemini-key', 'grok-key', 'deepseek-key');
+      expect(result).toBe('grok');
+    });
+
+    it('should use manually selected deepseek when it has a key', () => {
+      const result = getActiveProvider('deepseek', 'perplexity-key', 'gemini-key', 'grok-key', 'deepseek-key');
+      expect(result).toBe('deepseek');
+    });
+
+    it('should fall back to auto-selection when selected provider has no key', () => {
+      const result = getActiveProvider('gemini', 'perplexity-key', '', 'grok-key', 'deepseek-key');
+      expect(result).toBe('perplexity');
+    });
+
+    it('should fall back to auto-selection when no provider is selected', () => {
+      const result = getActiveProvider(null, 'perplexity-key', 'gemini-key', 'grok-key', 'deepseek-key');
+      expect(result).toBe('perplexity');
+    });
+
+    it('should return null when selected provider has no key and no other keys available', () => {
+      const result = getActiveProvider('gemini', '', '', '', '');
+      expect(result).toBe(null);
+    });
+
+    it('should ignore whitespace-only keys for selected provider', () => {
+      const result = getActiveProvider('perplexity', '  ', 'gemini-key', 'grok-key', 'deepseek-key');
+      expect(result).toBe('grok');
+    });
+  });
+
+  describe('getAvailableProviders', () => {
+    it('should return all providers when all keys are provided', () => {
+      const result = getAvailableProviders('perplexity-key', 'gemini-key', 'grok-key', 'deepseek-key');
+      expect(result).toEqual(['perplexity', 'grok', 'deepseek', 'gemini']);
+    });
+
+    it('should return only perplexity when only Perplexity key is provided', () => {
+      const result = getAvailableProviders('perplexity-key', '', '', '');
+      expect(result).toEqual(['perplexity']);
+    });
+
+    it('should return only grok when only Grok key is provided', () => {
+      const result = getAvailableProviders('', '', 'grok-key', '');
+      expect(result).toEqual(['grok']);
+    });
+
+    it('should return only deepseek when only DeepSeek key is provided', () => {
+      const result = getAvailableProviders('', '', '', 'deepseek-key');
+      expect(result).toEqual(['deepseek']);
+    });
+
+    it('should return only gemini when only Gemini key is provided', () => {
+      const result = getAvailableProviders('', 'gemini-key', '', '');
+      expect(result).toEqual(['gemini']);
+    });
+
+    it('should return empty array when no keys are provided', () => {
+      const result = getAvailableProviders('', '', '', '');
+      expect(result).toEqual([]);
+    });
+
+    it('should ignore whitespace-only keys', () => {
+      const result = getAvailableProviders('  ', 'gemini-key', '  ', 'deepseek-key');
+      expect(result).toEqual(['deepseek', 'gemini']);
+    });
+
+    it('should return providers in priority order', () => {
+      const result = getAvailableProviders('', 'gemini-key', 'grok-key', 'deepseek-key');
+      expect(result).toEqual(['grok', 'deepseek', 'gemini']);
     });
   });
 });

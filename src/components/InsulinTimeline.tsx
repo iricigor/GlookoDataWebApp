@@ -20,6 +20,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { InsulinTotalsBar } from './InsulinTotalsBar';
 
 const useStyles = makeStyles({
   container: {
@@ -27,9 +28,15 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     ...shorthands.gap('16px'),
   },
-  chartContainer: {
+  chartWithBarWrapper: {
+    display: 'flex',
+    ...shorthands.gap('8px'),
     width: '100%',
     height: '400px',
+  },
+  chartContainer: {
+    flex: 1,
+    height: '100%',
     ...shorthands.padding('16px'),
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
@@ -141,63 +148,72 @@ export function InsulinTimeline({ data }: InsulinTimelineProps) {
     return '';
   };
 
+  // Calculate daily totals
+  const basalTotal = data.reduce((sum, d) => sum + d.basalRate, 0);
+  const bolusTotal = data.reduce((sum, d) => sum + d.bolusTotal, 0);
+
   return (
     <div className={styles.container}>
-      <div className={styles.chartContainer}>
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
-            
-            <XAxis
-              dataKey="timeLabel"
-              tickFormatter={formatXAxis}
-              stroke={tokens.colorNeutralForeground2}
-              style={{ fontSize: tokens.fontSizeBase200 }}
-            />
-            
-            <YAxis
-              label={{ 
-                value: 'Insulin (Units)', 
-                angle: -90, 
-                position: 'insideLeft', 
-                style: { fontSize: tokens.fontSizeBase200 } 
-              }}
-              stroke={tokens.colorNeutralForeground2}
-              style={{ fontSize: tokens.fontSizeBase200 }}
-            />
-            
-            <Tooltip content={<CustomTooltip />} />
-            
-            <Legend
-              verticalAlign="top"
-              height={36}
-              iconType="line"
-              wrapperStyle={{ fontSize: tokens.fontSizeBase200 }}
-            />
-            
-            {/* Bolus bars */}
-            {hasBolusData && (
-              <Bar
-                dataKey="bolusTotal"
-                name="Bolus"
-                fill="#1976D2"
-                barSize={20}
+      <div className={styles.chartWithBarWrapper}>
+        <div className={styles.chartContainer}>
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
+              
+              <XAxis
+                dataKey="timeLabel"
+                tickFormatter={formatXAxis}
+                stroke={tokens.colorNeutralForeground2}
+                style={{ fontSize: tokens.fontSizeBase200 }}
               />
-            )}
-            
-            {/* Basal line */}
-            {hasBasalData && (
-              <Line
-                type="monotone"
-                dataKey="basalRate"
-                name="Basal Rate"
-                stroke="#2E7D32"
-                strokeWidth={2}
-                dot={false}
+              
+              <YAxis
+                label={{ 
+                  value: 'Insulin (Units)', 
+                  angle: -90, 
+                  position: 'insideLeft', 
+                  style: { fontSize: tokens.fontSizeBase200 } 
+                }}
+                stroke={tokens.colorNeutralForeground2}
+                style={{ fontSize: tokens.fontSizeBase200 }}
               />
-            )}
-          </ComposedChart>
-        </ResponsiveContainer>
+              
+              <Tooltip content={<CustomTooltip />} />
+              
+              <Legend
+                verticalAlign="top"
+                height={36}
+                iconType="line"
+                wrapperStyle={{ fontSize: tokens.fontSizeBase200 }}
+              />
+              
+              {/* Bolus bars */}
+              {hasBolusData && (
+                <Bar
+                  dataKey="bolusTotal"
+                  name="Bolus"
+                  fill="#1976D2"
+                  barSize={20}
+                />
+              )}
+              
+              {/* Basal line */}
+              {hasBasalData && (
+                <Line
+                  type="monotone"
+                  dataKey="basalRate"
+                  name="Basal Rate"
+                  stroke="#2E7D32"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              )}
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Totals bar on the right side */}
+        <InsulinTotalsBar basalTotal={basalTotal} bolusTotal={bolusTotal} />
       </div>
 
       {/* Custom legend */}

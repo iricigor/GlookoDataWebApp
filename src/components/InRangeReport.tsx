@@ -37,7 +37,7 @@ import type {
 import type { ExportFormat } from '../hooks/useExportFormat';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
 import { extractInsulinReadings, aggregateInsulinByDate } from '../utils/insulinDataUtils';
-import { groupByDayOfWeek, groupByDate, groupByWeek, calculatePercentage } from '../utils/glucoseRangeUtils';
+import { groupByDayOfWeek, groupByDate, groupByWeek, calculatePercentage, GLUCOSE_RANGE_COLORS } from '../utils/glucoseRangeUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { CopyToCsvButton } from './CopyToCsvButton';
 
@@ -391,14 +391,14 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
     return totals;
   };
 
-  // Colors for glucose ranges (matching Glooko style)
+  // Colors for glucose ranges (using shared constants)
   const getColorForCategory = (category: string): string => {
     switch (category) {
-      case 'veryLow': return '#8B0000'; // Dark red
-      case 'low': return '#D32F2F'; // Red
-      case 'inRange': return '#4CAF50'; // Green
-      case 'high': return '#FFB300'; // Amber/Orange
-      case 'veryHigh': return '#FF6F00'; // Dark orange
+      case 'veryLow': return GLUCOSE_RANGE_COLORS.veryLow;
+      case 'low': return GLUCOSE_RANGE_COLORS.low;
+      case 'inRange': return GLUCOSE_RANGE_COLORS.inRange;
+      case 'high': return GLUCOSE_RANGE_COLORS.high;
+      case 'veryHigh': return GLUCOSE_RANGE_COLORS.veryHigh;
       default: return tokens.colorNeutralForeground1;
     }
   };
