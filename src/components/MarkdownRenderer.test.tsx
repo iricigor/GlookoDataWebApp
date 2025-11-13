@@ -1,6 +1,13 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MarkdownRenderer } from './MarkdownRenderer';
+
+// Mock the CopyAIResponseButton component
+vi.mock('./CopyAIResponseButton', () => ({
+  CopyAIResponseButton: ({ content }: { content: string }) => (
+    <button data-testid="copy-button">Copy {content.substring(0, 10)}</button>
+  ),
+}));
 
 describe('MarkdownRenderer', () => {
   it('should render plain text', () => {
@@ -112,5 +119,57 @@ Your patient's TIR of 68.5% is **just below the recommended target of 70%**, ind
     expect(screen.getByRole('cell', { name: 'Data A' })).toBeInTheDocument();
     expect(screen.getByRole('cell', { name: 'Data B' })).toBeInTheDocument();
     expect(screen.getByRole('cell', { name: 'Data C' })).toBeInTheDocument();
+  });
+
+  it('should show copy button on hover when showCopyButton is true', () => {
+    const { container } = render(<MarkdownRenderer content="Test content" showCopyButton={true} />);
+    const wrapper = container.firstChild as HTMLElement;
+    
+    // Hover over the container
+    fireEvent.mouseEnter(wrapper);
+    
+    // Check if copy button is shown
+    const copyButton = screen.queryByTestId('copy-button');
+    expect(copyButton).toBeInTheDocument();
+  });
+
+  it('should not show copy button when showCopyButton is false', () => {
+    const { container } = render(<MarkdownRenderer content="Test content" showCopyButton={false} />);
+    const wrapper = container.firstChild as HTMLElement;
+    
+    // Hover over the container
+    fireEvent.mouseEnter(wrapper);
+    
+    // Check if copy button is not shown
+    const copyButton = screen.queryByTestId('copy-button');
+    expect(copyButton).not.toBeInTheDocument();
+  });
+
+  it('should default showCopyButton to true', () => {
+    const { container } = render(<MarkdownRenderer content="Test content" />);
+    const wrapper = container.firstChild as HTMLElement;
+    
+    // Hover over the container
+    fireEvent.mouseEnter(wrapper);
+    
+    // Check if copy button is shown by default
+    const copyButton = screen.queryByTestId('copy-button');
+    expect(copyButton).toBeInTheDocument();
+  });
+
+  it('should hide copy button when mouse leaves', () => {
+    const { container } = render(<MarkdownRenderer content="Test content" />);
+    const wrapper = container.firstChild as HTMLElement;
+    
+    // Hover over the container
+    fireEvent.mouseEnter(wrapper);
+    const copyButton = screen.getByTestId('copy-button');
+    expect(copyButton).toBeInTheDocument();
+    
+    // Mouse leaves - button should still be in DOM but wrapper should not have visible class
+    fireEvent.mouseLeave(wrapper);
+    // Button wrapper should not have the visible class anymore
+    const buttonWrapper = copyButton.parentElement;
+    expect(buttonWrapper).not.toHaveClass('copyButtonVisible');
   });
 });
