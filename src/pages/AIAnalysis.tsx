@@ -711,8 +711,10 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
       const prompt = generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData);
 
       // Get the appropriate API key for the active provider
-      const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
-                      activeProvider === 'grok' ? grokApiKey : geminiApiKey;
+      const apiKey = activeProvider === 'perplexity' ? perplexityApiKey
+                    : activeProvider === 'grok' ? grokApiKey
+                    : activeProvider === 'deepseek' ? deepseekApiKey
+                    : geminiApiKey;
 
       // Call the AI API using the selected provider
       return await callAIApi(activeProvider, apiKey, prompt);
