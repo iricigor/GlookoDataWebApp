@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>248 Update version info to link to GitHub Releases</summary>
+
+[#248](../../pull/248) Update version info to link to GitHub Releases
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>245 Add color scheme selector to BG Values graph</summary>
 
 [#245](../../pull/245) Add color scheme selector to BG Values graph
