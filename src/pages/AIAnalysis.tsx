@@ -778,7 +778,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
                   <>
                     {(!secondPromptResponse || secondPromptReady) && (
                       <Text className={styles.helperText}>
-                        Click Analyze to get AI-powered correlation analysis between glucose ranges and insulin doses. The analysis will identify patterns and relationships in your daily data{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}.
+                        Click Analyze to get AI-powered correlation analysis between glucose ranges and insulin doses. You will see patterns and relationships in your daily data{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}.
                       </Text>
                     )}
                     {secondPromptResponse && !secondPromptReady && (
