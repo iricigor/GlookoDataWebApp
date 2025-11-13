@@ -673,7 +673,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
                   <>
                     {(!aiResponse || readyForNewAnalysis) && (
                       <Text className={styles.helperText}>
-                        Click Analyze to get AI-powered insights on your Time in Range percentage. The analysis will provide personalized feedback and recommendations based on your glucose data{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}.
+                        Click Analyze to get AI-powered insights on your Time in Range percentage. You will receive personalized feedback and recommendations based on your glucose data{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}.
                       </Text>
                     )}
                     {aiResponse && !readyForNewAnalysis && (
