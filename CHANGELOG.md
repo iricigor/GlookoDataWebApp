@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>266 Extend AI analysis descriptions to two sentences</summary>
+
+[#266](../../pull/266) Extend AI analysis descriptions to two sentences
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>258 Fix markdown table rendering in AI responses</summary>
 
 [#258](../../pull/258) Fix markdown table rendering in AI responses
