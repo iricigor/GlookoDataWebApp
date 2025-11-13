@@ -134,6 +134,12 @@ interface MarkdownRendererProps {
   showCopyButton?: boolean;
 }
 
+/**
+ * Renders markdown content with syntax highlighting and copy-to-clipboard functionality.
+ * @param content - The markdown string to render.
+ * @param showCopyButton - Whether to show the copy-to-clipboard button on hover (default: true).
+ * @returns Rendered markdown with optional copy button.
+ */
 export function MarkdownRenderer({ content, showCopyButton = true }: MarkdownRendererProps) {
   const styles = useStyles();
   const [isHovered, setIsHovered] = useState(false);
