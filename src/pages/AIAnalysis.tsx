@@ -931,7 +931,7 @@ export function AIAnalysis({ selectedFile, perplexityApiKey, geminiApiKey, grokA
                   <>
                     {(!mealTimingResponse || mealTimingReady) && (
                       <Text className={styles.helperText}>
-                        Click Analyze to get AI-powered meal timing analysis with day-of-week patterns. The analysis will provide meal-specific recommendations based on your glucose and insulin data{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}.
+                        Click Analyze to get AI-powered meal timing analysis with day-of-week patterns. You will receive meal-specific recommendations based on your glucose and insulin data{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}.
                       </Text>
                     )}
                     {mealTimingResponse && !mealTimingReady && (
