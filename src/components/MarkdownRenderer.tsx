@@ -1,8 +1,27 @@
+import { useState } from 'react';
 import { makeStyles, tokens, shorthands } from '@fluentui/react-components';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { CopyAIResponseButton } from './CopyAIResponseButton';
 
 const useStyles = makeStyles({
+  container: {
+    position: 'relative',
+  },
+  copyButtonWrapper: {
+    position: 'sticky',
+    top: 0,
+    right: 0,
+    display: 'flex',
+    justifyContent: 'flex-end',
+    opacity: 0,
+    transition: 'opacity 0.2s ease-in-out',
+    pointerEvents: 'none', // Prevent button from interfering with hover detection when hidden
+  },
+  copyButtonVisible: {
+    opacity: 1,
+    pointerEvents: 'auto', // Allow button to be clicked when visible
+  },
   markdown: {
     fontSize: tokens.fontSizeBase400,
     color: tokens.colorNeutralForeground1,
@@ -113,14 +132,34 @@ const useStyles = makeStyles({
 
 interface MarkdownRendererProps {
   content: string;
+  /** Whether to show the copy button. Defaults to true. */
+  showCopyButton?: boolean;
 }
 
-export function MarkdownRenderer({ content }: MarkdownRendererProps) {
+/**
+ * Renders markdown content with syntax highlighting and copy-to-clipboard functionality.
+ * @param content - The markdown string to render.
+ * @param showCopyButton - Whether to show the copy-to-clipboard button on hover (default: true).
+ * @returns Rendered markdown with optional copy button.
+ */
+export function MarkdownRenderer({ content, showCopyButton = true }: MarkdownRendererProps) {
   const styles = useStyles();
+  const [isHovered, setIsHovered] = useState(false);
   
   return (
-    <div className={styles.markdown}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+    <div 
+      className={styles.container}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {showCopyButton && (
+        <div className={`${styles.copyButtonWrapper} ${isHovered ? styles.copyButtonVisible : ''}`}>
+          <CopyAIResponseButton content={content} />
+        </div>
+      )}
+      <div className={styles.markdown}>
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+      </div>
     </div>
   );
 }
