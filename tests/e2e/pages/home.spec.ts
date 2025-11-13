@@ -29,7 +29,7 @@ test.describe('Home Page', () => {
     
     // Verify navigation occurred
     await expect(page).toHaveURL(/#upload/);
-    await expect(page.locator('h1')).toContainText(/data upload/i);
+    await expect(page.locator('span').filter({ hasText: 'Data Upload' })).toBeVisible();
   });
 
   test('should navigate to Reports from home page button', async ({ homePage, page }) => {
@@ -37,7 +37,7 @@ test.describe('Home Page', () => {
     
     // Verify navigation occurred
     await expect(page).toHaveURL(/#reports/);
-    await expect(page.locator('h1')).toContainText(/reports/i);
+    await expect(page.locator('span').filter({ hasText: 'Comprehensive Reports' })).toBeVisible();
   });
 
   test('should navigate to AI Analysis from home page button', async ({ homePage, page }) => {
@@ -45,7 +45,7 @@ test.describe('Home Page', () => {
     
     // Verify navigation occurred
     await expect(page).toHaveURL(/#ai/);
-    await expect(page.locator('h1')).toContainText(/ai analysis/i);
+    await expect(page.locator('span').filter({ hasText: 'AI-Powered Analysis' })).toBeVisible();
   });
 
   test('should navigate to Settings from home page button', async ({ homePage, page }) => {
@@ -53,7 +53,7 @@ test.describe('Home Page', () => {
     
     // Verify navigation occurred
     await expect(page).toHaveURL(/#settings/);
-    await expect(page.locator('h1')).toContainText(/settings/i);
+    await expect(page.locator('span').filter({ hasText: 'Settings' }).first()).toBeVisible();
   });
 
   test('should display app title correctly', async ({ homePage }) => {

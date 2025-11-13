@@ -19,13 +19,13 @@ export class HomePage extends BasePage {
     // Define locators for home page elements
     // Note: The actual heading is "Glooko Insights" and uses a Text/span component, not h1
     this.welcomeHeading = page.locator('span').filter({ hasText: 'Glooko Insights' }).first();
-    // Note: Navigation items are Cards with onClick handlers
-    // Use a simpler approach - find by role or data attribute, or just by text and parent selector
-    // Cards are in a grid with cardsGrid class
-    this.uploadButton = page.locator('[class*="cardsGrid"]').getByText('Data Upload', { exact: true });
-    this.reportsButton = page.locator('[class*="cardsGrid"]').getByText('Comprehensive Reports', { exact: true });
-    this.aiAnalysisButton = page.locator('[class*="cardsGrid"]').getByText('AI Analysis', { exact: true });
-    this.settingsButton = page.locator('[class*="cardsGrid"]').getByText('Settings', { exact: true });
+    // Note: Navigation items are Fluent UI Cards with onClick handlers
+    // Find the card by looking for the title text and navigating to parent card
+    // Cards are rendered as div elements with specific structure
+    this.uploadButton = page.locator('text=Data Upload').locator('xpath=ancestor::div[contains(@class, "fui-Card")]').first();
+    this.reportsButton = page.locator('text=Comprehensive Reports').locator('xpath=ancestor::div[contains(@class, "fui-Card")]').first();
+    this.aiAnalysisButton = page.locator('text=AI Analysis').locator('xpath=ancestor::div[contains(@class, "fui-Card")]').first();
+    this.settingsButton = page.locator('text=Settings').locator('xpath=ancestor::div[contains(@class, "fui-Card")]').first();
   }
 
   /**
