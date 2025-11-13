@@ -87,4 +87,30 @@ Your patient's TIR of 68.5% is **just below the recommended target of 70%**, ind
     expect(screen.getByText('Monitor blood glucose')).toBeInTheDocument();
     expect(screen.getByText('Adjust diet')).toBeInTheDocument();
   });
+
+  it('should render markdown tables with proper HTML structure', () => {
+    const tableContent = `| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| Value 1  | Value 2  | Value 3  |
+| Data A   | Data B   | Data C   |`;
+    
+    render(<MarkdownRenderer content={tableContent} />);
+    
+    // Check that a table element exists
+    const table = screen.getByRole('table');
+    expect(table).toBeInTheDocument();
+    
+    // Check for table headers
+    expect(screen.getByRole('columnheader', { name: 'Column 1' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Column 2' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Column 3' })).toBeInTheDocument();
+    
+    // Check for table cells with data
+    expect(screen.getByRole('cell', { name: 'Value 1' })).toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: 'Value 2' })).toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: 'Value 3' })).toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: 'Data A' })).toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: 'Data B' })).toBeInTheDocument();
+    expect(screen.getByRole('cell', { name: 'Data C' })).toBeInTheDocument();
+  });
 });
