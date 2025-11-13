@@ -85,5 +85,13 @@ describe('glucoseInsulinPrompt', () => {
       expect(result).toContain('CSV format');
       expect(result).toContain('```csv');
     });
+
+    it('should include completion marker instruction', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(result).toContain('--- END OF ANALYSIS ---');
+      expect(result).toContain('End your response with');
+    });
   });
 });

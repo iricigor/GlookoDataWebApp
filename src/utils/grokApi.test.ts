@@ -252,7 +252,7 @@ describe('grokApi', () => {
       expect(body.messages[1].role).toBe('user');
       expect(body.messages[1].content).toBe('test prompt');
       expect(body.temperature).toBe(0.2);
-      expect(body.max_tokens).toBe(1000);
+      expect(body.max_tokens).toBe(4000);
     });
 
     it('should handle token limit error in HTTP 200 response', async () => {

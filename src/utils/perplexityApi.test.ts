@@ -218,7 +218,7 @@ describe('perplexityApi', () => {
       
       expect(body.model).toBe('sonar');
       expect(body.temperature).toBe(0.2);
-      expect(body.max_tokens).toBe(1000);
+      expect(body.max_tokens).toBe(4000);
     });
 
     it('should handle token limit error in HTTP 200 response', async () => {

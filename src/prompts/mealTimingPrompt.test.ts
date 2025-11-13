@@ -142,5 +142,16 @@ describe('mealTimingPrompt', () => {
       
       expect(result).toContain('you/your');
     });
+
+    it('should include completion marker instruction', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('--- END OF ANALYSIS ---');
+      expect(result).toContain('End your response with');
+    });
   });
 });

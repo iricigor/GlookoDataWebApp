@@ -61,5 +61,12 @@ describe('timeInRangePrompt', () => {
       expect(result).toContain('100.0%');
       expect(result).toBeTruthy();
     });
+
+    it('should include completion marker instruction', () => {
+      const result = generateTimeInRangePrompt(75);
+      
+      expect(result).toContain('--- END OF ANALYSIS ---');
+      expect(result).toContain('End your response with');
+    });
   });
 });
