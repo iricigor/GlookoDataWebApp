@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>275 Fix AI response truncation by increasing token limits and adding completion markers</summary>
+
+[#275](../../pull/275) Fix AI response truncation by increasing token limits and adding completion markers
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>273 Add copy-to-clipboard button for AI analysis responses</summary>
 
 [#273](../../pull/273) Add copy-to-clipboard button for AI analysis responses
