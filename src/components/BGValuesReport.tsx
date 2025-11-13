@@ -87,6 +87,35 @@ const useStyles = makeStyles({
     height: '400px',
     marginTop: '16px',
   },
+  chartWithBarContainer: {
+    display: 'flex',
+    ...shorthands.gap('16px'),
+    marginTop: '16px',
+  },
+  chartWrapper: {
+    flex: 1,
+    height: '400px',
+  },
+  summaryBarContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '60px',
+    height: '400px',
+    ...shorthands.gap('4px'),
+  },
+  summaryBarSegment: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForegroundOnBrand,
+    fontWeight: tokens.fontWeightSemibold,
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    ...shorthands.transition('all', '0.2s'),
+    '&:hover': {
+      opacity: 0.8,
+    },
+  },
   controlsRow: {
     display: 'flex',
     alignItems: 'center',
@@ -459,97 +488,144 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
           </div>
         </div>
         
-        <div className={styles.chartContainer}>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              {/* No CartesianGrid for clean Fluent UI look */}
-              
-              <XAxis
-                dataKey="time"
-                domain={['00:00', '23:59']}
-                tickFormatter={formatXAxis}
-                stroke={tokens.colorNeutralStroke1}
-                tick={{ 
-                  fill: tokens.colorNeutralForeground2,
-                  fontSize: tokens.fontSizeBase200,
-                  fontFamily: tokens.fontFamilyBase,
-                }}
-                axisLine={{ strokeWidth: 1 }}
-                tickLine={false}
-              />
-              
-              <YAxis
-                domain={[0, maxGlucose]}
-                label={{ 
-                  value: 'Glucose (mmol/L)', 
-                  angle: -90, 
-                  position: 'insideLeft', 
-                  style: { 
-                    fontSize: tokens.fontSizeBase200,
-                    fontFamily: tokens.fontFamilyBase,
+        <div className={styles.chartWithBarContainer}>
+          <div className={styles.chartWrapper}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                {/* No CartesianGrid for clean Fluent UI look */}
+                
+                <XAxis
+                  dataKey="time"
+                  domain={['00:00', '23:59']}
+                  tickFormatter={formatXAxis}
+                  stroke={tokens.colorNeutralStroke1}
+                  tick={{ 
                     fill: tokens.colorNeutralForeground2,
-                  } 
-                }}
-                stroke={tokens.colorNeutralStroke1}
-                tick={{ 
-                  fill: tokens.colorNeutralForeground2,
-                  fontSize: tokens.fontSizeBase200,
-                  fontFamily: tokens.fontFamilyBase,
-                }}
-                axisLine={{ strokeWidth: 1 }}
-                tickLine={false}
-              />
-              
-              <Tooltip content={<CustomTooltip />} />
-              
-              {/* Target range reference lines with Fluent UI semantic colors */}
-              <ReferenceLine 
-                y={thresholds.low} 
-                stroke={tokens.colorPaletteRedBorder1}
-                strokeDasharray="5 5" 
-                strokeWidth={1.5}
-                label={{ 
-                  value: `Low (${thresholds.low})`, 
-                  position: 'insideTopLeft', 
-                  style: { 
                     fontSize: tokens.fontSizeBase200,
                     fontFamily: tokens.fontFamilyBase,
-                    fill: tokens.colorPaletteRedForeground1,
-                  } 
-                }}
-              />
-              <ReferenceLine 
-                y={thresholds.high} 
-                stroke={tokens.colorPaletteMarigoldBorder1}
-                strokeDasharray="5 5" 
-                strokeWidth={1.5}
-                label={{ 
-                  value: `High (${thresholds.high})`, 
-                  position: 'insideTopLeft', 
-                  style: { 
+                  }}
+                  axisLine={{ strokeWidth: 1 }}
+                  tickLine={false}
+                />
+                
+                <YAxis
+                  domain={[0, maxGlucose]}
+                  label={{ 
+                    value: 'Glucose (mmol/L)', 
+                    angle: -90, 
+                    position: 'insideLeft', 
+                    style: { 
+                      fontSize: tokens.fontSizeBase200,
+                      fontFamily: tokens.fontFamilyBase,
+                      fill: tokens.colorNeutralForeground2,
+                    } 
+                  }}
+                  stroke={tokens.colorNeutralStroke1}
+                  tick={{ 
+                    fill: tokens.colorNeutralForeground2,
                     fontSize: tokens.fontSizeBase200,
                     fontFamily: tokens.fontFamilyBase,
-                    fill: tokens.colorPaletteMarigoldForeground1,
-                  } 
+                  }}
+                  axisLine={{ strokeWidth: 1 }}
+                  tickLine={false}
+                />
+                
+                <Tooltip content={<CustomTooltip />} />
+                
+                {/* Target range reference lines with Fluent UI semantic colors */}
+                <ReferenceLine 
+                  y={thresholds.low} 
+                  stroke={tokens.colorPaletteRedBorder1}
+                  strokeDasharray="5 5" 
+                  strokeWidth={1.5}
+                  label={{ 
+                    value: `Low (${thresholds.low})`, 
+                    position: 'insideTopLeft', 
+                    style: { 
+                      fontSize: tokens.fontSizeBase200,
+                      fontFamily: tokens.fontFamilyBase,
+                      fill: tokens.colorPaletteRedForeground1,
+                    } 
+                  }}
+                />
+                <ReferenceLine 
+                  y={thresholds.high} 
+                  stroke={tokens.colorPaletteMarigoldBorder1}
+                  strokeDasharray="5 5" 
+                  strokeWidth={1.5}
+                  label={{ 
+                    value: `High (${thresholds.high})`, 
+                    position: 'insideTopLeft', 
+                    style: { 
+                      fontSize: tokens.fontSizeBase200,
+                      fontFamily: tokens.fontFamilyBase,
+                      fill: tokens.colorPaletteMarigoldForeground1,
+                    } 
+                  }}
+                />
+                
+                {/* Glucose values line with dynamic or monochrome coloring */}
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke={isDynamicColorScheme(colorScheme) ? tokens.colorNeutralStroke2 : tokens.colorBrandForeground1}
+                  strokeWidth={isDynamicColorScheme(colorScheme) ? 1 : 2}
+                  dot={isDynamicColorScheme(colorScheme) ? (renderColoredDot as unknown as boolean) : false}
+                  activeDot={{ 
+                    r: 4, 
+                    strokeWidth: 2,
+                    stroke: tokens.colorNeutralBackground1,
+                    fill: isDynamicColorScheme(colorScheme) ? undefined : tokens.colorBrandForeground1,
+                  }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Vertical summary bar showing daily glucose range percentages */}
+          <div className={styles.summaryBarContainer}>
+            {/* High segment */}
+            {parseFloat(abovePercentage) > 0 && (
+              <div
+                className={styles.summaryBarSegment}
+                style={{
+                  height: `${abovePercentage}%`,
+                  backgroundColor: '#FFB300', // Amber/Orange for high
                 }}
-              />
-              
-              {/* Glucose values line with dynamic or monochrome coloring */}
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke={isDynamicColorScheme(colorScheme) ? tokens.colorNeutralStroke2 : tokens.colorBrandForeground1}
-                strokeWidth={isDynamicColorScheme(colorScheme) ? 1 : 2}
-                dot={isDynamicColorScheme(colorScheme) ? (renderColoredDot as unknown as boolean) : false}
-                activeDot={{ 
-                  r: 4, 
-                  strokeWidth: 2,
-                  stroke: tokens.colorNeutralBackground1,
-                  fill: isDynamicColorScheme(colorScheme) ? undefined : tokens.colorBrandForeground1,
+                title={`High: ${abovePercentage}%`}
+              >
+                {parseFloat(abovePercentage) >= 5 && `${abovePercentage}%`}
+              </div>
+            )}
+            
+            {/* In Range segment */}
+            {parseFloat(inRangePercentage) > 0 && (
+              <div
+                className={styles.summaryBarSegment}
+                style={{
+                  height: `${inRangePercentage}%`,
+                  backgroundColor: '#4CAF50', // Green for in-range
                 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+                title={`In Range: ${inRangePercentage}%`}
+              >
+                {parseFloat(inRangePercentage) >= 5 && `${inRangePercentage}%`}
+              </div>
+            )}
+            
+            {/* Low segment */}
+            {parseFloat(belowPercentage) > 0 && (
+              <div
+                className={styles.summaryBarSegment}
+                style={{
+                  height: `${belowPercentage}%`,
+                  backgroundColor: '#D32F2F', // Red for low
+                }}
+                title={`Low: ${belowPercentage}%`}
+              >
+                {parseFloat(belowPercentage) >= 5 && `${belowPercentage}%`}
+              </div>
+            )}
+          </div>
         </div>
       </Card>
     </div>
