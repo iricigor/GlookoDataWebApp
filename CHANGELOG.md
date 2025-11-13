@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>254 Unify Security & Privacy information with collapsible accordions</summary>
+
+[#254](../../pull/254) Unify Security & Privacy information with collapsible accordions
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>252 Fix nightly E2E test failures and update schedule to 3AM CET</summary>
 
 [#252](../../pull/252) Fix nightly E2E test failures and update schedule to 3AM CET
