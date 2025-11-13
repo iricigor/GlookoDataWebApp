@@ -131,9 +131,19 @@ export async function callDeepSeekApi(
     }
 
     // Parse successful response
-    const data = await response.json() as DeepSeekResponse;
+    const data = await response.json() as DeepSeekResponse | DeepSeekError;
     
-    if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+    // Check if response contains an error (some APIs can return errors with HTTP 200)
+    if ('error' in data && data.error) {
+      return {
+        success: false,
+        error: data.error.message || 'Unknown error from API',
+        errorType: 'api',
+      };
+    }
+    
+    // Type guard to check if data is a DeepSeekResponse
+    if ('choices' in data && data.choices && data.choices.length > 0 && data.choices[0].message) {
       const content = data.choices[0].message.content;
       return {
         success: true,
