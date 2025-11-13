@@ -17,12 +17,12 @@ import { copyToClipboard } from '../utils/csvUtils';
 
 const useStyles = makeStyles({
   buttonContainer: {
+    // Sticky positioning keeps the button visible in the top-right corner during scroll
     position: 'sticky',
     top: '8px',
     right: '8px',
-    float: 'right',
     zIndex: 10,
-    marginBottom: '-40px', // Negative margin to prevent affecting layout
+    // Removed float and negative margin for more robust layout
   },
   button: {
     minWidth: 'auto',
