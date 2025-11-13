@@ -225,6 +225,17 @@ const useStyles = makeStyles({
     color: tokens.colorPaletteYellowForeground1,
     flexShrink: 0,
   },
+  selectedText: {
+    color: tokens.colorBrandForeground1,
+    fontWeight: tokens.fontWeightSemibold,
+  },
+  selectButton: {
+    minWidth: 'auto',
+  },
+  helperText: {
+    marginTop: '12px',
+    marginBottom: '12px',
+  },
 });
 
 interface SettingsProps {
@@ -270,22 +281,28 @@ export function Settings({
   const availableProviders = getAvailableProviders(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
   const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
 
-  // Wrapper functions to auto-select provider when new key is entered
+  // Wrapper functions to handle key changes with auto-selection logic
   const handlePerplexityKeyChange = (key: string) => {
     const wasEmpty = !perplexityApiKey || perplexityApiKey.trim() === '';
+    const isNowEmpty = !key || key.trim() === '';
     const isNowFilled = key && key.trim() !== '';
     
     onPerplexityApiKeyChange(key);
     
     // Auto-select this provider if a new key was just entered
     if (wasEmpty && isNowFilled) {
-      // Use setTimeout to ensure the key change is processed first
       setTimeout(() => onSelectedProviderChange('perplexity'), 0);
+    }
+    // If the active provider's key was deleted, select first available provider
+    else if (!wasEmpty && isNowEmpty && activeProvider === 'perplexity') {
+      const remaining = getAvailableProviders('', geminiApiKey, grokApiKey, deepseekApiKey);
+      setTimeout(() => onSelectedProviderChange(remaining[0] || null), 0);
     }
   };
 
   const handleGrokKeyChange = (key: string) => {
     const wasEmpty = !grokApiKey || grokApiKey.trim() === '';
+    const isNowEmpty = !key || key.trim() === '';
     const isNowFilled = key && key.trim() !== '';
     
     onGrokApiKeyChange(key);
@@ -294,10 +311,16 @@ export function Settings({
     if (wasEmpty && isNowFilled) {
       setTimeout(() => onSelectedProviderChange('grok'), 0);
     }
+    // If the active provider's key was deleted, select first available provider
+    else if (!wasEmpty && isNowEmpty && activeProvider === 'grok') {
+      const remaining = getAvailableProviders(perplexityApiKey, geminiApiKey, '', deepseekApiKey);
+      setTimeout(() => onSelectedProviderChange(remaining[0] || null), 0);
+    }
   };
 
   const handleDeepSeekKeyChange = (key: string) => {
     const wasEmpty = !deepseekApiKey || deepseekApiKey.trim() === '';
+    const isNowEmpty = !key || key.trim() === '';
     const isNowFilled = key && key.trim() !== '';
     
     onDeepSeekApiKeyChange(key);
@@ -306,10 +329,16 @@ export function Settings({
     if (wasEmpty && isNowFilled) {
       setTimeout(() => onSelectedProviderChange('deepseek'), 0);
     }
+    // If the active provider's key was deleted, select first available provider
+    else if (!wasEmpty && isNowEmpty && activeProvider === 'deepseek') {
+      const remaining = getAvailableProviders(perplexityApiKey, geminiApiKey, grokApiKey, '');
+      setTimeout(() => onSelectedProviderChange(remaining[0] || null), 0);
+    }
   };
 
   const handleGeminiKeyChange = (key: string) => {
     const wasEmpty = !geminiApiKey || geminiApiKey.trim() === '';
+    const isNowEmpty = !key || key.trim() === '';
     const isNowFilled = key && key.trim() !== '';
     
     onGeminiApiKeyChange(key);
@@ -317,6 +346,11 @@ export function Settings({
     // Auto-select this provider if a new key was just entered
     if (wasEmpty && isNowFilled) {
       setTimeout(() => onSelectedProviderChange('gemini'), 0);
+    }
+    // If the active provider's key was deleted, select first available provider
+    else if (!wasEmpty && isNowEmpty && activeProvider === 'gemini') {
+      const remaining = getAvailableProviders(perplexityApiKey, '', grokApiKey, deepseekApiKey);
+      setTimeout(() => onSelectedProviderChange(remaining[0] || null), 0);
     }
   };
 
@@ -329,7 +363,7 @@ export function Settings({
     
     if (isActive) {
       // Show "✓ Selected" for the active provider
-      return <Text style={{ color: tokens.colorBrandForeground1, fontWeight: tokens.fontWeightSemibold }}>✓ Selected</Text>;
+      return <Text className={styles.selectedText}>✓ Selected</Text>;
     } else if (hasMultipleKeys) {
       // Show "Select" button for non-active providers when multiple keys exist
       return (
@@ -337,7 +371,7 @@ export function Settings({
           appearance="subtle"
           size="small"
           onClick={() => onSelectedProviderChange(provider)}
-          style={{ minWidth: 'auto' }}
+          className={styles.selectButton}
         >
           Select
         </Button>
@@ -410,7 +444,7 @@ export function Settings({
               
               {/* Helper text for multiple keys */}
               {availableProviders.length > 1 && (
-                <Text className={styles.settingDescription} style={{ marginTop: '12px', marginBottom: '12px' }}>
+                <Text className={`${styles.settingDescription} ${styles.helperText}`}>
                   Click "Select" next to any configured API key to switch providers.
                 </Text>
               )}
