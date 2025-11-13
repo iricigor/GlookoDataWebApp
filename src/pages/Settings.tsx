@@ -18,14 +18,14 @@ import {
   AccordionHeader,
   AccordionPanel,
 } from '@fluentui/react-components';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { GlucoseThresholdsSection } from '../components/GlucoseThresholdsSection';
 import { getVersionInfo, formatBuildDate } from '../utils/version';
-import { getProviderDisplayName, determineActiveProvider } from '../utils/aiApi';
+import { getProviderDisplayName, getActiveProvider, getAvailableProviders, type AIProvider } from '../utils/aiApi';
 
 const useStyles = makeStyles({
   container: {
@@ -225,6 +225,17 @@ const useStyles = makeStyles({
     color: tokens.colorPaletteYellowForeground1,
     flexShrink: 0,
   },
+  selectedText: {
+    color: tokens.colorBrandForeground1,
+    fontWeight: tokens.fontWeightSemibold,
+  },
+  selectButton: {
+    minWidth: 'auto',
+  },
+  helperText: {
+    marginTop: '12px',
+    marginBottom: '12px',
+  },
 });
 
 interface SettingsProps {
@@ -240,18 +251,151 @@ interface SettingsProps {
   onGrokApiKeyChange: (key: string) => void;
   deepseekApiKey: string;
   onDeepSeekApiKeyChange: (key: string) => void;
+  selectedProvider: AIProvider | null;
+  onSelectedProviderChange: (provider: AIProvider | null) => void;
 }
 
-export function Settings({ themeMode, onThemeChange, exportFormat, onExportFormatChange, perplexityApiKey, onPerplexityApiKeyChange, geminiApiKey, onGeminiApiKeyChange, grokApiKey, onGrokApiKeyChange, deepseekApiKey, onDeepSeekApiKeyChange }: SettingsProps) {
+export function Settings({ 
+  themeMode, 
+  onThemeChange, 
+  exportFormat, 
+  onExportFormatChange, 
+  perplexityApiKey, 
+  onPerplexityApiKeyChange, 
+  geminiApiKey, 
+  onGeminiApiKeyChange, 
+  grokApiKey, 
+  onGrokApiKeyChange, 
+  deepseekApiKey, 
+  onDeepSeekApiKeyChange,
+  selectedProvider,
+  onSelectedProviderChange,
+}: SettingsProps) {
   const styles = useStyles();
   const { thresholds, updateThreshold, validateThresholds, isValid } = useGlucoseThresholds();
   const validationError = validateThresholds(thresholds);
   const versionInfo = getVersionInfo();
   const [selectedTab, setSelectedTab] = useState<string>('general');
 
-  // Determine which provider is active based on available keys
-  // Priority: Perplexity > Grok > DeepSeek > Gemini
-  const activeProvider = determineActiveProvider(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
+  // Track previous key states for auto-selection logic
+  const prevKeysRef = useRef({
+    perplexity: perplexityApiKey,
+    grok: grokApiKey,
+    deepseek: deepseekApiKey,
+    gemini: geminiApiKey,
+  });
+
+  // Get available providers and determine active one
+  const availableProviders = getAvailableProviders(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
+  const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
+
+  // Handle auto-selection when keys change
+  useEffect(() => {
+    const prevKeys = prevKeysRef.current;
+    
+    // Check each provider for empty->filled or filled->empty transitions
+    const checkProvider = (
+      provider: AIProvider,
+      currentKey: string,
+      prevKey: string,
+      otherKeys: { perplexityKey: string; grokKey: string; deepseekKey: string; geminiKey: string }
+    ) => {
+      const wasEmpty = !prevKey || prevKey.trim() === '';
+      const isNowEmpty = !currentKey || currentKey.trim() === '';
+      const isNowFilled = currentKey && currentKey.trim() !== '';
+      
+      // Auto-select when new key is entered
+      if (wasEmpty && isNowFilled) {
+        onSelectedProviderChange(provider);
+      }
+      // If the active provider's key was deleted, select first available provider
+      else if (!wasEmpty && isNowEmpty && activeProvider === provider) {
+        const remaining = getAvailableProviders(
+          otherKeys.perplexityKey,
+          otherKeys.geminiKey,
+          otherKeys.grokKey,
+          otherKeys.deepseekKey
+        );
+        onSelectedProviderChange(remaining[0] || null);
+      }
+    };
+
+    // Check Perplexity
+    if (prevKeys.perplexity !== perplexityApiKey) {
+      checkProvider('perplexity', perplexityApiKey, prevKeys.perplexity, {
+        perplexityKey: '',
+        geminiKey: geminiApiKey,
+        grokKey: grokApiKey,
+        deepseekKey: deepseekApiKey,
+      });
+    }
+
+    // Check Grok
+    if (prevKeys.grok !== grokApiKey) {
+      checkProvider('grok', grokApiKey, prevKeys.grok, {
+        perplexityKey: perplexityApiKey,
+        geminiKey: geminiApiKey,
+        grokKey: '',
+        deepseekKey: deepseekApiKey,
+      });
+    }
+
+    // Check DeepSeek
+    if (prevKeys.deepseek !== deepseekApiKey) {
+      checkProvider('deepseek', deepseekApiKey, prevKeys.deepseek, {
+        perplexityKey: perplexityApiKey,
+        geminiKey: geminiApiKey,
+        grokKey: grokApiKey,
+        deepseekKey: '',
+      });
+    }
+
+    // Check Gemini
+    if (prevKeys.gemini !== geminiApiKey) {
+      checkProvider('gemini', geminiApiKey, prevKeys.gemini, {
+        perplexityKey: perplexityApiKey,
+        geminiKey: '',
+        grokKey: grokApiKey,
+        deepseekKey: deepseekApiKey,
+      });
+    }
+
+    // Update ref with current keys
+    prevKeysRef.current = {
+      perplexity: perplexityApiKey,
+      grok: grokApiKey,
+      deepseek: deepseekApiKey,
+      gemini: geminiApiKey,
+    };
+  }, [perplexityApiKey, grokApiKey, deepseekApiKey, geminiApiKey, activeProvider, onSelectedProviderChange]);
+
+  // Helper function to render the inline selection UI for each API key field
+  const renderKeyStatus = (provider: AIProvider, hasKey: boolean) => {
+    if (!hasKey) return undefined;
+    
+    const isActive = activeProvider === provider;
+    const hasMultipleKeys = availableProviders.length > 1;
+    
+    if (isActive) {
+      // Show "✓ Selected" for the active provider
+      return <Text className={styles.selectedText}>✓ Selected</Text>;
+    } else if (hasMultipleKeys) {
+      // Show "Select" button for non-active providers when multiple keys exist
+      return (
+        <Button
+          appearance="subtle"
+          size="small"
+          onClick={() => onSelectedProviderChange(provider)}
+          className={styles.selectButton}
+        >
+          Select
+        </Button>
+      );
+    } else {
+      // Single key configured - just show checkmark
+      return '✓';
+    }
+  };
 
   const renderTabContent = () => {
     switch (selectedTab) {
@@ -313,6 +457,13 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                 </Text>
               )}
               
+              {/* Helper text for multiple keys */}
+              {availableProviders.length > 1 && (
+                <Text className={`${styles.settingDescription} ${styles.helperText}`}>
+                  Click "Select" next to any configured API key to switch providers.
+                </Text>
+              )}
+              
               <div className={styles.apiKeyContainer}>
                 <div className={styles.apiKeyRow}>
                   <div className={styles.apiKeyLabelRow}>
@@ -334,7 +485,7 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                     value={perplexityApiKey}
                     onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
                     placeholder="Enter your Perplexity API key"
-                    contentAfter={perplexityApiKey ? (activeProvider === 'perplexity' ? '✓ Selected' : '✓') : undefined}
+                    contentAfter={renderKeyStatus('perplexity', !!perplexityApiKey)}
                     className={styles.apiKeyInput}
                   />
                 </div>
@@ -359,7 +510,7 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                     value={grokApiKey}
                     onChange={(_, data) => onGrokApiKeyChange(data.value)}
                     placeholder="Enter your Grok AI API key"
-                    contentAfter={grokApiKey ? (activeProvider === 'grok' ? '✓ Selected' : '✓') : undefined}
+                    contentAfter={renderKeyStatus('grok', !!grokApiKey)}
                     className={styles.apiKeyInput}
                   />
                 </div>
@@ -384,7 +535,7 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                     value={deepseekApiKey}
                     onChange={(_, data) => onDeepSeekApiKeyChange(data.value)}
                     placeholder="Enter your DeepSeek API key"
-                    contentAfter={deepseekApiKey ? (activeProvider === 'deepseek' ? '✓ Selected' : '✓') : undefined}
+                    contentAfter={renderKeyStatus('deepseek', !!deepseekApiKey)}
                     className={styles.apiKeyInput}
                   />
                 </div>
@@ -409,7 +560,7 @@ export function Settings({ themeMode, onThemeChange, exportFormat, onExportForma
                     value={geminiApiKey}
                     onChange={(_, data) => onGeminiApiKeyChange(data.value)}
                     placeholder="Enter your Google Gemini API key"
-                    contentAfter={geminiApiKey ? (activeProvider === 'gemini' ? '✓ Selected' : '✓') : undefined}
+                    contentAfter={renderKeyStatus('gemini', !!geminiApiKey)}
                     className={styles.apiKeyInput}
                   />
                 </div>
