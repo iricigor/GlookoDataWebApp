@@ -27,7 +27,7 @@ This page showcases the GlookoDataWebApp interface in **Light Mode** on desktop 
 
 ## Home Page
 
-![Home Page - Light Mode](screenshots/light/01-home.png)
+![Home Page - Light Mode](light/01-home.png)
 
 The home page features a modern, clean interface with four main navigation cards:
 - **Data Upload** - Upload and manage Glooko export files
@@ -39,7 +39,7 @@ The home page features a modern, clean interface with four main navigation cards
 
 ## Data Upload
 
-![Data Upload Page - Light Mode](screenshots/light/02-upload-with-file.png)
+![Data Upload Page - Light Mode](light/02-upload-with-file.png)
 
 The Data Upload page shows an uploaded demo data file with:
 - File name, size, and upload time
@@ -61,7 +61,7 @@ The Data Upload page shows an uploaded demo data file with:
 
 ### Reports - File Info
 
-![Reports - File Info - Light Mode](screenshots/light/03-reports-file-info.png)
+![Reports - File Info - Light Mode](light/03-reports-file-info.png)
 
 The File Info tab displays comprehensive metadata about the selected data file:
 - Patient information
@@ -72,7 +72,7 @@ The File Info tab displays comprehensive metadata about the selected data file:
 
 ### Reports - Time in Range
 
-![Reports - Time in Range - Light Mode](screenshots/light/04-reports-time-in-range.png)
+![Reports - Time in Range - Light Mode](light/04-reports-time-in-range.png)
 
 The Time in Range report provides glucose range analysis with:
 - Toggle between 3-category and 5-category modes
@@ -83,7 +83,7 @@ The Time in Range report provides glucose range analysis with:
 
 ### Reports - AGP Data
 
-![Reports - AGP Data - Light Mode](screenshots/light/05-reports-agp-data.png)
+![Reports - AGP Data - Light Mode](light/05-reports-agp-data.png)
 
 The Ambulatory Glucose Profile (AGP) report shows:
 - Statistical analysis of glucose readings
@@ -94,7 +94,7 @@ The Ambulatory Glucose Profile (AGP) report shows:
 
 ### Reports - Detailed CGM
 
-![Reports - Detailed CGM - Light Mode](screenshots/light/06-reports-detailed-cgm.png)
+![Reports - Detailed CGM - Light Mode](light/06-reports-detailed-cgm.png)
 
 The Detailed CGM (Continuous Glucose Monitoring) tab provides:
 - Complete table of glucose readings
@@ -105,7 +105,7 @@ The Detailed CGM (Continuous Glucose Monitoring) tab provides:
 
 ### Reports - Detailed Insulin
 
-![Reports - Detailed Insulin - Light Mode](screenshots/light/07-reports-detailed-insulin.png)
+![Reports - Detailed Insulin - Light Mode](light/07-reports-detailed-insulin.png)
 
 The Detailed Insulin report shows:
 - Bolus insulin doses (meal/correction)
@@ -120,13 +120,13 @@ The Detailed Insulin report shows:
 
 ### AI Analysis - File Info
 
-![AI Analysis - File Info - Light Mode](screenshots/light/08-ai-file-info.png)
+![AI Analysis - File Info - Light Mode](light/08-ai-file-info.png)
 
 The File Info tab in AI Analysis section displays the same metadata as Reports, providing context for AI-powered analysis.
 
 ### AI Analysis - Time in Range
 
-![AI Analysis - Time in Range - Light Mode](screenshots/light/09-ai-time-in-range.png)
+![AI Analysis - Time in Range - Light Mode](light/09-ai-time-in-range.png)
 
 The Time in Range AI analysis tab features:
 - "Analyze with AI" button for generating insights
@@ -139,7 +139,7 @@ The Time in Range AI analysis tab features:
 
 ### AI Analysis - Glucose & Insulin
 
-![AI Analysis - Glucose & Insulin - Light Mode](screenshots/light/10-ai-glucose-insulin.png)
+![AI Analysis - Glucose & Insulin - Light Mode](light/10-ai-glucose-insulin.png)
 
 The Glucose & Insulin analysis tab provides:
 - Combined analysis of CGM and insulin data
@@ -150,7 +150,7 @@ The Glucose & Insulin analysis tab provides:
 
 ### AI Analysis - Meal Timing
 
-![AI Analysis - Meal Timing - Light Mode](screenshots/light/11-ai-meal-timing.png)
+![AI Analysis - Meal Timing - Light Mode](light/11-ai-meal-timing.png)
 
 The Meal Timing analysis examines:
 - Relationship between meals and glucose levels
@@ -161,7 +161,7 @@ The Meal Timing analysis examines:
 
 ### AI Analysis - Pump Settings
 
-![AI Analysis - Pump Settings - Light Mode](screenshots/light/12-ai-pump-settings.png)
+![AI Analysis - Pump Settings - Light Mode](light/12-ai-pump-settings.png)
 
 The Pump Settings analysis evaluates:
 - Basal rate effectiveness
@@ -176,7 +176,7 @@ The Pump Settings analysis evaluates:
 
 ### Settings - General
 
-![Settings - General - Light Mode](screenshots/light/13-settings-general.png)
+![Settings - General - Light Mode](light/13-settings-general.png)
 
 The General settings tab includes:
 - **Theme Selection**: Light, Dark, or System preference
@@ -190,7 +190,7 @@ The General settings tab includes:
 
 ### Settings - Data & AI
 
-![Settings - Data & AI - Light Mode](screenshots/light/14-settings-data-ai.png)
+![Settings - Data & AI - Light Mode](light/14-settings-data-ai.png)
 
 The Data & AI settings tab provides:
 - **Export Format**: Choose between CSV and XLSX
@@ -206,7 +206,7 @@ The Data & AI settings tab provides:
 
 ### Settings - About
 
-![Settings - About - Light Mode](screenshots/light/15-settings-about.png)
+![Settings - About - Light Mode](light/15-settings-about.png)
 
 The About tab displays:
 - Application version information
@@ -232,8 +232,8 @@ All pages feature consistent navigation:
 
 - [Dark Mode Screenshots](SCREENSHOTS_DARK.md)
 - [Mobile Screenshots](SCREENSHOTS_MOBILE.md)
-- [Main Screenshots Overview](SCREENSHOTS.md)
-- [Data Upload Guide](DATA_UPLOAD.md)
-- [Reports Documentation](REPORTS.md)
-- [Settings Guide](SETTINGS.md)
-- [Main README](../README.md)
+- [Main Screenshots Overview](../SCREENSHOTS.md)
+- [Data Upload Guide](../DATA_UPLOAD.md)
+- [Reports Documentation](../REPORTS.md)
+- [Settings Guide](../SETTINGS.md)
+- [Main README](../../README.md)

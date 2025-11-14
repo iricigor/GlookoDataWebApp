@@ -17,7 +17,7 @@ GlookoDataWebApp is a modern web application for importing, visualizing, and ana
 
 We've organized our screenshots into three comprehensive collections based on theme and device type:
 
-### 📱 [Desktop - Light Mode](SCREENSHOTS_LIGHT.md)
+### 📱 [Desktop - Light Mode](screenshots/SCREENSHOTS_LIGHT.md)
 
 View the complete application interface in **Light Mode** on desktop displays (1920x1080):
 
@@ -29,11 +29,11 @@ View the complete application interface in **Light Mode** on desktop displays (1
 
 **Best for:** Daytime use, bright environments, users who prefer traditional light interfaces
 
-[→ View Light Mode Screenshots](SCREENSHOTS_LIGHT.md)
+[→ View Light Mode Screenshots](screenshots/SCREENSHOTS_LIGHT.md)
 
 ---
 
-### 🌙 [Desktop - Dark Mode](SCREENSHOTS_DARK.md)
+### 🌙 [Desktop - Dark Mode](screenshots/SCREENSHOTS_DARK.md)
 
 View the complete application interface in **Dark Mode** on desktop displays (1920x1080):
 
@@ -45,11 +45,11 @@ View the complete application interface in **Dark Mode** on desktop displays (19
 
 **Best for:** Night time use, low-light environments, reduced eye strain, OLED power savings
 
-[→ View Dark Mode Screenshots](SCREENSHOTS_DARK.md)
+[→ View Dark Mode Screenshots](screenshots/SCREENSHOTS_DARK.md)
 
 ---
 
-### 📱 [Mobile - Dark Theme](SCREENSHOTS_MOBILE.md)
+### 📱 [Mobile - Dark Theme](screenshots/SCREENSHOTS_MOBILE.md)
 
 View the complete application interface optimized for **mobile devices** (375x812 - iPhone size) with dark theme:
 
@@ -61,7 +61,7 @@ View the complete application interface optimized for **mobile devices** (375x81
 
 **Best for:** On-the-go access, smartphone usage, tablet viewing
 
-[→ View Mobile Screenshots](SCREENSHOTS_MOBILE.md)
+[→ View Mobile Screenshots](screenshots/SCREENSHOTS_MOBILE.md)
 
 ---
 
