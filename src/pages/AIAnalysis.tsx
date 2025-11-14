@@ -25,7 +25,7 @@ import {
 } from '@fluentui/react-components';
 import { BrainCircuitRegular, CheckmarkCircleRegular, ErrorCircleRegular } from '@fluentui/react-icons';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
-import { MarkdownRenderer } from '../components/MarkdownRenderer';
+import { MarkdownRenderer } from '../components/shared';
 import type { UploadedFile, AIAnalysisResult, DailyReport, GlucoseReading, InsulinReading } from '../types';
 import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
 import { extractDailyInsulinSummaries, extractInsulinReadings } from '../utils/insulinDataUtils';

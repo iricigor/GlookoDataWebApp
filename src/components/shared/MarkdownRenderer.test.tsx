@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MarkdownRenderer } from './MarkdownRenderer';
 
 // Mock the CopyAIResponseButton component
-vi.mock('./CopyAIResponseButton', () => ({
+vi.mock('../CopyAIResponseButton', () => ({
   CopyAIResponseButton: ({ content }: { content: string }) => (
     <button data-testid="copy-button">Copy {content.substring(0, 10)}</button>
   ),
