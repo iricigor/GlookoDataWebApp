@@ -1,132 +1,178 @@
 # Application Screenshots
 
-This page showcases the GlookoDataWebApp interface with various features and views.
+This page provides comprehensive visual documentation of the GlookoDataWebApp interface across different themes and device types.
 
-## Home Page
+## Overview
 
-### Light Mode
+GlookoDataWebApp is a modern web application for importing, visualizing, and analyzing diabetes data exported from the Glooko platform. The application features:
 
-![GlookoDataWebApp Home Page](https://github.com/user-attachments/assets/9630fcd4-4eca-4fb6-80c5-b4d53215b1c9)
+- **Microsoft Fluent UI Design** - Clean, modern interface with professional styling
+- **Multi-Theme Support** - Light mode, dark mode, and system preference detection
+- **Fully Responsive** - Optimized for desktop, tablet, and mobile devices
+- **Privacy-First** - All data processing happens in the browser, no server transmission
+- **AI-Powered Analysis** - Intelligent insights using advanced AI algorithms
+- **Comprehensive Reports** - Detailed analytics including time-in-range, AGP, and insulin data
 
-The application features a modern, Microsoft Fluent UI-based interface with intuitive navigation to key sections:
-- **Data Upload** - Upload and manage your Glooko export files
-- **Comprehensive Reports** - View detailed analytics and trends
-- **AI Analysis** - Get intelligent insights using AI algorithms
-- **Settings** - Configure data persistence options and theme preferences
+## Screenshot Collections
 
-### Dark Mode
+We've organized our screenshots into three comprehensive collections based on theme and device type:
 
-![GlookoDataWebApp Home Page - Dark Mode](https://github.com/user-attachments/assets/a64897c8-019f-44d7-8957-33a61b8f6c8a)
+### 📱 [Desktop - Light Mode](SCREENSHOTS_LIGHT.md)
 
-The application supports both light and dark themes with an automatic system preference detection option. Theme preferences are saved and persist across sessions.
+View the complete application interface in **Light Mode** on desktop displays (1920x1080):
 
-## Mobile Responsive Design
+- Home page with navigation cards
+- Data Upload with file management
+- Reports: File Info, Time in Range, AGP Data, Detailed CGM, Detailed Insulin
+- AI Analysis: All five analysis tabs (File Info, Time in Range, Glucose & Insulin, Meal Timing, Pump Settings)
+- Settings: General, Data & AI, About
 
-### Compact Layout
+**Best for:** Daytime use, bright environments, users who prefer traditional light interfaces
 
-![Mobile View](https://github.com/user-attachments/assets/9a03cc4e-a204-43f8-8726-815a5218e5b0)
-
-The application is fully responsive and optimized for mobile devices:
-
-- **Hamburger Menu** - Navigation automatically switches to a compact menu on small screens
-- **Single Column Layout** - Content cards stack vertically for better readability
-- **Touch-Friendly** - All interactive elements are sized appropriately for touch input
-- **No Horizontal Overflow** - Content fits perfectly within the viewport
-
-### Mobile Menu
-
-![Mobile Menu Open](https://github.com/user-attachments/assets/b7570844-07a1-4f59-98b8-dc8a44858cea)
-
-The hamburger menu provides easy access to all navigation items with a clean, touch-friendly interface.
-
-## Data Upload Page
-
-### Empty State
-
-![Data Upload Page - Empty State](https://github.com/user-attachments/assets/446b5a28-4763-42f5-857d-5dd8c44147a2)
-
-The Data Upload page provides an intuitive interface for importing Glooko export files with advanced features:
-
-- **Drag-and-drop upload zone** - Simply drag ZIP files onto the page or click to browse
-- **Intelligent CSV validation** - Validates metadata consistency across all CSV files
-- **Metadata extraction** - Automatically extracts and displays patient info and date ranges
-- **Column name detection** - Shows column headers from each CSV file
-- **Accurate row counting** - Displays data row counts (excluding metadata and headers)
-- **Expandable details view** - Click the chevron to see full metadata, CSV files, and column names
-- **Browser-based processing** - All files are stored and processed locally for privacy
-
-Files are maintained in memory for the duration of your session without being transmitted to any server, ensuring your data privacy.
-
-### With Uploaded Files
-
-![Data Upload Page - With Uploaded Files](https://github.com/user-attachments/assets/00e951f4-685f-4550-8cd4-d5b1be69436f)
-
-Example showing two valid ZIP files with green "Valid" badges. Each file has an expandable chevron icon to view details.
-
-### Expanded File Details
-
-![Data Upload Page - Expanded File Details](https://github.com/user-attachments/assets/66b9860d-3804-4952-8936-86fbe44e4395)
-
-Example showing expanded view with metadata, CSV file names, column headers as colored tags, and row counts.
-
-### Invalid Files
-
-![Data Upload Page - Invalid Files](https://github.com/user-attachments/assets/8b230ebb-7965-40b0-9dc4-8a47812c5c51)
-
-Example showing files marked as invalid because they contain CSV files with different metadata lines (different patients).
-
-### CSV Metadata Extraction
-
-![CSV Metadata Extraction](https://github.com/user-attachments/assets/1ecdd7da-107d-4110-b5bd-80c799ae39ec)
-
-The extraction process:
-1. **Extracts the metadata line** (first row) containing patient name, date range, etc.
-2. **Parses column headers** (second row) and displays them as colored tags
-3. **Counts data rows** (excluding metadata and header rows)
-4. **Merges related datasets** - Files with the same base name are automatically merged
-
-### Export Button
-
-![Data Upload with Export Button](https://github.com/user-attachments/assets/1ce3d310-e4cd-4a1a-9ea7-b9ec16592a2a)
-
-Example showing a valid ZIP file with the export button (download icon) in the Actions column.
-
-### Expanded Details with Export
-
-![Expanded Details with Export](https://github.com/user-attachments/assets/55141ff6-118f-4a7b-a49c-020429060bb4)
-
-Expanded view showing the datasets that will be exported to XLSX.
-
-## Reports Page
-
-### No Data Selected
-
-![Reports - No Data Selected](https://github.com/user-attachments/assets/ec23f42c-9f2b-4c45-8978-4dc5da04abca)
-
-When no data file is selected, the page prompts users to upload and select a data file.
-
-### 3 Categories Mode
-
-![Reports - 3 Categories Mode](https://github.com/user-attachments/assets/32f01e4a-7a28-487b-9bc9-4b42b084ed1c)
-
-The default view shows glucose range analysis in 3-category mode (Low, In Range, High), displaying both day-of-week and daily breakdown.
-
-### 5 Categories Mode
-
-![Reports - 5 Categories Mode](https://github.com/user-attachments/assets/04ab4825-b51d-4c2f-bd3d-b4771f65a6f7)
-
-Toggle to 5-category mode for more detailed analysis including Very Low and Very High ranges.
-
-## Settings Page
-
-![Settings Page](https://github.com/user-attachments/assets/3cdff779-be17-4782-b4bc-e84dc8be7032)
-
-The Settings page provides configuration options for themes and blood glucose thresholds. All settings are stored locally in your browser for privacy.
+[→ View Light Mode Screenshots](SCREENSHOTS_LIGHT.md)
 
 ---
 
-For more information, see:
-- [Main README](../README.md)
-- [Data Upload Guide](DATA_UPLOAD.md)
-- [Reports Documentation](REPORTS.md)
-- [Settings Guide](SETTINGS.md)
+### 🌙 [Desktop - Dark Mode](SCREENSHOTS_DARK.md)
+
+View the complete application interface in **Dark Mode** on desktop displays (1920x1080):
+
+- All pages and features in dark theme
+- High contrast design for reduced eye strain
+- Optimal for low-light environments
+- Lower power consumption on OLED displays
+- Same comprehensive coverage as light mode
+
+**Best for:** Night time use, low-light environments, reduced eye strain, OLED power savings
+
+[→ View Dark Mode Screenshots](SCREENSHOTS_DARK.md)
+
+---
+
+### 📱 [Mobile - Dark Theme](SCREENSHOTS_MOBILE.md)
+
+View the complete application interface optimized for **mobile devices** (375x812 - iPhone size) with dark theme:
+
+- Touch-optimized interface
+- Responsive single-column layout
+- All features accessible on mobile
+- Vertical tab navigation
+- Mobile-friendly charts and tables
+
+**Best for:** On-the-go access, smartphone usage, tablet viewing
+
+[→ View Mobile Screenshots](SCREENSHOTS_MOBILE.md)
+
+---
+
+## Quick Preview
+
+Here's a quick preview of the home page across different themes:
+
+### Desktop Light Mode
+![Home Page - Light Mode](screenshots/light/01-home.png)
+
+### Desktop Dark Mode
+![Home Page - Dark Mode](screenshots/dark/01-home.png)
+
+### Mobile Dark Theme
+![Home Page - Mobile](screenshots/mobile/01-home.png)
+
+---
+
+## Application Features
+
+### 📂 Data Upload
+- Drag-and-drop ZIP file upload
+- Intelligent CSV validation
+- Metadata extraction (patient info, date ranges)
+- Column detection with colored tags
+- Export to CSV/XLSX format
+
+### 📊 Comprehensive Reports
+- **File Info**: Complete metadata display
+- **Time in Range**: Glucose range analysis (3 or 5 categories)
+- **AGP Data**: Ambulatory Glucose Profile with percentiles
+- **Detailed CGM**: Complete glucose readings table
+- **Detailed Insulin**: Bolus and basal insulin data
+
+### 🧠 AI Analysis
+- **Multiple AI Providers**: Perplexity, Google Gemini, Grok, DeepSeek
+- **Time in Range Analysis**: AI-powered insights on glucose control
+- **Glucose & Insulin Correlation**: Pattern recognition and recommendations
+- **Meal Timing Analysis**: Optimize meal and insulin timing
+- **Pump Settings Review**: Basal rate and sensitivity recommendations
+
+### ⚙️ Settings
+- **Theme Selection**: Light, Dark, or System preference
+- **Glucose Thresholds**: Customizable ranges for Low/High alerts
+- **Data Persistence**: Optional session storage
+- **Export Format**: Choose CSV or XLSX
+- **AI Configuration**: Manage API keys for multiple providers
+
+---
+
+## Design Principles
+
+### Accessibility
+- WCAG 2.1 compliant contrast ratios
+- Screen reader support with ARIA labels
+- Keyboard navigation throughout
+- Focus indicators for all interactive elements
+
+### Responsive Design
+- Desktop (1920x1080 and above)
+- Tablet (768px - 1919px)
+- Mobile (375px - 767px)
+- No horizontal scrolling on any device
+- Touch-optimized controls on mobile
+
+### Performance
+- Fast loading times
+- Efficient data processing
+- Smooth animations and transitions
+- Optimized for mobile networks
+
+### Privacy & Security
+- Client-side only processing
+- No data transmitted to servers
+- Local storage for preferences
+- Secure API key storage
+
+---
+
+## Navigation
+
+All pages feature consistent navigation with:
+- **Top Navigation Bar**: Quick access to all sections
+- **Active Page Indicator**: Visual highlight of current page
+- **Responsive Menu**: Adapts to device size
+- **Footer**: Version information and build number
+
+---
+
+## Related Documentation
+
+### User Guides
+- [Main README](../README.md) - Project overview and quick start
+- [Quick Start Guide](../QUICKSTART.md) - Get started in 5 minutes
+- [Data Upload Guide](DATA_UPLOAD.md) - Detailed upload instructions
+- [Reports Documentation](REPORTS.md) - Understanding reports
+- [Settings Guide](SETTINGS.md) - Configure the application
+
+### Developer Documentation
+- [Contributing Guide](../CONTRIBUTING.md) - How to contribute
+- [E2E Testing Guide](E2E_TESTING.md) - Playwright testing
+- [README Automation](README_AUTOMATION.md) - Documentation automation
+
+---
+
+## Version Information
+
+Screenshots current as of version **1.2.1** (Build 220).
+
+For the latest updates and changes, see the [CHANGELOG](../CHANGELOG.md).
+
+---
+
+**Note:** All screenshots show the application with demo data loaded. Your actual data will appear in place of the demo data when you upload your own Glooko export files.
