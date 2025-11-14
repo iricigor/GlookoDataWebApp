@@ -184,9 +184,10 @@ configure_redirect_uris() {
     redirect_uris_json+="]"
     
     # Update the app registration with SPA redirect URIs
+    # Using --set to configure spa.redirectUris property in the application manifest
     az ad app update \
         --id "${APP_ID}" \
-        --spa-redirect-uris "${redirect_uris_json}" \
+        --set spa.redirectUris="${redirect_uris_json}" \
         --enable-id-token-issuance true \
         --enable-access-token-issuance true
     
