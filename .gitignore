@@ -17,6 +17,8 @@ coverage
 
 # Screenshots directory (temporary test files)
 screenshots
+# But allow docs/screenshots for documentation
+!docs/screenshots/
 
 # Playwright
 /test-results/
