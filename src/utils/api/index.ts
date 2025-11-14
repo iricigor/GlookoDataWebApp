@@ -1,3 +1,4 @@
+export * from './baseApiClient';
 export * from './perplexityApi';
 export * from './geminiApi';
 export * from './grokApi';
