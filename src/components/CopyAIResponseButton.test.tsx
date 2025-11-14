@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CopyAIResponseButton } from './CopyAIResponseButton';
-import * as csvUtils from '../utils/csvUtils';
+import * as csvUtils from '../utils/data';
 
 // Mock the copyToClipboard utility
-vi.mock('../utils/csvUtils', () => ({
+vi.mock('../utils/data', () => ({
   copyToClipboard: vi.fn(),
 }));
 

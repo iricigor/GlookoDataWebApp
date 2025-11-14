@@ -2,14 +2,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { AIAnalysis } from './AIAnalysis';
 import type { UploadedFile, AIAnalysisResult } from '../types';
-import * as glucoseDataUtils from '../utils/glucoseDataUtils';
-import * as insulinDataUtils from '../utils/insulinDataUtils';
-import * as aiApi from '../utils/aiApi';
+import * as glucoseDataUtils from '../utils/data';
+import * as insulinDataUtils from '../utils/data';
+import * as aiApi from '../utils/api';
 
 // Mock the modules
-vi.mock('../utils/glucoseDataUtils');
-vi.mock('../utils/insulinDataUtils');
-vi.mock('../utils/aiApi');
+vi.mock('../utils/data');
+vi.mock('../utils/api');
 vi.mock('../hooks/useGlucoseThresholds', () => ({
   useGlucoseThresholds: () => ({
     thresholds: {

@@ -2,7 +2,7 @@
  * Utility functions for parsing CSV metadata
  */
 
-import type { ParsedMetadata } from '../types';
+import type { ParsedMetadata } from '../../types';
 
 /**
  * Parse metadata line from CSV file

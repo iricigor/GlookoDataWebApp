@@ -27,17 +27,17 @@ import { BrainCircuitRegular, CheckmarkCircleRegular, ErrorCircleRegular } from 
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { MarkdownRenderer } from '../components/shared';
 import type { UploadedFile, AIAnalysisResult, DailyReport, GlucoseReading, InsulinReading } from '../types';
-import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
-import { extractDailyInsulinSummaries, extractInsulinReadings } from '../utils/insulinDataUtils';
-import { calculateGlucoseRangeStats, calculatePercentage, groupByDate } from '../utils/glucoseRangeUtils';
+import { extractGlucoseReadings } from '../utils/data';
+import { extractDailyInsulinSummaries, extractInsulinReadings } from '../utils/data';
+import { calculateGlucoseRangeStats, calculatePercentage, groupByDate } from '../utils/data';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { generateTimeInRangePrompt } from '../prompts/timeInRangePrompt';
 import { generateGlucoseInsulinPrompt } from '../prompts/glucoseInsulinPrompt';
 import { generateMealTimingPrompt } from '../prompts/mealTimingPrompt';
 import { generatePumpSettingsPrompt } from '../prompts/pumpSettingsPrompt';
-import { base64Encode } from '../utils/base64Utils';
-import { callAIApi, getActiveProvider, getProviderDisplayName, type AIProvider } from '../utils/aiApi';
-import { convertDailyReportsToCSV, convertGlucoseReadingsToCSV, convertBolusReadingsToCSV, convertBasalReadingsToCSV, filterGlucoseReadingsToLastDays, filterInsulinReadingsToLastDays } from '../utils/csvUtils';
+import { base64Encode } from '../utils/formatting';
+import { callAIApi, getActiveProvider, getProviderDisplayName, type AIProvider } from '../utils/api';
+import { convertDailyReportsToCSV, convertGlucoseReadingsToCSV, convertBolusReadingsToCSV, convertBasalReadingsToCSV, filterGlucoseReadingsToLastDays, filterInsulinReadingsToLastDays } from '../utils/data';
 
 const useStyles = makeStyles({
   container: {

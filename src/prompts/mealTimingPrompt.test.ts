@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { generateMealTimingPrompt } from './mealTimingPrompt';
-import { base64Encode } from '../utils/base64Utils';
+import { base64Encode } from '../utils/formatting';
 
 describe('mealTimingPrompt', () => {
   describe('generateMealTimingPrompt', () => {

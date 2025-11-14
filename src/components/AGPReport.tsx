@@ -22,9 +22,9 @@ import {
   Input,
 } from '@fluentui/react-components';
 import type { UploadedFile, GlucoseDataSource, AGPTimeSlotStats, AGPDayOfWeekFilter, GlucoseReading } from '../types';
-import type { ExportFormat } from '../utils/csvUtils';
-import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
-import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/agpUtils';
+import type { ExportFormat } from '../utils/data';
+import { extractGlucoseReadings } from '../utils/data';
+import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
 import { AGPGraph } from './AGPGraph';
 import { CopyToCsvButton } from './CopyToCsvButton';
 

@@ -25,7 +25,7 @@ import type { ExportFormat } from '../hooks/useExportFormat';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { GlucoseThresholdsSection } from '../components/GlucoseThresholdsSection';
 import { getVersionInfo, formatBuildDate } from '../utils/version';
-import { getProviderDisplayName, getActiveProvider, getAvailableProviders, type AIProvider } from '../utils/aiApi';
+import { getProviderDisplayName, getActiveProvider, getAvailableProviders, type AIProvider } from '../utils/api';
 
 const useStyles = makeStyles({
   container: {

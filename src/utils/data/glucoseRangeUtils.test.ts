@@ -20,7 +20,7 @@ import {
   filterReadingsByDate,
   formatDateDisplay,
 } from './glucoseRangeUtils';
-import type { GlucoseReading, GlucoseThresholds } from '../types';
+import type { GlucoseReading, GlucoseThresholds } from '../../types';
 
 // Standard thresholds in mmol/L
 const standardThresholds: GlucoseThresholds = {

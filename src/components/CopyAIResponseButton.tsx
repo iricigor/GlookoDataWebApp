@@ -12,7 +12,7 @@ import {
   shorthands,
 } from '@fluentui/react-components';
 import { CopyRegular, CheckmarkRegular } from '@fluentui/react-icons';
-import { copyToClipboard } from '../utils/csvUtils';
+import { copyToClipboard } from '../utils/data';
 
 const useStyles = makeStyles({
   buttonContainer: {

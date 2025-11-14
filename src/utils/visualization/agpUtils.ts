@@ -2,7 +2,7 @@
  * Utility functions for AGP (Ambulatory Glucose Profile) analysis
  */
 
-import type { GlucoseReading, AGPTimeSlotStats, AGPDayOfWeekFilter } from '../types';
+import type { GlucoseReading, AGPTimeSlotStats, AGPDayOfWeekFilter } from '../../types';
 
 /**
  * Calculate percentile value from sorted array of numbers
