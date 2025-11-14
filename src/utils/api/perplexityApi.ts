@@ -52,6 +52,7 @@ export interface PerplexityResult {
   content?: string;
   error?: string;
   errorType?: 'unauthorized' | 'network' | 'api' | 'unknown';
+  truncated?: boolean;
 }
 
 /**
@@ -147,10 +148,20 @@ export async function callPerplexityApi(
     
     // Type guard to check if data is a PerplexityResponse
     if ('choices' in data && data.choices && data.choices.length > 0 && data.choices[0].message) {
-      const content = data.choices[0].message.content;
+      const choice = data.choices[0];
+      const content = choice.message.content;
+      const truncated = choice.finish_reason === 'length';
+      
+      // If response was truncated due to token limit, add a warning
+      let finalContent = content.trim();
+      if (truncated) {
+        finalContent += '\n\n⚠️ **Note:** This response was truncated due to length limits. The analysis may be incomplete.';
+      }
+      
       return {
         success: true,
-        content: content.trim(),
+        content: finalContent,
+        truncated,
       };
     }
 

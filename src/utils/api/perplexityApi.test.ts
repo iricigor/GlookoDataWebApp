@@ -259,5 +259,64 @@ describe('perplexityApi', () => {
       expect(result.error).toContain('Rate limit exceeded');
       expect(result.errorType).toBe('api');
     });
+
+    it('should detect truncated response when finish_reason is length', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          choices: [
+            {
+              index: 0,
+              finish_reason: 'length',
+              message: {
+                role: 'assistant',
+                content: 'This is a truncated response',
+              },
+              delta: {
+                role: 'assistant',
+                content: '',
+              },
+            },
+          ],
+        }),
+      });
+
+      const result = await callPerplexityApi('test-key', 'test prompt');
+
+      expect(result.success).toBe(true);
+      expect(result.truncated).toBe(true);
+      expect(result.content).toContain('This is a truncated response');
+      expect(result.content).toContain('⚠️');
+      expect(result.content).toContain('truncated due to length limits');
+    });
+
+    it('should not mark response as truncated when finish_reason is stop', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          choices: [
+            {
+              index: 0,
+              finish_reason: 'stop',
+              message: {
+                role: 'assistant',
+                content: 'Complete response',
+              },
+              delta: {
+                role: 'assistant',
+                content: '',
+              },
+            },
+          ],
+        }),
+      });
+
+      const result = await callPerplexityApi('test-key', 'test prompt');
+
+      expect(result.success).toBe(true);
+      expect(result.truncated).toBe(false);
+      expect(result.content).toBe('Complete response');
+      expect(result.content).not.toContain('⚠️');
+    });
   });
 });

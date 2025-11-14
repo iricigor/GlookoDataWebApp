@@ -267,5 +267,64 @@ describe('geminiApi', () => {
       expect(result.error).toContain('Rate limit exceeded');
       expect(result.errorType).toBe('api');
     });
+
+    it('should detect truncated response when finishReason is MAX_TOKENS', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    text: 'This is a truncated response',
+                  },
+                ],
+                role: 'model',
+              },
+              finishReason: 'MAX_TOKENS',
+              index: 0,
+            },
+          ],
+        }),
+      });
+
+      const result = await callGeminiApi('test-key', 'test prompt');
+
+      expect(result.success).toBe(true);
+      expect(result.truncated).toBe(true);
+      expect(result.content).toContain('This is a truncated response');
+      expect(result.content).toContain('⚠️');
+      expect(result.content).toContain('truncated due to length limits');
+    });
+
+    it('should not mark response as truncated when finishReason is STOP', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    text: 'Complete response',
+                  },
+                ],
+                role: 'model',
+              },
+              finishReason: 'STOP',
+              index: 0,
+            },
+          ],
+        }),
+      });
+
+      const result = await callGeminiApi('test-key', 'test prompt');
+
+      expect(result.success).toBe(true);
+      expect(result.truncated).toBe(false);
+      expect(result.content).toBe('Complete response');
+      expect(result.content).not.toContain('⚠️');
+    });
   });
 });

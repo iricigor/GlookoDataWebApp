@@ -51,6 +51,7 @@ export interface GeminiResult {
   content?: string;
   error?: string;
   errorType?: 'unauthorized' | 'network' | 'api' | 'unknown';
+  truncated?: boolean;
 }
 
 /**
@@ -170,10 +171,20 @@ export async function callGeminiApi(
     if ('candidates' in data && data.candidates && data.candidates.length > 0 && 
         data.candidates[0].content && data.candidates[0].content.parts && 
         data.candidates[0].content.parts.length > 0) {
-      const content = data.candidates[0].content.parts[0].text;
+      const candidate = data.candidates[0];
+      const content = candidate.content.parts[0].text;
+      const truncated = candidate.finishReason === 'MAX_TOKENS';
+      
+      // If response was truncated due to token limit, add a warning
+      let finalContent = content.trim();
+      if (truncated) {
+        finalContent += '\n\n⚠️ **Note:** This response was truncated due to length limits. The analysis may be incomplete.';
+      }
+      
       return {
         success: true,
-        content: content.trim(),
+        content: finalContent,
+        truncated,
       };
     }
 
