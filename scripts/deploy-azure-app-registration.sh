@@ -186,7 +186,7 @@ configure_redirect_uris() {
     # Update the app registration with SPA redirect URIs
     az ad app update \
         --id "${APP_ID}" \
-        --web-redirect-uris "${redirect_uris_json}" \
+        --spa-redirect-uris "${redirect_uris_json}" \
         --enable-id-token-issuance true \
         --enable-access-token-issuance true
     
