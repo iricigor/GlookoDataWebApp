@@ -1,5 +1,4 @@
 import { chromium, Browser, Page } from '@playwright/test';
-import * as fs from 'fs';
 import * as path from 'path';
 
 const BASE_URL = 'http://localhost:5173';
