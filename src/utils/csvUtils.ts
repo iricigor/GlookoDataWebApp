@@ -2,6 +2,11 @@
  * CSV/TSV utility functions for exporting table data
  */
 
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
+import remarkRehype from 'remark-rehype';
+import rehypeStringify from 'rehype-stringify';
 import type { DailyReport, GlucoseReading, InsulinReading } from '../types';
 import { calculatePercentage } from './glucoseRangeUtils';
 
@@ -53,89 +58,20 @@ export function convertToCSV(data: (string | number)[][]): string {
 }
 
 /**
- * Simple markdown to HTML converter for clipboard
- * Converts basic markdown formatting to HTML while preserving structure
+ * Convert markdown to HTML using remark/rehype pipeline
+ * Supports full markdown syntax including tables, code blocks, lists, etc.
  * @param markdown - Markdown text to convert
  * @returns HTML string
  */
-function markdownToHtml(markdown: string): string {
-  let html = markdown;
+async function markdownToHtml(markdown: string): Promise<string> {
+  const file = await unified()
+    .use(remarkParse) // Parse markdown
+    .use(remarkGfm) // Support GitHub Flavored Markdown (tables, strikethrough, task lists, etc.)
+    .use(remarkRehype) // Convert to HTML AST
+    .use(rehypeStringify) // Convert to HTML string
+    .process(markdown);
   
-  // Convert headers (h1-h3)
-  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-  
-  // Convert bold and italic
-  html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-  
-  // Convert inline code
-  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-  
-  // Convert code blocks
-  html = html.replace(/```[\s\S]*?```/g, (match) => {
-    const code = match.slice(3, -3).trim();
-    return `<pre><code>${code}</code></pre>`;
-  });
-  
-  // Convert links
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-  
-  // Convert lists
-  const lines = html.split('\n');
-  let inList = false;
-  let listType = '';
-  const processedLines: string[] = [];
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const isUnorderedItem = /^[-*+] (.+)/.test(line);
-    const isOrderedItem = /^\d+\. (.+)/.test(line);
-    
-    if (isUnorderedItem || isOrderedItem) {
-      const currentListType = isUnorderedItem ? 'ul' : 'ol';
-      
-      if (!inList) {
-        processedLines.push(`<${currentListType}>`);
-        inList = true;
-        listType = currentListType;
-      } else if (listType !== currentListType) {
-        processedLines.push(`</${listType}>`);
-        processedLines.push(`<${currentListType}>`);
-        listType = currentListType;
-      }
-      
-      const content = isUnorderedItem 
-        ? line.replace(/^[-*+] /, '')
-        : line.replace(/^\d+\. /, '');
-      processedLines.push(`  <li>${content}</li>`);
-    } else {
-      if (inList) {
-        processedLines.push(`</${listType}>`);
-        inList = false;
-        listType = '';
-      }
-      processedLines.push(line);
-    }
-  }
-  
-  if (inList) {
-    processedLines.push(`</${listType}>`);
-  }
-  
-  html = processedLines.join('\n');
-  
-  // Convert paragraphs (lines separated by blank lines)
-  html = html.replace(/\n\n/g, '</p><p>');
-  
-  // Wrap in paragraph tags if not already in block elements
-  if (!html.startsWith('<')) {
-    html = `<p>${html}</p>`;
-  }
-  
-  return html;
+  return String(file);
 }
 
 /**
@@ -147,7 +83,7 @@ function markdownToHtml(markdown: string): string {
  */
 export async function copyToClipboard(text: string, html?: string): Promise<void> {
   // If no HTML provided and text looks like markdown, convert it
-  const htmlContent = html || markdownToHtml(text);
+  const htmlContent = html || await markdownToHtml(text);
   
   if (!navigator.clipboard) {
     // Fallback for browsers that don't support clipboard API

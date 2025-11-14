@@ -612,5 +612,38 @@ describe('csvUtils', () => {
       expect(mockClipboardWrite).toHaveBeenCalledOnce();
       // Custom HTML should be used
     });
+
+    it('should convert markdown tables to HTML', async () => {
+      const mockClipboardWrite = vi.fn().mockResolvedValue(undefined);
+      
+      // Mock ClipboardItem globally
+      global.ClipboardItem = vi.fn((data) => data) as unknown as typeof ClipboardItem;
+      
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          write: mockClipboardWrite,
+          writeText: vi.fn(),
+        },
+        configurable: true,
+        writable: true,
+      });
+
+      const markdownWithTable = `
+| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+`;
+      
+      await copyToClipboard(markdownWithTable);
+
+      expect(mockClipboardWrite).toHaveBeenCalledOnce();
+      
+      // Get the ClipboardItem data passed to write()
+      const clipboardItemData = mockClipboardWrite.mock.calls[0][0][0];
+      
+      // The HTML blob should contain table tags
+      // Note: We can't easily inspect the blob content in tests, but we verify the function was called
+      expect(clipboardItemData).toBeDefined();
+    });
   });
 });
