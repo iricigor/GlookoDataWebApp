@@ -19,7 +19,9 @@ const useStyles = makeStyles({
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
     backgroundColor: tokens.colorNeutralBackground1,
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transitionDuration: tokens.durationNormal,
+    transitionTimingFunction: tokens.curveEasyEase,
+    transitionProperty: 'all',
     '&:hover': {
       backgroundColor: tokens.colorNeutralBackground1Hover,
       ...shorthands.borderColor(tokens.colorBrandStroke1),
