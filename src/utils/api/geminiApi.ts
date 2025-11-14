@@ -6,6 +6,7 @@
  */
 
 import { AI_SYSTEM_PROMPT } from './aiPrompts';
+import { validateInputs, handleHttpError, handleException, type AIApiResult } from './baseApiClient';
 
 /**
  * Gemini API response structure
@@ -46,13 +47,7 @@ export interface GeminiError {
 /**
  * Result of calling Gemini API
  */
-export interface GeminiResult {
-  success: boolean;
-  content?: string;
-  error?: string;
-  errorType?: 'unauthorized' | 'network' | 'api' | 'unknown';
-  truncated?: boolean;
-}
+export type GeminiResult = AIApiResult;
 
 /**
  * Call Google Gemini API with a prompt
@@ -69,21 +64,10 @@ export async function callGeminiApi(
   maxTokens: number = 4000,
   isRetry: boolean = false
 ): Promise<GeminiResult> {
-  // Validate inputs
-  if (!apiKey || apiKey.trim() === '') {
-    return {
-      success: false,
-      error: 'API key is required',
-      errorType: 'unauthorized',
-    };
-  }
-
-  if (!prompt || prompt.trim() === '') {
-    return {
-      success: false,
-      error: 'Prompt is required',
-      errorType: 'api',
-    };
+  // Validate inputs using common validation
+  const validationError = validateInputs(apiKey, prompt);
+  if (validationError) {
+    return validationError;
   }
 
   try {
@@ -132,31 +116,9 @@ export async function callGeminiApi(
       }),
     });
 
-    // Handle HTTP errors
+    // Handle HTTP errors using common handler
     if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        return {
-          success: false,
-          error: 'Invalid API key or unauthorized access. Please check your API key in Settings.',
-          errorType: 'unauthorized',
-        };
-      }
-
-      // Try to parse error message from response
-      try {
-        const errorData = await response.json() as GeminiError;
-        return {
-          success: false,
-          error: errorData.error?.message || `API error: ${response.status} ${response.statusText}`,
-          errorType: 'api',
-        };
-      } catch {
-        return {
-          success: false,
-          error: `API error: ${response.status} ${response.statusText}`,
-          errorType: 'api',
-        };
-      }
+      return handleHttpError(response);
     }
 
     // Parse successful response
@@ -205,19 +167,7 @@ export async function callGeminiApi(
     };
 
   } catch (error) {
-    // Handle network errors or other exceptions
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      return {
-        success: false,
-        error: 'Network error. Please check your internet connection.',
-        errorType: 'network',
-      };
-    }
-
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
-      errorType: 'unknown',
-    };
+    // Handle exceptions using common handler
+    return handleException(error);
   }
 }
