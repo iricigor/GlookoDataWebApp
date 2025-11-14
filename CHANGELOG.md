@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>277 Fix clipboard formatting loss and screen flicker when copying AI responses</summary>
+
+[#277](../../pull/277) Fix clipboard formatting loss and screen flicker when copying AI responses
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>275 Fix AI response truncation by increasing token limits and adding completion markers</summary>
 
 [#275](../../pull/275) Fix AI response truncation by increasing token limits and adding completion markers
