@@ -6,7 +6,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: './src/test/setup.ts',
+    setupFiles: './src/testUtils/setup.ts',
     // Exclude Playwright e2e tests from Vitest
     exclude: [
       'node_modules',
@@ -31,7 +31,7 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       exclude: [
         'node_modules/',
-        'src/test/',
+        'src/testUtils/',
         '**/*.d.ts',
         '**/*.config.*',
         '**/mockData',

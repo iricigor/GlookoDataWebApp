@@ -6,7 +6,7 @@ import { describe, it, expect } from 'vitest';
 import JSZip from 'jszip';
 import ExcelJS from 'exceljs';
 import { convertZipToXlsx } from './xlsxUtils';
-import { generateMockCsvContent } from '../test/mockData';
+import { generateMockCsvContent } from '../testUtils/mockData';
 import type { UploadedFile } from '../types';
 
 /**
