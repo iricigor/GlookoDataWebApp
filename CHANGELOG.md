@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>289 Move screenshot documentation files into screenshots/ subfolder</summary>
+
+[#289](../../pull/289) Move screenshot documentation files into screenshots/ subfolder
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>287 Add Azure App Registration deployment script for Microsoft authentication</summary>
 
 [#287](../../pull/287) Add Azure App Registration deployment script for Microsoft authentication
