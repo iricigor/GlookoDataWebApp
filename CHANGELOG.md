@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>281 Detect and warn on truncated AI responses with automatic retry</summary>
+
+[#281](../../pull/281) Detect and warn on truncated AI responses with automatic retry
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>280 [WIP] Reorganize repository to eliminate duplicate files</summary>
 
 [#280](../../pull/280) [WIP] Reorganize repository to eliminate duplicate files
