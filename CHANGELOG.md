@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>283 Refactor AI API providers to eliminate duplication via shared base client</summary>
+
+[#283](../../pull/283) Refactor AI API providers to eliminate duplication via shared base client
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>281 Detect and warn on truncated AI responses with automatic retry</summary>
 
 [#281](../../pull/281) Detect and warn on truncated AI responses with automatic retry
