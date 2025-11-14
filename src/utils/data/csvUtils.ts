@@ -7,7 +7,7 @@ import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import rehypeStringify from 'rehype-stringify';
-import type { DailyReport, GlucoseReading, InsulinReading } from '../types';
+import type { DailyReport, GlucoseReading, InsulinReading } from '../../types';
 import { calculatePercentage } from './glucoseRangeUtils';
 
 export type ExportFormat = 'csv' | 'tsv';

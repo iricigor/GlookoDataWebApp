@@ -12,8 +12,8 @@ import {
   shorthands,
 } from '@fluentui/react-components';
 import { CopyRegular, CheckmarkRegular } from '@fluentui/react-icons';
-import { convertToDelimitedFormat, copyToClipboard } from '../utils/csvUtils';
-import type { ExportFormat } from '../utils/csvUtils';
+import { convertToDelimitedFormat, copyToClipboard } from '../utils/data';
+import type { ExportFormat } from '../utils/data';
 
 const useStyles = makeStyles({
   button: {

@@ -3,7 +3,7 @@
  */
 
 import JSZip from 'jszip';
-import type { UploadedFile, GlucoseReading, GlucoseDataSource } from '../types';
+import type { UploadedFile, GlucoseReading, GlucoseDataSource } from '../../types';
 
 /**
  * Parse glucose readings from CSV content

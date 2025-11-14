@@ -12,7 +12,7 @@ import {
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
 import type { UploadedFile, InsulinReading } from '../types';
-import { extractInsulinReadings, prepareInsulinTimelineData } from '../utils/insulinDataUtils';
+import { extractInsulinReadings, prepareInsulinTimelineData } from '../utils/data';
 import { InsulinTimeline } from './InsulinTimeline';
 import { InsulinDayNavigator } from './InsulinDayNavigator';
 import { InsulinSummaryCards } from './InsulinSummaryCards';

@@ -35,9 +35,9 @@ import type {
   DailyInsulinSummary,
 } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
-import { extractGlucoseReadings } from '../utils/glucoseDataUtils';
-import { extractInsulinReadings, aggregateInsulinByDate } from '../utils/insulinDataUtils';
-import { groupByDayOfWeek, groupByDate, groupByWeek, calculatePercentage, GLUCOSE_RANGE_COLORS } from '../utils/glucoseRangeUtils';
+import { extractGlucoseReadings } from '../utils/data';
+import { extractInsulinReadings, aggregateInsulinByDate } from '../utils/data';
+import { groupByDayOfWeek, groupByDate, groupByWeek, calculatePercentage, GLUCOSE_RANGE_COLORS } from '../utils/data';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { CopyToCsvButton } from './CopyToCsvButton';
 

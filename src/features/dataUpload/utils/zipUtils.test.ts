@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import JSZip from 'jszip';
 import { extractZipMetadata } from './zipUtils';
-import { generateMockCsvContent, MOCK_CSV_FILE_NAMES, MOCK_METADATA_LINE } from '../../../test/mockData';
+import { generateMockCsvContent, MOCK_CSV_FILE_NAMES, MOCK_METADATA_LINE } from '../../../testUtils/mockData';
 
 /**
  * Helper function to create a mock ZIP file for testing

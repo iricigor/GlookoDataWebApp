@@ -5,7 +5,7 @@
  * correlations between glucose levels and insulin doses.
  */
 
-import { base64Decode } from '../utils/base64Utils';
+import { base64Decode } from '../../../utils/formatting';
 
 /**
  * Generate AI prompt for glucose and insulin analysis with tiering

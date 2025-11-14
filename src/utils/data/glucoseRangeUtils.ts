@@ -11,7 +11,7 @@ import type {
   RangeCategoryMode,
   DayOfWeek,
   GlucoseThresholds,
-} from '../types';
+} from '../../types';
 
 /**
  * Glucose range category colors (matching Glooko style)

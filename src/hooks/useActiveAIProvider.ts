@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import type { AIProvider } from '../utils/aiApi';
+import type { AIProvider } from '../utils/api';
 
 export interface UseActiveAIProviderReturn {
   selectedProvider: AIProvider | null;

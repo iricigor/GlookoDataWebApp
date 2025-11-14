@@ -11,7 +11,7 @@ import {
   filterReadingsByDayOfWeek,
   filterReadingsByTimeRange,
 } from './agpUtils';
-import type { GlucoseReading } from '../types';
+import type { GlucoseReading } from '../../types';
 
 describe('agpUtils', () => {
   describe('calculatePercentile', () => {

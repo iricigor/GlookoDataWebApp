@@ -5,7 +5,7 @@
  * and verifying pump basal and correction settings.
  */
 
-import { base64Decode } from '../utils/base64Utils';
+import { base64Decode } from '../../../utils/formatting';
 
 /**
  * Generate AI prompt for pump settings verification analysis

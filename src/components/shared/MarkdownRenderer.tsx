@@ -1,7 +1,7 @@
 import { makeStyles, tokens, shorthands } from '@fluentui/react-components';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { CopyAIResponseButton } from './CopyAIResponseButton';
+import { CopyAIResponseButton } from '../CopyAIResponseButton';
 
 const useStyles = makeStyles({
   container: {

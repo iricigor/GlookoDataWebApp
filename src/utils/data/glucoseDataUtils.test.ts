@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import JSZip from 'jszip';
 import { extractGlucoseReadings, smoothGlucoseValues } from './glucoseDataUtils';
-import type { UploadedFile, GlucoseReading } from '../types';
+import type { UploadedFile, GlucoseReading } from '../../types';
 
 /**
  * Helper function to create a mock uploaded file for testing

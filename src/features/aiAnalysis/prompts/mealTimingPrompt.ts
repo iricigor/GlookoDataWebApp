@@ -5,7 +5,7 @@
  * meal timing and insulin delivery patterns.
  */
 
-import { base64Decode } from '../utils/base64Utils';
+import { base64Decode } from '../../../utils/formatting';
 
 /**
  * Generate AI prompt for meal timing analysis

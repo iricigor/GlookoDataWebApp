@@ -3,7 +3,7 @@
  */
 
 import JSZip from 'jszip';
-import type { UploadedFile, InsulinReading, DailyInsulinSummary } from '../types';
+import type { UploadedFile, InsulinReading, DailyInsulinSummary } from '../../types';
 
 /**
  * Parse daily insulin totals from combined insulin CSV (format: Timestamp, Total Bolus, Total Insulin, Total Basal)

@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { aggregateInsulinByDate, prepareInsulinTimelineData } from './insulinDataUtils';
-import type { InsulinReading } from '../types';
+import type { InsulinReading } from '../../types';
 
 describe('insulinDataUtils', () => {
   describe('aggregateInsulinByDate', () => {

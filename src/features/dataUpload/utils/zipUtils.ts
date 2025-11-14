@@ -4,7 +4,7 @@
 
 import JSZip from 'jszip';
 import type { ZipMetadata, CsvFileMetadata } from '../../../types';
-import { parseMetadata } from '../../../utils/metadataUtils';
+import { parseMetadata } from '../../../utils/data';
 
 /**
  * Extract the base name from a CSV file name

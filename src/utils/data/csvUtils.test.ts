@@ -13,7 +13,7 @@ import {
   filterInsulinReadingsToLastDays,
   copyToClipboard
 } from './csvUtils';
-import type { DailyReport, GlucoseReading, InsulinReading } from '../types';
+import type { DailyReport, GlucoseReading, InsulinReading } from '../../types';
 
 describe('csvUtils', () => {
   describe('convertToCSV', () => {

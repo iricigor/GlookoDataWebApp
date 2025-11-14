@@ -26,18 +26,18 @@ import {
 } from 'recharts';
 import type { UploadedFile, GlucoseReading, GlucoseDataSource } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
-import { extractGlucoseReadings, smoothGlucoseValues } from '../utils/glucoseDataUtils';
+import { extractGlucoseReadings, smoothGlucoseValues } from '../utils/data';
 import { 
   getUniqueDates, 
   filterReadingsByDate, 
   calculateGlucoseRangeStats,
   GLUCOSE_RANGE_COLORS,
   MIN_PERCENTAGE_TO_DISPLAY,
-} from '../utils/glucoseRangeUtils';
+} from '../utils/data';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { DayNavigator } from './DayNavigator';
 import { useBGColorScheme } from '../hooks/useBGColorScheme';
-import { getGlucoseColor, isDynamicColorScheme, COLOR_SCHEME_DESCRIPTORS } from '../utils/bgColorUtils';
+import { getGlucoseColor, isDynamicColorScheme, COLOR_SCHEME_DESCRIPTORS } from '../utils/formatting';
 import type { BGColorScheme } from '../hooks/useBGColorScheme';
 
 const useStyles = makeStyles({

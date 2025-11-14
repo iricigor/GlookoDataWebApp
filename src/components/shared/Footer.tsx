@@ -1,5 +1,5 @@
 import { makeStyles, Text, tokens, shorthands } from '@fluentui/react-components';
-import { getVersionInfo } from '../utils/version';
+import { getVersionInfo } from '../../utils/version';
 
 const useStyles = makeStyles({
   footer: {

@@ -6,7 +6,7 @@
  */
 
 import { tokens } from '@fluentui/react-components';
-import type { BGColorScheme } from '../hooks/useBGColorScheme';
+import type { BGColorScheme } from '../../hooks/useBGColorScheme';
 
 export interface ColorSchemeDescriptor {
   name: string;
