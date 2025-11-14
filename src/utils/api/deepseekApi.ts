@@ -49,6 +49,7 @@ export interface DeepSeekResult {
   content?: string;
   error?: string;
   errorType?: 'unauthorized' | 'network' | 'api' | 'unknown';
+  truncated?: boolean;
 }
 
 /**
@@ -56,11 +57,15 @@ export interface DeepSeekResult {
  * 
  * @param apiKey - DeepSeek API key
  * @param prompt - The prompt to send to the AI
+ * @param maxTokens - Maximum number of tokens for the response (default: 4000)
+ * @param isRetry - Internal flag to prevent infinite retry loops
  * @returns Promise with the result containing success status and content or error
  */
 export async function callDeepSeekApi(
   apiKey: string,
-  prompt: string
+  prompt: string,
+  maxTokens: number = 4000,
+  isRetry: boolean = false
 ): Promise<DeepSeekResult> {
   // Validate inputs
   if (!apiKey || apiKey.trim() === '') {
@@ -99,7 +104,7 @@ export async function callDeepSeekApi(
           },
         ],
         temperature: 0.2,
-        max_tokens: 4000,
+        max_tokens: maxTokens,
       }),
     });
 
@@ -144,10 +149,26 @@ export async function callDeepSeekApi(
     
     // Type guard to check if data is a DeepSeekResponse
     if ('choices' in data && data.choices && data.choices.length > 0 && data.choices[0].message) {
-      const content = data.choices[0].message.content;
+      const choice = data.choices[0];
+      const content = choice.message.content;
+      const truncated = choice.finish_reason === 'length';
+      
+      // If response was truncated and this is not already a retry, retry with double the tokens
+      if (truncated && !isRetry && maxTokens < 8000) {
+        const newMaxTokens = Math.min(maxTokens * 2, 8000);
+        return callDeepSeekApi(apiKey, prompt, newMaxTokens, true);
+      }
+      
+      // If response was truncated but we can't retry (already retried or at max), add a warning
+      let finalContent = content.trim();
+      if (truncated) {
+        finalContent += '\n\n⚠️ **Note:** This response was truncated due to length limits. The analysis may be incomplete.';
+      }
+      
       return {
         success: true,
-        content: content.trim(),
+        content: finalContent,
+        truncated,
       };
     }
 

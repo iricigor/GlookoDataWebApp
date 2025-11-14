@@ -295,5 +295,130 @@ describe('deepseekApi', () => {
       expect(result.error).toContain('Rate limit exceeded');
       expect(result.errorType).toBe('api');
     });
+
+    it('should detect truncated response when finish_reason is length', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          choices: [
+            {
+              message: {
+                role: 'assistant',
+                content: 'This is a truncated response',
+              },
+              finish_reason: 'length',
+              index: 0,
+            },
+          ],
+        }),
+      });
+      global.fetch = mockFetch;
+
+      const result = await callDeepSeekApi('test-key', 'test prompt');
+
+      expect(result.success).toBe(true);
+      expect(result.truncated).toBe(true);
+      expect(result.content).toContain('This is a truncated response');
+      expect(result.content).toContain('⚠️');
+      expect(result.content).toContain('truncated due to length limits');
+    });
+
+    it('should not mark response as truncated when finish_reason is stop', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          choices: [
+            {
+              message: {
+                role: 'assistant',
+                content: 'Complete response',
+              },
+              finish_reason: 'stop',
+              index: 0,
+            },
+          ],
+        }),
+      });
+      global.fetch = mockFetch;
+
+      const result = await callDeepSeekApi('test-key', 'test prompt');
+
+      expect(result.success).toBe(true);
+      expect(result.truncated).toBe(false);
+      expect(result.content).toBe('Complete response');
+      expect(result.content).not.toContain('⚠️');
+    });
+
+    it('should retry with doubled tokens when response is truncated', async () => {
+      // Mock both calls in sequence
+      global.fetch = vi.fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            choices: [
+              {
+                message: {
+                  role: 'assistant',
+                  content: 'This is a partial',
+                },
+                finish_reason: 'length',
+                index: 0,
+              },
+            ],
+          }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            choices: [
+              {
+                message: {
+                  role: 'assistant',
+                  content: 'This is a complete response',
+                },
+                finish_reason: 'stop',
+                index: 0,
+              },
+            ],
+          }),
+        });
+
+      const result = await callDeepSeekApi('test-key', 'test prompt');
+
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+
+      // Final result should be the complete response from retry
+      expect(result.success).toBe(true);
+      expect(result.truncated).toBe(false);
+      expect(result.content).toBe('This is a complete response');
+      expect(result.content).not.toContain('⚠️');
+    });
+
+    it('should not retry if already at max tokens (8000)', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          choices: [
+            {
+              message: {
+                role: 'assistant',
+                content: 'Truncated at max',
+              },
+              finish_reason: 'length',
+              index: 0,
+            },
+          ],
+        }),
+      });
+      global.fetch = mockFetch;
+
+      const result = await callDeepSeekApi('test-key', 'test prompt', 8000);
+
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(result.success).toBe(true);
+      expect(result.truncated).toBe(true);
+      expect(result.content).toContain('⚠️');
+      expect(result.content).toContain('truncated due to length limits');
+    });
   });
 });
