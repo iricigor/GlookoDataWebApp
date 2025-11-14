@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>291 Fix Azure App Registration script to use SPA redirect URIs parameter</summary>
+
+[#291](../../pull/291) Fix Azure App Registration script to use SPA redirect URIs parameter
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>289 Move screenshot documentation files into screenshots/ subfolder</summary>
 
 [#289](../../pull/289) Move screenshot documentation files into screenshots/ subfolder
