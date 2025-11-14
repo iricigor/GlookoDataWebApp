@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>285 Update screenshots documentation with comprehensive light/dark/mobile coverage</summary>
+
+[#285](../../pull/285) Update screenshots documentation with comprehensive light/dark/mobile coverage
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>283 Refactor AI API providers to eliminate duplication via shared base client</summary>
 
 [#283](../../pull/283) Refactor AI API providers to eliminate duplication via shared base client
