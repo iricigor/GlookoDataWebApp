@@ -67,9 +67,11 @@ describe('CopyAIResponseButton', () => {
     const button = screen.getByRole('button', { name: /copy ai response/i });
     fireEvent.click(button);
 
-    await waitFor(() => {
-      expect(mockCopyToClipboard).toHaveBeenCalled();
-    });
+    // Wait for the copy operation to complete (without advancing timers yet)
+    await vi.runAllTimersAsync();
+
+    // Verify copy was called
+    expect(mockCopyToClipboard).toHaveBeenCalled();
 
     // Fast-forward 2 seconds
     vi.advanceTimersByTime(2000);
@@ -83,21 +85,22 @@ describe('CopyAIResponseButton', () => {
   it('should handle copy error gracefully', async () => {
     const mockCopyToClipboard = vi.mocked(csvUtils.copyToClipboard);
     mockCopyToClipboard.mockRejectedValue(new Error('Copy failed'));
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {/* suppress console output */});
 
     render(<CopyAIResponseButton content="Test" />);
     
     const button = screen.getByRole('button', { name: /copy ai response/i });
     fireEvent.click(button);
 
+    // Wait for the copy operation to complete and error to be logged
     await waitFor(() => {
       expect(mockCopyToClipboard).toHaveBeenCalled();
-    });
+    }, { timeout: 1000 });
 
     // Verify error was logged
     await waitFor(() => {
       expect(consoleErrorSpy).toHaveBeenCalled();
-    });
+    }, { timeout: 1000 });
 
     consoleErrorSpy.mockRestore();
   });

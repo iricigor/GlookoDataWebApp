@@ -2,6 +2,11 @@
  * CSV/TSV utility functions for exporting table data
  */
 
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
+import remarkRehype from 'remark-rehype';
+import rehypeStringify from 'rehype-stringify';
 import type { DailyReport, GlucoseReading, InsulinReading } from '../types';
 import { calculatePercentage } from './glucoseRangeUtils';
 
@@ -53,11 +58,33 @@ export function convertToCSV(data: (string | number)[][]): string {
 }
 
 /**
- * Copy text to clipboard using the Clipboard API
- * @param text - Text to copy to clipboard
+ * Convert markdown to HTML using remark/rehype pipeline
+ * Supports full markdown syntax including tables, code blocks, lists, etc.
+ * @param markdown - Markdown text to convert
+ * @returns HTML string
+ */
+async function markdownToHtml(markdown: string): Promise<string> {
+  const file = await unified()
+    .use(remarkParse) // Parse markdown
+    .use(remarkGfm) // Support GitHub Flavored Markdown (tables, strikethrough, task lists, etc.)
+    .use(remarkRehype) // Convert to HTML AST
+    .use(rehypeStringify) // Convert to HTML string
+    .process(markdown);
+  
+  return String(file);
+}
+
+/**
+ * Copy text to clipboard with rich text (HTML) format support
+ * This allows formatting to be preserved when pasting into Word, Google Docs, etc.
+ * @param text - Plain text or markdown to copy to clipboard
+ * @param html - Optional HTML version. If not provided, will attempt to convert markdown to HTML
  * @returns Promise that resolves when copy is successful
  */
-export async function copyToClipboard(text: string): Promise<void> {
+export async function copyToClipboard(text: string, html?: string): Promise<void> {
+  // If no HTML provided and text looks like markdown, convert it
+  const htmlContent = html || await markdownToHtml(text);
+  
   if (!navigator.clipboard) {
     // Fallback for browsers that don't support clipboard API
     const textArea = document.createElement('textarea');
@@ -77,7 +104,18 @@ export async function copyToClipboard(text: string): Promise<void> {
     return;
   }
 
-  await navigator.clipboard.writeText(text);
+  // Use ClipboardItem to write both plain text and HTML
+  try {
+    const clipboardItem = new ClipboardItem({
+      'text/plain': new Blob([text], { type: 'text/plain' }),
+      'text/html': new Blob([htmlContent], { type: 'text/html' }),
+    });
+    await navigator.clipboard.write([clipboardItem]);
+  } catch (error) {
+    // Fallback to plain text if ClipboardItem is not supported
+    console.warn('ClipboardItem not supported, falling back to plain text:', error);
+    await navigator.clipboard.writeText(text);
+  }
 }
 
 /**

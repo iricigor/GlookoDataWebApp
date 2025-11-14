@@ -8,7 +8,6 @@ import { useState } from 'react';
 import {
   makeStyles,
   Button,
-  Tooltip,
   tokens,
   shorthands,
 } from '@fluentui/react-components';
@@ -69,19 +68,14 @@ export function CopyAIResponseButton({ content, ariaLabel = 'Copy AI response' }
 
   return (
     <div className={styles.buttonContainer}>
-      <Tooltip
-        content={copied ? 'Copied!' : 'Copy to clipboard'}
-        relationship="label"
-        positioning="below"
-      >
-        <Button
-          appearance="subtle"
-          icon={copied ? <CheckmarkRegular /> : <CopyRegular />}
-          onClick={handleCopy}
-          className={copied ? styles.copiedButton : styles.button}
-          aria-label={ariaLabel}
-        />
-      </Tooltip>
+      <Button
+        appearance="subtle"
+        icon={copied ? <CheckmarkRegular /> : <CopyRegular />}
+        onClick={handleCopy}
+        className={copied ? styles.copiedButton : styles.button}
+        aria-label={copied ? 'Copied!' : ariaLabel}
+        title={copied ? 'Copied!' : 'Copy to clipboard'}
+      />
     </div>
   );
 }
