@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>280 [WIP] Reorganize repository to eliminate duplicate files</summary>
+
+[#280](../../pull/280) [WIP] Reorganize repository to eliminate duplicate files
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>277 Fix clipboard formatting loss and screen flicker when copying AI responses</summary>
 
 [#277](../../pull/277) Fix clipboard formatting loss and screen flicker when copying AI responses
