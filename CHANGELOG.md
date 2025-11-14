@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>287 Add Azure App Registration deployment script for Microsoft authentication</summary>
+
+[#287](../../pull/287) Add Azure App Registration deployment script for Microsoft authentication
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>285 Update screenshots documentation with comprehensive light/dark/mobile coverage</summary>
 
 [#285](../../pull/285) Update screenshots documentation with comprehensive light/dark/mobile coverage
