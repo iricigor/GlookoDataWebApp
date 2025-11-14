@@ -59,11 +59,15 @@ export interface GeminiResult {
  * 
  * @param apiKey - Google Gemini API key
  * @param prompt - The prompt to send to the AI
+ * @param maxTokens - Maximum number of tokens for the response (default: 4000)
+ * @param isRetry - Internal flag to prevent infinite retry loops
  * @returns Promise with the result containing success status and content or error
  */
 export async function callGeminiApi(
   apiKey: string,
-  prompt: string
+  prompt: string,
+  maxTokens: number = 4000,
+  isRetry: boolean = false
 ): Promise<GeminiResult> {
   // Validate inputs
   if (!apiKey || apiKey.trim() === '') {
@@ -103,7 +107,7 @@ export async function callGeminiApi(
         ],
         generationConfig: {
           temperature: 0.2,
-          maxOutputTokens: 4000,
+          maxOutputTokens: maxTokens,
           topP: 0.8,
           topK: 40,
         },
@@ -175,7 +179,13 @@ export async function callGeminiApi(
       const content = candidate.content.parts[0].text;
       const truncated = candidate.finishReason === 'MAX_TOKENS';
       
-      // If response was truncated due to token limit, add a warning
+      // If response was truncated and this is not already a retry, retry with double the tokens
+      if (truncated && !isRetry && maxTokens < 8000) {
+        const newMaxTokens = Math.min(maxTokens * 2, 8000);
+        return callGeminiApi(apiKey, prompt, newMaxTokens, true);
+      }
+      
+      // If response was truncated but we can't retry (already retried or at max), add a warning
       let finalContent = content.trim();
       if (truncated) {
         finalContent += '\n\n⚠️ **Note:** This response was truncated due to length limits. The analysis may be incomplete.';
