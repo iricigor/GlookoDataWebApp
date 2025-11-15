@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>300 Add login/logout UI to navigation bar</summary>
+
+[#300](../../pull/300) Add login/logout UI to navigation bar
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>301 Unify table design with sticky headers and dual CSV export</summary>
 
 [#301](../../pull/301) Unify table design with sticky headers and dual CSV export
