@@ -17,7 +17,7 @@ import { DeleteRegular, ChevronRightRegular, ChevronDownRegular, ArrowDownloadRe
 import type { UploadedFile } from '../../../types';
 import type { ExportFormat } from '../../../hooks/useExportFormat';
 import { convertZipToXlsx, downloadXlsx } from '../../export/utils';
-import { CopyToCsvButton } from '../../../components/CopyToCsvButton';
+import { TableContainer } from '../../../components/TableContainer';
 
 const useStyles = makeStyles({
   container: {
@@ -36,28 +36,6 @@ const useStyles = makeStyles({
   },
   clearButton: {
     marginLeft: 'auto',
-  },
-  tableWrapper: {
-    position: 'relative',
-    '&:hover .csv-button': {
-      opacity: 1,
-    },
-  },
-  csvButton: {
-    position: 'sticky',
-    top: '8px',
-    right: '8px',
-    opacity: 0,
-    transitionProperty: 'opacity',
-    transitionDuration: tokens.durationNormal,
-    transitionTimingFunction: tokens.curveEasyEase,
-    zIndex: 10,
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderRadius(tokens.borderRadiusCircular),
-    boxShadow: tokens.shadow4,
-    float: 'right',
-    marginRight: '8px',
-    marginTop: '8px',
   },
   table: {
     backgroundColor: tokens.colorNeutralBackground1,
@@ -306,14 +284,13 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
           Clear All
         </Button>
       </div>
-      <div className={styles.tableWrapper}>
-        <div className={`${styles.csvButton} csv-button`}>
-          <CopyToCsvButton 
-            data={getFilesListAsCSV()} 
-            format={exportFormat}
-            ariaLabel={`Copy uploaded files table as ${exportFormat.toUpperCase()}`}
-          />
-        </div>
+      <TableContainer
+        data={getFilesListAsCSV()}
+        exportFormat={exportFormat}
+        fileName="uploaded-files"
+        copyAriaLabel={`Copy uploaded files table as ${exportFormat.toUpperCase()}`}
+        downloadAriaLabel={`Download uploaded files table as ${exportFormat.toUpperCase()}`}
+      >
         <Table className={styles.table}>
         <TableHeader>
           <TableRow>
@@ -450,7 +427,7 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
           })}
         </TableBody>
       </Table>
-      </div>
+      </TableContainer>
     </div>
   );
 }

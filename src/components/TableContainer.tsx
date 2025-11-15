@@ -4,7 +4,7 @@
  * and export functionality (copy to CSV and download CSV)
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import {
   makeStyles,
   tokens,

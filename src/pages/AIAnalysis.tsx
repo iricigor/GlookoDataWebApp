@@ -26,6 +26,7 @@ import {
 import { BrainCircuitRegular, CheckmarkCircleRegular, ErrorCircleRegular } from '@fluentui/react-icons';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { MarkdownRenderer } from '../components/shared';
+import { TableContainer } from '../components/TableContainer';
 import type { UploadedFile, AIAnalysisResult, DailyReport, GlucoseReading, InsulinReading } from '../types';
 import { extractGlucoseReadings } from '../utils/data';
 import { extractDailyInsulinSummaries, extractInsulinReadings } from '../utils/data';
@@ -172,23 +173,6 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
     textAlign: 'center',
-  },
-  scrollableTableContainer: {
-    marginTop: '16px',
-    maxHeight: '400px',
-    overflowY: 'auto',
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    ...shorthands.borderRadius('4px'),
-    position: 'relative',
-  },
-  scrollableTable: {
-    width: '100%',
-    '& thead': {
-      position: 'sticky',
-      top: 0,
-      backgroundColor: tokens.colorNeutralBackground1,
-      zIndex: 1,
-    },
   },
   promptTextContainer: {
     ...shorthands.padding('12px'),
@@ -954,11 +938,18 @@ export function AIAnalysis({
                 <AccordionItem value="datasetTable">
                   <AccordionHeader>Dataset showing glucose ranges and insulin doses by date</AccordionHeader>
                   <AccordionPanel>
-                    <div className={styles.scrollableTableContainer}>
-                      <Table className={styles.scrollableTable}>
+                    <TableContainer
+                      data={convertDatasetToArray(combinedDataset)}
+                      exportFormat="csv"
+                      fileName="glucose-insulin-by-date"
+                      copyAriaLabel="Copy glucose and insulin data by date as CSV"
+                      downloadAriaLabel="Download glucose and insulin data by date as CSV"
+                      scrollable
+                    >
+                      <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHeaderCell>Date</TableHeaderCell>
+                            <TableHeaderCell className={styles.emphasizedHeaderCell}>Date</TableHeaderCell>
                             <TableHeaderCell className={styles.emphasizedHeaderCell}>Day of Week</TableHeaderCell>
                             <TableHeaderCell>BG Below (%)</TableHeaderCell>
                             <TableHeaderCell className={styles.emphasizedHeaderCell}>BG In Range (%)</TableHeaderCell>
@@ -976,7 +967,7 @@ export function AIAnalysis({
                             
                             return (
                               <TableRow key={report.date}>
-                                <TableCell>{report.date}</TableCell>
+                                <TableCell className={styles.emphasizedCell}>{report.date}</TableCell>
                                 <TableCell className={styles.emphasizedCell}>{dayOfWeek}</TableCell>
                                 <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}%</TableCell>
                                 <TableCell className={styles.emphasizedCell}>{calculatePercentage(report.stats.inRange, report.stats.total)}%</TableCell>
@@ -989,7 +980,7 @@ export function AIAnalysis({
                           })}
                         </TableBody>
                       </Table>
-                    </div>
+                    </TableContainer>
                   </AccordionPanel>
                 </AccordionItem>
               </Accordion>
@@ -1313,6 +1304,40 @@ export function AIAnalysis({
       );
     }
     return null;
+  };
+
+  // Helper function to convert dataset to 2D array for CSV export
+  const convertDatasetToArray = (reports: DailyReport[]): (string | number)[][] => {
+    const headers = [
+      'Date',
+      'Day of Week',
+      'BG Below (%)',
+      'BG In Range (%)',
+      'BG Above (%)',
+      'Basal Insulin',
+      'Bolus Insulin',
+      'Total Insulin'
+    ];
+
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    const rows = reports.map(report => {
+      const date = new Date(report.date);
+      const dayOfWeek = dayNames[date.getDay()];
+
+      return [
+        report.date,
+        dayOfWeek,
+        `${calculatePercentage(report.stats.low, report.stats.total)}%`,
+        `${calculatePercentage(report.stats.inRange, report.stats.total)}%`,
+        `${calculatePercentage(report.stats.high, report.stats.total)}%`,
+        report.basalInsulin !== undefined ? report.basalInsulin : '-',
+        report.bolusInsulin !== undefined ? report.bolusInsulin : '-',
+        report.totalInsulin !== undefined ? report.totalInsulin : '-'
+      ];
+    });
+
+    return [headers, ...rows];
   };
 
   return (
