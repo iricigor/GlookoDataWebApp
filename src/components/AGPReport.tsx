@@ -26,7 +26,7 @@ import type { ExportFormat } from '../utils/data';
 import { extractGlucoseReadings } from '../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
 import { AGPGraph } from './AGPGraph';
-import { CopyToCsvButton } from './CopyToCsvButton';
+import { TableContainer } from './TableContainer';
 
 const useStyles = makeStyles({
   reportContainer: {
@@ -71,33 +71,6 @@ const useStyles = makeStyles({
     alignItems: 'center',
     ...shorthands.gap('12px'),
   },
-  tableContainer: {
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    ...shorthands.overflow('hidden'),
-    maxHeight: '600px',
-    overflowY: 'auto',
-    position: 'relative',
-    '&:hover .csv-button': {
-      opacity: 1,
-    },
-  },
-  stickyHeader: {
-    position: 'sticky',
-    top: 0,
-    backgroundColor: tokens.colorNeutralBackground1,
-    zIndex: 1,
-    textAlign: 'center',
-    '::after': {
-      content: '""',
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: '1px',
-      backgroundColor: tokens.colorNeutralStroke1,
-    },
-  },
   tableCell: {
     verticalAlign: 'middle',
   },
@@ -141,21 +114,13 @@ const useStyles = makeStyles({
   dropdown: {
     minWidth: '160px',
   },
-  csvButton: {
-    position: 'sticky',
-    top: '8px',
-    right: '8px',
-    opacity: 0,
-    transitionProperty: 'opacity',
-    transitionDuration: tokens.durationNormal,
-    transitionTimingFunction: tokens.curveEasyEase,
-    zIndex: 10,
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderRadius(tokens.borderRadiusCircular),
-    boxShadow: tokens.shadow4,
-    float: 'right',
-    marginRight: '8px',
-    marginTop: '8px',
+  highlightedHeaderCell: {
+    fontWeight: tokens.fontWeightSemibold,
+    backgroundColor: tokens.colorNeutralBackground2,
+  },
+  highlightedCell: {
+    fontWeight: tokens.fontWeightRegular,
+    backgroundColor: tokens.colorNeutralBackground2,
   },
 });
 
@@ -398,36 +363,36 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
 
               {/* AGP Table */}
               {!loading && !error && statsWithData.length > 0 && (
-                <div className={styles.tableContainer}>
-                  <div className={`${styles.csvButton} csv-button`}>
-                    <CopyToCsvButton 
-                      data={convertAGPStatsToCSV(statsWithData)}
-                      format={exportFormat}
-                      ariaLabel={`Copy AGP data as ${exportFormat.toUpperCase()}`}
-                    />
-                  </div>
+                <TableContainer
+                  data={convertAGPStatsToCSV(statsWithData)}
+                  exportFormat={exportFormat}
+                  fileName="agp-report"
+                  copyAriaLabel={`Copy AGP data as ${exportFormat.toUpperCase()}`}
+                  downloadAriaLabel={`Download AGP data as ${exportFormat.toUpperCase()}`}
+                  scrollable
+                >
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHeaderCell className={styles.stickyHeader}>Time</TableHeaderCell>
-                        <TableHeaderCell className={styles.stickyHeader}>Lowest</TableHeaderCell>
-                        <TableHeaderCell className={styles.stickyHeader}>10%</TableHeaderCell>
-                        <TableHeaderCell className={styles.stickyHeader}>25%</TableHeaderCell>
-                        <TableHeaderCell className={styles.stickyHeader}>50% (Median)</TableHeaderCell>
-                        <TableHeaderCell className={styles.stickyHeader}>75%</TableHeaderCell>
-                        <TableHeaderCell className={styles.stickyHeader}>90%</TableHeaderCell>
-                        <TableHeaderCell className={styles.stickyHeader}>Highest</TableHeaderCell>
-                        <TableHeaderCell className={styles.stickyHeader}>Count</TableHeaderCell>
+                        <TableHeaderCell className={styles.highlightedHeaderCell}>Time</TableHeaderCell>
+                        <TableHeaderCell>Lowest</TableHeaderCell>
+                        <TableHeaderCell>10%</TableHeaderCell>
+                        <TableHeaderCell>25%</TableHeaderCell>
+                        <TableHeaderCell className={styles.highlightedHeaderCell}>50% (Median)</TableHeaderCell>
+                        <TableHeaderCell>75%</TableHeaderCell>
+                        <TableHeaderCell>90%</TableHeaderCell>
+                        <TableHeaderCell>Highest</TableHeaderCell>
+                        <TableHeaderCell>Count</TableHeaderCell>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {statsWithData.map((stat) => (
                         <TableRow key={stat.timeSlot}>
-                          <TableCell className={styles.timeCell}>{stat.timeSlot}</TableCell>
+                          <TableCell className={`${styles.timeCell} ${styles.highlightedCell}`}>{stat.timeSlot}</TableCell>
                           <TableCell className={styles.valueCell}>{formatValue(stat.lowest)}</TableCell>
                           <TableCell className={styles.valueCell}>{formatValue(stat.p10)}</TableCell>
                           <TableCell className={styles.valueCell}>{formatValue(stat.p25)}</TableCell>
-                          <TableCell className={styles.valueCell}>{formatValue(stat.p50)}</TableCell>
+                          <TableCell className={`${styles.valueCell} ${styles.highlightedCell}`}>{formatValue(stat.p50)}</TableCell>
                           <TableCell className={styles.valueCell}>{formatValue(stat.p75)}</TableCell>
                           <TableCell className={styles.valueCell}>{formatValue(stat.p90)}</TableCell>
                           <TableCell className={styles.valueCell}>{formatValue(stat.highest)}</TableCell>
@@ -436,7 +401,7 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
                       ))}
                     </TableBody>
                   </Table>
-                </div>
+                </TableContainer>
               )}
 
               {!loading && !error && statsWithData.length === 0 && (

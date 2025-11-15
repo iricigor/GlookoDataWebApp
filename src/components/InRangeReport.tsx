@@ -39,7 +39,7 @@ import { extractGlucoseReadings } from '../utils/data';
 import { extractInsulinReadings, aggregateInsulinByDate } from '../utils/data';
 import { groupByDayOfWeek, groupByDate, groupByWeek, calculatePercentage, GLUCOSE_RANGE_COLORS } from '../utils/data';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
-import { CopyToCsvButton } from './CopyToCsvButton';
+import { TableContainer } from './TableContainer';
 
 const useStyles = makeStyles({
   reportContainer: {
@@ -124,30 +124,9 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
   },
-  tableContainer: {
-    position: 'relative',
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    ...shorthands.overflow('hidden'),
-    '&:hover .csv-button': {
-      opacity: 1,
-    },
-  },
-  csvButton: {
-    position: 'sticky',
-    top: '8px',
-    right: '8px',
-    opacity: 0,
-    transitionProperty: 'opacity',
-    transitionDuration: tokens.durationNormal,
-    transitionTimingFunction: tokens.curveEasyEase,
-    zIndex: 10,
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderRadius(tokens.borderRadiusCircular),
-    boxShadow: tokens.shadow4,
-    float: 'right',
-    marginRight: '8px',
-    marginTop: '8px',
+  error: {
+    color: tokens.colorStatusDangerForeground1,
+    fontSize: tokens.fontSizeBase300,
   },
   summaryLegend: {
     display: 'flex',
@@ -170,10 +149,6 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
   },
-  error: {
-    color: tokens.colorStatusDangerForeground1,
-    fontSize: tokens.fontSizeBase300,
-  },
   loading: {
     color: tokens.colorNeutralForeground2,
     fontSize: tokens.fontSizeBase300,
@@ -192,6 +167,14 @@ const useStyles = makeStyles({
   inRangeHeader: {
     fontWeight: tokens.fontWeightBold,
     color: tokens.colorBrandForeground1,
+  },
+  highlightedHeaderCell: {
+    fontWeight: tokens.fontWeightSemibold,
+    backgroundColor: tokens.colorNeutralBackground2,
+  },
+  highlightedCell: {
+    fontWeight: tokens.fontWeightRegular,
+    backgroundColor: tokens.colorNeutralBackground2,
   },
 });
 
@@ -446,8 +429,8 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
     if (categoryMode === 5) {
       return (
         <TableRow key={report.date}>
-          <TableCell>{report.date}</TableCell>
-          <TableCell>{dayOfWeek}</TableCell>
+          <TableCell className={styles.highlightedCell}>{report.date}</TableCell>
+          <TableCell className={styles.highlightedCell}>{dayOfWeek}</TableCell>
           <TableCell>{calculatePercentage(report.stats.veryLow ?? 0, report.stats.total)}% ({report.stats.veryLow ?? 0})</TableCell>
           <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}% ({report.stats.low})</TableCell>
           <TableCell className={styles.inRangeCell}>{calculatePercentage(report.stats.inRange, report.stats.total)}% ({report.stats.inRange})</TableCell>
@@ -461,8 +444,8 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
     } else {
       return (
         <TableRow key={report.date}>
-          <TableCell>{report.date}</TableCell>
-          <TableCell>{dayOfWeek}</TableCell>
+          <TableCell className={styles.highlightedCell}>{report.date}</TableCell>
+          <TableCell className={styles.highlightedCell}>{dayOfWeek}</TableCell>
           <TableCell>{calculatePercentage(report.stats.low, report.stats.total)}% ({report.stats.low})</TableCell>
           <TableCell className={styles.inRangeCell}>{calculatePercentage(report.stats.inRange, report.stats.total)}% ({report.stats.inRange})</TableCell>
           <TableCell>{calculatePercentage(report.stats.high, report.stats.total)}% ({report.stats.high})</TableCell>
@@ -701,21 +684,20 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
                     <AccordionItem value="dayOfWeek">
                       <AccordionHeader>Glucose Range by Day of Week</AccordionHeader>
                       <AccordionPanel>
-                        <div className={styles.tableContainer}>
-                          <div className={`${styles.csvButton} csv-button`}>
-                            <CopyToCsvButton 
-                              data={convertReportToCSV(
-                                dayOfWeekReports.map(r => ({ label: r.day, stats: r.stats })),
-                                'Day'
-                              )}
-                              format={exportFormat}
-                              ariaLabel={`Copy glucose range by day of week as ${exportFormat.toUpperCase()}`}
-                            />
-                          </div>
+                        <TableContainer
+                          data={convertReportToCSV(
+                            dayOfWeekReports.map(r => ({ label: r.day, stats: r.stats })),
+                            'Day'
+                          )}
+                          exportFormat={exportFormat}
+                          fileName="glucose-range-by-day-of-week"
+                          copyAriaLabel={`Copy glucose range by day of week as ${exportFormat.toUpperCase()}`}
+                          downloadAriaLabel={`Download glucose range by day of week as ${exportFormat.toUpperCase()}`}
+                        >
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHeaderCell>Day</TableHeaderCell>
+                                <TableHeaderCell className={styles.highlightedHeaderCell}>Day</TableHeaderCell>
                                 {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
                                 <TableHeaderCell>Low</TableHeaderCell>
                                 <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
@@ -728,7 +710,7 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
                               {dayOfWeekReports.map(report => renderStatsRow(report.day, report.stats))}
                             </TableBody>
                           </Table>
-                        </div>
+                        </TableContainer>
                       </AccordionPanel>
                     </AccordionItem>
                   )}
@@ -738,21 +720,20 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
                     <AccordionItem value="weekly">
                       <AccordionHeader>Glucose Range by Week</AccordionHeader>
                       <AccordionPanel>
-                        <div className={styles.tableContainer}>
-                          <div className={`${styles.csvButton} csv-button`}>
-                            <CopyToCsvButton 
-                              data={convertReportToCSV(
-                                weeklyReports.map(r => ({ label: r.weekLabel, stats: r.stats })),
-                                'Week'
-                              )}
-                              format={exportFormat}
-                              ariaLabel={`Copy glucose range by week as ${exportFormat.toUpperCase()}`}
-                            />
-                          </div>
+                        <TableContainer
+                          data={convertReportToCSV(
+                            weeklyReports.map(r => ({ label: r.weekLabel, stats: r.stats })),
+                            'Week'
+                          )}
+                          exportFormat={exportFormat}
+                          fileName="glucose-range-by-week"
+                          copyAriaLabel={`Copy glucose range by week as ${exportFormat.toUpperCase()}`}
+                          downloadAriaLabel={`Download glucose range by week as ${exportFormat.toUpperCase()}`}
+                        >
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHeaderCell>Week</TableHeaderCell>
+                                <TableHeaderCell className={styles.highlightedHeaderCell}>Week</TableHeaderCell>
                                 {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
                                 <TableHeaderCell>Low</TableHeaderCell>
                                 <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
@@ -765,7 +746,7 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
                               {weeklyReports.map(report => renderStatsRow(report.weekLabel, report.stats))}
                             </TableBody>
                           </Table>
-                        </div>
+                        </TableContainer>
                       </AccordionPanel>
                     </AccordionItem>
                   )}
@@ -775,22 +756,22 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
                     <AccordionItem value="daily">
                       <AccordionHeader>Glucose Range by Date</AccordionHeader>
                       <AccordionPanel>
-                        <div className={styles.tableContainer}>
-                          <div className={`${styles.csvButton} csv-button`}>
-                            <CopyToCsvButton 
-                              data={convertReportToCSV(
-                                dailyReports.map(r => ({ label: r.date, stats: r.stats })),
-                                'Date'
-                              )}
-                              format={exportFormat}
-                              ariaLabel={`Copy glucose range by date as ${exportFormat.toUpperCase()}`}
-                            />
-                          </div>
+                        <TableContainer
+                          data={convertReportToCSV(
+                            dailyReports.map(r => ({ label: r.date, stats: r.stats })),
+                            'Date'
+                          )}
+                          exportFormat={exportFormat}
+                          fileName="glucose-range-by-date"
+                          copyAriaLabel={`Copy glucose range by date as ${exportFormat.toUpperCase()}`}
+                          downloadAriaLabel={`Download glucose range by date as ${exportFormat.toUpperCase()}`}
+                          scrollable
+                        >
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHeaderCell>Date</TableHeaderCell>
-                                <TableHeaderCell>Day of Week</TableHeaderCell>
+                                <TableHeaderCell className={styles.highlightedHeaderCell}>Date</TableHeaderCell>
+                                <TableHeaderCell className={styles.highlightedHeaderCell}>Day of Week</TableHeaderCell>
                                 {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
                                 <TableHeaderCell>Low</TableHeaderCell>
                                 <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
@@ -805,7 +786,7 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
                               {dailyReports.map(report => renderDailyReportRow(report))}
                             </TableBody>
                           </Table>
-                        </div>
+                        </TableContainer>
                       </AccordionPanel>
                     </AccordionItem>
                   )}
