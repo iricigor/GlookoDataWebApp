@@ -113,7 +113,9 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForegroundOnBrand,
     fontWeight: tokens.fontWeightSemibold,
     ...shorthands.borderRadius(tokens.borderRadiusSmall),
-    ...shorthands.transition('all', '0.2s'),
+    transitionProperty: 'all',
+    transitionDuration: tokens.durationNormal,
+    transitionTimingFunction: tokens.curveEasyEase,
     '&:hover': {
       opacity: 0.8,
     },

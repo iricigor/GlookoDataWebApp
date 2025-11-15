@@ -62,10 +62,15 @@ const useStyles = makeStyles({
   navigationCard: {
     minHeight: '190px',
     cursor: 'pointer',
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    transitionDuration: tokens.durationNormal,
+    transitionTimingFunction: tokens.curveEasyEase,
+    transitionProperty: 'transform, box-shadow',
     ':hover': {
       transform: 'translateY(-4px)',
       boxShadow: tokens.shadow16,
+    },
+    ':active': {
+      transform: 'translateY(-2px) scale(1.02)',
     },
   },
   cardContent: {
