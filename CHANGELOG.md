@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>293 Migrate to Fluent UI v9 motion tokens and bump to v1.3.0</summary>
+
+[#293](../../pull/293) Migrate to Fluent UI v9 motion tokens and bump to v1.3.0
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>299 Fix Azure App Registration script: unquote JSON array in --set parameter</summary>
 
 [#299](../../pull/299) Fix Azure App Registration script: unquote JSON array in --set parameter
