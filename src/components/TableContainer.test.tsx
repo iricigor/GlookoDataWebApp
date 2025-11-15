@@ -143,7 +143,7 @@ describe('TableContainer', () => {
   });
 
   it('should render with scrollable option', () => {
-    const { container } = renderComponent({
+    renderComponent({
       data: mockData,
       scrollable: true,
       children: (
@@ -162,7 +162,7 @@ describe('TableContainer', () => {
   });
 
   it('should render with sticky headers by default', () => {
-    const { container } = renderComponent({
+    renderComponent({
       data: mockData,
       children: (
         <Table>
