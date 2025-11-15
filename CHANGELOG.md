@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>301 Unify table design with sticky headers and dual CSV export</summary>
+
+[#301](../../pull/301) Unify table design with sticky headers and dual CSV export
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>293 Migrate to Fluent UI v9 motion tokens and bump to v1.3.0</summary>
 
 [#293](../../pull/293) Migrate to Fluent UI v9 motion tokens and bump to v1.3.0
