@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>299 Fix Azure App Registration script: unquote JSON array in --set parameter</summary>
+
+[#299](../../pull/299) Fix Azure App Registration script: unquote JSON array in --set parameter
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>294 Fix Azure App registration script: use --set for spa.redirectUris</summary>
 
 [#294](../../pull/294) Fix Azure App registration script: use --set for spa.redirectUris
