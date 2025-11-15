@@ -18,6 +18,9 @@ import {
   SettingsRegular,
   NavigationRegular,
 } from '@fluentui/react-icons';
+import { useAuth } from '../../hooks/useAuth';
+import { LoginDialog } from './LoginDialog';
+import { LogoutDialog } from './LogoutDialog';
 
 const useStyles = makeStyles({
   nav: {
@@ -46,6 +49,11 @@ const useStyles = makeStyles({
       fontSize: tokens.fontSizeBase400,
     },
   },
+  centerSection: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
   navItems: {
     display: 'flex',
     ...shorthands.gap('8px'),
@@ -53,6 +61,11 @@ const useStyles = makeStyles({
     '@media (max-width: 768px)': {
       display: 'none',
     },
+  },
+  rightSection: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
   },
   hamburgerMenu: {
     display: 'none',
@@ -69,6 +82,7 @@ interface NavigationProps {
 
 export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   const styles = useStyles();
+  const { isLoggedIn, userName, login, logout } = useAuth();
 
   const navItems = [
     { page: 'home', label: 'Home', icon: <HomeRegular /> },
@@ -84,44 +98,55 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
         <Text className={styles.brandText}>Glooko Insights</Text>
       </div>
       
-      {/* Desktop Navigation */}
-      <div className={styles.navItems}>
-        {navItems.map((item) => (
-          <Button
-            key={item.page}
-            appearance={currentPage === item.page ? 'primary' : 'subtle'}
-            icon={item.icon}
-            onClick={() => onNavigate(item.page)}
-          >
-            {item.label}
-          </Button>
-        ))}
+      <div className={styles.centerSection}>
+        {/* Desktop Navigation */}
+        <div className={styles.navItems}>
+          {navItems.map((item) => (
+            <Button
+              key={item.page}
+              appearance={currentPage === item.page ? 'primary' : 'subtle'}
+              icon={item.icon}
+              onClick={() => onNavigate(item.page)}
+            >
+              {item.label}
+            </Button>
+          ))}
+        </div>
+
+        {/* Mobile Hamburger Menu */}
+        <div className={styles.hamburgerMenu}>
+          <Menu inline>
+            <MenuTrigger disableButtonEnhancement>
+              <Button 
+                appearance="subtle" 
+                icon={<NavigationRegular />}
+                aria-label="Navigation menu"
+              />
+            </MenuTrigger>
+            <MenuPopover>
+              <MenuList>
+                {navItems.map((item) => (
+                  <MenuItem
+                    key={item.page}
+                    icon={item.icon}
+                    onClick={() => onNavigate(item.page)}
+                  >
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </MenuPopover>
+          </Menu>
+        </div>
       </div>
 
-      {/* Mobile Hamburger Menu */}
-      <div className={styles.hamburgerMenu}>
-        <Menu inline>
-          <MenuTrigger disableButtonEnhancement>
-            <Button 
-              appearance="subtle" 
-              icon={<NavigationRegular />}
-              aria-label="Navigation menu"
-            />
-          </MenuTrigger>
-          <MenuPopover>
-            <MenuList>
-              {navItems.map((item) => (
-                <MenuItem
-                  key={item.page}
-                  icon={item.icon}
-                  onClick={() => onNavigate(item.page)}
-                >
-                  {item.label}
-                </MenuItem>
-              ))}
-            </MenuList>
-          </MenuPopover>
-        </Menu>
+      {/* Auth Section */}
+      <div className={styles.rightSection}>
+        {isLoggedIn && userName ? (
+          <LogoutDialog userName={userName} onLogout={logout} />
+        ) : (
+          <LoginDialog onLogin={login} />
+        )}
       </div>
     </nav>
   );
