@@ -185,9 +185,11 @@ configure_redirect_uris() {
     
     # Update the app registration with SPA redirect URIs
     # Using --set to configure spa.redirectUris property in the application manifest
+    # Note: The JSON array must not be quoted to be parsed correctly by Azure CLI
+    # shellcheck disable=SC2086
     az ad app update \
         --id "${APP_ID}" \
-        --set spa.redirectUris="${redirect_uris_json}" \
+        --set spa.redirectUris=${redirect_uris_json} \
         --enable-id-token-issuance true \
         --enable-access-token-issuance true
     
