@@ -32,6 +32,8 @@ readonly APP_DESCRIPTION="Web application for importing, visualizing, and analyz
 readonly WEB_APP_URL="https://glooko.iric.online"
 
 # Redirect URIs (add more if needed for development/testing)
+# Note: Both localhost and 127.0.0.1 are included for local development
+# as they are treated as different origins by MSAL/Azure
 readonly REDIRECT_URIS=(
     "${WEB_APP_URL}"
     "${WEB_APP_URL}/"
@@ -39,6 +41,9 @@ readonly REDIRECT_URIS=(
     "http://localhost:5173"
     "http://localhost:5173/"
     "http://localhost:5173/auth/callback"
+    "http://127.0.0.1:5173"
+    "http://127.0.0.1:5173/"
+    "http://127.0.0.1:5173/auth/callback"
 )
 
 # LOGOUT_URL reserved for future use (e.g., front-channel logout configuration)

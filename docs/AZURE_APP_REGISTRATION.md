@@ -97,9 +97,21 @@ If you need to allow work/school accounts, modify the `SIGN_IN_AUDIENCE` constan
 ### Redirect URIs
 
 The script configures these redirect URIs:
+
+**Production:**
 - `https://glooko.iric.online`
 - `https://glooko.iric.online/`
 - `https://glooko.iric.online/auth/callback`
+
+**Local Development:**
+- `http://localhost:5173`
+- `http://localhost:5173/`
+- `http://localhost:5173/auth/callback`
+- `http://127.0.0.1:5173`
+- `http://127.0.0.1:5173/`
+- `http://127.0.0.1:5173/auth/callback`
+
+**Note:** Both `localhost` and `127.0.0.1` are included because they are treated as different origins by MSAL and Azure AD. This ensures authentication works regardless of which hostname is used to access the local development server.
 
 These are used for authentication redirects after successful login.
 
