@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>308 Add 7-day fallback for oversized AI analysis datasets</summary>
+
+[#308](../../pull/308) Add 7-day fallback for oversized AI analysis datasets
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>304 Implement Microsoft authentication with MSAL</summary>
 
 [#304](../../pull/304) Implement Microsoft authentication with MSAL
