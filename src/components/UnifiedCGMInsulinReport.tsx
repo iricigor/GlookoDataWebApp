@@ -24,6 +24,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  CartesianGrid,
 } from 'recharts';
 import type { UploadedFile, GlucoseReading, InsulinReading } from '../types';
 import { extractGlucoseReadings, smoothGlucoseValues, extractInsulinReadings } from '../utils/data';
@@ -445,14 +446,14 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
     );
   };
 
-  // Format X-axis labels
+  // Format X-axis labels - show 0, 6, 12, 18, 24
   const formatXAxis = (value: string) => {
     const hour = parseInt(value.split(':')[0]);
-    if (hour === 0) return '00:00';
-    if (hour === 6) return '06:00';
-    if (hour === 12) return '12:00';
-    if (hour === 18) return '18:00';
-    if (hour === 23) return '23:59';
+    if (hour === 0) return '0';
+    if (hour === 6) return '6';
+    if (hour === 12) return '12';
+    if (hour === 18) return '18';
+    if (hour === 23 || hour === 24) return '24';
     return '';
   };
 
@@ -606,6 +607,8 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
           <div className={styles.chartWrapper}>
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} vertical={true} horizontal={false} />
+                
                 <XAxis
                   dataKey="time"
                   domain={['00:00', '23:59']}
