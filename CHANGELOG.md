@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>304 Implement Microsoft authentication with MSAL</summary>
+
+[#304](../../pull/304) Implement Microsoft authentication with MSAL
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>302 Fix Azure App Registration script SPA configuration format</summary>
 
 [#302](../../pull/302) Fix Azure App Registration script SPA configuration format
