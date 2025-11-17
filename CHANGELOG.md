@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>314 Reorganize deployment scripts into dedicated folder with comprehensive documentation</summary>
+
+[#314](../../pull/314) Reorganize deployment scripts into dedicated folder with comprehensive documentation
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>312 Implement Azure Table Storage sync for user settings</summary>
 
 [#312](../../pull/312) Implement Azure Table Storage sync for user settings
