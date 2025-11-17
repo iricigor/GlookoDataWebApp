@@ -605,7 +605,7 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
           {/* Chart */}
           <div className={styles.chartWrapper}>
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData} margin={{ top: 10, right: 60, left: 0, bottom: 0 }}>
+              <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <XAxis
                   dataKey="time"
                   domain={['00:00', '23:59']}
@@ -627,11 +627,13 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   label={{ 
                     value: 'Glucose (mmol/L)', 
                     angle: -90, 
-                    position: 'insideLeft', 
+                    position: 'insideLeft',
+                    offset: 10,
                     style: { 
                       fontSize: tokens.fontSizeBase200,
                       fontFamily: tokens.fontFamilyBase,
                       fill: tokens.colorNeutralForeground2,
+                      textAnchor: 'middle',
                     } 
                   }}
                   stroke={tokens.colorNeutralStroke1}
@@ -651,11 +653,13 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   label={{ 
                     value: 'Insulin (Units)', 
                     angle: 90, 
-                    position: 'insideRight', 
+                    position: 'insideRight',
+                    offset: 10,
                     style: { 
                       fontSize: tokens.fontSizeBase200,
                       fontFamily: tokens.fontFamilyBase,
                       fill: tokens.colorNeutralForeground2,
+                      textAnchor: 'middle',
                     } 
                   }}
                   stroke={tokens.colorNeutralStroke1}
@@ -726,8 +730,7 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   yAxisId="insulin"
                   dataKey="bolusTotal"
                   fill="#1976D2"
-                  fillOpacity={0.7}
-                  barSize={30}
+                  barSize={20}
                 />
                 
                 {/* Basal line */}
