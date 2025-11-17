@@ -20,9 +20,10 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  ReferenceLine,
 } from 'recharts';
 import type { UploadedFile, GlucoseReading, InsulinReading } from '../types';
-import { extractGlucoseReadings, extractInsulinReadings } from '../utils/data';
+import { extractGlucoseReadings, smoothGlucoseValues, extractInsulinReadings } from '../utils/data';
 import { 
   getUniqueDates, 
   filterReadingsByDate, 
@@ -223,6 +224,7 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
   const [insulinReadings, setInsulinReadings] = useState<InsulinReading[]>([]);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [currentDateIndex, setCurrentDateIndex] = useState<number>(0);
+  const [maxGlucose] = useState<number>(22.0); // Fixed at 22.0 for now
 
   // Load glucose and insulin readings when file is selected
   useEffect(() => {
@@ -269,8 +271,11 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
   // Get current date string
   const currentDate = availableDates[currentDateIndex] || '';
   
-  // Filter glucose readings for current date (for stats only)
+  // Filter glucose readings for current date
   const currentGlucoseReadings = currentDate ? filterReadingsByDate(glucoseReadings, currentDate) : [];
+
+  // Apply smoothing to glucose values
+  const smoothedReadings = smoothGlucoseValues(currentGlucoseReadings);
 
   // Prepare insulin timeline data for current date
   const insulinTimelineData = currentDate ? prepareInsulinTimelineData(insulinReadings, currentDate) : [];
@@ -280,12 +285,57 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
   const bolusTotal = insulinTimelineData.reduce((sum, d) => sum + d.bolusTotal, 0);
   const totalInsulin = basalTotal + bolusTotal;
 
-  // Use insulin timeline data directly for the chart
-  const chartData = insulinTimelineData.map(d => ({
-    time: d.timeLabel,
-    basalRate: d.basalRate,
-    bolusTotal: d.bolusTotal,
-  }));
+  // Prepare combined chart data with both insulin and glucose
+  const chartData = (() => {
+    const dataMap = new Map<number, {
+      time: string;
+      timeMinutes: number;
+      glucoseValue: number;
+      originalGlucoseValue: number;
+      basalRate: number;
+      bolusTotal: number;
+    }>();
+
+    // Add glucose data
+    smoothedReadings.forEach(reading => {
+      const time = reading.timestamp;
+      const hours = time.getHours();
+      const minutes = time.getMinutes();
+      const timeMinutes = hours * 60 + minutes;
+      const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      
+      const clampedValue = Math.min(reading.value, maxGlucose);
+      
+      dataMap.set(timeMinutes, {
+        time: timeString,
+        timeMinutes,
+        glucoseValue: clampedValue,
+        originalGlucoseValue: reading.value,
+        basalRate: 0,
+        bolusTotal: 0,
+      });
+    });
+
+    // Add insulin data
+    insulinTimelineData.forEach(insulinData => {
+      const existing = dataMap.get(insulinData.hour * 60);
+      if (existing) {
+        existing.basalRate = insulinData.basalRate;
+        existing.bolusTotal = insulinData.bolusTotal;
+      } else {
+        dataMap.set(insulinData.hour * 60, {
+          time: insulinData.timeLabel,
+          timeMinutes: insulinData.hour * 60,
+          glucoseValue: 0,
+          originalGlucoseValue: 0,
+          basalRate: insulinData.basalRate,
+          bolusTotal: insulinData.bolusTotal,
+        });
+      }
+    });
+
+    return Array.from(dataMap.values()).sort((a, b) => a.timeMinutes - b.timeMinutes);
+  })();
 
   // Calculate daily glucose statistics
   const stats = currentGlucoseReadings.length > 0 
@@ -313,12 +363,14 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
     }
   };
 
-  // Custom tooltip for insulin chart
+  // Custom tooltip for combined chart
   const CustomTooltip = ({ active, payload }: { 
     active?: boolean; 
     payload?: Array<{ 
       payload: {
         time: string;
+        glucoseValue: number;
+        originalGlucoseValue: number;
         basalRate: number;
         bolusTotal: number;
       }
@@ -326,6 +378,9 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
   }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      const displayGlucose = data.originalGlucoseValue > maxGlucose 
+        ? `${data.originalGlucoseValue.toFixed(1)} (clamped to ${maxGlucose.toFixed(1)})`
+        : data.glucoseValue > 0 ? data.glucoseValue.toFixed(1) : 'N/A';
       
       return (
         <div style={{
@@ -344,6 +399,11 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
           }}>
             {data.time}
           </div>
+          {data.glucoseValue > 0 && (
+            <div style={{ color: tokens.colorNeutralForeground2 }}>
+              Glucose: {displayGlucose} mmol/L
+            </div>
+          )}
           {data.basalRate > 0 && (
             <div style={{ color: '#2E7D32' }}>
               Basal: {data.basalRate.toFixed(2)} U
@@ -495,8 +555,9 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   tickLine={false}
                 />
                 
-                {/* Single Y-axis for insulin */}
+                {/* Left Y-axis for insulin (primary) */}
                 <YAxis
+                  yAxisId="insulin"
                   label={{ 
                     value: 'Insulin (Units)', 
                     angle: -90, 
@@ -519,22 +580,102 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   tickLine={false}
                 />
                 
+                {/* Right Y-axis for glucose (secondary) */}
+                <YAxis
+                  yAxisId="glucose"
+                  orientation="right"
+                  domain={[0, maxGlucose]}
+                  label={{ 
+                    value: 'Glucose (mmol/L)', 
+                    angle: 90, 
+                    position: 'insideRight',
+                    offset: 10,
+                    style: { 
+                      fontSize: tokens.fontSizeBase200,
+                      fontFamily: tokens.fontFamilyBase,
+                      fill: tokens.colorNeutralForeground2,
+                      textAnchor: 'middle',
+                    } 
+                  }}
+                  stroke={tokens.colorNeutralStroke1}
+                  tick={{ 
+                    fill: tokens.colorNeutralForeground2,
+                    fontSize: tokens.fontSizeBase200,
+                    fontFamily: tokens.fontFamilyBase,
+                  }}
+                  axisLine={{ strokeWidth: 1 }}
+                  tickLine={false}
+                />
+                
                 <Tooltip content={<CustomTooltip />} />
                 
-                {/* Bolus bars */}
+                {/* Bolus bars - insulin data on primary axis */}
                 <Bar
+                  yAxisId="insulin"
                   dataKey="bolusTotal"
                   fill="#1976D2"
                   barSize={20}
                 />
                 
-                {/* Basal line */}
+                {/* Basal line - insulin data on primary axis */}
                 <Line
+                  yAxisId="insulin"
                   type="monotone"
                   dataKey="basalRate"
                   stroke="#2E7D32"
                   strokeWidth={2}
                   dot={false}
+                />
+                
+                {/* Target range reference lines for glucose */}
+                <ReferenceLine 
+                  yAxisId="glucose"
+                  y={thresholds.low} 
+                  stroke={tokens.colorPaletteRedBorder1}
+                  strokeDasharray="5 5" 
+                  strokeWidth={1.5}
+                  label={{ 
+                    value: `Low (${thresholds.low})`, 
+                    position: 'insideTopRight', 
+                    style: { 
+                      fontSize: tokens.fontSizeBase200,
+                      fontFamily: tokens.fontFamilyBase,
+                      fill: tokens.colorPaletteRedForeground1,
+                    } 
+                  }}
+                />
+                <ReferenceLine 
+                  yAxisId="glucose"
+                  y={thresholds.high} 
+                  stroke={tokens.colorPaletteMarigoldBorder1}
+                  strokeDasharray="5 5" 
+                  strokeWidth={1.5}
+                  label={{ 
+                    value: `High (${thresholds.high})`, 
+                    position: 'insideTopRight', 
+                    style: { 
+                      fontSize: tokens.fontSizeBase200,
+                      fontFamily: tokens.fontFamilyBase,
+                      fill: tokens.colorPaletteMarigoldForeground1,
+                    } 
+                  }}
+                />
+                
+                {/* Glucose line on secondary axis */}
+                <Line
+                  yAxisId="glucose"
+                  type="monotone"
+                  dataKey="glucoseValue"
+                  stroke={tokens.colorBrandForeground1}
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ 
+                    r: 4, 
+                    strokeWidth: 2,
+                    stroke: tokens.colorNeutralBackground1,
+                    fill: tokens.colorBrandForeground1,
+                  }}
+                  connectNulls={false}
                 />
               </ComposedChart>
             </ResponsiveContainer>
