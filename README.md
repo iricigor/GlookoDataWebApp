@@ -14,12 +14,32 @@ The application features a modern, Microsoft Fluent UI-based interface with intu
 - **Comprehensive Reports** - View detailed analytics and trends
 - **AI Analysis** - Get intelligent insights using AI algorithms
 - **Settings** - Configure data persistence options and theme preferences
+- **User Authentication** - Sign in with Microsoft to sync your settings across devices
 
 📸 **[View all screenshots and interface examples →](docs/SCREENSHOTS.md)**
 
 ## 🔒 Privacy First
 
 All data processing happens locally in your browser. No files or data are transmitted to any server, ensuring complete privacy and security.
+
+When you sign in with your Microsoft account, only your preferences (theme, export format, glucose thresholds) are synchronized to Azure for cross-device access. Your uploaded files and API keys always remain private on your device.
+
+## ✨ New Features
+
+### 🔐 User Authentication & Settings Sync
+
+Sign in with your personal Microsoft account to:
+- **Sync your settings** across all your devices
+- **Access your preferences** from anywhere
+- **Automatic backup** of your theme, export format, and glucose threshold preferences
+
+Your privacy is protected:
+- ✅ Only preferences are synced (theme, export format, glucose thresholds)
+- ✅ Uploaded files stay on your device
+- ✅ API keys remain local for your security
+- ✅ Works offline - settings sync when available
+
+**Learn more:** [Azure Deployment Guide](docs/AZURE_DEPLOYMENT.md)
 
 ## 🚀 Quick Start
 
@@ -57,6 +77,7 @@ Comprehensive documentation is available to help you get started:
 - **[Data Upload Guide](docs/DATA_UPLOAD.md)** - Learn how to import and manage your data
 - **[Reports Documentation](docs/REPORTS.md)** - Understand the analytics and reports
 - **[Settings Guide](docs/SETTINGS.md)** - Configure themes and glucose thresholds
+- **[Azure Deployment Guide](docs/AZURE_DEPLOYMENT.md)** - Deploy Azure Table Storage for settings sync
 - **[Screenshots](docs/SCREENSHOTS.md)** - View all application screenshots
 - **[Contributing Guide](CONTRIBUTING.md)** - Learn how to contribute to the project
 - **[E2E Testing Guide](docs/E2E_TESTING.md)** - End-to-end testing with Playwright

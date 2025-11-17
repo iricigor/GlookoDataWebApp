@@ -7,14 +7,17 @@ import { DataUpload } from './pages/DataUpload'
 import { Reports } from './pages/Reports'
 import { AIAnalysis } from './pages/AIAnalysis'
 import { Settings } from './pages/Settings'
+import { useAuth } from './hooks/useAuth'
 import { useTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
+import { useGlucoseThresholds } from './hooks/useGlucoseThresholds'
 import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
 import { useGeminiApiKey } from './hooks/useGeminiApiKey'
 import { useGrokApiKey } from './hooks/useGrokApiKey'
 import { useDeepSeekApiKey } from './hooks/useDeepSeekApiKey'
 import { useActiveAIProvider } from './hooks/useActiveAIProvider'
 import { useSwipeGesture } from './hooks/useSwipeGesture'
+import { useSettingsSync } from './hooks/useSettingsSync'
 import type { UploadedFile, AIAnalysisResult } from './types'
 import { extractZipMetadata } from './features/dataUpload/utils'
 
@@ -23,13 +26,35 @@ const PAGE_ORDER = ['home', 'upload', 'reports', 'ai', 'settings'] as const
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
+  
+  // Authentication
+  const { isLoggedIn, userEmail } = useAuth()
+  
+  // Settings
   const { theme, themeMode, setThemeMode } = useTheme()
   const { exportFormat, setExportFormat } = useExportFormat()
+  const { thresholds: glucoseThresholds, setThresholds: setGlucoseThresholds } = useGlucoseThresholds()
+  
+  // Sync settings with Azure for authenticated users
+  useSettingsSync({
+    isLoggedIn,
+    userEmail,
+    themeMode,
+    exportFormat,
+    glucoseThresholds,
+    setThemeMode,
+    setExportFormat,
+    setGlucoseThresholds,
+  })
+  
+  // API Keys (not synced to Azure for security)
   const { apiKey: perplexityApiKey, setApiKey: setPerplexityApiKey } = usePerplexityApiKey()
   const { apiKey: geminiApiKey, setApiKey: setGeminiApiKey } = useGeminiApiKey()
   const { apiKey: grokApiKey, setApiKey: setGrokApiKey } = useGrokApiKey()
   const { apiKey: deepseekApiKey, setApiKey: setDeepSeekApiKey } = useDeepSeekApiKey()
   const { selectedProvider, setSelectedProvider } = useActiveAIProvider()
+  
+  // File management (not synced to Azure)
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
   const [aiAnalysisResults, setAiAnalysisResults] = useState<Record<string, AIAnalysisResult>>({})
