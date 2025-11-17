@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>302 Fix Azure App Registration script SPA configuration format</summary>
+
+[#302](../../pull/302) Fix Azure App Registration script SPA configuration format
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>300 Add login/logout UI to navigation bar</summary>
 
 [#300](../../pull/300) Add login/logout UI to navigation bar
