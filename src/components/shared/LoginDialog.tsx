@@ -9,15 +9,31 @@ import {
   DialogContent,
   makeStyles,
   Spinner,
+  shorthands,
 } from '@fluentui/react-components';
 import { PersonRegular } from '@fluentui/react-icons';
 import { useState } from 'react';
+
+// Microsoft logo SVG component
+const MicrosoftLogo = () => (
+  <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
+    <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
+    <rect x="1" y="11" width="9" height="9" fill="#00A4EF"/>
+    <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
+  </svg>
+);
 
 const useStyles = makeStyles({
   dialogContent: {
     display: 'flex',
     flexDirection: 'column',
     gap: '16px',
+  },
+  microsoftButton: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
   },
 });
 
@@ -68,9 +84,19 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
               appearance="primary" 
               onClick={handleLogin}
               disabled={loading}
-              icon={loading ? <Spinner size="tiny" /> : undefined}
+              className={styles.microsoftButton}
             >
-              {loading ? 'Signing in...' : 'Sign in with Microsoft'}
+              {loading ? (
+                <>
+                  <Spinner size="tiny" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <MicrosoftLogo />
+                  <span>Sign in with Microsoft</span>
+                </>
+              )}
             </Button>
           </DialogActions>
         </DialogBody>
