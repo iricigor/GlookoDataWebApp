@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>316 Add managed identity infrastructure with centralized configuration system</summary>
+
+[#316](../../pull/316) Add managed identity infrastructure with centralized configuration system
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>314 Reorganize deployment scripts into dedicated folder with comprehensive documentation</summary>
 
 [#314](../../pull/314) Reorganize deployment scripts into dedicated folder with comprehensive documentation
