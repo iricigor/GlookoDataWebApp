@@ -10,10 +10,6 @@ import {
   tokens,
   shorthands,
   Card,
-  TabList,
-  Tab,
-  Dropdown,
-  Option,
 } from '@fluentui/react-components';
 import {
   ComposedChart,
@@ -23,11 +19,10 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  ReferenceLine,
   CartesianGrid,
 } from 'recharts';
 import type { UploadedFile, GlucoseReading, InsulinReading } from '../types';
-import { extractGlucoseReadings, smoothGlucoseValues, extractInsulinReadings } from '../utils/data';
+import { extractGlucoseReadings, extractInsulinReadings } from '../utils/data';
 import { 
   getUniqueDates, 
   filterReadingsByDate, 
@@ -38,9 +33,6 @@ import {
 } from '../utils/data';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { DayNavigator } from './DayNavigator';
-import { useBGColorScheme } from '../hooks/useBGColorScheme';
-import { getGlucoseColor, isDynamicColorScheme, COLOR_SCHEME_DESCRIPTORS } from '../utils/formatting';
-import type { BGColorScheme } from '../hooks/useBGColorScheme';
 
 const useStyles = makeStyles({
   container: {
@@ -224,7 +216,6 @@ interface UnifiedCGMInsulinReportProps {
 export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
-  const { colorScheme, setColorScheme } = useBGColorScheme();
   
   const [loading, setLoading] = useState(false);
   const [dateChanging, setDateChanging] = useState(false);
@@ -232,7 +223,6 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
   const [insulinReadings, setInsulinReadings] = useState<InsulinReading[]>([]);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [currentDateIndex, setCurrentDateIndex] = useState<number>(0);
-  const [maxGlucose, setMaxGlucose] = useState<number>(22.0);
 
   // Load glucose and insulin readings when file is selected
   useEffect(() => {
@@ -279,11 +269,8 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
   // Get current date string
   const currentDate = availableDates[currentDateIndex] || '';
   
-  // Filter glucose readings for current date
+  // Filter glucose readings for current date (for stats only)
   const currentGlucoseReadings = currentDate ? filterReadingsByDate(glucoseReadings, currentDate) : [];
-
-  // Apply smoothing to glucose values
-  const smoothedReadings = smoothGlucoseValues(currentGlucoseReadings);
 
   // Prepare insulin timeline data for current date
   const insulinTimelineData = currentDate ? prepareInsulinTimelineData(insulinReadings, currentDate) : [];
@@ -293,60 +280,12 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
   const bolusTotal = insulinTimelineData.reduce((sum, d) => sum + d.bolusTotal, 0);
   const totalInsulin = basalTotal + bolusTotal;
 
-  // Prepare combined chart data
-  const chartData = (() => {
-    const dataMap = new Map<number, {
-      time: string;
-      timeMinutes: number;
-      glucoseValue: number;
-      originalGlucoseValue: number;
-      glucoseColor: string;
-      basalRate: number;
-      bolusTotal: number;
-    }>();
-
-    // Add glucose data
-    smoothedReadings.forEach(reading => {
-      const time = reading.timestamp;
-      const hours = time.getHours();
-      const minutes = time.getMinutes();
-      const timeMinutes = hours * 60 + minutes;
-      const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-      
-      const clampedValue = Math.min(reading.value, maxGlucose);
-      
-      dataMap.set(timeMinutes, {
-        time: timeString,
-        timeMinutes,
-        glucoseValue: clampedValue,
-        originalGlucoseValue: reading.value,
-        glucoseColor: getGlucoseColor(reading.value, colorScheme),
-        basalRate: 0,
-        bolusTotal: 0,
-      });
-    });
-
-    // Add insulin data
-    insulinTimelineData.forEach(insulinData => {
-      const existing = dataMap.get(insulinData.hour * 60);
-      if (existing) {
-        existing.basalRate = insulinData.basalRate;
-        existing.bolusTotal = insulinData.bolusTotal;
-      } else {
-        dataMap.set(insulinData.hour * 60, {
-          time: insulinData.timeLabel,
-          timeMinutes: insulinData.hour * 60,
-          glucoseValue: 0,
-          originalGlucoseValue: 0,
-          glucoseColor: tokens.colorNeutralForeground2,
-          basalRate: insulinData.basalRate,
-          bolusTotal: insulinData.bolusTotal,
-        });
-      }
-    });
-
-    return Array.from(dataMap.values()).sort((a, b) => a.timeMinutes - b.timeMinutes);
-  })();
+  // Use insulin timeline data directly for the chart
+  const chartData = insulinTimelineData.map(d => ({
+    time: d.timeLabel,
+    basalRate: d.basalRate,
+    bolusTotal: d.bolusTotal,
+  }));
 
   // Calculate daily glucose statistics
   const stats = currentGlucoseReadings.length > 0 
@@ -374,14 +313,12 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
     }
   };
 
-  // Custom tooltip
+  // Custom tooltip for insulin chart
   const CustomTooltip = ({ active, payload }: { 
     active?: boolean; 
     payload?: Array<{ 
       payload: {
         time: string;
-        glucoseValue: number;
-        originalGlucoseValue: number;
         basalRate: number;
         bolusTotal: number;
       }
@@ -389,9 +326,6 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
   }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      const displayGlucose = data.originalGlucoseValue > maxGlucose 
-        ? `${data.originalGlucoseValue.toFixed(1)} (clamped to ${maxGlucose.toFixed(1)})`
-        : data.glucoseValue > 0 ? data.glucoseValue.toFixed(1) : 'N/A';
       
       return (
         <div style={{
@@ -410,11 +344,6 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
           }}>
             {data.time}
           </div>
-          {data.glucoseValue > 0 && (
-            <div style={{ color: tokens.colorNeutralForeground2 }}>
-              Glucose: {displayGlucose} mmol/L
-            </div>
-          )}
           {data.basalRate > 0 && (
             <div style={{ color: '#2E7D32' }}>
               Basal: {data.basalRate.toFixed(2)} U
@@ -429,21 +358,6 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
       );
     }
     return null;
-  };
-
-  // Custom dot renderer for colored glucose values
-  const renderColoredDot = (props: { cx?: number; cy?: number; payload?: { glucoseColor: string } }): React.ReactElement | null => {
-    if (props.cx === undefined || props.cy === undefined || !props.payload) return <></>;
-    return (
-      <circle
-        cx={props.cx}
-        cy={props.cy}
-        r={3}
-        fill={props.payload.glucoseColor}
-        stroke={tokens.colorNeutralBackground1}
-        strokeWidth={1}
-      />
-    );
   };
 
   // Format X-axis labels - show 0, 6, 12, 18, 24
@@ -510,48 +424,6 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
           }}>
             Daily Overview
           </Text>
-          <div className={styles.rightControls}>
-            <div className={styles.controlGroup}>
-              <Text style={{ 
-                fontSize: tokens.fontSizeBase300,
-                fontFamily: tokens.fontFamilyBase,
-                color: tokens.colorNeutralForeground2,
-              }}>
-                Color Scheme:
-              </Text>
-              <Dropdown
-                value={COLOR_SCHEME_DESCRIPTORS[colorScheme].name}
-                selectedOptions={[colorScheme]}
-                onOptionSelect={(_, data) => setColorScheme(data.optionValue as BGColorScheme)}
-                className={styles.colorSchemeDropdown}
-                size="small"
-                positioning="below-start"
-                inlinePopup
-              >
-                <Option value="monochrome">{COLOR_SCHEME_DESCRIPTORS.monochrome.name}</Option>
-                <Option value="basic">{COLOR_SCHEME_DESCRIPTORS.basic.name}</Option>
-                <Option value="hsv">{COLOR_SCHEME_DESCRIPTORS.hsv.name}</Option>
-                <Option value="clinical">{COLOR_SCHEME_DESCRIPTORS.clinical.name}</Option>
-              </Dropdown>
-            </div>
-            <div className={styles.controlGroup}>
-              <Text style={{ 
-                fontSize: tokens.fontSizeBase300,
-                fontFamily: tokens.fontFamilyBase,
-                color: tokens.colorNeutralForeground2,
-              }}>
-                Max: {maxGlucose.toFixed(1)} mmol/L
-              </Text>
-              <TabList
-                selectedValue={maxGlucose === 16.0 ? '16.0' : '22.0'}
-                onTabSelect={(_, data) => setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0)}
-                size="small"
-              >
-                <Tab value="16.0">16.0</Tab>
-                <Tab value="22.0">22.0</Tab>
-              </TabList>
-            </div>
-          </div>
         </div>
         
         <div className={styles.chartWithBarsContainer}>
@@ -623,9 +495,8 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   tickLine={false}
                 />
                 
-                {/* Left Y-axis for insulin (primary) */}
+                {/* Single Y-axis for insulin */}
                 <YAxis
-                  yAxisId="insulin"
                   label={{ 
                     value: 'Insulin (Units)', 
                     angle: -90, 
@@ -648,102 +519,22 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   tickLine={false}
                 />
                 
-                {/* Right Y-axis for glucose (secondary) */}
-                <YAxis
-                  yAxisId="glucose"
-                  orientation="right"
-                  domain={[0, maxGlucose]}
-                  label={{ 
-                    value: 'Glucose (mmol/L)', 
-                    angle: 90, 
-                    position: 'insideRight',
-                    offset: 10,
-                    style: { 
-                      fontSize: tokens.fontSizeBase200,
-                      fontFamily: tokens.fontFamilyBase,
-                      fill: tokens.colorNeutralForeground2,
-                      textAnchor: 'middle',
-                    } 
-                  }}
-                  stroke={tokens.colorNeutralStroke1}
-                  tick={{ 
-                    fill: tokens.colorNeutralForeground2,
-                    fontSize: tokens.fontSizeBase200,
-                    fontFamily: tokens.fontFamilyBase,
-                  }}
-                  axisLine={{ strokeWidth: 1 }}
-                  tickLine={false}
-                />
-                
                 <Tooltip content={<CustomTooltip />} />
                 
-                {/* Bolus bars - rendered first (insulin primary) */}
+                {/* Bolus bars */}
                 <Bar
-                  yAxisId="insulin"
                   dataKey="bolusTotal"
                   fill="#1976D2"
                   barSize={20}
                 />
                 
-                {/* Basal line - insulin data */}
+                {/* Basal line */}
                 <Line
-                  yAxisId="insulin"
                   type="monotone"
                   dataKey="basalRate"
                   stroke="#2E7D32"
                   strokeWidth={2}
                   dot={false}
-                />
-                
-                {/* Target range reference lines for glucose */}
-                <ReferenceLine 
-                  yAxisId="glucose"
-                  y={thresholds.low} 
-                  stroke={tokens.colorPaletteRedBorder1}
-                  strokeDasharray="5 5" 
-                  strokeWidth={1.5}
-                  label={{ 
-                    value: `Low (${thresholds.low})`, 
-                    position: 'insideTopRight', 
-                    style: { 
-                      fontSize: tokens.fontSizeBase200,
-                      fontFamily: tokens.fontFamilyBase,
-                      fill: tokens.colorPaletteRedForeground1,
-                    } 
-                  }}
-                />
-                <ReferenceLine 
-                  yAxisId="glucose"
-                  y={thresholds.high} 
-                  stroke={tokens.colorPaletteMarigoldBorder1}
-                  strokeDasharray="5 5" 
-                  strokeWidth={1.5}
-                  label={{ 
-                    value: `High (${thresholds.high})`, 
-                    position: 'insideTopRight', 
-                    style: { 
-                      fontSize: tokens.fontSizeBase200,
-                      fontFamily: tokens.fontFamilyBase,
-                      fill: tokens.colorPaletteMarigoldForeground1,
-                    } 
-                  }}
-                />
-                
-                {/* Glucose line with dynamic coloring - rendered on top */}
-                <Line
-                  yAxisId="glucose"
-                  type="monotone"
-                  dataKey="glucoseValue"
-                  stroke={isDynamicColorScheme(colorScheme) ? tokens.colorNeutralStroke2 : tokens.colorBrandForeground1}
-                  strokeWidth={isDynamicColorScheme(colorScheme) ? 1 : 2}
-                  dot={isDynamicColorScheme(colorScheme) ? (renderColoredDot as unknown as boolean) : false}
-                  activeDot={{ 
-                    r: 4, 
-                    strokeWidth: 2,
-                    stroke: tokens.colorNeutralBackground1,
-                    fill: isDynamicColorScheme(colorScheme) ? undefined : tokens.colorBrandForeground1,
-                  }}
-                  connectNulls={false}
                 />
               </ComposedChart>
             </ResponsiveContainer>
