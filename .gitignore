@@ -40,3 +40,8 @@ screenshots
 *.sln
 *.sw?
 test-results.json
+
+# Deployment script artifacts
+scripts/deployment/.deploy-temp/
+scripts/deployment/config.json
+.glookodata/
