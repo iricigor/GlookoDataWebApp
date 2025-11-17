@@ -1,0 +1,79 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/assets/*",
+      "/demo-data.zip"
+    ]
+  },
+  "routes": [
+    {
+      "route": "/api/settings/*",
+      "allowedRoles": ["authenticated"]
+    }
+  ],
+  "dataApiBuilder": {
+    "enabled": true,
+    "config": {
+      "$schema": "https://github.com/Azure/data-api-builder/releases/download/v0.10.23/dab.draft.schema.json",
+      "data-source": {
+        "database-type": "cosmosdb_nosql",
+        "connection-string": "@env('AZURE_STORAGE_CONNECTION_STRING')",
+        "options": {
+          "database": "GlookoDataWebApp",
+          "container": "UserSettings",
+          "schema": "staticwebapp.database.schema"
+        }
+      },
+      "runtime": {
+        "rest": {
+          "enabled": true,
+          "path": "/api/data"
+        },
+        "graphql": {
+          "enabled": false
+        },
+        "host": {
+          "cors": {
+            "origins": ["https://glooko.iric.online", "http://localhost:5173", "http://127.0.0.1:5173"],
+            "allow-credentials": true
+          },
+          "authentication": {
+            "provider": "StaticWebApps"
+          }
+        }
+      },
+      "entities": {
+        "UserSettings": {
+          "source": "UserSettings",
+          "permissions": [
+            {
+              "role": "authenticated",
+              "actions": ["create", "read", "update"]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "responseOverrides": {
+    "401": {
+      "statusCode": 401,
+      "rewrite": "/index.html"
+    },
+    "404": {
+      "statusCode": 404,
+      "rewrite": "/index.html"
+    }
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "X-XSS-Protection": "1; mode=block",
+    "Referrer-Policy": "strict-origin-when-cross-origin"
+  },
+  "mimeTypes": {
+    ".json": "application/json",
+    ".zip": "application/zip"
+  }
+}
