@@ -82,7 +82,7 @@ interface NavigationProps {
 
 export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   const styles = useStyles();
-  const { isLoggedIn, userName, login, logout } = useAuth();
+  const { isLoggedIn, userName, userEmail, userPhoto, login, logout } = useAuth();
 
   const navItems = [
     { page: 'home', label: 'Home', icon: <HomeRegular /> },
@@ -143,7 +143,12 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
       {/* Auth Section */}
       <div className={styles.rightSection}>
         {isLoggedIn && userName ? (
-          <LogoutDialog userName={userName} onLogout={logout} />
+          <LogoutDialog 
+            userName={userName} 
+            userEmail={userEmail}
+            userPhoto={userPhoto}
+            onLogout={logout} 
+          />
         ) : (
           <LoginDialog onLogin={login} />
         )}

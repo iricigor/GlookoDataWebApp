@@ -1,87 +1,122 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useAuth } from './useAuth';
+
+// Mock MSAL browser
+vi.mock('@azure/msal-browser', () => {
+  return {
+    PublicClientApplication: vi.fn().mockImplementation(() => ({
+      initialize: vi.fn().mockResolvedValue(undefined),
+      handleRedirectPromise: vi.fn().mockResolvedValue(null),
+      getAllAccounts: vi.fn().mockReturnValue([]),
+      loginPopup: vi.fn().mockResolvedValue({
+        account: {
+          name: 'John Doe',
+          username: 'john@example.com',
+          homeAccountId: '123',
+          environment: 'login.microsoft.com',
+          tenantId: 'test-tenant',
+          localAccountId: '123',
+        },
+        accessToken: 'test-access-token',
+      }),
+      logoutPopup: vi.fn().mockResolvedValue(undefined),
+      acquireTokenSilent: vi.fn().mockResolvedValue({
+        accessToken: 'test-access-token',
+      }),
+    })),
+    LogLevel: {
+      Error: 0,
+      Warning: 1,
+      Info: 2,
+      Verbose: 3,
+    },
+  };
+});
+
+// Mock graph utils
+vi.mock('../utils/graphUtils', () => ({
+  fetchUserPhoto: vi.fn().mockResolvedValue(null),
+  getUserDisplayName: vi.fn().mockImplementation((account) => account.name || 'User'),
+  getUserEmail: vi.fn().mockImplementation((account) => account.username || ''),
+}));
 
 describe('useAuth', () => {
   beforeEach(() => {
-    localStorage.clear();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    localStorage.clear();
+    vi.clearAllMocks();
   });
 
-  it('should initialize with logged out state', () => {
+  it('should initialize with logged out state', async () => {
     const { result } = renderHook(() => useAuth());
     
-    expect(result.current.isLoggedIn).toBe(false);
-    expect(result.current.userName).toBeNull();
-  });
-
-  it('should login with user name', () => {
-    const { result } = renderHook(() => useAuth());
-    
-    act(() => {
-      result.current.login('John Doe');
-    });
-    
-    expect(result.current.isLoggedIn).toBe(true);
-    expect(result.current.userName).toBe('John Doe');
-  });
-
-  it('should logout', () => {
-    const { result } = renderHook(() => useAuth());
-    
-    act(() => {
-      result.current.login('John Doe');
-    });
-    
-    expect(result.current.isLoggedIn).toBe(true);
-    
-    act(() => {
-      result.current.logout();
+    await waitFor(() => {
+      expect(result.current.isInitialized).toBe(true);
     });
     
     expect(result.current.isLoggedIn).toBe(false);
     expect(result.current.userName).toBeNull();
   });
 
-  it('should persist state to localStorage', () => {
+  it('should login with Microsoft account', async () => {
     const { result } = renderHook(() => useAuth());
     
-    act(() => {
-      result.current.login('John Doe');
+    await waitFor(() => {
+      expect(result.current.isInitialized).toBe(true);
     });
     
-    const stored = localStorage.getItem('glooko-auth-state');
-    expect(stored).toBeTruthy();
-    expect(JSON.parse(stored!)).toEqual({
-      isLoggedIn: true,
-      userName: 'John Doe',
+    await act(async () => {
+      await result.current.login();
+    });
+    
+    await waitFor(() => {
+      expect(result.current.isLoggedIn).toBe(true);
+      expect(result.current.userName).toBe('John Doe');
+      expect(result.current.userEmail).toBe('john@example.com');
     });
   });
 
-  it('should load state from localStorage on initialization', () => {
-    localStorage.setItem('glooko-auth-state', JSON.stringify({
-      isLoggedIn: true,
-      userName: 'Jane Smith',
-    }));
-    
+  it('should logout', async () => {
     const { result } = renderHook(() => useAuth());
     
-    expect(result.current.isLoggedIn).toBe(true);
-    expect(result.current.userName).toBe('Jane Smith');
+    await waitFor(() => {
+      expect(result.current.isInitialized).toBe(true);
+    });
+    
+    await act(async () => {
+      await result.current.login();
+    });
+    
+    await waitFor(() => {
+      expect(result.current.isLoggedIn).toBe(true);
+    });
+    
+    await act(async () => {
+      await result.current.logout();
+    });
+    
+    await waitFor(() => {
+      expect(result.current.isLoggedIn).toBe(false);
+      expect(result.current.userName).toBeNull();
+    });
   });
 
-  it('should handle corrupted localStorage data gracefully', () => {
-    localStorage.setItem('glooko-auth-state', 'invalid json');
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
+  it('should have correct return values', async () => {
     const { result } = renderHook(() => useAuth());
     
-    expect(result.current.isLoggedIn).toBe(false);
-    expect(result.current.userName).toBeNull();
+    await waitFor(() => {
+      expect(result.current.isInitialized).toBe(true);
+    });
     
-    consoleErrorSpy.mockRestore();
+    expect(result.current).toHaveProperty('isLoggedIn');
+    expect(result.current).toHaveProperty('userName');
+    expect(result.current).toHaveProperty('userEmail');
+    expect(result.current).toHaveProperty('userPhoto');
+    expect(result.current).toHaveProperty('isInitialized');
+    expect(result.current).toHaveProperty('login');
+    expect(result.current).toHaveProperty('logout');
   });
 });
