@@ -623,12 +623,11 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   tickLine={false}
                 />
                 
-                {/* Left Y-axis for glucose */}
+                {/* Left Y-axis for insulin (primary) */}
                 <YAxis
-                  yAxisId="glucose"
-                  domain={[0, maxGlucose]}
+                  yAxisId="insulin"
                   label={{ 
-                    value: 'Glucose (mmol/L)', 
+                    value: 'Insulin (Units)', 
                     angle: -90, 
                     position: 'insideLeft',
                     offset: 10,
@@ -649,12 +648,13 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   tickLine={false}
                 />
                 
-                {/* Right Y-axis for insulin */}
+                {/* Right Y-axis for glucose (secondary) */}
                 <YAxis
-                  yAxisId="insulin"
+                  yAxisId="glucose"
                   orientation="right"
+                  domain={[0, maxGlucose]}
                   label={{ 
-                    value: 'Insulin (Units)', 
+                    value: 'Glucose (mmol/L)', 
                     angle: 90, 
                     position: 'insideRight',
                     offset: 10,
@@ -677,7 +677,25 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                 
                 <Tooltip content={<CustomTooltip />} />
                 
-                {/* Target range reference lines */}
+                {/* Bolus bars - rendered first (insulin primary) */}
+                <Bar
+                  yAxisId="insulin"
+                  dataKey="bolusTotal"
+                  fill="#1976D2"
+                  barSize={20}
+                />
+                
+                {/* Basal line - insulin data */}
+                <Line
+                  yAxisId="insulin"
+                  type="monotone"
+                  dataKey="basalRate"
+                  stroke="#2E7D32"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                
+                {/* Target range reference lines for glucose */}
                 <ReferenceLine 
                   yAxisId="glucose"
                   y={thresholds.low} 
@@ -686,7 +704,7 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   strokeWidth={1.5}
                   label={{ 
                     value: `Low (${thresholds.low})`, 
-                    position: 'insideTopLeft', 
+                    position: 'insideTopRight', 
                     style: { 
                       fontSize: tokens.fontSizeBase200,
                       fontFamily: tokens.fontFamilyBase,
@@ -702,7 +720,7 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   strokeWidth={1.5}
                   label={{ 
                     value: `High (${thresholds.high})`, 
-                    position: 'insideTopLeft', 
+                    position: 'insideTopRight', 
                     style: { 
                       fontSize: tokens.fontSizeBase200,
                       fontFamily: tokens.fontFamilyBase,
@@ -711,7 +729,7 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   }}
                 />
                 
-                {/* Glucose line with dynamic coloring */}
+                {/* Glucose line with dynamic coloring - rendered on top */}
                 <Line
                   yAxisId="glucose"
                   type="monotone"
@@ -726,24 +744,6 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                     fill: isDynamicColorScheme(colorScheme) ? undefined : tokens.colorBrandForeground1,
                   }}
                   connectNulls={false}
-                />
-                
-                {/* Bolus bars */}
-                <Bar
-                  yAxisId="insulin"
-                  dataKey="bolusTotal"
-                  fill="#1976D2"
-                  barSize={20}
-                />
-                
-                {/* Basal line */}
-                <Line
-                  yAxisId="insulin"
-                  type="monotone"
-                  dataKey="basalRate"
-                  stroke="#2E7D32"
-                  strokeWidth={2}
-                  dot={false}
                 />
               </ComposedChart>
             </ResponsiveContainer>
