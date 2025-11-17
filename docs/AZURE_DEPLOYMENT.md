@@ -1,6 +1,19 @@
 # Azure Table Storage Deployment Guide
 
+> **⚠️ DEPRECATED:** This guide is kept for reference only. Please use the new [DEPLOYMENT.md](DEPLOYMENT.md) guide for comprehensive deployment instructions with the reorganized scripts.
+
 This guide explains how to deploy and configure Azure Table Storage for storing user settings in GlookoDataWebApp.
+
+## ⚠️ Updated Documentation
+
+**This document is deprecated.** For the latest deployment instructions, see:
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Comprehensive deployment guide with updated scripts
+- **[deployment/README.md](../scripts/deployment/README.md)** - Deployment scripts documentation
+
+The deployment scripts have been reorganized and split into:
+- `deploy-azure-storage-account.sh` - Creates storage account
+- `deploy-azure-user-settings-table.sh` - Creates UserSettings table
+- `deploy-azure-pro-users-table.sh` - Creates ProUsers table (optional)
 
 ## Overview
 
@@ -27,16 +40,21 @@ Before deploying, ensure you have:
 
 ## Deployment Steps
 
+> **Note:** The instructions below reference old script names. Use the new scripts in `scripts/deployment/` directory instead. See [DEPLOYMENT.md](DEPLOYMENT.md) for current instructions.
+
 ### Step 1: Deploy Azure Table Storage
 
-Run the deployment script in Azure Cloud Shell or locally with Azure CLI:
+Run the deployment scripts in Azure Cloud Shell or locally with Azure CLI:
 
 ```bash
-cd scripts
-./deploy-azure-table-storage.sh
+cd scripts/deployment
+
+# Run these in order:
+./deploy-azure-storage-account.sh
+./deploy-azure-user-settings-table.sh
 ```
 
-This script will:
+The scripts will:
 - Create a resource group (if it doesn't exist)
 - Create a storage account with Table Storage
 - Create the UserSettings table
