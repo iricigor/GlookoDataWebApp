@@ -12,6 +12,7 @@ import { InRangeReport } from '../components/InRangeReport';
 import { AGPReport } from '../components/AGPReport';
 import { BGValuesReport } from '../components/BGValuesReport';
 import { InsulinDailyReport } from '../components/InsulinDailyReport';
+import { UnifiedCGMInsulinReport } from '../components/UnifiedCGMInsulinReport';
 import type { UploadedFile } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 
@@ -85,6 +86,8 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
         return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} />;
       case 'detailedInsulin':
         return <InsulinDailyReport selectedFile={selectedFile} />;
+      case 'unifiedCgmInsulin':
+        return <UnifiedCGMInsulinReport selectedFile={selectedFile} />;
       default:
         return null;
     }
@@ -112,6 +115,7 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
           <Tab value="agp">AGP Data</Tab>
           <Tab value="detailedCgm">Detailed CGM</Tab>
           <Tab value="detailedInsulin">Detailed Insulin</Tab>
+          <Tab value="unifiedCgmInsulin">Unified CGM & Insulin</Tab>
         </TabList>
 
         <div className={styles.contentArea}>
