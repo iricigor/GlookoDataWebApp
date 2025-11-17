@@ -35,7 +35,7 @@ Before running the script, ensure you have:
 1. Download the script from the repository:
    ```bash
    git clone https://github.com/iricigor/GlookoDataWebApp.git
-   cd GlookoDataWebApp/scripts
+   cd GlookoDataWebApp/scripts/deployment
    ```
 
    Or create a new file and copy the script content:

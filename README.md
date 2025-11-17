@@ -39,7 +39,7 @@ Your privacy is protected:
 - ✅ API keys remain local for your security
 - ✅ Works offline - settings sync when available
 
-**Learn more:** [Azure Deployment Guide](docs/AZURE_DEPLOYMENT.md)
+**Learn more:** [Azure Deployment Guide](docs/DEPLOYMENT.md)
 
 ## 🚀 Quick Start
 
@@ -77,7 +77,7 @@ Comprehensive documentation is available to help you get started:
 - **[Data Upload Guide](docs/DATA_UPLOAD.md)** - Learn how to import and manage your data
 - **[Reports Documentation](docs/REPORTS.md)** - Understand the analytics and reports
 - **[Settings Guide](docs/SETTINGS.md)** - Configure themes and glucose thresholds
-- **[Azure Deployment Guide](docs/AZURE_DEPLOYMENT.md)** - Deploy Azure Table Storage for settings sync
+- **[Azure Deployment Guide](docs/DEPLOYMENT.md)** - Deploy Azure resources for authentication and settings sync
 - **[Screenshots](docs/SCREENSHOTS.md)** - View all application screenshots
 - **[Contributing Guide](CONTRIBUTING.md)** - Learn how to contribute to the project
 - **[E2E Testing Guide](docs/E2E_TESTING.md)** - End-to-end testing with Playwright
