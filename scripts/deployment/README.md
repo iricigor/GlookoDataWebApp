@@ -94,6 +94,65 @@ chmod +x script.sh
 ./script.sh
 ```
 
+**To edit a script before running:**
+
+Azure Cloud Shell provides several editors. Choose the one you're most comfortable with:
+
+**Using nano (recommended for beginners):**
+```bash
+# Download script
+curl -o script.sh https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment/[SCRIPT_NAME]
+
+# Edit with nano
+nano script.sh
+
+# Make your changes (e.g., change LOCATION="eastus" to your preferred region)
+# Save: Ctrl+O, then Enter
+# Exit: Ctrl+X
+
+# Make executable and run
+chmod +x script.sh
+./script.sh
+```
+
+**Using vi/vim (for advanced users):**
+```bash
+# Download and edit
+curl -o script.sh https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment/[SCRIPT_NAME]
+vi script.sh
+
+# Press 'i' to enter insert mode
+# Make your changes
+# Press 'Esc' to exit insert mode
+# Type ':wq' and press Enter to save and quit
+
+# Make executable and run
+chmod +x script.sh
+./script.sh
+```
+
+**Using code editor (Azure Cloud Shell built-in):**
+```bash
+# Download script
+curl -o script.sh https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment/[SCRIPT_NAME]
+
+# Open in Cloud Shell editor
+code script.sh
+
+# Edit in the browser-based editor
+# Save: Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+# Close the editor tab when done
+
+# Make executable and run
+chmod +x script.sh
+./script.sh
+```
+
+**Common edits you might want to make:**
+- `LOCATION="eastus"` → Change to your preferred Azure region
+- `APP_NAME="glookodatawebapp"` → Change to a unique name if needed
+- Redirect URIs → Add additional development URLs
+
 See [DEPLOYMENT.md](../../docs/DEPLOYMENT.md) for detailed instructions.
 
 ---

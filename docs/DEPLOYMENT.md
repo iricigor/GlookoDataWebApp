@@ -200,15 +200,45 @@ curl -o deploy-storage.sh https://raw.githubusercontent.com/iricigor/GlookoDataW
 # Make executable
 chmod +x deploy-storage.sh
 
-# Edit configuration
+# Edit configuration using your preferred editor
+```
+
+**Choose an editor:**
+
+**Option 1: nano (recommended for beginners)**
+```bash
 nano deploy-storage.sh
-# Modify these lines:
-# readonly LOCATION="eastus"  # Change to your preferred region
-# readonly APP_NAME="glookodatawebapp"  # Change app name if needed
 
-# Save (Ctrl+O, Enter, Ctrl+X)
+# Navigate with arrow keys
+# Edit these lines:
+#   readonly LOCATION="eastus"          # Change to your preferred region
+#   readonly APP_NAME="glookodatawebapp"  # Change app name if needed
 
-# Run the script
+# Save: Ctrl+O, then Enter
+# Exit: Ctrl+X
+```
+
+**Option 2: vi/vim (for advanced users)**
+```bash
+vi deploy-storage.sh
+
+# Press 'i' to enter insert mode
+# Make your changes
+# Press 'Esc' to exit insert mode
+# Type ':wq' and press Enter to save and quit
+```
+
+**Option 3: Cloud Shell code editor**
+```bash
+code deploy-storage.sh
+
+# Edit in the browser-based editor
+# Save: Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+# Close the editor tab when done
+```
+
+**Then run the script:**
+```bash
 ./deploy-storage.sh
 ```
 
