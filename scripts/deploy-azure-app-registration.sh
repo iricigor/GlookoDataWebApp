@@ -36,6 +36,9 @@ readonly REDIRECT_URIS=(
     "${WEB_APP_URL}"
     "${WEB_APP_URL}/"
     "${WEB_APP_URL}/auth/callback"
+    "http://localhost:5173"
+    "http://localhost:5173/"
+    "http://localhost:5173/auth/callback"
 )
 
 # LOGOUT_URL reserved for future use (e.g., front-channel logout configuration)
@@ -183,13 +186,16 @@ configure_redirect_uris() {
     done
     redirect_uris_json+="]"
     
+    # Build the complete SPA JSON payload
+    # The spa property needs to be a complete JSON object with redirectUris array
+    local spa_payload="{\"redirectUris\":${redirect_uris_json}}"
+    
     # Update the app registration with SPA redirect URIs
-    # Using --set to configure spa.redirectUris property in the application manifest
-    # Note: The JSON array must not be quoted to be parsed correctly by Azure CLI
-    # shellcheck disable=SC2086
+    # Using --set to configure spa property in the application manifest
+    # The spa payload must be a complete JSON object, not just the redirectUris array
     az ad app update \
         --id "${APP_ID}" \
-        --set spa.redirectUris=${redirect_uris_json} \
+        --set spa="${spa_payload}" \
         --enable-id-token-issuance true \
         --enable-access-token-issuance true
     
