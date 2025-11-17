@@ -1,18 +1,19 @@
 #!/bin/bash
 
 ################################################################################
-# Azure Table Storage Deployment Script
+# Azure UserSettings Table Deployment Script
 # 
-# This script creates and configures Azure Storage Account with Table Storage
-# for storing user settings in the GlookoDataWebApp.
+# This script creates and configures the UserSettings table in Azure Table 
+# Storage for storing user preferences in the GlookoDataWebApp.
 #
 # Prerequisites:
+#   - Run deploy-azure-storage-account.sh first to create storage account
 #   - Run this script in Azure Cloud Shell (bash)
 #   - Must have appropriate permissions to create resources
 #   - Azure CLI is pre-installed in Cloud Shell
 #
 # Usage:
-#   ./deploy-azure-table-storage.sh
+#   ./deploy-azure-user-settings-table.sh
 #
 ################################################################################
 
@@ -28,10 +29,6 @@ readonly APP_NAME="glookodatawebapp"
 readonly RESOURCE_GROUP_NAME="${APP_NAME}-rg"
 readonly STORAGE_ACCOUNT_NAME="${APP_NAME}storage"
 readonly TABLE_NAME="UserSettings"
-readonly LOCATION="eastus"  # Change this to your preferred region
-
-# Tags for resource management
-readonly TAGS="Application=${APP_NAME} Environment=Production Purpose=UserSettings"
 
 # Output colors
 readonly COLOR_GREEN='\033[0;32m'
@@ -107,60 +104,22 @@ check_azure_login() {
     print_info "Subscription ID: ${subscription_id}"
 }
 
-################################################################################
-# RESOURCE CREATION FUNCTIONS
-################################################################################
-
-# Create Resource Group
-create_resource_group() {
-    print_section "Creating Resource Group"
-    
-    print_info "Checking if resource group exists: ${RESOURCE_GROUP_NAME}"
-    
-    if az group show --name "${RESOURCE_GROUP_NAME}" &> /dev/null; then
-        print_warning "Resource group '${RESOURCE_GROUP_NAME}' already exists"
-    else
-        print_info "Creating resource group: ${RESOURCE_GROUP_NAME}"
-        az group create \
-            --name "${RESOURCE_GROUP_NAME}" \
-            --location "${LOCATION}" \
-            --tags ${TAGS}
-        
-        print_success "Resource group created successfully"
-    fi
-    
-    print_info "Resource Group: ${RESOURCE_GROUP_NAME}"
-    print_info "Location: ${LOCATION}"
-}
-
-# Create Storage Account
-create_storage_account() {
-    print_section "Creating Storage Account"
-    
+# Check if storage account exists
+check_storage_account() {
     print_info "Checking if storage account exists: ${STORAGE_ACCOUNT_NAME}"
     
-    if az storage account show --name "${STORAGE_ACCOUNT_NAME}" --resource-group "${RESOURCE_GROUP_NAME}" &> /dev/null; then
-        print_warning "Storage account '${STORAGE_ACCOUNT_NAME}' already exists"
-    else
-        print_info "Creating storage account: ${STORAGE_ACCOUNT_NAME}"
-        print_info "This may take a few minutes..."
-        
-        az storage account create \
-            --name "${STORAGE_ACCOUNT_NAME}" \
-            --resource-group "${RESOURCE_GROUP_NAME}" \
-            --location "${LOCATION}" \
-            --sku Standard_LRS \
-            --kind StorageV2 \
-            --https-only true \
-            --min-tls-version TLS1_2 \
-            --allow-blob-public-access false \
-            --tags ${TAGS}
-        
-        print_success "Storage account created successfully"
+    if ! az storage account show --name "${STORAGE_ACCOUNT_NAME}" --resource-group "${RESOURCE_GROUP_NAME}" &> /dev/null; then
+        print_error "Storage account '${STORAGE_ACCOUNT_NAME}' does not exist"
+        print_info "Please run deploy-azure-storage-account.sh first"
+        exit 1
     fi
     
-    print_info "Storage Account: ${STORAGE_ACCOUNT_NAME}"
+    print_success "Storage account found"
 }
+
+################################################################################
+# TABLE CREATION FUNCTIONS
+################################################################################
 
 # Get Storage Account Connection String
 get_connection_string() {
@@ -219,65 +178,34 @@ configure_cors() {
     print_success "CORS configured successfully"
 }
 
-# Get Storage Account Key
-get_storage_key() {
-    print_section "Retrieving Storage Account Key"
-    
-    print_info "Getting storage account key..."
-    
-    STORAGE_KEY=$(az storage account keys list \
-        --resource-group "${RESOURCE_GROUP_NAME}" \
-        --account-name "${STORAGE_ACCOUNT_NAME}" \
-        --query "[0].value" -o tsv)
-    
-    print_success "Storage key retrieved"
-}
-
 # Display summary
 display_summary() {
     print_section "Deployment Summary"
     
-    print_success "Azure Table Storage configured successfully!"
+    print_success "UserSettings table configured successfully!"
     echo ""
-    print_info "Resource Details:"
-    echo "  - Resource Group: ${RESOURCE_GROUP_NAME}"
-    echo "  - Storage Account: ${STORAGE_ACCOUNT_NAME}"
+    print_info "Table Details:"
     echo "  - Table Name: ${TABLE_NAME}"
-    echo "  - Location: ${LOCATION}"
+    echo "  - Storage Account: ${STORAGE_ACCOUNT_NAME}"
+    echo "  - Resource Group: ${RESOURCE_GROUP_NAME}"
     echo ""
-    print_info "Storage Account Details:"
-    echo "  - Storage Account Name: ${STORAGE_ACCOUNT_NAME}"
-    echo "  - Connection String: (retrieved - do not expose)"
-    echo ""
-    print_warning "Security Information:"
-    echo "  - Never commit connection strings or keys to source control"
-    echo "  - Store connection string in Azure Static Web App environment variables"
-    echo "  - Use Managed Identity for production deployments when possible"
+    print_info "Table Schema:"
+    echo "  - PartitionKey: User email (from authenticated account)"
+    echo "  - RowKey: Fixed value 'settings'"
+    echo "  - ThemeMode: 'light', 'dark', or 'system'"
+    echo "  - ExportFormat: 'csv' or 'tsv'"
+    echo "  - GlucoseThresholds: JSON string with threshold values"
     echo ""
     print_info "Next Steps:"
     echo ""
-    echo "  1. Add the following to your Static Web App configuration:"
+    echo "  1. Ensure staticwebapp.config.json is deployed with your app"
+    echo "  2. Verify CORS configuration allows your web app origin"
+    echo "  3. Test the settings synchronization feature"
     echo ""
-    echo "     Environment Variable:"
-    echo "       Name: AZURE_STORAGE_CONNECTION_STRING"
-    echo "       Value: <connection-string>"
-    echo ""
-    echo "  2. Or configure in staticwebapp.config.json with dataApiBuilder"
-    echo ""
-    echo "  3. To set the environment variable in Azure Static Web App:"
-    echo "     az staticwebapp appsettings set \\"
-    echo "       --name <your-static-web-app-name> \\"
-    echo "       --setting-names AZURE_STORAGE_CONNECTION_STRING=\"\${CONNECTION_STRING}\""
-    echo ""
-    echo "  4. Update your application code to use the Data API"
-    echo ""
-    print_info "Connection String (SAVE THIS SECURELY):"
-    echo ""
-    echo "${CONNECTION_STRING}"
-    echo ""
-    print_info "Storage Account Key (SAVE THIS SECURELY):"
-    echo ""
-    echo "${STORAGE_KEY}"
+    print_warning "Security Reminder:"
+    echo "  - Only authenticated users can access their own settings"
+    echo "  - API keys and uploaded files are NOT stored in tables"
+    echo "  - All communications use HTTPS/TLS"
     echo ""
 }
 
@@ -286,28 +214,25 @@ display_summary() {
 ################################################################################
 
 main() {
-    print_section "Azure Table Storage Deployment"
-    print_info "Application: ${APP_NAME}"
-    print_info "Location: ${LOCATION}"
+    print_section "Azure UserSettings Table Deployment"
+    print_info "Table Name: ${TABLE_NAME}"
     echo ""
     
     # Run validation checks
     check_azure_cli
     check_azure_login
+    check_storage_account
     
-    # Create resources
-    create_resource_group
-    create_storage_account
+    # Create table and configure
     get_connection_string
     create_table
     configure_cors
-    get_storage_key
     
     # Display results
     display_summary
     
     print_section "Deployment Complete"
-    print_success "Table Storage is ready for use!"
+    print_success "UserSettings table is ready for use!"
 }
 
 # Run main function

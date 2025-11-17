@@ -1,35 +1,43 @@
 # Scripts Directory
 
-This directory contains utility scripts for the GlookoDataWebApp project.
+This directory contains utility scripts and tools for the GlookoDataWebApp project.
 
-## Available Scripts
+## 📁 Directory Structure
 
-### 1. deploy-azure-app-registration.sh
-
-**Purpose:** Automates the creation and configuration of an Azure App Registration for Microsoft authentication.
-
-**Usage:**
-```bash
-./deploy-azure-app-registration.sh
+```
+scripts/
+├── README.md                    # This file
+├── deployment/                  # Azure deployment scripts
+│   ├── README.md
+│   ├── deploy-azure-app-registration.sh
+│   ├── deploy-azure-storage-account.sh
+│   ├── deploy-azure-user-settings-table.sh
+│   └── deploy-azure-pro-users-table.sh
+├── capture-screenshots.ts       # Screenshot capture tool
+└── generate-demo-data.js        # Demo data generator
 ```
 
-**Environment:** Azure Cloud Shell (bash)
+## 🚀 Deployment Scripts
 
-**What it does:**
-- Creates an Azure App Registration in Microsoft Entra ID
-- Configures authentication for personal Microsoft accounts only
-- Sets up redirect URIs for the web application at glooko.iric.online
-- Configures required Microsoft Graph API permissions
-- Outputs configuration values for integration
+**Location:** `scripts/deployment/`
 
-**Documentation:** See [docs/AZURE_APP_REGISTRATION.md](../docs/AZURE_APP_REGISTRATION.md) for detailed setup guide.
+Azure deployment scripts for setting up authentication and storage resources.
 
-**Prerequisites:**
-- Access to Azure Cloud Shell
-- Permissions to create App Registrations
-- Application Administrator or Global Administrator role
+**See:** [deployment/README.md](deployment/README.md) for detailed information
 
-### 2. generate-demo-data.js
+**Quick Start:**
+```bash
+cd deployment
+./deploy-azure-app-registration.sh
+./deploy-azure-storage-account.sh
+./deploy-azure-user-settings-table.sh
+```
+
+**Documentation:** [docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md) - Comprehensive deployment guide
+
+## Available Utility Scripts
+
+### 1. generate-demo-data.js
 
 **Purpose:** Generates demo CGM (Continuous Glucose Monitoring) data with realistic glucose distributions for testing.
 
@@ -54,18 +62,26 @@ node generate-demo-data.js
 - Node.js 20 or higher
 - npm dependencies installed
 
-## Directory Structure
+### 2. capture-screenshots.ts
 
+**Purpose:** Automated screenshot capture tool for documentation.
+
+**Usage:**
+```bash
+npm run capture-screenshots
 ```
-scripts/
-├── README.md                           # This file
-├── deploy-azure-app-registration.sh    # Azure deployment script
-└── generate-demo-data.js               # Demo data generator
-```
+
+**Environment:** Node.js 20+ with Playwright
+
+**What it does:**
+- Captures screenshots of various application pages
+- Used for updating documentation and README
+- Saves screenshots to `docs/screenshots/`
 
 ## Related Documentation
 
-- [Azure App Registration Guide](../docs/AZURE_APP_REGISTRATION.md) - Detailed setup instructions for Azure authentication
+- [Deployment Guide](../docs/DEPLOYMENT.md) - Complete Azure deployment instructions
+- [Azure App Registration Guide](../docs/AZURE_APP_REGISTRATION.md) - Detailed setup for authentication
 - [Contributing Guide](../CONTRIBUTING.md) - General contribution guidelines
 - [Quick Start Guide](../QUICKSTART.md) - Getting started with development
 
@@ -75,3 +91,4 @@ scripts/
 - All scripts should include clear documentation and error handling
 - Shell scripts should use `set -e` for error handling and `set -u` for undefined variable checking
 - Scripts should be executable (`chmod +x script.sh`)
+- Deployment scripts are in the `deployment/` subdirectory
