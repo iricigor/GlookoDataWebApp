@@ -244,6 +244,7 @@ export function AIAnalysis({
   const [mealTimingCooldownActive, setMealTimingCooldownActive] = useState(false);
   const [mealTimingCooldownSeconds, setMealTimingCooldownSeconds] = useState(0);
   const [mealTimingReady, setMealTimingReady] = useState(false);
+  const [mealTimingRetryInfo, setMealTimingRetryInfo] = useState<string | null>(null);
   const [mealTimingDatasets, setMealTimingDatasets] = useState<{
     cgmReadings: GlucoseReading[];
     bolusReadings: InsulinReading[];
@@ -257,6 +258,7 @@ export function AIAnalysis({
   const [pumpSettingsCooldownActive, setPumpSettingsCooldownActive] = useState(false);
   const [pumpSettingsCooldownSeconds, setPumpSettingsCooldownSeconds] = useState(0);
   const [pumpSettingsReady, setPumpSettingsReady] = useState(false);
+  const [pumpSettingsRetryInfo, setPumpSettingsRetryInfo] = useState<string | null>(null);
 
   // Determine which AI provider to use (respecting manual selection)
   const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
@@ -285,9 +287,11 @@ export function AIAnalysis({
       setMealTimingResponse(null);
       setMealTimingError(null);
       setMealTimingReady(false);
+      setMealTimingRetryInfo(null);
       setPumpSettingsResponse(null);
       setPumpSettingsError(null);
       setPumpSettingsReady(false);
+      setPumpSettingsRetryInfo(null);
       return;
     }
 
@@ -308,9 +312,11 @@ export function AIAnalysis({
       setMealTimingResponse(null);
       setMealTimingError(null);
       setMealTimingReady(false);
+      setMealTimingRetryInfo(null);
       setPumpSettingsResponse(null);
       setPumpSettingsError(null);
       setPumpSettingsReady(false);
+      setPumpSettingsRetryInfo(null);
       try {
         // Extract CGM readings (default data source)
         const readings = await extractGlucoseReadings(selectedFile, 'cgm');
@@ -586,6 +592,7 @@ export function AIAnalysis({
 
     setAnalyzingMealTiming(true);
     setMealTimingError(null);
+    setMealTimingRetryInfo(null);
     setMealTimingReady(false); // Reset the flag when starting new analysis
     const previousResponse = mealTimingResponse; // Keep previous response in case of error
 
@@ -619,31 +626,53 @@ export function AIAnalysis({
     try {
       // First attempt: try with full dataset
       let result = await tryAnalysis(cgmReadings, bolusReadings, basalReadings);
+      let datasetInfo = '';
 
       // If request was too large, try with smaller dataset (last 28 days)
       if (!result.success && isRequestTooLargeError(result.error)) {
+        setMealTimingRetryInfo('Dataset too large. Retrying with last 28 days of data...');
+        
         // Filter datasets to last 28 days
-        const filteredCgm = filterGlucoseReadingsToLastDays(cgmReadings, 28);
-        const filteredBolus = filterInsulinReadingsToLastDays(bolusReadings, 28);
-        const filteredBasal = filterInsulinReadingsToLastDays(basalReadings, 28);
+        const filteredCgm28 = filterGlucoseReadingsToLastDays(cgmReadings, 28);
+        const filteredBolus28 = filterInsulinReadingsToLastDays(bolusReadings, 28);
+        const filteredBasal28 = filterInsulinReadingsToLastDays(basalReadings, 28);
 
         // Verify we still have data after filtering
-        if (filteredCgm.length > 0 && filteredBolus.length > 0) {
-          // Second attempt: try with filtered dataset
-          result = await tryAnalysis(filteredCgm, filteredBolus, filteredBasal);
+        if (filteredCgm28.length > 0 && filteredBolus28.length > 0) {
+          // Second attempt: try with 28-day filtered dataset
+          result = await tryAnalysis(filteredCgm28, filteredBolus28, filteredBasal28);
           
-          // If successful with smaller dataset, add a note to the response
-          if (result.success && result.content) {
-            result.content = `**Note:** Analysis based on the last 28 days of data due to dataset size constraints.\n\n${result.content}`;
+          // If still too large, try with 7 days
+          if (!result.success && isRequestTooLargeError(result.error)) {
+            setMealTimingRetryInfo('28-day dataset still too large. Retrying with last 7 days of data...');
+            
+            // Filter datasets to last 7 days
+            const filteredCgm7 = filterGlucoseReadingsToLastDays(cgmReadings, 7);
+            const filteredBolus7 = filterInsulinReadingsToLastDays(bolusReadings, 7);
+            const filteredBasal7 = filterInsulinReadingsToLastDays(basalReadings, 7);
+
+            // Verify we still have data after filtering
+            if (filteredCgm7.length > 0 && filteredBolus7.length > 0) {
+              // Third attempt: try with 7-day filtered dataset
+              result = await tryAnalysis(filteredCgm7, filteredBolus7, filteredBasal7);
+              
+              if (result.success && result.content) {
+                datasetInfo = '**Note:** Analysis based on the last 7 days of data due to dataset size constraints.\n\n';
+              }
+            }
+          } else if (result.success && result.content) {
+            datasetInfo = '**Note:** Analysis based on the last 28 days of data due to dataset size constraints.\n\n';
           }
         }
       }
 
       if (result.success && result.content) {
-        setMealTimingResponse(result.content);
+        setMealTimingResponse(datasetInfo + result.content);
+        setMealTimingRetryInfo(null);
       } else {
         // On error, keep the previous response if it exists
         setMealTimingError(result.error || 'Failed to get AI response');
+        setMealTimingRetryInfo(null);
         if (previousResponse) {
           setMealTimingResponse(previousResponse);
         }
@@ -651,6 +680,7 @@ export function AIAnalysis({
     } catch (err) {
       // On error, keep the previous response if it exists
       setMealTimingError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      setMealTimingRetryInfo(null);
       if (previousResponse) {
         setMealTimingResponse(previousResponse);
       }
@@ -679,6 +709,7 @@ export function AIAnalysis({
 
     setAnalyzingPumpSettings(true);
     setPumpSettingsError(null);
+    setPumpSettingsRetryInfo(null);
     setPumpSettingsReady(false); // Reset the flag when starting new analysis
     const previousResponse = pumpSettingsResponse; // Keep previous response in case of error
 
@@ -714,31 +745,53 @@ export function AIAnalysis({
     try {
       // First attempt: try with full dataset
       let result = await tryAnalysis(cgmReadings, bolusReadings, basalReadings);
+      let datasetInfo = '';
 
       // If request was too large, try with smaller dataset (last 28 days)
       if (!result.success && isRequestTooLargeError(result.error)) {
+        setPumpSettingsRetryInfo('Dataset too large. Retrying with last 28 days of data...');
+        
         // Filter datasets to last 28 days
-        const filteredCgm = filterGlucoseReadingsToLastDays(cgmReadings, 28);
-        const filteredBolus = filterInsulinReadingsToLastDays(bolusReadings, 28);
-        const filteredBasal = filterInsulinReadingsToLastDays(basalReadings, 28);
+        const filteredCgm28 = filterGlucoseReadingsToLastDays(cgmReadings, 28);
+        const filteredBolus28 = filterInsulinReadingsToLastDays(bolusReadings, 28);
+        const filteredBasal28 = filterInsulinReadingsToLastDays(basalReadings, 28);
 
         // Verify we still have data after filtering
-        if (filteredCgm.length > 0 && filteredBolus.length > 0) {
-          // Second attempt: try with filtered dataset
-          result = await tryAnalysis(filteredCgm, filteredBolus, filteredBasal);
+        if (filteredCgm28.length > 0 && filteredBolus28.length > 0) {
+          // Second attempt: try with 28-day filtered dataset
+          result = await tryAnalysis(filteredCgm28, filteredBolus28, filteredBasal28);
           
-          // If successful with smaller dataset, add a note to the response
-          if (result.success && result.content) {
-            result.content = `**Note:** Analysis based on the last 28 days of data due to dataset size constraints.\n\n${result.content}`;
+          // If still too large, try with 7 days
+          if (!result.success && isRequestTooLargeError(result.error)) {
+            setPumpSettingsRetryInfo('28-day dataset still too large. Retrying with last 7 days of data...');
+            
+            // Filter datasets to last 7 days
+            const filteredCgm7 = filterGlucoseReadingsToLastDays(cgmReadings, 7);
+            const filteredBolus7 = filterInsulinReadingsToLastDays(bolusReadings, 7);
+            const filteredBasal7 = filterInsulinReadingsToLastDays(basalReadings, 7);
+
+            // Verify we still have data after filtering
+            if (filteredCgm7.length > 0 && filteredBolus7.length > 0) {
+              // Third attempt: try with 7-day filtered dataset
+              result = await tryAnalysis(filteredCgm7, filteredBolus7, filteredBasal7);
+              
+              if (result.success && result.content) {
+                datasetInfo = '**Note:** Analysis based on the last 7 days of data due to dataset size constraints.\n\n';
+              }
+            }
+          } else if (result.success && result.content) {
+            datasetInfo = '**Note:** Analysis based on the last 28 days of data due to dataset size constraints.\n\n';
           }
         }
       }
 
       if (result.success && result.content) {
-        setPumpSettingsResponse(result.content);
+        setPumpSettingsResponse(datasetInfo + result.content);
+        setPumpSettingsRetryInfo(null);
       } else {
         // On error, keep the previous response if it exists
         setPumpSettingsError(result.error || 'Failed to get AI response');
+        setPumpSettingsRetryInfo(null);
         if (previousResponse) {
           setPumpSettingsResponse(previousResponse);
         }
@@ -746,6 +799,7 @@ export function AIAnalysis({
     } catch (err) {
       // On error, keep the previous response if it exists
       setPumpSettingsError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      setPumpSettingsRetryInfo(null);
       if (previousResponse) {
         setPumpSettingsResponse(previousResponse);
       }
@@ -1049,14 +1103,15 @@ export function AIAnalysis({
                     : 'Analyze with AI'}
                 </Button>
                 
-                {!analyzingMealTiming && !mealTimingCooldownActive && (
+                {/* Helper text - always visible when not in cooldown */}
+                {!mealTimingCooldownActive && (
                   <>
                     {(!mealTimingResponse || mealTimingReady) && (
                       <Text className={styles.helperText}>
                         Click Analyze to get AI-powered meal timing analysis with day-of-week patterns. You will receive meal-specific recommendations based on your glucose and insulin data{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}.
                       </Text>
                     )}
-                    {mealTimingResponse && !mealTimingReady && (
+                    {mealTimingResponse && !mealTimingReady && !analyzingMealTiming && (
                       <Text className={styles.helperText}>
                         Click the button above to request a new analysis
                       </Text>
@@ -1076,6 +1131,17 @@ export function AIAnalysis({
                   </div>
                 )}
               </div>
+
+              {/* Retry notification */}
+              {mealTimingRetryInfo && (
+                <div style={{ marginTop: '16px' }}>
+                  <MessageBar intent="warning">
+                    <MessageBarBody>
+                      {mealTimingRetryInfo}
+                    </MessageBarBody>
+                  </MessageBar>
+                </div>
+              )}
 
               {/* Accordion to show prompt text */}
               <Accordion collapsible style={{ marginTop: '16px' }}>
@@ -1188,14 +1254,15 @@ export function AIAnalysis({
                     : 'Analyze with AI'}
                 </Button>
                 
-                {!analyzingPumpSettings && !pumpSettingsCooldownActive && (
+                {/* Helper text - always visible when not in cooldown */}
+                {!pumpSettingsCooldownActive && (
                   <>
                     {(!pumpSettingsResponse || pumpSettingsReady) && (
                       <Text className={styles.helperText}>
                         Click Analyze to get AI-powered pump settings verification. The AI will infer your current pump settings, validate them, and provide specific recommendations for basal rates, insulin sensitivity factor (ISF), and carb ratios across different time segments{activeProvider ? ` (using ${getProviderDisplayName(activeProvider)})` : ''}.
                       </Text>
                     )}
-                    {pumpSettingsResponse && !pumpSettingsReady && (
+                    {pumpSettingsResponse && !pumpSettingsReady && !analyzingPumpSettings && (
                       <Text className={styles.helperText}>
                         Click the button above to request a new analysis
                       </Text>
@@ -1215,6 +1282,17 @@ export function AIAnalysis({
                   </div>
                 )}
               </div>
+
+              {/* Retry notification */}
+              {pumpSettingsRetryInfo && (
+                <div style={{ marginTop: '16px' }}>
+                  <MessageBar intent="warning">
+                    <MessageBarBody>
+                      {pumpSettingsRetryInfo}
+                    </MessageBarBody>
+                  </MessageBar>
+                </div>
+              )}
 
               {/* Accordion to show prompt text */}
               <Accordion collapsible style={{ marginTop: '16px' }}>
