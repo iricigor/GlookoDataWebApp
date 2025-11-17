@@ -105,7 +105,49 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     width: '100px',
     height: '400px',
-    ...shorthands.gap('8px'),
+    ...shorthands.gap('0px'),
+  },
+  insulinStackedBar: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    height: '100%',
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    overflow: 'hidden',
+  },
+  insulinBarSegment: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: tokens.fontSizeBase300,
+    color: 'white',
+    fontWeight: tokens.fontWeightSemibold,
+    fontFamily: tokens.fontFamilyBase,
+  },
+  simpleSummarySection: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    ...shorthands.padding('16px'),
+    ...shorthands.gap('24px'),
+    flexWrap: 'wrap',
+  },
+  simpleSummaryItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    ...shorthands.gap('4px'),
+  },
+  simpleSummaryLabel: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+    fontFamily: tokens.fontFamilyBase,
+  },
+  simpleSummaryValue: {
+    fontSize: tokens.fontSizeBase500,
+    fontWeight: tokens.fontWeightSemibold,
+    fontFamily: tokens.fontFamilyBase,
   },
   summaryBarSegment: {
     display: 'flex',
@@ -456,81 +498,6 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
         loading={dateChanging}
       />
 
-      {/* CGM Summary Cards */}
-      <div className={styles.summarySection}>
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Below Range</Text>
-          <div>
-            <Text className={`${styles.summaryValue} ${styles.statValueBelow}`}>
-              {belowPercentage}%
-            </Text>
-          </div>
-          <Text className={styles.summarySubtext}>({stats.low} readings)</Text>
-        </Card>
-
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>In Range</Text>
-          <div>
-            <Text className={`${styles.summaryValue} ${styles.statValueInRange}`}>
-              {inRangePercentage}%
-            </Text>
-          </div>
-          <Text className={styles.summarySubtext}>({stats.inRange} readings)</Text>
-        </Card>
-
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Above Range</Text>
-          <div>
-            <Text className={`${styles.summaryValue} ${styles.statValueAbove}`}>
-              {abovePercentage}%
-            </Text>
-          </div>
-          <Text className={styles.summarySubtext}>({stats.high} readings)</Text>
-        </Card>
-
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Total Readings</Text>
-          <div>
-            <Text className={styles.summaryValue} style={{ color: tokens.colorNeutralForeground1 }}>
-              {stats.total}
-            </Text>
-          </div>
-        </Card>
-      </div>
-
-      {/* Insulin Summary Cards */}
-      <div className={styles.summarySection}>
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Total Basal</Text>
-          <div>
-            <Text className={styles.summaryValue} style={{ color: '#2E7D32' }}>
-              {basalTotal.toFixed(1)}
-            </Text>
-            <Text className={styles.summaryUnit}>units</Text>
-          </div>
-        </Card>
-
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Total Bolus</Text>
-          <div>
-            <Text className={styles.summaryValue} style={{ color: '#1976D2' }}>
-              {bolusTotal.toFixed(1)}
-            </Text>
-            <Text className={styles.summaryUnit}>units</Text>
-          </div>
-        </Card>
-
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Total Insulin</Text>
-          <div>
-            <Text className={styles.summaryValue} style={{ color: tokens.colorNeutralForeground1 }}>
-              {totalInsulin.toFixed(1)}
-            </Text>
-            <Text className={styles.summaryUnit}>units</Text>
-          </div>
-        </Card>
-      </div>
-
       {/* Combined Chart */}
       <Card className={styles.chartCard}>
         <div className={styles.controlsRow}>
@@ -540,7 +507,7 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
             fontFamily: tokens.fontFamilyBase,
             color: tokens.colorNeutralForeground1,
           }}>
-            CGM & Insulin Throughout the Day
+            Daily Overview
           </Text>
           <div className={styles.rightControls}>
             <div className={styles.controlGroup}>
@@ -759,7 +726,8 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                   yAxisId="insulin"
                   dataKey="bolusTotal"
                   fill="#1976D2"
-                  barSize={15}
+                  fillOpacity={0.7}
+                  barSize={30}
                 />
                 
                 {/* Basal line */}
@@ -775,25 +743,88 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
             </ResponsiveContainer>
           </div>
 
-          {/* Right summary bar - Insulin totals */}
+          {/* Right summary bar - Insulin totals as stacked percentage bar */}
           <div className={styles.rightSummaryBar}>
-            <div className={styles.insulinSummaryCard} style={{ backgroundColor: '#2E7D32', color: 'white' }}>
-              <Text className={styles.insulinLabel} style={{ color: 'white' }}>Basal</Text>
-              <Text className={styles.insulinValue} style={{ color: 'white' }}>{basalTotal.toFixed(1)}U</Text>
-            </div>
-            
-            <div className={styles.insulinSummaryCard} style={{ backgroundColor: '#1976D2', color: 'white' }}>
-              <Text className={styles.insulinLabel} style={{ color: 'white' }}>Bolus</Text>
-              <Text className={styles.insulinValue} style={{ color: 'white' }}>{bolusTotal.toFixed(1)}U</Text>
-            </div>
-            
-            <div className={styles.insulinSummaryCard} style={{ backgroundColor: tokens.colorNeutralBackground2 }}>
-              <Text className={styles.insulinLabel}>Total</Text>
-              <Text className={styles.insulinValue}>{totalInsulin.toFixed(1)}U</Text>
+            <div className={styles.insulinStackedBar}>
+              {/* Basal segment */}
+              <div 
+                className={styles.insulinBarSegment}
+                style={{ 
+                  height: `${totalInsulin > 0 ? (basalTotal / totalInsulin) * 100 : 50}%`,
+                  backgroundColor: '#2E7D32',
+                }}
+              >
+                <Text style={{ fontSize: tokens.fontSizeBase100, color: 'white' }}>Basal</Text>
+                <Text style={{ fontSize: tokens.fontSizeBase400, fontWeight: tokens.fontWeightSemibold, color: 'white' }}>
+                  {basalTotal.toFixed(1)}U
+                </Text>
+              </div>
+              
+              {/* Bolus segment */}
+              <div 
+                className={styles.insulinBarSegment}
+                style={{ 
+                  height: `${totalInsulin > 0 ? (bolusTotal / totalInsulin) * 100 : 50}%`,
+                  backgroundColor: '#1976D2',
+                }}
+              >
+                <Text style={{ fontSize: tokens.fontSizeBase100, color: 'white' }}>Bolus</Text>
+                <Text style={{ fontSize: tokens.fontSizeBase400, fontWeight: tokens.fontWeightSemibold, color: 'white' }}>
+                  {bolusTotal.toFixed(1)}U
+                </Text>
+              </div>
             </div>
           </div>
         </div>
       </Card>
+
+      {/* Simplified Summary Below Chart */}
+      <div className={styles.simpleSummarySection}>
+        <div className={styles.simpleSummaryItem}>
+          <Text className={styles.simpleSummaryLabel}>Below Range</Text>
+          <Text className={`${styles.simpleSummaryValue} ${styles.statValueBelow}`}>
+            {belowPercentage}%
+          </Text>
+          <Text className={styles.simpleSummaryLabel}>({stats.low})</Text>
+        </div>
+
+        <div className={styles.simpleSummaryItem}>
+          <Text className={styles.simpleSummaryLabel}>In Range</Text>
+          <Text className={`${styles.simpleSummaryValue} ${styles.statValueInRange}`}>
+            {inRangePercentage}%
+          </Text>
+          <Text className={styles.simpleSummaryLabel}>({stats.inRange})</Text>
+        </div>
+
+        <div className={styles.simpleSummaryItem}>
+          <Text className={styles.simpleSummaryLabel}>Above Range</Text>
+          <Text className={`${styles.simpleSummaryValue} ${styles.statValueAbove}`}>
+            {abovePercentage}%
+          </Text>
+          <Text className={styles.simpleSummaryLabel}>({stats.high})</Text>
+        </div>
+
+        <div className={styles.simpleSummaryItem}>
+          <Text className={styles.simpleSummaryLabel}>Total Basal</Text>
+          <Text className={styles.simpleSummaryValue} style={{ color: '#2E7D32' }}>
+            {basalTotal.toFixed(1)} U
+          </Text>
+        </div>
+
+        <div className={styles.simpleSummaryItem}>
+          <Text className={styles.simpleSummaryLabel}>Total Bolus</Text>
+          <Text className={styles.simpleSummaryValue} style={{ color: '#1976D2' }}>
+            {bolusTotal.toFixed(1)} U
+          </Text>
+        </div>
+
+        <div className={styles.simpleSummaryItem}>
+          <Text className={styles.simpleSummaryLabel}>Total Insulin</Text>
+          <Text className={styles.simpleSummaryValue} style={{ color: tokens.colorNeutralForeground1 }}>
+            {totalInsulin.toFixed(1)} U
+          </Text>
+        </div>
+      </div>
     </div>
   );
 }
