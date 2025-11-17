@@ -103,7 +103,7 @@ const useStyles = makeStyles({
   rightSummaryBar: {
     display: 'flex',
     flexDirection: 'column',
-    width: '100px',
+    width: '60px',
     height: '400px',
     ...shorthands.gap('0px'),
   },
@@ -733,7 +733,7 @@ export function UnifiedCGMInsulinReport({ selectedFile }: UnifiedCGMInsulinRepor
                 {/* Basal line */}
                 <Line
                   yAxisId="insulin"
-                  type="stepAfter"
+                  type="monotone"
                   dataKey="basalRate"
                   stroke="#2E7D32"
                   strokeWidth={2}
