@@ -312,6 +312,13 @@ Fix insulin dataset being exported with wrong column headers from manual_insulin
 
 ### Other
 <details>
+<summary>312 Implement Azure Table Storage sync for user settings</summary>
+
+[#312](../../pull/312) Implement Azure Table Storage sync for user settings
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>308 Add 7-day fallback for oversized AI analysis datasets</summary>
 
 [#308](../../pull/308) Add 7-day fallback for oversized AI analysis datasets
