@@ -10,6 +10,7 @@ import { Settings } from './pages/Settings'
 import { useAuth } from './hooks/useAuth'
 import { useTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
+import { useResponseLanguage } from './hooks/useResponseLanguage'
 import { useGlucoseThresholds } from './hooks/useGlucoseThresholds'
 import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
 import { useGeminiApiKey } from './hooks/useGeminiApiKey'
@@ -33,6 +34,7 @@ function App() {
   // Settings
   const { theme, themeMode, setThemeMode } = useTheme()
   const { exportFormat, setExportFormat } = useExportFormat()
+  const { responseLanguage, setResponseLanguage } = useResponseLanguage()
   const { thresholds: glucoseThresholds, setThresholds: setGlucoseThresholds } = useGlucoseThresholds()
   
   // Sync settings with Azure for authenticated users
@@ -219,6 +221,7 @@ function App() {
             grokApiKey={grokApiKey}
             deepseekApiKey={deepseekApiKey}
             selectedProvider={selectedProvider}
+            responseLanguage={responseLanguage}
             existingAnalysis={currentAIAnalysis}
             onAnalysisComplete={handleAIAnalysisComplete}
           />
@@ -228,7 +231,9 @@ function App() {
           themeMode={themeMode} 
           onThemeChange={setThemeMode} 
           exportFormat={exportFormat} 
-          onExportFormatChange={setExportFormat} 
+          onExportFormatChange={setExportFormat}
+          responseLanguage={responseLanguage}
+          onResponseLanguageChange={setResponseLanguage}
           perplexityApiKey={perplexityApiKey} 
           onPerplexityApiKeyChange={setPerplexityApiKey} 
           geminiApiKey={geminiApiKey} 

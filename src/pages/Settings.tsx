@@ -22,6 +22,7 @@ import { useState, useEffect, useRef } from 'react';
 import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
+import type { ResponseLanguage } from '../hooks/useResponseLanguage';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { GlucoseThresholdsSection } from '../components/GlucoseThresholdsSection';
 import { getVersionInfo, formatBuildDate } from '../utils/version';
@@ -243,6 +244,8 @@ interface SettingsProps {
   onThemeChange: (mode: ThemeMode) => void;
   exportFormat: ExportFormat;
   onExportFormatChange: (format: ExportFormat) => void;
+  responseLanguage: ResponseLanguage;
+  onResponseLanguageChange: (language: ResponseLanguage) => void;
   perplexityApiKey: string;
   onPerplexityApiKeyChange: (key: string) => void;
   geminiApiKey: string;
@@ -259,7 +262,9 @@ export function Settings({
   themeMode, 
   onThemeChange, 
   exportFormat, 
-  onExportFormatChange, 
+  onExportFormatChange,
+  responseLanguage,
+  onResponseLanguageChange,
   perplexityApiKey, 
   onPerplexityApiKeyChange, 
   geminiApiKey, 
@@ -430,6 +435,21 @@ export function Settings({
               >
                 <Radio value="csv" label="CSV (Comma-Separated Values)" />
                 <Radio value="tsv" label="TSV (Tab-Separated Values)" />
+              </RadioGroup>
+            </div>
+
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>AI Response Language</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Choose the language for AI analysis responses. This affects all AI-generated insights and recommendations.
+              </Text>
+              <RadioGroup
+                value={responseLanguage}
+                onChange={(_, data) => onResponseLanguageChange(data.value as ResponseLanguage)}
+              >
+                <Radio value="english" label="English" />
+                <Radio value="czech" label="Czech (Čeština)" />
               </RadioGroup>
             </div>
 

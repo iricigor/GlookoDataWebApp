@@ -93,5 +93,29 @@ describe('glucoseInsulinPrompt', () => {
       expect(result).toContain('--- END OF ANALYSIS ---');
       expect(result).toContain('End your response with');
     });
+
+    it('should default to English language', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(result).toContain('Respond in English');
+    });
+
+    it('should generate English prompt when specified', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data, 'english');
+      
+      expect(result).toContain('Respond in English');
+      expect(result).not.toContain('česky');
+    });
+
+    it('should generate Czech prompt when specified', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data, 'czech');
+      
+      expect(result).toContain('Respond in Czech language');
+      expect(result).toContain('česky');
+      expect(result).not.toContain('Respond in English');
+    });
   });
 });

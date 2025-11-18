@@ -65,6 +65,7 @@ describe('AIAnalysis', () => {
         grokApiKey=""
         deepseekApiKey=""
         selectedProvider={null}
+        responseLanguage="english"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -93,6 +94,7 @@ describe('AIAnalysis', () => {
         grokApiKey=""
         deepseekApiKey=""
         selectedProvider={null}
+        responseLanguage="english"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -138,6 +140,7 @@ describe('AIAnalysis', () => {
         grokApiKey=""
         deepseekApiKey=""
         selectedProvider={null}
+        responseLanguage="english"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -200,6 +203,7 @@ describe('AIAnalysis', () => {
         grokApiKey=""
         deepseekApiKey=""
         selectedProvider={null}
+        responseLanguage="english"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -247,6 +251,7 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         existingAnalysis={existingAnalysis}
         selectedProvider={null}
+        responseLanguage="english"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -278,6 +283,7 @@ describe('AIAnalysis', () => {
         grokApiKey=""
         deepseekApiKey=""
         selectedProvider={null}
+        responseLanguage="english"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -349,6 +355,7 @@ describe('AIAnalysis', () => {
         grokApiKey=""
         deepseekApiKey=""
         selectedProvider={null}
+        responseLanguage="english"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -390,6 +397,7 @@ describe('AIAnalysis', () => {
         grokApiKey="test-grok-key"
         deepseekApiKey=""
         selectedProvider={null}
+        responseLanguage="english"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -440,6 +448,7 @@ describe('AIAnalysis', () => {
         grokApiKey="test-grok-key"
         deepseekApiKey=""
         selectedProvider={null}
+        responseLanguage="english"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -483,6 +492,7 @@ describe('AIAnalysis', () => {
         grokApiKey=""
         deepseekApiKey=""
         selectedProvider={null}
+        responseLanguage="english"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );

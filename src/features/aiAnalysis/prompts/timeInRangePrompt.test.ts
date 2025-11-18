@@ -68,5 +68,26 @@ describe('timeInRangePrompt', () => {
       expect(result).toContain('--- END OF ANALYSIS ---');
       expect(result).toContain('End your response with');
     });
+
+    it('should default to English language', () => {
+      const result = generateTimeInRangePrompt(75);
+      
+      expect(result).toContain('Respond in English');
+    });
+
+    it('should generate English prompt when specified', () => {
+      const result = generateTimeInRangePrompt(75, 'english');
+      
+      expect(result).toContain('Respond in English');
+      expect(result).not.toContain('česky');
+    });
+
+    it('should generate Czech prompt when specified', () => {
+      const result = generateTimeInRangePrompt(75, 'czech');
+      
+      expect(result).toContain('Respond in Czech language');
+      expect(result).toContain('česky');
+      expect(result).not.toContain('Respond in English');
+    });
   });
 });

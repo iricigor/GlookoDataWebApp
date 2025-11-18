@@ -6,6 +6,7 @@
  */
 
 import { base64Decode } from '../../../utils/formatting';
+import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 
 /**
  * Generate AI prompt for pump settings verification analysis
@@ -13,16 +14,21 @@ import { base64Decode } from '../../../utils/formatting';
  * @param base64CgmData - Base64 encoded CSV data with CGM readings (Timestamp, CGM Glucose Value)
  * @param base64BolusData - Base64 encoded CSV data with bolus insulin (Timestamp, Insulin Delivered)
  * @param base64BasalData - Base64 encoded CSV data with basal insulin (Timestamp, Insulin Delivered/Rate)
+ * @param language - Response language (english or czech)
  * @returns Formatted prompt for AI analysis
  */
 export function generatePumpSettingsPrompt(
   base64CgmData: string,
   base64BolusData: string,
-  base64BasalData: string
+  base64BasalData: string,
+  language: ResponseLanguage = 'english'
 ): string {
   const cgmData = base64Decode(base64CgmData);
   const bolusData = base64Decode(base64BolusData);
   const basalData = base64Decode(base64BasalData);
+  const languageInstruction = language === 'czech' 
+    ? 'Respond in Czech language (česky).'
+    : 'Respond in English.';
   
   return `You are an expert diabetes data analyst. I have three datasets:
 
@@ -187,7 +193,7 @@ Pump basal insulin delivery data:
 ${basalData}
 \`\`\`
 
-Remember that all glucose values are in mmol/L (not mg/dL). Address me directly using "you/your" language. Keep your response clear, detailed, and actionable.
+Remember that all glucose values are in mmol/L (not mg/dL). Address me directly using "you/your" language. Keep your response clear, detailed, and actionable. ${languageInstruction}
 
 IMPORTANT: End your response with "--- END OF ANALYSIS ---" on a new line to confirm your analysis is complete.`;
 }

@@ -153,5 +153,38 @@ describe('mealTimingPrompt', () => {
       expect(result).toContain('--- END OF ANALYSIS ---');
       expect(result).toContain('End your response with');
     });
+
+    it('should default to English language', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Respond in English');
+    });
+
+    it('should generate English prompt when specified', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal, 'english');
+      
+      expect(result).toContain('Respond in English');
+      expect(result).not.toContain('česky');
+    });
+
+    it('should generate Czech prompt when specified', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal, 'czech');
+      
+      expect(result).toContain('Respond in Czech language');
+      expect(result).toContain('česky');
+      expect(result).not.toContain('Respond in English');
+    });
   });
 });
