@@ -1,59 +1,8 @@
-# Deployment Scripts
+# Bash Deployment Scripts (CLI)
 
-> **Important:** This directory has been reorganized! Deployment scripts are now available in two flavors:
-> - **Bash scripts**: [deployment-cli](../deployment-cli/) - For Azure Cloud Shell, Linux, macOS, WSL
-> - **PowerShell scripts**: [deployment-ps](../deployment-ps/) - For Windows, PowerShell 7+
->
-> Both implementations provide **identical functionality**. Choose the one that best fits your environment.
+This directory contains **Bash** Azure deployment scripts for the GlookoDataWebApp project with support for **managed identity** (secure, secret-free authentication) and **centralized configuration management**.
 
-## Quick Navigation
-
-### For Bash Users (Linux, macOS, Azure Cloud Shell, WSL)
-👉 **Go to [deployment-cli/README.md](../deployment-cli/README.md)**
-
-Example quick start:
-```bash
-cd scripts/deployment-cli
-./deploy-azure-master.sh --all
-```
-
-### For PowerShell Users (Windows, PowerShell 7+)
-👉 **Go to [deployment-ps/README.md](../deployment-ps/README.md)**
-
-Example quick start:
-```powershell
-cd scripts/deployment-ps
-./deploy-azure-master.ps1 -All
-```
-
-## What Gets Deployed
-
-Both script sets deploy the same Azure resources:
-
-- **Resource Group** - Container for all resources
-- **Managed Identity** - Secure authentication without secrets (optional but recommended)
-- **Storage Account** - For data storage (StorageV2, LRS)
-- **Tables** - UserSettings and ProUsers tables
-- **Static Web App** - Hosts the web application
-- **App Registration** - Microsoft authentication configuration
-
-## Key Features
-
-Both Bash and PowerShell implementations include:
-
-- ✅ **Managed identity support** - Eliminate secrets from your configuration
-- ✅ **Centralized configuration** - Single config file for all scripts
-- ✅ **Master orchestration script** - Deploy everything with one command
-- ✅ **Idempotent operations** - Safe to run multiple times
-- ✅ **Interactive setup** - Create configuration interactively
-- ✅ **Dry-run mode** - Validate before deploying
-- ✅ **Comprehensive help** - Use `--help` or `-Help` on any script
-
----
-
-## Original Documentation
-
-This directory previously contained Azure deployment scripts. The original documentation is preserved below for reference.
+> **Note:** PowerShell versions of these scripts are available in the [deployment-ps](../deployment-ps/) directory. Both implementations provide identical functionality.
 
 ## 🌟 What's New
 

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "GlookoDataWebApp Azure Deployment Configuration",
+  "description": "Configuration file for Azure deployment scripts. Save this as ~/.glookodata/config.json and customize values as needed.",
+  "type": "object",
+  "properties": {
+    "resourceGroup": {
+      "type": "string",
+      "description": "Azure resource group name",
+      "default": "glookodatawebapp-rg"
+    },
+    "location": {
+      "type": "string",
+      "description": "Azure region for resources",
+      "default": "eastus"
+    },
+    "appName": {
+      "type": "string",
+      "description": "Application base name (used for resource naming)",
+      "default": "glookodatawebapp"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "description": "Storage account name (must be globally unique, 3-24 lowercase letters/numbers)",
+      "default": "glookodatawebappstorage"
+    },
+    "managedIdentityName": {
+      "type": "string",
+      "description": "User-assigned managed identity name",
+      "default": "glookodatawebapp-identity"
+    },
+    "staticWebAppName": {
+      "type": "string",
+      "description": "Static Web App name",
+      "default": "glookodatawebapp-swa"
+    },
+    "staticWebAppSku": {
+      "type": "string",
+      "description": "Static Web App SKU tier",
+      "enum": ["Free", "Standard"],
+      "default": "Free"
+    },
+    "webAppUrl": {
+      "type": "string",
+      "description": "Production web application URL",
+      "default": "https://glooko.iric.online"
+    },
+    "appRegistrationName": {
+      "type": "string",
+      "description": "Azure App Registration display name",
+      "default": "GlookoDataWebApp"
+    },
+    "signInAudience": {
+      "type": "string",
+      "description": "Supported account types for authentication",
+      "enum": ["AzureADMyOrg", "AzureADMultipleOrgs", "AzureADandPersonalMicrosoftAccount", "PersonalMicrosoftAccount"],
+      "default": "PersonalMicrosoftAccount"
+    },
+    "useManagedIdentity": {
+      "type": "boolean",
+      "description": "Use managed identity for resource authentication instead of connection strings",
+      "default": true
+    },
+    "tags": {
+      "type": "object",
+      "description": "Common tags to apply to all Azure resources",
+      "default": {
+        "Application": "GlookoDataWebApp",
+        "Environment": "Production",
+        "ManagedBy": "AzureDeploymentScripts"
+      }
+    }
+  }
+}
