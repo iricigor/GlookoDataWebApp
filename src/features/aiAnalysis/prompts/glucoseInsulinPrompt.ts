@@ -6,15 +6,20 @@
  */
 
 import { base64Decode } from '../../../utils/formatting';
+import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 
 /**
  * Generate AI prompt for glucose and insulin analysis with tiering
  * 
  * @param base64CsvData - Base64 encoded CSV data containing date, day of week, BG ranges, and insulin doses
+ * @param language - Response language (english or czech)
  * @returns Formatted prompt for AI analysis
  */
-export function generateGlucoseInsulinPrompt(base64CsvData: string): string {
+export function generateGlucoseInsulinPrompt(base64CsvData: string, language: ResponseLanguage = 'english'): string {
   const csvData = base64Decode(base64CsvData);
+  const languageInstruction = language === 'czech' 
+    ? 'Respond in Czech language (česky).'
+    : 'Respond in English.';
   
   return `**Role and Goal**
 You are an expert Data Analyst and Diabetes Management Specialist. Your goal is to analyze the provided daily blood glucose (BG) and insulin data over the specified period and identify actionable trends and anomalies to help optimize diabetes control. The analysis must be clear, concise, and focus on practical recommendations.
@@ -43,7 +48,7 @@ Perform the following specific analyses on provided data set and report the find
 ${csvData}
 \`\`\`
 
-Remember that all glucose values are in mmol/L (not mg/dL). Address me directly using "you/your" language. Keep your response clear and actionable.
+Remember that all glucose values are in mmol/L (not mg/dL). Address me directly using "you/your" language. Keep your response clear and actionable. ${languageInstruction}
 
 IMPORTANT: End your response with "--- END OF ANALYSIS ---" on a new line to confirm your analysis is complete.`;
 }

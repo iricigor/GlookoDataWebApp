@@ -11,6 +11,7 @@
 export interface UserSettings {
   themeMode: 'light' | 'dark' | 'system';
   exportFormat: 'csv' | 'tsv';
+  responseLanguage: 'english' | 'czech';
   glucoseThresholds: {
     veryHigh: number;
     high: number;
@@ -24,6 +25,7 @@ export interface UserSettingsResponse {
   RowKey: string;  // Always "settings"
   ThemeMode: string;
   ExportFormat: string;
+  ResponseLanguage: string;
   GlucoseThresholds: string;  // JSON string
   Timestamp?: string;
 }
@@ -66,6 +68,7 @@ export async function loadUserSettings(userEmail: string): Promise<UserSettings 
     const settings: UserSettings = {
       themeMode: (settingsData.ThemeMode as UserSettings['themeMode']) || 'system',
       exportFormat: (settingsData.ExportFormat as UserSettings['exportFormat']) || 'csv',
+      responseLanguage: (settingsData.ResponseLanguage as UserSettings['responseLanguage']) || 'english',
       glucoseThresholds: settingsData.GlucoseThresholds 
         ? JSON.parse(settingsData.GlucoseThresholds)
         : { veryHigh: 13.9, high: 10.0, low: 3.9, veryLow: 3.0 },
@@ -92,6 +95,7 @@ export async function saveUserSettings(userEmail: string, settings: UserSettings
       RowKey: 'settings',
       ThemeMode: settings.themeMode,
       ExportFormat: settings.exportFormat,
+      ResponseLanguage: settings.responseLanguage,
       GlucoseThresholds: JSON.stringify(settings.glucoseThresholds),
     };
 

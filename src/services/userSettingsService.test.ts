@@ -19,6 +19,7 @@ describe('userSettingsService', () => {
             RowKey: 'settings',
             ThemeMode: 'dark',
             ExportFormat: 'tsv',
+            ResponseLanguage: 'english',
             GlucoseThresholds: '{"veryHigh":14.0,"high":10.5,"low":4.0,"veryLow":3.5}',
           },
         ],
@@ -34,6 +35,7 @@ describe('userSettingsService', () => {
       expect(settings).toEqual({
         themeMode: 'dark',
         exportFormat: 'tsv',
+        responseLanguage: 'english',
         glucoseThresholds: {
           veryHigh: 14.0,
           high: 10.5,
@@ -92,6 +94,7 @@ describe('userSettingsService', () => {
             RowKey: 'settings',
             ThemeMode: 'light',
             ExportFormat: 'csv',
+            ResponseLanguage: 'english',
             GlucoseThresholds: '',  // Empty string
           },
         ],
@@ -122,6 +125,7 @@ describe('userSettingsService', () => {
       const settings: UserSettings = {
         themeMode: 'dark',
         exportFormat: 'tsv',
+        responseLanguage: 'english',
         glucoseThresholds: {
           veryHigh: 14.0,
           high: 10.5,
@@ -158,6 +162,7 @@ describe('userSettingsService', () => {
       const settings: UserSettings = {
         themeMode: 'light',
         exportFormat: 'csv',
+        responseLanguage: 'english',
         glucoseThresholds: {
           veryHigh: 13.9,
           high: 10.0,
@@ -182,6 +187,7 @@ describe('userSettingsService', () => {
       const settings: UserSettings = {
         themeMode: 'system',
         exportFormat: 'csv',
+        responseLanguage: 'english',
         glucoseThresholds: {
           veryHigh: 13.9,
           high: 10.0,
