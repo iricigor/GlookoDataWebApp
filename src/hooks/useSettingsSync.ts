@@ -15,6 +15,7 @@ import { loadUserSettings, saveUserSettings, isUserSettingsServiceAvailable } fr
 import type { UserSettings } from '../services/userSettingsService';
 import type { ThemeMode } from './useTheme';
 import type { ExportFormat } from './useExportFormat';
+import type { ResponseLanguage } from './useResponseLanguage';
 import type { GlucoseThresholds } from '../types';
 
 interface UseSettingsSyncParams {
@@ -25,11 +26,13 @@ interface UseSettingsSyncParams {
   // Current settings values
   themeMode: ThemeMode;
   exportFormat: ExportFormat;
+  responseLanguage: ResponseLanguage;
   glucoseThresholds: GlucoseThresholds;
   
   // Setters to update settings when loaded from Azure
   setThemeMode: (mode: ThemeMode) => void;
   setExportFormat: (format: ExportFormat) => void;
+  setResponseLanguage: (language: ResponseLanguage) => void;
   setGlucoseThresholds: (thresholds: GlucoseThresholds) => void;
 }
 
@@ -44,6 +47,7 @@ interface UseSettingsSyncParams {
  *   const { isLoggedIn, userEmail } = useAuth();
  *   const { themeMode, setThemeMode } = useTheme();
  *   const { exportFormat, setExportFormat } = useExportFormat();
+ *   const { responseLanguage, setResponseLanguage } = useResponseLanguage();
  *   const { thresholds, setThresholds } = useGlucoseThresholds();
  *   
  *   useSettingsSync({
@@ -51,9 +55,11 @@ interface UseSettingsSyncParams {
  *     userEmail,
  *     themeMode,
  *     exportFormat,
+ *     responseLanguage,
  *     glucoseThresholds: thresholds,
  *     setThemeMode,
  *     setExportFormat,
+ *     setResponseLanguage,
  *     setGlucoseThresholds: setThresholds,
  *   });
  *   
@@ -67,9 +73,11 @@ export function useSettingsSync(params: UseSettingsSyncParams): void {
     userEmail,
     themeMode,
     exportFormat,
+    responseLanguage,
     glucoseThresholds,
     setThemeMode,
     setExportFormat,
+    setResponseLanguage,
     setGlucoseThresholds,
   } = params;
   
@@ -126,6 +134,7 @@ export function useSettingsSync(params: UseSettingsSyncParams): void {
             // Apply loaded settings
             setThemeMode(settings.themeMode);
             setExportFormat(settings.exportFormat);
+            setResponseLanguage(settings.responseLanguage);
             setGlucoseThresholds(settings.glucoseThresholds);
             
             console.log('User settings loaded from Azure successfully');
@@ -143,7 +152,7 @@ export function useSettingsSync(params: UseSettingsSyncParams): void {
           isLoadingRef.current = false;
         });
     }
-  }, [isLoggedIn, userEmail, setThemeMode, setExportFormat, setGlucoseThresholds]);
+  }, [isLoggedIn, userEmail, setThemeMode, setExportFormat, setResponseLanguage, setGlucoseThresholds]);
   
   // Save settings to Azure when they change (debounced, for authenticated users only)
   useEffect(() => {
@@ -167,6 +176,7 @@ export function useSettingsSync(params: UseSettingsSyncParams): void {
         const settings: UserSettings = {
           themeMode,
           exportFormat,
+          responseLanguage,
           glucoseThresholds,
         };
         
@@ -183,7 +193,7 @@ export function useSettingsSync(params: UseSettingsSyncParams): void {
       
       return () => clearTimeout(timeoutId);
     }
-  }, [isLoggedIn, userEmail, themeMode, exportFormat, glucoseThresholds]);
+  }, [isLoggedIn, userEmail, themeMode, exportFormat, responseLanguage, glucoseThresholds]);
   
   // Save settings when user logs out
   useEffect(() => {
@@ -195,6 +205,7 @@ export function useSettingsSync(params: UseSettingsSyncParams): void {
       const settings: UserSettings = {
         themeMode,
         exportFormat,
+        responseLanguage,
         glucoseThresholds,
       };
       
@@ -212,5 +223,5 @@ export function useSettingsSync(params: UseSettingsSyncParams): void {
     // Update refs for next comparison
     prevLoggedInRef.current = isLoggedIn;
     prevUserEmailRef.current = userEmail;
-  }, [isLoggedIn, userEmail, themeMode, exportFormat, glucoseThresholds]);
+  }, [isLoggedIn, userEmail, themeMode, exportFormat, responseLanguage, glucoseThresholds]);
 }

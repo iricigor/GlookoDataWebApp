@@ -43,9 +43,11 @@ function App() {
     userEmail,
     themeMode,
     exportFormat,
+    responseLanguage,
     glucoseThresholds,
     setThemeMode,
     setExportFormat,
+    setResponseLanguage,
     setGlucoseThresholds,
   })
   
