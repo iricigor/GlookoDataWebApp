@@ -134,7 +134,12 @@ export function useSwipeGesture(
     const deltaX = e.clientX - mouseStartX.current;
     const deltaY = Math.abs(e.clientY - mouseStartY.current);
 
-    if (Math.abs(deltaX) >= minSwipeDistance && deltaY <= maxVerticalMovement) {
+    // Check if user has selected text during the drag operation
+    const selection = window.getSelection();
+    const hasTextSelection = selection && selection.toString().length > 0;
+
+    // Only trigger swipe if no text is selected
+    if (!hasTextSelection && Math.abs(deltaX) >= minSwipeDistance && deltaY <= maxVerticalMovement) {
       if (deltaX > 0 && callbacks.onSwipeRight) {
         callbacks.onSwipeRight();
       } else if (deltaX < 0 && callbacks.onSwipeLeft) {
