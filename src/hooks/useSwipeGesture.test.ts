@@ -151,139 +151,6 @@ describe('useSwipeGesture', () => {
     });
   });
 
-  describe('mouse events - swipe left', () => {
-    it('should detect mouse swipe left', () => {
-      const onSwipeLeft = vi.fn();
-      renderHook(() => 
-        useSwipeGesture(element, { onSwipeLeft })
-      );
-
-      // Simulate mouse swipe left
-      const mouseDown = new MouseEvent('mousedown', { clientX: 200, clientY: 100 });
-      const mouseMove = new MouseEvent('mousemove', { clientX: 100, clientY: 100 });
-      const mouseUp = new MouseEvent('mouseup', { clientX: 100, clientY: 100 });
-
-      element.dispatchEvent(mouseDown);
-      element.dispatchEvent(mouseMove);
-      element.dispatchEvent(mouseUp);
-
-      expect(onSwipeLeft).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not detect mouse swipe left with insufficient distance', () => {
-      const onSwipeLeft = vi.fn();
-      renderHook(() => 
-        useSwipeGesture(element, { onSwipeLeft }, { minSwipeDistance: 100 })
-      );
-
-      const mouseDown = new MouseEvent('mousedown', { clientX: 100, clientY: 100 });
-      const mouseMove = new MouseEvent('mousemove', { clientX: 70, clientY: 100 });
-      const mouseUp = new MouseEvent('mouseup', { clientX: 70, clientY: 100 });
-
-      element.dispatchEvent(mouseDown);
-      element.dispatchEvent(mouseMove);
-      element.dispatchEvent(mouseUp);
-
-      expect(onSwipeLeft).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('mouse events - swipe right', () => {
-    it('should detect mouse swipe right', () => {
-      const onSwipeRight = vi.fn();
-      renderHook(() => 
-        useSwipeGesture(element, { onSwipeRight })
-      );
-
-      const mouseDown = new MouseEvent('mousedown', { clientX: 100, clientY: 100 });
-      const mouseMove = new MouseEvent('mousemove', { clientX: 200, clientY: 100 });
-      const mouseUp = new MouseEvent('mouseup', { clientX: 200, clientY: 100 });
-
-      element.dispatchEvent(mouseDown);
-      element.dispatchEvent(mouseMove);
-      element.dispatchEvent(mouseUp);
-
-      expect(onSwipeRight).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('text selection handling', () => {
-    it('should not trigger swipe when text is selected during mouse drag', () => {
-      const onSwipeLeft = vi.fn();
-      renderHook(() => 
-        useSwipeGesture(element, { onSwipeLeft })
-      );
-
-      // Create text content that can be selected
-      element.innerHTML = '<p>Some text to select</p>';
-      
-      // Simulate text selection by creating a selection before mouseup
-      const range = document.createRange();
-      range.selectNodeContents(element.firstChild!);
-      const selection = window.getSelection();
-      selection!.removeAllRanges();
-      selection!.addRange(range);
-
-      const mouseDown = new MouseEvent('mousedown', { clientX: 200, clientY: 100 });
-      const mouseMove = new MouseEvent('mousemove', { clientX: 100, clientY: 100 });
-      const mouseUp = new MouseEvent('mouseup', { clientX: 100, clientY: 100 });
-
-      element.dispatchEvent(mouseDown);
-      element.dispatchEvent(mouseMove);
-      element.dispatchEvent(mouseUp);
-
-      // Should NOT call swipe callback when text is selected
-      expect(onSwipeLeft).not.toHaveBeenCalled();
-
-      // Clean up
-      selection!.removeAllRanges();
-    });
-
-    it('should trigger swipe when no text is selected during mouse drag', () => {
-      const onSwipeLeft = vi.fn();
-      renderHook(() => 
-        useSwipeGesture(element, { onSwipeLeft })
-      );
-
-      // Ensure no text is selected
-      const selection = window.getSelection();
-      selection!.removeAllRanges();
-
-      const mouseDown = new MouseEvent('mousedown', { clientX: 200, clientY: 100 });
-      const mouseMove = new MouseEvent('mousemove', { clientX: 100, clientY: 100 });
-      const mouseUp = new MouseEvent('mouseup', { clientX: 100, clientY: 100 });
-
-      element.dispatchEvent(mouseDown);
-      element.dispatchEvent(mouseMove);
-      element.dispatchEvent(mouseUp);
-
-      // Should call swipe callback when no text is selected
-      expect(onSwipeLeft).toHaveBeenCalledTimes(1);
-    });
-
-    it('should trigger swipe right when no text is selected', () => {
-      const onSwipeRight = vi.fn();
-      renderHook(() => 
-        useSwipeGesture(element, { onSwipeRight })
-      );
-
-      // Ensure no text is selected
-      const selection = window.getSelection();
-      selection!.removeAllRanges();
-
-      const mouseDown = new MouseEvent('mousedown', { clientX: 100, clientY: 100 });
-      const mouseMove = new MouseEvent('mousemove', { clientX: 200, clientY: 100 });
-      const mouseUp = new MouseEvent('mouseup', { clientX: 200, clientY: 100 });
-
-      element.dispatchEvent(mouseDown);
-      element.dispatchEvent(mouseMove);
-      element.dispatchEvent(mouseUp);
-
-      // Should call swipe callback when no text is selected
-      expect(onSwipeRight).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('configuration', () => {
     it('should respect custom minSwipeDistance', () => {
       const onSwipeLeft = vi.fn();
@@ -390,21 +257,6 @@ describe('useSwipeGesture', () => {
 
       expect(onSwipeLeft).not.toHaveBeenCalled();
     });
-
-    it('should handle mouseup without mousemove', () => {
-      const onSwipeLeft = vi.fn();
-      renderHook(() => 
-        useSwipeGesture(element, { onSwipeLeft })
-      );
-
-      const mouseDown = new MouseEvent('mousedown', { clientX: 200, clientY: 100 });
-      const mouseUp = new MouseEvent('mouseup', { clientX: 100, clientY: 100 });
-
-      element.dispatchEvent(mouseDown);
-      element.dispatchEvent(mouseUp);
-
-      expect(onSwipeLeft).not.toHaveBeenCalled();
-    });
   });
 
   describe('cleanup', () => {
@@ -420,9 +272,6 @@ describe('useSwipeGesture', () => {
       expect(removeEventListenerSpy).toHaveBeenCalledWith('touchstart', expect.any(Function));
       expect(removeEventListenerSpy).toHaveBeenCalledWith('touchmove', expect.any(Function));
       expect(removeEventListenerSpy).toHaveBeenCalledWith('touchend', expect.any(Function));
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('mousedown', expect.any(Function));
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('mousemove', expect.any(Function));
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('mouseup', expect.any(Function));
     });
   });
 });

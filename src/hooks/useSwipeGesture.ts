@@ -1,7 +1,8 @@
 /**
- * Custom hook for detecting swipe gestures on touch and mouse devices
+ * Custom hook for detecting swipe gestures on touch devices
  * 
- * This hook enables horizontal swipe navigation for mobile devices
+ * This hook enables horizontal swipe navigation for mobile and tablet devices.
+ * Mouse-based swipe is intentionally disabled on desktop to avoid conflicts with text selection.
  */
 
 import { useEffect, useRef, useCallback } from 'react';
@@ -102,79 +103,22 @@ export function useSwipeGesture(
     isSwiping.current = false;
   }, [callbacks, minSwipeDistance, maxVerticalMovement]);
 
-  // Mouse event handlers for desktop testing
-  const mouseStartX = useRef<number>(0);
-  const mouseStartY = useRef<number>(0);
-  const isMouseDown = useRef<boolean>(false);
-
-  const handleMouseDown = useCallback((e: MouseEvent) => {
-    mouseStartX.current = e.clientX;
-    mouseStartY.current = e.clientY;
-    isMouseDown.current = true;
-  }, []);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isMouseDown.current) return;
-    
-    const deltaX = Math.abs(e.clientX - mouseStartX.current);
-    const deltaY = Math.abs(e.clientY - mouseStartY.current);
-    
-    if (deltaX > 10 && deltaX > deltaY) {
-      isSwiping.current = true;
-    }
-  }, []);
-
-  const handleMouseUp = useCallback((e: MouseEvent) => {
-    if (!isMouseDown.current || !isSwiping.current) {
-      isMouseDown.current = false;
-      isSwiping.current = false;
-      return;
-    }
-
-    const deltaX = e.clientX - mouseStartX.current;
-    const deltaY = Math.abs(e.clientY - mouseStartY.current);
-
-    // Check if user has selected text during the drag operation
-    const selection = window.getSelection();
-    const hasTextSelection = selection && selection.toString().length > 0;
-
-    // Only trigger swipe if no text is selected
-    if (!hasTextSelection && Math.abs(deltaX) >= minSwipeDistance && deltaY <= maxVerticalMovement) {
-      if (deltaX > 0 && callbacks.onSwipeRight) {
-        callbacks.onSwipeRight();
-      } else if (deltaX < 0 && callbacks.onSwipeLeft) {
-        callbacks.onSwipeLeft();
-      }
-    }
-
-    isMouseDown.current = false;
-    isSwiping.current = false;
-  }, [callbacks, minSwipeDistance, maxVerticalMovement]);
-
   useEffect(() => {
     if (!element || !enabled) {
       return;
     }
 
-    // Touch events
+    // Touch events only - mouse swipe disabled to prevent conflicts with text selection
     element.addEventListener('touchstart', handleTouchStart, { passive: true });
     element.addEventListener('touchmove', handleTouchMove, { passive: true });
     element.addEventListener('touchend', handleTouchEnd);
-
-    // Mouse events (for desktop testing)
-    element.addEventListener('mousedown', handleMouseDown);
-    element.addEventListener('mousemove', handleMouseMove);
-    element.addEventListener('mouseup', handleMouseUp);
 
     return () => {
       element.removeEventListener('touchstart', handleTouchStart);
       element.removeEventListener('touchmove', handleTouchMove);
       element.removeEventListener('touchend', handleTouchEnd);
-      element.removeEventListener('mousedown', handleMouseDown);
-      element.removeEventListener('mousemove', handleMouseMove);
-      element.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [element, enabled, handleTouchStart, handleTouchMove, handleTouchEnd, handleMouseDown, handleMouseMove, handleMouseUp]);
+  }, [element, enabled, handleTouchStart, handleTouchMove, handleTouchEnd]);
 
   return {
     isSwiping: isSwiping.current,
