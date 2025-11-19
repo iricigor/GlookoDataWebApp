@@ -9,6 +9,7 @@ import {
   Button,
   tokens,
   shorthands,
+  Input,
 } from '@fluentui/react-components';
 import {
   ChevronLeftRegular,
@@ -33,6 +34,14 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
   },
+  datePickerContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
+  dateInput: {
+    minWidth: '150px',
+  },
 });
 
 interface InsulinDayNavigatorProps {
@@ -41,6 +50,9 @@ interface InsulinDayNavigatorProps {
   onNextDay: () => void;
   canGoPrevious: boolean;
   canGoNext: boolean;
+  onDateSelect?: (date: string) => void;
+  minDate?: string;
+  maxDate?: string;
 }
 
 export function InsulinDayNavigator({
@@ -49,6 +61,9 @@ export function InsulinDayNavigator({
   onNextDay,
   canGoPrevious,
   canGoNext,
+  onDateSelect,
+  minDate,
+  maxDate,
 }: InsulinDayNavigatorProps) {
   const styles = useStyles();
 
@@ -75,9 +90,23 @@ export function InsulinDayNavigator({
         </Button>
       </div>
       
-      <Text className={styles.dateDisplay}>
-        {formatDate(currentDate)}
-      </Text>
+      <div className={styles.datePickerContainer}>
+        <Text className={styles.dateDisplay}>
+          {formatDate(currentDate)}
+        </Text>
+        {onDateSelect && minDate && maxDate && (
+          <Input
+            type="date"
+            value={currentDate}
+            min={minDate}
+            max={maxDate}
+            onChange={(e) => onDateSelect(e.target.value)}
+            appearance="outline"
+            className={styles.dateInput}
+            size="small"
+          />
+        )}
+      </div>
       
       <div className={styles.navigationButtons}>
         <Button

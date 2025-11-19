@@ -16,6 +16,7 @@ import { extractInsulinReadings, prepareInsulinTimelineData } from '../utils/dat
 import { InsulinTimeline } from './InsulinTimeline';
 import { InsulinDayNavigator } from './InsulinDayNavigator';
 import { InsulinSummaryCards } from './InsulinSummaryCards';
+import { useSelectedDate } from '../hooks/useSelectedDate';
 
 const useStyles = makeStyles({
   container: {
@@ -45,6 +46,7 @@ interface InsulinDailyReportProps {
 
 export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
   const styles = useStyles();
+  const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
   const [loading, setLoading] = useState(false);
   const [insulinReadings, setInsulinReadings] = useState<InsulinReading[]>([]);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
@@ -86,8 +88,14 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
         ).sort();
 
         setAvailableDates(dates);
-        // Start with the most recent date
-        setCurrentDateIndex(dates.length > 0 ? dates.length - 1 : 0);
+        
+        // If we have a saved date, try to use it
+        if (selectedDate && dates.includes(selectedDate)) {
+          setCurrentDateIndex(dates.indexOf(selectedDate));
+        } else {
+          // Otherwise, start with the most recent date
+          setCurrentDateIndex(dates.length > 0 ? dates.length - 1 : 0);
+        }
       } catch (error) {
         console.error('Failed to extract insulin data:', error);
         setInsulinReadings([]);
@@ -98,7 +106,7 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
     };
 
     loadData();
-  }, [selectedFile]);
+  }, [selectedFile, selectedDate]);
 
   // Prepare timeline data when date changes
   useEffect(() => {
@@ -106,9 +114,15 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
       const currentDate = availableDates[currentDateIndex];
       const data = prepareInsulinTimelineData(insulinReadings, currentDate);
       setTimelineData(data);
+      
+      // Save current date to shared state
+      if (currentDate !== selectedDate) {
+        setSelectedDate(currentDate);
+      }
     } else {
       setTimelineData([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDateIndex, availableDates, insulinReadings]);
 
   const handlePreviousDay = () => {
@@ -122,6 +136,18 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
       setCurrentDateIndex(currentDateIndex + 1);
     }
   };
+
+  // Handle date selection from date picker
+  const handleDateSelect = (date: string) => {
+    const newIndex = availableDates.indexOf(date);
+    if (newIndex !== -1) {
+      setCurrentDateIndex(newIndex);
+    }
+  };
+
+  // Get min and max dates for date picker
+  const minDate = availableDates.length > 0 ? availableDates[0] : undefined;
+  const maxDate = availableDates.length > 0 ? availableDates[availableDates.length - 1] : undefined;
 
   // Calculate daily summaries
   const getDailySummary = () => {
@@ -180,6 +206,9 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
         onNextDay={handleNextDay}
         canGoPrevious={currentDateIndex > 0}
         canGoNext={currentDateIndex < availableDates.length - 1}
+        onDateSelect={handleDateSelect}
+        minDate={minDate}
+        maxDate={maxDate}
       />
 
       {/* Summary Cards */}
