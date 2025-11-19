@@ -55,36 +55,39 @@ Import-Module GlookoDeployment
 
 # 2. Initialize configuration
 Initialize-GlookoConfig
+# Or use the alias: Initialize-GC
 
 # 3. Customize configuration (optional)
 Set-GlookoConfig -Location "westus2" -ResourceGroup "my-glooko-rg"
+# Or use the alias: Set-GC -Location "westus2" -ResourceGroup "my-glooko-rg"
 
 # 4. Deploy all resources
 Invoke-GlookoDeployment -All
+# Or use the alias: Invoke-GD -All
 
 # Or deploy individual components
-New-GlookoManagedIdentity
-New-GlookoStorageAccount -UseManagedIdentity
+Set-GlookoManagedIdentity      # Or: Set-GMI
+Set-GlookoStorageAccount -UseManagedIdentity  # Or: Set-GSA -UseManagedIdentity
 ```
 
 ## Available Commands
 
 ### Configuration Management
 
-| Command | Description |
-|---------|-------------|
-| `Get-GlookoConfig` | Retrieves current configuration |
-| `Set-GlookoConfig` | Sets configuration values |
-| `Test-GlookoConfig` | Validates configuration |
-| `Initialize-GlookoConfig` | Creates new configuration file |
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `Get-GlookoConfig` | `Get-GC` | Retrieves current configuration |
+| `Set-GlookoConfig` | `Set-GC` | Sets configuration values |
+| `Test-GlookoConfig` | `Test-GC` | Validates configuration |
+| `Initialize-GlookoConfig` | `Initialize-GC` | Creates new configuration file |
 
 ### Deployment Functions
 
-| Command | Description |
-|---------|-------------|
-| `New-GlookoManagedIdentity` | Creates user-assigned managed identity |
-| `New-GlookoStorageAccount` | Creates Azure Storage Account |
-| `Invoke-GlookoDeployment` | Master orchestration for all deployments |
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `Set-GlookoManagedIdentity` | `Set-GMI` | Creates/updates user-assigned managed identity |
+| `Set-GlookoStorageAccount` | `Set-GSA` | Creates/updates Azure Storage Account |
+| `Invoke-GlookoDeployment` | `Invoke-GD` | Master orchestration for all deployments |
 
 ## Configuration
 
@@ -119,55 +122,55 @@ Configuration is stored at `~/.glookodata/config.json` with the following preced
 
 ```powershell
 # Create configuration file with defaults
-Initialize-GlookoConfig
+Initialize-GlookoConfig  # Or: Initialize-GC
 
 # Update specific values
-Set-GlookoConfig -Location "westus2" -StorageAccountName "myuniquestorage"
+Set-GlookoConfig -Location "westus2" -StorageAccountName "myuniquestorage"  # Or: Set-GC
 
 # View current configuration
-Get-GlookoConfig
+Get-GlookoConfig  # Or: Get-GC
 
 # Validate configuration
-Test-GlookoConfig
+Test-GlookoConfig  # Or: Test-GC
 ```
 
 ### Deploy Managed Identity
 
 ```powershell
 # Deploy with default configuration
-New-GlookoManagedIdentity
+Set-GlookoManagedIdentity  # Or: Set-GMI
 
 # Deploy with custom parameters
-New-GlookoManagedIdentity -Name "my-identity" -Location "westus2"
+Set-GlookoManagedIdentity -Name "my-identity" -Location "westus2"  # Or: Set-GMI
 
 # Deploy and assign storage roles
-New-GlookoManagedIdentity -AssignStorageRoles
+Set-GlookoManagedIdentity -AssignStorageRoles  # Or: Set-GMI -AssignStorageRoles
 ```
 
 ### Deploy Storage Account
 
 ```powershell
 # Deploy with managed identity (recommended)
-New-GlookoStorageAccount -UseManagedIdentity
+Set-GlookoStorageAccount -UseManagedIdentity  # Or: Set-GSA -UseManagedIdentity
 
 # Deploy with custom name
-New-GlookoStorageAccount -Name "mystorageacct" -Location "westus2"
+Set-GlookoStorageAccount -Name "mystorageacct" -Location "westus2"  # Or: Set-GSA
 
 # Deploy and show connection string
-New-GlookoStorageAccount -ShowConnectionString
+Set-GlookoStorageAccount -ShowConnectionString  # Or: Set-GSA -ShowConnectionString
 ```
 
 ### Master Deployment
 
 ```powershell
 # Deploy everything
-Invoke-GlookoDeployment -All
+Invoke-GlookoDeployment -All  # Or: Invoke-GD -All
 
 # Deploy specific components
-Invoke-GlookoDeployment -Identity -Storage
+Invoke-GlookoDeployment -Identity -Storage  # Or: Invoke-GD -Identity -Storage
 
 # Preview what would be deployed
-Invoke-GlookoDeployment -All -WhatIf
+Invoke-GlookoDeployment -All -WhatIf  # Or: Invoke-GD -All -WhatIf
 ```
 
 ### Using Environment Variables
@@ -186,35 +189,67 @@ New-GlookoStorageAccount
 
 ```powershell
 # Use custom config file
-$config = Get-GlookoConfig -ConfigFile ~/my-custom-config.json
-New-GlookoStorageAccount -ConfigFile ~/my-custom-config.json
+$config = Get-GlookoConfig -ConfigFile ~/my-custom-config.json  # Or: Get-GC
+Set-GlookoStorageAccount -ConfigFile ~/my-custom-config.json    # Or: Set-GSA
+```
+
+## Command Aliases
+
+All commands have short aliases using capital letters from the command name:
+
+- **Get-GlookoConfig** → `Get-GC`
+- **Set-GlookoConfig** → `Set-GC`
+- **Test-GlookoConfig** → `Test-GC`
+- **Initialize-GlookoConfig** → `Initialize-GC`
+- **Set-GlookoManagedIdentity** → `Set-GMI`
+- **Set-GlookoStorageAccount** → `Set-GSA`
+- **Invoke-GlookoDeployment** → `Invoke-GD`
+
+Example using aliases:
+```powershell
+# Short version
+Initialize-GC
+Set-GC -Location "westus2"
+Set-GMI
+Set-GSA -UseManagedIdentity
+Invoke-GD -All
+
+# Same as:
+Initialize-GlookoConfig
+Set-GlookoConfig -Location "westus2"
+Set-GlookoManagedIdentity
+Set-GlookoStorageAccount -UseManagedIdentity
+Invoke-GlookoDeployment -All
 ```
 
 ## Module Structure
 
 ```
 GlookoDeployment/
-├── GlookoDeployment.psd1          # Module manifest
-├── GlookoDeployment.psm1          # Module loader
-├── Public/                         # Exported functions
-│   ├── Config-Management.ps1       # Configuration functions
-│   ├── New-GlookoManagedIdentity.ps1
-│   ├── New-GlookoStorageAccount.ps1
-│   └── Invoke-GlookoDeployment.ps1
-└── Private/                        # Internal functions
-    ├── Write-Message.ps1           # Output formatting
-    ├── Config-Functions.ps1        # Configuration helpers
-    └── Azure-Functions.ps1         # Azure resource helpers
+├── GlookoDeployment.psd1                 # Module manifest
+├── GlookoDeployment.psm1                 # Module loader
+├── Public/                                # Exported functions
+│   ├── Config-Management.ps1              # Configuration functions (Get/Set/Test/Initialize)
+│   ├── Set-GlookoManagedIdentity.ps1      # Deploy managed identity
+│   ├── Set-GlookoStorageAccount.ps1       # Deploy storage account
+│   └── Invoke-GlookoDeployment.ps1        # Master orchestration
+└── Private/                               # Internal functions
+    ├── Write-Message.ps1                  # Output formatting
+    ├── Config-Functions.ps1               # Configuration helpers
+    └── Azure-Functions.ps1                # Azure resource helpers
 ```
 
 ## Getting Help
 
 ```powershell
 # Get help for a specific command
-Get-Help New-GlookoStorageAccount -Full
+Get-Help Set-GlookoStorageAccount -Full
 
 # List all available commands
 Get-Command -Module GlookoDeployment
+
+# List all aliases
+Get-Alias | Where-Object { $_.Source -eq 'GlookoDeployment' }
 
 # View module information
 Get-Module GlookoDeployment | Format-List
@@ -242,11 +277,12 @@ Remove-Item $modulePath -Recurse -Force
 |---------|------------------------------|---------------------------|
 | Installation | Clone repo | One-line install |
 | Updates | Git pull | Reinstall script |
-| Usage | `./deploy-script.ps1` | `New-GlookoResource` |
+| Usage | `./deploy-script.ps1` | `Set-GlookoResource` or alias |
 | Functions | File-based | Module-based |
 | Configuration | Dot-sourced lib | Built-in |
 | Discovery | File browsing | `Get-Command` |
 | Help | `-Help` flag | `Get-Help` |
+| Aliases | None | Short aliases (Set-GMI, etc.) |
 
 ## Troubleshooting
 
