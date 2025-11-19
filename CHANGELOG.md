@@ -485,6 +485,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 </details>
 
 ### Other
+<details>
+<summary>352 Auto-detect CHANGELOG version from package.json and add missing PR entries</summary>
+
+[#352](../../pull/352) Auto-detect CHANGELOG version from package.json and add missing PR entries
+  - [Auto-generated entry from PR merge]
+</details>
+
 
 <details>
 <summary>283 Refactor AI API providers to eliminate duplication via shared base client</summary>
