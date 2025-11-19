@@ -11,7 +11,8 @@ import {
   Divider,
   Title3,
 } from '@fluentui/react-components';
-import type { GlucoseThresholds } from '../types';
+import type { GlucoseThresholds, GlucoseUnit } from '../types';
+import { convertGlucoseValue, mgdlToMmol, getUnitLabel } from '../utils/data';
 
 const useStyles = makeStyles({
   settingSection: {
@@ -90,6 +91,7 @@ interface GlucoseThresholdsSectionProps {
   onUpdateThreshold: (key: keyof GlucoseThresholds, value: number) => void;
   isValid: boolean;
   validationError: string | null;
+  glucoseUnit: GlucoseUnit;
 }
 
 export function GlucoseThresholdsSection({
@@ -97,12 +99,21 @@ export function GlucoseThresholdsSection({
   onUpdateThreshold,
   isValid,
   validationError,
+  glucoseUnit,
 }: GlucoseThresholdsSectionProps) {
   const styles = useStyles();
 
+  // Get conversion parameters based on unit
+  const min = glucoseUnit === 'mg/dL' ? 1 : 0.1;
+  const max = glucoseUnit === 'mg/dL' ? 540 : 30;
+  const step = glucoseUnit === 'mg/dL' ? 1 : 0.1;
+  const precision = glucoseUnit === 'mg/dL' ? 0 : 1;
+
   const handleSpinButtonChange = (key: keyof GlucoseThresholds, value: number | null | undefined) => {
     if (value !== null && value !== undefined) {
-      onUpdateThreshold(key, value);
+      // Convert mg/dL to mmol/L for internal storage
+      const mmolValue = glucoseUnit === 'mg/dL' ? mgdlToMmol(value) : value;
+      onUpdateThreshold(key, mmolValue);
     }
   };
 
@@ -114,7 +125,7 @@ export function GlucoseThresholdsSection({
       <Divider className={styles.divider} />
       
       <Text className={styles.settingDescription}>
-        Configure your blood glucose threshold values in mmol/L. Values must be in ascending order.
+        Configure your blood glucose threshold values in {getUnitLabel(glucoseUnit)}. Values must be in ascending order.
       </Text>
 
       <Card className={styles.thresholdCard}>
@@ -122,12 +133,12 @@ export function GlucoseThresholdsSection({
           <div className={styles.thresholdRow}>
             <Label className={styles.thresholdLabel}>Very High</Label>
             <SpinButton
-              value={thresholds.veryHigh}
+              value={convertGlucoseValue(thresholds.veryHigh, glucoseUnit)}
               onChange={(_, data) => handleSpinButtonChange('veryHigh', data.value)}
-              min={0.1}
-              max={30}
-              step={0.1}
-              precision={1}
+              min={min}
+              max={max}
+              step={step}
+              precision={precision}
               className={styles.spinButton}
               aria-label="Very high threshold"
             />
@@ -136,12 +147,12 @@ export function GlucoseThresholdsSection({
           <div className={styles.thresholdRow}>
             <Label className={styles.thresholdLabel}>High</Label>
             <SpinButton
-              value={thresholds.high}
+              value={convertGlucoseValue(thresholds.high, glucoseUnit)}
               onChange={(_, data) => handleSpinButtonChange('high', data.value)}
-              min={0.1}
-              max={30}
-              step={0.1}
-              precision={1}
+              min={min}
+              max={max}
+              step={step}
+              precision={precision}
               className={styles.spinButton}
               aria-label="High threshold"
             />
@@ -150,12 +161,12 @@ export function GlucoseThresholdsSection({
           <div className={styles.thresholdRow}>
             <Label className={styles.thresholdLabel}>Low</Label>
             <SpinButton
-              value={thresholds.low}
+              value={convertGlucoseValue(thresholds.low, glucoseUnit)}
               onChange={(_, data) => handleSpinButtonChange('low', data.value)}
-              min={0.1}
-              max={30}
-              step={0.1}
-              precision={1}
+              min={min}
+              max={max}
+              step={step}
+              precision={precision}
               className={styles.spinButton}
               aria-label="Low threshold"
             />
@@ -164,12 +175,12 @@ export function GlucoseThresholdsSection({
           <div className={styles.thresholdRow}>
             <Label className={styles.thresholdLabel}>Very Low</Label>
             <SpinButton
-              value={thresholds.veryLow}
+              value={convertGlucoseValue(thresholds.veryLow, glucoseUnit)}
               onChange={(_, data) => handleSpinButtonChange('veryLow', data.value)}
-              min={0.1}
-              max={30}
-              step={0.1}
-              precision={1}
+              min={min}
+              max={max}
+              step={step}
+              precision={precision}
               className={styles.spinButton}
               aria-label="Very low threshold"
             />
@@ -178,7 +189,7 @@ export function GlucoseThresholdsSection({
           {isValid && (
             <Text className={styles.rangeText}>
               In Range: <span className={styles.rangeValue}>
-                {thresholds.low.toFixed(1)}-{thresholds.high.toFixed(1)} mmol/L
+                {convertGlucoseValue(thresholds.low, glucoseUnit).toFixed(precision)}-{convertGlucoseValue(thresholds.high, glucoseUnit).toFixed(precision)} {getUnitLabel(glucoseUnit)}
               </span>
             </Text>
           )}
