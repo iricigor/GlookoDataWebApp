@@ -11,7 +11,7 @@ import {
   Spinner,
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
-import type { UploadedFile, InsulinReading, GlucoseReading } from '../types';
+import type { UploadedFile, InsulinReading, GlucoseReading, GlucoseUnit } from '../types';
 import { extractInsulinReadings, prepareInsulinTimelineData, extractGlucoseReadings, filterReadingsByDate } from '../utils/data';
 import { InsulinDayNavigator } from './InsulinDayNavigator';
 import { useSelectedDate } from '../hooks/useSelectedDate';
@@ -55,9 +55,10 @@ const useStyles = makeStyles({
 
 interface UnifiedDailyReportProps {
   selectedFile?: UploadedFile;
+  glucoseUnit: GlucoseUnit;
 }
 
-export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
+export function UnifiedDailyReport({ selectedFile, glucoseUnit }: UnifiedDailyReportProps) {
   const styles = useStyles();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
   const { colorScheme, setColorScheme } = useBGColorScheme();

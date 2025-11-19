@@ -24,9 +24,9 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
-import type { UploadedFile, GlucoseReading, GlucoseDataSource } from '../types';
+import type { UploadedFile, GlucoseReading, GlucoseDataSource, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
-import { extractGlucoseReadings, smoothGlucoseValues } from '../utils/data';
+import { extractGlucoseReadings, smoothGlucoseValues, convertGlucoseValue, displayGlucoseValue, getUnitLabel } from '../utils/data';
 import { 
   getUniqueDates, 
   filterReadingsByDate, 
@@ -187,9 +187,10 @@ const useStyles = makeStyles({
 interface BGValuesReportProps {
   selectedFile?: UploadedFile;
   exportFormat: ExportFormat;
+  glucoseUnit: GlucoseUnit;
 }
 
-export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
+export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
   const { colorScheme, setColorScheme } = useBGColorScheme();
@@ -200,7 +201,9 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   const [allReadings, setAllReadings] = useState<GlucoseReading[]>([]);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [currentDateIndex, setCurrentDateIndex] = useState<number>(0);
-  const [maxGlucose, setMaxGlucose] = useState<number>(22.0);
+  const [maxGlucose, setMaxGlucose] = useState<number>(
+    glucoseUnit === 'mg/dL' ? 396 : 22.0
+  );
   const [dataSource] = useState<GlucoseDataSource>('cgm');
 
   // Load glucose readings when file is selected
@@ -327,8 +330,8 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       const displayValue = data.originalValue > maxGlucose 
-        ? `${data.originalValue.toFixed(1)} (clamped to ${maxGlucose.toFixed(1)})`
-        : data.value.toFixed(1);
+        ? `${displayGlucoseValue(data.originalValue, glucoseUnit)} (clamped to ${displayGlucoseValue(maxGlucose, glucoseUnit)})`
+        : displayGlucoseValue(data.value, glucoseUnit);
       
       return (
         <div style={{
@@ -348,7 +351,7 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
             {data.time}
           </div>
           <div style={{ color: tokens.colorNeutralForeground2 }}>
-            Glucose: {displayValue} mmol/L
+            Glucose: {displayValue} {getUnitLabel(glucoseUnit)}
           </div>
         </div>
       );
@@ -506,12 +509,31 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
             </div>
             <div className={styles.maxValueContainer}>
               <TabList
-                selectedValue={maxGlucose === 16.0 ? '16.0' : '22.0'}
-                onTabSelect={(_, data) => setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0)}
+                selectedValue={
+                  glucoseUnit === 'mg/dL'
+                    ? (maxGlucose === 288 ? '288' : '396')
+                    : (maxGlucose === 16.0 ? '16.0' : '22.0')
+                }
+                onTabSelect={(_, data) => {
+                  if (glucoseUnit === 'mg/dL') {
+                    setMaxGlucose(data.value === '288' ? 288 : 396);
+                  } else {
+                    setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0);
+                  }
+                }}
                 size="small"
               >
-                <Tab value="16.0">16.0</Tab>
-                <Tab value="22.0">22.0</Tab>
+                {glucoseUnit === 'mg/dL' ? (
+                  <>
+                    <Tab value="288">288</Tab>
+                    <Tab value="396">396</Tab>
+                  </>
+                ) : (
+                  <>
+                    <Tab value="16.0">16.0</Tab>
+                    <Tab value="22.0">22.0</Tab>
+                  </>
+                )}
               </TabList>
             </div>
           </div>
@@ -540,7 +562,7 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
                 <YAxis
                   domain={[0, maxGlucose]}
                   label={{ 
-                    value: 'Glucose (mmol/L)', 
+                    value: `Glucose (${getUnitLabel(glucoseUnit)})`, 
                     angle: -90, 
                     position: 'insideLeft', 
                     style: { 
