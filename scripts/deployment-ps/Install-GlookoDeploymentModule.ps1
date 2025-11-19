@@ -61,7 +61,15 @@ $GitHubRawBase = "https://raw.githubusercontent.com/$GitHubRepo/$Branch/scripts/
 if ($Scope -eq 'AllUsers') {
     $installPath = "$env:ProgramFiles\PowerShell\Modules\$ModuleName"
 } else {
-    $installPath = Join-Path ([Environment]::GetFolderPath('MyDocuments')) "PowerShell\Modules\$ModuleName"
+    # Use $HOME/.local/share/powershell/Modules on Linux, ~/Documents/PowerShell/Modules on Windows
+    $docsPath = [Environment]::GetFolderPath('MyDocuments')
+    if ([string]::IsNullOrEmpty($docsPath)) {
+        # Linux/macOS fallback
+        $installPath = Join-Path $HOME ".local/share/powershell/Modules/$ModuleName"
+    } else {
+        # Windows
+        $installPath = Join-Path $docsPath "PowerShell\Modules\$ModuleName"
+    }
 }
 
 # Helper functions
@@ -82,10 +90,16 @@ function Remove-ExistingModule {
     Write-ColorMessage "Removing existing module..." -Color Yellow
     
     # Remove from all possible locations
+    $docsPath = [Environment]::GetFolderPath('MyDocuments')
     $possiblePaths = @(
-        (Join-Path ([Environment]::GetFolderPath('MyDocuments')) "PowerShell\Modules\$ModuleName"),
-        "$env:ProgramFiles\PowerShell\Modules\$ModuleName"
+        "$env:ProgramFiles\PowerShell\Modules\$ModuleName",
+        (Join-Path $HOME ".local/share/powershell/Modules/$ModuleName")
     )
+    
+    # Add Windows path if available
+    if (-not [string]::IsNullOrEmpty($docsPath)) {
+        $possiblePaths += (Join-Path $docsPath "PowerShell\Modules\$ModuleName")
+    }
     
     foreach ($path in $possiblePaths) {
         if (Test-Path $path) {
@@ -159,7 +173,7 @@ function Install-FromLocal {
     }
     
     # Copy module files
-    Copy-Item -Path "$SourcePath\*" -Destination $installPath -Recurse -Force
+    Copy-Item -Path (Join-Path $SourcePath "*") -Destination $installPath -Recurse -Force
     
     Write-ColorMessage "Installation completed!" -Color Green
 }
