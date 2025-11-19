@@ -186,9 +186,13 @@ interface InRangeReportProps {
   glucoseUnit: GlucoseUnit;
 }
 
-export function InRangeReport({ selectedFile, exportFormat, glucoseUnit: _glucoseUnit }: InRangeReportProps) {
+export function InRangeReport({ selectedFile, exportFormat, glucoseUnit }: InRangeReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
+  
+  // glucoseUnit is passed for consistency but not yet used in this component
+  // It may be needed in future when we add glucose value displays
+  void glucoseUnit;
 
   const [dataSource, setDataSource] = useState<GlucoseDataSource>('cgm');
   const [categoryMode, setCategoryMode] = useState<RangeCategoryMode>(3);
