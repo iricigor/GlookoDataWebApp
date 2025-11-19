@@ -7,6 +7,7 @@
 
 import { base64Decode } from '../../../utils/formatting';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
+import type { GlucoseUnit } from '../../../types';
 
 /**
  * Generate AI prompt for pump settings verification analysis
@@ -15,13 +16,15 @@ import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
  * @param base64BolusData - Base64 encoded CSV data with bolus insulin (Timestamp, Insulin Delivered)
  * @param base64BasalData - Base64 encoded CSV data with basal insulin (Timestamp, Insulin Delivered/Rate)
  * @param language - Response language (english or czech)
+ * @param unit - Glucose unit (mmol/L or mg/dL)
  * @returns Formatted prompt for AI analysis
  */
 export function generatePumpSettingsPrompt(
   base64CgmData: string,
   base64BolusData: string,
   base64BasalData: string,
-  language: ResponseLanguage = 'english'
+  language: ResponseLanguage = 'english',
+  unit: GlucoseUnit = 'mmol/L'
 ): string {
   const cgmData = base64Decode(base64CgmData);
   const bolusData = base64Decode(base64BolusData);
@@ -30,13 +33,19 @@ export function generatePumpSettingsPrompt(
     ? 'Respond in Czech language (česky).'
     : 'Respond in English.';
   
+  // Unit-specific values
+  const targetGlucose = unit === 'mg/dL' ? '110' : '6.1';
+  const lowThreshold = unit === 'mg/dL' ? '70' : '3.9';
+  const highThreshold = unit === 'mg/dL' ? '180' : '10.0';
+  const isfConversionThreshold = unit === 'mg/dL' ? '9' : '0.5';
+  
   return `You are an expert diabetes data analyst. I have three datasets:
 
-1. **CGM sheet**: Columns: Timestamp, CGM Glucose Value (mmol/l), [Serial Number]
-2. **Bolus sheet**: Columns: Timestamp, Insulin Type, Blood Glucose Input (mmol/l), Carbs Input (g), Carbs Ratio, Insulin Delivered (U), Initial Delivery (U), Extended Delivery (U), [Serial Number]
+1. **CGM sheet**: Columns: Timestamp, CGM Glucose Value (${unit}), [Serial Number]
+2. **Bolus sheet**: Columns: Timestamp, Insulin Type, Blood Glucose Input (${unit}), Carbs Input (g), Carbs Ratio, Insulin Delivered (U), Initial Delivery (U), Extended Delivery (U), [Serial Number]
 3. **Basal sheet**: Columns: Timestamp, Insulin Type, Duration (minutes), Percentage (%), Rate, Insulin Delivered (U), [Serial Number]
 
-My target glucose is 6.1 mmol/L. I use different pump settings for day and night. I also want to compare **workdays (Mon–Fri)** vs **weekends (Sat–Sun)**.
+My target glucose is ${targetGlucose} ${unit}. I use different pump settings for day and night. I also want to compare **workdays (Mon–Fri)** vs **weekends (Sat–Sun)**.
 
 Using ONLY the data, perform a complete, step-by-step analysis to INFER my current pump settings and evaluate control across all time segments. Do NOT assume any settings or boundaries — derive everything from the data.
 
@@ -65,18 +74,18 @@ Using ONLY the data, perform a complete, step-by-step analysis to INFER my curre
   - Blood Glucose Input > 6.1 and not blank
   - Insulin Delivered > 0
   - No extended delivery
-- For each: ISF = (BG – 6.1) / Insulin Delivered
+- For each: ISF = (BG – ${targetGlucose}) / Insulin Delivered
 - Compute **median ISF** separately for:
   - Day period
   - Night period
-- If difference < 0.5 mmol/L per U → report as **same ISF**
-- Report: ISF = ?.? mmol/L per U (same / Day: ?.? / Night: ?.?)
+- If difference < ${isfConversionThreshold} ${unit} per U → report as **same ISF**
+- Report: ISF = ?.? ${unit} per U (same / Day: ?.? / Night: ?.?)
 
 ---
 
 ### STEP 4: Validate ISF Accuracy
 - Using inferred ISF:
-  - Expected U = (BG – 6.1) / ISF
+  - Expected U = (BG – ${targetGlucose}) / ISF
   - Compare to Actual Insulin Delivered
 - Report:
   - Median |Expected – Actual|
@@ -108,9 +117,9 @@ Using ONLY the data, perform a complete, step-by-step analysis to INFER my curre
 - From "cgm" sheet, compute for **each of the 4 segments** + **Overall**:
   - Average glucose
   - Standard deviation
-  - Time in Range (3.9–10.0 mmol/L)
-  - Time <3.9 mmol/L
-  - Time >10.0 mmol/L
+  - Time in Range (${lowThreshold}–${highThreshold} ${unit})
+  - Time <${lowThreshold} ${unit}
+  - Time >${highThreshold} ${unit}
   - GMI = 3.31 + 0.02392 × (mean glucose in mg/dL)
 
 ---
@@ -144,8 +153,8 @@ DETECTED DAY/NIGHT SPLIT
 Day: HH:MM–HH:MM | Night: HH:MM–HH:MM
 
 INFERRED PUMP SETTINGS
-Target: 6.1 mmol/L
-ISF: ?.? mmol/L per U [same / Day: ?.? / Night: ?.?]
+Target: ${targetGlucose} ${unit}
+ISF: ?.? ${unit} per U [same / Day: ?.? / Night: ?.?]
 Basal: ?.?? U/h (Day), ?.?? U/h (Night)
 ICR: ~? g/U (most common)
 
@@ -193,7 +202,7 @@ Pump basal insulin delivery data:
 ${basalData}
 \`\`\`
 
-Remember that all glucose values are in mmol/L (not mg/dL). Address me directly using "you/your" language. Keep your response clear, detailed, and actionable. ${languageInstruction}
+Remember that all glucose values are in ${unit} (not ${unit === 'mg/dL' ? 'mmol/L' : 'mg/dL'}). Address me directly using "you/your" language. Keep your response clear, detailed, and actionable. ${languageInstruction}
 
 IMPORTANT: End your response with "--- END OF ANALYSIS ---" on a new line to confirm your analysis is complete.`;
 }

@@ -27,7 +27,7 @@ import { BrainCircuitRegular, CheckmarkCircleRegular, ErrorCircleRegular } from 
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { MarkdownRenderer } from '../components/shared';
 import { TableContainer } from '../components/TableContainer';
-import type { UploadedFile, AIAnalysisResult, DailyReport, GlucoseReading, InsulinReading } from '../types';
+import type { UploadedFile, AIAnalysisResult, DailyReport, GlucoseReading, InsulinReading, GlucoseUnit } from '../types';
 import type { ResponseLanguage } from '../hooks/useResponseLanguage';
 import { extractGlucoseReadings } from '../utils/data';
 import { extractDailyInsulinSummaries, extractInsulinReadings } from '../utils/data';
@@ -203,6 +203,7 @@ interface AIAnalysisProps {
   deepseekApiKey: string;
   selectedProvider: AIProvider | null;
   responseLanguage: ResponseLanguage;
+  glucoseUnit: GlucoseUnit;
   existingAnalysis?: AIAnalysisResult;
   onAnalysisComplete: (fileId: string, response: string, inRangePercentage: number) => void;
 }
@@ -215,6 +216,7 @@ export function AIAnalysis({
   deepseekApiKey, 
   selectedProvider,
   responseLanguage,
+  glucoseUnit,
   existingAnalysis, 
   onAnalysisComplete 
 }: AIAnalysisProps) {
@@ -483,7 +485,7 @@ export function AIAnalysis({
 
     try {
       // Generate the prompt with the TIR percentage
-      const prompt = generateTimeInRangePrompt(inRangePercentage, responseLanguage);
+      const prompt = generateTimeInRangePrompt(inRangePercentage, responseLanguage, glucoseUnit);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
@@ -546,7 +548,7 @@ export function AIAnalysis({
       const base64CsvData = base64Encode(csvData);
 
       // Generate the prompt with the base64 CSV data
-      const prompt = generateGlucoseInsulinPrompt(base64CsvData, responseLanguage);
+      const prompt = generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
@@ -616,7 +618,7 @@ export function AIAnalysis({
       const base64BasalData = base64Encode(basalCsv);
 
       // Generate the prompt with the base64 CSV data
-      const prompt = generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage);
+      const prompt = generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
@@ -733,7 +735,7 @@ export function AIAnalysis({
       const base64BasalData = base64Encode(basalCsv);
 
       // Generate the prompt with the base64 CSV data
-      const prompt = generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage);
+      const prompt = generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey
@@ -875,7 +877,7 @@ export function AIAnalysis({
                   <AccordionHeader>View AI Prompt</AccordionHeader>
                   <AccordionPanel>
                     <div className={styles.promptTextContainer}>
-                      {generateTimeInRangePrompt(inRangePercentage, responseLanguage)}
+                      {generateTimeInRangePrompt(inRangePercentage, responseLanguage, glucoseUnit)}
                     </div>
                   </AccordionPanel>
                 </AccordionItem>
@@ -983,7 +985,7 @@ export function AIAnalysis({
                       {(() => {
                         const csvData = convertDailyReportsToCSV(combinedDataset);
                         const base64CsvData = base64Encode(csvData);
-                        return generateGlucoseInsulinPrompt(base64CsvData, responseLanguage);
+                        return generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit);
                       })()}
                     </div>
                   </AccordionPanel>
@@ -1159,7 +1161,7 @@ export function AIAnalysis({
                         const base64CgmData = base64Encode(cgmCsv);
                         const base64BolusData = base64Encode(bolusCsv);
                         const base64BasalData = base64Encode(basalCsv);
-                        return generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage);
+                        return generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit);
                       })()}
                     </div>
                   </AccordionPanel>
@@ -1310,7 +1312,7 @@ export function AIAnalysis({
                         const base64CgmData = base64Encode(cgmCsv);
                         const base64BolusData = base64Encode(bolusCsv);
                         const base64BasalData = base64Encode(basalCsv);
-                        return generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage);
+                        return generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit);
                       })()}
                     </div>
                   </AccordionPanel>

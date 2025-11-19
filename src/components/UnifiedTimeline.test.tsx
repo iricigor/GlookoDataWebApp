@@ -11,16 +11,16 @@ import type { BGColorScheme } from '../hooks/useBGColorScheme';
 describe('UnifiedTimeline', () => {
   const mockSetColorScheme = vi.fn();
   const mockSetMaxGlucose = vi.fn();
-  const mockSetShowCGM = vi.fn();
   
   const defaultProps = {
     colorScheme: 'monochrome' as BGColorScheme,
     setColorScheme: mockSetColorScheme,
     maxGlucose: 22.0,
     setMaxGlucose: mockSetMaxGlucose,
-    showCGM: true,
-    setShowCGM: mockSetShowCGM,
-    hasCGMData: true,
+    
+    
+    
+      glucoseUnit: "mmol/L" as const,
   };
 
   const mockInsulinData = [

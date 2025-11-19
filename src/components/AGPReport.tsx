@@ -21,9 +21,9 @@ import {
   Tab,
   Input,
 } from '@fluentui/react-components';
-import type { UploadedFile, GlucoseDataSource, AGPTimeSlotStats, AGPDayOfWeekFilter, GlucoseReading } from '../types';
+import type { UploadedFile, GlucoseDataSource, AGPTimeSlotStats, AGPDayOfWeekFilter, GlucoseReading, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../utils/data';
-import { extractGlucoseReadings } from '../utils/data';
+import { extractGlucoseReadings, displayGlucoseValue, getUnitLabel } from '../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
 import { AGPGraph } from './AGPGraph';
 import { TableContainer } from './TableContainer';
@@ -128,9 +128,10 @@ const useStyles = makeStyles({
 interface AGPReportProps {
   selectedFile?: UploadedFile;
   exportFormat: ExportFormat;
+  glucoseUnit: GlucoseUnit;
 }
 
-export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
+export function AGPReport({ selectedFile, exportFormat, glucoseUnit }: AGPReportProps) {
   const styles = useStyles();
 
   const [dataSource, setDataSource] = useState<GlucoseDataSource>('cgm');
@@ -253,7 +254,7 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
 
   const formatValue = (value: number): string => {
     if (value === 0) return '-';
-    return value.toFixed(1);
+    return displayGlucoseValue(value, glucoseUnit);
   };
 
   // Filter out time slots with no data
@@ -363,14 +364,14 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
 
               {/* AGP Graph */}
               {!loading && !error && statsWithData.length > 0 && (
-                <AGPGraph data={agpStats} />
+                <AGPGraph data={agpStats} glucoseUnit={glucoseUnit} />
               )}
 
               {/* Info text */}
               {!loading && !error && statsWithData.length > 0 && (
                 <Text className={styles.info}>
                   Showing statistics for {statsWithData.length} time periods with data. 
-                  All values are in mmol/L. Percentiles are calculated across all days for each 5-minute time slot.
+                  All values are in {getUnitLabel(glucoseUnit)}. Percentiles are calculated across all days for each 5-minute time slot.
                 </Text>
               )}
 
