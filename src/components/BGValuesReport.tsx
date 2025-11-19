@@ -26,7 +26,7 @@ import {
 } from 'recharts';
 import type { UploadedFile, GlucoseReading, GlucoseDataSource, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
-import { extractGlucoseReadings, smoothGlucoseValues, convertGlucoseValue, displayGlucoseValue, getUnitLabel } from '../utils/data';
+import { extractGlucoseReadings, smoothGlucoseValues, displayGlucoseValue, getUnitLabel } from '../utils/data';
 import { 
   getUniqueDates, 
   filterReadingsByDate, 

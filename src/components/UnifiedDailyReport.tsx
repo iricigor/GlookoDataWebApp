@@ -58,7 +58,7 @@ interface UnifiedDailyReportProps {
   glucoseUnit: GlucoseUnit;
 }
 
-export function UnifiedDailyReport({ selectedFile, glucoseUnit }: UnifiedDailyReportProps) {
+export function UnifiedDailyReport({ selectedFile, glucoseUnit: _glucoseUnit }: UnifiedDailyReportProps) {
   const styles = useStyles();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
   const { colorScheme, setColorScheme } = useBGColorScheme();

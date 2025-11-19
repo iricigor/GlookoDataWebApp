@@ -20,7 +20,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import type { AGPTimeSlotStats, GlucoseUnit } from '../types';
-import { convertGlucoseValue, displayGlucoseValue, getUnitLabel } from '../utils/data';
+import { convertGlucoseValue, getUnitLabel } from '../utils/data';
 
 const useStyles = makeStyles({
   container: {

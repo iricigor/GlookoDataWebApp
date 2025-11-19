@@ -186,7 +186,7 @@ interface InRangeReportProps {
   glucoseUnit: GlucoseUnit;
 }
 
-export function InRangeReport({ selectedFile, exportFormat, glucoseUnit }: InRangeReportProps) {
+export function InRangeReport({ selectedFile, exportFormat, glucoseUnit: _glucoseUnit }: InRangeReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
 

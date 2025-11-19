@@ -36,9 +36,6 @@ export function generateMealTimingPrompt(
   // Unit-specific values for ranges
   const lowThreshold = unit === 'mg/dL' ? '70' : '3.9';
   const highThreshold = unit === 'mg/dL' ? '180' : '10.0';
-  const unitInstruction = unit === 'mg/dL'
-    ? 'Remember that all glucose values are in mg/dL (not mmol/L).'
-    : 'Remember that all glucose values are in mmol/L (not mg/dL).';
   
   return `**Role and Goal**
 You are an expert Data Analyst and Diabetes Management Specialist. Analyze the provided time-series data to provide a day-of-the-week specific and meal-specific optimization report. The analysis must identify Basal, Bolus, and Timing issues to offer practical, specific recommendations for improving time-in-range (TIR).
