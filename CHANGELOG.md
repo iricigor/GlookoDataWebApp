@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>355 Convert PowerShell deployment scripts to modular PowerShell module</summary>
+
+[#355](../../pull/355) Convert PowerShell deployment scripts to modular PowerShell module
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>352 Auto-detect CHANGELOG version from package.json and add missing PR entries</summary>
 
 [#352](../../pull/352) Auto-detect CHANGELOG version from package.json and add missing PR entries
