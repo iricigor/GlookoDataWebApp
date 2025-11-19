@@ -13,6 +13,7 @@ import { AGPReport } from '../components/AGPReport';
 import { BGValuesReport } from '../components/BGValuesReport';
 import { InsulinDailyReport } from '../components/InsulinDailyReport';
 import { UnifiedDailyReport } from '../components/UnifiedDailyReport';
+import { IOBReport } from '../components/IOBReport';
 import type { UploadedFile, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 
@@ -89,6 +90,8 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit }: ReportsProp
         return <InsulinDailyReport selectedFile={selectedFile} />;
       case 'unifiedView':
         return <UnifiedDailyReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
+      case 'iob':
+        return <IOBReport selectedFile={selectedFile} />;
       default:
         return null;
     }
@@ -117,6 +120,7 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit }: ReportsProp
           <Tab value="detailedCgm">Detailed CGM</Tab>
           <Tab value="detailedInsulin">Detailed Insulin</Tab>
           <Tab value="unifiedView">Unified view</Tab>
+          <Tab value="iob">IOB</Tab>
         </TabList>
 
         <div className={styles.contentArea}>
