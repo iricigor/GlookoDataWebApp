@@ -70,8 +70,8 @@
 ## New Features
 - Initial release of GlookoDeployment module
 - Configuration management functions (Get/Set/Test/Initialize-GlookoConfig)
-- Managed identity deployment (New-GlookoManagedIdentity)
-- Storage account deployment (New-GlookoStorageAccount)
+- Managed identity deployment (Set-GlookoManagedIdentity)
+- Storage account deployment (Set-GlookoStorageAccount)
 - Master orchestration function (Invoke-GlookoDeployment)
 - Support for both managed identity and connection string authentication
 - Centralized configuration file (~/.glookodata/config.json)
