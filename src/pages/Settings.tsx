@@ -13,9 +13,13 @@ import {
   Button,
   TabList,
   Tab,
+  Accordion,
+  AccordionItem,
+  AccordionHeader,
+  AccordionPanel,
 } from '@fluentui/react-components';
 import { useState, useEffect, useRef } from 'react';
-import { BugRegular, LightbulbRegular, CodeRegular } from '@fluentui/react-icons';
+import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import type { ResponseLanguage } from '../hooks/useResponseLanguage';
@@ -184,13 +188,7 @@ const useStyles = makeStyles({
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
   },
-  infoSectionTitle: {
-    fontSize: tokens.fontSizeBase400,
-    fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground1,
-    marginBottom: '12px',
-  },
-  infoSectionContent: {
+  accordionContent: {
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
     lineHeight: tokens.lineHeightBase400,
@@ -211,6 +209,30 @@ const useStyles = makeStyles({
         textDecoration: 'underline',
       },
     },
+    '& ul': {
+      margin: '8px 0',
+      paddingLeft: '24px',
+    },
+    '& li': {
+      marginBottom: '4px',
+    },
+  },
+  accordionSummary: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    lineHeight: tokens.lineHeightBase400,
+    marginBottom: '0',
+    display: 'block',
+  },
+  warningHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
+  warningIcon: {
+    fontSize: tokens.fontSizeBase400,
+    color: tokens.colorPaletteYellowForeground1,
+    flexShrink: 0,
   },
 });
 
@@ -576,67 +598,180 @@ export function Settings({
                 </div>
               </div>
               
-              {/* Free API Key Information */}
+              {/* Information Sections - All in one accordion */}
               <div className={styles.infoSection}>
-                <Text className={styles.infoSectionTitle}>🎁 Free API Key Availability</Text>
-                <div className={styles.infoSectionContent}>
-                  <p>
-                    <strong>Google Gemini:</strong> ✅ Offers a free tier with monthly quota for API calls.{' '}
-                    <Link href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
-                      Get your free API key
-                    </Link>
-                  </p>
-                  <p>
-                    <strong>DeepSeek:</strong> ✅ Offers limited free cloud API tier with monthly requests.{' '}
-                    <Link href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">
-                      Get your free API key
-                    </Link>
-                  </p>
-                  <p>
-                    <strong>Perplexity:</strong> ⚠️ API is primarily paid with limited free tier.{' '}
-                    <Link href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
-                      Check pricing
-                    </Link>
-                  </p>
-                  <p>
-                    <strong>Grok AI:</strong> ❌ No free API access. Requires X Premium+ subscription ($30/month).{' '}
-                    <Link href="https://console.x.ai/" target="_blank" rel="noopener noreferrer">
-                      Learn more
-                    </Link>
-                  </p>
-                </div>
-              </div>
-              
-              {/* Security & Privacy Information */}
-              <div className={styles.infoSection}>
-                <Text className={styles.infoSectionTitle}>Security & Privacy Information</Text>
-                <div className={styles.infoSectionContent}>
-                  <p>
-                    <strong>⚠️ Important: Data Handling & Your Responsibility</strong> — When you use AI analysis features, your sensitive health data will be sent to the selected AI provider ({activeProvider ? getProviderDisplayName(activeProvider) : 'the configured AI service'}). The data is sent without personally identifiable information (such as your name or email), but the AI provider may be able to associate your API key with the health data you send.
-                  </p>
-                  <p>
-                    <strong>Your Responsibility:</strong> You are responsible for the security of this information and its use in accordance with all applicable data protection rules and regulations. Review the privacy policies of your chosen AI provider before using these features.
-                  </p>
-                  <p>
-                    <strong>API Key Storage:</strong> Your API keys are stored locally in your browser's local storage (not cookies) and persist until you manually clear them or clear your browser data. The keys are never transmitted to our servers or any third party.
-                  </p>
-                  <p>
-                    <strong>AI Communication:</strong> When you request AI analysis, your browser sends the request directly to the selected AI provider's API. Our application does not act as an intermediary—the communication goes straight from your browser to the AI provider.
-                  </p>
-                  <p>
-                    <strong>Security Best Practices:</strong> Monitor your API key usage regularly through your provider's dashboard, apply least privilege access permissions when creating API keys, and set daily spending limits to prevent unexpected charges and unauthorized usage.
-                  </p>
-                </div>
-              </div>
+                <Accordion collapsible multiple>
+                  {/* Free API Key Availability */}
+                  <AccordionItem value="freeapi">
+                    <AccordionHeader>
+                      <Text className={styles.accordionSummary}>
+                        <strong>🎁 Free API Key Availability</strong> — Information about free tier options for each AI provider.
+                      </Text>
+                    </AccordionHeader>
+                    <AccordionPanel>
+                      <div className={styles.accordionContent}>
+                        <p>
+                          <strong>Google Gemini:</strong> ✅ Offers a free tier with monthly quota for API calls.{' '}
+                          <Link href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
+                            Get your free API key
+                          </Link>
+                        </p>
+                        <p>
+                          <strong>DeepSeek:</strong> ✅ Offers limited free cloud API tier with monthly requests.{' '}
+                          <Link href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">
+                            Get your free API key
+                          </Link>
+                        </p>
+                        <p>
+                          <strong>Perplexity:</strong> ⚠️ API is primarily paid with limited free tier.{' '}
+                          <Link href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
+                            Check pricing
+                          </Link>
+                        </p>
+                        <p>
+                          <strong>Grok AI:</strong> ❌ No free API access. Requires X Premium+ subscription ($30/month).{' '}
+                          <Link href="https://console.x.ai/" target="_blank" rel="noopener noreferrer">
+                            Learn more
+                          </Link>
+                        </p>
+                      </div>
+                    </AccordionPanel>
+                  </AccordionItem>
 
-              {/* Data Storage Section */}
-              <div className={styles.infoSection}>
-                <Text className={styles.infoSectionTitle}>Data Storage</Text>
-                <div className={styles.infoSectionContent}>
-                  <p>
-                    Your data is stored locally with configurable persistence options. All processing happens in your browser. This application is fully open source—you can review the code on GitHub or deploy your own instance for complete control.
-                  </p>
-                </div>
+                  {/* Important: Data Handling & Your Responsibility */}
+                  <AccordionItem value="datahandling">
+                    <AccordionHeader>
+                      <div className={styles.warningHeader}>
+                        <WarningRegular className={styles.warningIcon} />
+                        <Text className={styles.accordionSummary}>
+                          <strong>Important: Data Handling & Your Responsibility</strong> — Your health data is sent to AI providers when using analysis features.
+                        </Text>
+                      </div>
+                    </AccordionHeader>
+                    <AccordionPanel>
+                      <div className={styles.accordionContent}>
+                        <p>
+                          When you use AI analysis features, your sensitive health data will be sent to the selected AI provider ({activeProvider ? getProviderDisplayName(activeProvider) : 'the configured AI service'}). The data is sent <strong>without personally identifiable information</strong> (such as your name or email), but the AI provider may be able to associate your API key with the health data you send.
+                        </p>
+                        <p>
+                          <strong>Your Responsibility:</strong> You are responsible for the security of this information and its use in accordance with all applicable data protection rules and regulations. Review the privacy policies of your chosen AI provider before using these features.
+                        </p>
+                        <p>
+                          <strong>Best Practices:</strong> Monitor your API key usage regularly through your provider's dashboard, apply least privilege access permissions when creating API keys, and set daily spending limits to prevent unexpected charges and unauthorized usage.
+                        </p>
+                      </div>
+                    </AccordionPanel>
+                  </AccordionItem>
+
+                  {/* API Key Storage */}
+                  <AccordionItem value="storage">
+                    <AccordionHeader>
+                      <Text className={styles.accordionSummary}>
+                        <strong>API Key Storage:</strong> Your API keys are stored locally in your browser and never sent to our servers.
+                      </Text>
+                    </AccordionHeader>
+                    <AccordionPanel>
+                      <div className={styles.accordionContent}>
+                        <p>
+                          Your API keys are stored locally in your browser's local storage (not cookies) and persist until you manually clear them or clear your browser data. The keys are never transmitted to our servers or any third party.
+                        </p>
+                        <p>
+                          <strong>Technical Details:</strong> We use browser local storage API, which provides persistent storage that remains available across browser sessions. This data is stored only on your device and is accessible only by this web application from the same domain.
+                        </p>
+                      </div>
+                    </AccordionPanel>
+                  </AccordionItem>
+
+                  {/* AI Communication */}
+                  <AccordionItem value="communication">
+                    <AccordionHeader>
+                      <Text className={styles.accordionSummary}>
+                        <strong>AI Communication:</strong> All AI analysis happens directly between your browser and the AI provider—no intermediary servers.
+                      </Text>
+                    </AccordionHeader>
+                    <AccordionPanel>
+                      <div className={styles.accordionContent}>
+                        <p>
+                          When you request AI analysis, your browser sends the request directly to the selected AI provider's API. Our application does not act as an intermediary—the communication goes straight from your browser to the AI provider.
+                        </p>
+                        <p>
+                          <strong>Provider Priority:</strong> If multiple API keys are configured, they are used in this order: Perplexity → Grok AI → DeepSeek → Google Gemini. To use a different provider, remove the API keys with higher priority.
+                        </p>
+                      </div>
+                    </AccordionPanel>
+                  </AccordionItem>
+
+                  {/* Security Best Practices */}
+                  <AccordionItem value="bestpractices">
+                    <AccordionHeader>
+                      <Text className={styles.accordionSummary}>
+                        <strong>Security Best Practices:</strong> Follow these recommendations to keep your API keys and data secure.
+                      </Text>
+                    </AccordionHeader>
+                    <AccordionPanel>
+                      <div className={styles.accordionContent}>
+                        <p>
+                          <strong>Create Secure API Keys:</strong> Use minimal permissions when creating API keys at:
+                        </p>
+                        <ul>
+                          <li>
+                            <Link href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
+                              Perplexity Settings
+                            </Link>
+                          </li>
+                          <li>
+                            <Link href="https://console.x.ai/" target="_blank" rel="noopener noreferrer">
+                              xAI Console
+                            </Link> (for Grok AI)
+                          </li>
+                          <li>
+                            <Link href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">
+                              DeepSeek Platform
+                            </Link>
+                          </li>
+                          <li>
+                            <Link href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
+                              Google AI Studio
+                            </Link>
+                          </li>
+                        </ul>
+                        <p>
+                          <strong>Protect Your Keys:</strong> Choose keys designated for client-side applications and set spending limits to prevent unexpected charges. Monitor your API key usage regularly through your provider's dashboard.
+                        </p>
+                        <p>
+                          <strong>Risk Mitigation:</strong> If someone gains access to your browser session or computer, they could potentially access your stored API key. To reduce this risk:
+                        </p>
+                        <ul>
+                          <li>Log out from shared computers</li>
+                          <li>Use browser privacy features (private/incognito mode when appropriate)</li>
+                          <li>Regularly rotate your API keys</li>
+                          <li>Monitor your API usage in your provider's dashboard</li>
+                          <li>Clear browser data when using public computers</li>
+                        </ul>
+                      </div>
+                    </AccordionPanel>
+                  </AccordionItem>
+
+                  {/* Data Storage */}
+                  <AccordionItem value="datastorage">
+                    <AccordionHeader>
+                      <Text className={styles.accordionSummary}>
+                        <strong>Data Storage:</strong> Your data is stored locally with configurable persistence options.
+                      </Text>
+                    </AccordionHeader>
+                    <AccordionPanel>
+                      <div className={styles.accordionContent}>
+                        <p>
+                          Your data is stored locally with configurable persistence options. All processing happens in your browser. This application is fully open source—you can{' '}
+                          <Link href="https://github.com/iricigor/GlookoDataWebApp" target="_blank" rel="noopener noreferrer">
+                            review the code on GitHub
+                          </Link>{' '}
+                          or deploy your own instance for complete control.
+                        </p>
+                      </div>
+                    </AccordionPanel>
+                  </AccordionItem>
+                </Accordion>
               </div>
             </div>
           </>
