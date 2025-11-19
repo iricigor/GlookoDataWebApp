@@ -73,7 +73,6 @@ export function UnifiedDailyReport({ selectedFile, glucoseUnit }: UnifiedDailyRe
     basalRate: number;
     bolusTotal: number;
   }>>([]);
-  const [showCGM, setShowCGM] = useState(false);
   const [maxGlucose, setMaxGlucose] = useState<number>(
     glucoseUnit === 'mg/dL' ? 396 : 22.0
   );
@@ -212,8 +211,8 @@ export function UnifiedDailyReport({ selectedFile, glucoseUnit }: UnifiedDailyRe
 
   const currentDate = availableDates[currentDateIndex];
 
-  // Filter glucose readings for current date if CGM is enabled
-  const currentGlucoseReadings = showCGM && glucoseReadings.length > 0
+  // Filter glucose readings for current date
+  const currentGlucoseReadings = glucoseReadings.length > 0
     ? filterReadingsByDate(glucoseReadings, currentDate)
     : [];
 
@@ -232,33 +231,15 @@ export function UnifiedDailyReport({ selectedFile, glucoseUnit }: UnifiedDailyRe
       />
 
       {/* Timeline Chart */}
-      {showCGM && currentGlucoseReadings.length > 0 ? (
-        <UnifiedTimeline 
-          insulinData={timelineData} 
-          glucoseReadings={currentGlucoseReadings}
-          colorScheme={colorScheme}
-          setColorScheme={setColorScheme}
-          maxGlucose={maxGlucose}
-          setMaxGlucose={setMaxGlucose}
-          showCGM={showCGM}
-          setShowCGM={setShowCGM}
-          hasCGMData={glucoseReadings.length > 0}
-          glucoseUnit={glucoseUnit}
-        />
-      ) : (
-        <UnifiedTimeline 
-          insulinData={timelineData} 
-          glucoseReadings={[]}
-          colorScheme={colorScheme}
-          setColorScheme={setColorScheme}
-          maxGlucose={maxGlucose}
-          setMaxGlucose={setMaxGlucose}
-          showCGM={showCGM}
-          setShowCGM={setShowCGM}
-          hasCGMData={glucoseReadings.length > 0}
-          glucoseUnit={glucoseUnit}
-        />
-      )}
+      <UnifiedTimeline 
+        insulinData={timelineData} 
+        glucoseReadings={currentGlucoseReadings}
+        colorScheme={colorScheme}
+        setColorScheme={setColorScheme}
+        maxGlucose={maxGlucose}
+        setMaxGlucose={setMaxGlucose}
+        glucoseUnit={glucoseUnit}
+      />
     </div>
   );
 }

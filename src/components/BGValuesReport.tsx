@@ -587,12 +587,12 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
                 
                 {/* Target range reference lines with Fluent UI semantic colors */}
                 <ReferenceLine 
-                  y={thresholds.low} 
+                  y={convertGlucoseValue(thresholds.low, glucoseUnit)} 
                   stroke={tokens.colorPaletteRedBorder1}
                   strokeDasharray="5 5" 
                   strokeWidth={1.5}
                   label={{ 
-                    value: `Low (${thresholds.low})`, 
+                    value: `Low (${displayGlucoseValue(thresholds.low, glucoseUnit)})`, 
                     position: 'insideTopLeft', 
                     style: { 
                       fontSize: tokens.fontSizeBase200,
@@ -602,12 +602,12 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
                   }}
                 />
                 <ReferenceLine 
-                  y={thresholds.high} 
+                  y={convertGlucoseValue(thresholds.high, glucoseUnit)} 
                   stroke={tokens.colorPaletteMarigoldBorder1}
                   strokeDasharray="5 5" 
                   strokeWidth={1.5}
                   label={{ 
-                    value: `High (${thresholds.high})`, 
+                    value: `High (${displayGlucoseValue(thresholds.high, glucoseUnit)})`, 
                     position: 'insideTopLeft', 
                     style: { 
                       fontSize: tokens.fontSizeBase200,

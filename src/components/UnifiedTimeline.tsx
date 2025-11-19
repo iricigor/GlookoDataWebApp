@@ -12,7 +12,6 @@ import {
   Option,
   TabList,
   Tab,
-  Switch,
 } from '@fluentui/react-components';
 import {
   ComposedChart,
@@ -131,13 +130,10 @@ interface UnifiedTimelineProps {
   setColorScheme: (scheme: BGColorScheme) => void;
   maxGlucose: number;
   setMaxGlucose: (value: number) => void;
-  showCGM: boolean;
-  setShowCGM: (value: boolean) => void;
-  hasCGMData: boolean;
   glucoseUnit: GlucoseUnit;
 }
 
-export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, setColorScheme, maxGlucose, setMaxGlucose, showCGM, setShowCGM, hasCGMData, glucoseUnit }: UnifiedTimelineProps) {
+export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, setColorScheme, maxGlucose, setMaxGlucose, glucoseUnit }: UnifiedTimelineProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
 
@@ -301,13 +297,6 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
           }}>
             Unified Timeline
           </Text>
-          <Switch
-            checked={showCGM}
-            onChange={(e) => setShowCGM(e.currentTarget.checked)}
-            label="Show CGM"
-            labelPosition="after"
-            disabled={!hasCGMData}
-          />
         </div>
         {hasGlucoseData && (
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
