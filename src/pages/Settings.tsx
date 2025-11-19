@@ -870,6 +870,37 @@ export function Settings({
                 )}
               </div>
             </div>
+
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>Demo Data Attribution</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                The demo datasets included in this application are inspired by real-world Type 1 Diabetes data patterns 
+                from the <strong>AZT1D dataset</strong> (Khamesian et al., 2025), which is available under the Creative 
+                Commons Attribution 4.0 (CC BY 4.0) license.
+              </Text>
+              <Text className={styles.settingDescription} style={{ marginTop: '12px' }}>
+                <strong>Citation:</strong> Khamesian, S., Arefeen, A., Thompson, B. M., Grando, M. A., & Ghasemzadeh, H. (2025). 
+                AZT1D: A Real-World Dataset for Type 1 Diabetes. arXiv:2506.14789. DOI:{' '}
+                <Link 
+                  href="https://doi.org/10.17632/gk9m674wcx.1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  10.17632/gk9m674wcx.1
+                </Link>
+              </Text>
+              <Text className={styles.settingDescription} style={{ marginTop: '12px' }}>
+                For more information about the original dataset, visit:{' '}
+                <Link 
+                  href="https://arxiv.org/abs/2506.14789"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  https://arxiv.org/abs/2506.14789
+                </Link>
+              </Text>
+            </div>
           </>
         );
       

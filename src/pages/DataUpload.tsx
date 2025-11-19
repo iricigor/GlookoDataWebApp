@@ -88,6 +88,7 @@ export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll
         files={uploadedFiles}
         onRemoveFile={onRemoveFile}
         onClearAll={onClearAll}
+        onAddFiles={onAddFiles}
         selectedFileId={selectedFileId}
         onSelectFile={onSelectFile}
         exportFormat={exportFormat}

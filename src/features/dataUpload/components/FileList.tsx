@@ -3,6 +3,12 @@ import {
   makeStyles,
   Text,
   Button,
+  Menu,
+  MenuTrigger,
+  MenuPopover,
+  MenuList,
+  MenuItem,
+  Tooltip,
   tokens,
   shorthands,
   Table,
@@ -13,11 +19,12 @@ import {
   TableCell,
   Radio,
 } from '@fluentui/react-components';
-import { DeleteRegular, ChevronRightRegular, ChevronDownRegular, ArrowDownloadRegular } from '@fluentui/react-icons';
+import { DeleteRegular, ChevronRightRegular, ChevronDownRegular, ArrowDownloadRegular, DatabaseRegular } from '@fluentui/react-icons';
 import type { UploadedFile } from '../../../types';
 import type { ExportFormat } from '../../../hooks/useExportFormat';
 import { convertZipToXlsx, downloadXlsx } from '../../export/utils';
 import { TableContainer } from '../../../components/TableContainer';
+import { DEMO_DATASETS, loadDemoDataset, getDemoDataAttribution } from '../../../utils/demoData';
 
 const useStyles = makeStyles({
   container: {
@@ -28,14 +35,20 @@ const useStyles = makeStyles({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: '16px',
+    ...shorthands.gap('12px'),
   },
   title: {
     fontSize: tokens.fontSizeBase500,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
   },
-  clearButton: {
+  buttonGroup: {
+    display: 'flex',
+    ...shorthands.gap('8px'),
     marginLeft: 'auto',
+  },
+  clearButton: {
+    marginLeft: '0',
   },
   table: {
     backgroundColor: tokens.colorNeutralBackground1,
@@ -158,6 +171,7 @@ interface FileListProps {
   files: UploadedFile[];
   onRemoveFile: (id: string) => void;
   onClearAll: () => void;
+  onAddFiles: (files: UploadedFile[]) => void;
   selectedFileId?: string | null;
   onSelectFile?: (id: string | null) => void;
   exportFormat: ExportFormat;
@@ -181,10 +195,11 @@ function getDataSetColor(rowCount: number): string {
   }
 }
 
-export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSelectFile, exportFormat }: FileListProps) {
+export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selectedFileId, onSelectFile, exportFormat }: FileListProps) {
   const styles = useStyles();
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
   const [exportingFiles, setExportingFiles] = useState<Set<string>>(new Set());
+  const [loadingDemo, setLoadingDemo] = useState(false);
 
   const toggleExpand = (fileId: string) => {
     setExpandedFiles((prev) => {
@@ -196,6 +211,24 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
       }
       return newSet;
     });
+  };
+
+  const handleLoadDemoData = async (datasetId: string) => {
+    const dataset = DEMO_DATASETS.find(d => d.id === datasetId);
+    if (!dataset) {
+      return;
+    }
+
+    setLoadingDemo(true);
+    try {
+      const demoFile = await loadDemoDataset(dataset);
+      onAddFiles([demoFile]);
+    } catch (error) {
+      console.error('Failed to load demo data:', error);
+      alert(`Failed to load demo data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoadingDemo(false);
+    }
   };
 
   const handleExportToXlsx = async (file: UploadedFile) => {
@@ -276,13 +309,48 @@ export function FileList({ files, onRemoveFile, onClearAll, selectedFileId, onSe
         <Text className={styles.title}>
           Uploaded Files ({files.length})
         </Text>
-        <Button
-          appearance="secondary"
-          onClick={onClearAll}
-          className={styles.clearButton}
-        >
-          Clear All
-        </Button>
+        <div className={styles.buttonGroup}>
+          <Tooltip 
+            content={getDemoDataAttribution()}
+            relationship="description"
+          >
+            <Menu>
+              <MenuTrigger disableButtonEnhancement>
+                <Button
+                  appearance="secondary"
+                  icon={<DatabaseRegular />}
+                  disabled={loadingDemo}
+                >
+                  {loadingDemo ? 'Loading...' : 'Load Demo Data'}
+                </Button>
+              </MenuTrigger>
+              <MenuPopover>
+                <MenuList>
+                  {DEMO_DATASETS.map((dataset) => (
+                    <MenuItem
+                      key={dataset.id}
+                      onClick={() => handleLoadDemoData(dataset.id)}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 500 }}>{dataset.name}</div>
+                        <div style={{ fontSize: '0.85em', color: tokens.colorNeutralForeground2 }}>
+                          {dataset.description}
+                        </div>
+                      </div>
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              </MenuPopover>
+            </Menu>
+          </Tooltip>
+          <Button
+            appearance="secondary"
+            onClick={onClearAll}
+            className={styles.clearButton}
+          >
+            Clear All
+          </Button>
+        </div>
       </div>
       <TableContainer
         data={getFilesListAsCSV()}

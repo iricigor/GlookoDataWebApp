@@ -78,26 +78,26 @@ function App() {
     }))
   }, [])
 
-  // Load demo data on app startup
+  // Load demo data on app startup (Joshua dataset)
   useEffect(() => {
     const loadDemoData = async () => {
       try {
-        // Fetch the demo data file from public folder
-        const response = await fetch('/demo-data.zip')
+        // Fetch Joshua's demo data file from public folder
+        const response = await fetch('/demo-data/joshua-demo-data.zip')
         if (!response.ok) {
           console.warn('Demo data file not found')
           return
         }
 
         const blob = await response.blob()
-        const file = new File([blob], 'demo-data.zip', { type: 'application/zip' })
+        const file = new File([blob], 'joshua-demo-data.zip', { type: 'application/zip' })
 
         // Extract metadata from the demo file
         const zipMetadata = await extractZipMetadata(file)
 
         const demoFile: UploadedFile = {
           id: `demo-${Date.now()}`,
-          name: 'demo-data.zip',
+          name: 'joshua-demo-data.zip',
           size: file.size,
           uploadTime: new Date(),
           file: file,
