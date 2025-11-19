@@ -13,12 +13,13 @@ import {
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
 import type { UploadedFile, InsulinReading, GlucoseReading } from '../types';
-import { extractInsulinReadings, prepareInsulinTimelineData, extractGlucoseReadings } from '../utils/data';
+import { extractInsulinReadings, prepareInsulinTimelineData, extractGlucoseReadings, filterReadingsByDate } from '../utils/data';
 import { InsulinTimeline } from './InsulinTimeline';
 import { InsulinDayNavigator } from './InsulinDayNavigator';
 import { InsulinSummaryCards } from './InsulinSummaryCards';
 import { useSelectedDate } from '../hooks/useSelectedDate';
 import { UnifiedTimeline } from './UnifiedTimeline';
+import { useBGColorScheme } from '../hooks/useBGColorScheme';
 
 const useStyles = makeStyles({
   container: {
@@ -62,6 +63,7 @@ interface UnifiedDailyReportProps {
 export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
   const styles = useStyles();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
+  const { colorScheme, setColorScheme } = useBGColorScheme();
   const [loading, setLoading] = useState(false);
   const [insulinReadings, setInsulinReadings] = useState<InsulinReading[]>([]);
   const [glucoseReadings, setGlucoseReadings] = useState<GlucoseReading[]>([]);
@@ -74,6 +76,7 @@ export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
     bolusTotal: number;
   }>>([]);
   const [showCGM, setShowCGM] = useState(false);
+  const [maxGlucose, setMaxGlucose] = useState<number>(22.0);
 
   // Extract insulin and glucose data when file changes
   useEffect(() => {
@@ -228,14 +231,7 @@ export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
 
   // Filter glucose readings for current date if CGM is enabled
   const currentGlucoseReadings = showCGM && glucoseReadings.length > 0
-    ? glucoseReadings.filter(reading => {
-        const date = new Date(reading.timestamp);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const readingDate = `${year}-${month}-${day}`;
-        return readingDate === currentDate;
-      })
+    ? filterReadingsByDate(glucoseReadings, currentDate)
     : [];
 
   return (
@@ -279,6 +275,10 @@ export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
         <UnifiedTimeline 
           insulinData={timelineData} 
           glucoseReadings={currentGlucoseReadings}
+          colorScheme={colorScheme}
+          setColorScheme={setColorScheme}
+          maxGlucose={maxGlucose}
+          setMaxGlucose={setMaxGlucose}
         />
       ) : (
         <InsulinTimeline data={timelineData} />

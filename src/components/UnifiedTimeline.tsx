@@ -8,6 +8,10 @@ import {
   Text,
   tokens,
   shorthands,
+  Dropdown,
+  Option,
+  TabList,
+  Tab,
 } from '@fluentui/react-components';
 import {
   ComposedChart,
@@ -24,6 +28,9 @@ import {
 import { InsulinTotalsBar } from './InsulinTotalsBar';
 import type { GlucoseReading } from '../types';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
+import { calculateGlucoseRangeStats, GLUCOSE_RANGE_COLORS, MIN_PERCENTAGE_TO_DISPLAY } from '../utils/data';
+import { COLOR_SCHEME_DESCRIPTORS } from '../utils/formatting';
+import type { BGColorScheme } from '../hooks/useBGColorScheme';
 
 const useStyles = makeStyles({
   container: {
@@ -31,11 +38,52 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     ...shorthands.gap('16px'),
   },
+  controlsRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '16px',
+  },
+  maxValueContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+  },
+  colorSchemeContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+  },
+  colorSchemeDropdown: {
+    minWidth: '200px',
+  },
   chartWithBarWrapper: {
     display: 'flex',
     ...shorthands.gap('8px'),
     width: '100%',
     height: '400px',
+  },
+  glucoseRangeBar: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '60px',
+    height: '400px',
+    ...shorthands.gap('4px'),
+  },
+  rangeBarSegment: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForegroundOnBrand,
+    fontWeight: tokens.fontWeightSemibold,
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    transitionProperty: 'all',
+    transitionDuration: tokens.durationNormal,
+    transitionTimingFunction: tokens.curveEasyEase,
+    '&:hover': {
+      opacity: 0.8,
+    },
   },
   chartContainer: {
     flex: 1,
@@ -78,9 +126,13 @@ interface UnifiedTimelineProps {
     bolusTotal: number;
   }>;
   glucoseReadings: GlucoseReading[];
+  colorScheme: BGColorScheme;
+  setColorScheme: (scheme: BGColorScheme) => void;
+  maxGlucose: number;
+  setMaxGlucose: (value: number) => void;
 }
 
-export function UnifiedTimeline({ insulinData, glucoseReadings }: UnifiedTimelineProps) {
+export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, setColorScheme, maxGlucose, setMaxGlucose }: UnifiedTimelineProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
 
@@ -88,6 +140,15 @@ export function UnifiedTimeline({ insulinData, glucoseReadings }: UnifiedTimelin
   const hasBasalData = insulinData.some(d => d.basalRate > 0);
   const hasBolusData = insulinData.some(d => d.bolusTotal > 0);
   const hasGlucoseData = glucoseReadings.length > 0;
+
+  // Calculate glucose range statistics for the bar
+  const glucoseStats = hasGlucoseData 
+    ? calculateGlucoseRangeStats(glucoseReadings, thresholds, 3)
+    : { low: 0, inRange: 0, high: 0, total: 0 };
+
+  const belowPercentage = glucoseStats.total > 0 ? ((glucoseStats.low / glucoseStats.total) * 100).toFixed(1) : '0.0';
+  const inRangePercentage = glucoseStats.total > 0 ? ((glucoseStats.inRange / glucoseStats.total) * 100).toFixed(1) : '0.0';
+  const abovePercentage = glucoseStats.total > 0 ? ((glucoseStats.high / glucoseStats.total) * 100).toFixed(1) : '0.0';
 
   if (!hasBasalData && !hasBolusData && !hasGlucoseData) {
     return (
@@ -188,7 +249,116 @@ export function UnifiedTimeline({ insulinData, glucoseReadings }: UnifiedTimelin
 
   return (
     <div className={styles.container}>
+      {/* Controls Row */}
+      {hasGlucoseData && (
+        <div className={styles.controlsRow}>
+          <Text style={{ 
+            fontSize: tokens.fontSizeBase500, 
+            fontWeight: tokens.fontWeightSemibold,
+            fontFamily: tokens.fontFamilyBase,
+            color: tokens.colorNeutralForeground1,
+          }}>
+            Unified Timeline
+          </Text>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <div className={styles.colorSchemeContainer}>
+              <Text style={{ 
+                fontSize: tokens.fontSizeBase300,
+                fontFamily: tokens.fontFamilyBase,
+                color: tokens.colorNeutralForeground2,
+              }}>
+                Color Scheme:
+              </Text>
+              <Dropdown
+                value={COLOR_SCHEME_DESCRIPTORS[colorScheme].name}
+                selectedOptions={[colorScheme]}
+                onOptionSelect={(_, data) => setColorScheme(data.optionValue as BGColorScheme)}
+                className={styles.colorSchemeDropdown}
+                size="small"
+                positioning="below-start"
+                inlinePopup
+              >
+                <Option value="monochrome">{COLOR_SCHEME_DESCRIPTORS.monochrome.name}</Option>
+                <Option value="basic">{COLOR_SCHEME_DESCRIPTORS.basic.name}</Option>
+                <Option value="hsv">{COLOR_SCHEME_DESCRIPTORS.hsv.name}</Option>
+                <Option value="clinical">{COLOR_SCHEME_DESCRIPTORS.clinical.name}</Option>
+              </Dropdown>
+            </div>
+            <div className={styles.maxValueContainer}>
+              <Text style={{ 
+                fontSize: tokens.fontSizeBase300,
+                fontFamily: tokens.fontFamilyBase,
+                color: tokens.colorNeutralForeground2,
+              }}>
+                Max: {maxGlucose.toFixed(1)} mmol/L
+              </Text>
+              <TabList
+                selectedValue={maxGlucose === 16.0 ? '16.0' : '22.0'}
+                onTabSelect={(_, data) => setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0)}
+                size="small"
+              >
+                <Tab value="16.0">16.0</Tab>
+                <Tab value="22.0">22.0</Tab>
+              </TabList>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className={styles.chartWithBarWrapper}>
+        {/* Glucose Range Bar on the LEFT */}
+        {hasGlucoseData && (
+          <div className={styles.glucoseRangeBar}>
+            {/* High segment */}
+            {parseFloat(abovePercentage) > 0 && (
+              <div
+                className={styles.rangeBarSegment}
+                style={{
+                  height: `${abovePercentage}%`,
+                  backgroundColor: GLUCOSE_RANGE_COLORS.high,
+                }}
+                title={`High: ${abovePercentage}%`}
+                aria-label={`High: ${abovePercentage}%`}
+                role="img"
+              >
+                {parseFloat(abovePercentage) >= MIN_PERCENTAGE_TO_DISPLAY && `${abovePercentage}%`}
+              </div>
+            )}
+            
+            {/* In Range segment */}
+            {parseFloat(inRangePercentage) > 0 && (
+              <div
+                className={styles.rangeBarSegment}
+                style={{
+                  height: `${inRangePercentage}%`,
+                  backgroundColor: GLUCOSE_RANGE_COLORS.inRange,
+                }}
+                title={`In Range: ${inRangePercentage}%`}
+                aria-label={`In Range: ${inRangePercentage}%`}
+                role="img"
+              >
+                {parseFloat(inRangePercentage) >= MIN_PERCENTAGE_TO_DISPLAY && `${inRangePercentage}%`}
+              </div>
+            )}
+            
+            {/* Low segment */}
+            {parseFloat(belowPercentage) > 0 && (
+              <div
+                className={styles.rangeBarSegment}
+                style={{
+                  height: `${belowPercentage}%`,
+                  backgroundColor: GLUCOSE_RANGE_COLORS.low,
+                }}
+                title={`Low: ${belowPercentage}%`}
+                aria-label={`Low: ${belowPercentage}%`}
+                role="img"
+              >
+                {parseFloat(belowPercentage) >= MIN_PERCENTAGE_TO_DISPLAY && `${belowPercentage}%`}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className={styles.chartContainer}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={mergedData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -224,7 +394,7 @@ export function UnifiedTimeline({ insulinData, glucoseReadings }: UnifiedTimelin
                 }}
                 stroke={tokens.colorNeutralForeground2}
                 style={{ fontSize: tokens.fontSizeBase200 }}
-                domain={[0, 22]}
+                domain={[0, maxGlucose]}
               />
               
               <Tooltip content={<CustomTooltip />} />
@@ -297,7 +467,7 @@ export function UnifiedTimeline({ insulinData, glucoseReadings }: UnifiedTimelin
           </ResponsiveContainer>
         </div>
 
-        {/* Totals bar on the right side */}
+        {/* Insulin Totals bar on the RIGHT side */}
         <InsulinTotalsBar basalTotal={basalTotal} bolusTotal={bolusTotal} />
       </div>
 

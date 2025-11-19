@@ -2,12 +2,23 @@
  * Unit tests for UnifiedTimeline component
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { UnifiedTimeline } from './UnifiedTimeline';
 import type { GlucoseReading } from '../types';
+import type { BGColorScheme } from '../hooks/useBGColorScheme';
 
 describe('UnifiedTimeline', () => {
+  const mockSetColorScheme = vi.fn();
+  const mockSetMaxGlucose = vi.fn();
+  
+  const defaultProps = {
+    colorScheme: 'monochrome' as BGColorScheme,
+    setColorScheme: mockSetColorScheme,
+    maxGlucose: 22.0,
+    setMaxGlucose: mockSetMaxGlucose,
+  };
+
   const mockInsulinData = [
     {
       hour: 0,
@@ -43,6 +54,7 @@ describe('UnifiedTimeline', () => {
   it('should render chart with insulin and glucose data', () => {
     render(
       <UnifiedTimeline 
+        {...defaultProps}
         insulinData={mockInsulinData} 
         glucoseReadings={mockGlucoseReadings}
       />
@@ -56,6 +68,7 @@ describe('UnifiedTimeline', () => {
   it('should render no data message when all data is empty', () => {
     render(
       <UnifiedTimeline 
+        {...defaultProps}
         insulinData={[]} 
         glucoseReadings={[]}
       />
@@ -67,6 +80,7 @@ describe('UnifiedTimeline', () => {
   it('should render chart with only insulin data', () => {
     render(
       <UnifiedTimeline 
+        {...defaultProps}
         insulinData={mockInsulinData} 
         glucoseReadings={[]}
       />
@@ -80,6 +94,7 @@ describe('UnifiedTimeline', () => {
   it('should render legend items for all data types present', () => {
     render(
       <UnifiedTimeline 
+        {...defaultProps}
         insulinData={mockInsulinData} 
         glucoseReadings={mockGlucoseReadings}
       />
@@ -93,6 +108,7 @@ describe('UnifiedTimeline', () => {
   it('should render InsulinTotalsBar with correct totals', () => {
     const { container } = render(
       <UnifiedTimeline 
+        {...defaultProps}
         insulinData={mockInsulinData} 
         glucoseReadings={mockGlucoseReadings}
       />
@@ -115,6 +131,7 @@ describe('UnifiedTimeline', () => {
 
     render(
       <UnifiedTimeline 
+        {...defaultProps}
         insulinData={zeroInsulinData} 
         glucoseReadings={mockGlucoseReadings}
       />
@@ -137,6 +154,7 @@ describe('UnifiedTimeline', () => {
 
     render(
       <UnifiedTimeline 
+        {...defaultProps}
         insulinData={mockInsulinData} 
         glucoseReadings={multipleGlucoseReadings}
       />
