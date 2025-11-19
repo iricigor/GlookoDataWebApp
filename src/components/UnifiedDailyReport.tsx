@@ -11,7 +11,7 @@ import {
   Spinner,
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
-import type { UploadedFile, InsulinReading, GlucoseReading } from '../types';
+import type { UploadedFile, InsulinReading, GlucoseReading, GlucoseUnit } from '../types';
 import { extractInsulinReadings, prepareInsulinTimelineData, extractGlucoseReadings, filterReadingsByDate } from '../utils/data';
 import { InsulinDayNavigator } from './InsulinDayNavigator';
 import { useSelectedDate } from '../hooks/useSelectedDate';
@@ -55,9 +55,10 @@ const useStyles = makeStyles({
 
 interface UnifiedDailyReportProps {
   selectedFile?: UploadedFile;
+  glucoseUnit: GlucoseUnit;
 }
 
-export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
+export function UnifiedDailyReport({ selectedFile, glucoseUnit }: UnifiedDailyReportProps) {
   const styles = useStyles();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
   const { colorScheme, setColorScheme } = useBGColorScheme();
@@ -72,8 +73,9 @@ export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
     basalRate: number;
     bolusTotal: number;
   }>>([]);
-  const [showCGM, setShowCGM] = useState(false);
-  const [maxGlucose, setMaxGlucose] = useState<number>(22.0);
+  const [maxGlucose, setMaxGlucose] = useState<number>(
+    glucoseUnit === 'mg/dL' ? 396 : 22.0
+  );
 
   // Extract insulin and glucose data when file changes
   useEffect(() => {
@@ -209,8 +211,8 @@ export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
 
   const currentDate = availableDates[currentDateIndex];
 
-  // Filter glucose readings for current date if CGM is enabled
-  const currentGlucoseReadings = showCGM && glucoseReadings.length > 0
+  // Filter glucose readings for current date
+  const currentGlucoseReadings = glucoseReadings.length > 0
     ? filterReadingsByDate(glucoseReadings, currentDate)
     : [];
 
@@ -229,31 +231,15 @@ export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
       />
 
       {/* Timeline Chart */}
-      {showCGM && currentGlucoseReadings.length > 0 ? (
-        <UnifiedTimeline 
-          insulinData={timelineData} 
-          glucoseReadings={currentGlucoseReadings}
-          colorScheme={colorScheme}
-          setColorScheme={setColorScheme}
-          maxGlucose={maxGlucose}
-          setMaxGlucose={setMaxGlucose}
-          showCGM={showCGM}
-          setShowCGM={setShowCGM}
-          hasCGMData={glucoseReadings.length > 0}
-        />
-      ) : (
-        <UnifiedTimeline 
-          insulinData={timelineData} 
-          glucoseReadings={[]}
-          colorScheme={colorScheme}
-          setColorScheme={setColorScheme}
-          maxGlucose={maxGlucose}
-          setMaxGlucose={setMaxGlucose}
-          showCGM={showCGM}
-          setShowCGM={setShowCGM}
-          hasCGMData={glucoseReadings.length > 0}
-        />
-      )}
+      <UnifiedTimeline 
+        insulinData={timelineData} 
+        glucoseReadings={currentGlucoseReadings}
+        colorScheme={colorScheme}
+        setColorScheme={setColorScheme}
+        maxGlucose={maxGlucose}
+        setMaxGlucose={setMaxGlucose}
+        glucoseUnit={glucoseUnit}
+      />
     </div>
   );
 }

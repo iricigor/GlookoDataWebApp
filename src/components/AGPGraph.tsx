@@ -19,7 +19,8 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
-import type { AGPTimeSlotStats } from '../types';
+import type { AGPTimeSlotStats, GlucoseUnit } from '../types';
+import { convertGlucoseValue, getUnitLabel } from '../utils/data';
 
 const useStyles = makeStyles({
   container: {
@@ -74,9 +75,10 @@ const useStyles = makeStyles({
 
 interface AGPGraphProps {
   data: AGPTimeSlotStats[];
+  glucoseUnit: GlucoseUnit;
 }
 
-export function AGPGraph({ data }: AGPGraphProps) {
+export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
   const styles = useStyles();
 
   // Filter data to only include slots with readings
@@ -94,20 +96,25 @@ export function AGPGraph({ data }: AGPGraphProps) {
   }
 
   // Prepare data for the chart - sample every hour for better performance
+  // Convert all values to the display unit
   const chartData = filteredData.filter((_, index) => index % 12 === 0).map(slot => ({
     time: slot.timeSlot,
-    p10_p90_min: slot.p10,
-    p10_p90_max: slot.p90,
-    p25_p75_min: slot.p25,
-    p25_p75_max: slot.p75,
-    median: slot.p50,
-    lowest: slot.lowest,
-    highest: slot.highest,
+    p10_p90_min: convertGlucoseValue(slot.p10, glucoseUnit),
+    p10_p90_max: convertGlucoseValue(slot.p90, glucoseUnit),
+    p25_p75_min: convertGlucoseValue(slot.p25, glucoseUnit),
+    p25_p75_max: convertGlucoseValue(slot.p75, glucoseUnit),
+    median: convertGlucoseValue(slot.p50, glucoseUnit),
+    lowest: convertGlucoseValue(slot.lowest, glucoseUnit),
+    highest: convertGlucoseValue(slot.highest, glucoseUnit),
   }));
 
-  // Target range in mmol/L (3.9-10.0 mmol/L)
-  const targetMin = 3.9;
-  const targetMax = 10.0;
+  // Target range (stored internally in mmol/L, converted for display)
+  const targetMin = convertGlucoseValue(3.9, glucoseUnit);
+  const targetMax = convertGlucoseValue(10.0, glucoseUnit);
+  
+  // Y-axis domain - scale based on unit
+  const yAxisMax = glucoseUnit === 'mg/dL' ? 360 : 20;
+  const unitLabel = getUnitLabel(glucoseUnit);
 
   // Custom tooltip
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string; median: number; p25_p75_min: number; p25_p75_max: number; p10_p90_min: number; p10_p90_max: number } }> }) => {
@@ -124,9 +131,9 @@ export function AGPGraph({ data }: AGPGraphProps) {
           <div style={{ fontWeight: tokens.fontWeightSemibold, marginBottom: '4px' }}>
             {data.time}
           </div>
-          <div>Median: {data.median.toFixed(1)} mmol/L</div>
-          <div>25-75%: {data.p25_p75_min.toFixed(1)} - {data.p25_p75_max.toFixed(1)} mmol/L</div>
-          <div>10-90%: {data.p10_p90_min.toFixed(1)} - {data.p10_p90_max.toFixed(1)} mmol/L</div>
+          <div>Median: {data.median.toFixed(glucoseUnit === 'mg/dL' ? 0 : 1)} {unitLabel}</div>
+          <div>25-75%: {data.p25_p75_min.toFixed(glucoseUnit === 'mg/dL' ? 0 : 1)} - {data.p25_p75_max.toFixed(glucoseUnit === 'mg/dL' ? 0 : 1)} {unitLabel}</div>
+          <div>10-90%: {data.p10_p90_min.toFixed(glucoseUnit === 'mg/dL' ? 0 : 1)} - {data.p10_p90_max.toFixed(glucoseUnit === 'mg/dL' ? 0 : 1)} {unitLabel}</div>
         </div>
       );
     }
@@ -171,8 +178,8 @@ export function AGPGraph({ data }: AGPGraphProps) {
             />
             
             <YAxis 
-              domain={[0, 20]}
-              label={{ value: 'Glucose (mmol/L)', angle: -90, position: 'insideLeft', style: { fontSize: tokens.fontSizeBase200 } }}
+              domain={[0, yAxisMax]}
+              label={{ value: `Glucose (${unitLabel})`, angle: -90, position: 'insideLeft', style: { fontSize: tokens.fontSizeBase200 } }}
               stroke={tokens.colorNeutralForeground2}
               style={{ fontSize: tokens.fontSizeBase200 }}
             />
