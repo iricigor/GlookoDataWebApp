@@ -215,7 +215,7 @@ function App() {
           />
         )
       case 'reports':
-        return <Reports selectedFile={selectedFile} exportFormat={exportFormat} />
+        return <Reports selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />
       case 'ai':
         return (
           <AIAnalysis 

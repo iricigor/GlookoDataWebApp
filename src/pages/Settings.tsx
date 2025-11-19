@@ -478,6 +478,7 @@ export function Settings({
               onUpdateThreshold={updateThreshold}
               isValid={isValid}
               validationError={validationError}
+              glucoseUnit={glucoseUnit}
             />
           </>
         );

@@ -24,7 +24,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
-import type { UploadedFile, GlucoseReading, GlucoseDataSource } from '../types';
+import type { UploadedFile, GlucoseReading, GlucoseDataSource, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import { extractGlucoseReadings, smoothGlucoseValues } from '../utils/data';
 import { 
@@ -187,9 +187,10 @@ const useStyles = makeStyles({
 interface BGValuesReportProps {
   selectedFile?: UploadedFile;
   exportFormat: ExportFormat;
+  glucoseUnit: GlucoseUnit; // Added for future use, not fully implemented yet
 }
 
-export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
+export function BGValuesReport({ selectedFile, glucoseUnit: _glucoseUnit }: BGValuesReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
   const { colorScheme, setColorScheme } = useBGColorScheme();
