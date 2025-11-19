@@ -48,8 +48,7 @@ function Invoke-GlookoDeployment {
         [switch]$Tables,
         [switch]$Auth,
         [switch]$WebApp,
-        [string]$ConfigFile,
-        [switch]$WhatIf
+        [string]$ConfigFile
     )
     
     Write-Section "Glooko Deployment Orchestration"
