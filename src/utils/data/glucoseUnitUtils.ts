@@ -3,6 +3,7 @@
  */
 
 import type { GlucoseUnit } from '../../types';
+import { findColumnIndex, getColumnVariants } from './columnMapper';
 
 /**
  * Conversion factor from mmol/L to mg/dL
@@ -77,19 +78,20 @@ export function getUnitLabel(unit: GlucoseUnit): string {
 /**
  * Detect glucose unit from column headers
  * Looks for column containing "glucose" or "glucose value" and extracts the unit from parentheses
+ * Supports both English and German column names
  * 
  * @param columnHeaders - Array of column header names from CSV
  * @returns Detected unit ('mmol/L' or 'mg/dL'), or null if not found
  */
 export function detectGlucoseUnit(columnHeaders: string[]): GlucoseUnit | null {
-  // Find the glucose column
-  const glucoseColumn = columnHeaders.find(header => 
-    header.toLowerCase().includes('glucose')
-  );
-
-  if (!glucoseColumn) {
+  // Find the glucose column using both English and German variants
+  const glucoseIndex = findColumnIndex(columnHeaders, getColumnVariants('glucoseValue'));
+  
+  if (glucoseIndex === -1) {
     return null;
   }
+
+  const glucoseColumn = columnHeaders[glucoseIndex];
 
   // Extract content in parentheses
   const match = glucoseColumn.match(/\(([^)]+)\)/);

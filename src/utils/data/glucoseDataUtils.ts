@@ -5,6 +5,7 @@
 import JSZip from 'jszip';
 import type { UploadedFile, GlucoseReading, GlucoseDataSource } from '../../types';
 import { mgdlToMmol } from './glucoseUnitUtils';
+import { findColumnIndex, getColumnVariants } from './columnMapper';
 
 /**
  * Parse glucose readings from CSV content
@@ -29,11 +30,9 @@ function parseGlucoseReadingsFromCSV(
   const headerLine = lines[1];
   const headers = headerLine.split(delimiter).map(h => h.trim());
   
-  // Find timestamp and glucose value column indices
-  const timestampIndex = headers.findIndex(h => h.toLowerCase().includes('timestamp'));
-  const glucoseIndex = headers.findIndex(h => 
-    h.toLowerCase().includes('glucose value') || h.toLowerCase().includes('glucose')
-  );
+  // Find timestamp and glucose value column indices (supports both English and German)
+  const timestampIndex = findColumnIndex(headers, getColumnVariants('timestamp'));
+  const glucoseIndex = findColumnIndex(headers, getColumnVariants('glucoseValue'));
 
   if (timestampIndex === -1 || glucoseIndex === -1) {
     return [];

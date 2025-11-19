@@ -177,5 +177,20 @@ describe('glucoseUnitUtils', () => {
       const headers = ['Timestamp', 'Glucose Value (unknown)', 'Device'];
       expect(detectGlucoseUnit(headers)).toBeNull();
     });
+
+    it('should detect mg/dL from German column headers', () => {
+      const germanHeaders = ['Zeitstempel', 'Glukosewert (mg/dl)', 'Manuelles Lesen', 'Seriennummer'];
+      expect(detectGlucoseUnit(germanHeaders)).toBe('mg/dL');
+    });
+
+    it('should detect mmol/L from German column headers', () => {
+      const germanHeaders = ['Zeitstempel', 'Glukosewert (mmol/l)', 'Manuelles Lesen', 'Seriennummer'];
+      expect(detectGlucoseUnit(germanHeaders)).toBe('mmol/L');
+    });
+
+    it('should detect from CGM German column headers', () => {
+      const germanHeaders = ['Zeitstempel', 'CGM-Glukosewert (mg/dl)', 'Seriennummer'];
+      expect(detectGlucoseUnit(germanHeaders)).toBe('mg/dL');
+    });
   });
 });

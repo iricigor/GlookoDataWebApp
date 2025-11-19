@@ -261,3 +261,83 @@ describe('smoothGlucoseValues', () => {
     expect(smoothed).toEqual([]);
   });
 });
+
+describe('German language support', () => {
+  it('should extract glucose readings from German CSV file', async () => {
+    const zip = new JSZip();
+    const lines: string[] = [];
+    lines.push('Name:Test Patient\tDate Range:2025-01-01 - 2025-01-14');
+    lines.push('Zeitstempel\tGlukosewert (mg/dl)\tManuelles Lesen\tSeriennummer'); // German headers
+    lines.push('2025-01-01 10:00:00\t90\tDevice\t');
+    lines.push('2025-01-01 11:00:00\t180\tDevice\t');
+    lines.push('2025-01-01 12:00:00\t126\tDevice\t');
+    
+    zip.file('bg_data_1.csv', lines.join('\n'));
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const file = new File([blob], 'test.zip', { type: 'application/zip' });
+    
+    const uploadedFile: UploadedFile = {
+      id: 'test-id',
+      name: 'test.zip',
+      size: blob.size,
+      uploadTime: new Date(),
+      file,
+      zipMetadata: {
+        isValid: true,
+        csvFiles: [{
+          name: 'bg',
+          rowCount: 3,
+          columnNames: ['Zeitstempel', 'Glukosewert (mg/dl)', 'Manuelles Lesen', 'Seriennummer'],
+          glucoseUnit: 'mg/dL'
+        }],
+      },
+    };
+    
+    const readings = await extractGlucoseReadings(uploadedFile, 'bg');
+    
+    expect(readings).toHaveLength(3);
+    // Values should be converted from mg/dL to mmol/L
+    expect(readings[0].value).toBe(5.0);  // 90 mg/dL
+    expect(readings[1].value).toBe(10.0); // 180 mg/dL
+    expect(readings[2].value).toBe(7.0);  // 126 mg/dL
+  });
+
+  it('should extract CGM readings from German CSV file', async () => {
+    const zip = new JSZip();
+    const lines: string[] = [];
+    lines.push('Name:Test Patient\tDate Range:2025-01-01 - 2025-01-14');
+    lines.push('Zeitstempel\tCGM-Glukosewert (mmol/l)\tSeriennummer'); // German CGM headers
+    lines.push('2025-01-01 10:00:00\t5.5\t123456');
+    lines.push('2025-01-01 10:05:00\t6.0\t123456');
+    lines.push('2025-01-01 10:10:00\t6.5\t123456');
+    
+    zip.file('cgm_data_1.csv', lines.join('\n'));
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const file = new File([blob], 'test.zip', { type: 'application/zip' });
+    
+    const uploadedFile: UploadedFile = {
+      id: 'test-id',
+      name: 'test.zip',
+      size: blob.size,
+      uploadTime: new Date(),
+      file,
+      zipMetadata: {
+        isValid: true,
+        csvFiles: [{
+          name: 'cgm',
+          rowCount: 3,
+          columnNames: ['Zeitstempel', 'CGM-Glukosewert (mmol/l)', 'Seriennummer'],
+          glucoseUnit: 'mmol/L'
+        }],
+      },
+    };
+    
+    const readings = await extractGlucoseReadings(uploadedFile, 'cgm');
+    
+    expect(readings).toHaveLength(3);
+    // Values should remain in mmol/L
+    expect(readings[0].value).toBe(5.5);
+    expect(readings[1].value).toBe(6.0);
+    expect(readings[2].value).toBe(6.5);
+  });
+});
