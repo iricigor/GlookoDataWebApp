@@ -12,6 +12,7 @@ import {
   Option,
   TabList,
   Tab,
+  Switch,
 } from '@fluentui/react-components';
 import {
   ComposedChart,
@@ -29,7 +30,7 @@ import { InsulinTotalsBar } from './InsulinTotalsBar';
 import type { GlucoseReading } from '../types';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { calculateGlucoseRangeStats, GLUCOSE_RANGE_COLORS, MIN_PERCENTAGE_TO_DISPLAY } from '../utils/data';
-import { COLOR_SCHEME_DESCRIPTORS } from '../utils/formatting';
+import { COLOR_SCHEME_DESCRIPTORS, getGlucoseColor, isDynamicColorScheme } from '../utils/formatting';
 import type { BGColorScheme } from '../hooks/useBGColorScheme';
 
 const useStyles = makeStyles({
@@ -130,9 +131,12 @@ interface UnifiedTimelineProps {
   setColorScheme: (scheme: BGColorScheme) => void;
   maxGlucose: number;
   setMaxGlucose: (value: number) => void;
+  showCGM: boolean;
+  setShowCGM: (value: boolean) => void;
+  hasCGMData: boolean;
 }
 
-export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, setColorScheme, maxGlucose, setMaxGlucose }: UnifiedTimelineProps) {
+export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, setColorScheme, maxGlucose, setMaxGlucose, showCGM, setShowCGM, hasCGMData }: UnifiedTimelineProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
 
@@ -181,8 +185,24 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
     return {
       ...insulin,
       glucose: avgGlucose,
+      glucoseColor: avgGlucose !== null ? getGlucoseColor(avgGlucose, colorScheme) : undefined,
     };
   });
+
+  // Custom dot renderer for colored glucose values (when using dynamic color schemes)
+  const renderColoredDot = (props: { cx?: number; cy?: number; payload?: { glucoseColor?: string } }): React.ReactElement | null => {
+    if (props.cx === undefined || props.cy === undefined || !props.payload || !props.payload.glucoseColor) return <></>;
+    return (
+      <circle
+        cx={props.cx}
+        cy={props.cy}
+        r={3}
+        fill={props.payload.glucoseColor}
+        stroke={tokens.colorNeutralBackground1}
+        strokeWidth={1}
+      />
+    );
+  };
 
   // Custom tooltip
   const CustomTooltip = ({ active, payload }: {
@@ -249,9 +269,9 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
 
   return (
     <div className={styles.container}>
-      {/* Controls Row */}
-      {hasGlucoseData && (
-        <div className={styles.controlsRow}>
+      {/* Controls Row - Always visible */}
+      <div className={styles.controlsRow}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <Text style={{ 
             fontSize: tokens.fontSizeBase500, 
             fontWeight: tokens.fontWeightSemibold,
@@ -260,6 +280,15 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
           }}>
             Unified Timeline
           </Text>
+          <Switch
+            checked={showCGM}
+            onChange={(e) => setShowCGM(e.currentTarget.checked)}
+            label="Show CGM"
+            labelPosition="after"
+            disabled={!hasCGMData}
+          />
+        </div>
+        {hasGlucoseData && (
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
             <div className={styles.colorSchemeContainer}>
               <Text style={{ 
@@ -285,13 +314,6 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
               </Dropdown>
             </div>
             <div className={styles.maxValueContainer}>
-              <Text style={{ 
-                fontSize: tokens.fontSizeBase300,
-                fontFamily: tokens.fontFamilyBase,
-                color: tokens.colorNeutralForeground2,
-              }}>
-                Max: {maxGlucose.toFixed(1)} mmol/L
-              </Text>
               <TabList
                 selectedValue={maxGlucose === 16.0 ? '16.0' : '22.0'}
                 onTabSelect={(_, data) => setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0)}
@@ -302,8 +324,8 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
               </TabList>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <div className={styles.chartWithBarWrapper}>
         {/* Glucose Range Bar on the LEFT */}
@@ -457,9 +479,15 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
                   type="monotone"
                   dataKey="glucose"
                   name="Glucose"
-                  stroke="#FF6B35"
-                  strokeWidth={2}
-                  dot={false}
+                  stroke={isDynamicColorScheme(colorScheme) ? tokens.colorNeutralStroke2 : '#FF6B35'}
+                  strokeWidth={isDynamicColorScheme(colorScheme) ? 1 : 2}
+                  dot={isDynamicColorScheme(colorScheme) ? (renderColoredDot as unknown as boolean) : false}
+                  activeDot={{ 
+                    r: 4, 
+                    strokeWidth: 2,
+                    stroke: tokens.colorNeutralBackground1,
+                    fill: isDynamicColorScheme(colorScheme) ? undefined : '#FF6B35',
+                  }}
                   connectNulls
                 />
               )}

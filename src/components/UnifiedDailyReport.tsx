@@ -9,12 +9,10 @@ import {
   tokens,
   shorthands,
   Spinner,
-  Switch,
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
 import type { UploadedFile, InsulinReading, GlucoseReading } from '../types';
 import { extractInsulinReadings, prepareInsulinTimelineData, extractGlucoseReadings, filterReadingsByDate } from '../utils/data';
-import { InsulinTimeline } from './InsulinTimeline';
 import { InsulinDayNavigator } from './InsulinDayNavigator';
 import { InsulinSummaryCards } from './InsulinSummaryCards';
 import { useSelectedDate } from '../hooks/useSelectedDate';
@@ -248,21 +246,6 @@ export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
         maxDate={maxDate}
       />
 
-      {/* CGM Toggle Switch */}
-      <div className={styles.switchContainer}>
-        <Switch
-          checked={showCGM}
-          onChange={(e) => setShowCGM(e.currentTarget.checked)}
-          label="Show CGM Data"
-          labelPosition="after"
-        />
-        {glucoseReadings.length === 0 && (
-          <Text style={{ color: tokens.colorNeutralForeground3, fontSize: tokens.fontSizeBase200 }}>
-            (No CGM data available)
-          </Text>
-        )}
-      </div>
-
       {/* Summary Cards */}
       <InsulinSummaryCards
         basalTotal={summary.basalTotal}
@@ -279,9 +262,22 @@ export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
           setColorScheme={setColorScheme}
           maxGlucose={maxGlucose}
           setMaxGlucose={setMaxGlucose}
+          showCGM={showCGM}
+          setShowCGM={setShowCGM}
+          hasCGMData={glucoseReadings.length > 0}
         />
       ) : (
-        <InsulinTimeline data={timelineData} />
+        <UnifiedTimeline 
+          insulinData={timelineData} 
+          glucoseReadings={[]}
+          colorScheme={colorScheme}
+          setColorScheme={setColorScheme}
+          maxGlucose={maxGlucose}
+          setMaxGlucose={setMaxGlucose}
+          showCGM={showCGM}
+          setShowCGM={setShowCGM}
+          hasCGMData={glucoseReadings.length > 0}
+        />
       )}
     </div>
   );

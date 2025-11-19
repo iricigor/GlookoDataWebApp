@@ -505,13 +505,6 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
               </Dropdown>
             </div>
             <div className={styles.maxValueContainer}>
-              <Text style={{ 
-                fontSize: tokens.fontSizeBase300,
-                fontFamily: tokens.fontFamilyBase,
-                color: tokens.colorNeutralForeground2,
-              }}>
-                Max: {maxGlucose.toFixed(1)} mmol/L
-              </Text>
               <TabList
                 selectedValue={maxGlucose === 16.0 ? '16.0' : '22.0'}
                 onTabSelect={(_, data) => setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0)}

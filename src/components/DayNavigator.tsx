@@ -38,11 +38,6 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
   },
-  datePickerContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    ...shorthands.gap('8px'),
-  },
   dateInput: {
     minWidth: '150px',
   },
@@ -98,23 +93,21 @@ export function DayNavigator({
       
       <div className={styles.dateDisplay}>
         {loading && <Spinner size="tiny" />}
-        <div className={styles.datePickerContainer}>
-          <Text>
-            {formatDate(currentDate)}
-          </Text>
-          {onDateSelect && minDate && maxDate && (
-            <Input
-              type="date"
-              value={currentDate}
-              min={minDate}
-              max={maxDate}
-              onChange={(e) => onDateSelect(e.target.value)}
-              appearance="outline"
-              className={styles.dateInput}
-              size="small"
-            />
-          )}
-        </div>
+        <Text>
+          {formatDate(currentDate)}
+        </Text>
+        {onDateSelect && minDate && maxDate && (
+          <Input
+            type="date"
+            value={currentDate}
+            min={minDate}
+            max={maxDate}
+            onChange={(e) => onDateSelect(e.target.value)}
+            appearance="outline"
+            className={styles.dateInput}
+            size="small"
+          />
+        )}
       </div>
       
       <div className={styles.navigationButtons}>
