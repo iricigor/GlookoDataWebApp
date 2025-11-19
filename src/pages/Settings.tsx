@@ -238,6 +238,56 @@ const useStyles = makeStyles({
     marginTop: '12px',
     marginBottom: '12px',
   },
+  freeApiInfo: {
+    marginTop: '24px',
+    marginBottom: '24px',
+    ...shorthands.padding('16px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
+  },
+  freeApiTitle: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    marginBottom: '12px',
+  },
+  freeApiList: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    lineHeight: tokens.lineHeightBase400,
+    '& p': {
+      margin: '0 0 8px 0',
+      '&:last-child': {
+        marginBottom: '0',
+      },
+    },
+    '& a': {
+      color: tokens.colorBrandForeground1,
+      textDecoration: 'none',
+      '&:hover': {
+        textDecoration: 'underline',
+      },
+    },
+  },
+  dataStorageSection: {
+    marginTop: '24px',
+    ...shorthands.padding('16px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
+  },
+  dataStorageTitle: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    marginBottom: '8px',
+  },
+  dataStorageText: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    lineHeight: tokens.lineHeightBase400,
+  },
 });
 
 interface SettingsProps {
@@ -492,11 +542,6 @@ export function Settings({
               <Text className={styles.settingDescription}>
                 Configure your AI settings for intelligent analysis.
               </Text>
-              {activeProvider && (
-                <Text className={styles.settingDescription} style={{ color: tokens.colorBrandForeground1, fontWeight: tokens.fontWeightSemibold }}>
-                  Currently using: {getProviderDisplayName(activeProvider)}
-                </Text>
-              )}
               
               {/* Helper text for multiple keys */}
               {availableProviders.length > 1 && (
@@ -604,6 +649,37 @@ export function Settings({
                     contentAfter={renderKeyStatus('gemini', !!geminiApiKey)}
                     className={styles.apiKeyInput}
                   />
+                </div>
+              </div>
+              
+              {/* Free API Key Information */}
+              <div className={styles.freeApiInfo}>
+                <Text className={styles.freeApiTitle}>🎁 Free API Key Availability</Text>
+                <div className={styles.freeApiList}>
+                  <p>
+                    <strong>Google Gemini:</strong> ✅ Offers a free tier with monthly quota for API calls.{' '}
+                    <Link href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
+                      Get your free API key
+                    </Link>
+                  </p>
+                  <p>
+                    <strong>DeepSeek:</strong> ✅ Offers limited free cloud API tier with monthly requests.{' '}
+                    <Link href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">
+                      Get your free API key
+                    </Link>
+                  </p>
+                  <p>
+                    <strong>Perplexity:</strong> ⚠️ API is primarily paid with limited free tier.{' '}
+                    <Link href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer">
+                      Check pricing
+                    </Link>
+                  </p>
+                  <p>
+                    <strong>Grok AI:</strong> ❌ No free API access. Requires X Premium+ subscription ($30/month).{' '}
+                    <Link href="https://console.x.ai/" target="_blank" rel="noopener noreferrer">
+                      Learn more
+                    </Link>
+                  </p>
                 </div>
               </div>
               
@@ -747,10 +823,10 @@ export function Settings({
               </div>
             </div>
 
-            <div className={styles.settingSection}>
-              <Title3 className={styles.sectionTitle}>Data Privacy</Title3>
-              <Divider className={styles.divider} />
-              <Text className={styles.settingDescription}>
+            {/* Data Storage Section */}
+            <div className={styles.dataStorageSection}>
+              <Text className={styles.dataStorageTitle}>Data Storage</Text>
+              <Text className={styles.dataStorageText}>
                 Your data is stored locally with configurable persistence options. All processing happens in your browser.
               </Text>
             </div>
