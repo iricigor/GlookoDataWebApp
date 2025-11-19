@@ -61,7 +61,7 @@ describe('UnifiedDailyReport', () => {
   ];
 
   it('should render no data message when no file is selected', () => {
-    render(<UnifiedDailyReport />);
+    render(<UnifiedDailyReport glucoseUnit="mmol/L" />);
     
     expect(screen.getByText(/please upload and select a file/i)).toBeInTheDocument();
   });
@@ -71,7 +71,7 @@ describe('UnifiedDailyReport', () => {
       () => new Promise(() => {}) // Never resolves
     );
 
-    render(<UnifiedDailyReport selectedFile={mockFile} />);
+    render(<UnifiedDailyReport selectedFile={mockFile} glucoseUnit="mmol/L" />);
     
     await waitFor(() => {
       expect(screen.getByText(/loading data/i)).toBeInTheDocument();
@@ -82,7 +82,7 @@ describe('UnifiedDailyReport', () => {
     vi.mocked(dataUtils.extractInsulinReadings).mockResolvedValue([]);
     vi.mocked(dataUtils.extractGlucoseReadings).mockResolvedValue([]);
 
-    render(<UnifiedDailyReport selectedFile={mockFile} />);
+    render(<UnifiedDailyReport selectedFile={mockFile} glucoseUnit="mmol/L" />);
     
     await waitFor(() => {
       expect(screen.getByText(/no insulin data available/i)).toBeInTheDocument();
@@ -101,7 +101,7 @@ describe('UnifiedDailyReport', () => {
       },
     ]);
 
-    render(<UnifiedDailyReport selectedFile={mockFile} />);
+    render(<UnifiedDailyReport selectedFile={mockFile} glucoseUnit="mmol/L" />);
     
     await waitFor(() => {
       expect(screen.getByTestId('day-navigator')).toBeInTheDocument();
@@ -121,7 +121,7 @@ describe('UnifiedDailyReport', () => {
       },
     ]);
 
-    render(<UnifiedDailyReport selectedFile={mockFile} />);
+    render(<UnifiedDailyReport selectedFile={mockFile} glucoseUnit="mmol/L" />);
     
     await waitFor(() => {
       expect(screen.getByRole('switch', { name: /show cgm data/i })).toBeInTheDocument();
@@ -140,7 +140,7 @@ describe('UnifiedDailyReport', () => {
       },
     ]);
 
-    render(<UnifiedDailyReport selectedFile={mockFile} />);
+    render(<UnifiedDailyReport selectedFile={mockFile} glucoseUnit="mmol/L" />);
     
     await waitFor(() => {
       expect(screen.getByTestId('insulin-timeline')).toBeInTheDocument();
@@ -160,7 +160,7 @@ describe('UnifiedDailyReport', () => {
       },
     ]);
 
-    render(<UnifiedDailyReport selectedFile={mockFile} />);
+    render(<UnifiedDailyReport selectedFile={mockFile} glucoseUnit="mmol/L" />);
     
     await waitFor(() => {
       expect(screen.getByText(/no cgm data available/i)).toBeInTheDocument();

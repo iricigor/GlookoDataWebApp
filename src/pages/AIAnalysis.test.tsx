@@ -66,6 +66,7 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         selectedProvider={null}
         responseLanguage="english"
+        glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -95,6 +96,7 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         selectedProvider={null}
         responseLanguage="english"
+        glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -141,6 +143,7 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         selectedProvider={null}
         responseLanguage="english"
+        glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -204,6 +207,7 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         selectedProvider={null}
         responseLanguage="english"
+        glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -252,6 +256,7 @@ describe('AIAnalysis', () => {
         existingAnalysis={existingAnalysis}
         selectedProvider={null}
         responseLanguage="english"
+        glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -284,6 +289,7 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         selectedProvider={null}
         responseLanguage="english"
+        glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -356,6 +362,7 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         selectedProvider={null}
         responseLanguage="english"
+        glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -398,6 +405,7 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         selectedProvider={null}
         responseLanguage="english"
+        glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -449,6 +457,7 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         selectedProvider={null}
         responseLanguage="english"
+        glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -493,6 +502,7 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         selectedProvider={null}
         responseLanguage="english"
+        glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
