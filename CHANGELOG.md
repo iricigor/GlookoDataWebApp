@@ -46,6 +46,189 @@ Version 1.3 represents a major milestone with the implementation of Microsoft au
 ### New Features
 
 <details>
+<summary>347 Add German and Serbian language support for AI responses</summary>
+
+[#347](../../pull/347) Add German and Serbian language support for AI responses
+  - Extended `ResponseLanguage` type to include 'german' and 'serbian' in addition to 'english' and 'czech'
+  - Created shared `getLanguageInstruction()` utility function in `promptUtils.ts` to eliminate code duplication
+  - Updated all 4 AI prompt generators to use the shared utility (timeInRange, glucoseInsulin, mealTiming, pumpSettings)
+  - Added radio options in Settings UI for German (Deutsch) and Serbian (Srpski - latinica)
+  - Clarified that only AI responses change - app interface remains English
+  - Reduced codebase by 27 lines through code consolidation
+  - Test coverage: 765 tests passing with new test cases for both languages
+</details>
+
+<details>
+<summary>345 Add automatic German language support for Glooko CSV exports</summary>
+
+[#345](../../pull/345) Add automatic German language support for Glooko CSV exports
+  - New column mapping system (`columnMapper.ts`) with bidirectional English ↔ German mappings for all dataset types
+  - Automatic language detection via header pattern matching
+  - `findColumnIndex()` helper for language-agnostic column lookup
+  - Updated data extraction modules (glucoseDataUtils, insulinDataUtils, glucoseUnitUtils) to use column mapper
+  - Transparent processing - German columns mapped to English internally, existing logic unchanged
+  - Zero configuration required - language detection and mapping happen automatically during file upload
+  - 26 unit tests for column mapper (language detection, mapping, edge cases)
+  - 3 integration tests with German CSV data (glucose and insulin extraction)
+  - All 777 existing tests pass with no regressions
+</details>
+
+<details>
+<summary>343 Detect and convert blood glucose units in CSV imports</summary>
+
+[#343](../../pull/343) Detect and convert blood glucose units in CSV imports
+  - Added `detectGlucoseUnit()` to parse column headers and extract units from parentheses notation
+  - Case-insensitive matching for variations: mg/dL, mg/dl, mmol/L, mmol, etc.
+  - Modified `extractZipMetadata()` to detect and store glucose units per dataset
+  - Validates consistency between CGM and BG datasets when both present
+  - Rejects files with mismatched units with clear error messages
+  - Modified `parseGlucoseReadingsFromCSV()` to accept conversion flag
+  - Automatically converts mg/dL → mmol/L during extraction using factor 1/18.018
+  - All glucose values stored internally in mmol/L regardless of source format
+  - Added `glucoseUnit?: GlucoseUnit | null` to `CsvFileMetadata` interface
+  - Updated demo-data.zip to use consistent units (mmol/L for both CGM and BG)
+  - 25 tests for unit detection, 8 tests for ZIP validation, 10 tests for data extraction with conversion
+</details>
+
+<details>
+<summary>342 Add IOB tab to Reports page with date picker and graph placeholder</summary>
+
+[#342](../../pull/342) Add IOB tab to Reports page with date picker and graph placeholder
+  - New `IOBReport` component following existing report pattern with `DayNavigator`
+  - Reports page updated with "IOB" tab in vertical TabList with routing to IOBReport
+  - Date navigation controls (Previous Day/Next Day buttons and date picker)
+  - Insulin data extraction for available dates
+  - Placeholder message where IOB graph will be configured in future PR
+  - Unit tests for component rendering and E2E test for tab visibility/interaction
+</details>
+
+<details>
+<summary>339 Adapt app to support different BG units</summary>
+
+[#339](../../pull/339) Adapt app to support different BG units
+  - Component hierarchy passes glucoseUnit through App → Reports/AIAnalysis → Components
+  - All 4 AI prompts specify response units dynamically based on user Settings
+  - Updated report components (AGPReport, InRangeReport, BGValuesReport, UnifiedTimeline) to display values in selected unit
+  - Y-axis labels and data points converted to display unit while maintaining internal mmol/L storage
+  - Reference threshold lines converted to display unit
+  - Max value selector supports mg/dL values (288/396) in addition to mmol/L
+  - Color logic uses original mmol/L values to ensure thresholds remain accurate
+  - Fixed "Detailed CGM" reference lines to properly convert to mg/dL when selected
+  - Removed unnecessary "Show CGM" toggle from Unified Timeline
+  - Updated all test files for comprehensive coverage
+  - Build and lint passing successfully
+</details>
+
+<details>
+<summary>337 Add glucose unit toggle (mmol/L ⇔ mg/dL) - Settings page only</summary>
+
+[#337](../../pull/337) Add glucose unit toggle (mmol/L ⇔ mg/dL) - Settings page only
+  - New `useGlucoseUnit` hook with cookie-persisted preference (like useExportFormat)
+  - Conversion utilities: `mmolToMgdl()`, `mgdlToMmol()`, `displayGlucoseValue()` using factor 18.018
+  - Added `GlucoseUnit = 'mmol/L' | 'mg/dL'` type definition
+  - Radio group in Settings General tab for unit selection
+  - Dynamic description text updates based on selected unit
+  - `GlucoseThresholdsSection` converts values for display/input
+  - Spin button ranges adjust: mmol/L (0.1-30, step 0.1), mg/dL (1-540, step 1)
+  - "In Range" label updates: 3.9-10.0 mmol/L → 70-180 mg/dL
+  - Internal storage remains mmol/L; conversion happens at display layer
+  - 27 tests cover conversion logic and hook behavior
+  - Display precision: mmol/L uses 1 decimal, mg/dL uses integers
+</details>
+
+<details>
+<summary>335 Add unified insulin and CGM view with toggle control, glucose analytics, and high-resolution data visualization</summary>
+
+[#335](../../pull/335) Add unified insulin and CGM view with toggle control, glucose analytics, and high-resolution data visualization
+  - New components: `UnifiedDailyReport.tsx` (state and data loading), `UnifiedTimeline.tsx` (dual Y-axis chart)
+  - Reports.tsx updated with "Unified view" tab
+  - Chart displays basal insulin (green line, left axis), bolus insulin (blue bars, left axis)
+  - High-resolution glucose values with dynamic coloring (right axis) when toggled on
+  - Glucose threshold reference lines displayed when CGM enabled
+  - Glucose range bar (left side) shows daily percentages for High, In Range, Low (60px width matching insulin totals bar)
+  - Color scheme selector with 4 options: Monochrome, Basic Colors, HSV Spectrum, Clinical Zones
+  - BG Max Value selector with simplified tabs (16.0 / 22.0 mmol/L)
+  - Show CGM switch positioned next to title inside graph area for quick access
+  - Title "Unified Timeline" always visible regardless of CGM state
+  - Glucose data displayed at original 5-minute granularity (~288 points/day) instead of hourly averages
+  - Gracefully handles missing CGM data by disabling the switch
+  - Enhanced interactions: active state with scale(1.02) on Home page navigation cards
+  - Consistent styling applied across BGValuesReport and DayNavigator components
+</details>
+
+<details>
+<summary>333 Add shared date picker with cookie persistence across all reports</summary>
+
+[#333](../../pull/333) Add shared date picker with cookie persistence across all reports
+  - Created `useDateRange` hook for date range reports (Time in Range, AGP Data)
+    - Manages shared date range state with cookie persistence, keyed by file ID
+    - Follows existing pattern from useExportFormat and useGlucoseThresholds
+    - Returns `{ startDate, endDate, setStartDate, setEndDate }` interface
+  - Created `useSelectedDate` hook for single date reports (Detailed CGM, Detailed Insulin)
+    - Manages shared single date state with cookie persistence, keyed by file ID
+    - Returns `{ selectedDate, setSelectedDate }` interface
+  - Enhanced `DayNavigator` and `InsulinDayNavigator` components with date picker input fields
+    - New props: onDateSelect, minDate, maxDate
+    - Date picker appears next to formatted date display for direct date selection
+  - Integrated hooks in AGPReport.tsx, InRangeReport.tsx, BGValuesReport.tsx, InsulinDailyReport.tsx
+  - Configuration priority: CLI args → environment variables → config file → defaults
+  - Date selections persist when switching between related tabs and across browser sessions (365-day cookie expiration)
+  - 13 tests for useDateRange hook and 10 tests for useSelectedDate hook
+</details>
+
+<details>
+<summary>324 Add AI response language setting with Azure sync (English/Czech)</summary>
+
+[#324](../../pull/324) Add AI response language setting with Azure sync (English/Czech)
+  - New `useResponseLanguage` hook with cookie-persisted preference ('english' | 'czech')
+  - Settings UI: "AI Response Language" section under General tab with radio group
+  - All four prompt generators (timeInRange, glucoseInsulin, mealTiming, pumpSettings) accept optional language parameter
+  - Appends language instruction: "Respond in English" or "Respond in Czech language (česky)"
+  - Azure settings sync: Added `responseLanguage` to `UserSettings` interface and Azure storage
+  - Updated `userSettingsService` to save/load language preference
+  - Updated `useSettingsSync` hook to sync language across devices for authenticated users
+  - Anonymous users continue to use cookie-based storage
+  - Data flow: App.tsx passes language to AIAnalysis.tsx which uses it in prompt generation
+</details>
+
+<details>
+<summary>322 Add 1.3.x section to CHANGELOG with Microsoft authentication and cloud sync features</summary>
+
+[#322](../../pull/322) Add 1.3.x section to CHANGELOG with Microsoft authentication and cloud sync features
+  - New 1.3.x section with overview of Microsoft OAuth 2.0 authentication and cloud-based settings synchronization
+  - Documented 11 new features: MSAL.js integration, Azure Table Storage sync, managed identity infrastructure, deployment automation
+  - Documented 4 bug fixes related to Azure App Registration script iterations
+  - Documented 3 improvements: AI API refactoring, truncation detection, repository cleanup
+  - Table of Contents updated: 1.3.x → 1.2.x → 1.1.x → 1.0.x
+  - Moved 19 PRs (#287-#316, merged ≥2025-11-14) from 1.2.x to 1.3.x
+  - Changed 1.2.x from "Current Development" to "Released"
+  - Updated instructions to reference 1.3.x as current version
+  - All entries follow collapsible details format with relative PR links and descending sort order
+</details>
+
+<details>
+<summary>320 Add PowerShell 7 deployment scripts and reorganize into CLI/PS directories</summary>
+
+[#320](../../pull/320) Add PowerShell 7 deployment scripts and reorganize into CLI/PS directories
+  - New directory structure: `scripts/deployment-cli/` (bash) and `scripts/deployment-ps/` (PowerShell 7)
+  - Created 8 PowerShell scripts with native parameter binding and validation attributes:
+    - `config-lib.ps1` - Configuration library with dot-sourcing pattern
+    - `deploy-azure-master.ps1` - Orchestration with parameter binding
+    - `deploy-azure-managed-identity.ps1` - Identity management
+    - `deploy-azure-storage-account.ps1` - Storage deployment
+    - `deploy-azure-static-web-app.ps1` - Static web app with SKU validation
+    - `deploy-azure-app-registration.ps1` - App registration
+    - `deploy-azure-user-settings-table.ps1` - Table creation
+    - `deploy-azure-pro-users-table.ps1` - Table creation
+  - PowerShell 7.0+ required (`#Requires -Version 7.0`)
+  - Dot-sourcing for shared library: `. ./config-lib.ps1`
+  - PowerShell-native error handling with try/catch
+  - Same configuration precedence: params → env vars → config file → defaults
+  - Updated `scripts/deployment/README.md` with navigation to both implementations
+  - Full feature parity for managed identity, configuration management, and deployment orchestration
+</details>
+
+<details>
 <summary>316 Add managed identity infrastructure with centralized configuration system</summary>
 
 [#316](../../pull/316) Add managed identity infrastructure with centralized configuration system
@@ -226,6 +409,22 @@ Version 1.3 represents a major milestone with the implementation of Microsoft au
 </details>
 
 ### Fixes
+
+<details>
+<summary>326 Disable mouse swipe on desktop to prevent text selection conflicts</summary>
+
+[#326](../../pull/326) Disable mouse swipe on desktop to prevent text selection conflicts
+  - Removed all mouse event handlers (handleMouseDown, handleMouseMove, handleMouseUp) from `useSwipeGesture.ts`
+  - Swipe navigation now only works on touch devices (mobile/tablet)
+  - Eliminates conflicts with text selection on desktop
+  - Mouse-based swipe disabled completely to prevent unwanted page navigation during text selection
+  - Touch events only: touchstart, touchmove, touchend
+  - Follows industry standard approach for swipe gesture handling
+  - Removed ~50 lines of code and simplified implementation
+  - Better performance with fewer event handlers
+  - Updated documentation to reflect touch-only behavior
+  - Removed mouse-related test cases, keeping only touch event tests
+</details>
 
 <details>
 <summary>302 Fix Azure App Registration script SPA configuration format</summary>
