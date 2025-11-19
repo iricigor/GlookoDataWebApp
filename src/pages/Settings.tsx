@@ -462,7 +462,7 @@ export function Settings({
               <Title3 className={styles.sectionTitle}>AI Response Language</Title3>
               <Divider className={styles.divider} />
               <Text className={styles.settingDescription}>
-                Choose the language for AI analysis responses. This affects all AI-generated insights and recommendations.
+                Choose the language for AI analysis responses. This affects all AI-generated insights and recommendations. Note: This does not change the application interface, which is only available in English.
               </Text>
               <RadioGroup
                 value={responseLanguage}
@@ -470,6 +470,8 @@ export function Settings({
               >
                 <Radio value="english" label="English" />
                 <Radio value="czech" label="Czech (Čeština)" />
+                <Radio value="german" label="German (Deutsch)" />
+                <Radio value="serbian" label="Serbian (Srpski - latinica)" />
               </RadioGroup>
             </div>
 

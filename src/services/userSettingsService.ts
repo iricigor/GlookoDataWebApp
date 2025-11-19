@@ -11,7 +11,7 @@
 export interface UserSettings {
   themeMode: 'light' | 'dark' | 'system';
   exportFormat: 'csv' | 'tsv';
-  responseLanguage: 'english' | 'czech';
+  responseLanguage: 'english' | 'czech' | 'german' | 'serbian';
   glucoseThresholds: {
     veryHigh: number;
     high: number;

@@ -8,6 +8,7 @@
 import { base64Decode } from '../../../utils/formatting';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit } from '../../../types';
+import { getLanguageInstruction } from './promptUtils';
 
 /**
  * Generate AI prompt for meal timing analysis
@@ -15,7 +16,7 @@ import type { GlucoseUnit } from '../../../types';
  * @param base64CgmData - Base64 encoded CSV data with CGM readings (Timestamp, CGM Glucose Value)
  * @param base64BolusData - Base64 encoded CSV data with bolus insulin (Timestamp, Insulin Delivered)
  * @param base64BasalData - Base64 encoded CSV data with basal insulin (Timestamp, Insulin Delivered/Rate)
- * @param language - Response language (english or czech)
+ * @param language - Response language (english, czech, german, or serbian)
  * @param unit - Glucose unit (mmol/L or mg/dL)
  * @returns Formatted prompt for AI analysis
  */
@@ -29,9 +30,7 @@ export function generateMealTimingPrompt(
   const cgmData = base64Decode(base64CgmData);
   const bolusData = base64Decode(base64BolusData);
   const basalData = base64Decode(base64BasalData);
-  const languageInstruction = language === 'czech' 
-    ? 'Respond in Czech language (česky).'
-    : 'Respond in English.';
+  const languageInstruction = getLanguageInstruction(language);
   
   // Unit-specific values for ranges
   const lowThreshold = unit === 'mg/dL' ? '70' : '3.9';
