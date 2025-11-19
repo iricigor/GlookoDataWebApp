@@ -4,15 +4,21 @@
 
 import JSZip from 'jszip';
 import type { UploadedFile, GlucoseReading, GlucoseDataSource } from '../../types';
+import { mgdlToMmol } from './glucoseUnitUtils';
 
 /**
  * Parse glucose readings from CSV content
  * 
  * @param csvContent - The CSV file content as string
  * @param delimiter - The delimiter used in the CSV (tab or comma)
+ * @param shouldConvertFromMgdl - Whether to convert values from mg/dL to mmol/L
  * @returns Array of glucose readings
  */
-function parseGlucoseReadingsFromCSV(csvContent: string, delimiter: string = '\t'): GlucoseReading[] {
+function parseGlucoseReadingsFromCSV(
+  csvContent: string, 
+  delimiter: string = '\t',
+  shouldConvertFromMgdl: boolean = false
+): GlucoseReading[] {
   const lines = csvContent.trim().split('\n');
   
   if (lines.length < 2) {
@@ -33,8 +39,6 @@ function parseGlucoseReadingsFromCSV(csvContent: string, delimiter: string = '\t
     return [];
   }
 
-  // Assume input data is always in mmol/L (no conversion needed)
-
   const readings: GlucoseReading[] = [];
 
   // Process data rows (starting from line 2)
@@ -53,9 +57,14 @@ function parseGlucoseReadingsFromCSV(csvContent: string, delimiter: string = '\t
     const timestamp = new Date(timestampStr);
     if (isNaN(timestamp.getTime())) continue;
 
-    // Parse glucose value (expected to be in mmol/L)
-    const value = parseFloat(glucoseStr);
+    // Parse glucose value
+    let value = parseFloat(glucoseStr);
     if (isNaN(value) || value <= 0) continue;
+
+    // Convert from mg/dL to mmol/L if needed
+    if (shouldConvertFromMgdl) {
+      value = mgdlToMmol(value);
+    }
 
     readings.push({ timestamp, value });
   }
@@ -108,6 +117,9 @@ export async function extractGlucoseReadings(
     throw new Error(`No ${datasetName} data found in the ZIP file`);
   }
 
+  // Determine if we need to convert from mg/dL to mmol/L
+  const shouldConvertFromMgdl = csvFile.glucoseUnit === 'mg/dL';
+
   // Load the ZIP file
   const zip = await JSZip.loadAsync(uploadedFile.file);
 
@@ -120,7 +132,7 @@ export async function extractGlucoseReadings(
       if (fileData) {
         const content = await fileData.async('string');
         const delimiter = detectDelimiter(content);
-        const readings = parseGlucoseReadingsFromCSV(content, delimiter);
+        const readings = parseGlucoseReadingsFromCSV(content, delimiter, shouldConvertFromMgdl);
         allReadings = allReadings.concat(readings);
       }
     }
@@ -131,7 +143,7 @@ export async function extractGlucoseReadings(
       const fileData = zip.files[fileName];
       const content = await fileData.async('string');
       const delimiter = detectDelimiter(content);
-      allReadings = parseGlucoseReadingsFromCSV(content, delimiter);
+      allReadings = parseGlucoseReadingsFromCSV(content, delimiter, shouldConvertFromMgdl);
     }
   }
 

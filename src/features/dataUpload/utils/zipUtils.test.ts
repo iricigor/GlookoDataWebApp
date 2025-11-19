@@ -470,5 +470,170 @@ describe('zipUtils', () => {
         expect(result.parsedMetadata?.dateRange).toBeUndefined();
       });
     });
+
+    describe('glucose unit detection and validation', () => {
+      it('should detect mg/dL unit in BG data', async () => {
+        const files = {
+          'bg_data_1.csv': generateMockCsvContent('bg_data', 5),
+        };
+        
+        const zipFile = await createMockZipFile(files);
+        const result = await extractZipMetadata(zipFile);
+        
+        expect(result.isValid).toBe(true);
+        const bgFile = result.csvFiles.find(f => f.name === 'bg');
+        expect(bgFile).toBeDefined();
+        expect(bgFile?.glucoseUnit).toBe('mg/dL');
+      });
+
+      it('should detect mmol/L unit in CGM data', async () => {
+        const cgmContent = [
+          MOCK_METADATA_LINE,
+          'Timestamp\tGlucose Value (mmol/L)\tTrend Arrow\tTransmitter ID',
+          '2025-01-01 10:00:00\t5.5\tFlat\tDXC4B2P',
+          '2025-01-01 10:05:00\t6.0\tUp\tDXC4B2P',
+        ].join('\n');
+
+        const files = {
+          'cgm_data_1.csv': cgmContent,
+        };
+        
+        const zipFile = await createMockZipFile(files);
+        const result = await extractZipMetadata(zipFile);
+        
+        expect(result.isValid).toBe(true);
+        const cgmFile = result.csvFiles.find(f => f.name === 'cgm');
+        expect(cgmFile).toBeDefined();
+        expect(cgmFile?.glucoseUnit).toBe('mmol/L');
+      });
+
+      it('should reject ZIP with inconsistent glucose units between CGM and BG', async () => {
+        const cgmContent = [
+          MOCK_METADATA_LINE,
+          'Timestamp\tGlucose Value (mmol/L)\tTrend Arrow\tTransmitter ID',
+          '2025-01-01 10:00:00\t5.5\tFlat\tDXC4B2P',
+        ].join('\n');
+
+        const bgContent = [
+          MOCK_METADATA_LINE,
+          'Timestamp\tGlucose Value (mg/dL)\tDevice\tNotes',
+          '2025-01-01 10:00:00\t100\tGlucometer\t',
+        ].join('\n');
+
+        const files = {
+          'cgm_data_1.csv': cgmContent,
+          'bg_data_1.csv': bgContent,
+        };
+        
+        const zipFile = await createMockZipFile(files);
+        const result = await extractZipMetadata(zipFile);
+        
+        expect(result.isValid).toBe(false);
+        expect(result.error).toBeDefined();
+        expect(result.error).toContain('Inconsistent glucose units');
+        expect(result.error).toContain('mmol/L');
+        expect(result.error).toContain('mg/dL');
+      });
+
+      it('should accept ZIP with consistent glucose units (both mmol/L)', async () => {
+        const cgmContent = [
+          MOCK_METADATA_LINE,
+          'Timestamp\tGlucose Value (mmol/L)\tTrend Arrow\tTransmitter ID',
+          '2025-01-01 10:00:00\t5.5\tFlat\tDXC4B2P',
+        ].join('\n');
+
+        const bgContent = [
+          MOCK_METADATA_LINE,
+          'Timestamp\tGlucose Value (mmol/L)\tDevice\tNotes',
+          '2025-01-01 10:00:00\t5.6\tGlucometer\t',
+        ].join('\n');
+
+        const files = {
+          'cgm_data_1.csv': cgmContent,
+          'bg_data_1.csv': bgContent,
+        };
+        
+        const zipFile = await createMockZipFile(files);
+        const result = await extractZipMetadata(zipFile);
+        
+        expect(result.isValid).toBe(true);
+        expect(result.error).toBeUndefined();
+        
+        const cgmFile = result.csvFiles.find(f => f.name === 'cgm');
+        const bgFile = result.csvFiles.find(f => f.name === 'bg');
+        
+        expect(cgmFile?.glucoseUnit).toBe('mmol/L');
+        expect(bgFile?.glucoseUnit).toBe('mmol/L');
+      });
+
+      it('should accept ZIP with consistent glucose units (both mg/dL)', async () => {
+        const cgmContent = [
+          MOCK_METADATA_LINE,
+          'Timestamp\tGlucose Value (mg/dL)\tTrend Arrow\tTransmitter ID',
+          '2025-01-01 10:00:00\t100\tFlat\tDXC4B2P',
+        ].join('\n');
+
+        const bgContent = [
+          MOCK_METADATA_LINE,
+          'Timestamp\tGlucose Value (mg/dL)\tDevice\tNotes',
+          '2025-01-01 10:00:00\t105\tGlucometer\t',
+        ].join('\n');
+
+        const files = {
+          'cgm_data_1.csv': cgmContent,
+          'bg_data_1.csv': bgContent,
+        };
+        
+        const zipFile = await createMockZipFile(files);
+        const result = await extractZipMetadata(zipFile);
+        
+        expect(result.isValid).toBe(true);
+        expect(result.error).toBeUndefined();
+        
+        const cgmFile = result.csvFiles.find(f => f.name === 'cgm');
+        const bgFile = result.csvFiles.find(f => f.name === 'bg');
+        
+        expect(cgmFile?.glucoseUnit).toBe('mg/dL');
+        expect(bgFile?.glucoseUnit).toBe('mg/dL');
+      });
+
+      it('should accept ZIP with only CGM data (no BG)', async () => {
+        const cgmContent = [
+          MOCK_METADATA_LINE,
+          'Timestamp\tGlucose Value (mg/dL)\tTrend Arrow\tTransmitter ID',
+          '2025-01-01 10:00:00\t100\tFlat\tDXC4B2P',
+        ].join('\n');
+
+        const files = {
+          'cgm_data_1.csv': cgmContent,
+          'insulin_data_1.csv': generateMockCsvContent('insulin_data', 5),
+        };
+        
+        const zipFile = await createMockZipFile(files);
+        const result = await extractZipMetadata(zipFile);
+        
+        expect(result.isValid).toBe(true);
+        expect(result.error).toBeUndefined();
+      });
+
+      it('should accept ZIP with only BG data (no CGM)', async () => {
+        const bgContent = [
+          MOCK_METADATA_LINE,
+          'Timestamp\tGlucose Value (mmol/L)\tDevice\tNotes',
+          '2025-01-01 10:00:00\t5.5\tGlucometer\t',
+        ].join('\n');
+
+        const files = {
+          'bg_data_1.csv': bgContent,
+          'insulin_data_1.csv': generateMockCsvContent('insulin_data', 5),
+        };
+        
+        const zipFile = await createMockZipFile(files);
+        const result = await extractZipMetadata(zipFile);
+        
+        expect(result.isValid).toBe(true);
+        expect(result.error).toBeUndefined();
+      });
+    });
   });
 });

@@ -51,6 +51,7 @@ async function createMockUploadedFileWithUnit(
           name: datasetName,
           rowCount: values.length,
           columnNames: ['Timestamp', `Glucose Value (${unit})`, 'Device', 'Notes'],
+          glucoseUnit: unit,
         }
       ],
     },
@@ -75,6 +76,24 @@ describe('glucoseDataUtils', () => {
       expect(readings[7].value).toBe(9.2);
     });
 
+    it('should convert mg/dL values to mmol/L', async () => {
+      // Values in mg/dL that correspond to specific mmol/L values
+      // 90 mg/dL ≈ 5.0 mmol/L, 180 mg/dL ≈ 10.0 mmol/L, 126 mg/dL ≈ 7.0 mmol/L
+      const mgdlValues = [90, 180, 126, 108, 144];
+      const uploadedFile = await createMockUploadedFileWithUnit('bg', 'mg/dL', mgdlValues);
+      
+      const readings = await extractGlucoseReadings(uploadedFile, 'bg');
+      
+      expect(readings).toHaveLength(5);
+      
+      // Values should be converted to mmol/L
+      expect(readings[0].value).toBe(5.0);  // 90 mg/dL
+      expect(readings[1].value).toBe(10.0); // 180 mg/dL
+      expect(readings[2].value).toBe(7.0);  // 126 mg/dL
+      expect(readings[3].value).toBe(6.0);  // 108 mg/dL
+      expect(readings[4].value).toBe(8.0);  // 144 mg/dL
+    });
+
     it('should handle data with mmol/L values', async () => {
       // All input data is assumed to be in mmol/L
       const mmolValues = [13.4, 12.8, 12.4, 12, 11.7, 11, 9.6, 9.2];
@@ -92,7 +111,7 @@ describe('glucoseDataUtils', () => {
     });
 
     it('should handle data regardless of unit header label', async () => {
-      // Test with "mmol" label - input is still assumed to be mmol/L
+      // Test with "mmol" label - input is in mmol/L
       const zip = new JSZip();
       const lines: string[] = [];
       lines.push('Name:Test\tDate Range:2025-01-01 - 2025-01-01');
@@ -111,7 +130,12 @@ describe('glucoseDataUtils', () => {
         file,
         zipMetadata: {
           isValid: true,
-          csvFiles: [{ name: 'bg', rowCount: 1, columnNames: ['Timestamp', 'Glucose Value (mmol)', 'Device'] }],
+          csvFiles: [{ 
+            name: 'bg', 
+            rowCount: 1, 
+            columnNames: ['Timestamp', 'Glucose Value (mmol)', 'Device'],
+            glucoseUnit: 'mmol/L' // Unit detected as mmol/L
+          }],
         },
       };
       
@@ -122,7 +146,7 @@ describe('glucoseDataUtils', () => {
     });
 
     it('should handle data with MMOL/L label (case insensitive)', async () => {
-      // Test case-insensitive - input is assumed to be in mmol/L
+      // Test case-insensitive - input is in mmol/L
       const zip = new JSZip();
       const lines: string[] = [];
       lines.push('Name:Test\tDate Range:2025-01-01 - 2025-01-01');
@@ -141,7 +165,12 @@ describe('glucoseDataUtils', () => {
         file,
         zipMetadata: {
           isValid: true,
-          csvFiles: [{ name: 'bg', rowCount: 1, columnNames: ['Timestamp', 'Glucose Value (MMOL/L)', 'Device'] }],
+          csvFiles: [{ 
+            name: 'bg', 
+            rowCount: 1, 
+            columnNames: ['Timestamp', 'Glucose Value (MMOL/L)', 'Device'],
+            glucoseUnit: 'mmol/L' // Unit detected as mmol/L
+          }],
         },
       };
       

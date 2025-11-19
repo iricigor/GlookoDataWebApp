@@ -11,6 +11,7 @@ import {
   formatGlucoseValue,
   displayGlucoseValue,
   getUnitLabel,
+  detectGlucoseUnit,
 } from './glucoseUnitUtils';
 
 describe('glucoseUnitUtils', () => {
@@ -136,6 +137,45 @@ describe('glucoseUnitUtils', () => {
       expect(mmolToMgdl(3.0)).toBe(54);  // Very low threshold (alternate)
       expect(mmolToMgdl(10.0)).toBe(180); // High threshold
       expect(mmolToMgdl(13.9)).toBe(250); // Very high threshold
+    });
+  });
+
+  describe('detectGlucoseUnit', () => {
+    it('should detect mg/dL unit from column headers', () => {
+      const headers = ['Timestamp', 'Glucose Value (mg/dL)', 'Device', 'Notes'];
+      expect(detectGlucoseUnit(headers)).toBe('mg/dL');
+    });
+
+    it('should detect mmol/L unit from column headers', () => {
+      const headers = ['Timestamp', 'Glucose Value (mmol/L)', 'Trend Arrow', 'Transmitter ID'];
+      expect(detectGlucoseUnit(headers)).toBe('mmol/L');
+    });
+
+    it('should be case-insensitive', () => {
+      expect(detectGlucoseUnit(['Timestamp', 'Glucose Value (MG/DL)', 'Device'])).toBe('mg/dL');
+      expect(detectGlucoseUnit(['Timestamp', 'Glucose Value (MMOL/L)', 'Device'])).toBe('mmol/L');
+      expect(detectGlucoseUnit(['Timestamp', 'glucose value (mg/dl)', 'Device'])).toBe('mg/dL');
+    });
+
+    it('should handle variations in unit format', () => {
+      expect(detectGlucoseUnit(['Timestamp', 'Glucose Value (mg/dl)', 'Device'])).toBe('mg/dL');
+      expect(detectGlucoseUnit(['Timestamp', 'Glucose Value (mmol)', 'Device'])).toBe('mmol/L');
+      expect(detectGlucoseUnit(['Timestamp', 'Glucose (mg/dL)', 'Device'])).toBe('mg/dL');
+    });
+
+    it('should return null when no glucose column found', () => {
+      const headers = ['Timestamp', 'Blood Pressure', 'Device'];
+      expect(detectGlucoseUnit(headers)).toBeNull();
+    });
+
+    it('should return null when glucose column has no unit in parentheses', () => {
+      const headers = ['Timestamp', 'Glucose Value', 'Device'];
+      expect(detectGlucoseUnit(headers)).toBeNull();
+    });
+
+    it('should return null when unit is not recognized', () => {
+      const headers = ['Timestamp', 'Glucose Value (unknown)', 'Device'];
+      expect(detectGlucoseUnit(headers)).toBeNull();
     });
   });
 });
