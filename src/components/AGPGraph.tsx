@@ -19,8 +19,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
-import type { AGPTimeSlotStats, GlucoseUnit } from '../types';
-import { getUnitLabel } from '../utils/data';
+import type { AGPTimeSlotStats } from '../types';
 
 const useStyles = makeStyles({
   container: {
@@ -75,10 +74,9 @@ const useStyles = makeStyles({
 
 interface AGPGraphProps {
   data: AGPTimeSlotStats[];
-  glucoseUnit: GlucoseUnit;
 }
 
-export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
+export function AGPGraph({ data }: AGPGraphProps) {
   const styles = useStyles();
 
   // Filter data to only include slots with readings
@@ -174,7 +172,7 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
             
             <YAxis 
               domain={[0, 20]}
-              label={{ value: `Glucose (${getUnitLabel(glucoseUnit)})`, angle: -90, position: 'insideLeft', style: { fontSize: tokens.fontSizeBase200 } }}
+              label={{ value: 'Glucose (mmol/L)', angle: -90, position: 'insideLeft', style: { fontSize: tokens.fontSizeBase200 } }}
               stroke={tokens.colorNeutralForeground2}
               style={{ fontSize: tokens.fontSizeBase200 }}
             />

@@ -33,7 +33,6 @@ import type {
   WeeklyReport,
   GlucoseReading,
   DailyInsulinSummary,
-  GlucoseUnit,
 } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import { extractGlucoseReadings } from '../utils/data';
@@ -183,11 +182,9 @@ const useStyles = makeStyles({
 interface InRangeReportProps {
   selectedFile?: UploadedFile;
   exportFormat: ExportFormat;
-  glucoseUnit: GlucoseUnit; // Added for future use, not implemented in display yet
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function InRangeReport({ selectedFile, exportFormat, glucoseUnit: _glucoseUnit }: InRangeReportProps) {
+export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
 

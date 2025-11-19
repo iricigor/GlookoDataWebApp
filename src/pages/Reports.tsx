@@ -12,7 +12,7 @@ import { InRangeReport } from '../components/InRangeReport';
 import { AGPReport } from '../components/AGPReport';
 import { BGValuesReport } from '../components/BGValuesReport';
 import { InsulinDailyReport } from '../components/InsulinDailyReport';
-import type { UploadedFile, GlucoseUnit } from '../types';
+import type { UploadedFile } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 
 const useStyles = makeStyles({
@@ -63,10 +63,9 @@ const useStyles = makeStyles({
 interface ReportsProps {
   selectedFile?: UploadedFile;
   exportFormat: ExportFormat;
-  glucoseUnit: GlucoseUnit;
 }
 
-export function Reports({ selectedFile, exportFormat, glucoseUnit }: ReportsProps) {
+export function Reports({ selectedFile, exportFormat }: ReportsProps) {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState<string>('inRange');
 
@@ -79,11 +78,11 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit }: ReportsProp
           </div>
         );
       case 'inRange':
-        return <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
+        return <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} />;
       case 'agp':
-        return <AGPReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
+        return <AGPReport selectedFile={selectedFile} exportFormat={exportFormat} />;
       case 'detailedCgm':
-        return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
+        return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} />;
       case 'detailedInsulin':
         return <InsulinDailyReport selectedFile={selectedFile} />;
       default:
