@@ -82,10 +82,13 @@ function App() {
   useEffect(() => {
     const loadDemoData = async () => {
       try {
+        // Small delay to ensure DOM is ready
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
         // Fetch Joshua's demo data file from public folder
         const response = await fetch('/demo-data/joshua-demo-data.zip')
         if (!response.ok) {
-          console.warn('Demo data file not found')
+          console.warn('Demo data file not found, skipping auto-load')
           return
         }
 
@@ -107,11 +110,13 @@ function App() {
         setUploadedFiles([demoFile])
         setSelectedFileId(demoFile.id)
       } catch (error) {
+        // Silently handle errors - app should work without demo data
         console.error('Failed to load demo data:', error)
       }
     }
 
-    loadDemoData()
+    // Don't block app initialization with demo data loading
+    loadDemoData().catch(err => console.error('Demo data loading error:', err))
   }, [])
 
   // Handle hash-based routing
