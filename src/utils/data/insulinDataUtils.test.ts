@@ -218,4 +218,71 @@ describe('insulinDataUtils', () => {
       expect(result[23].timeLabel).toBe('23:00');
     });
   });
+
+  describe('German language support', () => {
+    it('should extract insulin readings from German CSV file', async () => {
+      const JSZip = (await import('jszip')).default;
+      const { extractInsulinReadings } = await import('./insulinDataUtils');
+      
+      const zip = new JSZip();
+      
+      // Create German basal insulin file
+      const basalLines: string[] = [];
+      basalLines.push('Name:Test Patient\tDate Range:2025-01-01 - 2025-01-14');
+      basalLines.push('Zeitstempel\tInsulin-Typ\tDauer (Minuten)\tRate'); // German headers
+      basalLines.push('2025-01-01 08:00:00\tBasal\t60\t1.0');
+      basalLines.push('2025-01-01 09:00:00\tBasal\t60\t1.2');
+      zip.file('basal_data_1.csv', basalLines.join('\n'));
+      
+      // Create German bolus insulin file
+      const bolusLines: string[] = [];
+      bolusLines.push('Name:Test Patient\tDate Range:2025-01-01 - 2025-01-14');
+      bolusLines.push('Zeitstempel\tInsulin-Typ\tAbgegebenes Insulin (E)\tSeriennummer'); // German headers
+      bolusLines.push('2025-01-01 12:00:00\tBolus\t5.5\t123456');
+      bolusLines.push('2025-01-01 18:00:00\tBolus\t7.0\t123456');
+      zip.file('bolus_data_1.csv', bolusLines.join('\n'));
+      
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const file = new File([blob], 'test.zip', { type: 'application/zip' });
+      
+      const uploadedFile = {
+        id: 'test-id',
+        name: 'test.zip',
+        size: blob.size,
+        uploadTime: new Date(),
+        file,
+        zipMetadata: {
+          isValid: true,
+          csvFiles: [
+            {
+              name: 'basal',
+              rowCount: 2,
+              columnNames: ['Zeitstempel', 'Insulin-Typ', 'Dauer (Minuten)', 'Rate'],
+            },
+            {
+              name: 'bolus',
+              rowCount: 2,
+              columnNames: ['Zeitstempel', 'Insulin-Typ', 'Abgegebenes Insulin (E)', 'Seriennummer'],
+            }
+          ],
+        },
+      };
+      
+      const readings = await extractInsulinReadings(uploadedFile);
+      
+      expect(readings).toHaveLength(4);
+      
+      // Check basal readings
+      const basalReadings = readings.filter(r => r.insulinType === 'basal');
+      expect(basalReadings).toHaveLength(2);
+      expect(basalReadings[0].dose).toBe(1.0);
+      expect(basalReadings[1].dose).toBe(1.2);
+      
+      // Check bolus readings
+      const bolusReadings = readings.filter(r => r.insulinType === 'bolus');
+      expect(bolusReadings).toHaveLength(2);
+      expect(bolusReadings[0].dose).toBe(5.5);
+      expect(bolusReadings[1].dose).toBe(7.0);
+    });
+  });
 });

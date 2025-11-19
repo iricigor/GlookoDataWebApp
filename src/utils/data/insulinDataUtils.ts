@@ -4,6 +4,7 @@
 
 import JSZip from 'jszip';
 import type { UploadedFile, InsulinReading, DailyInsulinSummary } from '../../types';
+import { findColumnIndex, getColumnVariants } from './columnMapper';
 
 /**
  * Parse daily insulin totals from combined insulin CSV (format: Timestamp, Total Bolus, Total Insulin, Total Basal)
@@ -26,11 +27,11 @@ function parseDailyInsulinFromCSV(
   const headerLine = lines[1];
   const headers = headerLine.split(delimiter).map(h => h.trim());
   
-  // Find column indices
-  const timestampIndex = headers.findIndex(h => h.toLowerCase().includes('timestamp'));
-  const totalBolusIndex = headers.findIndex(h => h.toLowerCase().includes('total bolus') || h.toLowerCase() === 'total bolus (u)');
-  const totalBasalIndex = headers.findIndex(h => h.toLowerCase().includes('total basal') || h.toLowerCase() === 'total basal (u)');
-  const totalInsulinIndex = headers.findIndex(h => h.toLowerCase().includes('total insulin') || h.toLowerCase() === 'total insulin (u)');
+  // Find column indices (supports both English and German)
+  const timestampIndex = findColumnIndex(headers, getColumnVariants('timestamp'));
+  const totalBolusIndex = findColumnIndex(headers, getColumnVariants('totalBolus'));
+  const totalBasalIndex = findColumnIndex(headers, getColumnVariants('totalBasal'));
+  const totalInsulinIndex = findColumnIndex(headers, getColumnVariants('totalInsulin'));
 
   if (timestampIndex === -1) {
     return [];
@@ -93,15 +94,9 @@ function parseInsulinReadingsFromCSV(
   const headerLine = lines[1];
   const headers = headerLine.split(delimiter).map(h => h.trim());
   
-  // Find timestamp and dose column indices
-  const timestampIndex = headers.findIndex(h => h.toLowerCase().includes('timestamp'));
-  const doseIndex = headers.findIndex(h => {
-    const lower = h.toLowerCase();
-    return lower.includes('dose') || 
-           lower.includes('units') ||
-           lower.includes('rate') ||
-           lower.includes('delivered');
-  });
+  // Find timestamp and dose column indices (supports both English and German)
+  const timestampIndex = findColumnIndex(headers, getColumnVariants('timestamp'));
+  const doseIndex = findColumnIndex(headers, getColumnVariants('dose'));
 
   if (timestampIndex === -1 || doseIndex === -1) {
     return [];

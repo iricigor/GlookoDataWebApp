@@ -26,6 +26,17 @@ When you sign in with your Microsoft account, only your preferences (theme, expo
 
 ## ✨ New Features
 
+### 🌐 Multi-Language Support
+
+The application now **automatically supports German-language Glooko exports** in addition to English:
+
+- 🇬🇧 **English** - Standard Glooko export files
+- 🇩🇪 **German** - Automatically detected and processed
+- ⚡ **Zero configuration** - Language is detected from column headers
+- 🔄 **Full compatibility** - All features work with both languages
+
+Simply upload your German or English Glooko export files - the application handles the rest automatically. See the [Data Upload Guide](docs/DATA_UPLOAD.md) for details.
+
 ### 🔐 User Authentication & Settings Sync
 
 Sign in with your personal Microsoft account to:

@@ -188,8 +188,41 @@ The application processes your data as follows:
 1. **Extracts metadata**: Reads the first line from each CSV file
 2. **Validates consistency**: Ensures all CSV files have identical metadata
 3. **Parses headers**: Extracts column names from the second line
-4. **Counts data rows**: Calculates the number of actual data rows (excluding metadata and header)
-5. **Stores information**: Keeps all data in browser memory for the session
+4. **Detects language**: Automatically identifies English or German column names
+5. **Counts data rows**: Calculates the number of actual data rows (excluding metadata and header)
+6. **Stores information**: Keeps all data in browser memory for the session
+
+#### Language Support
+
+The application **automatically detects and supports** both English and German Glooko export files:
+
+**Supported Languages:**
+- 🇬🇧 **English**: Standard Glooko export language
+- 🇩🇪 **German**: German-language Glooko exports (detected automatically)
+
+**How It Works:**
+1. The application examines the column headers in your CSV files
+2. It automatically detects whether the export is in English or German
+3. German column names are internally mapped to English equivalents for processing
+4. All features (Reports, AI Analysis, XLSX export) work seamlessly with both languages
+
+**Example Column Name Mappings:**
+- `Zeitstempel` → `Timestamp`
+- `Glukosewert (mg/dl)` → `Glucose Value (mg/dL)`
+- `CGM-Glukosewert (mmol/l)` → `Glucose Value (mmol/L)`
+- `Insulin-Typ` → `Insulin Type`
+- `Abgegebenes Insulin (E)` → `Dose (units)`
+- `Dauer (Minuten)` → `Duration (min)`
+
+**No Configuration Required:**
+- You don't need to select a language or change any settings
+- Upload your German or English exports just like you would any other file
+- The application handles the rest automatically
+
+**Mixed Language Files:**
+- All CSV files in a single ZIP must use the same language
+- Mixing English and German CSV files in one ZIP is not supported
+- Create separate ZIP files for different language exports if needed
 
 ### 7. Browser-Based Storage
 
