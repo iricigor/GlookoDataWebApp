@@ -6,24 +6,64 @@
  * This script is triggered by GitHub Actions when a PR is merged to main.
  * It adds entries to CHANGELOG.md in the collapsible details format.
  * 
- * Usage: node update-changelog.cjs <pr_number> <pr_title> <pr_labels>
+ * Usage: node update-changelog.cjs <pr_number> <pr_title> [pr_labels] [version]
+ * 
+ * Arguments:
+ *   pr_number  - PR number (required)
+ *   pr_title   - PR title (required)
+ *   pr_labels  - Comma-separated PR labels (optional, default: none)
+ *   version    - Version to use (optional, default: read from package.json)
+ * 
+ * Examples:
+ *   node update-changelog.cjs 123 "Fix bug"
+ *   node update-changelog.cjs 123 "Fix bug" "bug,priority"
+ *   node update-changelog.cjs 123 "Fix bug" "" "1.4.0"
  */
 
 const fs = require('fs');
 const path = require('path');
 
 // Parse command line arguments
-const [, , prNumber, prTitle, prLabels] = process.argv;
+const [, , prNumber, prTitle, prLabels, versionArg] = process.argv;
 
 if (!prNumber || !prTitle) {
-  console.error('Usage: node update-changelog.cjs <pr_number> <pr_title> <pr_labels>');
+  console.error('Usage: node update-changelog.cjs <pr_number> <pr_title> [pr_labels] [version]');
   process.exit(1);
 }
 
 const labels = prLabels ? prLabels.split(',').map(l => l.trim()) : [];
 
+/**
+ * Get version from package.json
+ */
+function getVersionFromPackageJson() {
+  try {
+    const packageJsonPath = path.join(__dirname, '../../package.json');
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    // Extract major.minor from version (e.g., "1.3.0" -> "1.3")
+    const version = packageJson.version;
+    const match = version.match(/^(\d+\.\d+)/);
+    if (match) {
+      return match[1];
+    }
+    console.error(`Warning: Could not parse version from package.json: ${version}`);
+    return null;
+  } catch (error) {
+    console.error(`Warning: Could not read version from package.json: ${error.message}`);
+    return null;
+  }
+}
+
+// Determine version to use
+const version = versionArg || getVersionFromPackageJson();
+if (!version) {
+  console.error('Error: Could not determine version. Please provide version as argument or ensure package.json has a valid version.');
+  process.exit(1);
+}
+
 console.log(`Processing PR #${prNumber}: ${prTitle}`);
 console.log(`Labels: ${labels.join(', ') || 'none'}`);
+console.log(`Using version: ${version}.x`);
 
 // Read CHANGELOG.md
 const changelogPath = path.join(__dirname, '../../CHANGELOG.md');
@@ -60,18 +100,18 @@ function createChangelogEntry(prNum, title) {
 }
 
 /**
- * Add new entry to the appropriate category in version 1.2.x
+ * Add new entry to the appropriate category in the current development version
  */
-function addEntryToChangelog(content, prNum, title, lbls) {
+function addEntryToChangelog(content, prNum, title, lbls, ver) {
   const category = getCategoryFromLabels(lbls);
   const newEntry = createChangelogEntry(prNum, title);
   
-  // Find the version 1.2.x section
-  const versionMarker = '## [1.2.x] - Current Development';
+  // Find the version section
+  const versionMarker = `## [${ver}.x] - Current Development`;
   const versionIndex = content.indexOf(versionMarker);
   
   if (versionIndex === -1) {
-    console.error('Error: Could not find version 1.2.x section');
+    console.error(`Error: Could not find version ${ver}.x section`);
     return content;
   }
   
@@ -80,7 +120,7 @@ function addEntryToChangelog(content, prNum, title, lbls) {
   const categoryIndex = content.indexOf(categoryMarker, versionIndex);
   
   if (categoryIndex === -1) {
-    console.error(`Error: Could not find ${category} section in version 1.2.x`);
+    console.error(`Error: Could not find ${category} section in version ${ver}.x`);
     return content;
   }
   
@@ -113,7 +153,7 @@ function addEntryToChangelog(content, prNum, title, lbls) {
 }
 
 // Update CHANGELOG
-changelog = addEntryToChangelog(changelog, prNumber, prTitle, labels);
+changelog = addEntryToChangelog(changelog, prNumber, prTitle, labels, version);
 
 // Write updated CHANGELOG
 fs.writeFileSync(changelogPath, changelog, 'utf8');
