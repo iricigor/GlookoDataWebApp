@@ -60,18 +60,18 @@ function createChangelogEntry(prNum, title) {
 }
 
 /**
- * Add new entry to the appropriate category in version 1.2.x
+ * Add new entry to the appropriate category in version 1.3.x
  */
 function addEntryToChangelog(content, prNum, title, lbls) {
   const category = getCategoryFromLabels(lbls);
   const newEntry = createChangelogEntry(prNum, title);
   
-  // Find the version 1.2.x section
-  const versionMarker = '## [1.2.x] - Current Development';
+  // Find the version 1.3.x section
+  const versionMarker = '## [1.3.x] - Current Development';
   const versionIndex = content.indexOf(versionMarker);
   
   if (versionIndex === -1) {
-    console.error('Error: Could not find version 1.2.x section');
+    console.error('Error: Could not find version 1.3.x section');
     return content;
   }
   
@@ -80,7 +80,7 @@ function addEntryToChangelog(content, prNum, title, lbls) {
   const categoryIndex = content.indexOf(categoryMarker, versionIndex);
   
   if (categoryIndex === -1) {
-    console.error(`Error: Could not find ${category} section in version 1.2.x`);
+    console.error(`Error: Could not find ${category} section in version 1.3.x`);
     return content;
   }
   
