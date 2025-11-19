@@ -39,6 +39,7 @@ import { extractGlucoseReadings } from '../utils/data';
 import { extractInsulinReadings, aggregateInsulinByDate } from '../utils/data';
 import { groupByDayOfWeek, groupByDate, groupByWeek, calculatePercentage, GLUCOSE_RANGE_COLORS } from '../utils/data';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
+import { useDateRange } from '../hooks/useDateRange';
 import { TableContainer } from './TableContainer';
 
 const useStyles = makeStyles({
@@ -196,10 +197,16 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
   const [dailyReports, setDailyReports] = useState<DailyReport[]>([]);
   const [weeklyReports, setWeeklyReports] = useState<WeeklyReport[]>([]);
   const [insulinSummaries, setInsulinSummaries] = useState<DailyInsulinSummary[]>([]);
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
-  const [minDate, setMinDate] = useState<string>('');
-  const [maxDate, setMaxDate] = useState<string>('');
+  const { 
+    startDate, 
+    endDate, 
+    minDate, 
+    maxDate, 
+    setStartDate, 
+    setEndDate, 
+    setDateRange,
+    clearDateRange
+  } = useDateRange(selectedFile?.id);
 
   useEffect(() => {
     if (!selectedFile) {
@@ -209,10 +216,7 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
       setWeeklyReports([]);
       setInsulinSummaries([]);
       setError(null);
-      setStartDate('');
-      setEndDate('');
-      setMinDate('');
-      setMaxDate('');
+      clearDateRange();
       return;
     }
 
@@ -230,10 +234,7 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
           setDailyReports([]);
           setWeeklyReports([]);
           setInsulinSummaries([]);
-          setStartDate('');
-          setEndDate('');
-          setMinDate('');
-          setMaxDate('');
+          clearDateRange();
         } else {
           // Find min and max dates
           const timestamps = glucoseReadings.map(r => r.timestamp.getTime());
@@ -243,10 +244,25 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
           const maxDateStr = new Date(maxTimestamp).toISOString().split('T')[0];
           
           setReadings(glucoseReadings);
-          setMinDate(minDateStr);
-          setMaxDate(maxDateStr);
-          setStartDate(minDateStr);
-          setEndDate(maxDateStr);
+          
+          // Set date range using the hook - it will use saved values if they exist
+          // and are within the valid range, otherwise use min/max from data
+          if (!minDate || !maxDate || minDate !== minDateStr || maxDate !== maxDateStr) {
+            // Data range changed, update min/max and optionally preserve user selection if valid
+            const currentStart = startDate || minDateStr;
+            const currentEnd = endDate || maxDateStr;
+            
+            // Check if current selection is within new data range
+            const isStartValid = currentStart >= minDateStr && currentStart <= maxDateStr;
+            const isEndValid = currentEnd >= minDateStr && currentEnd <= maxDateStr;
+            
+            setDateRange(
+              minDateStr,
+              maxDateStr,
+              isStartValid ? currentStart : minDateStr,
+              isEndValid ? currentEnd : maxDateStr
+            );
+          }
           
           // Generate reports
           const dailyGlucoseReports = groupByDate(glucoseReadings, thresholds, categoryMode);
@@ -290,7 +306,7 @@ export function InRangeReport({ selectedFile, exportFormat }: InRangeReportProps
     };
 
     loadData();
-  }, [selectedFile, dataSource, thresholds, categoryMode]);
+  }, [selectedFile, dataSource, thresholds, categoryMode, minDate, maxDate, startDate, endDate, setDateRange, clearDateRange]);
 
   // Recalculate stats when category mode changes
   useEffect(() => {

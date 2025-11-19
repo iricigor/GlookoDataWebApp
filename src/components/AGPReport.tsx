@@ -27,6 +27,7 @@ import { extractGlucoseReadings } from '../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
 import { AGPGraph } from './AGPGraph';
 import { TableContainer } from './TableContainer';
+import { useDateRange } from '../hooks/useDateRange';
 
 const useStyles = makeStyles({
   reportContainer: {
@@ -134,10 +135,16 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
 
   const [dataSource, setDataSource] = useState<GlucoseDataSource>('cgm');
   const [dayFilter, setDayFilter] = useState<AGPDayOfWeekFilter>('All Days');
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
-  const [minDate, setMinDate] = useState<string>('');
-  const [maxDate, setMaxDate] = useState<string>('');
+  const { 
+    startDate, 
+    endDate, 
+    minDate, 
+    maxDate, 
+    setStartDate, 
+    setEndDate, 
+    setDateRange,
+    clearDateRange
+  } = useDateRange(selectedFile?.id);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agpStats, setAgpStats] = useState<AGPTimeSlotStats[]>([]);
@@ -148,10 +155,7 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
       setAgpStats([]);
       setAllReadings([]);
       setError(null);
-      setStartDate('');
-      setEndDate('');
-      setMinDate('');
-      setMaxDate('');
+      clearDateRange();
       return;
     }
 
@@ -166,10 +170,7 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
           setError(`No ${dataSource.toUpperCase()} data found in the selected file`);
           setAgpStats([]);
           setAllReadings([]);
-          setStartDate('');
-          setEndDate('');
-          setMinDate('');
-          setMaxDate('');
+          clearDateRange();
         } else {
           // Find min and max dates
           const timestamps = glucoseReadings.map(r => r.timestamp.getTime());
@@ -179,10 +180,25 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
           const maxDateStr = new Date(maxTimestamp).toISOString().split('T')[0];
           
           setAllReadings(glucoseReadings);
-          setMinDate(minDateStr);
-          setMaxDate(maxDateStr);
-          setStartDate(minDateStr);
-          setEndDate(maxDateStr);
+          
+          // Set date range using the hook - it will use saved values if they exist
+          // and are within the valid range, otherwise use min/max from data
+          if (!minDate || !maxDate || minDate !== minDateStr || maxDate !== maxDateStr) {
+            // Data range changed, update min/max and optionally preserve user selection if valid
+            const currentStart = startDate || minDateStr;
+            const currentEnd = endDate || maxDateStr;
+            
+            // Check if current selection is within new data range
+            const isStartValid = currentStart >= minDateStr && currentStart <= maxDateStr;
+            const isEndValid = currentEnd >= minDateStr && currentEnd <= maxDateStr;
+            
+            setDateRange(
+              minDateStr,
+              maxDateStr,
+              isStartValid ? currentStart : minDateStr,
+              isEndValid ? currentEnd : maxDateStr
+            );
+          }
           
           // Apply day-of-week filter
           const filteredReadings = filterReadingsByDayOfWeek(glucoseReadings, dayFilter);
@@ -199,17 +215,14 @@ export function AGPReport({ selectedFile, exportFormat }: AGPReportProps) {
         setError(err instanceof Error ? err.message : 'Failed to load glucose data');
         setAgpStats([]);
         setAllReadings([]);
-        setStartDate('');
-        setEndDate('');
-        setMinDate('');
-        setMaxDate('');
+        clearDateRange();
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [selectedFile, dataSource, dayFilter]);
+  }, [selectedFile, dataSource, dayFilter, minDate, maxDate, startDate, endDate, setDateRange, clearDateRange]);
 
   // Filter readings by date range
   useEffect(() => {
