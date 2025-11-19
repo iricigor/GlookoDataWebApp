@@ -182,7 +182,7 @@ $env:LOCATION = "westus2"
 $env:STORAGE_ACCOUNT_NAME = "mystorageacct"
 
 # Deploy (will use environment variables)
-New-GlookoStorageAccount
+Set-GlookoStorageAccount
 ```
 
 ### Using Custom Configuration File
