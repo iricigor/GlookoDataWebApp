@@ -13,7 +13,7 @@ import { AGPReport } from '../components/AGPReport';
 import { BGValuesReport } from '../components/BGValuesReport';
 import { InsulinDailyReport } from '../components/InsulinDailyReport';
 import { UnifiedDailyReport } from '../components/UnifiedDailyReport';
-import type { UploadedFile } from '../types';
+import type { UploadedFile, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 
 const useStyles = makeStyles({
@@ -64,9 +64,10 @@ const useStyles = makeStyles({
 interface ReportsProps {
   selectedFile?: UploadedFile;
   exportFormat: ExportFormat;
+  glucoseUnit: GlucoseUnit;
 }
 
-export function Reports({ selectedFile, exportFormat }: ReportsProps) {
+export function Reports({ selectedFile, exportFormat, glucoseUnit }: ReportsProps) {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState<string>('inRange');
 
@@ -79,15 +80,15 @@ export function Reports({ selectedFile, exportFormat }: ReportsProps) {
           </div>
         );
       case 'inRange':
-        return <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} />;
+        return <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
       case 'agp':
-        return <AGPReport selectedFile={selectedFile} exportFormat={exportFormat} />;
+        return <AGPReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
       case 'detailedCgm':
-        return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} />;
+        return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
       case 'detailedInsulin':
         return <InsulinDailyReport selectedFile={selectedFile} />;
       case 'unifiedView':
-        return <UnifiedDailyReport selectedFile={selectedFile} />;
+        return <UnifiedDailyReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
       default:
         return null;
     }

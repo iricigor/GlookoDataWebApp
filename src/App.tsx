@@ -215,7 +215,7 @@ function App() {
           />
         )
       case 'reports':
-        return <Reports selectedFile={selectedFile} exportFormat={exportFormat} />
+        return <Reports selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />
       case 'ai':
         return (
           <AIAnalysis 
@@ -226,6 +226,7 @@ function App() {
             deepseekApiKey={deepseekApiKey}
             selectedProvider={selectedProvider}
             responseLanguage={responseLanguage}
+            glucoseUnit={glucoseUnit}
             existingAnalysis={currentAIAnalysis}
             onAnalysisComplete={handleAIAnalysisComplete}
           />
