@@ -6,6 +6,7 @@
 
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit } from '../../../types';
+import { getLanguageInstruction } from './promptUtils';
 
 /**
  * Generate AI prompt for time-in-range analysis
@@ -16,15 +17,7 @@ import type { GlucoseUnit } from '../../../types';
  * @returns Formatted prompt for AI analysis
  */
 export function generateTimeInRangePrompt(tirPercentage: number, language: ResponseLanguage = 'english', unit: GlucoseUnit = 'mmol/L'): string {
-  let languageInstruction = 'Respond in English.';
-  
-  if (language === 'czech') {
-    languageInstruction = 'Respond in Czech language (česky).';
-  } else if (language === 'german') {
-    languageInstruction = 'Respond in German language (auf Deutsch).';
-  } else if (language === 'serbian') {
-    languageInstruction = 'Respond in Serbian language using Latin script (na srpskom latiničnim pismom).';
-  }
+  const languageInstruction = getLanguageInstruction(language);
   
   const unitInstruction = unit === 'mg/dL'
     ? 'Remember that all glucose values are in mg/dL (not mmol/L).'

@@ -8,6 +8,7 @@
 import { base64Decode } from '../../../utils/formatting';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit } from '../../../types';
+import { getLanguageInstruction } from './promptUtils';
 
 /**
  * Generate AI prompt for glucose and insulin analysis with tiering
@@ -19,15 +20,7 @@ import type { GlucoseUnit } from '../../../types';
  */
 export function generateGlucoseInsulinPrompt(base64CsvData: string, language: ResponseLanguage = 'english', unit: GlucoseUnit = 'mmol/L'): string {
   const csvData = base64Decode(base64CsvData);
-  let languageInstruction = 'Respond in English.';
-  
-  if (language === 'czech') {
-    languageInstruction = 'Respond in Czech language (česky).';
-  } else if (language === 'german') {
-    languageInstruction = 'Respond in German language (auf Deutsch).';
-  } else if (language === 'serbian') {
-    languageInstruction = 'Respond in Serbian language using Latin script (na srpskom latiničnim pismom).';
-  }
+  const languageInstruction = getLanguageInstruction(language);
   
   const unitInstruction = unit === 'mg/dL'
     ? 'Remember that all glucose values are in mg/dL (not mmol/L).'

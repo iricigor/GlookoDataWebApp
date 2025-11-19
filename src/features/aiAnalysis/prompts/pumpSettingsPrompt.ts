@@ -8,6 +8,7 @@
 import { base64Decode } from '../../../utils/formatting';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit } from '../../../types';
+import { getLanguageInstruction } from './promptUtils';
 
 /**
  * Generate AI prompt for pump settings verification analysis
@@ -29,15 +30,7 @@ export function generatePumpSettingsPrompt(
   const cgmData = base64Decode(base64CgmData);
   const bolusData = base64Decode(base64BolusData);
   const basalData = base64Decode(base64BasalData);
-  let languageInstruction = 'Respond in English.';
-  
-  if (language === 'czech') {
-    languageInstruction = 'Respond in Czech language (česky).';
-  } else if (language === 'german') {
-    languageInstruction = 'Respond in German language (auf Deutsch).';
-  } else if (language === 'serbian') {
-    languageInstruction = 'Respond in Serbian language using Latin script (na srpskom latiničnim pismom).';
-  }
+  const languageInstruction = getLanguageInstruction(language);
   
   // Unit-specific values
   const targetGlucose = unit === 'mg/dL' ? '110' : '6.1';

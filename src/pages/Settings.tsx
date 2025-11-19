@@ -471,7 +471,7 @@ export function Settings({
                 <Radio value="english" label="English" />
                 <Radio value="czech" label="Czech (Čeština)" />
                 <Radio value="german" label="German (Deutsch)" />
-                <Radio value="serbian" label="Serbian (Srpski - Latin)" />
+                <Radio value="serbian" label="Serbian (Srpski - latinica)" />
               </RadioGroup>
             </div>
 
