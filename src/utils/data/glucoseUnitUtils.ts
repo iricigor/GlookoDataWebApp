@@ -73,3 +73,41 @@ export function displayGlucoseValue(mmolValue: number, targetUnit: GlucoseUnit):
 export function getUnitLabel(unit: GlucoseUnit): string {
   return unit;
 }
+
+/**
+ * Detect glucose unit from column headers
+ * Looks for column containing "glucose" or "glucose value" and extracts the unit from parentheses
+ * 
+ * @param columnHeaders - Array of column header names from CSV
+ * @returns Detected unit ('mmol/L' or 'mg/dL'), or null if not found
+ */
+export function detectGlucoseUnit(columnHeaders: string[]): GlucoseUnit | null {
+  // Find the glucose column
+  const glucoseColumn = columnHeaders.find(header => 
+    header.toLowerCase().includes('glucose')
+  );
+
+  if (!glucoseColumn) {
+    return null;
+  }
+
+  // Extract content in parentheses
+  const match = glucoseColumn.match(/\(([^)]+)\)/);
+  if (!match) {
+    return null;
+  }
+
+  const unitText = match[1].toLowerCase().trim();
+
+  // Check for mg/dL variations
+  if (unitText.includes('mg') && unitText.includes('dl')) {
+    return 'mg/dL';
+  }
+
+  // Check for mmol/L variations
+  if (unitText.includes('mmol')) {
+    return 'mmol/L';
+  }
+
+  return null;
+}

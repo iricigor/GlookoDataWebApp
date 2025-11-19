@@ -5,6 +5,7 @@
 import JSZip from 'jszip';
 import type { ZipMetadata, CsvFileMetadata } from '../../../types';
 import { parseMetadata } from '../../../utils/data';
+import { detectGlucoseUnit } from '../../../utils/data/glucoseUnitUtils';
 
 /**
  * Extract the base name from a CSV file name
@@ -66,11 +67,16 @@ function detectDelimiter(content: string): string {
  * Automatically detects delimiter (tab or comma)
  * 
  * @param content - The CSV file content as string
- * @returns Object with metadata line, header columns, and row count
+ * @returns Object with metadata line, header columns, row count, and detected glucose unit
  */
-function parseCsvContent(content: string): { metadataLine: string; columnNames: string[]; rowCount: number } {
+function parseCsvContent(content: string): { 
+  metadataLine: string; 
+  columnNames: string[]; 
+  rowCount: number;
+  glucoseUnit: ReturnType<typeof detectGlucoseUnit>;
+} {
   if (!content || content.trim().length === 0) {
-    return { metadataLine: '', columnNames: [], rowCount: 0 };
+    return { metadataLine: '', columnNames: [], rowCount: 0, glucoseUnit: null };
   }
   
   const lines = content.trim().split('\n');
@@ -85,10 +91,13 @@ function parseCsvContent(content: string): { metadataLine: string; columnNames: 
   const headerLine = lines.length > 1 ? lines[1].trim() : '';
   const columnNames = headerLine ? headerLine.split(delimiter).map(col => col.trim()).filter(col => col.length > 0) : [];
   
+  // Detect glucose unit from column headers
+  const glucoseUnit = detectGlucoseUnit(columnNames);
+  
   // Remaining lines are data rows (subtract metadata line and header line)
   const rowCount = Math.max(0, lines.length - 2);
   
-  return { metadataLine, columnNames, rowCount };
+  return { metadataLine, columnNames, rowCount, glucoseUnit };
 }
 
 /**
@@ -128,6 +137,7 @@ function groupCsvFiles(files: CsvFileMetadata[]): CsvFileMetadata[] {
       
       // Use the first file's column names (they should all be the same)
       const columnNames = groupFiles[0].columnNames;
+      const glucoseUnit = groupFiles[0].glucoseUnit;
       
       // Validate that all files in the group have the same column names
       const allSameColumns = groupFiles.every(file => {
@@ -150,6 +160,7 @@ function groupCsvFiles(files: CsvFileMetadata[]): CsvFileMetadata[] {
           name: baseName, // Just the set name, no extension
           rowCount: totalRowCount,
           columnNames,
+          glucoseUnit,
           fileCount: groupFiles.length,
           sourceFiles
         });
@@ -193,7 +204,7 @@ export async function extractZipMetadata(file: File): Promise<ZipMetadata> {
     for (const fileName of fileEntries) {
       const fileData = zip.files[fileName];
       const content = await fileData.async('string');
-      const { metadataLine, columnNames, rowCount } = parseCsvContent(content);
+      const { metadataLine, columnNames, rowCount, glucoseUnit } = parseCsvContent(content);
       
       // Validate that all CSV files have the same metadata line
       if (zipMetadataLine === undefined) {
@@ -213,6 +224,7 @@ export async function extractZipMetadata(file: File): Promise<ZipMetadata> {
         name: displayName,
         rowCount,
         columnNames,
+        glucoseUnit,
         // Store the full path so we can access it later in xlsxUtils
         sourceFiles: [fileName]
       });
@@ -220,6 +232,21 @@ export async function extractZipMetadata(file: File): Promise<ZipMetadata> {
     
     // Group and merge related CSV files
     const groupedCsvFiles = groupCsvFiles(csvFiles);
+    
+    // Validate glucose unit consistency between cgm and bg datasets
+    const cgmFile = groupedCsvFiles.find(f => f.name === 'cgm');
+    const bgFile = groupedCsvFiles.find(f => f.name === 'bg');
+    
+    if (cgmFile && bgFile) {
+      // Both cgm and bg exist, check for unit consistency
+      if (cgmFile.glucoseUnit && bgFile.glucoseUnit && cgmFile.glucoseUnit !== bgFile.glucoseUnit) {
+        return {
+          isValid: false,
+          csvFiles: [],
+          error: `Inconsistent glucose units: CGM uses ${cgmFile.glucoseUnit} but BG uses ${bgFile.glucoseUnit}. All datasets must use the same unit.`
+        };
+      }
+    }
     
     // Parse the metadata line if it exists
     const parsedMetadata = zipMetadataLine ? parseMetadata(zipMetadataLine) : undefined;
