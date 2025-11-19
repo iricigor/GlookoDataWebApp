@@ -86,6 +86,11 @@ export interface UploadedFile {
 }
 
 /**
+ * Glucose unit type (mmol/L or mg/dL)
+ */
+export type GlucoseUnit = 'mmol/L' | 'mg/dL';
+
+/**
  * Blood glucose thresholds (in mmol/L)
  */
 export interface GlucoseThresholds {

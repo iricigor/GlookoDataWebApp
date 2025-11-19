@@ -23,6 +23,7 @@ import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular } from '@flue
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import type { ResponseLanguage } from '../hooks/useResponseLanguage';
+import type { GlucoseUnit } from '../types';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { GlucoseThresholdsSection } from '../components/GlucoseThresholdsSection';
 import { getVersionInfo, formatBuildDate } from '../utils/version';
@@ -246,6 +247,8 @@ interface SettingsProps {
   onExportFormatChange: (format: ExportFormat) => void;
   responseLanguage: ResponseLanguage;
   onResponseLanguageChange: (language: ResponseLanguage) => void;
+  glucoseUnit: GlucoseUnit;
+  onGlucoseUnitChange: (unit: GlucoseUnit) => void;
   perplexityApiKey: string;
   onPerplexityApiKeyChange: (key: string) => void;
   geminiApiKey: string;
@@ -265,6 +268,8 @@ export function Settings({
   onExportFormatChange,
   responseLanguage,
   onResponseLanguageChange,
+  glucoseUnit,
+  onGlucoseUnitChange,
   perplexityApiKey, 
   onPerplexityApiKeyChange, 
   geminiApiKey, 
@@ -435,6 +440,21 @@ export function Settings({
               >
                 <Radio value="csv" label="CSV (Comma-Separated Values)" />
                 <Radio value="tsv" label="TSV (Tab-Separated Values)" />
+              </RadioGroup>
+            </div>
+
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>Glucose Unit</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Choose your preferred unit for displaying blood glucose values. This setting affects all glucose readings, charts, and thresholds throughout the app.
+              </Text>
+              <RadioGroup
+                value={glucoseUnit}
+                onChange={(_, data) => onGlucoseUnitChange(data.value as GlucoseUnit)}
+              >
+                <Radio value="mmol/L" label="mmol/L (millimoles per liter)" />
+                <Radio value="mg/dL" label="mg/dL (milligrams per deciliter)" />
               </RadioGroup>
             </div>
 

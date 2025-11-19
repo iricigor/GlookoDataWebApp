@@ -12,6 +12,7 @@ import { useTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
 import { useResponseLanguage } from './hooks/useResponseLanguage'
 import { useGlucoseThresholds } from './hooks/useGlucoseThresholds'
+import { useGlucoseUnit } from './hooks/useGlucoseUnit'
 import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
 import { useGeminiApiKey } from './hooks/useGeminiApiKey'
 import { useGrokApiKey } from './hooks/useGrokApiKey'
@@ -36,6 +37,7 @@ function App() {
   const { exportFormat, setExportFormat } = useExportFormat()
   const { responseLanguage, setResponseLanguage } = useResponseLanguage()
   const { thresholds: glucoseThresholds, setThresholds: setGlucoseThresholds } = useGlucoseThresholds()
+  const { glucoseUnit, setGlucoseUnit } = useGlucoseUnit()
   
   // Sync settings with Azure for authenticated users
   useSettingsSync({
@@ -230,19 +232,21 @@ function App() {
         )
       case 'settings':
         return <Settings 
-          themeMode={themeMode} 
-          onThemeChange={setThemeMode} 
-          exportFormat={exportFormat} 
+          themeMode={themeMode}
+          onThemeChange={setThemeMode}
+          exportFormat={exportFormat}
           onExportFormatChange={setExportFormat}
           responseLanguage={responseLanguage}
           onResponseLanguageChange={setResponseLanguage}
-          perplexityApiKey={perplexityApiKey} 
-          onPerplexityApiKeyChange={setPerplexityApiKey} 
-          geminiApiKey={geminiApiKey} 
-          onGeminiApiKeyChange={setGeminiApiKey} 
-          grokApiKey={grokApiKey} 
-          onGrokApiKeyChange={setGrokApiKey} 
-          deepseekApiKey={deepseekApiKey} 
+          glucoseUnit={glucoseUnit}
+          onGlucoseUnitChange={setGlucoseUnit}
+          perplexityApiKey={perplexityApiKey}
+          onPerplexityApiKeyChange={setPerplexityApiKey}
+          geminiApiKey={geminiApiKey}
+          onGeminiApiKeyChange={setGeminiApiKey}
+          grokApiKey={grokApiKey}
+          onGrokApiKeyChange={setGrokApiKey}
+          deepseekApiKey={deepseekApiKey}
           onDeepSeekApiKeyChange={setDeepSeekApiKey}
           selectedProvider={selectedProvider}
           onSelectedProviderChange={setSelectedProvider}
