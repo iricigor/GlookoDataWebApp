@@ -186,6 +186,7 @@ interface InRangeReportProps {
   glucoseUnit: GlucoseUnit; // Added for future use, not implemented in display yet
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function InRangeReport({ selectedFile, exportFormat, glucoseUnit: _glucoseUnit }: InRangeReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();

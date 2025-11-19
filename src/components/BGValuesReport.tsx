@@ -190,6 +190,7 @@ interface BGValuesReportProps {
   glucoseUnit: GlucoseUnit; // Added for future use, not fully implemented yet
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function BGValuesReport({ selectedFile, glucoseUnit: _glucoseUnit }: BGValuesReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
