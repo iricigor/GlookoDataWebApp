@@ -27,6 +27,26 @@ describe('useResponseLanguage', () => {
     expect(result.current.responseLanguage).toBe('czech');
   });
 
+  it('should update language to german', () => {
+    const { result } = renderHook(() => useResponseLanguage());
+    
+    act(() => {
+      result.current.setResponseLanguage('german');
+    });
+    
+    expect(result.current.responseLanguage).toBe('german');
+  });
+
+  it('should update language to serbian', () => {
+    const { result } = renderHook(() => useResponseLanguage());
+    
+    act(() => {
+      result.current.setResponseLanguage('serbian');
+    });
+    
+    expect(result.current.responseLanguage).toBe('serbian');
+  });
+
   it('should update language to english', () => {
     const { result } = renderHook(() => useResponseLanguage());
     

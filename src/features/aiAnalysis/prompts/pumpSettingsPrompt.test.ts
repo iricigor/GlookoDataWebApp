@@ -267,5 +267,30 @@ describe('pumpSettingsPrompt', () => {
       expect(result).toContain('česky');
       expect(result).not.toContain('Respond in English');
     });
+
+    it('should generate German prompt when specified', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal, 'german');
+      
+      expect(result).toContain('Respond in German language');
+      expect(result).toContain('auf Deutsch');
+      expect(result).not.toContain('Respond in English');
+    });
+
+    it('should generate Serbian prompt when specified', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal, 'serbian');
+      
+      expect(result).toContain('Respond in Serbian language');
+      expect(result).toContain('Latin script');
+      expect(result).toContain('srpskom latiničnim pismom');
+      expect(result).not.toContain('Respond in English');
+    });
   });
 });

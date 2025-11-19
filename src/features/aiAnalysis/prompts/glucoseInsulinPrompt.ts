@@ -13,15 +13,21 @@ import type { GlucoseUnit } from '../../../types';
  * Generate AI prompt for glucose and insulin analysis with tiering
  * 
  * @param base64CsvData - Base64 encoded CSV data containing date, day of week, BG ranges, and insulin doses
- * @param language - Response language (english or czech)
+ * @param language - Response language (english, czech, german, or serbian)
  * @param unit - Glucose unit (mmol/L or mg/dL)
  * @returns Formatted prompt for AI analysis
  */
 export function generateGlucoseInsulinPrompt(base64CsvData: string, language: ResponseLanguage = 'english', unit: GlucoseUnit = 'mmol/L'): string {
   const csvData = base64Decode(base64CsvData);
-  const languageInstruction = language === 'czech' 
-    ? 'Respond in Czech language (česky).'
-    : 'Respond in English.';
+  let languageInstruction = 'Respond in English.';
+  
+  if (language === 'czech') {
+    languageInstruction = 'Respond in Czech language (česky).';
+  } else if (language === 'german') {
+    languageInstruction = 'Respond in German language (auf Deutsch).';
+  } else if (language === 'serbian') {
+    languageInstruction = 'Respond in Serbian language using Latin script (na srpskom latiničnim pismom).';
+  }
   
   const unitInstruction = unit === 'mg/dL'
     ? 'Remember that all glucose values are in mg/dL (not mmol/L).'

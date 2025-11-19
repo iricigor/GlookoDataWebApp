@@ -117,5 +117,24 @@ describe('glucoseInsulinPrompt', () => {
       expect(result).toContain('česky');
       expect(result).not.toContain('Respond in English');
     });
+
+    it('should generate German prompt when specified', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data, 'german');
+      
+      expect(result).toContain('Respond in German language');
+      expect(result).toContain('auf Deutsch');
+      expect(result).not.toContain('Respond in English');
+    });
+
+    it('should generate Serbian prompt when specified', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data, 'serbian');
+      
+      expect(result).toContain('Respond in Serbian language');
+      expect(result).toContain('Latin script');
+      expect(result).toContain('srpskom latiničnim pismom');
+      expect(result).not.toContain('Respond in English');
+    });
   });
 });

@@ -6,7 +6,7 @@
 
 import { useState, useCallback } from 'react';
 
-export type ResponseLanguage = 'english' | 'czech';
+export type ResponseLanguage = 'english' | 'czech' | 'german' | 'serbian';
 
 export interface UseResponseLanguageReturn {
   responseLanguage: ResponseLanguage;
@@ -25,7 +25,7 @@ function getLanguageFromCookie(): ResponseLanguage | null {
     const [name, value] = cookie.trim().split('=');
     if (name === RESPONSE_LANGUAGE_COOKIE_NAME) {
       const languageValue = value as ResponseLanguage;
-      if (languageValue === 'english' || languageValue === 'czech') {
+      if (languageValue === 'english' || languageValue === 'czech' || languageValue === 'german' || languageValue === 'serbian') {
         return languageValue;
       }
     }
