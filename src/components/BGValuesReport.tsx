@@ -39,6 +39,7 @@ import { DayNavigator } from './DayNavigator';
 import { useBGColorScheme } from '../hooks/useBGColorScheme';
 import { getGlucoseColor, isDynamicColorScheme, COLOR_SCHEME_DESCRIPTORS } from '../utils/formatting';
 import type { BGColorScheme } from '../hooks/useBGColorScheme';
+import { useSelectedDate } from '../hooks/useSelectedDate';
 
 const useStyles = makeStyles({
   container: {
@@ -192,6 +193,7 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
   const { colorScheme, setColorScheme } = useBGColorScheme();
+  const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
   
   const [loading, setLoading] = useState(false);
   const [dateChanging, setDateChanging] = useState(false);
@@ -219,9 +221,14 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
         const dates = getUniqueDates(readings);
         setAvailableDates(dates);
         
-        // Start with the last available date
-        if (dates.length > 0) {
-          setCurrentDateIndex(dates.length - 1);
+        // If we have a saved date, try to use it
+        if (selectedDate && dates.includes(selectedDate)) {
+          setCurrentDateIndex(dates.indexOf(selectedDate));
+        } else {
+          // Otherwise, start with the last available date
+          if (dates.length > 0) {
+            setCurrentDateIndex(dates.length - 1);
+          }
         }
       } catch (error) {
         console.error('Failed to load glucose data:', error);
@@ -233,10 +240,18 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
     };
 
     loadData();
-  }, [selectedFile, dataSource]);
+  }, [selectedFile, dataSource, selectedDate]);
 
   // Get current date string
   const currentDate = availableDates[currentDateIndex] || '';
+  
+  // Save current date to shared state when it changes
+  useEffect(() => {
+    if (currentDate && currentDate !== selectedDate) {
+      setSelectedDate(currentDate);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDate]);
   
   // Filter readings for current date
   const currentReadings = currentDate ? filterReadingsByDate(allReadings, currentDate) : [];
@@ -292,6 +307,20 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
       setTimeout(() => setDateChanging(false), 100);
     }
   };
+
+  // Handle date selection from date picker
+  const handleDateSelect = (date: string) => {
+    const newIndex = availableDates.indexOf(date);
+    if (newIndex !== -1) {
+      setDateChanging(true);
+      setCurrentDateIndex(newIndex);
+      setTimeout(() => setDateChanging(false), 100);
+    }
+  };
+
+  // Get min and max dates for date picker
+  const minDate = availableDates.length > 0 ? availableDates[0] : undefined;
+  const maxDate = availableDates.length > 0 ? availableDates[availableDates.length - 1] : undefined;
 
   // Custom tooltip with Fluent UI styling
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string; value: number; originalValue: number; color: string } }> }) => {
@@ -393,6 +422,9 @@ export function BGValuesReport({ selectedFile }: BGValuesReportProps) {
         canGoPrevious={currentDateIndex > 0}
         canGoNext={currentDateIndex < availableDates.length - 1}
         loading={dateChanging}
+        onDateSelect={handleDateSelect}
+        minDate={minDate}
+        maxDate={maxDate}
       />
 
       {/* Daily Statistics - moved above chart, styled like Insulin page */}

@@ -10,6 +10,7 @@ import {
   Spinner,
   tokens,
   shorthands,
+  Input,
 } from '@fluentui/react-components';
 import {
   ChevronLeftRegular,
@@ -37,6 +38,14 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
   },
+  datePickerContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
+  dateInput: {
+    minWidth: '150px',
+  },
 });
 
 interface DayNavigatorProps {
@@ -46,6 +55,9 @@ interface DayNavigatorProps {
   canGoPrevious: boolean;
   canGoNext: boolean;
   loading?: boolean;
+  onDateSelect?: (date: string) => void;
+  minDate?: string;
+  maxDate?: string;
 }
 
 export function DayNavigator({
@@ -55,6 +67,9 @@ export function DayNavigator({
   canGoPrevious,
   canGoNext,
   loading = false,
+  onDateSelect,
+  minDate,
+  maxDate,
 }: DayNavigatorProps) {
   const styles = useStyles();
 
@@ -83,9 +98,23 @@ export function DayNavigator({
       
       <div className={styles.dateDisplay}>
         {loading && <Spinner size="tiny" />}
-        <Text>
-          {formatDate(currentDate)}
-        </Text>
+        <div className={styles.datePickerContainer}>
+          <Text>
+            {formatDate(currentDate)}
+          </Text>
+          {onDateSelect && minDate && maxDate && (
+            <Input
+              type="date"
+              value={currentDate}
+              min={minDate}
+              max={maxDate}
+              onChange={(e) => onDateSelect(e.target.value)}
+              appearance="outline"
+              className={styles.dateInput}
+              size="small"
+            />
+          )}
+        </div>
       </div>
       
       <div className={styles.navigationButtons}>
