@@ -58,7 +58,7 @@ interface UnifiedDailyReportProps {
   glucoseUnit: GlucoseUnit;
 }
 
-export function UnifiedDailyReport({ selectedFile, glucoseUnit: _glucoseUnit }: UnifiedDailyReportProps) {
+export function UnifiedDailyReport({ selectedFile, glucoseUnit }: UnifiedDailyReportProps) {
   const styles = useStyles();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
   const { colorScheme, setColorScheme } = useBGColorScheme();
@@ -74,7 +74,9 @@ export function UnifiedDailyReport({ selectedFile, glucoseUnit: _glucoseUnit }: 
     bolusTotal: number;
   }>>([]);
   const [showCGM, setShowCGM] = useState(false);
-  const [maxGlucose, setMaxGlucose] = useState<number>(22.0);
+  const [maxGlucose, setMaxGlucose] = useState<number>(
+    glucoseUnit === 'mg/dL' ? 396 : 22.0
+  );
 
   // Extract insulin and glucose data when file changes
   useEffect(() => {
@@ -241,6 +243,7 @@ export function UnifiedDailyReport({ selectedFile, glucoseUnit: _glucoseUnit }: 
           showCGM={showCGM}
           setShowCGM={setShowCGM}
           hasCGMData={glucoseReadings.length > 0}
+          glucoseUnit={glucoseUnit}
         />
       ) : (
         <UnifiedTimeline 
@@ -253,6 +256,7 @@ export function UnifiedDailyReport({ selectedFile, glucoseUnit: _glucoseUnit }: 
           showCGM={showCGM}
           setShowCGM={setShowCGM}
           hasCGMData={glucoseReadings.length > 0}
+          glucoseUnit={glucoseUnit}
         />
       )}
     </div>

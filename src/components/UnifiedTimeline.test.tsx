@@ -21,6 +21,7 @@ describe('UnifiedTimeline', () => {
     showCGM: true,
     setShowCGM: mockSetShowCGM,
     hasCGMData: true,
+      glucoseUnit: "mmol/L" as const,
   };
 
   const mockInsulinData = [

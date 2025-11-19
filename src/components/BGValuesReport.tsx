@@ -26,7 +26,7 @@ import {
 } from 'recharts';
 import type { UploadedFile, GlucoseReading, GlucoseDataSource, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
-import { extractGlucoseReadings, smoothGlucoseValues, displayGlucoseValue, getUnitLabel } from '../utils/data';
+import { extractGlucoseReadings, smoothGlucoseValues, displayGlucoseValue, getUnitLabel, convertGlucoseValue } from '../utils/data';
 import { 
   getUniqueDates, 
   filterReadingsByDate, 
@@ -270,15 +270,17 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
       const minutes = time.getMinutes();
       const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
       
-      // Clamp value to maxGlucose
-      const clampedValue = Math.min(reading.value, maxGlucose);
+      // Convert to display unit
+      const convertedValue = convertGlucoseValue(reading.value, glucoseUnit);
+      // Clamp value to maxGlucose (in display unit)
+      const clampedValue = Math.min(convertedValue, maxGlucose);
       
       return {
         time: timeString,
         timeMinutes: hours * 60 + minutes, // For sorting
         value: clampedValue,
-        originalValue: reading.value, // Keep original for tooltip
-        color: getGlucoseColor(reading.value, colorScheme), // Calculate color based on scheme
+        originalValue: convertedValue, // Keep original (converted) for tooltip
+        color: getGlucoseColor(reading.value, colorScheme), // Calculate color based on scheme using mmol/L value
       };
     })
     .sort((a, b) => a.timeMinutes - b.timeMinutes);

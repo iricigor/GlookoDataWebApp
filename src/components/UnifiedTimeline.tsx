@@ -27,9 +27,9 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { InsulinTotalsBar } from './InsulinTotalsBar';
-import type { GlucoseReading } from '../types';
+import type { GlucoseReading, GlucoseUnit } from '../types';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
-import { calculateGlucoseRangeStats, GLUCOSE_RANGE_COLORS, MIN_PERCENTAGE_TO_DISPLAY } from '../utils/data';
+import { calculateGlucoseRangeStats, GLUCOSE_RANGE_COLORS, MIN_PERCENTAGE_TO_DISPLAY, convertGlucoseValue, getUnitLabel } from '../utils/data';
 import { COLOR_SCHEME_DESCRIPTORS, getGlucoseColor, isDynamicColorScheme } from '../utils/formatting';
 import type { BGColorScheme } from '../hooks/useBGColorScheme';
 
@@ -134,9 +134,10 @@ interface UnifiedTimelineProps {
   showCGM: boolean;
   setShowCGM: (value: boolean) => void;
   hasCGMData: boolean;
+  glucoseUnit: GlucoseUnit;
 }
 
-export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, setColorScheme, maxGlucose, setMaxGlucose, showCGM, setShowCGM, hasCGMData }: UnifiedTimelineProps) {
+export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, setColorScheme, maxGlucose, setMaxGlucose, showCGM, setShowCGM, hasCGMData, glucoseUnit }: UnifiedTimelineProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
 
@@ -177,8 +178,8 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
       timeDecimal,
       basalRate: 0, // Will be filled from insulin data
       bolusTotal: 0, // Will be filled from insulin data
-      glucose: reading.value,
-      glucoseColor: getGlucoseColor(reading.value, colorScheme),
+      glucose: convertGlucoseValue(reading.value, glucoseUnit), // Convert to display unit
+      glucoseColor: getGlucoseColor(reading.value, colorScheme), // Use original mmol/L for color
       isGlucosePoint: true,
     };
   });
@@ -335,12 +336,31 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
             </div>
             <div className={styles.maxValueContainer}>
               <TabList
-                selectedValue={maxGlucose === 16.0 ? '16.0' : '22.0'}
-                onTabSelect={(_, data) => setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0)}
+                selectedValue={
+                  glucoseUnit === 'mg/dL'
+                    ? (maxGlucose === 288 ? '288' : '396')
+                    : (maxGlucose === 16.0 ? '16.0' : '22.0')
+                }
+                onTabSelect={(_, data) => {
+                  if (glucoseUnit === 'mg/dL') {
+                    setMaxGlucose(data.value === '288' ? 288 : 396);
+                  } else {
+                    setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0);
+                  }
+                }}
                 size="small"
               >
-                <Tab value="16.0">16.0</Tab>
-                <Tab value="22.0">22.0</Tab>
+                {glucoseUnit === 'mg/dL' ? (
+                  <>
+                    <Tab value="288">288</Tab>
+                    <Tab value="396">396</Tab>
+                  </>
+                ) : (
+                  <>
+                    <Tab value="16.0">16.0</Tab>
+                    <Tab value="22.0">22.0</Tab>
+                  </>
+                )}
               </TabList>
             </div>
           </div>
@@ -432,7 +452,7 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
                 yAxisId="right"
                 orientation="right"
                 label={{ 
-                  value: 'Glucose (mmol/L)', 
+                  value: `Glucose (${getUnitLabel(glucoseUnit)})`, 
                   angle: 90, 
                   position: 'insideRight', 
                   style: { fontSize: tokens.fontSizeBase200 } 
@@ -456,14 +476,14 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
                 <>
                   <ReferenceLine 
                     yAxisId="right" 
-                    y={thresholds.low} 
+                    y={convertGlucoseValue(thresholds.low, glucoseUnit)} 
                     stroke="#FFA726" 
                     strokeDasharray="3 3" 
                     strokeWidth={1}
                   />
                   <ReferenceLine 
                     yAxisId="right" 
-                    y={thresholds.high} 
+                    y={convertGlucoseValue(thresholds.high, glucoseUnit)} 
                     stroke="#FFA726" 
                     strokeDasharray="3 3" 
                     strokeWidth={1}
