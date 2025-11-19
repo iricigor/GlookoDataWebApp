@@ -164,29 +164,49 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
     );
   }
 
-  // Prepare glucose data by hour (average values for each hour)
-  const glucoseByHour: { [hour: number]: number[] } = {};
-  
-  glucoseReadings.forEach(reading => {
+  // Prepare glucose data at original granularity (every ~5 minutes)
+  // Create data points for insulin (hourly) and glucose (at actual reading times)
+  const glucoseDataPoints = glucoseReadings.map(reading => {
     const hour = reading.timestamp.getHours();
-    if (!glucoseByHour[hour]) {
-      glucoseByHour[hour] = [];
-    }
-    glucoseByHour[hour].push(reading.value);
+    const minute = reading.timestamp.getMinutes();
+    const timeDecimal = hour + minute / 60; // e.g., 9:30 = 9.5
+    
+    return {
+      hour,
+      timeLabel: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
+      timeDecimal,
+      basalRate: 0, // Will be filled from insulin data
+      bolusTotal: 0, // Will be filled from insulin data
+      glucose: reading.value,
+      glucoseColor: getGlucoseColor(reading.value, colorScheme),
+      isGlucosePoint: true,
+    };
   });
 
-  // Merge insulin and glucose data
-  const mergedData = insulinData.map(insulin => {
-    const glucoseValues = glucoseByHour[insulin.hour] || [];
-    const avgGlucose = glucoseValues.length > 0
-      ? glucoseValues.reduce((sum, val) => sum + val, 0) / glucoseValues.length
-      : null;
+  // Create insulin-only data points (hourly)
+  const insulinDataPoints = insulinData.map(insulin => ({
+    ...insulin,
+    timeDecimal: insulin.hour,
+    glucose: null,
+    glucoseColor: undefined,
+    isGlucosePoint: false,
+  }));
 
-    return {
-      ...insulin,
-      glucose: avgGlucose,
-      glucoseColor: avgGlucose !== null ? getGlucoseColor(avgGlucose, colorScheme) : undefined,
-    };
+  // Merge and sort all data points by time
+  const allDataPoints = [...insulinDataPoints, ...glucoseDataPoints].sort((a, b) => a.timeDecimal - b.timeDecimal);
+
+  // For glucose points, fill in insulin values from the nearest previous insulin hour
+  const mergedData = allDataPoints.map((point) => {
+    if (point.isGlucosePoint) {
+      // Find the insulin data for this hour
+      const hourData = insulinData.find(insulin => insulin.hour === point.hour);
+      return {
+        ...point,
+        basalRate: hourData?.basalRate || 0,
+        bolusTotal: 0, // Don't show bolus at glucose points to avoid duplication
+      };
+    }
+    return point;
   });
 
   // Custom dot renderer for colored glucose values (when using dynamic color schemes)
@@ -250,8 +270,8 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
   };
 
   // Format X-axis labels (show every 3 hours)
-  const formatXAxis = (value: string) => {
-    const hour = parseInt(value.split(':')[0]);
+  const formatXAxis = (value: number) => {
+    const hour = Math.floor(value);
     if (hour === 0) return '12A';
     if (hour === 3) return '3A';
     if (hour === 6) return '6A';
@@ -387,7 +407,10 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
               <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
               
               <XAxis
-                dataKey="timeLabel"
+                dataKey="timeDecimal"
+                type="number"
+                domain={[0, 24]}
+                ticks={[0, 3, 6, 9, 12, 15, 18, 21, 24]}
                 tickFormatter={formatXAxis}
                 stroke={tokens.colorNeutralForeground2}
                 style={{ fontSize: tokens.fontSizeBase200 }}

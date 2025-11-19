@@ -14,7 +14,6 @@ import { useState, useEffect } from 'react';
 import type { UploadedFile, InsulinReading, GlucoseReading } from '../types';
 import { extractInsulinReadings, prepareInsulinTimelineData, extractGlucoseReadings, filterReadingsByDate } from '../utils/data';
 import { InsulinDayNavigator } from './InsulinDayNavigator';
-import { InsulinSummaryCards } from './InsulinSummaryCards';
 import { useSelectedDate } from '../hooks/useSelectedDate';
 import { UnifiedTimeline } from './UnifiedTimeline';
 import { useBGColorScheme } from '../hooks/useBGColorScheme';
@@ -179,22 +178,6 @@ export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
   const minDate = availableDates.length > 0 ? availableDates[0] : undefined;
   const maxDate = availableDates.length > 0 ? availableDates[availableDates.length - 1] : undefined;
 
-  // Calculate daily summaries
-  const getDailySummary = () => {
-    if (availableDates.length === 0 || timelineData.length === 0) {
-      return { basalTotal: 0, bolusTotal: 0, totalInsulin: 0 };
-    }
-
-    const basalTotal = timelineData.reduce((sum, d) => sum + d.basalRate, 0);
-    const bolusTotal = timelineData.reduce((sum, d) => sum + d.bolusTotal, 0);
-    
-    return {
-      basalTotal: Math.round(basalTotal * 10) / 10,
-      bolusTotal: Math.round(bolusTotal * 10) / 10,
-      totalInsulin: Math.round((basalTotal + bolusTotal) * 10) / 10,
-    };
-  };
-
   if (!selectedFile) {
     return (
       <div className={styles.container}>
@@ -225,7 +208,6 @@ export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
   }
 
   const currentDate = availableDates[currentDateIndex];
-  const summary = getDailySummary();
 
   // Filter glucose readings for current date if CGM is enabled
   const currentGlucoseReadings = showCGM && glucoseReadings.length > 0
@@ -244,13 +226,6 @@ export function UnifiedDailyReport({ selectedFile }: UnifiedDailyReportProps) {
         onDateSelect={handleDateSelect}
         minDate={minDate}
         maxDate={maxDate}
-      />
-
-      {/* Summary Cards */}
-      <InsulinSummaryCards
-        basalTotal={summary.basalTotal}
-        bolusTotal={summary.bolusTotal}
-        totalInsulin={summary.totalInsulin}
       />
 
       {/* Timeline Chart */}
