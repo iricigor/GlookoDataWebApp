@@ -324,7 +324,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
           Uploaded Files ({files.length})
         </Text>
         <div className={styles.buttonGroup}>
-          <Menu>
+          <Menu positioning="below-end">
             <MenuTrigger disableButtonEnhancement>
               <Button
                   appearance="secondary"

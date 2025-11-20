@@ -14,3 +14,12 @@
   overflow-y: auto;
   overflow-x: hidden;
 }
+
+/* Fix Fluent UI portal overlay blocking page content */
+[data-portal-node="true"] {
+  pointer-events: none;
+}
+
+[data-portal-node="true"] > * {
+  pointer-events: auto;
+}
