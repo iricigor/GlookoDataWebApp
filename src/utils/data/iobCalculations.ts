@@ -16,14 +16,16 @@ export interface IOBDataPoint {
   basalIOB: number;     // IOB from basal insulin in units
   bolusIOB: number;     // IOB from bolus insulin in units
   totalIOB: number;     // Total IOB in units
+  basalAmount: number;  // Total basal insulin delivered in this hour
+  bolusAmount: number;  // Total bolus insulin delivered in this hour
 }
 
 /**
- * Calculate the remaining active insulin at a given time using exponential decay
+ * Calculate the remaining active insulin at a given time using linear decay
  * 
- * The insulin activity curve follows an exponential decay model:
- * - Peak activity occurs shortly after administration
- * - Activity decreases exponentially over time
+ * The insulin activity curve follows a linear decay model:
+ * - Insulin activity decreases linearly over time
+ * - After the duration, no insulin is active
  * - Duration parameter controls how long insulin remains active
  * 
  * @param dose - The insulin dose in units
@@ -46,12 +48,10 @@ function calculateActiveInsulin(
     return 0;
   }
 
-  // Exponential decay model
-  // Formula: dose * e^(-k * t) where k is the decay constant
-  // k = ln(2) / half-life, we use half-life as duration/2 for a reasonable model
-  const halfLife = insulinDuration / 2;
-  const decayConstant = Math.LN2 / halfLife;
-  const activeInsulin = dose * Math.exp(-decayConstant * timeSinceAdministration);
+  // Linear decay model
+  // Formula: dose * (1 - t / duration)
+  // This gives a straight line from dose at t=0 to 0 at t=duration
+  const activeInsulin = dose * (1 - timeSinceAdministration / insulinDuration);
 
   return activeInsulin;
 }
@@ -112,19 +112,17 @@ export function calculateIOBAtTime(
 }
 
 /**
- * Generate IOB data points for a full day (24 hours)
+ * Generate IOB data points for a full day (24 hours) with hourly aggregation
  * 
  * @param insulinReadings - Array of all insulin readings
  * @param date - Date to generate IOB data for (YYYY-MM-DD format)
  * @param insulinDuration - Duration of insulin action in hours
- * @param intervalMinutes - Time interval between data points (default 15 minutes)
- * @returns Array of IOB data points for the day
+ * @returns Array of IOB data points for each hour of the day
  */
 export function calculateDailyIOB(
   insulinReadings: InsulinReading[],
   date: string,
-  insulinDuration: number,
-  intervalMinutes: number = 15
+  insulinDuration: number
 ): IOBDataPoint[] {
   const dataPoints: IOBDataPoint[] = [];
   
@@ -140,32 +138,43 @@ export function calculateDailyIOB(
     reading => reading.timestamp >= lookbackStart && reading.timestamp <= endOfDay
   );
 
-  // Generate data points at regular intervals
-  const totalMinutes = 24 * 60; // 1440 minutes in a day
-  const numberOfPoints = Math.floor(totalMinutes / intervalMinutes);
+  // Generate data points for each hour (24 data points)
+  for (let hour = 0; hour < 24; hour++) {
+    const hourStart = new Date(startOfDay.getTime() + hour * 60 * 60 * 1000);
+    const hourEnd = new Date(hourStart.getTime() + 60 * 60 * 1000);
+    
+    // Calculate insulin amounts added during this hour
+    const hourReadings = relevantReadings.filter(
+      r => r.timestamp >= hourStart && r.timestamp < hourEnd
+    );
+    
+    const basalAmount = hourReadings
+      .filter(r => r.insulinType === 'basal')
+      .reduce((sum, r) => sum + r.dose, 0);
+    
+    const bolusAmount = hourReadings
+      .filter(r => r.insulinType === 'bolus')
+      .reduce((sum, r) => sum + r.dose, 0);
 
-  for (let i = 0; i <= numberOfPoints; i++) {
-    const minutesFromStart = i * intervalMinutes;
-    const currentTime = new Date(startOfDay.getTime() + minutesFromStart * 60 * 1000);
-
-    // Calculate IOB at this time
+    // Calculate IOB at the END of this hour
+    const currentTime = hourEnd;
     const { basalIOB, bolusIOB, totalIOB } = calculateIOBAtTime(
       relevantReadings,
       currentTime,
       insulinDuration
     );
 
-    // Format time label
-    const hours = currentTime.getHours();
-    const minutes = currentTime.getMinutes();
-    const timeLabel = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    // Format time label (start of hour)
+    const timeLabel = `${String(hour).padStart(2, '0')}:00`;
 
     dataPoints.push({
-      time: currentTime,
+      time: hourStart,
       timeLabel,
       basalIOB,
       bolusIOB,
       totalIOB,
+      basalAmount: Math.round(basalAmount * 100) / 100,
+      bolusAmount: Math.round(bolusAmount * 100) / 100,
     });
   }
 

@@ -13,7 +13,8 @@ import {
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
 import {
-  LineChart,
+  ComposedChart,
+  Bar,
   Line,
   XAxis,
   YAxis,
@@ -234,41 +235,45 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
       <Card className={styles.graphCard}>
         <div className={styles.graphContainer}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart
+            <ComposedChart
               data={iobData}
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="timeLabel" 
-                interval={11}  // Show every 3 hours (12 * 15min = 3 hours)
                 label={{ value: 'Time of Day', position: 'insideBottom', offset: -5 }}
               />
               <YAxis 
-                label={{ value: 'IOB (units)', angle: -90, position: 'insideLeft' }}
+                yAxisId="left"
+                label={{ value: 'Insulin (units)', angle: -90, position: 'insideLeft' }}
+              />
+              <YAxis 
+                yAxisId="right"
+                orientation="right"
+                label={{ value: 'IOB (units)', angle: 90, position: 'insideRight' }}
               />
               <Tooltip 
                 formatter={(value: number) => `${value.toFixed(2)} U`}
                 labelFormatter={(label) => `Time: ${label}`}
               />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="basalIOB" 
-                stroke={tokens.colorPaletteBlueForeground2} 
-                name="Basal IOB"
-                dot={false}
-                strokeWidth={2}
+              <Bar 
+                yAxisId="left"
+                dataKey="basalAmount" 
+                stackId="insulin"
+                fill={tokens.colorPaletteGreenForeground2}
+                name="Basal Insulin"
+              />
+              <Bar 
+                yAxisId="left"
+                dataKey="bolusAmount" 
+                stackId="insulin"
+                fill={tokens.colorPaletteBlueForeground2}
+                name="Bolus Insulin"
               />
               <Line 
-                type="monotone" 
-                dataKey="bolusIOB" 
-                stroke={tokens.colorPaletteGreenForeground2} 
-                name="Bolus IOB"
-                dot={false}
-                strokeWidth={2}
-              />
-              <Line 
+                yAxisId="right"
                 type="monotone" 
                 dataKey="totalIOB" 
                 stroke={tokens.colorPaletteRedForeground2} 
@@ -276,7 +281,7 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
                 dot={false}
                 strokeWidth={3}
               />
-            </LineChart>
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
       </Card>

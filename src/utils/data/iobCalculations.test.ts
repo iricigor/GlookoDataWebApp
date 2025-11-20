@@ -36,7 +36,7 @@ describe('IOB Calculations', () => {
       expect(result.totalIOB).toBe(result.bolusIOB);
     });
 
-    it('should calculate IOB for basal micro-doses with decay', () => {
+    it('should calculate IOB for basal with linear decay', () => {
       const readings: InsulinReading[] = [
         {
           timestamp: new Date('2024-01-15T10:00:00'),
@@ -48,10 +48,9 @@ describe('IOB Calculations', () => {
       const currentTime = new Date('2024-01-15T11:00:00'); // 1 hour later
       const result = calculateIOBAtTime(readings, currentTime, 5);
       
-      // Basal uses exponential decay like bolus
-      // After 1 hour with 5-hour duration, some insulin is still active
-      expect(result.basalIOB).toBeGreaterThan(0);
-      expect(result.basalIOB).toBeLessThan(2); // Less than full dose due to decay
+      // Linear decay: after 1 hour with 5-hour duration
+      // Active = 2 * (1 - 1/5) = 2 * 0.8 = 1.6 units
+      expect(result.basalIOB).toBe(1.6);
       expect(result.bolusIOB).toBe(0);
       expect(result.totalIOB).toBe(result.basalIOB);
     });
@@ -172,32 +171,39 @@ describe('IOB Calculations', () => {
         },
       ];
       
-      const result = calculateDailyIOB(readings, '2024-01-15', 5, 60); // 60-minute intervals
+      const result = calculateDailyIOB(readings, '2024-01-15', 5);
       
-      // Should have 24 hourly data points (0:00 to 23:00) plus one at 24:00
-      expect(result.length).toBe(25);
+      // Should have 24 hourly data points (0:00 to 23:00)
+      expect(result.length).toBe(24);
     });
 
     it('should include correct time labels', () => {
       const readings: InsulinReading[] = [];
-      const result = calculateDailyIOB(readings, '2024-01-15', 5, 60);
+      const result = calculateDailyIOB(readings, '2024-01-15', 5);
       
       expect(result[0].timeLabel).toBe('00:00');
       expect(result[12].timeLabel).toBe('12:00');
-      // Last point is at 24:00 which is represented as 00:00 of the next day
-      expect(result[result.length - 1].timeLabel).toBe('00:00');
+      expect(result[23].timeLabel).toBe('23:00');
     });
 
-    it('should respect interval parameter', () => {
-      const readings: InsulinReading[] = [];
-      const result30 = calculateDailyIOB(readings, '2024-01-15', 5, 30); // 30-minute intervals
-      const result15 = calculateDailyIOB(readings, '2024-01-15', 5, 15); // 15-minute intervals
+    it('should include insulin amounts in data points', () => {
+      const readings: InsulinReading[] = [
+        {
+          timestamp: new Date('2024-01-15T08:30:00'),
+          dose: 5,
+          insulinType: 'bolus',
+        },
+        {
+          timestamp: new Date('2024-01-15T08:45:00'),
+          dose: 0.5,
+          insulinType: 'basal',
+        },
+      ];
+      const result = calculateDailyIOB(readings, '2024-01-15', 5);
       
-      // 30-minute intervals: 24 hours * 2 = 48 points + 1 = 49
-      expect(result30.length).toBe(49);
-      
-      // 15-minute intervals: 24 hours * 4 = 96 points + 1 = 97
-      expect(result15.length).toBe(97);
+      // Hour 8 should have the bolus and basal amounts
+      expect(result[8].bolusAmount).toBe(5);
+      expect(result[8].basalAmount).toBe(0.5);
     });
 
     it('should calculate IOB throughout the day', () => {
@@ -209,18 +215,14 @@ describe('IOB Calculations', () => {
         },
       ];
       
-      const result = calculateDailyIOB(readings, '2024-01-15', 5, 60);
+      const result = calculateDailyIOB(readings, '2024-01-15', 5);
       
-      // Find the data point at noon
-      const noonPoint = result.find(p => p.timeLabel === '12:00');
-      expect(noonPoint).toBeDefined();
-      expect(noonPoint!.bolusIOB).toBeGreaterThan(0);
+      // Hour 12 (noon) should have the bolus
+      expect(result[12].bolusAmount).toBe(10);
+      expect(result[12].bolusIOB).toBeGreaterThan(0);
       
-      // Data point at 18:00 should have some IOB (within 6 hours)
-      const eveningPoint = result.find(p => p.timeLabel === '18:00');
-      expect(eveningPoint).toBeDefined();
-      // After 6 hours with 5-hour duration, should be zero
-      expect(eveningPoint!.bolusIOB).toBe(0);
+      // Hour 18 (6 hours later) with 5-hour duration should have zero IOB
+      expect(result[18].bolusIOB).toBe(0);
     });
 
     it('should include insulin from previous day within duration window', () => {
@@ -232,18 +234,16 @@ describe('IOB Calculations', () => {
         },
       ];
       
-      const result = calculateDailyIOB(readings, '2024-01-15', 5, 60);
+      const result = calculateDailyIOB(readings, '2024-01-15', 5);
       
-      // At midnight, there should still be IOB from the 10 PM dose (2 hours ago)
-      const midnightPoint = result.find(p => p.timeLabel === '00:00');
-      expect(midnightPoint).toBeDefined();
-      expect(midnightPoint!.bolusIOB).toBeGreaterThan(0);
+      // At hour 0 (midnight), there should still be IOB from the 10 PM dose (2 hours ago)
+      expect(result[0].bolusIOB).toBeGreaterThan(0);
     });
 
     it('should handle empty readings', () => {
-      const result = calculateDailyIOB([], '2024-01-15', 5, 60);
+      const result = calculateDailyIOB([], '2024-01-15', 5);
       
-      expect(result.length).toBeGreaterThan(0);
+      expect(result.length).toBe(24);
       expect(result.every(p => p.totalIOB === 0)).toBe(true);
     });
   });
