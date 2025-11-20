@@ -36,7 +36,7 @@ describe('IOB Calculations', () => {
       expect(result.totalIOB).toBe(result.bolusIOB);
     });
 
-    it('should calculate IOB for a single basal dose', () => {
+    it('should calculate IOB for basal continuous delivery', () => {
       const readings: InsulinReading[] = [
         {
           timestamp: new Date('2024-01-15T10:00:00'),
@@ -48,8 +48,10 @@ describe('IOB Calculations', () => {
       const currentTime = new Date('2024-01-15T11:00:00'); // 1 hour later
       const result = calculateIOBAtTime(readings, currentTime, 5);
       
-      expect(result.basalIOB).toBeGreaterThan(0);
-      expect(result.basalIOB).toBeLessThan(2);
+      // Basal is continuous delivery: IOB = rate × duration
+      // Rate = 2 units / 1 hour = 2 U/hr
+      // IOB = 2 U/hr × 5h = 10 units
+      expect(result.basalIOB).toBe(10);
       expect(result.bolusIOB).toBe(0);
       expect(result.totalIOB).toBe(result.basalIOB);
     });
