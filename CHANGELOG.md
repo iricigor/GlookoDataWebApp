@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>358 Fix report content alignment and add tab/date persistence</summary>
+
+[#358](../../pull/358) Fix report content alignment and add tab/date persistence
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>355 Convert PowerShell deployment scripts to modular PowerShell module</summary>
 
 [#355](../../pull/355) Convert PowerShell deployment scripts to modular PowerShell module
