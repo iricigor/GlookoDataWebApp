@@ -2,9 +2,9 @@
 
 This directory contains PowerShell 7+ deployment scripts for the GlookoDataWebApp project.
 
-## 📦 GlookoDeployment PowerShell Module (Recommended)
+## 📦 GlookoDeployment PowerShell Module
 
-The **GlookoDeployment** PowerShell module provides the primary deployment functionality with **managed identity** support and **centralized configuration management**.
+The **GlookoDeployment** PowerShell module provides complete deployment functionality with **managed identity** support and **centralized configuration management**.
 
 ### Installation
 
@@ -24,9 +24,15 @@ Or run the installer script locally:
 
 After installation, the module provides these commands:
 
+**Deployment Functions:**
 - **`Invoke-GlookoDeployment`** (Invoke-GD) - Master orchestration for all deployments
 - **`Set-GlookoManagedIdentity`** (Set-GMI) - Deploy managed identity
 - **`Set-GlookoStorageAccount`** (Set-GSA) - Deploy storage account
+- **`Set-GlookoTableStorage`** (Set-GTS) - Deploy storage tables (UserSettings, ProUsers)
+- **`Set-GlookoAppRegistration`** (Set-GAR) - Deploy app registration for authentication
+- **`Set-GlookoStaticWebApp`** (Set-GSWA) - Deploy static web app
+
+**Configuration Functions:**
 - **`Get-GlookoConfig`** (Get-GC) - Get current configuration
 - **`Set-GlookoConfig`** (Set-GC) - Update configuration values
 - **`Initialize-GlookoConfig`** (Init-GC) - Create new configuration
@@ -47,27 +53,19 @@ Initialize-GlookoConfig
 # 4. Edit configuration (optional)
 notepad ~/.glookodata/config.json
 
-# 5. Deploy resources
+# 5. Deploy all resources
 Invoke-GlookoDeployment -All
 
 # Or deploy specific components
-Invoke-GlookoDeployment -Identity -Storage
+Invoke-GlookoDeployment -Identity -Storage -Tables -Auth -WebApp
+
+# Or use individual functions
 Set-GlookoManagedIdentity
 Set-GlookoStorageAccount -UseManagedIdentity
+Set-GlookoTableStorage
+Set-GlookoAppRegistration
+Set-GlookoStaticWebApp -Sku Standard -AssignManagedIdentity
 ```
-
-## 📄 Standalone Scripts (Legacy)
-
-The following standalone scripts are provided for specific functionality not yet available in the module:
-
-### Available Standalone Scripts
-
-- **`deploy-azure-app-registration.ps1`** - Creates Azure App Registration for authentication
-- **`deploy-azure-user-settings-table.ps1`** - Creates UserSettings table with CORS
-- **`deploy-azure-pro-users-table.ps1`** - Creates ProUsers table
-- **`deploy-azure-static-web-app.ps1`** - Creates Azure Static Web App
-
-**Note:** These scripts will be migrated to the module in future releases. For now, they must be run standalone after deploying core resources via the module.
 
 ### Prerequisites
 
@@ -80,22 +78,10 @@ The following standalone scripts are provided for specific functionality not yet
 
 ### Usage Example
 
-```powershell
-# First, use the module for core resources
-Import-Module GlookoDeployment
-Invoke-GlookoDeployment -Identity -Storage
-
-# Then run standalone scripts for tables and web app
-./deploy-azure-user-settings-table.ps1
-./deploy-azure-pro-users-table.ps1
-./deploy-azure-static-web-app.ps1 -Sku Standard
-./deploy-azure-app-registration.ps1
-```
-
 ## Key Features
 
 - ✅ **PowerShell 7+ compatibility** - Uses modern PowerShell features
-- ✅ **Module-based architecture** - Installable GlookoDeployment module
+- ✅ **Module-based architecture** - Complete GlookoDeployment module
 - ✅ **Idempotent** - Safe to run multiple times
 - ✅ **Validation** - Checks prerequisites before running
 - ✅ **Color-coded output** - Easy to read progress and errors
@@ -103,6 +89,7 @@ Invoke-GlookoDeployment -Identity -Storage
 - ✅ **Configuration management** - Centralized config via module
 - ✅ **Help documentation** - Use `-Help` or `Get-Help <command>`
 - ✅ **Managed Identity support** - Secure, secret-free authentication
+- ✅ **All-in-one deployment** - Single module for all Azure resources
 
 ## Documentation
 
@@ -144,17 +131,34 @@ Install Azure CLI: https://docs.microsoft.com/cli/azure/install-azure-cli
 
 ## Migration from Standalone Scripts
 
-If you were using the old standalone scripts (`deploy-azure-master.ps1`, `deploy-azure-managed-identity.ps1`, etc.), they have been replaced by the GlookoDeployment module:
+All standalone deployment scripts have been consolidated into the GlookoDeployment module:
 
-**Old approach:**
+**Old standalone scripts (deprecated):**
 ```powershell
 ./deploy-azure-master.ps1 -All
+./deploy-azure-managed-identity.ps1
+./deploy-azure-storage-account.ps1
+./deploy-azure-user-settings-table.ps1
+./deploy-azure-pro-users-table.ps1
+./deploy-azure-app-registration.ps1
+./deploy-azure-static-web-app.ps1
 ```
 
-**New approach:**
+**New module-based approach:**
 ```powershell
+# Install module (one-time)
+iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
+
+# Deploy all resources
 Import-Module GlookoDeployment
 Invoke-GlookoDeployment -All
+
+# Or use individual functions
+Set-GlookoManagedIdentity
+Set-GlookoStorageAccount -UseManagedIdentity
+Set-GlookoTableStorage
+Set-GlookoAppRegistration
+Set-GlookoStaticWebApp -Sku Standard -AssignManagedIdentity
 ```
 
 Your existing configuration file (`~/.glookodata/config.json`) will continue to work with the module.

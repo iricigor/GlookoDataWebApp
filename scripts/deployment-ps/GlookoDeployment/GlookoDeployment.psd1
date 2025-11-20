@@ -31,6 +31,9 @@
         'Initialize-GlookoConfig',
         'Set-GlookoManagedIdentity',
         'Set-GlookoStorageAccount',
+        'Set-GlookoTableStorage',
+        'Set-GlookoAppRegistration',
+        'Set-GlookoStaticWebApp',
         'Invoke-GlookoDeployment'
     )
     
@@ -48,6 +51,9 @@
         'Initialize-GC',
         'Set-GMI',
         'Set-GSA',
+        'Set-GTS',
+        'Set-GAR',
+        'Set-GSWA',
         'Invoke-GD'
     )
     

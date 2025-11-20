@@ -132,6 +132,9 @@ function Install-FromGitHub {
         @{ Path = 'Public/Config-Management.ps1'; Destination = $publicPath }
         @{ Path = 'Public/Set-GlookoManagedIdentity.ps1'; Destination = $publicPath }
         @{ Path = 'Public/Set-GlookoStorageAccount.ps1'; Destination = $publicPath }
+        @{ Path = 'Public/Set-GlookoTableStorage.ps1'; Destination = $publicPath }
+        @{ Path = 'Public/Set-GlookoAppRegistration.ps1'; Destination = $publicPath }
+        @{ Path = 'Public/Set-GlookoStaticWebApp.ps1'; Destination = $publicPath }
         @{ Path = 'Public/Invoke-GlookoDeployment.ps1'; Destination = $publicPath }
         @{ Path = 'Private/Write-Message.ps1'; Destination = $privatePath }
         @{ Path = 'Private/Config-Functions.ps1'; Destination = $privatePath }
@@ -200,13 +203,16 @@ function Show-PostInstallInfo {
     Write-ColorMessage "     Get-Help Set-GlookoStorageAccount -Full" -Color Yellow
     
     Write-ColorMessage "`nAvailable Commands:" -Color White
-    Write-ColorMessage "  - Get-GlookoConfig          (Get-GC)    - Get current configuration" -Color Gray
-    Write-ColorMessage "  - Set-GlookoConfig          (Set-GC)    - Set configuration values" -Color Gray
-    Write-ColorMessage "  - Test-GlookoConfig         (Test-GC)   - Validate configuration" -Color Gray
-    Write-ColorMessage "  - Initialize-GlookoConfig   (Init-GC)   - Create new configuration" -Color Gray
-    Write-ColorMessage "  - Set-GlookoManagedIdentity (Set-GMI)   - Deploy managed identity" -Color Gray
-    Write-ColorMessage "  - Set-GlookoStorageAccount  (Set-GSA)   - Deploy storage account" -Color Gray
-    Write-ColorMessage "  - Invoke-GlookoDeployment   (Invoke-GD) - Deploy all resources" -Color Gray
+    Write-ColorMessage "  - Get-GlookoConfig          (Get-GC)     - Get current configuration" -Color Gray
+    Write-ColorMessage "  - Set-GlookoConfig          (Set-GC)     - Set configuration values" -Color Gray
+    Write-ColorMessage "  - Test-GlookoConfig         (Test-GC)    - Validate configuration" -Color Gray
+    Write-ColorMessage "  - Initialize-GlookoConfig   (Init-GC)    - Create new configuration" -Color Gray
+    Write-ColorMessage "  - Set-GlookoManagedIdentity (Set-GMI)    - Deploy managed identity" -Color Gray
+    Write-ColorMessage "  - Set-GlookoStorageAccount  (Set-GSA)    - Deploy storage account" -Color Gray
+    Write-ColorMessage "  - Set-GlookoTableStorage    (Set-GTS)    - Deploy storage tables" -Color Gray
+    Write-ColorMessage "  - Set-GlookoAppRegistration (Set-GAR)    - Deploy app registration" -Color Gray
+    Write-ColorMessage "  - Set-GlookoStaticWebApp    (Set-GSWA)   - Deploy static web app" -Color Gray
+    Write-ColorMessage "  - Invoke-GlookoDeployment   (Invoke-GD)  - Deploy all resources" -Color Gray
     
     Write-ColorMessage "`nConfiguration file will be created at:" -Color White
     Write-ColorMessage "  ~/.glookodata/config.json" -Color Gray

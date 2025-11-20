@@ -135,18 +135,52 @@ function Invoke-GlookoDeployment {
     }
     
     if ($Tables) {
-        Write-InfoMessage "Table deployment requires additional implementation"
-        Write-InfoMessage "Please run deploy-azure-user-settings-table.ps1 and deploy-azure-pro-users-table.ps1"
+        Write-Section "Deploying Storage Tables"
+        if ($WhatIf) {
+            Write-InfoMessage "Would deploy storage tables: UserSettings, ProUsers"
+        } else {
+            try {
+                $results.Tables = Set-GlookoTableStorage -ConfigFile $ConfigFile
+                Write-SuccessMessage "Storage tables deployment completed"
+            } catch {
+                Write-ErrorMessage "Storage tables deployment failed: $_"
+                $results.Tables = @{ Error = $_.Exception.Message }
+            }
+        }
     }
     
     if ($Auth) {
-        Write-InfoMessage "App registration deployment requires additional implementation"
-        Write-InfoMessage "Please run deploy-azure-app-registration.ps1"
+        Write-Section "Deploying App Registration"
+        if ($WhatIf) {
+            Write-InfoMessage "Would deploy app registration: $($config.AppRegistrationName)"
+        } else {
+            try {
+                $results.Auth = Set-GlookoAppRegistration -ConfigFile $ConfigFile
+                Write-SuccessMessage "App registration deployment completed"
+            } catch {
+                Write-ErrorMessage "App registration deployment failed: $_"
+                $results.Auth = @{ Error = $_.Exception.Message }
+            }
+        }
     }
     
     if ($WebApp) {
-        Write-InfoMessage "Static web app deployment requires additional implementation"
-        Write-InfoMessage "Please run deploy-azure-static-web-app.ps1"
+        Write-Section "Deploying Static Web App"
+        if ($WhatIf) {
+            Write-InfoMessage "Would deploy static web app: $($config.StaticWebAppName)"
+        } else {
+            try {
+                $params = @{ ConfigFile = $ConfigFile }
+                if ($config.UseManagedIdentity -eq "true" -and $config.StaticWebAppSku -eq "Standard") {
+                    $params.AssignManagedIdentity = $true
+                }
+                $results.WebApp = Set-GlookoStaticWebApp @params
+                Write-SuccessMessage "Static web app deployment completed"
+            } catch {
+                Write-ErrorMessage "Static web app deployment failed: $_"
+                $results.WebApp = @{ Error = $_.Exception.Message }
+            }
+        }
     }
     
     # Display final summary
