@@ -245,6 +245,8 @@ interface SettingsProps {
   onResponseLanguageChange: (language: ResponseLanguage) => void;
   glucoseUnit: GlucoseUnit;
   onGlucoseUnitChange: (unit: GlucoseUnit) => void;
+  insulinDuration: number;
+  onInsulinDurationChange: (duration: number) => void;
   perplexityApiKey: string;
   onPerplexityApiKeyChange: (key: string) => void;
   geminiApiKey: string;
@@ -266,6 +268,8 @@ export function Settings({
   onResponseLanguageChange,
   glucoseUnit,
   onGlucoseUnitChange,
+  insulinDuration,
+  onInsulinDurationChange,
   perplexityApiKey, 
   onPerplexityApiKeyChange, 
   geminiApiKey, 
@@ -469,6 +473,36 @@ export function Settings({
                 <Radio value="german" label="German (Deutsch)" />
                 <Radio value="serbian" label="Serbian (Srpski - latinica)" />
               </RadioGroup>
+            </div>
+
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>Insulin Duration</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Set the duration of insulin action (in hours) for IOB (Insulin On Board) calculations. 
+                This affects how long insulin is considered active in your body. Typical values range from 3-6 hours.
+              </Text>
+              <Label htmlFor="insulin-duration-input">
+                Duration (hours):
+              </Label>
+              <Input
+                id="insulin-duration-input"
+                type="number"
+                min={1}
+                max={10}
+                step={0.5}
+                value={insulinDuration.toString()}
+                onChange={(_, data) => {
+                  const value = parseFloat(data.value);
+                  if (!isNaN(value)) {
+                    onInsulinDurationChange(value);
+                  }
+                }}
+                style={{ maxWidth: '200px' }}
+              />
+              <Text className={styles.settingDescription} style={{ marginTop: '8px' }}>
+                Default: 5 hours. Range: 1-10 hours.
+              </Text>
             </div>
 
             <GlucoseThresholdsSection

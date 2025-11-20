@@ -1,6 +1,6 @@
 /**
  * IOBReport component
- * Displays Insulin On Board (IOB) report with date navigation and graph placeholder
+ * Displays Insulin On Board (IOB) report with date navigation and interactive graph
  */
 
 import {
@@ -9,12 +9,25 @@ import {
   tokens,
   shorthands,
   Spinner,
+  Card,
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
-import type { UploadedFile } from '../types';
-import { extractInsulinReadings } from '../utils/data';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import type { UploadedFile, InsulinReading } from '../types';
+import type { IOBDataPoint } from '../utils/data/iobCalculations';
+import { extractInsulinReadings, calculateDailyIOB } from '../utils/data';
 import { DayNavigator } from './DayNavigator';
 import { useSelectedDate } from '../hooks/useSelectedDate';
+import { useInsulinDuration } from '../hooks/useInsulinDuration';
 
 const useStyles = makeStyles({
   container: {
@@ -35,18 +48,23 @@ const useStyles = makeStyles({
     ...shorthands.padding('48px'),
     color: tokens.colorNeutralForeground3,
   },
-  graphPlaceholder: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '400px',
-    backgroundColor: tokens.colorNeutralBackground2,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    ...shorthands.border('1px', 'dashed', tokens.colorNeutralStroke1),
+  graphCard: {
+    ...shorthands.padding('24px'),
+    backgroundColor: tokens.colorNeutralBackground1,
   },
-  placeholderText: {
-    color: tokens.colorNeutralForeground3,
-    fontSize: tokens.fontSizeBase400,
+  graphContainer: {
+    width: '100%',
+    height: '400px',
+  },
+  settingInfo: {
+    ...shorthands.padding('12px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    marginBottom: '16px',
+  },
+  settingText: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
   },
 });
 
@@ -57,7 +75,10 @@ interface IOBReportProps {
 export function IOBReport({ selectedFile }: IOBReportProps) {
   const styles = useStyles();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
+  const { insulinDuration } = useInsulinDuration();
   const [loading, setLoading] = useState(false);
+  const [insulinReadings, setInsulinReadings] = useState<InsulinReading[]>([]);
+  const [iobData, setIobData] = useState<IOBDataPoint[]>([]);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
 
@@ -65,6 +86,8 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
   useEffect(() => {
     const loadData = async () => {
       if (!selectedFile) {
+        setInsulinReadings([]);
+        setIobData([]);
         setAvailableDates([]);
         setCurrentDateIndex(0);
         return;
@@ -73,6 +96,7 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
       setLoading(true);
       try {
         const readings = await extractInsulinReadings(selectedFile);
+        setInsulinReadings(readings);
 
         // Extract unique dates from readings
         const dates = Array.from(
@@ -98,6 +122,8 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
         }
       } catch (error) {
         console.error('Failed to extract insulin data:', error);
+        setInsulinReadings([]);
+        setIobData([]);
         setAvailableDates([]);
       } finally {
         setLoading(false);
@@ -106,6 +132,15 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
 
     loadData();
   }, [selectedFile, selectedDate]);
+
+  // Calculate IOB data when date or insulin duration changes
+  useEffect(() => {
+    if (availableDates.length > 0 && insulinReadings.length > 0) {
+      const currentDate = availableDates[currentDateIndex];
+      const data = calculateDailyIOB(insulinReadings, currentDate, insulinDuration);
+      setIobData(data);
+    }
+  }, [currentDateIndex, availableDates, insulinReadings, insulinDuration]);
 
   // Update selected date when date index changes
   useEffect(() => {
@@ -187,12 +222,64 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
         maxDate={maxDate}
       />
 
-      {/* Graph Placeholder */}
-      <div className={styles.graphPlaceholder}>
-        <Text className={styles.placeholderText}>
-          IOB graph will be configured here
+      {/* Insulin Duration Info */}
+      <div className={styles.settingInfo}>
+        <Text className={styles.settingText}>
+          <strong>Insulin Duration:</strong> {insulinDuration} hours 
+          {' '} (You can change this in Settings → General → Insulin Duration)
         </Text>
       </div>
+
+      {/* IOB Graph */}
+      <Card className={styles.graphCard}>
+        <div className={styles.graphContainer}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={iobData}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="timeLabel" 
+                interval={11}  // Show every 3 hours (12 * 15min = 3 hours)
+                label={{ value: 'Time of Day', position: 'insideBottom', offset: -5 }}
+              />
+              <YAxis 
+                label={{ value: 'IOB (units)', angle: -90, position: 'insideLeft' }}
+              />
+              <Tooltip 
+                formatter={(value: number) => `${value.toFixed(2)} U`}
+                labelFormatter={(label) => `Time: ${label}`}
+              />
+              <Legend />
+              <Line 
+                type="monotone" 
+                dataKey="basalIOB" 
+                stroke={tokens.colorPaletteBlueForeground2} 
+                name="Basal IOB"
+                dot={false}
+                strokeWidth={2}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="bolusIOB" 
+                stroke={tokens.colorPaletteGreenForeground2} 
+                name="Bolus IOB"
+                dot={false}
+                strokeWidth={2}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="totalIOB" 
+                stroke={tokens.colorPaletteRedForeground2} 
+                name="Total IOB"
+                dot={false}
+                strokeWidth={3}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
     </div>
   );
 }

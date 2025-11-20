@@ -13,6 +13,7 @@ import { useExportFormat } from './hooks/useExportFormat'
 import { useResponseLanguage } from './hooks/useResponseLanguage'
 import { useGlucoseThresholds } from './hooks/useGlucoseThresholds'
 import { useGlucoseUnit } from './hooks/useGlucoseUnit'
+import { useInsulinDuration } from './hooks/useInsulinDuration'
 import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
 import { useGeminiApiKey } from './hooks/useGeminiApiKey'
 import { useGrokApiKey } from './hooks/useGrokApiKey'
@@ -39,6 +40,7 @@ function App() {
   const { responseLanguage, setResponseLanguage } = useResponseLanguage()
   const { thresholds: glucoseThresholds, setThresholds: setGlucoseThresholds } = useGlucoseThresholds()
   const { glucoseUnit, setGlucoseUnit } = useGlucoseUnit()
+  const { insulinDuration, setInsulinDuration } = useInsulinDuration()
   
   // Sync settings with Azure for authenticated users
   useSettingsSync({
@@ -247,6 +249,8 @@ function App() {
           onResponseLanguageChange={setResponseLanguage}
           glucoseUnit={glucoseUnit}
           onGlucoseUnitChange={setGlucoseUnit}
+          insulinDuration={insulinDuration}
+          onInsulinDurationChange={setInsulinDuration}
           perplexityApiKey={perplexityApiKey}
           onPerplexityApiKeyChange={setPerplexityApiKey}
           geminiApiKey={geminiApiKey}

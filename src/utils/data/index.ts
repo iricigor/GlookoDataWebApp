@@ -5,3 +5,4 @@ export * from './insulinDataUtils';
 export * from './metadataUtils';
 export * from './glucoseUnitUtils';
 export * from './columnMapper';
+export * from './iobCalculations';
