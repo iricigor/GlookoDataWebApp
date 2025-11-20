@@ -8,6 +8,7 @@ import {
   MenuPopover,
   MenuList,
   MenuItem,
+  Tooltip,
   tokens,
   shorthands,
   Table,
@@ -23,7 +24,7 @@ import type { UploadedFile } from '../../../types';
 import type { ExportFormat } from '../../../hooks/useExportFormat';
 import { convertZipToXlsx, downloadXlsx } from '../../export/utils';
 import { TableContainer } from '../../../components/TableContainer';
-import { DEMO_DATASETS, loadDemoDataset } from '../../../utils/demoData';
+import { DEMO_DATASETS, loadDemoDataset, getDemoDataAttribution } from '../../../utils/demoData';
 
 const useStyles = makeStyles({
   container: {
@@ -324,34 +325,39 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
           Uploaded Files ({files.length})
         </Text>
         <div className={styles.buttonGroup}>
-          <Menu positioning="below-end">
-            <MenuTrigger disableButtonEnhancement>
-              <Button
-                  appearance="secondary"
-                  icon={<DatabaseRegular />}
-                  disabled={loadingDemo}
-                >
-                  {loadingDemo ? 'Loading...' : 'Load Demo Data'}
-                </Button>
-              </MenuTrigger>
-              <MenuPopover>
-                <MenuList>
-                  {DEMO_DATASETS.map((dataset) => (
-                    <MenuItem
-                      key={dataset.id}
-                      onClick={() => handleLoadDemoData(dataset.id)}
-                    >
-                      <div>
-                        <div style={{ fontWeight: 500 }}>{dataset.name}</div>
-                        <div style={{ fontSize: '0.85em', color: tokens.colorNeutralForeground2 }}>
-                          {dataset.description}
+          <Tooltip 
+            content={getDemoDataAttribution()}
+            relationship="description"
+          >
+            <Menu positioning="below-end">
+              <MenuTrigger disableButtonEnhancement>
+                <Button
+                    appearance="secondary"
+                    icon={<DatabaseRegular />}
+                    disabled={loadingDemo}
+                  >
+                    {loadingDemo ? 'Loading...' : 'Load Demo Data'}
+                  </Button>
+                </MenuTrigger>
+                <MenuPopover>
+                  <MenuList>
+                    {DEMO_DATASETS.map((dataset) => (
+                      <MenuItem
+                        key={dataset.id}
+                        onClick={() => handleLoadDemoData(dataset.id)}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 500 }}>{dataset.name}</div>
+                          <div style={{ fontSize: '0.85em', color: tokens.colorNeutralForeground2 }}>
+                            {dataset.description}
+                          </div>
                         </div>
-                      </div>
-                    </MenuItem>
-                  ))}
-                </MenuList>
-              </MenuPopover>
-            </Menu>
+                      </MenuItem>
+                    ))}
+                  </MenuList>
+                </MenuPopover>
+              </Menu>
+            </Tooltip>
           <Button
             appearance="secondary"
             onClick={onClearAll}
