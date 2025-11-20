@@ -21,7 +21,6 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('24px'),
-    ...shorthands.padding('24px'),
   },
   loadingContainer: {
     display: 'flex',

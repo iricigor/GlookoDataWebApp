@@ -6,7 +6,7 @@ import {
   TabList,
   Tab,
 } from '@fluentui/react-components';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { InRangeReport } from '../components/InRangeReport';
 import { AGPReport } from '../components/AGPReport';
@@ -70,7 +70,16 @@ interface ReportsProps {
 
 export function Reports({ selectedFile, exportFormat, glucoseUnit }: ReportsProps) {
   const styles = useStyles();
-  const [selectedTab, setSelectedTab] = useState<string>('inRange');
+  const [selectedTab, setSelectedTab] = useState<string>(() => {
+    // Load the last selected tab from localStorage
+    const savedTab = localStorage.getItem('reports-selected-tab');
+    return savedTab || 'inRange';
+  });
+
+  // Save the selected tab to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('reports-selected-tab', selectedTab);
+  }, [selectedTab]);
 
   const renderTabContent = () => {
     switch (selectedTab) {

@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react';
 import type { UploadedFile, InsulinReading } from '../types';
 import { extractInsulinReadings, prepareInsulinTimelineData } from '../utils/data';
 import { InsulinTimeline } from './InsulinTimeline';
-import { InsulinDayNavigator } from './InsulinDayNavigator';
+import { DayNavigator } from './DayNavigator';
 import { InsulinSummaryCards } from './InsulinSummaryCards';
 import { useSelectedDate } from '../hooks/useSelectedDate';
 
@@ -23,7 +23,6 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('24px'),
-    ...shorthands.padding('24px'),
   },
   loadingContainer: {
     display: 'flex',
@@ -200,7 +199,7 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
   return (
     <div className={styles.container}>
       {/* Navigation Bar */}
-      <InsulinDayNavigator
+      <DayNavigator
         currentDate={currentDate}
         onPreviousDay={handlePreviousDay}
         onNextDay={handleNextDay}
