@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>366 Fix Set-GlookoConfig JSON truncation and consolidate deployment into module</summary>
+
+[#366](../../pull/366) Fix Set-GlookoConfig JSON truncation and consolidate deployment into module
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>353 Add extended demo data with 6 patient datasets and load UI</summary>
 
 [#353](../../pull/353) Add extended demo data with 6 patient datasets and load UI
