@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>353 Add extended demo data with 6 patient datasets and load UI</summary>
+
+[#353](../../pull/353) Add extended demo data with 6 patient datasets and load UI
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>358 Fix report content alignment and add tab/date persistence</summary>
 
 [#358](../../pull/358) Fix report content alignment and add tab/date persistence
