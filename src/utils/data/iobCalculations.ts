@@ -148,13 +148,16 @@ export function calculateDailyIOB(
       r => r.timestamp >= hourStart && r.timestamp < hourEnd
     );
     
-    const basalAmount = hourReadings
-      .filter(r => r.insulinType === 'basal')
-      .reduce((sum, r) => sum + r.dose, 0);
+    // Calculate basal amount: use average rate (like Detailed Insulin page)
+    // This represents the basal delivery rate in U/hr
+    const basalReadings = hourReadings.filter(r => r.insulinType === 'basal');
+    const basalAmount = basalReadings.length > 0
+      ? basalReadings.reduce((sum, r) => sum + r.dose, 0) / basalReadings.length
+      : 0;
     
-    const bolusAmount = hourReadings
-      .filter(r => r.insulinType === 'bolus')
-      .reduce((sum, r) => sum + r.dose, 0);
+    // Calculate bolus total for the hour (sum of all bolus doses)
+    const bolusReadings = hourReadings.filter(r => r.insulinType === 'bolus');
+    const bolusAmount = bolusReadings.reduce((sum, r) => sum + r.dose, 0);
 
     // Calculate IOB at the END of this hour
     const currentTime = hourEnd;
