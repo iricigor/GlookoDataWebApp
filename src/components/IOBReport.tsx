@@ -252,7 +252,7 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
         <Text className={styles.settingText}>
           Insulin Duration: {insulinDuration} hours (
           <a href="#settings" className={styles.settingLink}>change in Settings</a>).
-          {' '}IOB calculated using linear decay: each dose contributes (1 - time_elapsed / duration) × dose_amount.
+          {' '}IOB calculated using linear decay: {Math.round((1 - 1/insulinDuration) * 100)}% of previous IOB carries forward each hour, plus new insulin delivered in that hour.
         </Text>
       </div>
 
