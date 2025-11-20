@@ -110,7 +110,7 @@ function Set-GlookoConfig {
     
     # Create empty config if it doesn't exist
     if (-not (Test-Path $configPath)) {
-        @{} | ConvertTo-Json | Set-Content $configPath
+        @{} | ConvertTo-Json -Depth 10 | Set-Content $configPath
     }
     
     # Load existing config
@@ -130,7 +130,7 @@ function Set-GlookoConfig {
     if ($UseManagedIdentity) { $config.useManagedIdentity = ($UseManagedIdentity -eq 'true') }
     
     # Save updated config
-    $config | ConvertTo-Json | Set-Content $configPath
+    $config | ConvertTo-Json -Depth 10 | Set-Content $configPath
     
     Write-SuccessMessage "Configuration saved to: $configPath"
     
@@ -264,7 +264,7 @@ function Initialize-GlookoConfig {
         signInAudience = "PersonalMicrosoftAccount"
     }
     
-    $defaultConfig | ConvertTo-Json | Set-Content $configPath
+    $defaultConfig | ConvertTo-Json -Depth 10 | Set-Content $configPath
     
     Write-SuccessMessage "Configuration file created successfully"
     Write-InfoMessage "Location: $configPath"

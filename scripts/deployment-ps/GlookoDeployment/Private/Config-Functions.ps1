@@ -67,13 +67,13 @@ function Save-GlookoConfigValue {
     
     # Create empty config if it doesn't exist
     if (-not (Test-Path $ConfigFile)) {
-        @{} | ConvertTo-Json | Set-Content $ConfigFile
+        @{} | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile
     }
     
     try {
         $configData = Get-Content $ConfigFile -Raw | ConvertFrom-Json -AsHashtable
         $configData[$Key] = $Value
-        $configData | ConvertTo-Json | Set-Content $ConfigFile
+        $configData | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile
         return $true
     }
     catch {
