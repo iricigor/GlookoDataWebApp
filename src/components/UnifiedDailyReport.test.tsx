@@ -24,8 +24,8 @@ vi.mock('./UnifiedTimeline', () => ({
   UnifiedTimeline: () => <div data-testid="unified-timeline">Unified Timeline</div>,
 }));
 
-vi.mock('./InsulinDayNavigator', () => ({
-  InsulinDayNavigator: () => <div data-testid="day-navigator">Day Navigator</div>,
+vi.mock('./DayNavigator', () => ({
+  DayNavigator: () => <div data-testid="day-navigator">Day Navigator</div>,
 }));
 
 vi.mock('./InsulinSummaryCards', () => ({

@@ -13,7 +13,7 @@ import {
 import { useState, useEffect } from 'react';
 import type { UploadedFile, InsulinReading, GlucoseReading, GlucoseUnit } from '../types';
 import { extractInsulinReadings, prepareInsulinTimelineData, extractGlucoseReadings, filterReadingsByDate } from '../utils/data';
-import { InsulinDayNavigator } from './InsulinDayNavigator';
+import { DayNavigator } from './DayNavigator';
 import { useSelectedDate } from '../hooks/useSelectedDate';
 import { UnifiedTimeline } from './UnifiedTimeline';
 import { useBGColorScheme } from '../hooks/useBGColorScheme';
@@ -23,7 +23,6 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('24px'),
-    ...shorthands.padding('24px'),
   },
   loadingContainer: {
     display: 'flex',
@@ -219,7 +218,7 @@ export function UnifiedDailyReport({ selectedFile, glucoseUnit }: UnifiedDailyRe
   return (
     <div className={styles.container}>
       {/* Navigation Bar */}
-      <InsulinDayNavigator
+      <DayNavigator
         currentDate={currentDate}
         onPreviousDay={handlePreviousDay}
         onNextDay={handleNextDay}
