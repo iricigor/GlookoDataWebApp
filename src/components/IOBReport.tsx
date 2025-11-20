@@ -10,6 +10,16 @@ import {
   shorthands,
   Spinner,
   Card,
+  Accordion,
+  AccordionItem,
+  AccordionHeader,
+  AccordionPanel,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  TableHeader,
+  TableHeaderCell,
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
 import {
@@ -58,7 +68,7 @@ const useStyles = makeStyles({
     height: '400px',
   },
   settingInfo: {
-    marginBottom: '16px',
+    marginBottom: '8px',
   },
   settingText: {
     fontSize: tokens.fontSizeBase200,
@@ -72,16 +82,14 @@ const useStyles = makeStyles({
     },
   },
   calculationInfo: {
-    ...shorthands.padding('12px'),
-    backgroundColor: tokens.colorNeutralBackground2,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    marginTop: '16px',
     marginBottom: '8px',
   },
   calculationText: {
     fontSize: tokens.fontSizeBase200,
-    color: tokens.colorNeutralForeground2,
-    lineHeight: '1.5',
+    color: tokens.colorNeutralForeground3,
+  },
+  dataTable: {
+    marginTop: '16px',
   },
 });
 
@@ -239,21 +247,12 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
         maxDate={maxDate}
       />
 
-      {/* Insulin Duration Info */}
+      {/* Insulin Duration and IOB Calculation Info */}
       <div className={styles.settingInfo}>
         <Text className={styles.settingText}>
-          Insulin Duration: {insulinDuration} hours 
-          {' '} (<a href="#settings" className={styles.settingLink}>change in Settings</a>)
-        </Text>
-      </div>
-
-      {/* IOB Calculation Explanation */}
-      <div className={styles.calculationInfo}>
-        <Text className={styles.calculationText}>
-          <strong>IOB Calculation:</strong> For each hour, IOB is calculated by summing the 
-          remaining active insulin from all doses delivered within the insulin duration window. 
-          Linear decay is used: a dose contributes (1 - time_elapsed / duration) × dose_amount 
-          to the IOB at any given time.
+          Insulin Duration: {insulinDuration} hours (
+          <a href="#settings" className={styles.settingLink}>change in Settings</a>).
+          {' '}IOB calculated using linear decay: each dose contributes (1 - time_elapsed / duration) × dose_amount.
         </Text>
       </div>
 
@@ -263,13 +262,13 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={iobData}
-              margin={{ top: 5, right: 30, left: 20, bottom: 25 }}
+              margin={{ top: 5, right: 30, left: 20, bottom: 35 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="timeLabel"
                 interval={5}  // Show every 6 hours (0, 6, 12, 18)
-                label={{ value: 'Time of Day', position: 'insideBottom', offset: -15 }}
+                label={{ value: 'Time of Day', position: 'insideBottom', offset: -25 }}
               />
               <YAxis 
                 label={{ value: 'Insulin / IOB (units)', angle: -90, position: 'insideLeft' }}
@@ -278,7 +277,7 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
                 formatter={(value: number) => `${value.toFixed(2)} U`}
                 labelFormatter={(label) => `Time: ${label}`}
               />
-              <Legend wrapperStyle={{ paddingTop: '15px' }} />
+              <Legend wrapperStyle={{ paddingTop: '20px' }} />
               <Bar 
                 dataKey="basalAmount" 
                 stackId="insulin"
@@ -303,6 +302,35 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
           </ResponsiveContainer>
         </div>
       </Card>
+
+      {/* Collapsible Data Table */}
+      <Accordion collapsible className={styles.dataTable}>
+        <AccordionItem value="dataTable">
+          <AccordionHeader>View Hourly Data Table</AccordionHeader>
+          <AccordionPanel>
+            <Table size="small">
+              <TableHeader>
+                <TableRow>
+                  <TableHeaderCell>Hour</TableHeaderCell>
+                  <TableHeaderCell>Basal (U)</TableHeaderCell>
+                  <TableHeaderCell>Bolus (U)</TableHeaderCell>
+                  <TableHeaderCell>IOB at End of Hour (U)</TableHeaderCell>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {iobData.map((dataPoint) => (
+                  <TableRow key={dataPoint.timeLabel}>
+                    <TableCell>{dataPoint.timeLabel}</TableCell>
+                    <TableCell>{dataPoint.basalAmount.toFixed(2)}</TableCell>
+                    <TableCell>{dataPoint.bolusAmount.toFixed(2)}</TableCell>
+                    <TableCell>{dataPoint.totalIOB.toFixed(2)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 }
