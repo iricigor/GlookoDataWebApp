@@ -6,12 +6,14 @@
 #
 # Prerequisites:
 #   - PowerShell 7.0+
-#   - Azure CLI installed
+#   - Azure CLI installed and configured (az login)
 #   - For managed identity: Standard SKU required
+#   - GlookoDeployment module installed for configuration management
 #
 ################################################################################
 
 #Requires -Version 7.0
+#Requires -Modules @{ ModuleName='GlookoDeployment'; ModuleVersion='0.0.0' }
 
 [CmdletBinding()]
 param(
@@ -25,16 +27,6 @@ param(
     [switch]$Help
 )
 
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$ConfigLibPath = Join-Path $ScriptDir "config-lib.ps1"
-if (Test-Path $ConfigLibPath) {
-    . $ConfigLibPath
-}
-else {
-    Write-Host "ERROR: config-lib.ps1 not found in $ScriptDir" -ForegroundColor Red
-    exit 1
-}
-
 if ($Help) {
     @"
 Azure Static Web App Deployment Script
@@ -43,46 +35,67 @@ Usage: $($MyInvocation.MyCommand.Name) [OPTIONS]
 
 This script creates Azure Static Web App with optional managed identity.
 
+Prerequisites:
+  - GlookoDeployment PowerShell module must be installed
+  - For managed identity: Standard SKU is required
+
 Parameters:
-  -Name <string>       Static Web App name
-  -ResourceGroup <string>  Resource group name
-  -Location <string>   Azure region
-  -Sku <string>        SKU: Free or Standard (default: Free)
-  -ManagedIdentity     Enable managed identity (requires Standard SKU)
-  -ConfigFile <string> Custom configuration file
-  -Help                Show this help message
+  -Name <string>           Static Web App name (overrides config/default)
+  -ResourceGroup <string>  Resource group name (overrides config/default)
+  -Location <string>       Azure region (overrides config/default)
+  -Sku <string>            SKU: Free or Standard (default: Free)
+  -ManagedIdentity         Enable managed identity (requires Standard SKU)
+  -ConfigFile <string>     Custom configuration file
+  -Help                    Show this help message
 
 Examples:
   ./deploy-azure-static-web-app.ps1 -Sku Standard -ManagedIdentity
   ./deploy-azure-static-web-app.ps1 -Sku Free
+
+Installation:
+  To install the GlookoDeployment module:
+  iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
 
 "@
     exit 0
 }
 
 if ($ManagedIdentity -and $Sku -eq "Free") {
-    Write-ErrorMessage "Managed identity requires Standard SKU"
-    Write-InfoMessage "Use -Sku Standard with -ManagedIdentity"
+    Write-Host "❌ Managed identity requires Standard SKU" -ForegroundColor Red
+    Write-Host "ℹ️  Use -Sku Standard with -ManagedIdentity" -ForegroundColor Blue
     exit 1
 }
 
-if ($Name) { $env:STATIC_WEB_APP_NAME = $Name }
-if ($ResourceGroup) { $env:RESOURCE_GROUP = $ResourceGroup }
-if ($Location) { $env:LOCATION = $Location }
-if ($Sku) { $env:STATIC_WEB_APP_SKU = $Sku }
+# Load configuration from GlookoDeployment module
+$config = if ($ConfigFile) {
+    Load-GlookoConfig -ConfigFile $ConfigFile
+} else {
+    Load-GlookoConfig
+}
 
-Load-Config -ConfigFile $(if ($ConfigFile) { $ConfigFile } else { $script:DefaultConfigFile })
-Test-Prerequisites
-Initialize-ResourceGroup
+# Override with command-line parameters
+if ($Name) { $config.StaticWebAppName = $Name }
+if ($ResourceGroup) { $config.ResourceGroup = $ResourceGroup }
+if ($Location) { $config.Location = $Location }
+if ($Sku) { $config.StaticWebAppSku = $Sku }
+
+# Check prerequisites
+if (-not (Test-AzurePrerequisites)) {
+    Write-ErrorMessage "Prerequisites not met"
+    exit 1
+}
+
+# Ensure resource group exists
+Initialize-GlookoResourceGroup -ResourceGroupName $config.ResourceGroup -Location $config.Location -Tags $config.Tags
 
 Write-Section "Creating Azure Static Web App"
 
-$swaName = $script:Config.StaticWebAppName
-$rgName = $script:Config.ResourceGroup
-$location = $script:Config.Location
+$swaName = $config.StaticWebAppName
+$rgName = $config.ResourceGroup
+$location = $config.Location
 
 Write-InfoMessage "Checking if Static Web App exists..."
-if (Test-ResourceExists -ResourceType "staticwebapp" -ResourceName $swaName -ResourceGroupName $rgName) {
+if (Test-GlookoResourceExists -ResourceType "staticwebapp" -ResourceName $swaName -ResourceGroupName $rgName) {
     Write-WarningMessage "Static Web App '$swaName' already exists"
 }
 else {
@@ -101,8 +114,8 @@ else {
 if ($ManagedIdentity) {
     Write-Section "Configuring Managed Identity"
     
-    $identityName = $script:Config.ManagedIdentityName
-    $identityId = Get-ManagedIdentityId -IdentityName $identityName
+    $identityName = $config.ManagedIdentityName
+    $identityId = Get-GlookoManagedIdentityId -IdentityName $identityName -ResourceGroupName $rgName
     
     if ($identityId) {
         Write-InfoMessage "Assigning managed identity to Static Web App..."
@@ -113,7 +126,7 @@ if ($ManagedIdentity) {
         Write-SuccessMessage "Managed identity assigned"
     }
     else {
-        Write-WarningMessage "Managed identity not found. Run deploy-azure-managed-identity.ps1 first"
+        Write-WarningMessage "Managed identity not found. Deploy managed identity first using: Set-GlookoManagedIdentity"
     }
 }
 

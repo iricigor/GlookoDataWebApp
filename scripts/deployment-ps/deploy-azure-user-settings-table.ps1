@@ -6,9 +6,9 @@
 #
 # Prerequisites:
 #   - PowerShell 7.0+
-#   - Azure CLI installed
-#   - Logged in to Azure (az login)
-#   - Storage account must exist (run deploy-azure-storage-account.ps1 first)
+#   - Azure CLI installed and configured (az login)
+#   - Storage account must exist (deploy with Set-GlookoStorageAccount from GlookoDeployment module)
+#   - GlookoDeployment module installed for configuration management
 #
 # Usage:
 #   ./deploy-azure-user-settings-table.ps1 [OPTIONS]
@@ -16,6 +16,7 @@
 ################################################################################
 
 #Requires -Version 7.0
+#Requires -Modules @{ ModuleName='GlookoDeployment'; ModuleVersion='0.0.0' }
 
 [CmdletBinding()]
 param(
@@ -25,16 +26,6 @@ param(
     [switch]$Help
 )
 
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$ConfigLibPath = Join-Path $ScriptDir "config-lib.ps1"
-if (Test-Path $ConfigLibPath) {
-    . $ConfigLibPath
-}
-else {
-    Write-Host "ERROR: config-lib.ps1 not found in $ScriptDir" -ForegroundColor Red
-    exit 1
-}
-
 if ($Help) {
     @"
 Azure User Settings Table Deployment Script
@@ -43,11 +34,19 @@ Usage: $($MyInvocation.MyCommand.Name) [OPTIONS]
 
 This script creates the UserSettings table in Azure Table Storage.
 
+Prerequisites:
+  - GlookoDeployment PowerShell module must be installed
+  - Storage account must already exist
+
 Parameters:
   -StorageAccountName <string>  Storage account name (overrides config/default)
   -ResourceGroup <string>       Resource group name (overrides config/default)
   -ConfigFile <string>          Use custom configuration file
   -Help                         Show this help message and exit
+
+Installation:
+  To install the GlookoDeployment module:
+  iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
 
 For more information, visit:
   https://github.com/iricigor/GlookoDataWebApp/tree/main/scripts/deployment
@@ -56,25 +55,32 @@ For more information, visit:
     exit 0
 }
 
-# Override environment variables with command-line parameters
-if ($StorageAccountName) { $env:STORAGE_ACCOUNT_NAME = $StorageAccountName }
-if ($ResourceGroup) { $env:RESOURCE_GROUP = $ResourceGroup }
+# Load configuration from GlookoDeployment module
+$config = if ($ConfigFile) {
+    Load-GlookoConfig -ConfigFile $ConfigFile
+} else {
+    Load-GlookoConfig
+}
 
-# Load configuration
-Load-Config -ConfigFile $(if ($ConfigFile) { $ConfigFile } else { $script:DefaultConfigFile })
+# Override with command-line parameters
+if ($StorageAccountName) { $config.StorageAccountName = $StorageAccountName }
+if ($ResourceGroup) { $config.ResourceGroup = $ResourceGroup }
 
 # Check prerequisites
-Test-Prerequisites
+if (-not (Test-AzurePrerequisites)) {
+    Write-ErrorMessage "Prerequisites not met"
+    exit 1
+}
 
 Write-Section "Creating UserSettings Table"
 
-$storageAccountName = $script:Config.StorageAccountName
-$rgName = $script:Config.ResourceGroup
+$storageAccountName = $config.StorageAccountName
+$rgName = $config.ResourceGroup
 
 Write-InfoMessage "Checking if storage account exists..."
-if (-not (Test-ResourceExists -ResourceType "storage-account" -ResourceName $storageAccountName -ResourceGroupName $rgName)) {
+if (-not (Test-GlookoResourceExists -ResourceType "storage-account" -ResourceName $storageAccountName -ResourceGroupName $rgName)) {
     Write-ErrorMessage "Storage account '$storageAccountName' not found"
-    Write-InfoMessage "Please run deploy-azure-storage-account.ps1 first"
+    Write-InfoMessage "Please deploy storage account first using: Set-GlookoStorageAccount"
     exit 1
 }
 

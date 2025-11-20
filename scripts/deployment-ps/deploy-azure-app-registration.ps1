@@ -6,12 +6,14 @@
 #
 # Prerequisites:
 #   - PowerShell 7.0+
-#   - Azure CLI installed
+#   - Azure CLI installed and configured (az login)
 #   - Application Administrator permissions
+#   - GlookoDeployment module installed for configuration management
 #
 ################################################################################
 
 #Requires -Version 7.0
+#Requires -Modules @{ ModuleName='GlookoDeployment'; ModuleVersion='0.0.0' }
 
 [CmdletBinding()]
 param(
@@ -21,16 +23,6 @@ param(
     [switch]$Help
 )
 
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$ConfigLibPath = Join-Path $ScriptDir "config-lib.ps1"
-if (Test-Path $ConfigLibPath) {
-    . $ConfigLibPath
-}
-else {
-    Write-Host "ERROR: config-lib.ps1 not found in $ScriptDir" -ForegroundColor Red
-    exit 1
-}
-
 if ($Help) {
     @"
 Azure App Registration Deployment Script
@@ -39,26 +31,45 @@ Usage: $($MyInvocation.MyCommand.Name) [OPTIONS]
 
 This script creates Azure App Registration for Microsoft authentication.
 
+Prerequisites:
+  - GlookoDeployment PowerShell module must be installed
+  - Application Administrator permissions in Azure AD
+
 Parameters:
-  -AppName <string>      App registration name
-  -WebAppUrl <string>    Production web URL
+  -AppName <string>      App registration name (overrides config/default)
+  -WebAppUrl <string>    Production web URL (overrides config/default)
   -ConfigFile <string>   Custom configuration file
   -Help                  Show this help message
+
+Installation:
+  To install the GlookoDeployment module:
+  iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
 
 "@
     exit 0
 }
 
-if ($AppName) { $env:APP_REGISTRATION_NAME = $AppName }
-if ($WebAppUrl) { $env:WEB_APP_URL = $WebAppUrl }
+# Load configuration from GlookoDeployment module
+$config = if ($ConfigFile) {
+    Load-GlookoConfig -ConfigFile $ConfigFile
+} else {
+    Load-GlookoConfig
+}
 
-Load-Config -ConfigFile $(if ($ConfigFile) { $ConfigFile } else { $script:DefaultConfigFile })
-Test-Prerequisites
+# Override with command-line parameters
+if ($AppName) { $config.AppRegistrationName = $AppName }
+if ($WebAppUrl) { $config.WebAppUrl = $WebAppUrl }
+
+# Check prerequisites
+if (-not (Test-AzurePrerequisites)) {
+    Write-ErrorMessage "Prerequisites not met"
+    exit 1
+}
 
 Write-Section "Creating Azure App Registration"
 
-$appName = $script:Config.AppRegistrationName
-$webAppUrl = $script:Config.WebAppUrl
+$appName = $config.AppRegistrationName
+$webAppUrl = $config.WebAppUrl
 
 Write-InfoMessage "Checking if app registration exists..."
 $existingApp = az ad app list --display-name $appName --query "[0]" 2>$null | ConvertFrom-Json
