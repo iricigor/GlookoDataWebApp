@@ -75,24 +75,48 @@ export function calculateIOBAtTime(
   // Look back at all insulin readings within the insulin duration window
   const lookbackTime = new Date(currentTime.getTime() - insulinDuration * 60 * 60 * 1000);
 
-  for (const reading of insulinReadings) {
-    // Skip readings outside the lookback window
-    if (reading.timestamp < lookbackTime || reading.timestamp > currentTime) {
-      continue;
+  // Separate basal and bolus readings
+  const basalReadings = insulinReadings.filter(r => 
+    r.insulinType === 'basal' && 
+    r.timestamp >= lookbackTime && 
+    r.timestamp <= currentTime
+  );
+  
+  const bolusReadings = insulinReadings.filter(r => 
+    r.insulinType === 'bolus' && 
+    r.timestamp >= lookbackTime && 
+    r.timestamp <= currentTime
+  );
+
+  // Calculate basal IOB by grouping readings into time windows
+  // Basal is continuous delivery, so we need to calculate the rate and apply decay
+  if (basalReadings.length > 0) {
+    // Group basal readings by hour to get hourly totals
+    const hourlyBasal = new Map<number, number>();
+    
+    for (const reading of basalReadings) {
+      const hoursSinceReading = (currentTime.getTime() - reading.timestamp.getTime()) / (1000 * 60 * 60);
+      const hourBucket = Math.floor(hoursSinceReading);
+      
+      if (hourBucket < insulinDuration) {
+        const current = hourlyBasal.get(hourBucket) || 0;
+        hourlyBasal.set(hourBucket, current + reading.dose);
+      }
     }
-
-    // Calculate time since this dose was administered (in hours)
-    const timeSinceAdministration = (currentTime.getTime() - reading.timestamp.getTime()) / (1000 * 60 * 60);
-
-    // Calculate active insulin for this dose
-    const activeInsulin = calculateActiveInsulin(reading.dose, timeSinceAdministration, insulinDuration);
-
-    // Add to the appropriate category
-    if (reading.insulinType === 'basal') {
+    
+    // Apply exponential decay to each hourly total
+    for (const [hourBucket, totalDose] of hourlyBasal) {
+      const timeSinceAdministration = hourBucket + 0.5; // Use middle of the hour
+      const activeInsulin = calculateActiveInsulin(totalDose, timeSinceAdministration, insulinDuration);
       basalIOB += activeInsulin;
-    } else {
-      bolusIOB += activeInsulin;
     }
+  }
+
+  // Calculate bolus IOB using exponential decay for each discrete dose
+  for (const reading of bolusReadings) {
+    const timeSinceAdministration = (currentTime.getTime() - reading.timestamp.getTime()) / (1000 * 60 * 60);
+    const activeInsulin = calculateActiveInsulin(reading.dose, timeSinceAdministration, insulinDuration);
+    bolusIOB += activeInsulin;
   }
 
   return {
