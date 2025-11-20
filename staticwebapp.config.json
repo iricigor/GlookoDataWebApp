@@ -3,10 +3,17 @@
     "rewrite": "/index.html",
     "exclude": [
       "/assets/*",
-      "/demo-data.zip"
+      "/demo-data.zip",
+      "/demo-data/*"
     ]
   },
   "routes": [
+    {
+      "route": "/demo-data/*.zip",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
     {
       "route": "/api/settings/*",
       "allowedRoles": ["authenticated"]

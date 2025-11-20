@@ -7,7 +7,9 @@ import type { ExportFormat } from '../../../hooks/useExportFormat';
 describe('FileList', () => {
   const mockOnRemoveFile = vi.fn();
   const mockOnClearAll = vi.fn();
+  const mockOnAddFiles = vi.fn();
   const defaultExportFormat: ExportFormat = 'csv';
+  const defaultIsLoadingDemoData = false;
 
   const createMockFile = (csvFiles: Array<{ name: string; rowCount: number }>): UploadedFile => ({
     id: 'test-file-1',
@@ -29,7 +31,7 @@ describe('FileList', () => {
   describe('data set color based on row count', () => {
     it('should render data set with 0 rows', () => {
       const files = [createMockFile([{ name: 'empty-data', rowCount: 0 }])];
-      const { container } = render(<FileList files={files} onRemoveFile={mockOnRemoveFile} onClearAll={mockOnClearAll} exportFormat={defaultExportFormat} />);
+      const { container } = render(<FileList files={files} onRemoveFile={mockOnRemoveFile} onClearAll={mockOnClearAll} onAddFiles={mockOnAddFiles} exportFormat={defaultExportFormat} isLoadingDemoData={defaultIsLoadingDemoData} />);
       
       // Component should render without errors
       expect(container.querySelector('table')).toBeTruthy();
@@ -38,7 +40,7 @@ describe('FileList', () => {
 
     it('should render data set with 1-9 rows', () => {
       const files = [createMockFile([{ name: 'small-data', rowCount: 5 }])];
-      const { container } = render(<FileList files={files} onRemoveFile={mockOnRemoveFile} onClearAll={mockOnClearAll} exportFormat={defaultExportFormat} />);
+      const { container } = render(<FileList files={files} onRemoveFile={mockOnRemoveFile} onClearAll={mockOnClearAll} onAddFiles={mockOnAddFiles} exportFormat={defaultExportFormat} isLoadingDemoData={defaultIsLoadingDemoData} />);
       
       expect(container.querySelector('table')).toBeTruthy();
       expect(screen.getByText('test-data.zip')).toBeTruthy();
@@ -46,7 +48,7 @@ describe('FileList', () => {
 
     it('should render data set with 10+ rows', () => {
       const files = [createMockFile([{ name: 'large-data', rowCount: 100 }])];
-      const { container } = render(<FileList files={files} onRemoveFile={mockOnRemoveFile} onClearAll={mockOnClearAll} exportFormat={defaultExportFormat} />);
+      const { container } = render(<FileList files={files} onRemoveFile={mockOnRemoveFile} onClearAll={mockOnClearAll} onAddFiles={mockOnAddFiles} exportFormat={defaultExportFormat} isLoadingDemoData={defaultIsLoadingDemoData} />);
       
       expect(container.querySelector('table')).toBeTruthy();
       expect(screen.getByText('test-data.zip')).toBeTruthy();
@@ -58,7 +60,7 @@ describe('FileList', () => {
         { name: 'small-data', rowCount: 5 },
         { name: 'large-data', rowCount: 100 },
       ])];
-      const { container } = render(<FileList files={files} onRemoveFile={mockOnRemoveFile} onClearAll={mockOnClearAll} exportFormat={defaultExportFormat} />);
+      const { container } = render(<FileList files={files} onRemoveFile={mockOnRemoveFile} onClearAll={mockOnClearAll} onAddFiles={mockOnAddFiles} exportFormat={defaultExportFormat} isLoadingDemoData={defaultIsLoadingDemoData} />);
       
       expect(container.querySelector('table')).toBeTruthy();
       expect(screen.getByText('test-data.zip')).toBeTruthy();
@@ -67,7 +69,7 @@ describe('FileList', () => {
 
   describe('empty state', () => {
     it('should display empty state when no files are uploaded', () => {
-      render(<FileList files={[]} onRemoveFile={mockOnRemoveFile} onClearAll={mockOnClearAll} exportFormat={defaultExportFormat} />);
+      render(<FileList files={[]} onRemoveFile={mockOnRemoveFile} onClearAll={mockOnClearAll} onAddFiles={mockOnAddFiles} exportFormat={defaultExportFormat} isLoadingDemoData={defaultIsLoadingDemoData} />);
       
       expect(screen.getByText('No files uploaded yet. Upload ZIP files to get started.')).toBeTruthy();
     });
