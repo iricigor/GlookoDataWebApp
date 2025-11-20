@@ -88,32 +88,13 @@ export function calculateIOBAtTime(
     r.timestamp <= currentTime
   );
 
-  // Calculate basal IOB - basal is continuous delivery, not discrete doses
-  // IOB = average delivery rate × insulin duration
-  if (basalReadings.length > 0) {
-    // Calculate total basal delivered
-    const totalBasalDelivered = basalReadings.reduce((sum, r) => sum + r.dose, 0);
-    
-    // Find the time span of actual basal data (first to last reading)
-    const timestamps = basalReadings.map(r => r.timestamp.getTime());
-    const firstReading = Math.min(...timestamps);
-    const lastReading = Math.max(...timestamps);
-    
-    // If we only have one reading, use the time from that reading to now
-    const dataSpanHours = basalReadings.length === 1
-      ? (currentTime.getTime() - firstReading) / (1000 * 60 * 60)
-      : (lastReading - firstReading) / (1000 * 60 * 60);
-    
-    // Calculate average delivery rate (units per hour)
-    // For single reading, rate = dose / time elapsed
-    // For multiple readings, rate = total / time span
-    const averageBasalRate = dataSpanHours > 0 
-      ? totalBasalDelivered / dataSpanHours 
-      : 0;
-    
-    // For continuous delivery at steady state: IOB = rate × duration
-    // This represents the amount of insulin still active from continuous infusion
-    basalIOB = averageBasalRate * insulinDuration;
+  // Calculate basal IOB using exponential decay, same as bolus
+  // Even though basal is continuous delivery, we can treat each small reading
+  // as a micro-dose and apply decay to each one
+  for (const reading of basalReadings) {
+    const timeSinceAdministration = (currentTime.getTime() - reading.timestamp.getTime()) / (1000 * 60 * 60);
+    const activeInsulin = calculateActiveInsulin(reading.dose, timeSinceAdministration, insulinDuration);
+    basalIOB += activeInsulin;
   }
 
   // Calculate bolus IOB using exponential decay for each discrete dose

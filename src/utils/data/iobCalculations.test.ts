@@ -36,7 +36,7 @@ describe('IOB Calculations', () => {
       expect(result.totalIOB).toBe(result.bolusIOB);
     });
 
-    it('should calculate IOB for basal continuous delivery', () => {
+    it('should calculate IOB for basal micro-doses with decay', () => {
       const readings: InsulinReading[] = [
         {
           timestamp: new Date('2024-01-15T10:00:00'),
@@ -48,10 +48,10 @@ describe('IOB Calculations', () => {
       const currentTime = new Date('2024-01-15T11:00:00'); // 1 hour later
       const result = calculateIOBAtTime(readings, currentTime, 5);
       
-      // Basal is continuous delivery: IOB = rate × duration
-      // Rate = 2 units / 1 hour = 2 U/hr
-      // IOB = 2 U/hr × 5h = 10 units
-      expect(result.basalIOB).toBe(10);
+      // Basal uses exponential decay like bolus
+      // After 1 hour with 5-hour duration, some insulin is still active
+      expect(result.basalIOB).toBeGreaterThan(0);
+      expect(result.basalIOB).toBeLessThan(2); // Less than full dose due to decay
       expect(result.bolusIOB).toBe(0);
       expect(result.totalIOB).toBe(result.basalIOB);
     });
