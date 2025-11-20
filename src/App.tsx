@@ -28,6 +28,7 @@ const PAGE_ORDER = ['home', 'upload', 'reports', 'ai', 'settings'] as const
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
+  const [isLoadingDemoData, setIsLoadingDemoData] = useState(true)
   
   // Authentication
   const { isLoggedIn, userEmail } = useAuth()
@@ -82,13 +83,11 @@ function App() {
   useEffect(() => {
     const loadDemoData = async () => {
       try {
-        // Small delay to ensure DOM is ready
-        await new Promise(resolve => setTimeout(resolve, 100))
-        
         // Fetch Joshua's demo data file from public folder
         const response = await fetch('/demo-data/joshua-demo-data.zip')
         if (!response.ok) {
           console.warn('Demo data file not found, skipping auto-load')
+          setIsLoadingDemoData(false)
           return
         }
 
@@ -109,14 +108,15 @@ function App() {
 
         setUploadedFiles([demoFile])
         setSelectedFileId(demoFile.id)
+        setIsLoadingDemoData(false)
       } catch (error) {
         // Silently handle errors - app should work without demo data
         console.error('Failed to load demo data:', error)
+        setIsLoadingDemoData(false)
       }
     }
 
-    // Don't block app initialization with demo data loading
-    loadDemoData().catch(err => console.error('Demo data loading error:', err))
+    loadDemoData()
   }, [])
 
   // Handle hash-based routing
@@ -217,6 +217,7 @@ function App() {
             selectedFileId={selectedFileId}
             onSelectFile={handleSelectFile}
             exportFormat={exportFormat}
+            isLoadingDemoData={isLoadingDemoData}
           />
         )
       case 'reports':

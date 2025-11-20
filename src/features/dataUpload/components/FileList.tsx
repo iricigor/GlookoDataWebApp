@@ -8,7 +8,6 @@ import {
   MenuPopover,
   MenuList,
   MenuItem,
-  Tooltip,
   tokens,
   shorthands,
   Table,
@@ -24,7 +23,7 @@ import type { UploadedFile } from '../../../types';
 import type { ExportFormat } from '../../../hooks/useExportFormat';
 import { convertZipToXlsx, downloadXlsx } from '../../export/utils';
 import { TableContainer } from '../../../components/TableContainer';
-import { DEMO_DATASETS, loadDemoDataset, getDemoDataAttribution } from '../../../utils/demoData';
+import { DEMO_DATASETS, loadDemoDataset } from '../../../utils/demoData';
 
 const useStyles = makeStyles({
   container: {
@@ -175,6 +174,7 @@ interface FileListProps {
   selectedFileId?: string | null;
   onSelectFile?: (id: string | null) => void;
   exportFormat: ExportFormat;
+  isLoadingDemoData?: boolean;
 }
 
 /**
@@ -195,7 +195,7 @@ function getDataSetColor(rowCount: number): string {
   }
 }
 
-export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selectedFileId, onSelectFile, exportFormat }: FileListProps) {
+export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selectedFileId, onSelectFile, exportFormat, isLoadingDemoData }: FileListProps) {
   const styles = useStyles();
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
   const [exportingFiles, setExportingFiles] = useState<Set<string>>(new Set());
@@ -290,6 +290,20 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
     return [headers, ...rows];
   };
 
+  // Show loading state while demo data is being loaded
+  if (isLoadingDemoData) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <Text className={styles.title}>Uploaded Files</Text>
+        </div>
+        <div className={styles.emptyState}>
+          <Text>Loading demo data...</Text>
+        </div>
+      </div>
+    );
+  }
+
   if (files.length === 0) {
     return (
       <div className={styles.container}>
@@ -310,13 +324,9 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
           Uploaded Files ({files.length})
         </Text>
         <div className={styles.buttonGroup}>
-          <Tooltip 
-            content={getDemoDataAttribution()}
-            relationship="description"
-          >
-            <Menu>
-              <MenuTrigger disableButtonEnhancement>
-                <Button
+          <Menu>
+            <MenuTrigger disableButtonEnhancement>
+              <Button
                   appearance="secondary"
                   icon={<DatabaseRegular />}
                   disabled={loadingDemo}
@@ -342,7 +352,6 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
                 </MenuList>
               </MenuPopover>
             </Menu>
-          </Tooltip>
           <Button
             appearance="secondary"
             onClick={onClearAll}
