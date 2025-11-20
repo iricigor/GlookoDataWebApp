@@ -58,14 +58,30 @@ const useStyles = makeStyles({
     height: '400px',
   },
   settingInfo: {
-    ...shorthands.padding('12px'),
-    backgroundColor: tokens.colorNeutralBackground3,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
     marginBottom: '16px',
   },
   settingText: {
-    fontSize: tokens.fontSizeBase300,
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground3,
+  },
+  settingLink: {
+    color: tokens.colorBrandForeground1,
+    textDecoration: 'none',
+    ':hover': {
+      textDecoration: 'underline',
+    },
+  },
+  calculationInfo: {
+    ...shorthands.padding('12px'),
+    backgroundColor: tokens.colorNeutralBackground2,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    marginTop: '16px',
+    marginBottom: '8px',
+  },
+  calculationText: {
+    fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground2,
+    lineHeight: '1.5',
   },
 });
 
@@ -226,8 +242,18 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
       {/* Insulin Duration Info */}
       <div className={styles.settingInfo}>
         <Text className={styles.settingText}>
-          <strong>Insulin Duration:</strong> {insulinDuration} hours 
-          {' '} (You can change this in Settings → General → Insulin Duration)
+          Insulin Duration: {insulinDuration} hours 
+          {' '} (<a href="#settings" className={styles.settingLink}>change in Settings</a>)
+        </Text>
+      </div>
+
+      {/* IOB Calculation Explanation */}
+      <div className={styles.calculationInfo}>
+        <Text className={styles.calculationText}>
+          <strong>IOB Calculation:</strong> For each hour, IOB is calculated by summing the 
+          remaining active insulin from all doses delivered within the insulin duration window. 
+          Linear decay is used: a dose contributes (1 - time_elapsed / duration) × dose_amount 
+          to the IOB at any given time.
         </Text>
       </div>
 
@@ -237,43 +263,35 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={iobData}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 5, right: 30, left: 20, bottom: 25 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
-                dataKey="timeLabel" 
-                label={{ value: 'Time of Day', position: 'insideBottom', offset: -5 }}
+                dataKey="timeLabel"
+                interval={5}  // Show every 6 hours (0, 6, 12, 18)
+                label={{ value: 'Time of Day', position: 'insideBottom', offset: -15 }}
               />
               <YAxis 
-                yAxisId="left"
-                label={{ value: 'Insulin (units)', angle: -90, position: 'insideLeft' }}
-              />
-              <YAxis 
-                yAxisId="right"
-                orientation="right"
-                label={{ value: 'IOB (units)', angle: 90, position: 'insideRight' }}
+                label={{ value: 'Insulin / IOB (units)', angle: -90, position: 'insideLeft' }}
               />
               <Tooltip 
                 formatter={(value: number) => `${value.toFixed(2)} U`}
                 labelFormatter={(label) => `Time: ${label}`}
               />
-              <Legend />
+              <Legend wrapperStyle={{ paddingTop: '15px' }} />
               <Bar 
-                yAxisId="left"
                 dataKey="basalAmount" 
                 stackId="insulin"
-                fill={tokens.colorPaletteGreenForeground2}
+                fill="#2E7D32"
                 name="Basal Insulin"
               />
               <Bar 
-                yAxisId="left"
                 dataKey="bolusAmount" 
                 stackId="insulin"
-                fill={tokens.colorPaletteBlueForeground2}
+                fill="#1976D2"
                 name="Bolus Insulin"
               />
               <Line 
-                yAxisId="right"
                 type="monotone" 
                 dataKey="totalIOB" 
                 stroke={tokens.colorPaletteRedForeground2} 
