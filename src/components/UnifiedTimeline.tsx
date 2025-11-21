@@ -234,6 +234,11 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
   }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      
+      // Find the glucose entry in the payload if it exists
+      const glucoseEntry = payload.find(entry => entry.dataKey === 'glucose');
+      const glucoseValue = glucoseEntry ? glucoseEntry.value : data.glucose;
+      
       return (
         <div style={{
           backgroundColor: tokens.colorNeutralBackground1,
@@ -245,9 +250,9 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
           <div style={{ fontWeight: tokens.fontWeightSemibold, marginBottom: '4px' }}>
             {data.timeLabel}
           </div>
-          {data.glucose !== null && data.glucose !== undefined && (
+          {glucoseValue !== null && glucoseValue !== undefined && (
             <div style={{ color: '#FF6B35', marginBottom: '4px' }}>
-              Glucose: {formatGlucoseValue(data.glucose, glucoseUnit)} {getUnitLabel(glucoseUnit)}
+              Glucose: {formatGlucoseValue(glucoseValue, glucoseUnit)} {getUnitLabel(glucoseUnit)}
             </div>
           )}
           {data.basalRate > 0 && (
