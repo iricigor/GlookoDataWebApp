@@ -28,7 +28,7 @@ import {
 import { InsulinTotalsBar } from './InsulinTotalsBar';
 import type { GlucoseReading, GlucoseUnit } from '../types';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
-import { calculateGlucoseRangeStats, GLUCOSE_RANGE_COLORS, MIN_PERCENTAGE_TO_DISPLAY, convertGlucoseValue, getUnitLabel } from '../utils/data';
+import { calculateGlucoseRangeStats, GLUCOSE_RANGE_COLORS, MIN_PERCENTAGE_TO_DISPLAY, convertGlucoseValue, getUnitLabel, formatGlucoseValue } from '../utils/data';
 import { COLOR_SCHEME_DESCRIPTORS, getGlucoseColor, isDynamicColorScheme } from '../utils/formatting';
 import type { BGColorScheme } from '../hooks/useBGColorScheme';
 
@@ -234,6 +234,12 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
   }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      
+      // Find the glucose entry in the payload if it exists
+      // Use the payload.glucose value (already converted) not entry.value
+      const glucoseEntry = payload.find(entry => entry.dataKey === 'glucose');
+      const glucoseValue = glucoseEntry ? glucoseEntry.payload.glucose : data.glucose;
+      
       return (
         <div style={{
           backgroundColor: tokens.colorNeutralBackground1,
@@ -245,9 +251,9 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
           <div style={{ fontWeight: tokens.fontWeightSemibold, marginBottom: '4px' }}>
             {data.timeLabel}
           </div>
-          {data.glucose !== null && (
+          {glucoseValue !== null && glucoseValue !== undefined && (
             <div style={{ color: '#FF6B35', marginBottom: '4px' }}>
-              Glucose: {data.glucose.toFixed(1)} mmol/L
+              Glucose: {formatGlucoseValue(glucoseValue, glucoseUnit)} {getUnitLabel(glucoseUnit)}
             </div>
           )}
           {data.basalRate > 0 && (
