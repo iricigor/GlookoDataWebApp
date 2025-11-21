@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>372 Implement IOB graph with recharts line chart and accordion data table</summary>
+
+[#372](../../pull/372) Implement IOB graph with recharts line chart and accordion data table
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>370 Add IOB preparation: configurable insulin duration and hourly data table</summary>
 
 [#370](../../pull/370) Add IOB preparation: configurable insulin duration and hourly data table
