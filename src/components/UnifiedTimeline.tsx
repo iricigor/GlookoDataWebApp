@@ -236,8 +236,9 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
       const data = payload[0].payload;
       
       // Find the glucose entry in the payload if it exists
+      // Use the payload.glucose value (already converted) not entry.value
       const glucoseEntry = payload.find(entry => entry.dataKey === 'glucose');
-      const glucoseValue = glucoseEntry ? glucoseEntry.value : data.glucose;
+      const glucoseValue = glucoseEntry ? glucoseEntry.payload.glucose : data.glucose;
       
       return (
         <div style={{
