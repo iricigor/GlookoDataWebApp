@@ -26,6 +26,9 @@ export default defineConfig({
         maxThreads: 4,
       },
     },
+    // Reduce test timeout for faster failure detection
+    testTimeout: 10000,
+    hookTimeout: 10000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
