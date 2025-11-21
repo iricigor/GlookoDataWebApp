@@ -66,9 +66,18 @@ const useStyles = makeStyles({
     top: 0,
     backgroundColor: tokens.colorNeutralBackground1,
     zIndex: 1,
+    '& th': {
+      textAlign: 'center',
+    },
   },
   centeredCell: {
     textAlign: 'center',
+  },
+  centeredHeaderCell: {
+    textAlign: 'center',
+    '& > div': {
+      justifyContent: 'center',
+    },
   },
 });
 
@@ -238,10 +247,10 @@ export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps)
           <Table size="small">
             <TableHeader className={styles.stickyHeader}>
               <TableRow>
-                <TableHeaderCell style={{ textAlign: 'center' }}>Time</TableHeaderCell>
-                <TableHeaderCell style={{ textAlign: 'center' }}>Basal</TableHeaderCell>
-                <TableHeaderCell style={{ textAlign: 'center' }}>Bolus</TableHeaderCell>
-                <TableHeaderCell style={{ textAlign: 'center' }}>Active IOB</TableHeaderCell>
+                <TableHeaderCell className={styles.centeredHeaderCell}>Time</TableHeaderCell>
+                <TableHeaderCell className={styles.centeredHeaderCell}>Basal</TableHeaderCell>
+                <TableHeaderCell className={styles.centeredHeaderCell}>Bolus</TableHeaderCell>
+                <TableHeaderCell className={styles.centeredHeaderCell}>Active IOB</TableHeaderCell>
               </TableRow>
             </TableHeader>
             <TableBody>
