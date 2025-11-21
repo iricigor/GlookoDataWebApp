@@ -440,21 +440,6 @@ export function Settings({
             </div>
 
             <div className={styles.settingSection}>
-              <Title3 className={styles.sectionTitle}>Glucose Unit</Title3>
-              <Divider className={styles.divider} />
-              <Text className={styles.settingDescription}>
-                Choose your preferred unit for displaying blood glucose values. This setting affects all glucose readings, charts, and thresholds throughout the app.
-              </Text>
-              <RadioGroup
-                value={glucoseUnit}
-                onChange={(_, data) => onGlucoseUnitChange(data.value as GlucoseUnit)}
-              >
-                <Radio value="mmol/L" label="mmol/L (millimoles per liter)" />
-                <Radio value="mg/dL" label="mg/dL (milligrams per deciliter)" />
-              </RadioGroup>
-            </div>
-
-            <div className={styles.settingSection}>
               <Title3 className={styles.sectionTitle}>AI Response Language</Title3>
               <Divider className={styles.divider} />
               <Text className={styles.settingDescription}>
@@ -470,6 +455,26 @@ export function Settings({
                 <Radio value="serbian" label="Serbian (Srpski - latinica)" />
               </RadioGroup>
             </div>
+          </>
+        );
+      
+      case 'glucose':
+        return (
+          <>
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>Glucose Unit</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Choose your preferred unit for displaying blood glucose values. This setting affects all glucose readings, charts, and thresholds throughout the app.
+              </Text>
+              <RadioGroup
+                value={glucoseUnit}
+                onChange={(_, data) => onGlucoseUnitChange(data.value as GlucoseUnit)}
+              >
+                <Radio value="mmol/L" label="mmol/L (millimoles per liter)" />
+                <Radio value="mg/dL" label="mg/dL (milligrams per deciliter)" />
+              </RadioGroup>
+            </div>
 
             <GlucoseThresholdsSection
               thresholds={thresholds}
@@ -481,7 +486,7 @@ export function Settings({
           </>
         );
       
-      case 'data':
+      case 'ai':
         return (
           <>
             <div className={styles.settingSection}>
@@ -927,7 +932,8 @@ export function Settings({
           appearance="subtle"
         >
           <Tab value="general">General</Tab>
-          <Tab value="data">Data & AI</Tab>
+          <Tab value="glucose">Glucose Data</Tab>
+          <Tab value="ai">AI Settings</Tab>
           <Tab value="about">About</Tab>
         </TabList>
 
