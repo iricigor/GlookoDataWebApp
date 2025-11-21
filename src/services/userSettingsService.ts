@@ -18,6 +18,7 @@ export interface UserSettings {
     low: number;
     veryLow: number;
   };
+  insulinDuration?: number;  // Optional: Insulin duration in hours (default 5)
 }
 
 export interface UserSettingsResponse {
@@ -27,6 +28,7 @@ export interface UserSettingsResponse {
   ExportFormat: string;
   ResponseLanguage: string;
   GlucoseThresholds: string;  // JSON string
+  InsulinDuration?: string;  // Insulin duration in hours
   Timestamp?: string;
 }
 
@@ -72,6 +74,7 @@ export async function loadUserSettings(userEmail: string): Promise<UserSettings 
       glucoseThresholds: settingsData.GlucoseThresholds 
         ? JSON.parse(settingsData.GlucoseThresholds)
         : { veryHigh: 13.9, high: 10.0, low: 3.9, veryLow: 3.0 },
+      insulinDuration: settingsData.InsulinDuration ? parseFloat(settingsData.InsulinDuration) : 5,
     };
 
     return settings;
@@ -97,6 +100,7 @@ export async function saveUserSettings(userEmail: string, settings: UserSettings
       ExportFormat: settings.exportFormat,
       ResponseLanguage: settings.responseLanguage,
       GlucoseThresholds: JSON.stringify(settings.glucoseThresholds),
+      InsulinDuration: settings.insulinDuration?.toString(),
     };
 
     // Use PUT to upsert (create or update)

@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { aggregateInsulinByDate, prepareInsulinTimelineData } from './insulinDataUtils';
+import { aggregateInsulinByDate, prepareInsulinTimelineData, calculateIOB, prepareHourlyIOBData } from './insulinDataUtils';
 import type { InsulinReading } from '../../types';
 
 describe('insulinDataUtils', () => {
@@ -283,6 +283,159 @@ describe('insulinDataUtils', () => {
       expect(bolusReadings).toHaveLength(2);
       expect(bolusReadings[0].dose).toBe(5.5);
       expect(bolusReadings[1].dose).toBe(7.0);
+    });
+  });
+
+  describe('calculateIOB', () => {
+    it('should calculate IOB with linear decay', () => {
+      // Create a reading 2 hours ago with 10 units
+      const now = new Date('2024-01-01T12:00:00');
+      const twoHoursAgo = new Date('2024-01-01T10:00:00');
+      
+      const readings: InsulinReading[] = [
+        { timestamp: twoHoursAgo, dose: 10, insulinType: 'bolus' }
+      ];
+
+      // With 5-hour duration, after 2 hours: IOB = 10 * (1 - 2/5) = 10 * 0.6 = 6
+      const iob = calculateIOB(readings, now, 5);
+      expect(iob).toBe(6);
+    });
+
+    it('should return 0 IOB when insulin has fully decayed', () => {
+      const now = new Date('2024-01-01T12:00:00');
+      const sixHoursAgo = new Date('2024-01-01T06:00:00');
+      
+      const readings: InsulinReading[] = [
+        { timestamp: sixHoursAgo, dose: 10, insulinType: 'bolus' }
+      ];
+
+      // With 5-hour duration, after 6 hours: IOB = 0
+      const iob = calculateIOB(readings, now, 5);
+      expect(iob).toBe(0);
+    });
+
+    it('should sum IOB from multiple readings', () => {
+      const now = new Date('2024-01-01T12:00:00');
+      const oneHourAgo = new Date('2024-01-01T11:00:00');
+      const threeHoursAgo = new Date('2024-01-01T09:00:00');
+      
+      const readings: InsulinReading[] = [
+        { timestamp: oneHourAgo, dose: 10, insulinType: 'bolus' },
+        { timestamp: threeHoursAgo, dose: 5, insulinType: 'basal' }
+      ];
+
+      // After 1 hour: 10 * (1 - 1/5) = 8
+      // After 3 hours: 5 * (1 - 3/5) = 2
+      // Total: 10
+      const iob = calculateIOB(readings, now, 5);
+      expect(iob).toBe(10);
+    });
+
+    it('should ignore readings after target time', () => {
+      const now = new Date('2024-01-01T12:00:00');
+      const futureTime = new Date('2024-01-01T13:00:00');
+      
+      const readings: InsulinReading[] = [
+        { timestamp: futureTime, dose: 10, insulinType: 'bolus' }
+      ];
+
+      const iob = calculateIOB(readings, now, 5);
+      expect(iob).toBe(0);
+    });
+
+    it('should handle empty readings array', () => {
+      const now = new Date('2024-01-01T12:00:00');
+      const iob = calculateIOB([], now, 5);
+      expect(iob).toBe(0);
+    });
+
+    it('should work with different insulin durations', () => {
+      const now = new Date('2024-01-01T12:00:00');
+      const twoHoursAgo = new Date('2024-01-01T10:00:00');
+      
+      const readings: InsulinReading[] = [
+        { timestamp: twoHoursAgo, dose: 10, insulinType: 'bolus' }
+      ];
+
+      // With 4-hour duration, after 2 hours: IOB = 10 * (1 - 2/4) = 5
+      const iob = calculateIOB(readings, now, 4);
+      expect(iob).toBe(5);
+    });
+  });
+
+  describe('prepareHourlyIOBData', () => {
+    it('should prepare 24 hours of IOB data', () => {
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:30:00'), dose: 2.5, insulinType: 'basal' },
+        { timestamp: new Date('2024-01-01T08:45:00'), dose: 5, insulinType: 'bolus' }
+      ];
+
+      const data = prepareHourlyIOBData(readings, '2024-01-01', 5);
+      
+      expect(data).toHaveLength(24);
+      expect(data[0].hour).toBe(0);
+      expect(data[23].hour).toBe(23);
+    });
+
+    it('should calculate insulin totals from previous hour', () => {
+      // Add readings in hour 8 (8:00-9:00)
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:30:00'), dose: 2.5, insulinType: 'basal' },
+        { timestamp: new Date('2024-01-01T08:45:00'), dose: 5, insulinType: 'bolus' }
+      ];
+
+      const data = prepareHourlyIOBData(readings, '2024-01-01', 5);
+      
+      // Hour 9 should show totals from hour 8
+      const hour9Data = data[9];
+      expect(hour9Data.basalInPreviousHour).toBe(2.5);
+      expect(hour9Data.bolusInPreviousHour).toBe(5);
+    });
+
+    it('should calculate active IOB at each hour', () => {
+      // Add bolus at 08:00
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00'), dose: 10, insulinType: 'bolus' }
+      ];
+
+      const data = prepareHourlyIOBData(readings, '2024-01-01', 5);
+      
+      // At 10:00 (2 hours later): IOB = 10 * (1 - 2/5) = 6
+      const hour10Data = data[10];
+      expect(hour10Data.activeIOB).toBe(6);
+    });
+
+    it('should format time labels correctly', () => {
+      const data = prepareHourlyIOBData([], '2024-01-01', 5);
+      
+      expect(data[0].timeLabel).toBe('00:00');
+      expect(data[9].timeLabel).toBe('09:00');
+      expect(data[23].timeLabel).toBe('23:00');
+    });
+
+    it('should handle no readings gracefully', () => {
+      const data = prepareHourlyIOBData([], '2024-01-01', 5);
+      
+      expect(data).toHaveLength(24);
+      data.forEach(hour => {
+        expect(hour.basalInPreviousHour).toBe(0);
+        expect(hour.bolusInPreviousHour).toBe(0);
+        expect(hour.activeIOB).toBe(0);
+      });
+    });
+
+    it('should use custom insulin duration', () => {
+      // Add bolus at 08:00
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:00:00'), dose: 10, insulinType: 'bolus' }
+      ];
+
+      // With 4-hour duration
+      const data = prepareHourlyIOBData(readings, '2024-01-01', 4);
+      
+      // At 10:00 (2 hours later): IOB = 10 * (1 - 2/4) = 5
+      const hour10Data = data[10];
+      expect(hour10Data.activeIOB).toBe(5);
     });
   });
 });

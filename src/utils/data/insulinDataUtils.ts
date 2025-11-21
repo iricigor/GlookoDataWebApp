@@ -397,3 +397,107 @@ export function prepareInsulinTimelineData(readings: InsulinReading[], date: str
 
   return hourlyData;
 }
+
+/**
+ * Calculate IOB (Insulin On Board) at a specific time using linear decay
+ * 
+ * @param readings - Array of insulin readings
+ * @param targetTime - Time to calculate IOB for
+ * @param insulinDuration - Duration of insulin action in hours (e.g., 5)
+ * @returns Active IOB in units
+ */
+export function calculateIOB(
+  readings: InsulinReading[],
+  targetTime: Date,
+  insulinDuration: number
+): number {
+  let totalIOB = 0;
+
+  // Calculate IOB contribution from each insulin reading
+  for (const reading of readings) {
+    // Only consider readings that are before the target time
+    if (reading.timestamp > targetTime) {
+      continue;
+    }
+
+    // Calculate time elapsed since insulin was delivered (in hours)
+    const timeElapsedMs = targetTime.getTime() - reading.timestamp.getTime();
+    const timeElapsedHours = timeElapsedMs / (1000 * 60 * 60);
+
+    // If insulin is still active (within duration window)
+    if (timeElapsedHours < insulinDuration) {
+      // Linear decay: IOB = dose * (1 - timeElapsed / duration)
+      const remainingFraction = 1 - (timeElapsedHours / insulinDuration);
+      totalIOB += reading.dose * remainingFraction;
+    }
+  }
+
+  return Math.round(totalIOB * 100) / 100; // Round to 2 decimals
+}
+
+/**
+ * Prepare hourly IOB data for a specific date
+ * Shows insulin totals in previous hour and active IOB at each hour
+ * 
+ * @param readings - Array of insulin readings
+ * @param date - Date to prepare data for (YYYY-MM-DD format)
+ * @param insulinDuration - Duration of insulin action in hours (default 5)
+ * @returns Array of hourly IOB data points (24 hours)
+ */
+export function prepareHourlyIOBData(
+  readings: InsulinReading[],
+  date: string,
+  insulinDuration: number = 5
+): Array<{
+  hour: number;
+  timeLabel: string;
+  basalInPreviousHour: number;
+  bolusInPreviousHour: number;
+  activeIOB: number;
+}> {
+  const hourlyData: Array<{
+    hour: number;
+    timeLabel: string;
+    basalInPreviousHour: number;
+    bolusInPreviousHour: number;
+    activeIOB: number;
+  }> = [];
+
+  // Parse the date to get start of day
+  const [year, month, day] = date.split('-').map(Number);
+  
+  for (let hour = 0; hour < 24; hour++) {
+    const timeLabel = `${String(hour).padStart(2, '0')}:00`;
+    
+    // Create date object for this hour (at :00 minutes)
+    const currentHour = new Date(year, month - 1, day, hour, 0, 0);
+    const previousHourStart = new Date(year, month - 1, day, hour - 1, 0, 0);
+    
+    // Filter readings from previous hour (hour-1 to hour)
+    const previousHourReadings = readings.filter(reading => {
+      return reading.timestamp >= previousHourStart && reading.timestamp < currentHour;
+    });
+
+    // Calculate basal and bolus totals in previous hour
+    const basalInPreviousHour = previousHourReadings
+      .filter(r => r.insulinType === 'basal')
+      .reduce((sum, r) => sum + r.dose, 0);
+
+    const bolusInPreviousHour = previousHourReadings
+      .filter(r => r.insulinType === 'bolus')
+      .reduce((sum, r) => sum + r.dose, 0);
+
+    // Calculate active IOB at this hour
+    const activeIOB = calculateIOB(readings, currentHour, insulinDuration);
+
+    hourlyData.push({
+      hour,
+      timeLabel,
+      basalInPreviousHour: Math.round(basalInPreviousHour * 10) / 10,
+      bolusInPreviousHour: Math.round(bolusInPreviousHour * 10) / 10,
+      activeIOB,
+    });
+  }
+
+  return hourlyData;
+}

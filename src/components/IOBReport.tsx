@@ -1,6 +1,6 @@
 /**
  * IOBReport component
- * Displays Insulin On Board (IOB) report with date navigation and graph placeholder
+ * Displays Insulin On Board (IOB) report with date navigation and table
  */
 
 import {
@@ -9,10 +9,16 @@ import {
   tokens,
   shorthands,
   Spinner,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHeaderCell,
+  TableBody,
+  TableCell,
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
-import type { UploadedFile } from '../types';
-import { extractInsulinReadings } from '../utils/data';
+import type { UploadedFile, InsulinReading, HourlyIOBData } from '../types';
+import { extractInsulinReadings, prepareHourlyIOBData } from '../utils/data';
 import { DayNavigator } from './DayNavigator';
 import { useSelectedDate } from '../hooks/useSelectedDate';
 
@@ -39,7 +45,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: '400px',
+    minHeight: '300px',
     backgroundColor: tokens.colorNeutralBackground2,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     ...shorthands.border('1px', 'dashed', tokens.colorNeutralStroke1),
@@ -48,16 +54,28 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
     fontSize: tokens.fontSizeBase400,
   },
+  tableContainer: {
+    maxHeight: '600px',
+    overflowY: 'auto',
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+  },
+  numberCell: {
+    textAlign: 'right',
+  },
 });
 
 interface IOBReportProps {
   selectedFile?: UploadedFile;
+  insulinDuration?: number;
 }
 
-export function IOBReport({ selectedFile }: IOBReportProps) {
+export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps) {
   const styles = useStyles();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
   const [loading, setLoading] = useState(false);
+  const [allReadings, setAllReadings] = useState<InsulinReading[]>([]);
+  const [hourlyData, setHourlyData] = useState<HourlyIOBData[]>([]);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
 
@@ -67,12 +85,15 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
       if (!selectedFile) {
         setAvailableDates([]);
         setCurrentDateIndex(0);
+        setAllReadings([]);
+        setHourlyData([]);
         return;
       }
 
       setLoading(true);
       try {
         const readings = await extractInsulinReadings(selectedFile);
+        setAllReadings(readings);
 
         // Extract unique dates from readings
         const dates = Array.from(
@@ -117,6 +138,16 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDateIndex, availableDates]);
+
+  // Calculate hourly IOB data when date or insulin duration changes
+  useEffect(() => {
+    if (selectedDate && allReadings.length > 0) {
+      const data = prepareHourlyIOBData(allReadings, selectedDate, insulinDuration);
+      setHourlyData(data);
+    } else {
+      setHourlyData([]);
+    }
+  }, [selectedDate, allReadings, insulinDuration]);
 
   const handlePreviousDay = () => {
     if (currentDateIndex > 0) {
@@ -193,6 +224,38 @@ export function IOBReport({ selectedFile }: IOBReportProps) {
           IOB graph will be configured here
         </Text>
       </div>
+
+      {/* Hourly IOB Data Table */}
+      {hourlyData.length > 0 && (
+        <div className={styles.tableContainer}>
+          <Table size="small">
+            <TableHeader>
+              <TableRow>
+                <TableHeaderCell>Time</TableHeaderCell>
+                <TableHeaderCell className={styles.numberCell}>Basal (previous hour)</TableHeaderCell>
+                <TableHeaderCell className={styles.numberCell}>Bolus (previous hour)</TableHeaderCell>
+                <TableHeaderCell className={styles.numberCell}>Active IOB</TableHeaderCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {hourlyData.map((data) => (
+                <TableRow key={data.hour}>
+                  <TableCell>{data.timeLabel}</TableCell>
+                  <TableCell className={styles.numberCell}>
+                    {data.basalInPreviousHour.toFixed(1)} U
+                  </TableCell>
+                  <TableCell className={styles.numberCell}>
+                    {data.bolusInPreviousHour.toFixed(1)} U
+                  </TableCell>
+                  <TableCell className={styles.numberCell}>
+                    {data.activeIOB.toFixed(2)} U
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }
