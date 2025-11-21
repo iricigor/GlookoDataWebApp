@@ -377,7 +377,7 @@ describe('insulinDataUtils', () => {
       expect(data[23].hour).toBe(23);
     });
 
-    it('should calculate insulin totals from previous hour', () => {
+    it('should calculate insulin values during each hour', () => {
       // Add readings in hour 8 (8:00-9:00)
       const readings: InsulinReading[] = [
         { timestamp: new Date('2024-01-01T08:30:00'), dose: 2.5, insulinType: 'basal' },
@@ -386,10 +386,25 @@ describe('insulinDataUtils', () => {
 
       const data = prepareHourlyIOBData(readings, '2024-01-01', 5);
       
-      // Hour 9 should show totals from hour 8
-      const hour9Data = data[9];
-      expect(hour9Data.basalInPreviousHour).toBe(2.5);
-      expect(hour9Data.bolusInPreviousHour).toBe(5);
+      // Hour 8 should show basal rate (single reading, so average = value) and bolus sum
+      const hour8Data = data[8];
+      expect(hour8Data.basalInPreviousHour).toBe(2.5);  // Average of single reading
+      expect(hour8Data.bolusInPreviousHour).toBe(5);    // Sum of bolus doses
+    });
+
+    it('should average basal readings when multiple readings in same hour', () => {
+      // Add multiple basal readings in hour 8
+      const readings: InsulinReading[] = [
+        { timestamp: new Date('2024-01-01T08:15:00'), dose: 2.0, insulinType: 'basal' },
+        { timestamp: new Date('2024-01-01T08:30:00'), dose: 3.0, insulinType: 'basal' },
+        { timestamp: new Date('2024-01-01T08:45:00'), dose: 4.0, insulinType: 'basal' }
+      ];
+
+      const data = prepareHourlyIOBData(readings, '2024-01-01', 5);
+      
+      // Hour 8 should show average of basal readings: (2 + 3 + 4) / 3 = 3.0
+      const hour8Data = data[8];
+      expect(hour8Data.basalInPreviousHour).toBe(3.0);
     });
 
     it('should calculate active IOB at each hour', () => {

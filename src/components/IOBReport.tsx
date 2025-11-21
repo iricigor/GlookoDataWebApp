@@ -59,9 +59,16 @@ const useStyles = makeStyles({
     overflowY: 'auto',
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    position: 'relative',
   },
-  numberCell: {
-    textAlign: 'right',
+  stickyHeader: {
+    position: 'sticky',
+    top: 0,
+    backgroundColor: tokens.colorNeutralBackground1,
+    zIndex: 1,
+  },
+  centeredCell: {
+    textAlign: 'center',
   },
 });
 
@@ -229,25 +236,25 @@ export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps)
       {hourlyData.length > 0 && (
         <div className={styles.tableContainer}>
           <Table size="small">
-            <TableHeader>
+            <TableHeader className={styles.stickyHeader}>
               <TableRow>
-                <TableHeaderCell>Time</TableHeaderCell>
-                <TableHeaderCell className={styles.numberCell}>Basal (previous hour)</TableHeaderCell>
-                <TableHeaderCell className={styles.numberCell}>Bolus (previous hour)</TableHeaderCell>
-                <TableHeaderCell className={styles.numberCell}>Active IOB</TableHeaderCell>
+                <TableHeaderCell className={styles.centeredCell}>Time</TableHeaderCell>
+                <TableHeaderCell className={styles.centeredCell}>Basal</TableHeaderCell>
+                <TableHeaderCell className={styles.centeredCell}>Bolus</TableHeaderCell>
+                <TableHeaderCell className={styles.centeredCell}>Active IOB</TableHeaderCell>
               </TableRow>
             </TableHeader>
             <TableBody>
               {hourlyData.map((data) => (
                 <TableRow key={data.hour}>
-                  <TableCell>{data.timeLabel}</TableCell>
-                  <TableCell className={styles.numberCell}>
+                  <TableCell className={styles.centeredCell}>{data.timeLabel}</TableCell>
+                  <TableCell className={styles.centeredCell}>
                     {data.basalInPreviousHour.toFixed(1)} U
                   </TableCell>
-                  <TableCell className={styles.numberCell}>
+                  <TableCell className={styles.centeredCell}>
                     {data.bolusInPreviousHour.toFixed(1)} U
                   </TableCell>
-                  <TableCell className={styles.numberCell}>
+                  <TableCell className={styles.centeredCell}>
                     {data.activeIOB.toFixed(2)} U
                   </TableCell>
                 </TableRow>

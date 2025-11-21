@@ -471,21 +471,23 @@ export function prepareHourlyIOBData(
     
     // Create date object for this hour (at :00 minutes)
     const currentHour = new Date(year, month - 1, day, hour, 0, 0);
-    const previousHourStart = new Date(year, month - 1, day, hour - 1, 0, 0);
+    const nextHour = new Date(year, month - 1, day, hour + 1, 0, 0);
     
-    // Filter readings from previous hour (hour-1 to hour)
-    const previousHourReadings = readings.filter(reading => {
-      return reading.timestamp >= previousHourStart && reading.timestamp < currentHour;
+    // Filter readings during this hour (from hour to hour+1)
+    const hourReadings = readings.filter(reading => {
+      return reading.timestamp >= currentHour && reading.timestamp < nextHour;
     });
 
-    // Calculate basal and bolus totals in previous hour
-    const basalInPreviousHour = previousHourReadings
-      .filter(r => r.insulinType === 'basal')
-      .reduce((sum, r) => sum + r.dose, 0);
+    // Calculate basal: use average of readings (same as prepareInsulinTimelineData)
+    // This gives us the basal rate for the hour
+    const basalReadings = hourReadings.filter(r => r.insulinType === 'basal');
+    const basalInHour = basalReadings.length > 0
+      ? basalReadings.reduce((sum, r) => sum + r.dose, 0) / basalReadings.length
+      : 0;
 
-    const bolusInPreviousHour = previousHourReadings
-      .filter(r => r.insulinType === 'bolus')
-      .reduce((sum, r) => sum + r.dose, 0);
+    // Calculate bolus: sum all bolus doses (same as prepareInsulinTimelineData)
+    const bolusReadings = hourReadings.filter(r => r.insulinType === 'bolus');
+    const bolusInHour = bolusReadings.reduce((sum, r) => sum + r.dose, 0);
 
     // Calculate active IOB at this hour
     const activeIOB = calculateIOB(readings, currentHour, insulinDuration);
@@ -493,8 +495,8 @@ export function prepareHourlyIOBData(
     hourlyData.push({
       hour,
       timeLabel,
-      basalInPreviousHour: Math.round(basalInPreviousHour * 10) / 10,
-      bolusInPreviousHour: Math.round(bolusInPreviousHour * 10) / 10,
+      basalInPreviousHour: Math.round(basalInHour * 10) / 10,
+      bolusInPreviousHour: Math.round(bolusInHour * 10) / 10,
       activeIOB,
     });
   }
