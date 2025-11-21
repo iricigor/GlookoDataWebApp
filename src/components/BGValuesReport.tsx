@@ -331,8 +331,8 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string; value: number; originalValue: number; color: string } }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
-      // data.value and data.originalValue are already in display units
-      // Use formatGlucoseValue (not displayGlucoseValue which converts again)
+      // data.value and data.originalValue are already converted to the user's selected unit (mg/dL or mmol/L)
+      // Use formatGlucoseValue (not displayGlucoseValue which would convert again from mmol/L)
       const displayValue = data.originalValue > maxGlucose 
         ? `${formatGlucoseValue(data.originalValue, glucoseUnit)} (clamped to ${formatGlucoseValue(maxGlucose, glucoseUnit)})`
         : formatGlucoseValue(data.value, glucoseUnit);
