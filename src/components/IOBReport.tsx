@@ -238,10 +238,10 @@ export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps)
           <Table size="small">
             <TableHeader className={styles.stickyHeader}>
               <TableRow>
-                <TableHeaderCell className={styles.centeredCell}>Time</TableHeaderCell>
-                <TableHeaderCell className={styles.centeredCell}>Basal</TableHeaderCell>
-                <TableHeaderCell className={styles.centeredCell}>Bolus</TableHeaderCell>
-                <TableHeaderCell className={styles.centeredCell}>Active IOB</TableHeaderCell>
+                <TableHeaderCell style={{ textAlign: 'center' }}>Time</TableHeaderCell>
+                <TableHeaderCell style={{ textAlign: 'center' }}>Basal</TableHeaderCell>
+                <TableHeaderCell style={{ textAlign: 'center' }}>Bolus</TableHeaderCell>
+                <TableHeaderCell style={{ textAlign: 'center' }}>Active IOB</TableHeaderCell>
               </TableRow>
             </TableHeader>
             <TableBody>

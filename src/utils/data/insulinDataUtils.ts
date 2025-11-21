@@ -102,6 +102,12 @@ function parseInsulinReadingsFromCSV(
     return [];
   }
 
+  // For basal data, also find duration column to calculate actual delivered insulin
+  let durationIndex = -1;
+  if (insulinType === 'basal') {
+    durationIndex = findColumnIndex(headers, getColumnVariants('duration'));
+  }
+
   const readings: InsulinReading[] = [];
 
   // Process data rows (starting from line 2)
@@ -121,10 +127,21 @@ function parseInsulinReadingsFromCSV(
     if (isNaN(timestamp.getTime())) continue;
 
     // Parse dose value
-    // Note: For basal data, this is actually the rate (units/hr)
-    // For bolus data, this is the actual dose (units)
-    const dose = parseFloat(doseStr);
+    let dose = parseFloat(doseStr);
     if (isNaN(dose) || dose < 0) continue;
+
+    // For basal data: dose column contains rate (units/hr), duration in minutes
+    // Calculate actual delivered insulin: rate × (duration / 60)
+    if (insulinType === 'basal' && durationIndex !== -1) {
+      const durationStr = values[durationIndex]?.trim();
+      if (durationStr) {
+        const durationMinutes = parseFloat(durationStr);
+        if (!isNaN(durationMinutes) && durationMinutes > 0) {
+          // Convert rate to actual delivered amount
+          dose = dose * (durationMinutes / 60);
+        }
+      }
+    }
 
     readings.push({ timestamp, dose, insulinType });
   }
@@ -379,11 +396,10 @@ export function prepareInsulinTimelineData(readings: InsulinReading[], date: str
       return reading.timestamp.getHours() === hour;
     });
 
-    // Calculate basal rate (average for the hour)
+    // Calculate basal total for the hour
+    // After parsing, dose contains actual delivered insulin (rate × duration/60)
     const basalReadings = hourReadings.filter(r => r.insulinType === 'basal');
-    const basalRate = basalReadings.length > 0
-      ? basalReadings.reduce((sum, r) => sum + r.dose, 0) / basalReadings.length
-      : 0;
+    const basalRate = basalReadings.reduce((sum, r) => sum + r.dose, 0);
 
     // Calculate bolus total for the hour
     const bolusReadings = hourReadings.filter(r => r.insulinType === 'bolus');
@@ -480,13 +496,11 @@ export function prepareHourlyIOBData(
       return reading.timestamp >= currentHour && reading.timestamp < nextHour;
     });
 
-    // Calculate basal: For basal readings, the dose field contains the rate (units/hr)
-    // We average the rates to get a typical rate for the hour
-    // This rate represents the actual insulin delivered per hour
-    const basalReadings = hourReadings.filter(r => r.insulinType === 'basal');
-    const basalInHour = basalReadings.length > 0
-      ? basalReadings.reduce((sum, r) => sum + r.dose, 0) / basalReadings.length
-      : 0;
+    // Calculate basal: After parsing, dose already contains actual delivered insulin
+    // (rate × duration/60), so we sum the delivered amounts
+    const basalInHour = hourReadings
+      .filter(r => r.insulinType === 'basal')
+      .reduce((sum, r) => sum + r.dose, 0);
 
     // Calculate bolus: sum all bolus doses
     const bolusInHour = hourReadings
