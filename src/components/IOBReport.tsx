@@ -95,6 +95,59 @@ interface IOBReportProps {
   insulinDuration?: number;
 }
 
+// Custom tooltip component for the IOB chart
+const CustomTooltip = ({ active, payload }: {
+  active?: boolean;
+  payload?: Array<{
+    name: string;
+    value: number;
+    dataKey: string;
+    color: string;
+    payload: HourlyIOBData;
+  }>;
+}) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div style={{
+        backgroundColor: tokens.colorNeutralBackground1,
+        padding: '12px',
+        border: `1px solid ${tokens.colorNeutralStroke1}`,
+        borderRadius: tokens.borderRadiusMedium,
+        fontSize: tokens.fontSizeBase200,
+      }}>
+        <div style={{ fontWeight: tokens.fontWeightSemibold, marginBottom: '4px' }}>
+          {data.timeLabel}
+        </div>
+        <div style={{ color: '#1976D2' }}>
+          Active IOB: {data.activeIOB.toFixed(2)} U
+        </div>
+        <div style={{ color: tokens.colorNeutralForeground2, marginTop: '4px' }}>
+          Basal in hour: {data.basalInPreviousHour.toFixed(1)} U
+        </div>
+        <div style={{ color: tokens.colorNeutralForeground2 }}>
+          Bolus in hour: {data.bolusInPreviousHour.toFixed(1)} U
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Format X-axis labels (show every 3 hours)
+const formatXAxis = (value: string) => {
+  const hour = parseInt(value.split(':')[0]);
+  if (hour === 0) return '12A';
+  if (hour === 3) return '3A';
+  if (hour === 6) return '6A';
+  if (hour === 9) return '9A';
+  if (hour === 12) return '12P';
+  if (hour === 15) return '3P';
+  if (hour === 18) return '6P';
+  if (hour === 21) return '9P';
+  return '';
+};
+
 export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps) {
   const styles = useStyles();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
@@ -228,59 +281,6 @@ export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps)
   }
 
   const currentDate = availableDates[currentDateIndex];
-
-  // Custom tooltip for the IOB chart
-  const CustomTooltip = ({ active, payload }: {
-    active?: boolean;
-    payload?: Array<{
-      name: string;
-      value: number;
-      dataKey: string;
-      color: string;
-      payload: HourlyIOBData;
-    }>;
-  }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div style={{
-          backgroundColor: tokens.colorNeutralBackground1,
-          padding: '12px',
-          border: `1px solid ${tokens.colorNeutralStroke1}`,
-          borderRadius: tokens.borderRadiusMedium,
-          fontSize: tokens.fontSizeBase200,
-        }}>
-          <div style={{ fontWeight: tokens.fontWeightSemibold, marginBottom: '4px' }}>
-            {data.timeLabel}
-          </div>
-          <div style={{ color: '#1976D2' }}>
-            Active IOB: {data.activeIOB.toFixed(2)} U
-          </div>
-          <div style={{ color: tokens.colorNeutralForeground2, marginTop: '4px' }}>
-            Basal in hour: {data.basalInPreviousHour.toFixed(1)} U
-          </div>
-          <div style={{ color: tokens.colorNeutralForeground2 }}>
-            Bolus in hour: {data.bolusInPreviousHour.toFixed(1)} U
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Format X-axis labels (show every 3 hours)
-  const formatXAxis = (value: string) => {
-    const hour = parseInt(value.split(':')[0]);
-    if (hour === 0) return '12A';
-    if (hour === 3) return '3A';
-    if (hour === 6) return '6A';
-    if (hour === 9) return '9A';
-    if (hour === 12) return '12P';
-    if (hour === 15) return '3P';
-    if (hour === 18) return '6P';
-    if (hour === 21) return '9P';
-    return '';
-  };
 
   return (
     <div className={styles.container}>
