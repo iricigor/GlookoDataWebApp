@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>367 Fix glucose tooltip value display in Unified Timeline and Detailed CGM charts</summary>
+
+[#367](../../pull/367) Fix glucose tooltip value display in Unified Timeline and Detailed CGM charts
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>366 Fix Set-GlookoConfig JSON truncation and consolidate deployment into module</summary>
 
 [#366](../../pull/366) Fix Set-GlookoConfig JSON truncation and consolidate deployment into module
