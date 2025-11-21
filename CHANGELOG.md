@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>370 Add IOB preparation: configurable insulin duration and hourly data table</summary>
+
+[#370](../../pull/370) Add IOB preparation: configurable insulin duration and hourly data table
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>367 Fix glucose tooltip value display in Unified Timeline and Detailed CGM charts</summary>
 
 [#367](../../pull/367) Fix glucose tooltip value display in Unified Timeline and Detailed CGM charts
