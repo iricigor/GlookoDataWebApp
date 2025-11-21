@@ -121,6 +121,8 @@ function parseInsulinReadingsFromCSV(
     if (isNaN(timestamp.getTime())) continue;
 
     // Parse dose value
+    // Note: For basal data, this is actually the rate (units/hr)
+    // For bolus data, this is the actual dose (units)
     const dose = parseFloat(doseStr);
     if (isNaN(dose) || dose < 0) continue;
 
@@ -478,16 +480,18 @@ export function prepareHourlyIOBData(
       return reading.timestamp >= currentHour && reading.timestamp < nextHour;
     });
 
-    // Calculate basal: use average of readings (same as prepareInsulinTimelineData)
-    // This gives us the basal rate for the hour
+    // Calculate basal: For basal readings, the dose field contains the rate (units/hr)
+    // We average the rates to get a typical rate for the hour
+    // This rate represents the actual insulin delivered per hour
     const basalReadings = hourReadings.filter(r => r.insulinType === 'basal');
     const basalInHour = basalReadings.length > 0
       ? basalReadings.reduce((sum, r) => sum + r.dose, 0) / basalReadings.length
       : 0;
 
-    // Calculate bolus: sum all bolus doses (same as prepareInsulinTimelineData)
-    const bolusReadings = hourReadings.filter(r => r.insulinType === 'bolus');
-    const bolusInHour = bolusReadings.reduce((sum, r) => sum + r.dose, 0);
+    // Calculate bolus: sum all bolus doses
+    const bolusInHour = hourReadings
+      .filter(r => r.insulinType === 'bolus')
+      .reduce((sum, r) => sum + r.dose, 0);
 
     // Calculate active IOB at this hour
     const activeIOB = calculateIOB(readings, currentHour, insulinDuration);
