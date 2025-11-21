@@ -28,7 +28,7 @@ import {
 import { InsulinTotalsBar } from './InsulinTotalsBar';
 import type { GlucoseReading, GlucoseUnit } from '../types';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
-import { calculateGlucoseRangeStats, GLUCOSE_RANGE_COLORS, MIN_PERCENTAGE_TO_DISPLAY, convertGlucoseValue, getUnitLabel } from '../utils/data';
+import { calculateGlucoseRangeStats, GLUCOSE_RANGE_COLORS, MIN_PERCENTAGE_TO_DISPLAY, convertGlucoseValue, getUnitLabel, formatGlucoseValue } from '../utils/data';
 import { COLOR_SCHEME_DESCRIPTORS, getGlucoseColor, isDynamicColorScheme } from '../utils/formatting';
 import type { BGColorScheme } from '../hooks/useBGColorScheme';
 
@@ -245,9 +245,9 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
           <div style={{ fontWeight: tokens.fontWeightSemibold, marginBottom: '4px' }}>
             {data.timeLabel}
           </div>
-          {data.glucose !== null && (
+          {data.glucose !== null && data.glucose !== undefined && (
             <div style={{ color: '#FF6B35', marginBottom: '4px' }}>
-              Glucose: {data.glucose.toFixed(1)} mmol/L
+              Glucose: {formatGlucoseValue(data.glucose, glucoseUnit)} {getUnitLabel(glucoseUnit)}
             </div>
           )}
           {data.basalRate > 0 && (
