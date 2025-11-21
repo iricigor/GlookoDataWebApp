@@ -15,8 +15,22 @@ import {
   TableHeaderCell,
   TableBody,
   TableCell,
+  Accordion,
+  AccordionItem,
+  AccordionHeader,
+  AccordionPanel,
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 import type { UploadedFile, InsulinReading, HourlyIOBData } from '../types';
 import { extractInsulinReadings, prepareHourlyIOBData } from '../utils/data';
 import { DayNavigator } from './DayNavigator';
@@ -41,18 +55,13 @@ const useStyles = makeStyles({
     ...shorthands.padding('48px'),
     color: tokens.colorNeutralForeground3,
   },
-  graphPlaceholder: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '300px',
-    backgroundColor: tokens.colorNeutralBackground2,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    ...shorthands.border('1px', 'dashed', tokens.colorNeutralStroke1),
-  },
-  placeholderText: {
-    color: tokens.colorNeutralForeground3,
-    fontSize: tokens.fontSizeBase400,
+  chartContainer: {
+    height: '400px',
+    width: '100%',
+    ...shorthands.padding('16px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
   },
   tableContainer: {
     maxHeight: '600px',
@@ -85,6 +94,55 @@ interface IOBReportProps {
   selectedFile?: UploadedFile;
   insulinDuration?: number;
 }
+
+// Custom tooltip component for the IOB chart
+const CustomTooltip = ({ active, payload }: {
+  active?: boolean;
+  payload?: Array<{
+    name: string;
+    value: number;
+    dataKey: string;
+    color: string;
+    payload: HourlyIOBData;
+  }>;
+}) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div style={{
+        backgroundColor: tokens.colorNeutralBackground1,
+        padding: '12px',
+        border: `1px solid ${tokens.colorNeutralStroke1}`,
+        borderRadius: tokens.borderRadiusMedium,
+        fontSize: tokens.fontSizeBase200,
+      }}>
+        <div style={{ fontWeight: tokens.fontWeightSemibold, marginBottom: '4px' }}>
+          {data.timeLabel}
+        </div>
+        <div style={{ color: '#1976D2' }}>
+          Active IOB: {data.activeIOB.toFixed(2)} U
+        </div>
+        <div style={{ color: tokens.colorNeutralForeground2, marginTop: '4px' }}>
+          Basal in hour: {data.basalInPreviousHour.toFixed(1)} U
+        </div>
+        <div style={{ color: tokens.colorNeutralForeground2 }}>
+          Bolus in hour: {data.bolusInPreviousHour.toFixed(1)} U
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Format X-axis labels (show every 3 hours)
+const formatXAxis = (value: string) => {
+  const hour = parseInt(value.split(':')[0]);
+  const timeLabels: Record<number, string> = {
+    0: '12A', 3: '3A', 6: '6A', 9: '9A',
+    12: '12P', 15: '3P', 18: '6P', 21: '9P'
+  };
+  return timeLabels[hour] || '';
+};
 
 export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps) {
   const styles = useStyles();
@@ -234,43 +292,91 @@ export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps)
         maxDate={maxDate}
       />
 
-      {/* Graph Placeholder */}
-      <div className={styles.graphPlaceholder}>
-        <Text className={styles.placeholderText}>
-          IOB graph will be configured here
-        </Text>
-      </div>
-
-      {/* Hourly IOB Data Table */}
+      {/* IOB Graph */}
       {hourlyData.length > 0 && (
-        <div className={styles.tableContainer}>
-          <Table size="small">
-            <TableHeader className={styles.stickyHeader}>
-              <TableRow>
-                <TableHeaderCell className={styles.centeredHeaderCell}>Time</TableHeaderCell>
-                <TableHeaderCell className={styles.centeredHeaderCell}>Basal</TableHeaderCell>
-                <TableHeaderCell className={styles.centeredHeaderCell}>Bolus</TableHeaderCell>
-                <TableHeaderCell className={styles.centeredHeaderCell}>Active IOB</TableHeaderCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {hourlyData.map((data) => (
-                <TableRow key={data.hour}>
-                  <TableCell className={styles.centeredCell}>{data.timeLabel}</TableCell>
-                  <TableCell className={styles.centeredCell}>
-                    {data.basalInPreviousHour.toFixed(1)} U
-                  </TableCell>
-                  <TableCell className={styles.centeredCell}>
-                    {data.bolusInPreviousHour.toFixed(1)} U
-                  </TableCell>
-                  <TableCell className={styles.centeredCell}>
-                    {data.activeIOB.toFixed(2)} U
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <div className={styles.chartContainer}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={hourlyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
+              
+              <XAxis
+                dataKey="timeLabel"
+                tickFormatter={formatXAxis}
+                stroke={tokens.colorNeutralForeground2}
+                style={{ fontSize: tokens.fontSizeBase200 }}
+              />
+              
+              <YAxis
+                label={{ 
+                  value: 'Active IOB (Units)', 
+                  angle: -90, 
+                  position: 'insideLeft', 
+                  style: { fontSize: tokens.fontSizeBase200 } 
+                }}
+                stroke={tokens.colorNeutralForeground2}
+                style={{ fontSize: tokens.fontSizeBase200 }}
+              />
+              
+              <Tooltip content={<CustomTooltip />} />
+              
+              <Legend
+                verticalAlign="top"
+                height={36}
+                iconType="line"
+                wrapperStyle={{ fontSize: tokens.fontSizeBase200 }}
+              />
+              
+              <Line
+                type="monotone"
+                dataKey="activeIOB"
+                name="Active IOB"
+                stroke="#1976D2"
+                strokeWidth={2}
+                dot={{ r: 3 }}
+                activeDot={{ r: 5 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
+      )}
+
+      {/* Hourly IOB Data Table in Accordion */}
+      {hourlyData.length > 0 && (
+        <Accordion collapsible>
+          <AccordionItem value="dataTable">
+            <AccordionHeader>View Hourly Data Table</AccordionHeader>
+            <AccordionPanel>
+              <div className={styles.tableContainer}>
+                <Table size="small">
+                  <TableHeader className={styles.stickyHeader}>
+                    <TableRow>
+                      <TableHeaderCell className={styles.centeredHeaderCell}>Time</TableHeaderCell>
+                      <TableHeaderCell className={styles.centeredHeaderCell}>Basal</TableHeaderCell>
+                      <TableHeaderCell className={styles.centeredHeaderCell}>Bolus</TableHeaderCell>
+                      <TableHeaderCell className={styles.centeredHeaderCell}>Active IOB</TableHeaderCell>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {hourlyData.map((data) => (
+                      <TableRow key={data.hour}>
+                        <TableCell className={styles.centeredCell}>{data.timeLabel}</TableCell>
+                        <TableCell className={styles.centeredCell}>
+                          {data.basalInPreviousHour.toFixed(1)} U
+                        </TableCell>
+                        <TableCell className={styles.centeredCell}>
+                          {data.bolusInPreviousHour.toFixed(1)} U
+                        </TableCell>
+                        <TableCell className={styles.centeredCell}>
+                          {data.activeIOB.toFixed(2)} U
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
       )}
     </div>
   );
