@@ -203,6 +203,17 @@ export interface InsulinTimelineDataPoint {
 }
 
 /**
+ * Hourly IOB (Insulin On Board) data point
+ */
+export interface HourlyIOBData {
+  hour: number;           // Hour of day (0-23)
+  timeLabel: string;      // Formatted time label (e.g., "00:00", "06:00")
+  basalInPreviousHour: number;  // Total basal insulin in previous hour (units)
+  bolusInPreviousHour: number;  // Total bolus insulin in previous hour (units)
+  activeIOB: number;      // Active IOB at this moment (units)
+}
+
+/**
  * Parsed glucose reading from CSV data
  */
 export interface GlucoseReading {

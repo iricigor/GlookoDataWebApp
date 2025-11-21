@@ -42,6 +42,7 @@ describe('userSettingsService', () => {
           low: 4.0,
           veryLow: 3.5,
         },
+        insulinDuration: 5,
       });
 
       expect(global.fetch).toHaveBeenCalledWith(

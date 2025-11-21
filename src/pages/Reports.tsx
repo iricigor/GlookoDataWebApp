@@ -66,9 +66,10 @@ interface ReportsProps {
   selectedFile?: UploadedFile;
   exportFormat: ExportFormat;
   glucoseUnit: GlucoseUnit;
+  insulinDuration?: number;
 }
 
-export function Reports({ selectedFile, exportFormat, glucoseUnit }: ReportsProps) {
+export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDuration }: ReportsProps) {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState<string>(() => {
     // Load the last selected tab from localStorage
@@ -100,7 +101,7 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit }: ReportsProp
       case 'unifiedView':
         return <UnifiedDailyReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
       case 'iob':
-        return <IOBReport selectedFile={selectedFile} />;
+        return <IOBReport selectedFile={selectedFile} insulinDuration={insulinDuration} />;
       default:
         return null;
     }

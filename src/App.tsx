@@ -20,6 +20,7 @@ import { useDeepSeekApiKey } from './hooks/useDeepSeekApiKey'
 import { useActiveAIProvider } from './hooks/useActiveAIProvider'
 import { useSwipeGesture } from './hooks/useSwipeGesture'
 import { useSettingsSync } from './hooks/useSettingsSync'
+import { useInsulinDuration } from './hooks/useInsulinDuration'
 import type { UploadedFile, AIAnalysisResult } from './types'
 import { extractZipMetadata } from './features/dataUpload/utils'
 
@@ -39,6 +40,7 @@ function App() {
   const { responseLanguage, setResponseLanguage } = useResponseLanguage()
   const { thresholds: glucoseThresholds, setThresholds: setGlucoseThresholds } = useGlucoseThresholds()
   const { glucoseUnit, setGlucoseUnit } = useGlucoseUnit()
+  const { insulinDuration, setInsulinDuration } = useInsulinDuration()
   
   // Sync settings with Azure for authenticated users
   useSettingsSync({
@@ -221,7 +223,7 @@ function App() {
           />
         )
       case 'reports':
-        return <Reports selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />
+        return <Reports selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} />
       case 'ai':
         return (
           <AIAnalysis 
@@ -247,6 +249,8 @@ function App() {
           onResponseLanguageChange={setResponseLanguage}
           glucoseUnit={glucoseUnit}
           onGlucoseUnitChange={setGlucoseUnit}
+          insulinDuration={insulinDuration}
+          onInsulinDurationChange={setInsulinDuration}
           perplexityApiKey={perplexityApiKey}
           onPerplexityApiKeyChange={setPerplexityApiKey}
           geminiApiKey={geminiApiKey}
