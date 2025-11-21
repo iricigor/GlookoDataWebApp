@@ -26,7 +26,7 @@ import {
 } from 'recharts';
 import type { UploadedFile, GlucoseReading, GlucoseDataSource, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
-import { extractGlucoseReadings, smoothGlucoseValues, displayGlucoseValue, getUnitLabel, convertGlucoseValue } from '../utils/data';
+import { extractGlucoseReadings, smoothGlucoseValues, displayGlucoseValue, getUnitLabel, convertGlucoseValue, formatGlucoseValue } from '../utils/data';
 import { 
   getUniqueDates, 
   filterReadingsByDate, 
@@ -331,9 +331,11 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string; value: number; originalValue: number; color: string } }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      // data.value and data.originalValue are already in display units
+      // Use formatGlucoseValue (not displayGlucoseValue which converts again)
       const displayValue = data.originalValue > maxGlucose 
-        ? `${displayGlucoseValue(data.originalValue, glucoseUnit)} (clamped to ${displayGlucoseValue(maxGlucose, glucoseUnit)})`
-        : displayGlucoseValue(data.value, glucoseUnit);
+        ? `${formatGlucoseValue(data.originalValue, glucoseUnit)} (clamped to ${formatGlucoseValue(maxGlucose, glucoseUnit)})`
+        : formatGlucoseValue(data.value, glucoseUnit);
       
       return (
         <div style={{
