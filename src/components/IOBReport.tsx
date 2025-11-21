@@ -137,15 +137,11 @@ const CustomTooltip = ({ active, payload }: {
 // Format X-axis labels (show every 3 hours)
 const formatXAxis = (value: string) => {
   const hour = parseInt(value.split(':')[0]);
-  if (hour === 0) return '12A';
-  if (hour === 3) return '3A';
-  if (hour === 6) return '6A';
-  if (hour === 9) return '9A';
-  if (hour === 12) return '12P';
-  if (hour === 15) return '3P';
-  if (hour === 18) return '6P';
-  if (hour === 21) return '9P';
-  return '';
+  const timeLabels: Record<number, string> = {
+    0: '12A', 3: '3A', 6: '6A', 9: '9A',
+    12: '12P', 15: '3P', 18: '6P', 21: '9P'
+  };
+  return timeLabels[hour] || '';
 };
 
 export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps) {
