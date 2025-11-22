@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>378 Fix Reports page header spacing</summary>
+
+[#378](../../pull/378) Fix Reports page header spacing
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>376 Move icon files to dedicated public/favicon folder</summary>
 
 [#376](../../pull/376) Move icon files to dedicated public/favicon folder
