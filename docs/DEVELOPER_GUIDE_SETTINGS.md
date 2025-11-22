@@ -13,6 +13,7 @@ The user settings system provides automatic synchronization of user preferences 
 │                        App.tsx                          │
 │  - Initializes all hooks                                │
 │  - Passes settings to components                        │
+│  - Renders WelcomeDialog                                │
 └────────────┬────────────────────────────────────────────┘
              │
      ┌───────┴────────┐
@@ -37,9 +38,18 @@ The user settings system provides automatic synchronization of user preferences 
 │ - Loads from Azure on login    │
 │ - Saves to Azure on change     │
 │ - Saves to Azure on logout     │
+│ - Triggers onFirstTimeLogin    │
 └────┬───────────────────────────┘
      │
-┌────▼──────────────────────────┐
+     │  ┌───────────────────────┐
+     └──▶ useWelcomeDialog      │
+        │                       │
+        │ - Shows welcome popup │
+        │ - Creates settings    │
+        │ - Countdown timer     │
+        └───────┬───────────────┘
+                │
+┌───────────────▼────────────────┐
 │  userSettingsService           │
 │                                │
 │ - loadUserSettings()           │
@@ -93,6 +103,25 @@ The `useSettingsSync` hook handles all sync operations:
 - **On Change**: Save to Azure after 2-second debounce
 - **On Logout**: Immediate save to Azure
 - **Service Check**: Automatically detects if Azure is available
+- **First-Time Login**: Triggers welcome dialog when no settings exist
+
+### 4. First-Time Login Experience
+
+The `useWelcomeDialog` hook provides a guided onboarding flow:
+- **Detection**: Automatically detects when user logs in for the first time (no settings in Azure)
+- **Welcome Dialog**: Displays informative dialog about cloud storage setup
+- **Settings Creation**: Creates initial user settings in Azure Table Storage
+- **Confirmation**: Shows success message with 10-second countdown
+- **User Control**: Allows manual close or waits for automatic close
+
+**Flow:**
+1. User logs in with Microsoft account
+2. `useSettingsSync` attempts to load settings from Azure
+3. If no settings found, triggers `onFirstTimeLogin` callback
+4. `useWelcomeDialog.triggerWelcomeDialog()` shows the welcome dialog
+5. Dialog automatically calls `createUserSettings()` to save initial settings
+6. Success message displayed with countdown timer
+7. User can close manually or wait for auto-close
 
 ## Adding a New Setting
 
