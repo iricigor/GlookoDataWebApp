@@ -33,7 +33,7 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeHero800,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
-    marginBottom: '8px',
+    marginBottom: '12px',
     fontFamily: 'Segoe UI, sans-serif',
     display: 'block',
   },
