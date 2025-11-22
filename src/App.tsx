@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { FluentProvider } from '@fluentui/react-components'
 import './App.css'
-import { Navigation, Footer } from './components/shared'
+import { Navigation, Footer, WelcomeDialog } from './components/shared'
 import { Home } from './pages/Home'
 import { DataUpload } from './pages/DataUpload'
 import { Reports } from './pages/Reports'
@@ -21,6 +21,7 @@ import { useActiveAIProvider } from './hooks/useActiveAIProvider'
 import { useSwipeGesture } from './hooks/useSwipeGesture'
 import { useSettingsSync } from './hooks/useSettingsSync'
 import { useInsulinDuration } from './hooks/useInsulinDuration'
+import { useWelcomeDialog } from './hooks/useWelcomeDialog'
 import type { UploadedFile, AIAnalysisResult } from './types'
 import { extractZipMetadata } from './features/dataUpload/utils'
 
@@ -42,6 +43,21 @@ function App() {
   const { glucoseUnit, setGlucoseUnit } = useGlucoseUnit()
   const { insulinDuration, setInsulinDuration } = useInsulinDuration()
   
+  // Welcome dialog for first-time login
+  const {
+    showWelcomeDialog,
+    triggerWelcomeDialog,
+    closeWelcomeDialog,
+    createUserSettings,
+  } = useWelcomeDialog({
+    userEmail,
+    themeMode,
+    exportFormat,
+    responseLanguage,
+    glucoseThresholds,
+    insulinDuration,
+  })
+  
   // Sync settings with Azure for authenticated users
   useSettingsSync({
     isLoggedIn,
@@ -54,6 +70,7 @@ function App() {
     setExportFormat,
     setResponseLanguage,
     setGlucoseThresholds,
+    onFirstTimeLogin: triggerWelcomeDialog,
   })
   
   // API Keys (not synced to Azure for security)
@@ -274,6 +291,16 @@ function App() {
         {renderPage()}
       </main>
       <Footer />
+      
+      {/* Welcome dialog for first-time login */}
+      {userEmail && (
+        <WelcomeDialog
+          open={showWelcomeDialog}
+          userEmail={userEmail}
+          onClose={closeWelcomeDialog}
+          onCreateSettings={createUserSettings}
+        />
+      )}
     </FluentProvider>
   )
 }

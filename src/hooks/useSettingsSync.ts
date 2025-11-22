@@ -34,6 +34,9 @@ interface UseSettingsSyncParams {
   setExportFormat: (format: ExportFormat) => void;
   setResponseLanguage: (language: ResponseLanguage) => void;
   setGlucoseThresholds: (thresholds: GlucoseThresholds) => void;
+  
+  // Optional callback when no settings are found (first-time login)
+  onFirstTimeLogin?: () => void;
 }
 
 /**
@@ -79,6 +82,7 @@ export function useSettingsSync(params: UseSettingsSyncParams): void {
     setExportFormat,
     setResponseLanguage,
     setGlucoseThresholds,
+    onFirstTimeLogin,
   } = params;
   
   // Track if Azure service is available
@@ -140,6 +144,11 @@ export function useSettingsSync(params: UseSettingsSyncParams): void {
             console.log('User settings loaded from Azure successfully');
           } else {
             console.log('No saved settings found in Azure, using current values');
+            
+            // This is a first-time login - trigger the callback if provided
+            if (onFirstTimeLogin) {
+              onFirstTimeLogin();
+            }
           }
           
           // Mark this user as loaded
@@ -152,7 +161,7 @@ export function useSettingsSync(params: UseSettingsSyncParams): void {
           isLoadingRef.current = false;
         });
     }
-  }, [isLoggedIn, userEmail, setThemeMode, setExportFormat, setResponseLanguage, setGlucoseThresholds]);
+  }, [isLoggedIn, userEmail, setThemeMode, setExportFormat, setResponseLanguage, setGlucoseThresholds, onFirstTimeLogin]);
   
   // Save settings to Azure when they change (debounced, for authenticated users only)
   useEffect(() => {

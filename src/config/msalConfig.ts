@@ -63,6 +63,11 @@ export const msalConfig: Configuration = {
         }
       },
     },
+    // Configure popup window interaction to avoid COOP policy issues
+    windowHashTimeout: 60000,
+    iframeHashTimeout: 6000,
+    loadFrameTimeout: 0,
+    asyncPopups: false,
   },
 };
 
