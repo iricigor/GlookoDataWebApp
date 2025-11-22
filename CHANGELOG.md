@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>385 Add first-time login welcome dialog and fix MSAL COOP error</summary>
+
+[#385](../../pull/385) Add first-time login welcome dialog and fix MSAL COOP error
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>380 Fix date persistence bug by removing circular dependency in report components</summary>
 
 [#380](../../pull/380) Fix date persistence bug by removing circular dependency in report components
