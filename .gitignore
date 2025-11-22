@@ -45,3 +45,7 @@ test-results.json
 scripts/deployment/.deploy-temp/
 scripts/deployment/config.json
 .glookodata/
+
+# Source data files (too large for git)
+**/CGM Records.zip
+CGM Records.zip
