@@ -3,7 +3,7 @@
  * Displays daily glucose values graph with navigation
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   makeStyles,
   Text,
@@ -205,6 +205,9 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
     glucoseUnit === 'mg/dL' ? 396 : 22.0
   );
   const [dataSource] = useState<GlucoseDataSource>('cgm');
+  
+  // Track the file ID to detect file changes vs date changes
+  const loadedFileIdRef = useRef<string | undefined>(undefined);
 
   // Load glucose readings when file is selected
   useEffect(() => {
@@ -212,7 +215,19 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
       setAllReadings([]);
       setAvailableDates([]);
       setCurrentDateIndex(0);
+      loadedFileIdRef.current = undefined;
       return;
+    }
+
+    // Only reload data if:
+    // 1. File changed (selectedFile.id !== loadedFileIdRef.current), OR
+    // 2. Data source changed, OR
+    // 3. This is the first load and we have a selectedDate from cookie
+    const isFileChange = selectedFile.id !== loadedFileIdRef.current;
+    const isInitialLoadWithSavedDate = loadedFileIdRef.current === undefined && selectedDate;
+    
+    if (!isFileChange && !isInitialLoadWithSavedDate) {
+      return; // Don't reload data for date changes
     }
 
     const loadData = async () => {
@@ -223,6 +238,9 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
         
         const dates = getUniqueDates(readings);
         setAvailableDates(dates);
+        
+        // Mark that we've loaded data for this file
+        loadedFileIdRef.current = selectedFile.id;
         
         // If we have a saved date, try to use it
         if (selectedDate && dates.includes(selectedDate)) {
@@ -237,16 +255,14 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
         console.error('Failed to load glucose data:', error);
         setAllReadings([]);
         setAvailableDates([]);
+        loadedFileIdRef.current = undefined;
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-    // Note: selectedDate is intentionally not in the dependency array
-    // It's only used to initialize currentDateIndex when data loads
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFile, dataSource]);
+  }, [selectedFile, dataSource, selectedDate]);
 
   // Get current date string
   const currentDate = availableDates[currentDateIndex] || '';

@@ -20,7 +20,7 @@ import {
   AccordionHeader,
   AccordionPanel,
 } from '@fluentui/react-components';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   LineChart,
   Line,
@@ -152,18 +152,30 @@ export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps)
   const [hourlyData, setHourlyData] = useState<HourlyIOBData[]>([]);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
+  
+  // Track the file ID to detect file changes vs date changes
+  const loadedFileIdRef = useRef<string | undefined>(undefined);
 
   // Extract insulin data when file changes
   useEffect(() => {
-    const loadData = async () => {
-      if (!selectedFile) {
-        setAvailableDates([]);
-        setCurrentDateIndex(0);
-        setAllReadings([]);
-        setHourlyData([]);
-        return;
-      }
+    if (!selectedFile) {
+      setAvailableDates([]);
+      setCurrentDateIndex(0);
+      setAllReadings([]);
+      setHourlyData([]);
+      loadedFileIdRef.current = undefined;
+      return;
+    }
+    
+    // Only reload data if file changed or this is the first load with a saved date
+    const isFileChange = selectedFile.id !== loadedFileIdRef.current;
+    const isInitialLoadWithSavedDate = loadedFileIdRef.current === undefined && selectedDate;
+    
+    if (!isFileChange && !isInitialLoadWithSavedDate) {
+      return; // Don't reload data for date changes
+    }
 
+    const loadData = async () => {
       setLoading(true);
       try {
         const readings = await extractInsulinReadings(selectedFile);
@@ -184,6 +196,9 @@ export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps)
 
         setAvailableDates(dates);
         
+        // Mark that we've loaded data for this file
+        loadedFileIdRef.current = selectedFile.id;
+        
         // If we have a saved date, try to use it
         if (selectedDate && dates.includes(selectedDate)) {
           setCurrentDateIndex(dates.indexOf(selectedDate));
@@ -194,16 +209,14 @@ export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps)
       } catch (error) {
         console.error('Failed to extract insulin data:', error);
         setAvailableDates([]);
+        loadedFileIdRef.current = undefined;
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-    // Note: selectedDate is intentionally not in the dependency array
-    // It's only used to initialize currentDateIndex when data loads
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFile]);
+  }, [selectedFile, selectedDate]);
 
   // Update selected date when date index changes
   useEffect(() => {
