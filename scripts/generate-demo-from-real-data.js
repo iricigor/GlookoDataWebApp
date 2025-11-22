@@ -41,18 +41,19 @@ function selectTrendArrow(current, previous) {
  */
 function parseCsvLine(line) {
   const parts = line.split(',');
-  if (parts.length < 9) return null;
+  if (parts.length < 7) return null;
   
   return {
     eventDateTime: parts[0],
-    deviceMode: parts[1] || '',
+    // Handle both formats: "CGM" column or "Readings (CGM / BGM)" column
+    deviceMode: parts[1] || parts[8] || '',  // DeviceMode can be in different positions
     bolusType: parts[2] || '',
-    basal: parts[3] || '',
+    basal: parts[3] || parts[1] || '',  // Basal can be in position 1 or 3
     correctionDelivered: parts[4] || '',
-    totalBolusInsulinDelivered: parts[5] || '',
+    totalBolusInsulinDelivered: parts[5] || parts[7] || '',
     foodDelivered: parts[6] || '',
-    carbSize: parts[7] || '',
-    cgm: parts[8] ? parseFloat(parts[8]) : null
+    carbSize: parts[7] || parts[3] || '',
+    cgm: parts[8] ? parseFloat(parts[8]) : (parts[6] ? parseFloat(parts[6]) : null)  // Try both CGM columns
   };
 }
 
@@ -234,52 +235,52 @@ async function main() {
   const zip = await JSZip.loadAsync(zipData);
   
   // Define the 6 demo datasets we want to create
-  // Subject selection based on data analysis:
-  // - Good glucose control (avg 130-145 mg/dL)
-  // - Diverse meal patterns and insulin usage
-  // - Representative activity levels (sleep/exercise modes)
+  // Subject selection based on actual AZT1D demographics (Table I):
+  // - Verified age and gender from published dataset
+  // - Good glucose control (A1c 5.0-7.3%)
+  // - Representative of diverse age groups and lifestyles
   const datasets = [
     { 
       id: 'joshua', 
       name: 'Joshua', 
-      subjectId: 5, 
+      subjectId: 7, 
       description: 'Male, 25-45, Active lifestyle',
-      rationale: 'Good control (134.6 mg/dL avg), moderate carb intake (35g/meal), 396 bolus entries showing active management'
+      rationale: 'Male, Age 36, A1c 6.8% - Good control (142.5 mg/dL avg), many meals (585), active management'
     },
     { 
       id: 'charles', 
       name: 'Charles', 
-      subjectId: 12, 
+      subjectId: 11, 
       description: 'Male, 45-65, Regular schedule',
-      rationale: 'Excellent control (135.6 mg/dL avg), larger meals (47.6g/meal), exercise tracking, balanced approach'
+      rationale: 'Male, Age 59, A1c 7.3% - Good control (166.3 mg/dL avg), larger meals (64.2g/meal), consistent routine'
     },
     { 
       id: 'albert', 
       name: 'Albert', 
-      subjectId: 15, 
+      subjectId: 18, 
       description: 'Male, 65-85, Retired',
-      rationale: 'Good control (133.5 mg/dL avg), consistent routine with extensive sleep mode tracking, stable patterns'
+      rationale: 'Male, Age 65, A1c 6.9% - Good control (152.1 mg/dL avg), sleep tracking, stable patterns'
     },
     { 
       id: 'hannah', 
       name: 'Hannah', 
-      subjectId: 13, 
+      subjectId: 14, 
       description: 'Female, 25-45, Active lifestyle',
-      rationale: 'Excellent control (134.8 mg/dL avg), moderate carbs (28.3g/meal), exercise tracking, efficient insulin use'
+      rationale: 'Female, Age 32, A1c 5.0% - Excellent control, exercise tracking, balanced diet'
     },
     { 
       id: 'nancy', 
       name: 'Nancy', 
       subjectId: 20, 
       description: 'Female, 45-65, Professional',
-      rationale: 'Good control (133.2 mg/dL avg), structured routine (426 bolus entries), extensive sleep tracking'
+      rationale: 'Female, Age 61, A1c 6.7% - Good control (133.2 mg/dL avg), structured routine (426 bolus entries), extensive sleep tracking'
     },
     { 
       id: 'dorothy', 
       name: 'Dorothy', 
       subjectId: 6, 
       description: 'Female, 65-85, Retired',
-      rationale: 'Good control (143.6 mg/dL avg), fewer corrections needed, very consistent routine with extensive sleep tracking'
+      rationale: 'Female, Age 77, A1c 6.6% - Good control (143.6 mg/dL avg), fewer corrections needed, very consistent routine with extensive sleep tracking'
     }
   ];
   

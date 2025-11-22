@@ -23,44 +23,45 @@ export interface DemoDataset {
  * 
  * Each dataset represents an anonymized subject from the AZT1D study,
  * showing authentic day-to-day variability in glucose control, insulin usage,
- * and diabetes management patterns.
+ * and diabetes management patterns. Subject selections verified against
+ * published demographics (Table I).
  */
 export const DEMO_DATASETS: DemoDataset[] = [
   {
     id: 'joshua',
     name: 'Joshua (Male, 25-45)',
     filename: 'joshua-demo-data.zip',
-    description: 'Active lifestyle, moderate carb intake (Subject 5: 134.6 mg/dL avg)',
+    description: 'Active lifestyle, moderate carb intake (Subject 7: Male, 36, A1c 6.8%)',
   },
   {
     id: 'charles',
     name: 'Charles (Male, 45-65)',
     filename: 'charles-demo-data.zip',
-    description: 'Regular schedule, balanced diet (Subject 12: 135.6 mg/dL avg)',
+    description: 'Regular schedule, balanced diet (Subject 11: Male, 59, A1c 7.3%)',
   },
   {
     id: 'albert',
     name: 'Albert (Male, 65-85)',
     filename: 'albert-demo-data.zip',
-    description: 'Retired, consistent routine (Subject 15: 133.5 mg/dL avg)',
+    description: 'Retired, consistent routine (Subject 18: Male, 65, A1c 6.9%)',
   },
   {
     id: 'hannah',
     name: 'Hannah (Female, 25-45)',
     filename: 'hannah-demo-data.zip',
-    description: 'Active lifestyle, varied schedule (Subject 13: 134.8 mg/dL avg)',
+    description: 'Active lifestyle, varied schedule (Subject 14: Female, 32, A1c 5.0%)',
   },
   {
     id: 'nancy',
     name: 'Nancy (Female, 45-65)',
     filename: 'nancy-demo-data.zip',
-    description: 'Professional, structured meals (Subject 20: 133.2 mg/dL avg)',
+    description: 'Professional, structured meals (Subject 20: Female, 61, A1c 6.7%)',
   },
   {
     id: 'dorothy',
     name: 'Dorothy (Female, 65-85)',
     filename: 'dorothy-demo-data.zip',
-    description: 'Retired, regular meal times (Subject 6: 143.6 mg/dL avg)',
+    description: 'Retired, regular meal times (Subject 6: Female, 77, A1c 6.6%)',
   },
 ];
 
