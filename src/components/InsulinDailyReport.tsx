@@ -59,6 +59,8 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
   
   // Track the file ID to detect file changes vs date changes
   const loadedFileIdRef = useRef<string | undefined>(undefined);
+  // Track whether we've already applied the saved date from cookie
+  const hasAppliedSavedDateRef = useRef<boolean>(false);
 
   // Extract insulin data when file changes
   useEffect(() => {
@@ -68,17 +70,29 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
       setCurrentDateIndex(0);
       setTimelineData([]);
       loadedFileIdRef.current = undefined;
+      hasAppliedSavedDateRef.current = false;
       return;
     }
     
-    // Only reload data if file changed or this is the first load with a saved date
+    // Check if this is a file change
     const isFileChange = selectedFile.id !== loadedFileIdRef.current;
-    const isInitialLoadWithSavedDate = loadedFileIdRef.current === undefined && selectedDate;
     
-    if (!isFileChange && !isInitialLoadWithSavedDate) {
-      return; // Don't reload data for date changes
+    // Check if we need to apply the saved date that just loaded from cookie
+    const shouldApplySavedDate = !hasAppliedSavedDateRef.current && selectedDate && availableDates.includes(selectedDate);
+    
+    // If not a file change and we don't need to apply saved date, skip
+    if (!isFileChange && !shouldApplySavedDate) {
+      return;
     }
 
+    // If we're just applying the saved date (not loading new data)
+    if (!isFileChange && shouldApplySavedDate) {
+      setCurrentDateIndex(availableDates.indexOf(selectedDate));
+      hasAppliedSavedDateRef.current = true;
+      return;
+    }
+
+    // Otherwise, load data for the new file
     const loadData = async () => {
       setLoading(true);
       try {
@@ -100,28 +114,31 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
 
         setAvailableDates(dates);
         
-        // Mark that we've loaded data for this file
-        loadedFileIdRef.current = selectedFile.id;
-        
         // If we have a saved date, try to use it
         if (selectedDate && dates.includes(selectedDate)) {
           setCurrentDateIndex(dates.indexOf(selectedDate));
+          hasAppliedSavedDateRef.current = true;
         } else {
           // Otherwise, start with the most recent date
           setCurrentDateIndex(dates.length > 0 ? dates.length - 1 : 0);
+          hasAppliedSavedDateRef.current = false; // Will apply when cookie loads
         }
+        
+        // Mark that we've loaded data for this file
+        loadedFileIdRef.current = selectedFile.id;
       } catch (error) {
         console.error('Failed to extract insulin data:', error);
         setInsulinReadings([]);
         setAvailableDates([]);
         loadedFileIdRef.current = undefined;
+        hasAppliedSavedDateRef.current = false;
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [selectedFile, selectedDate]);
+  }, [selectedFile, selectedDate, availableDates]);
 
   // Prepare timeline data when date changes
   useEffect(() => {

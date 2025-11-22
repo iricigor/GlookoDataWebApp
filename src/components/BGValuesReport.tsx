@@ -208,6 +208,8 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
   
   // Track the file ID to detect file changes vs date changes
   const loadedFileIdRef = useRef<string | undefined>(undefined);
+  // Track whether we've already applied the saved date from cookie
+  const hasAppliedSavedDateRef = useRef<boolean>(false);
 
   // Load glucose readings when file is selected
   useEffect(() => {
@@ -216,20 +218,29 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
       setAvailableDates([]);
       setCurrentDateIndex(0);
       loadedFileIdRef.current = undefined;
+      hasAppliedSavedDateRef.current = false;
       return;
     }
 
-    // Only reload data if:
-    // 1. File changed (selectedFile.id !== loadedFileIdRef.current), OR
-    // 2. Data source changed, OR
-    // 3. This is the first load and we have a selectedDate from cookie
+    // Check if this is a file change
     const isFileChange = selectedFile.id !== loadedFileIdRef.current;
-    const isInitialLoadWithSavedDate = loadedFileIdRef.current === undefined && selectedDate;
     
-    if (!isFileChange && !isInitialLoadWithSavedDate) {
-      return; // Don't reload data for date changes
+    // Check if we need to apply the saved date that just loaded from cookie
+    const shouldApplySavedDate = !hasAppliedSavedDateRef.current && selectedDate && availableDates.includes(selectedDate);
+    
+    // If not a file change and we don't need to apply saved date, skip
+    if (!isFileChange && !shouldApplySavedDate) {
+      return;
     }
 
+    // If we're just applying the saved date (not loading new data)
+    if (!isFileChange && shouldApplySavedDate) {
+      setCurrentDateIndex(availableDates.indexOf(selectedDate));
+      hasAppliedSavedDateRef.current = true;
+      return;
+    }
+
+    // Otherwise, load data for the new file
     const loadData = async () => {
       setLoading(true);
       try {
@@ -239,30 +250,33 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
         const dates = getUniqueDates(readings);
         setAvailableDates(dates);
         
-        // Mark that we've loaded data for this file
-        loadedFileIdRef.current = selectedFile.id;
-        
         // If we have a saved date, try to use it
         if (selectedDate && dates.includes(selectedDate)) {
           setCurrentDateIndex(dates.indexOf(selectedDate));
+          hasAppliedSavedDateRef.current = true;
         } else {
           // Otherwise, start with the last available date
           if (dates.length > 0) {
             setCurrentDateIndex(dates.length - 1);
           }
+          hasAppliedSavedDateRef.current = false; // Will apply when cookie loads
         }
+        
+        // Mark that we've loaded data for this file
+        loadedFileIdRef.current = selectedFile.id;
       } catch (error) {
         console.error('Failed to load glucose data:', error);
         setAllReadings([]);
         setAvailableDates([]);
         loadedFileIdRef.current = undefined;
+        hasAppliedSavedDateRef.current = false;
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [selectedFile, dataSource, selectedDate]);
+  }, [selectedFile, dataSource, selectedDate, availableDates]);
 
   // Get current date string
   const currentDate = availableDates[currentDateIndex] || '';
