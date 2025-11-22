@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>376 Move icon files to dedicated public/favicon folder</summary>
+
+[#376](../../pull/376) Move icon files to dedicated public/favicon folder
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>374 Optimize test execution with reduced timeout thresholds</summary>
 
 [#374](../../pull/374) Optimize test execution with reduced timeout thresholds
