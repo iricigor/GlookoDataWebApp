@@ -243,7 +243,10 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
     };
 
     loadData();
-  }, [selectedFile, dataSource, selectedDate]);
+    // Note: selectedDate is intentionally not in the dependency array
+    // It's only used to initialize currentDateIndex when data loads
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFile, dataSource]);
 
   // Get current date string
   const currentDate = availableDates[currentDateIndex] || '';

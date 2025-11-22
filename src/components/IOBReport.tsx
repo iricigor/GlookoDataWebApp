@@ -200,7 +200,10 @@ export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps)
     };
 
     loadData();
-  }, [selectedFile, selectedDate]);
+    // Note: selectedDate is intentionally not in the dependency array
+    // It's only used to initialize currentDateIndex when data loads
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFile]);
 
   // Update selected date when date index changes
   useEffect(() => {

@@ -136,7 +136,10 @@ export function UnifiedDailyReport({ selectedFile, glucoseUnit }: UnifiedDailyRe
     };
 
     loadData();
-  }, [selectedFile, selectedDate]);
+    // Note: selectedDate is intentionally not in the dependency array
+    // It's only used to initialize currentDateIndex when data loads
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFile]);
 
   // Prepare timeline data when date changes
   useEffect(() => {
