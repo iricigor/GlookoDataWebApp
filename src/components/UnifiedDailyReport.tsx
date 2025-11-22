@@ -10,7 +10,7 @@ import {
   shorthands,
   Spinner,
 } from '@fluentui/react-components';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { UploadedFile, InsulinReading, GlucoseReading, GlucoseUnit } from '../types';
 import { extractInsulinReadings, prepareInsulinTimelineData, extractGlucoseReadings, filterReadingsByDate } from '../utils/data';
 import { DayNavigator } from './DayNavigator';
@@ -75,19 +75,45 @@ export function UnifiedDailyReport({ selectedFile, glucoseUnit }: UnifiedDailyRe
   const [maxGlucose, setMaxGlucose] = useState<number>(
     glucoseUnit === 'mg/dL' ? 396 : 22.0
   );
+  
+  // Track the file ID to detect file changes vs date changes
+  const loadedFileIdRef = useRef<string | undefined>(undefined);
+  // Track whether we've already applied the saved date from cookie
+  const hasAppliedSavedDateRef = useRef<boolean>(false);
 
   // Extract insulin and glucose data when file changes
   useEffect(() => {
-    const loadData = async () => {
-      if (!selectedFile) {
-        setInsulinReadings([]);
-        setGlucoseReadings([]);
-        setAvailableDates([]);
-        setCurrentDateIndex(0);
-        setTimelineData([]);
-        return;
-      }
+    if (!selectedFile) {
+      setInsulinReadings([]);
+      setGlucoseReadings([]);
+      setAvailableDates([]);
+      setCurrentDateIndex(0);
+      setTimelineData([]);
+      loadedFileIdRef.current = undefined;
+      hasAppliedSavedDateRef.current = false;
+      return;
+    }
+    
+    // Check if this is a file change
+    const isFileChange = selectedFile.id !== loadedFileIdRef.current;
+    
+    // Check if we need to apply the saved date that just loaded from cookie
+    const shouldApplySavedDate = !hasAppliedSavedDateRef.current && selectedDate && availableDates.includes(selectedDate);
+    
+    // If not a file change and we don't need to apply saved date, skip
+    if (!isFileChange && !shouldApplySavedDate) {
+      return;
+    }
 
+    // If we're just applying the saved date (not loading new data)
+    if (!isFileChange && shouldApplySavedDate) {
+      setCurrentDateIndex(availableDates.indexOf(selectedDate));
+      hasAppliedSavedDateRef.current = true;
+      return;
+    }
+
+    // Otherwise, load data for the new file
+    const loadData = async () => {
       setLoading(true);
       try {
         // Load insulin data
@@ -121,21 +147,31 @@ export function UnifiedDailyReport({ selectedFile, glucoseUnit }: UnifiedDailyRe
         // If we have a saved date, try to use it
         if (selectedDate && dates.includes(selectedDate)) {
           setCurrentDateIndex(dates.indexOf(selectedDate));
+          hasAppliedSavedDateRef.current = true;
         } else {
           // Otherwise, start with the most recent date
           setCurrentDateIndex(dates.length > 0 ? dates.length - 1 : 0);
+          hasAppliedSavedDateRef.current = false; // Will apply when cookie loads
         }
+        
+        // Mark that we've loaded data for this file
+        loadedFileIdRef.current = selectedFile.id;
       } catch (error) {
         console.error('Failed to extract data:', error);
         setInsulinReadings([]);
         setGlucoseReadings([]);
         setAvailableDates([]);
+        loadedFileIdRef.current = undefined;
+        hasAppliedSavedDateRef.current = false;
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Note: availableDates is intentionally not in the dependency array to avoid loops.
+    // It's safe because when selectedDate changes (from cookie), availableDates is already populated.
   }, [selectedFile, selectedDate]);
 
   // Prepare timeline data when date changes
