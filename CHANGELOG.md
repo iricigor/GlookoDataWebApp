@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>380 Fix date persistence bug by removing circular dependency in report components</summary>
+
+[#380](../../pull/380) Fix date persistence bug by removing circular dependency in report components
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>381 Add German demo datasets to validate German language import support</summary>
 
 [#381](../../pull/381) Add German demo datasets to validate German language import support
