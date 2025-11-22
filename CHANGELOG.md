@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>381 Add German demo datasets to validate German language import support</summary>
+
+[#381](../../pull/381) Add German demo datasets to validate German language import support
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>383 Fix module export bug causing Azure Cloud Shell failures</summary>
 
 [#383](../../pull/383) Fix module export bug causing Azure Cloud Shell failures
