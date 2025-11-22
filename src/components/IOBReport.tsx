@@ -233,7 +233,7 @@ export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps)
     };
 
     loadData();
-  }, [selectedFile, selectedDate, availableDates]);
+  }, [selectedFile, selectedDate]);
 
   // Update selected date when date index changes
   useEffect(() => {

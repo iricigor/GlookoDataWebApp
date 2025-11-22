@@ -276,7 +276,7 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
     };
 
     loadData();
-  }, [selectedFile, dataSource, selectedDate, availableDates]);
+  }, [selectedFile, dataSource, selectedDate]);
 
   // Get current date string
   const currentDate = availableDates[currentDateIndex] || '';

@@ -138,7 +138,7 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
     };
 
     loadData();
-  }, [selectedFile, selectedDate, availableDates]);
+  }, [selectedFile, selectedDate]);
 
   // Prepare timeline data when date changes
   useEffect(() => {

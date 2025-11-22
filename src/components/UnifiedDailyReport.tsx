@@ -169,7 +169,7 @@ export function UnifiedDailyReport({ selectedFile, glucoseUnit }: UnifiedDailyRe
     };
 
     loadData();
-  }, [selectedFile, selectedDate, availableDates]);
+  }, [selectedFile, selectedDate]);
 
   // Prepare timeline data when date changes
   useEffect(() => {
