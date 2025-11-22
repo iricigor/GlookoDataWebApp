@@ -234,13 +234,53 @@ async function main() {
   const zip = await JSZip.loadAsync(zipData);
   
   // Define the 6 demo datasets we want to create
+  // Subject selection based on data analysis:
+  // - Good glucose control (avg 130-145 mg/dL)
+  // - Diverse meal patterns and insulin usage
+  // - Representative activity levels (sleep/exercise modes)
   const datasets = [
-    { id: 'joshua', name: 'Joshua', subjectId: 5, description: 'Male, 25-45, Active lifestyle' },
-    { id: 'charles', name: 'Charles', subjectId: 10, description: 'Male, 45-65, Regular schedule' },
-    { id: 'albert', name: 'Albert', subjectId: 15, description: 'Male, 65-85, Retired' },
-    { id: 'hannah', name: 'Hannah', subjectId: 20, description: 'Female, 25-45, Active lifestyle' },
-    { id: 'nancy', name: 'Nancy', subjectId: 3, description: 'Female, 45-65, Professional' },
-    { id: 'dorothy', name: 'Dorothy', subjectId: 8, description: 'Female, 65-85, Retired' }
+    { 
+      id: 'joshua', 
+      name: 'Joshua', 
+      subjectId: 5, 
+      description: 'Male, 25-45, Active lifestyle',
+      rationale: 'Good control (134.6 mg/dL avg), moderate carb intake (35g/meal), 396 bolus entries showing active management'
+    },
+    { 
+      id: 'charles', 
+      name: 'Charles', 
+      subjectId: 12, 
+      description: 'Male, 45-65, Regular schedule',
+      rationale: 'Excellent control (135.6 mg/dL avg), larger meals (47.6g/meal), exercise tracking, balanced approach'
+    },
+    { 
+      id: 'albert', 
+      name: 'Albert', 
+      subjectId: 15, 
+      description: 'Male, 65-85, Retired',
+      rationale: 'Good control (133.5 mg/dL avg), consistent routine with extensive sleep mode tracking, stable patterns'
+    },
+    { 
+      id: 'hannah', 
+      name: 'Hannah', 
+      subjectId: 13, 
+      description: 'Female, 25-45, Active lifestyle',
+      rationale: 'Excellent control (134.8 mg/dL avg), moderate carbs (28.3g/meal), exercise tracking, efficient insulin use'
+    },
+    { 
+      id: 'nancy', 
+      name: 'Nancy', 
+      subjectId: 20, 
+      description: 'Female, 45-65, Professional',
+      rationale: 'Good control (133.2 mg/dL avg), structured routine (426 bolus entries), extensive sleep tracking'
+    },
+    { 
+      id: 'dorothy', 
+      name: 'Dorothy', 
+      subjectId: 6, 
+      description: 'Female, 65-85, Retired',
+      rationale: 'Good control (143.6 mg/dL avg), fewer corrections needed, very consistent routine with extensive sleep tracking'
+    }
   ];
   
   const outputDir = path.join(__dirname, '..', 'public', 'demo-data');

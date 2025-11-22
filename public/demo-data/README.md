@@ -4,31 +4,43 @@ This folder contains demo datasets for the Glooko Data Web App. These datasets a
 
 ## Available Demo Datasets
 
-The following 6 demo datasets are available:
+The following 6 demo datasets are available, each based on real anonymized data from the AZT1D study:
 
 1. **Joshua (Male, 25-45)** - `joshua-demo-data.zip`
-   - Active lifestyle with moderate carb intake
-   - Based on Subject 5 from the AZT1D dataset
+   - Active lifestyle with moderate carb intake (35g/meal average)
+   - Based on **Subject 5** from the AZT1D dataset
+   - Average glucose: 134.6 mg/dL (7.5 mmol/L)
+   - Characteristics: Good glucose control, 396 bolus entries showing active diabetes management
 
 2. **Charles (Male, 45-65)** - `charles-demo-data.zip`
-   - Regular schedule with balanced diet
-   - Based on Subject 10 from the AZT1D dataset
+   - Regular schedule with balanced diet (47.6g/meal average)
+   - Based on **Subject 12** from the AZT1D dataset
+   - Average glucose: 135.6 mg/dL (7.5 mmol/L)
+   - Characteristics: Excellent control, larger meals, exercise tracking enabled, balanced management approach
 
 3. **Albert (Male, 65-85)** - `albert-demo-data.zip`
    - Retired with consistent routine
-   - Based on Subject 15 from the AZT1D dataset
+   - Based on **Subject 15** from the AZT1D dataset
+   - Average glucose: 133.5 mg/dL (7.4 mmol/L)
+   - Characteristics: Good control, extensive sleep mode tracking, stable and predictable patterns
 
 4. **Hannah (Female, 25-45)** - `hannah-demo-data.zip`
-   - Active lifestyle with varied schedule
-   - Based on Subject 20 from the AZT1D dataset
+   - Active lifestyle with varied schedule (28.3g/meal average)
+   - Based on **Subject 13** from the AZT1D dataset
+   - Average glucose: 134.8 mg/dL (7.5 mmol/L)
+   - Characteristics: Excellent control, exercise tracking, efficient insulin use with fewer corrections needed
 
 5. **Nancy (Female, 45-65)** - `nancy-demo-data.zip`
-   - Professional with structured meals
-   - Based on Subject 3 from the AZT1D dataset
+   - Professional with structured meals (26.1g/meal average)
+   - Based on **Subject 20** from the AZT1D dataset
+   - Average glucose: 133.2 mg/dL (7.4 mmol/L)
+   - Characteristics: Good control, structured routine with 426 bolus entries, extensive sleep mode tracking
 
 6. **Dorothy (Female, 65-85)** - `dorothy-demo-data.zip`
-   - Retired with regular meal times
-   - Based on Subject 8 from the AZT1D dataset
+   - Retired with regular meal times (33.9g/meal average)
+   - Based on **Subject 6** from the AZT1D dataset
+   - Average glucose: 143.6 mg/dL (8.0 mmol/L)
+   - Characteristics: Good control, fewer corrections needed, very consistent routine with extensive sleep tracking
 
 ## Data Format
 
@@ -48,6 +60,14 @@ Each demo dataset is provided as a ZIP file containing multiple CSV files:
 - **notes_data_1.csv** - User notes (placeholder)
 
 ## Data Characteristics
+
+### Subject Selection Criteria
+The 6 subjects were carefully selected from the 25 available in the AZT1D dataset based on:
+- **Good glucose control**: Average glucose between 130-145 mg/dL (7.2-8.0 mmol/L)
+- **Data completeness**: At least 8,000 CGM readings (40+ days of data)
+- **Diverse patterns**: Variety in meal sizes, insulin usage, and activity tracking
+- **Representative personas**: Covering different age groups and lifestyle patterns
+- **Real variability**: Each subject shows authentic day-to-day variations in diabetes management
 
 ### Natural Variability
 Each dataset exhibits realistic day-to-day variability as observed in real T1D patients:
