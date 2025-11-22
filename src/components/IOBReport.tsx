@@ -233,6 +233,9 @@ export function IOBReport({ selectedFile, insulinDuration = 5 }: IOBReportProps)
     };
 
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Note: availableDates is intentionally not in the dependency array to avoid loops.
+    // It's safe because when selectedDate changes (from cookie), availableDates is already populated.
   }, [selectedFile, selectedDate]);
 
   // Update selected date when date index changes

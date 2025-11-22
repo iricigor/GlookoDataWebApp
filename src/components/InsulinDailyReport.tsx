@@ -138,6 +138,9 @@ export function InsulinDailyReport({ selectedFile }: InsulinDailyReportProps) {
     };
 
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Note: availableDates is intentionally not in the dependency array to avoid loops.
+    // It's safe because when selectedDate changes (from cookie), availableDates is already populated.
   }, [selectedFile, selectedDate]);
 
   // Prepare timeline data when date changes

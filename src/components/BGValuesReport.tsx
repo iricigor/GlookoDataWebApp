@@ -276,6 +276,9 @@ export function BGValuesReport({ selectedFile, glucoseUnit }: BGValuesReportProp
     };
 
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Note: availableDates is intentionally not in the dependency array to avoid loops.
+    // It's safe because when selectedDate changes (from cookie), availableDates is already populated.
   }, [selectedFile, dataSource, selectedDate]);
 
   // Get current date string
