@@ -2,6 +2,36 @@
 
 This folder contains demo datasets for the Glooko Data Web App. These datasets are based on real, anonymized continuous glucose monitoring (CGM) data from individuals with Type 1 Diabetes.
 
+## Data Source and Attribution
+
+### Original Data Source
+These demo datasets are derived from the **AZT1D** (Arizona Type 1 Diabetes) dataset, which contains real-world CGM and insulin pump data from individuals with Type 1 Diabetes.
+
+### Citation
+If you use these demo datasets in research or publications, please cite the original AZT1D dataset:
+
+**Khamesian, M., Behrouz, S., Amorim, A. C., Liu, Y., Jennings, M., & Moradi, H. (2025).**  
+*AZT1D: A Multi-modal Dataset of 240 Days Sensor-Based and EHR Recordings from 25 Individuals with Type 1 Diabetes.*  
+Available at: https://arxiv.org/abs/2506.14789  
+DOI: [10.17632/gk9m674wcx.1](https://doi.org/10.17632/gk9m674wcx.1)
+
+### License
+The AZT1D dataset is available under the **Creative Commons Attribution 4.0 International (CC BY 4.0)** license.
+
+You are free to:
+- **Share** — copy and redistribute the material in any medium or format
+- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
+
+Under the following terms:
+- **Attribution** — You must give appropriate credit to the original authors, provide a link to the license, and indicate if changes were made.
+
+Full license text: https://creativecommons.org/licenses/by/4.0/
+
+### Important Notes
+- **Fictional Names**: The persona names (Joshua, Charles, Albert, Hannah, Nancy, Dorothy) are randomly selected popular names and are not related to the actual subjects in the AZT1D dataset. They are used solely for easier identification of different demo datasets.
+- **Anonymized Data**: All data has been fully anonymized. No personally identifiable information is included.
+- **Verified Demographics**: Subject selections were verified against demographic data published in Table I of the AZT1D paper to ensure accurate age and gender representation.
+
 ## Available Demo Datasets
 
 The following 6 demo datasets are available, each based on real anonymized data from the AZT1D study with verified demographics from Table I of the published paper:
@@ -99,40 +129,16 @@ To convert to mg/dL (used in the United States):
 - **mg/dL = mmol/L × 18**
 - Example: 5.5 mmol/L = 99 mg/dL
 
-## Data Source and Attribution
+## Data Processing
 
-### Original Data Source
-These demo datasets are derived from the **AZT1D** (Arizona Type 1 Diabetes) dataset, which contains real-world CGM and insulin pump data from individuals with Type 1 Diabetes.
-
-### Citation
-If you use these demo datasets in research or publications, please cite the original AZT1D dataset:
-
-**Khamesian, M., Behrouz, S., Amorim, A. C., Liu, Y., Jennings, M., & Moradi, H. (2025).**  
-*AZT1D: A Multi-modal Dataset of 240 Days Sensor-Based and EHR Recordings from 25 Individuals with Type 1 Diabetes.*  
-Available at: https://arxiv.org/abs/2506.14789  
-DOI: [10.17632/gk9m674wcx.1](https://doi.org/10.17632/gk9m674wcx.1)
-
-### License
-The AZT1D dataset is available under the **Creative Commons Attribution 4.0 International (CC BY 4.0)** license.
-
-You are free to:
-- **Share** — copy and redistribute the material in any medium or format
-- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
-
-Under the following terms:
-- **Attribution** — You must give appropriate credit to the original authors, provide a link to the license, and indicate if changes were made.
-
-Full license text: https://creativecommons.org/licenses/by/4.0/
-
-### Data Processing
 The demo datasets in this folder have been processed from the original AZT1D data:
-1. Selected subjects were anonymized and renamed to fictional personas
+1. Selected subjects were anonymized and renamed to fictional personas (names are randomly selected and not related to actual subjects)
 2. Glucose values were converted from mg/dL to mmol/L
 3. Data was reformatted to match the Glooko export CSV structure
 4. CGM data was split into multiple files to simulate multiple sensor sessions
 5. Personally identifiable information was replaced with generic values
 
-### Original Research Context
+## Original Research Context
 The AZT1D dataset was collected to support research in:
 - Predictive modeling for glucose forecasting
 - Personalized insulin dosing algorithms
@@ -148,7 +154,7 @@ The data was collected from real patients using:
 
 - All data has been fully anonymized
 - No personally identifiable information is included
-- Patient names in the demo datasets are fictional
+- Patient names in the demo datasets (Joshua, Charles, Albert, Hannah, Nancy, Dorothy) are fictional and randomly selected - they are not related to the actual subjects
 - Data collection was conducted with appropriate ethical approval
 - Original data was collected at the Arizona State University
 
