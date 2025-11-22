@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>373 Replace synthetic demo data with real AZT1D patient data for authentic variability</summary>
+
+[#373](../../pull/373) Replace synthetic demo data with real AZT1D patient data for authentic variability
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>378 Fix Reports page header spacing</summary>
 
 [#378](../../pull/378) Fix Reports page header spacing
