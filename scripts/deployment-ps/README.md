@@ -163,6 +163,38 @@ Set-GlookoStaticWebApp -Sku Standard -AssignManagedIdentity
 
 Your existing configuration file (`~/.glookodata/config.json`) will continue to work with the module.
 
+## Contributing to the Module
+
+When making changes to the GlookoDeployment module:
+
+1. **Always bump the module version** in `GlookoDeployment.psd1`
+   - Use semantic versioning: MAJOR.MINOR.PATCH
+   - Patch version for bug fixes (1.0.0 → 1.0.1)
+   - Minor version for new features (1.0.0 → 1.1.0)
+   - Major version for breaking changes (1.0.0 → 2.0.0)
+
+2. **Update the ReleaseNotes** in `GlookoDeployment.psd1`
+   - Add new version section at the top
+   - Document all changes clearly
+
+3. **Test the module** before committing
+   ```powershell
+   # Test manifest is valid
+   Test-ModuleManifest -Path ./GlookoDeployment.psd1
+   
+   # Test module loads correctly
+   Import-Module ./GlookoDeployment.psd1 -Force
+   
+   # Verify all functions are available
+   Get-Command -Module GlookoDeployment
+   ```
+
+4. **Why version bumping is required:**
+   - The one-liner installer downloads the latest version from GitHub
+   - Users rely on `iex (irm ...)` to get updates
+   - Without version changes, PowerShell may cache old versions
+   - Azure Cloud Shell requires new versions to refresh the module
+
 ## Support
 
 For issues or questions:

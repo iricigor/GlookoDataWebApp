@@ -25,5 +25,8 @@ Export-ModuleMember -Function @(
     'Initialize-GlookoConfig',
     'Set-GlookoManagedIdentity',
     'Set-GlookoStorageAccount',
+    'Set-GlookoTableStorage',
+    'Set-GlookoAppRegistration',
+    'Set-GlookoStaticWebApp',
     'Invoke-GlookoDeployment'
 ) -Alias *

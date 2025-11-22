@@ -3,7 +3,7 @@
     RootModule = 'GlookoDeployment.psm1'
     
     # Version number of this module
-    ModuleVersion = '1.0.0'
+    ModuleVersion = '1.0.1'
     
     # ID used to uniquely identify this module
     GUID = '8b5c3d2e-1f4a-4b6c-9d8e-7f6a5b4c3d2e'
@@ -71,6 +71,12 @@
             
             # ReleaseNotes of this module
             ReleaseNotes = @'
+# Version 1.0.1 (2025-11-22)
+
+## Bug Fixes
+- Fixed module loading issue where Set-GlookoTableStorage, Set-GlookoAppRegistration, and Set-GlookoStaticWebApp functions were not being exported
+- Module now correctly exports all 10 public functions
+
 # Version 1.0.0 (2024-12-19)
 
 ## New Features
