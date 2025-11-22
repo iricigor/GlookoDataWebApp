@@ -49,9 +49,9 @@ To use a different icon option:
 
 1. Copy the desired option file to `favicon.svg`:
    ```bash
-   cp public/favicon-option1.svg public/favicon.svg
+   cp public/favicon/favicon-option1.svg public/favicon/favicon.svg
    ```
 
-2. The `index.html` file references `/favicon.svg`, so no code changes are needed
+2. The `index.html` file references `/favicon/favicon.svg`, so no code changes are needed
 
 3. Clear your browser cache to see the change immediately
