@@ -34,7 +34,9 @@ Full license text: https://creativecommons.org/licenses/by/4.0/
 
 ## Available Demo Datasets
 
-The following 6 demo datasets are available, each based on real anonymized data from the AZT1D study with verified demographics from Table I of the published paper:
+The following 8 demo datasets are available, each based on real anonymized data from the AZT1D study with verified demographics from Table I of the published paper:
+
+### English Demo Datasets (mmol/L units)
 
 1. **Joshua (Male, 25-45)** - `joshua-demo-data.zip`
    - Active lifestyle with moderate carb intake
@@ -78,9 +80,29 @@ The following 6 demo datasets are available, each based on real anonymized data 
    - Average glucose: 143.6 mg/dL (8.0 mmol/L)
    - Characteristics: Good control, fewer corrections needed, very consistent routine with extensive sleep tracking
 
+### German Demo Datasets (mg/dL units)
+
+These datasets use **German column headers** and **mg/dL** glucose units, as typically exported from Glooko in German-speaking regions.
+
+7. **Stefan (Male, 25-45)** - `stefan-demo-data.zip`
+   - Active lifestyle with consistent management
+   - Based on **Subject 10** from the AZT1D dataset
+   - **Language**: German column headers (Zeitstempel, CGM-Glukosewert, etc.)
+   - **Units**: mg/dL for glucose values
+   - Characteristics: Good glucose control, ~12,000 CGM readings, ~475 bolus entries
+
+8. **Anja (Female, 25-45)** - `anja-demo-data.zip`
+   - Professional with structured routine
+   - Based on **Subject 15** from the AZT1D dataset
+   - **Language**: German column headers (Zeitstempel, CGM-Glukosewert, etc.)
+   - **Units**: mg/dL for glucose values
+   - Characteristics: Good glucose control, ~15,800 CGM readings, ~390 bolus entries
+
 ## Data Format
 
-Each demo dataset is provided as a ZIP file containing multiple CSV files:
+### English Datasets (mmol/L)
+
+Each English demo dataset is provided as a ZIP file containing multiple CSV files with **English column headers** and glucose values in **mmol/L**:
 
 - **cgm_data_1.csv, cgm_data_2.csv, cgm_data_3.csv** - Continuous glucose monitoring readings (in mmol/L)
 - **bolus_data_1.csv** - Insulin bolus delivery records
@@ -95,16 +117,50 @@ Each demo dataset is provided as a ZIP file containing multiple CSV files:
 - **medication_data_1.csv** - Medication records (placeholder)
 - **notes_data_1.csv** - User notes (placeholder)
 
+### German Datasets (mg/dL)
+
+Each German demo dataset (Stefan, Anja) uses **German column headers** and glucose values in **mg/dL**:
+
+- **cgm_data_1.csv, cgm_data_2.csv, cgm_data_3.csv** - CGM readings with German headers:
+  - `Zeitstempel` (Timestamp)
+  - `CGM-Glukosewert (mg/dl)` (CGM Glucose Value in mg/dL)
+  - `Seriennummer` (Serial Number)
+
+- **bolus_data_1.csv** - Insulin bolus records with German headers:
+  - `Zeitstempel` (Timestamp)
+  - `Insulin-Typ` (Insulin Type)
+  - `Blutzuckereingabe (mg/dl)` (Blood Glucose Input in mg/dL)
+  - `Kohlenhydrataufnahme (g)` (Carbohydrate Intake in g)
+  - `Abgegebenes Insulin (E)` (Delivered Insulin in units)
+
+- **basal_data_1.csv, basal_data_2.csv** - Basal insulin with German headers:
+  - `Zeitstempel` (Timestamp)
+  - `Insulin-Typ` (Insulin Type)
+  - `Dauer (Minuten)` (Duration in minutes)
+  - `Rate` (Rate)
+  - `Abgegebenes Insulin (E)` (Delivered Insulin in units)
+
+- Other placeholder files with German headers (alarms, bg, carbs, exercise, food, insulin, manual_insulin, medication, notes)
+
 ## Data Characteristics
 
 ### Subject Selection Criteria
-The 6 subjects were carefully selected from the 25 available in the AZT1D dataset based on:
+
+**English Datasets (6 subjects):**
+The 6 English demo subjects were carefully selected from the 25 available in the AZT1D dataset based on:
 - **Verified demographics**: Age and gender matched against Table I from the published paper (Khamesian et al., 2025)
 - **Good glucose control**: A1c between 5.0-7.3%, representing well-managed Type 1 Diabetes
 - **Data completeness**: At least 8,000 CGM readings (40+ days of continuous data)
 - **Diverse patterns**: Variety in meal sizes, insulin usage, and activity tracking
 - **Representative personas**: Covering different age groups (27-80 years) and lifestyle patterns
 - **Real variability**: Each subject shows authentic day-to-day variations in diabetes management
+
+**German Datasets (2 subjects):**
+The 2 German demo subjects (Stefan, Anja) were selected to:
+- **Test German language support**: Validate that the app correctly handles German column headers
+- **Test mg/dL units**: Ensure proper conversion and display of glucose values in mg/dL
+- **Provide variety**: Use different subjects than the English datasets
+- **Authentic data**: Based on real anonymized CGM data from different AZT1D subjects
 
 **Note on age/gender matching**: Subject selections were verified against the demographic data published in Table I of the AZT1D paper to ensure accurate representation of the intended age ranges and genders.
 
@@ -123,18 +179,36 @@ Each dataset contains approximately 4-8 weeks of continuous CGM data with:
 - Continuous basal insulin delivery records
 
 ### Glucose Units
-All glucose values in the demo datasets are provided in **mmol/L** (millimoles per liter), which is the standard unit used in many countries including the UK, Australia, and most of Europe.
 
-To convert to mg/dL (used in the United States):
+**English Datasets (Joshua, Charles, Albert, Hannah, Nancy, Dorothy):**
+All glucose values are provided in **mmol/L** (millimoles per liter), which is the standard unit used in many countries including the UK, Australia, and most of Europe.
+
+**German Datasets (Stefan, Anja):**
+All glucose values are provided in **mg/dL** (milligrams per deciliter), which is commonly used in German-speaking countries and the United States.
+
+**Unit Conversion:**
 - **mg/dL = mmol/L × 18**
 - Example: 5.5 mmol/L = 99 mg/dL
+- **mmol/L = mg/dL ÷ 18**
+- Example: 180 mg/dL = 10.0 mmol/L
+
+**Note:** The GlookoDataWebApp automatically detects the glucose units from the import file and converts them as needed. Users can also toggle between mmol/L and mg/dL display in the Settings page.
 
 ## Data Processing
 
 The demo datasets in this folder have been processed from the original AZT1D data:
+
+**English Datasets (Joshua, Charles, Albert, Hannah, Nancy, Dorothy):**
 1. Selected subjects were anonymized and renamed to fictional personas (names are randomly selected and not related to actual subjects)
 2. Glucose values were converted from mg/dL to mmol/L
-3. Data was reformatted to match the Glooko export CSV structure
+3. Data was reformatted to match the Glooko export CSV structure with English headers
+4. CGM data was split into multiple files to simulate multiple sensor sessions
+5. Personally identifiable information was replaced with generic values
+
+**German Datasets (Stefan, Anja):**
+1. Selected subjects were anonymized and renamed to fictional German personas
+2. Glucose values were kept in mg/dL (as typically exported from German Glooko)
+3. Data was reformatted with **German column headers** (Zeitstempel, CGM-Glukosewert, Insulin-Typ, etc.)
 4. CGM data was split into multiple files to simulate multiple sensor sessions
 5. Personally identifiable information was replaced with generic values
 

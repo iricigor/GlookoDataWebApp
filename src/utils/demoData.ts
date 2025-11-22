@@ -63,6 +63,18 @@ export const DEMO_DATASETS: DemoDataset[] = [
     filename: 'dorothy-demo-data.zip',
     description: 'Retired, regular meal times (Subject 6: Female, 77, A1c 6.6%)',
   },
+  {
+    id: 'stefan',
+    name: 'Stefan (Male, 25-45) 🇩🇪',
+    filename: 'stefan-demo-data.zip',
+    description: 'German dataset: Active lifestyle (Subject 10, mg/dL units, German headers)',
+  },
+  {
+    id: 'anja',
+    name: 'Anja (Female, 25-45) 🇩🇪',
+    filename: 'anja-demo-data.zip',
+    description: 'German dataset: Professional routine (Subject 15, mg/dL units, German headers)',
+  },
 ];
 
 /**
