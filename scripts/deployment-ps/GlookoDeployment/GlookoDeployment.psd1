@@ -71,7 +71,7 @@
             
             # ReleaseNotes of this module
             ReleaseNotes = @'
-# Version 1.0.1 (2024-11-22)
+# Version 1.0.1 (2025-11-22)
 
 ## Bug Fixes
 - Fixed module loading issue where Set-GlookoTableStorage, Set-GlookoAppRegistration, and Set-GlookoStaticWebApp functions were not being exported
