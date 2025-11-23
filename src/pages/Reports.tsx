@@ -72,7 +72,13 @@ interface ReportsProps {
 export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDuration }: ReportsProps) {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState<string>(() => {
-    // Load the last selected tab from localStorage
+    // Check URL hash for deep linking first (e.g., #reports/agp)
+    const hash = window.location.hash.slice(1);
+    const parts = hash.split('/');
+    if (parts.length > 1 && parts[0] === 'reports') {
+      return parts[1];
+    }
+    // Otherwise, load the last selected tab from localStorage
     const savedTab = localStorage.getItem('reports-selected-tab');
     return savedTab || 'inRange';
   });
