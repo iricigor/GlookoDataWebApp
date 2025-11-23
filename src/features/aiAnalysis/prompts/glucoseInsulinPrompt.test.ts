@@ -38,12 +38,15 @@ describe('glucoseInsulinPrompt', () => {
       expect(result).toContain('Day of Week');
     });
 
-    it('should include insulin efficacy tiers requirement', () => {
+    it('should include insulin efficacy analysis with terciles', () => {
       const base64Data = base64Encode(sampleCsvData);
       const result = generateGlucoseInsulinPrompt(base64Data);
       
-      expect(result).toContain('Insulin Efficacy Tiers');
-      expect(result).toContain('Total Dose Tiering');
+      expect(result).toContain('Insulin Efficacy Analysis');
+      expect(result).toContain('terciles');
+      expect(result).toContain('Low Tercile');
+      expect(result).toContain('Medium Tercile');
+      expect(result).toContain('High Tercile');
     });
 
     it('should include anomalies requirement', () => {
@@ -135,6 +138,65 @@ describe('glucoseInsulinPrompt', () => {
       expect(result).toContain('Latin script');
       expect(result).toContain('srpskom latiničnim pismom');
       expect(result).not.toContain('Respond in English');
+    });
+
+    it('should include data integrity warning about missing data', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(result).toContain('CRITICAL: Data Integrity');
+      expect(result).toContain('NEVER hallucinate');
+      expect(result).toContain('missing or incomplete');
+    });
+
+    it('should include basal drift test instructions', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(result).toContain('Basal Drift Test');
+      expect(result).toContain('overnight periods');
+      expect(result).toContain('10 PM – 6 AM');
+      expect(result).toContain('fasting periods');
+      expect(result).toContain('30-50 mg/dL');
+    });
+
+    it('should include hypoglycemia risk analysis', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(result).toContain('Hypoglycemia Risk Analysis');
+      expect(result).toContain('BG Below');
+      expect(result).toContain('dosage volume is generally too aggressive');
+      expect(result).toContain('nocturnal hypoglycemia risk');
+    });
+
+    it('should include variance analysis for BG In Range', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(result).toContain('variance');
+      expect(result).toContain('standard deviation');
+      expect(result).toContain('weekends vs. workdays');
+      expect(result).toContain('variability');
+    });
+
+    it('should use mg/dL when unit is specified as mg/dL', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data, 'english', 'mg/dL');
+      
+      expect(result).toContain('mg/dL');
+      expect(result).toContain('not mmol/L');
+    });
+
+    it('should include actionable recommendations with tercile context', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(result).toContain('Actionable Summary');
+      expect(result).toContain('tercile analysis');
+      expect(result).toContain('variance analysis');
+      expect(result).toContain('basal drift test');
+      expect(result).toContain('hypoglycemia risk');
     });
   });
 });
