@@ -39,7 +39,8 @@ describe('pumpSettingsPrompt', () => {
       
       const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
       
-      expect(result).toContain('expert diabetes data analyst');
+      expect(result).toContain('expert endocrinologist');
+      expect(result).toContain('certified diabetes pump trainer');
       expect(result).toContain('three datasets');
     });
 
@@ -63,7 +64,7 @@ describe('pumpSettingsPrompt', () => {
       const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
       
       expect(result).toContain('STEP 2: Infer Basal Profile');
-      expect(result).toContain('most frequent Rate');
+      expect(result).toContain('median Rate');
     });
 
     it('should include step 3: infer ISF', () => {
@@ -291,6 +292,150 @@ describe('pumpSettingsPrompt', () => {
       expect(result).toContain('Latin script');
       expect(result).toContain('srpskom latiničnim pismom');
       expect(result).not.toContain('Respond in English');
+    });
+
+    it('should include severe hypoglycemia threshold (<3.0 mmol/L)', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('3.0');
+      expect(result).toContain('Severe hypo');
+      expect(result).toContain('severe hypoglycemia');
+    });
+
+    it('should include severe hyperglycemia threshold (>13.9 mmol/L)', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('13.9');
+      expect(result).toContain('Severe hyper');
+      expect(result).toContain('severe hyperglycemia');
+    });
+
+    it('should include Coefficient of Variation (CV%) in CGM metrics', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Coefficient of Variation');
+      expect(result).toContain('CV %');
+      expect(result).toContain('(SD / Mean) × 100');
+    });
+
+    it('should filter out low-dose corrections (<0.3 U) in ISF step', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Insulin Delivered ≥ 0.3 U');
+      expect(result).toContain('filter out micro-corrections');
+    });
+
+    it('should filter out combo/extended boluses (>30%) in ICR step', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('No extended bolus portion >30%');
+      expect(result).toContain('filter out combo/extended meal boluses');
+    });
+
+    it('should require statistical description of weekday/weekend differences', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Statistically describe the differences');
+      expect(result).toContain('statistical description of weekday/weekend differences');
+    });
+
+    it('should limit recommendations to maximum 6 items', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('maximum 6 prioritized');
+      expect(result).toContain('Limit to 6 recommendations maximum');
+      expect(result).toContain('MAX 6 ITEMS');
+    });
+
+    it('should include pattern analysis requirements', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Post-meal peaks');
+      expect(result).toContain('Overnight drift');
+      expect(result).toContain('Stacking corrections');
+      expect(result).toContain('Late pre-bolus evidence');
+      expect(result).toContain('hypoglycemia 02:00–06:00');
+    });
+
+    it('should include ISF percentile range reporting', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('25th–75th percentile range');
+      expect(result).toContain('number of corrections used');
+    });
+
+    it('should use mg/dL thresholds when unit is mg/dL', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal, 'english', 'mg/dL');
+      
+      expect(result).toContain('110 mg/dL');
+      expect(result).toContain('70 mg/dL');
+      expect(result).toContain('54 mg/dL');
+      expect(result).toContain('180 mg/dL');
+      expect(result).toContain('250 mg/dL');
+      expect(result).toContain('126 mg/dL');
+    });
+
+    it('should include enhanced basal detection with clustering', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Convert every 5–15 min delivery to instantaneous rate');
+      expect(result).toContain('Round time to nearest 30 min');
+      expect(result).toContain('two most common rate clusters');
+      expect(result).toContain('exact switch times');
+    });
+
+    it('should include rigorous analysis instruction', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Analyze rigorously with maximum statistical detail');
     });
   });
 });
