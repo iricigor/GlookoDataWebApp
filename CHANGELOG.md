@@ -486,6 +486,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>389 Enhance TIR prompt with target range, TAR percentage, and behavioral recommendations</summary>
+
+[#389](../../pull/389) Enhance TIR prompt with target range, TAR percentage, and behavioral recommendations
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>385 Add first-time login welcome dialog and fix MSAL COOP error</summary>
 
 [#385](../../pull/385) Add first-time login welcome dialog and fix MSAL COOP error
