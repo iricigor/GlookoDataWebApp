@@ -92,7 +92,7 @@ describe('timeInRangePrompt', () => {
     it('should include "respond only with" instruction', () => {
       const result = generateTimeInRangePrompt(mockStats, mockThresholds);
       
-      expect(result).toContain('Respond only with the assessment + recommendations, no intro, no disclaimers, no extra text');
+      expect(result).toContain('Respond only with the assessment + recommendations, no intro, no extra text');
     });
 
     it('should handle zero TIR', () => {
@@ -124,7 +124,7 @@ describe('timeInRangePrompt', () => {
     it('should include completion marker instruction', () => {
       const result = generateTimeInRangePrompt(mockStats, mockThresholds);
       
-      expect(result).toContain('--- END OF ANALYSIS ---');
+      expect(result).toContain('--- CONCLUSIO DATAE ---');
       expect(result).toContain('End your response with');
     });
 

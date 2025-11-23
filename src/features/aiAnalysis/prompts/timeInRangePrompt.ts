@@ -6,7 +6,8 @@
 
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit, GlucoseRangeStats, GlucoseThresholds } from '../../../types';
-import { getLanguageInstruction } from './promptUtils';
+import type { AIProvider } from '../../../utils/api/aiApi';
+import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils';
 import { calculatePercentage } from '../../../utils/data';
 
 /**
@@ -21,15 +22,18 @@ const MMOL_TO_MGDL_FACTOR = 18;
  * @param thresholds - Glucose thresholds
  * @param language - Response language (english, czech, german, or serbian)
  * @param unit - Glucose unit (mmol/L or mg/dL)
+ * @param provider - AI provider being used (optional)
  * @returns Formatted prompt for AI analysis
  */
 export function generateTimeInRangePrompt(
   stats: GlucoseRangeStats,
   thresholds: GlucoseThresholds,
   language: ResponseLanguage = 'english',
-  unit: GlucoseUnit = 'mmol/L'
+  unit: GlucoseUnit = 'mmol/L',
+  provider?: AIProvider
 ): string {
   const languageInstruction = getLanguageInstruction(language);
+  const disclaimerInstruction = getDisclaimerInstruction(provider);
   
   const unitInstruction = unit === 'mg/dL'
     ? 'Remember that all glucose values are in mg/dL (not mmol/L).'
@@ -47,7 +51,5 @@ export function generateTimeInRangePrompt(
     ? `${(thresholds.high * MMOL_TO_MGDL_FACTOR).toFixed(0)} mg/dL`
     : `${thresholds.high.toFixed(1)} mmol/L`;
   
-  return `My percent time-in-range (TIR) from continuous glucose monitoring is ${tirPercentage.toFixed(1)}%, based on a target range of ${targetRangeStr}. My Time Above Range (>${highThresholdStr}) is ${tarPercentage.toFixed(1)}%. Provide a brief assessment and 2-3 specific, actionable and behavioral recommendations to improve your glucose management. Be encouraging but realistic. ${unitInstruction} The target TIR for most adults with diabetes is 70% or higher. Keep your response concise (under 200 words) and practical. Address me directly using "you/your" language. ${languageInstruction} Respond only with the assessment + recommendations, no intro, no disclaimers, no extra text.
-
-IMPORTANT: End your response with "--- END OF ANALYSIS ---" on a new line to confirm your analysis is complete.`;
+  return `My percent time-in-range (TIR) from continuous glucose monitoring is ${tirPercentage.toFixed(1)}%, based on a target range of ${targetRangeStr}. My Time Above Range (>${highThresholdStr}) is ${tarPercentage.toFixed(1)}%. Provide a brief assessment and 2-3 specific, actionable and behavioral recommendations to improve your glucose management. Be encouraging but realistic. ${unitInstruction} The target TIR for most adults with diabetes is 70% or higher. Keep your response concise (under 200 words) and practical. Address me directly using "you/your" language. ${languageInstruction} Respond only with the assessment + recommendations, no intro, no extra text.${disclaimerInstruction}`;
 }

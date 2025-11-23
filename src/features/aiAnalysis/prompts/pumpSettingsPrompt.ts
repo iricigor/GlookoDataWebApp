@@ -8,7 +8,8 @@
 import { base64Decode } from '../../../utils/formatting';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit } from '../../../types';
-import { getLanguageInstruction } from './promptUtils';
+import type { AIProvider } from '../../../utils/api/aiApi';
+import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils';
 
 /**
  * Generate AI prompt for pump settings verification analysis
@@ -18,6 +19,7 @@ import { getLanguageInstruction } from './promptUtils';
  * @param base64BasalData - Base64 encoded CSV data with basal insulin (Timestamp, Insulin Delivered/Rate)
  * @param language - Response language (english, czech, german, or serbian)
  * @param unit - Glucose unit (mmol/L or mg/dL)
+ * @param provider - AI provider being used (optional)
  * @returns Formatted prompt for AI analysis
  */
 export function generatePumpSettingsPrompt(
@@ -25,12 +27,14 @@ export function generatePumpSettingsPrompt(
   base64BolusData: string,
   base64BasalData: string,
   language: ResponseLanguage = 'english',
-  unit: GlucoseUnit = 'mmol/L'
+  unit: GlucoseUnit = 'mmol/L',
+  provider?: AIProvider
 ): string {
   const cgmData = base64Decode(base64CgmData);
   const bolusData = base64Decode(base64BolusData);
   const basalData = base64Decode(base64BasalData);
   const languageInstruction = getLanguageInstruction(language);
+  const disclaimerInstruction = getDisclaimerInstruction(provider);
   
   // Unit-specific values
   const targetGlucose = unit === 'mg/dL' ? '110' : '6.1';
@@ -230,7 +234,5 @@ Pump basal insulin delivery data:
 ${basalData}
 \`\`\`
 
-Remember that all glucose values are in ${unit} (not ${unit === 'mg/dL' ? 'mmol/L' : 'mg/dL'}). Address me directly using "you/your" language. Keep your response clear, detailed, and actionable. ${languageInstruction}
-
-IMPORTANT: End your response with "--- END OF ANALYSIS ---" on a new line to confirm your analysis is complete.`;
+Remember that all glucose values are in ${unit} (not ${unit === 'mg/dL' ? 'mmol/L' : 'mg/dL'}). Address me directly using "you/your" language. Keep your response clear, detailed, and actionable. ${languageInstruction}${disclaimerInstruction}`;
 }
