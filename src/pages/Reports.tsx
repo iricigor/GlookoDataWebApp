@@ -46,15 +46,24 @@ const useStyles = makeStyles({
   contentWrapper: {
     display: 'flex',
     ...shorthands.gap('24px'),
-    '@media (max-width: 768px)': {
+    '@media (max-width: 1023px)': {
       flexDirection: 'column',
     },
   },
-  tabList: {
+  tabListVertical: {
     flexShrink: 0,
     width: '200px',
-    '@media (max-width: 768px)': {
+    '@media (min-width: 1024px)': {
+      display: 'none',
+    },
+    '@media (max-width: 1023px)': {
       width: '100%',
+    },
+  },
+  tabListHorizontal: {
+    marginBottom: '24px',
+    '@media (max-width: 1023px)': {
+      display: 'none',
     },
   },
   contentArea: {
@@ -122,20 +131,38 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
         </Text>
       </div>
 
+      {/* Horizontal TabList for desktop */}
+      <TabList
+        selectedValue={selectedTab}
+        onTabSelect={(_, data) => setSelectedTab(data.value as string)}
+        className={styles.tabListHorizontal}
+        appearance="subtle"
+        size="large"
+      >
+        <Tab value="fileInfo">File Info</Tab>
+        <Tab value="inRange">Time in Range</Tab>
+        <Tab value="agp">AGP</Tab>
+        <Tab value="detailedCgm">Detailed CGM</Tab>
+        <Tab value="detailedInsulin">Detailed Insulin</Tab>
+        <Tab value="unifiedView">Unified View</Tab>
+        <Tab value="iob">IOB</Tab>
+      </TabList>
+
       <div className={styles.contentWrapper}>
+        {/* Vertical TabList for mobile */}
         <TabList
           vertical
           selectedValue={selectedTab}
           onTabSelect={(_, data) => setSelectedTab(data.value as string)}
-          className={styles.tabList}
+          className={styles.tabListVertical}
           appearance="subtle"
         >
           <Tab value="fileInfo">File Info</Tab>
           <Tab value="inRange">Time in Range</Tab>
-          <Tab value="agp">AGP Data</Tab>
+          <Tab value="agp">AGP</Tab>
           <Tab value="detailedCgm">Detailed CGM</Tab>
           <Tab value="detailedInsulin">Detailed Insulin</Tab>
-          <Tab value="unifiedView">Unified view</Tab>
+          <Tab value="unifiedView">Unified View</Tab>
           <Tab value="iob">IOB</Tab>
         </TabList>
 

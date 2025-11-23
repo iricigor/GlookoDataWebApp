@@ -70,15 +70,24 @@ const useStyles = makeStyles({
   contentWrapper: {
     display: 'flex',
     ...shorthands.gap('24px'),
-    '@media (max-width: 768px)': {
+    '@media (max-width: 1023px)': {
       flexDirection: 'column',
     },
   },
-  tabList: {
+  tabListVertical: {
     flexShrink: 0,
     width: '200px',
-    '@media (max-width: 768px)': {
+    '@media (min-width: 1024px)': {
+      display: 'none',
+    },
+    '@media (max-width: 1023px)': {
       width: '100%',
+    },
+  },
+  tabListHorizontal: {
+    marginBottom: '24px',
+    '@media (max-width: 1023px)': {
+      display: 'none',
     },
   },
   contentArea: {
@@ -1460,13 +1469,14 @@ export function AIAnalysis({
           </Text>
         </div>
       ) : (
-        <div className={styles.contentWrapper}>
+        <>
+          {/* Horizontal TabList for desktop */}
           <TabList
-            vertical
             selectedValue={selectedTab}
             onTabSelect={(_, data) => setSelectedTab(data.value as string)}
-            className={styles.tabList}
+            className={styles.tabListHorizontal}
             appearance="subtle"
+            size="large"
           >
             <Tab value="fileInfo">File Info</Tab>
             <Tab value="timeInRange">Time in Range</Tab>
@@ -1475,10 +1485,27 @@ export function AIAnalysis({
             <Tab value="pumpSettings">Pump Settings</Tab>
           </TabList>
 
-          <div className={styles.contentArea}>
-            {renderTabContent()}
+          <div className={styles.contentWrapper}>
+            {/* Vertical TabList for mobile */}
+            <TabList
+              vertical
+              selectedValue={selectedTab}
+              onTabSelect={(_, data) => setSelectedTab(data.value as string)}
+              className={styles.tabListVertical}
+              appearance="subtle"
+            >
+              <Tab value="fileInfo">File Info</Tab>
+              <Tab value="timeInRange">Time in Range</Tab>
+              <Tab value="glucoseInsulin">Glucose & Insulin</Tab>
+              <Tab value="mealTiming">Meal Timing</Tab>
+              <Tab value="pumpSettings">Pump Settings</Tab>
+            </TabList>
+
+            <div className={styles.contentArea}>
+              {renderTabContent()}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -71,8 +71,9 @@ describe('AIAnalysis', () => {
       />
     );
 
-    // Switch to Time in Range tab
-    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+    // Switch to Time in Range tab (get first one for desktop horizontal tab)
+    const timeInRangeTabs = screen.getAllByRole('tab', { name: /Time in Range/i });
+    fireEvent.click(timeInRangeTabs[0]);
     
     // Wait for button to appear (data should load automatically)
     await waitFor(() => {
@@ -102,11 +103,12 @@ describe('AIAnalysis', () => {
     );
 
     // Wait for the button to be available (after data loads)
-    // Switch to Time in Range tab
+    // Switch to Time in Range tab (get first one for desktop horizontal tab)
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+    const timeInRangeTabs = screen.getAllByRole('tab', { name: /Time in Range/i });
+    fireEvent.click(timeInRangeTabs[0]);
 
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
@@ -149,11 +151,12 @@ describe('AIAnalysis', () => {
     );
 
     // Wait for the button to be available
-    // Switch to Time in Range tab
+    // Switch to Time in Range tab (get first one for desktop horizontal tab)
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+    const timeInRangeTabs = screen.getAllByRole('tab', { name: /Time in Range/i });
+    fireEvent.click(timeInRangeTabs[0]);
 
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
@@ -213,11 +216,12 @@ describe('AIAnalysis', () => {
     );
 
     // Wait for the button and click it
-    // Switch to Time in Range tab
+    // Switch to Time in Range tab (get first one for desktop horizontal tab)
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+    const timeInRangeTabs1 = screen.getAllByRole('tab', { name: /Time in Range/i });
+    fireEvent.click(timeInRangeTabs1[0]);
 
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
@@ -295,11 +299,12 @@ describe('AIAnalysis', () => {
     );
 
     // First analysis
-    // Switch to Time in Range tab
+    // Switch to Time in Range tab (get first one for desktop horizontal tab)
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+    const timeInRangeTabs2 = screen.getAllByRole('tab', { name: /Time in Range/i });
+    fireEvent.click(timeInRangeTabs2[0]);
 
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
@@ -367,11 +372,12 @@ describe('AIAnalysis', () => {
       />
     );
 
-    // Switch to Time in Range tab
+    // Switch to Time in Range tab (get first one for desktop horizontal tab)
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+    const timeInRangeTabs3 = screen.getAllByRole('tab', { name: /Time in Range/i });
+    fireEvent.click(timeInRangeTabs3[0]);
 
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
@@ -411,11 +417,12 @@ describe('AIAnalysis', () => {
     );
 
     // Wait for the button to be available
-    // Switch to Time in Range tab
+    // Switch to Time in Range tab (get first one for desktop horizontal tab)
     await waitFor(() => {
       expect(screen.getAllByText('Time in Range').length).toBeGreaterThan(0);
     });
-    fireEvent.click(screen.getByRole('tab', { name: /Time in Range/i }));
+    const timeInRangeTabs4 = screen.getAllByRole('tab', { name: /Time in Range/i });
+    fireEvent.click(timeInRangeTabs4[0]);
 
     await waitFor(() => {
       expect(getFirstAnalyzeButton()).toBeInTheDocument();
@@ -462,11 +469,12 @@ describe('AIAnalysis', () => {
       />
     );
 
-    // Switch to Meal Timing tab
+    // Switch to Meal Timing tab (get first one for desktop horizontal tab)
     await waitFor(() => {
       expect(screen.getAllByText('Meal Timing').length).toBeGreaterThan(0);
     });
-    fireEvent.click(screen.getByRole('tab', { name: /Meal Timing/i }));
+    const mealTimingTabs = screen.getAllByRole('tab', { name: /Meal Timing/i });
+    fireEvent.click(mealTimingTabs[0]);
 
     // Wait for the Analyze button on Meal Timing tab
     await waitFor(() => {
@@ -507,11 +515,12 @@ describe('AIAnalysis', () => {
       />
     );
 
-    // Switch back to Meal Timing tab
+    // Switch back to Meal Timing tab (get first one for desktop horizontal tab)
     await waitFor(() => {
       expect(screen.getAllByText('Meal Timing').length).toBeGreaterThan(0);
     });
-    fireEvent.click(screen.getByRole('tab', { name: /Meal Timing/i }));
+    const mealTimingTabs2 = screen.getAllByRole('tab', { name: /Meal Timing/i });
+    fireEvent.click(mealTimingTabs2[0]);
 
     await waitFor(() => {
       const analyzeButtons = screen.getAllByText('Analyze with AI');
