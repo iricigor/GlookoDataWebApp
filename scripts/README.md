@@ -7,33 +7,14 @@ This directory contains utility scripts and tools for the GlookoDataWebApp proje
 ```
 scripts/
 ├── README.md                    # This file
-├── deployment/                  # Azure deployment scripts
-│   ├── README.md
-│   ├── deploy-azure-app-registration.sh
-│   ├── deploy-azure-storage-account.sh
-│   ├── deploy-azure-user-settings-table.sh
-│   └── deploy-azure-pro-users-table.sh
 ├── capture-screenshots.ts       # Screenshot capture tool
-└── generate-demo-data.js        # Demo data generator
+├── generate-demo-data.js        # Demo data generator
+├── generate-demo-from-real-data.js
+├── generate-german-demo-data.js
+├── test-demo-loading.mjs
+├── test-german-demo-data.mjs
+└── test-german-import-e2e.mjs
 ```
-
-## 🚀 Deployment Scripts
-
-**Location:** `scripts/deployment/`
-
-Azure deployment scripts for setting up authentication and storage resources.
-
-**See:** [deployment/README.md](deployment/README.md) for detailed information
-
-**Quick Start:**
-```bash
-cd deployment
-./deploy-azure-app-registration.sh
-./deploy-azure-storage-account.sh
-./deploy-azure-user-settings-table.sh
-```
-
-**Documentation:** [docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md) - Comprehensive deployment guide
 
 ## Available Utility Scripts
 
@@ -80,8 +61,7 @@ npm run capture-screenshots
 
 ## Related Documentation
 
-- [Deployment Guide](../docs/DEPLOYMENT.md) - Complete Azure deployment instructions
-- [Azure App Registration Guide](../docs/AZURE_APP_REGISTRATION.md) - Detailed setup for authentication
+- [Deployment Guide](../docs/DEPLOYMENT.md) - Azure Static Web Apps deployment
 - [Contributing Guide](../CONTRIBUTING.md) - General contribution guidelines
 - [Quick Start Guide](../QUICKSTART.md) - Getting started with development
 
@@ -89,6 +69,4 @@ npm run capture-screenshots
 
 - Scripts in this directory are maintained as part of the GlookoDataWebApp project
 - All scripts should include clear documentation and error handling
-- Shell scripts should use `set -e` for error handling and `set -u` for undefined variable checking
-- Scripts should be executable (`chmod +x script.sh`)
-- Deployment scripts are in the `deployment/` subdirectory
+- Scripts should be well-documented and easy to understand
