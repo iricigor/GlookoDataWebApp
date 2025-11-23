@@ -43,15 +43,21 @@ async function takeScreenshot(page: Page, name: string, subdir: string) {
 
 // Accept cookie consent
 async function acceptCookies(page: Page) {
-  // Look for the cookie consent dialog
-  const acceptButton = page.getByRole('button', { name: 'Accept' });
-  const isVisible = await acceptButton.isVisible().catch(() => false);
-  
-  if (isVisible) {
-    await acceptButton.click();
-    await page.waitForTimeout(500);
-    console.log('  ✓ Accepted cookies');
+  // Look for the cookie consent dialog with "Got it" button
+  try {
+    const acceptButton = page.getByRole('button', { name: 'Got it' });
+    const isVisible = await acceptButton.isVisible({ timeout: 2000 }).catch(() => false);
+    
+    if (isVisible) {
+      await acceptButton.click();
+      await page.waitForTimeout(1000); // Wait for cookie to be set and banner to disappear
+      console.log('  ✓ Accepted cookies');
+      return true;
+    }
+  } catch (e) {
+    console.log('  ⚠ Cookie banner not found or already dismissed');
   }
+  return false;
 }
 
 // Capture screenshots for a specific mode
