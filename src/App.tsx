@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { FluentProvider } from '@fluentui/react-components'
 import './App.css'
-import { Navigation, Footer } from './components/shared'
+import { Navigation, Footer, CookieConsent } from './components/shared'
 import { Home } from './pages/Home'
 import { DataUpload } from './pages/DataUpload'
 import { Reports } from './pages/Reports'
@@ -18,6 +18,7 @@ import { useDeepSeekApiKey } from './hooks/useDeepSeekApiKey'
 import { useActiveAIProvider } from './hooks/useActiveAIProvider'
 import { useSwipeGesture } from './hooks/useSwipeGesture'
 import { useInsulinDuration } from './hooks/useInsulinDuration'
+import { useCookieConsent } from './hooks/useCookieConsent'
 import type { UploadedFile, AIAnalysisResult } from './types'
 import { extractZipMetadata } from './features/dataUpload/utils'
 
@@ -34,6 +35,9 @@ function App() {
   const { responseLanguage, setResponseLanguage } = useResponseLanguage()
   const { glucoseUnit, setGlucoseUnit } = useGlucoseUnit()
   const { insulinDuration, setInsulinDuration } = useInsulinDuration()
+  
+  // Cookie consent management
+  const { hasConsented, acknowledgeConsent } = useCookieConsent()
   
   // API Keys (stored in browser cookies)
   const { apiKey: perplexityApiKey, setApiKey: setPerplexityApiKey } = usePerplexityApiKey()
@@ -253,6 +257,7 @@ function App() {
         {renderPage()}
       </main>
       <Footer />
+      {!hasConsented && <CookieConsent onAccept={acknowledgeConsent} />}
     </FluentProvider>
   )
 }
