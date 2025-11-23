@@ -515,6 +515,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>387 Remove cloud storage settings sync while preserving basic authentication</summary>
+
+[#387](../../pull/387) Remove cloud storage settings sync while preserving basic authentication
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>389 Enhance TIR prompt with target range, TAR percentage, and behavioral recommendations</summary>
 
 [#389](../../pull/389) Enhance TIR prompt with target range, TAR percentage, and behavioral recommendations
