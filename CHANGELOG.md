@@ -515,6 +515,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>396 [WIP] Add enhancements to pump settings AI analysis</summary>
+
+[#396](../../pull/396) [WIP] Add enhancements to pump settings AI analysis
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>393 Enhance meal timing prompt with precise detection criteria and weekday/weekend analysis</summary>
 
 [#393](../../pull/393) Enhance meal timing prompt with precise detection criteria and weekday/weekend analysis
