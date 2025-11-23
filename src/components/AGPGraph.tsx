@@ -97,16 +97,29 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
 
   // Prepare data for the chart - sample every hour for better performance
   // Convert all values to the display unit
-  const chartData = filteredData.filter((_, index) => index % 12 === 0).map(slot => ({
-    time: slot.timeSlot,
-    p10_p90_min: convertGlucoseValue(slot.p10, glucoseUnit),
-    p10_p90_max: convertGlucoseValue(slot.p90, glucoseUnit),
-    p25_p75_min: convertGlucoseValue(slot.p25, glucoseUnit),
-    p25_p75_max: convertGlucoseValue(slot.p75, glucoseUnit),
-    median: convertGlucoseValue(slot.p50, glucoseUnit),
-    lowest: convertGlucoseValue(slot.lowest, glucoseUnit),
-    highest: convertGlucoseValue(slot.highest, glucoseUnit),
-  }));
+  const chartData = filteredData.filter((_, index) => index % 12 === 0).map(slot => {
+    const p10 = convertGlucoseValue(slot.p10, glucoseUnit);
+    const p25 = convertGlucoseValue(slot.p25, glucoseUnit);
+    const p75 = convertGlucoseValue(slot.p75, glucoseUnit);
+    const p90 = convertGlucoseValue(slot.p90, glucoseUnit);
+    
+    return {
+      time: slot.timeSlot,
+      // Original values for reference
+      p10_p90_min: p10,
+      p10_p90_max: p90,
+      p25_p75_min: p25,
+      p25_p75_max: p75,
+      // Stacked values for proper rendering
+      p10_base: p10,  // Bottom of 10-90 band
+      p10_to_p25: p25 - p10,  // Height from p10 to p25 (lower outer band)
+      p25_to_p75: p75 - p25,  // Height from p25 to p75 (inner band)
+      p75_to_p90: p90 - p75,  // Height from p75 to p90 (upper outer band)
+      median: convertGlucoseValue(slot.p50, glucoseUnit),
+      lowest: convertGlucoseValue(slot.lowest, glucoseUnit),
+      highest: convertGlucoseValue(slot.highest, glucoseUnit),
+    };
+  });
 
   // Target range (stored internally in mmol/L, converted for display)
   const targetMin = convertGlucoseValue(3.9, glucoseUnit);
@@ -186,35 +199,46 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
             
             <Tooltip content={<CustomTooltip />} />
             
-            {/* 10-90 percentile range */}
+            {/* Stack the bands from bottom to top to show all layers */}
+            {/* Using stackId to properly layer the areas */}
+            
+            {/* Invisible base to start stacking from p10 */}
             <Area
               type="monotone"
-              dataKey="p10_p90_max"
+              dataKey="p10_base"
+              stackId="bands"
+              stroke="none"
+              fill="transparent"
+              fillOpacity={0}
+            />
+            
+            {/* Bottom of 10-90 band (p10 to p25) - light blue */}
+            <Area
+              type="monotone"
+              dataKey="p10_to_p25"
+              stackId="bands"
               stroke="none"
               fill="url(#color10_90)"
               fillOpacity={1}
             />
-            <Area
-              type="monotone"
-              dataKey="p10_p90_min"
-              stroke="none"
-              fill={tokens.colorNeutralBackground1}
-              fillOpacity={1}
-            />
             
-            {/* 25-75 percentile range */}
+            {/* Middle 25-75 band (p25 to p75) - darker blue */}
             <Area
               type="monotone"
-              dataKey="p25_p75_max"
+              dataKey="p25_to_p75"
+              stackId="bands"
               stroke="none"
               fill="url(#color25_75)"
               fillOpacity={1}
             />
+            
+            {/* Top of 10-90 band (p75 to p90) - light blue */}
             <Area
               type="monotone"
-              dataKey="p25_p75_min"
+              dataKey="p75_to_p90"
+              stackId="bands"
               stroke="none"
-              fill={tokens.colorNeutralBackground1}
+              fill="url(#color10_90)"
               fillOpacity={1}
             />
             

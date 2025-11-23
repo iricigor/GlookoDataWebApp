@@ -108,7 +108,9 @@ function App() {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1) || 'home'
-      setCurrentPage(hash)
+      // Support deep linking: #reports/agp
+      const [page] = hash.split('/')
+      setCurrentPage(page)
     }
 
     handleHashChange()
