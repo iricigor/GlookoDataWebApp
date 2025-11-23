@@ -17,6 +17,10 @@ const useStyles = makeStyles({
     width: '80px',
     height: '100%',
     ...shorthands.padding('10px', '8px', '0', '8px'),
+    '@media (max-width: 768px)': {
+      width: '50px',
+      ...shorthands.padding('10px', '4px', '0', '4px'),
+    },
   },
   barContainer: {
     display: 'flex',
@@ -39,6 +43,10 @@ const useStyles = makeStyles({
     ...shorthands.padding('4px'),
     textAlign: 'center',
     wordBreak: 'break-word',
+    '@media (max-width: 768px)': {
+      fontSize: tokens.fontSizeBase200,
+      ...shorthands.padding('2px'),
+    },
   },
   basalSection: {
     display: 'flex',
@@ -51,6 +59,10 @@ const useStyles = makeStyles({
     ...shorthands.padding('4px'),
     textAlign: 'center',
     wordBreak: 'break-word',
+    '@media (max-width: 768px)': {
+      fontSize: tokens.fontSizeBase200,
+      ...shorthands.padding('2px'),
+    },
   },
 });
 
