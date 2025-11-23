@@ -41,6 +41,19 @@ async function takeScreenshot(page: Page, name: string, subdir: string) {
   console.log(`✓ Captured: ${subdir}/${name}.png`);
 }
 
+// Accept cookie consent
+async function acceptCookies(page: Page) {
+  // Look for the cookie consent dialog
+  const acceptButton = page.getByRole('button', { name: 'Accept' });
+  const isVisible = await acceptButton.isVisible().catch(() => false);
+  
+  if (isVisible) {
+    await acceptButton.click();
+    await page.waitForTimeout(500);
+    console.log('  ✓ Accepted cookies');
+  }
+}
+
 // Capture screenshots for a specific mode
 async function captureMode(browser: Browser, mode: 'light' | 'dark' | 'mobile') {
   const viewport = mode === 'mobile' ? MOBILE_VIEWPORT : DESKTOP_VIEWPORT;
@@ -59,19 +72,28 @@ async function captureMode(browser: Browser, mode: 'light' | 'dark' | 'mobile') 
   // Set theme
   await setTheme(page, theme);
   
-  // 1. Home Page
-  console.log('\nHome page...');
+  // 1. Home Page - WITH cookie banner
+  console.log('\nHome page (with cookie banner)...');
   await page.goto(`${BASE_URL}/#home`);
   await waitForStability(page);
-  await takeScreenshot(page, '01-home', subdir);
+  await takeScreenshot(page, '01-home-with-cookies', subdir);
   
-  // 2. Data Upload Page
+  // Accept cookies
+  await acceptCookies(page);
+  
+  // 2. Home Page - WITHOUT cookie banner
+  console.log('Home page (without cookie banner)...');
+  await page.goto(`${BASE_URL}/#home`);
+  await waitForStability(page);
+  await takeScreenshot(page, '02-home', subdir);
+  
+  // 3. Data Upload Page
   console.log('\nData Upload page...');
   await page.goto(`${BASE_URL}/#upload`);
   await waitForStability(page);
-  await takeScreenshot(page, '02-upload-with-file', subdir);
+  await takeScreenshot(page, '03-upload-with-file', subdir);
   
-  // 3. Reports Page - All tabs
+  // 4. Reports Page - All tabs
   console.log('\nReports page...');
   await page.goto(`${BASE_URL}/#reports`);
   await waitForStability(page);
@@ -79,98 +101,109 @@ async function captureMode(browser: Browser, mode: 'light' | 'dark' | 'mobile') 
   // Reports - File Info
   await page.getByRole('tab', { name: 'File Info' }).click();
   await page.waitForTimeout(500);
-  await takeScreenshot(page, '03-reports-file-info', subdir);
+  await takeScreenshot(page, '04-reports-file-info', subdir);
   
   // Reports - Time in Range
   await page.getByRole('tab', { name: 'Time in Range' }).click();
   await page.waitForTimeout(1000);
-  await takeScreenshot(page, '04-reports-time-in-range', subdir);
+  await takeScreenshot(page, '05-reports-time-in-range', subdir);
   
   // Reports - AGP Data
   await page.getByRole('tab', { name: 'AGP Data' }).click();
   await page.waitForTimeout(1000);
-  await takeScreenshot(page, '05-reports-agp-data', subdir);
+  await takeScreenshot(page, '06-reports-agp-data', subdir);
   
   // Reports - Detailed CGM
   await page.getByRole('tab', { name: 'Detailed CGM' }).click();
   await page.waitForTimeout(1000);
-  await takeScreenshot(page, '06-reports-detailed-cgm', subdir);
+  await takeScreenshot(page, '07-reports-detailed-cgm', subdir);
   
   // Reports - Detailed Insulin
   await page.getByRole('tab', { name: 'Detailed Insulin' }).click();
   await page.waitForTimeout(1000);
-  await takeScreenshot(page, '07-reports-detailed-insulin', subdir);
+  await takeScreenshot(page, '08-reports-detailed-insulin', subdir);
   
-  // 4. AI Analysis Page - All tabs
+  // 5. AI Analysis Page - All tabs
   console.log('\nAI Analysis page...');
   await page.goto(`${BASE_URL}/#ai`);
   await waitForStability(page);
+  await page.waitForTimeout(2000); // Extra wait for any dynamic content
   
-  // Check if we need to set an API key first
-  const needsApiKey = await page.getByText('Please add your API key').isVisible().catch(() => false);
-  
-  if (needsApiKey) {
-    // Go to settings and add a dummy API key
-    await page.goto(`${BASE_URL}/#settings`);
-    await waitForStability(page);
-    await page.getByRole('tab', { name: 'Data & AI' }).click();
-    await page.waitForTimeout(500);
-    
-    // Find and fill Perplexity API key field
-    const apiKeyInput = page.getByLabel('Perplexity API Key');
-    await apiKeyInput.fill('dummy-api-key-for-screenshots');
-    await page.waitForTimeout(500);
-    
-    // Go back to AI Analysis page
-    await page.goto(`${BASE_URL}/#ai`);
-    await waitForStability(page);
-  }
-  
-  // Now capture AI Analysis tabs
-  // AI - File Info
-  await page.getByRole('tab', { name: 'File Info' }).click();
-  await page.waitForTimeout(500);
-  await takeScreenshot(page, '08-ai-file-info', subdir);
+  // Take screenshots of AI Analysis tabs
+  // The page should show vertical tabs on the left
+  // AI - File Info (default tab)
+  await takeScreenshot(page, '09-ai-file-info', subdir);
   
   // AI - Time in Range
-  await page.getByRole('tab', { name: 'Time in Range' }).click();
-  await page.waitForTimeout(500);
-  await takeScreenshot(page, '09-ai-time-in-range', subdir);
+  try {
+    await page.getByText('Time in Range', { exact: true }).click({ timeout: 5000 });
+    await page.waitForTimeout(1000);
+    await takeScreenshot(page, '10-ai-time-in-range', subdir);
+  } catch (e) {
+    console.log('  ⚠ Skipping Time in Range tab (not found or not clickable)');
+  }
   
   // AI - Glucose & Insulin
-  await page.getByRole('tab', { name: 'Glucose & Insulin' }).click();
-  await page.waitForTimeout(500);
-  await takeScreenshot(page, '10-ai-glucose-insulin', subdir);
+  try {
+    await page.getByText('Glucose & Insulin', { exact: true }).click({ timeout: 5000 });
+    await page.waitForTimeout(1000);
+    await takeScreenshot(page, '11-ai-glucose-insulin', subdir);
+  } catch (e) {
+    console.log('  ⚠ Skipping Glucose & Insulin tab (not found or not clickable)');
+  }
   
   // AI - Meal Timing
-  await page.getByRole('tab', { name: 'Meal Timing' }).click();
-  await page.waitForTimeout(500);
-  await takeScreenshot(page, '11-ai-meal-timing', subdir);
+  try {
+    await page.getByText('Meal Timing', { exact: true }).click({ timeout: 5000 });
+    await page.waitForTimeout(1000);
+    await takeScreenshot(page, '12-ai-meal-timing', subdir);
+  } catch (e) {
+    console.log('  ⚠ Skipping Meal Timing tab (not found or not clickable)');
+  }
   
   // AI - Pump Settings
-  await page.getByRole('tab', { name: 'Pump Settings' }).click();
-  await page.waitForTimeout(500);
-  await takeScreenshot(page, '12-ai-pump-settings', subdir);
+  try {
+    await page.getByText('Pump Settings', { exact: true }).click({ timeout: 5000 });
+    await page.waitForTimeout(1000);
+    await takeScreenshot(page, '13-ai-pump-settings', subdir);
+  } catch (e) {
+    console.log('  ⚠ Skipping Pump Settings tab (not found or not clickable)');
+  }
   
-  // 5. Settings Page - All tabs
+  // 6. Settings Page - All tabs
   console.log('\nSettings page...');
   await page.goto(`${BASE_URL}/#settings`);
   await waitForStability(page);
   
-  // Settings - General
-  await page.getByRole('tab', { name: 'General' }).click();
-  await page.waitForTimeout(500);
-  await takeScreenshot(page, '13-settings-general', subdir);
+  // Settings - General (try to click, if already selected just capture)
+  try {
+    await page.getByRole('tab', { name: 'General' }).click({ timeout: 3000 });
+    await page.waitForTimeout(500);
+  } catch (e) {
+    // Tab might already be selected
+    await page.waitForTimeout(500);
+  }
+  await takeScreenshot(page, '14-settings-general', subdir);
   
   // Settings - Data & AI
-  await page.getByRole('tab', { name: 'Data & AI' }).click();
-  await page.waitForTimeout(500);
-  await takeScreenshot(page, '14-settings-data-ai', subdir);
+  try {
+    // Try different possible names for the tab
+    const dataAiTab = page.locator('button[role="tab"]').filter({ hasText: /Data.*AI/ });
+    await dataAiTab.click({ timeout: 5000 });
+    await page.waitForTimeout(500);
+    await takeScreenshot(page, '15-settings-data-ai', subdir);
+  } catch (e) {
+    console.log('  ⚠ Skipping Data & AI tab (not found or not clickable)');
+  }
   
   // Settings - About
-  await page.getByRole('tab', { name: 'About' }).click();
-  await page.waitForTimeout(500);
-  await takeScreenshot(page, '15-settings-about', subdir);
+  try {
+    await page.getByRole('tab', { name: 'About' }).click({ timeout: 5000 });
+    await page.waitForTimeout(500);
+    await takeScreenshot(page, '16-settings-about', subdir);
+  } catch (e) {
+    console.log('  ⚠ Skipping About tab (not found or not clickable)');
+  }
   
   await context.close();
   console.log(`✅ ${mode} mode complete!`);
