@@ -18,9 +18,6 @@ import {
   SettingsRegular,
   NavigationRegular,
 } from '@fluentui/react-icons';
-import { useAuth } from '../../hooks/useAuth';
-import { LoginDialog } from './LoginDialog';
-import { LogoutDialog } from './LogoutDialog';
 
 const useStyles = makeStyles({
   nav: {
@@ -82,7 +79,6 @@ interface NavigationProps {
 
 export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   const styles = useStyles();
-  const { isLoggedIn, userName, userEmail, userPhoto, login, logout } = useAuth();
 
   const navItems = [
     { page: 'home', label: 'Home', icon: <HomeRegular /> },
@@ -138,20 +134,6 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
             </MenuPopover>
           </Menu>
         </div>
-      </div>
-
-      {/* Auth Section */}
-      <div className={styles.rightSection}>
-        {isLoggedIn && userName ? (
-          <LogoutDialog 
-            userName={userName} 
-            userEmail={userEmail}
-            userPhoto={userPhoto}
-            onLogout={logout} 
-          />
-        ) : (
-          <LoginDialog onLogin={login} />
-        )}
       </div>
     </nav>
   );

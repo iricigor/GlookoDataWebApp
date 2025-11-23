@@ -1,17 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { FluentProvider } from '@fluentui/react-components'
 import './App.css'
-import { Navigation, Footer, WelcomeDialog } from './components/shared'
+import { Navigation, Footer } from './components/shared'
 import { Home } from './pages/Home'
 import { DataUpload } from './pages/DataUpload'
 import { Reports } from './pages/Reports'
 import { AIAnalysis } from './pages/AIAnalysis'
 import { Settings } from './pages/Settings'
-import { useAuth } from './hooks/useAuth'
 import { useTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
 import { useResponseLanguage } from './hooks/useResponseLanguage'
-import { useGlucoseThresholds } from './hooks/useGlucoseThresholds'
 import { useGlucoseUnit } from './hooks/useGlucoseUnit'
 import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
 import { useGeminiApiKey } from './hooks/useGeminiApiKey'
@@ -19,9 +17,7 @@ import { useGrokApiKey } from './hooks/useGrokApiKey'
 import { useDeepSeekApiKey } from './hooks/useDeepSeekApiKey'
 import { useActiveAIProvider } from './hooks/useActiveAIProvider'
 import { useSwipeGesture } from './hooks/useSwipeGesture'
-import { useSettingsSync } from './hooks/useSettingsSync'
 import { useInsulinDuration } from './hooks/useInsulinDuration'
-import { useWelcomeDialog } from './hooks/useWelcomeDialog'
 import type { UploadedFile, AIAnalysisResult } from './types'
 import { extractZipMetadata } from './features/dataUpload/utils'
 
@@ -32,55 +28,21 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const [isLoadingDemoData, setIsLoadingDemoData] = useState(true)
   
-  // Authentication
-  const { isLoggedIn, userEmail } = useAuth()
-  
   // Settings
   const { theme, themeMode, setThemeMode } = useTheme()
   const { exportFormat, setExportFormat } = useExportFormat()
   const { responseLanguage, setResponseLanguage } = useResponseLanguage()
-  const { thresholds: glucoseThresholds, setThresholds: setGlucoseThresholds } = useGlucoseThresholds()
   const { glucoseUnit, setGlucoseUnit } = useGlucoseUnit()
   const { insulinDuration, setInsulinDuration } = useInsulinDuration()
   
-  // Welcome dialog for first-time login
-  const {
-    showWelcomeDialog,
-    triggerWelcomeDialog,
-    closeWelcomeDialog,
-    createUserSettings,
-  } = useWelcomeDialog({
-    userEmail,
-    themeMode,
-    exportFormat,
-    responseLanguage,
-    glucoseThresholds,
-    insulinDuration,
-  })
-  
-  // Sync settings with Azure for authenticated users
-  useSettingsSync({
-    isLoggedIn,
-    userEmail,
-    themeMode,
-    exportFormat,
-    responseLanguage,
-    glucoseThresholds,
-    setThemeMode,
-    setExportFormat,
-    setResponseLanguage,
-    setGlucoseThresholds,
-    onFirstTimeLogin: triggerWelcomeDialog,
-  })
-  
-  // API Keys (not synced to Azure for security)
+  // API Keys (stored in browser cookies)
   const { apiKey: perplexityApiKey, setApiKey: setPerplexityApiKey } = usePerplexityApiKey()
   const { apiKey: geminiApiKey, setApiKey: setGeminiApiKey } = useGeminiApiKey()
   const { apiKey: grokApiKey, setApiKey: setGrokApiKey } = useGrokApiKey()
   const { apiKey: deepseekApiKey, setApiKey: setDeepSeekApiKey } = useDeepSeekApiKey()
   const { selectedProvider, setSelectedProvider } = useActiveAIProvider()
   
-  // File management (not synced to Azure)
+  // File management
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
   const [aiAnalysisResults, setAiAnalysisResults] = useState<Record<string, AIAnalysisResult>>({})
@@ -291,16 +253,6 @@ function App() {
         {renderPage()}
       </main>
       <Footer />
-      
-      {/* Welcome dialog for first-time login */}
-      {userEmail && (
-        <WelcomeDialog
-          open={showWelcomeDialog}
-          userEmail={userEmail}
-          onClose={closeWelcomeDialog}
-          onCreateSettings={createUserSettings}
-        />
-      )}
     </FluentProvider>
   )
 }
