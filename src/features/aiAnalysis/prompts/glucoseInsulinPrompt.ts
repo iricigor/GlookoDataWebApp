@@ -11,12 +11,12 @@ import type { GlucoseUnit } from '../../../types';
 import { getLanguageInstruction } from './promptUtils';
 
 /**
- * Generate AI prompt for glucose and insulin analysis with tiering
+ * Generate AI prompt for glucose and insulin analysis with tercile-based statistical analysis
  * 
  * @param base64CsvData - Base64 encoded CSV data containing date, day of week, BG ranges, and insulin doses
  * @param language - Response language (english, czech, german, or serbian)
  * @param unit - Glucose unit (mmol/L or mg/dL)
- * @returns Formatted prompt for AI analysis
+ * @returns Formatted prompt for AI analysis with tercile analysis, basal drift test, hypoglycemia risk, and variance analysis
  */
 export function generateGlucoseInsulinPrompt(base64CsvData: string, language: ResponseLanguage = 'english', unit: GlucoseUnit = 'mmol/L'): string {
   const csvData = base64Decode(base64CsvData);
@@ -48,7 +48,7 @@ Perform the following specific analyses on provided data set and report the find
 - IMPORTANT: Use terciles instead of arbitrary tiers. Divide all days with complete insulin data into three roughly equal groups based on Total Daily Insulin Dose: Low Tercile (bottom 33%), Medium Tercile (middle 33%), and High Tercile (top 33%).
 - Report the average BG In Range (%) for each tercile.
 - Bolus Ratio Impact: Calculate the average BG Above (%) for days where the Bolus-to-Total-Insulin Ratio is above the dataset median and compare it to days below the median.
-- If fewer than 3 days have complete insulin data, note this limitation and skip tercile analysis.
+- If fewer than 9 days have complete insulin data, note this limitation and skip tercile analysis (as meaningful terciles require at least 3 days per group).
 
 3. Basal Drift Test (Overnight & Fasting Analysis):
 - Identify overnight periods (approximately 10 PM – 6 AM) in the dataset.
