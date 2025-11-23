@@ -60,13 +60,13 @@ export async function callAIApi(
 export function getProviderDisplayName(provider: AIProvider): string {
   switch (provider) {
     case 'perplexity':
-      return 'Perplexity';
+      return 'Perplexity AI';
     case 'gemini':
-      return 'Google Gemini';
+      return 'Google Gemini AI';
     case 'grok':
       return 'Grok AI';
     case 'deepseek':
-      return 'DeepSeek';
+      return 'DeepSeek AI';
     default:
       return provider;
   }

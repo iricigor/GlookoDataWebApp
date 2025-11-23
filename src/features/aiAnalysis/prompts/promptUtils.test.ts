@@ -43,17 +43,17 @@ describe('promptUtils', () => {
       expect(result).toContain('--- CONCLUSIO DATAE ---');
     });
 
-    it('should return disclaimer with Perplexity when perplexity provider specified', () => {
+    it('should return disclaimer with Perplexity AI when perplexity provider specified', () => {
       const result = getDisclaimerInstruction('perplexity');
-      expect(result).toContain('Data is provided by Perplexity');
+      expect(result).toContain('Data is provided by Perplexity AI');
       expect(result).toContain('it might not be correct');
       expect(result).toContain('Always consult with your doctor');
       expect(result).toContain('--- CONCLUSIO DATAE ---');
     });
 
-    it('should return disclaimer with Google Gemini when gemini provider specified', () => {
+    it('should return disclaimer with Google Gemini AI when gemini provider specified', () => {
       const result = getDisclaimerInstruction('gemini');
-      expect(result).toContain('Data is provided by Google Gemini');
+      expect(result).toContain('Data is provided by Google Gemini AI');
       expect(result).toContain('it might not be correct');
       expect(result).toContain('Always consult with your doctor');
       expect(result).toContain('--- CONCLUSIO DATAE ---');
@@ -67,9 +67,9 @@ describe('promptUtils', () => {
       expect(result).toContain('--- CONCLUSIO DATAE ---');
     });
 
-    it('should return disclaimer with DeepSeek when deepseek provider specified', () => {
+    it('should return disclaimer with DeepSeek AI when deepseek provider specified', () => {
       const result = getDisclaimerInstruction('deepseek');
-      expect(result).toContain('Data is provided by DeepSeek');
+      expect(result).toContain('Data is provided by DeepSeek AI');
       expect(result).toContain('it might not be correct');
       expect(result).toContain('Always consult with your doctor');
       expect(result).toContain('--- CONCLUSIO DATAE ---');

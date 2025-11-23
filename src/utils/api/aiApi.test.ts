@@ -79,20 +79,20 @@ describe('aiApi', () => {
   });
 
   describe('getProviderDisplayName', () => {
-    it('should return "Perplexity" for perplexity provider', () => {
-      expect(getProviderDisplayName('perplexity')).toBe('Perplexity');
+    it('should return "Perplexity AI" for perplexity provider', () => {
+      expect(getProviderDisplayName('perplexity')).toBe('Perplexity AI');
     });
 
-    it('should return "Google Gemini" for gemini provider', () => {
-      expect(getProviderDisplayName('gemini')).toBe('Google Gemini');
+    it('should return "Google Gemini AI" for gemini provider', () => {
+      expect(getProviderDisplayName('gemini')).toBe('Google Gemini AI');
     });
 
     it('should return "Grok AI" for grok provider', () => {
       expect(getProviderDisplayName('grok')).toBe('Grok AI');
     });
 
-    it('should return "DeepSeek" for deepseek provider', () => {
-      expect(getProviderDisplayName('deepseek')).toBe('DeepSeek');
+    it('should return "DeepSeek AI" for deepseek provider', () => {
+      expect(getProviderDisplayName('deepseek')).toBe('DeepSeek AI');
     });
 
     it('should return the provider value for unknown providers', () => {
