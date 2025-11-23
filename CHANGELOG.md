@@ -515,6 +515,13 @@ Documentation improvements for deployment, managed identity, and developer guide
 
 ### Other
 <details>
+<summary>393 Enhance meal timing prompt with precise detection criteria and weekday/weekend analysis</summary>
+
+[#393](../../pull/393) Enhance meal timing prompt with precise detection criteria and weekday/weekend analysis
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>391 Enhance glucose insulin AI prompt with tercile-based analysis and safety features</summary>
 
 [#391](../../pull/391) Enhance glucose insulin AI prompt with tercile-based analysis and safety features
