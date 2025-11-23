@@ -181,5 +181,37 @@ describe('timeInRangePrompt', () => {
       // Check for properly rounded values
       expect(result).toMatch(/70-180 mg\/dL/); // Should be rounded to nearest integer
     });
+
+    it('should include English disclaimer when English language specified', () => {
+      const result = generateTimeInRangePrompt(mockStats, mockThresholds, 'english', 'mmol/L', 'perplexity');
+      
+      expect(result).toContain('Data is provided by Perplexity AI');
+      expect(result).toContain('it might not be correct');
+      expect(result).toContain('Always consult with your doctor');
+    });
+
+    it('should include Czech disclaimer when Czech language specified', () => {
+      const result = generateTimeInRangePrompt(mockStats, mockThresholds, 'czech', 'mmol/L', 'gemini');
+      
+      expect(result).toContain('Data poskytuje Google Gemini AI');
+      expect(result).toContain('nemusí být správná');
+      expect(result).toContain('Vždy se poraďte se svým lékařem');
+    });
+
+    it('should include German disclaimer when German language specified', () => {
+      const result = generateTimeInRangePrompt(mockStats, mockThresholds, 'german', 'mmol/L', 'grok');
+      
+      expect(result).toContain('Daten werden von Grok AI bereitgestellt');
+      expect(result).toContain('möglicherweise nicht korrekt');
+      expect(result).toContain('Konsultieren Sie immer Ihren Arzt');
+    });
+
+    it('should include Serbian disclaimer when Serbian language specified', () => {
+      const result = generateTimeInRangePrompt(mockStats, mockThresholds, 'serbian', 'mmol/L', 'deepseek');
+      
+      expect(result).toContain('Podatke pruža DeepSeek AI');
+      expect(result).toContain('mogu biti netačni');
+      expect(result).toContain('Uvek se konsultujte sa svojim lekarom');
+    });
   });
 });
