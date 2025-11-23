@@ -265,6 +265,7 @@ Dark mode navigation features:
 
 ## Related Documentation
 
+- [All Screenshots (Single Page)](ALL_SCREENSHOTS.md)
 - [Light Mode Screenshots](SCREENSHOTS_LIGHT.md)
 - [Mobile Screenshots](SCREENSHOTS_MOBILE.md)
 - [Main Screenshots Overview](../SCREENSHOTS.md)

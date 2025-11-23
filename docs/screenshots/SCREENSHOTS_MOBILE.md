@@ -316,6 +316,7 @@ The mobile About tab displays:
 
 ## Related Documentation
 
+- [All Screenshots (Single Page)](ALL_SCREENSHOTS.md)
 - [Light Mode Screenshots](SCREENSHOTS_LIGHT.md)
 - [Dark Mode Screenshots](SCREENSHOTS_DARK.md)
 - [Main Screenshots Overview](../SCREENSHOTS.md)

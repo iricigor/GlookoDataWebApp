@@ -230,6 +230,7 @@ All pages feature consistent navigation:
 
 ## Related Documentation
 
+- [All Screenshots (Single Page)](ALL_SCREENSHOTS.md)
 - [Dark Mode Screenshots](SCREENSHOTS_DARK.md)
 - [Mobile Screenshots](SCREENSHOTS_MOBILE.md)
 - [Main Screenshots Overview](../SCREENSHOTS.md)
