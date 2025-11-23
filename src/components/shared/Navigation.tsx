@@ -31,6 +31,8 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
     borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
     boxShadow: tokens.shadow4,
+    zIndex: 100,
+    position: 'relative',
     '@media (max-width: 768px)': {
       ...shorthands.padding('12px', '16px'),
     },
