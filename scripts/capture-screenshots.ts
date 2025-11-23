@@ -116,7 +116,7 @@ async function captureMode(browser: Browser, mode: 'light' | 'dark' | 'mobile') 
   
   // Reports - AGP Data
   await page.getByRole('tab', { name: 'AGP Data' }).click();
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(2000); // Wait 2 seconds for AGP graph to fully render
   await takeScreenshot(page, '06-reports-agp-data', subdir);
   
   // Reports - Detailed CGM
