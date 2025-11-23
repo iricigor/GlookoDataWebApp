@@ -60,9 +60,26 @@ jobs:
           echo "Auto-detecting latest merged PR..."
           
           # Get the latest merged PR to main branch
-          LATEST_PR=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          HTTP_CODE=$(curl -s -w "%{http_code}" -o /tmp/pr_response.json \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=1")
+          
+          # Check if API call was successful
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "Error: GitHub API returned HTTP $HTTP_CODE"
+            cat /tmp/pr_response.json
+            exit 1
+          fi
+          
+          LATEST_PR=$(cat /tmp/pr_response.json)
+          
+          # Check if any PRs were returned
+          PR_COUNT=$(echo "$LATEST_PR" | jq '. | length')
+          if [ "$PR_COUNT" -eq 0 ]; then
+            echo "Error: No closed PRs found in the repository"
+            exit 1
+          fi
           
           # Extract PR details
           PR_NUMBER=$(echo "$LATEST_PR" | jq -r '.[0].number')
@@ -71,6 +88,7 @@ jobs:
           # Check if PR was actually merged (not just closed)
           if [ "$PR_MERGED" = "null" ]; then
             echo "Error: Latest PR #$PR_NUMBER was closed but not merged"
+            echo "Please provide a specific PR number or ensure there is at least one merged PR"
             exit 1
           fi
           
@@ -96,10 +114,27 @@ jobs:
               # If PR number provided but title is empty, fetch from GitHub API
               if [ -z "$PR_TITLE" ]; then
                 echo "Fetching PR details from GitHub API..."
-                PR_DATA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                HTTP_CODE=$(curl -s -w "%{http_code}" -o /tmp/pr_details.json \
+                  -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                   -H "Accept: application/vnd.github.v3+json" \
                   "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER")
+                
+                # Check if API call was successful
+                if [ "$HTTP_CODE" -ne 200 ]; then
+                  echo "Error: Failed to fetch PR #$PR_NUMBER. GitHub API returned HTTP $HTTP_CODE"
+                  cat /tmp/pr_details.json
+                  exit 1
+                fi
+                
+                PR_DATA=$(cat /tmp/pr_details.json)
                 PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
+                
+                # Validate PR title was retrieved
+                if [ "$PR_TITLE" = "null" ] || [ -z "$PR_TITLE" ]; then
+                  echo "Error: Could not fetch title for PR #$PR_NUMBER"
+                  exit 1
+                fi
+                
                 if [ -z "$PR_LABELS" ]; then
                   PR_LABELS=$(echo "$PR_DATA" | jq -r '[.labels[].name] | join(",")')
                 fi
