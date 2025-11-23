@@ -94,9 +94,9 @@ export function CookieConsent({ onAccept }: CookieConsentProps) {
             <div className={styles.textContent}>
               <Text className={styles.text}>
                 This app uses <strong>functional cookies only</strong> to save your preferences 
-                (theme, settings, date selections). We do <strong>not collect personal data</strong>, 
-                use tracking cookies, or send any data to external servers. 
-                All processing happens locally in your browser.{' '}
+                (theme, settings, date selections). We do <strong>not collect personal data via cookies</strong>, 
+                use tracking cookies, or send cookie data to external servers. 
+                All data processing happens locally in your browser.{' '}
                 <Link
                   href="https://github.com/iricigor/GlookoDataWebApp#-privacy-first"
                   target="_blank"

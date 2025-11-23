@@ -12,7 +12,7 @@ describe('CookieConsent', () => {
     render(<CookieConsent onAccept={mockOnAccept} />);
     
     expect(screen.getByText(/functional cookies only/i)).toBeInTheDocument();
-    expect(screen.getByText(/not collect personal data/i)).toBeInTheDocument();
+    expect(screen.getByText(/not collect personal data via cookies/i)).toBeInTheDocument();
   });
 
   it('should display cookie icon', () => {
@@ -64,7 +64,7 @@ describe('CookieConsent', () => {
     const mockOnAccept = vi.fn();
     render(<CookieConsent onAccept={mockOnAccept} />);
     
-    expect(screen.getByText(/not collect personal data/i)).toBeInTheDocument();
+    expect(screen.getByText(/not collect personal data via cookies/i)).toBeInTheDocument();
     expect(screen.getByText(/locally in your browser/i)).toBeInTheDocument();
   });
 
