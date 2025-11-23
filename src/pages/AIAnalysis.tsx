@@ -27,7 +27,7 @@ import { BrainCircuitRegular, CheckmarkCircleRegular, ErrorCircleRegular } from 
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { MarkdownRenderer } from '../components/shared';
 import { TableContainer } from '../components/TableContainer';
-import type { UploadedFile, AIAnalysisResult, DailyReport, GlucoseReading, InsulinReading, GlucoseUnit } from '../types';
+import type { UploadedFile, AIAnalysisResult, DailyReport, GlucoseReading, InsulinReading, GlucoseUnit, GlucoseRangeStats } from '../types';
 import type { ResponseLanguage } from '../hooks/useResponseLanguage';
 import { extractGlucoseReadings } from '../utils/data';
 import { extractDailyInsulinSummaries, extractInsulinReadings } from '../utils/data';
@@ -225,7 +225,7 @@ export function AIAnalysis({
   const [selectedTab, setSelectedTab] = useState<string>('fileInfo');
   
   const [inRangePercentage, setInRangePercentage] = useState<number | null>(null);
-  const [glucoseStats, setGlucoseStats] = useState<import('../types').GlucoseRangeStats | null>(null);
+  const [glucoseStats, setGlucoseStats] = useState<GlucoseRangeStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
