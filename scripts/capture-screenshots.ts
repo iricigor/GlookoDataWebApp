@@ -54,7 +54,7 @@ async function acceptCookies(page: Page) {
       console.log('  ✓ Accepted cookies');
       return true;
     }
-  } catch (e) {
+  } catch {
     console.log('  ⚠ Cookie banner not found or already dismissed');
   }
   return false;
@@ -145,7 +145,7 @@ async function captureMode(browser: Browser, mode: 'light' | 'dark' | 'mobile') 
     await page.getByText('Time in Range', { exact: true }).click({ timeout: 5000 });
     await page.waitForTimeout(1000);
     await takeScreenshot(page, '10-ai-time-in-range', subdir);
-  } catch (e) {
+  } catch {
     console.log('  ⚠ Skipping Time in Range tab (not found or not clickable)');
   }
   
@@ -154,7 +154,7 @@ async function captureMode(browser: Browser, mode: 'light' | 'dark' | 'mobile') 
     await page.getByText('Glucose & Insulin', { exact: true }).click({ timeout: 5000 });
     await page.waitForTimeout(1000);
     await takeScreenshot(page, '11-ai-glucose-insulin', subdir);
-  } catch (e) {
+  } catch {
     console.log('  ⚠ Skipping Glucose & Insulin tab (not found or not clickable)');
   }
   
@@ -163,7 +163,7 @@ async function captureMode(browser: Browser, mode: 'light' | 'dark' | 'mobile') 
     await page.getByText('Meal Timing', { exact: true }).click({ timeout: 5000 });
     await page.waitForTimeout(1000);
     await takeScreenshot(page, '12-ai-meal-timing', subdir);
-  } catch (e) {
+  } catch {
     console.log('  ⚠ Skipping Meal Timing tab (not found or not clickable)');
   }
   
@@ -172,7 +172,7 @@ async function captureMode(browser: Browser, mode: 'light' | 'dark' | 'mobile') 
     await page.getByText('Pump Settings', { exact: true }).click({ timeout: 5000 });
     await page.waitForTimeout(1000);
     await takeScreenshot(page, '13-ai-pump-settings', subdir);
-  } catch (e) {
+  } catch {
     console.log('  ⚠ Skipping Pump Settings tab (not found or not clickable)');
   }
   
@@ -185,7 +185,7 @@ async function captureMode(browser: Browser, mode: 'light' | 'dark' | 'mobile') 
   try {
     await page.getByRole('tab', { name: 'General' }).click({ timeout: 3000 });
     await page.waitForTimeout(500);
-  } catch (e) {
+  } catch {
     // Tab might already be selected
     await page.waitForTimeout(500);
   }
@@ -198,7 +198,7 @@ async function captureMode(browser: Browser, mode: 'light' | 'dark' | 'mobile') 
     await dataAiTab.click({ timeout: 5000 });
     await page.waitForTimeout(500);
     await takeScreenshot(page, '15-settings-data-ai', subdir);
-  } catch (e) {
+  } catch {
     console.log('  ⚠ Skipping Data & AI tab (not found or not clickable)');
   }
   
@@ -207,7 +207,7 @@ async function captureMode(browser: Browser, mode: 'light' | 'dark' | 'mobile') 
     await page.getByRole('tab', { name: 'About' }).click({ timeout: 5000 });
     await page.waitForTimeout(500);
     await takeScreenshot(page, '16-settings-about', subdir);
-  } catch (e) {
+  } catch {
     console.log('  ⚠ Skipping About tab (not found or not clickable)');
   }
   
