@@ -43,6 +43,11 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: '16px',
+    '@media (max-width: 768px)': {
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      ...shorthands.gap('12px'),
+    },
   },
   maxValueContainer: {
     display: 'flex',
@@ -56,6 +61,9 @@ const useStyles = makeStyles({
   },
   colorSchemeDropdown: {
     minWidth: '200px',
+    '@media (max-width: 768px)': {
+      minWidth: '150px',
+    },
   },
   chartWithBarWrapper: {
     display: 'flex',
@@ -69,6 +77,9 @@ const useStyles = makeStyles({
     width: '60px',
     height: '400px',
     ...shorthands.gap('4px'),
+    '@media (max-width: 768px)': {
+      width: 'clamp(30px, 7.5vw, 60px)',
+    },
   },
   rangeBarSegment: {
     display: 'flex',
@@ -83,6 +94,9 @@ const useStyles = makeStyles({
     transitionTimingFunction: tokens.curveEasyEase,
     '&:hover': {
       opacity: 0.8,
+    },
+    '@media (max-width: 768px)': {
+      fontSize: tokens.fontSizeBase100,
     },
   },
   chartContainer: {
