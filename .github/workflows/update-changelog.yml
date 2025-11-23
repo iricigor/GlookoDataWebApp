@@ -8,15 +8,17 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: 'PR number to add to CHANGELOG'
-        required: true
-        type: number
-      pr_title:
-        description: 'PR title'
-        required: true
+        description: 'PR number to add to CHANGELOG (leave blank to auto-detect latest merged PR)'
+        required: false
         type: string
+        default: ''
+      pr_title:
+        description: 'PR title (leave blank to auto-detect from PR number)'
+        required: false
+        type: string
+        default: ''
       pr_labels:
-        description: 'Comma-separated PR labels (e.g., "✨ Feature,🪲 Bug")'
+        description: 'Comma-separated PR labels (e.g., "✨ Feature,🪲 Bug"). Leave blank to auto-detect from PR'
         required: false
         type: string
         default: ''
@@ -51,16 +53,66 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: Auto-detect Latest Merged PR (if needed)
+        id: auto_detect_pr
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.pr_number == ''
+        run: |
+          echo "Auto-detecting latest merged PR..."
+          
+          # Get the latest merged PR to main branch
+          LATEST_PR=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=1")
+          
+          # Extract PR details
+          PR_NUMBER=$(echo "$LATEST_PR" | jq -r '.[0].number')
+          PR_MERGED=$(echo "$LATEST_PR" | jq -r '.[0].merged_at')
+          
+          # Check if PR was actually merged (not just closed)
+          if [ "$PR_MERGED" = "null" ]; then
+            echo "Error: Latest PR #$PR_NUMBER was closed but not merged"
+            exit 1
+          fi
+          
+          PR_TITLE=$(echo "$LATEST_PR" | jq -r '.[0].title')
+          PR_LABELS=$(echo "$LATEST_PR" | jq -r '[.[0].labels[].name] | join(",")')
+          
+          echo "Auto-detected PR #$PR_NUMBER: $PR_TITLE"
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "pr_title=$PR_TITLE" >> $GITHUB_OUTPUT
+          echo "pr_labels=$PR_LABELS" >> $GITHUB_OUTPUT
+
       - name: Extract PR Information
         id: pr_info
         run: |
-          # Use workflow_dispatch inputs if available, otherwise use PR event data
+          # Use workflow_dispatch inputs if available, otherwise use PR event data or auto-detected values
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            PR_NUMBER="${{ github.event.inputs.pr_number }}"
-            PR_TITLE="${{ github.event.inputs.pr_title }}"
-            PR_LABELS="${{ github.event.inputs.pr_labels }}"
+            # Check if PR number was provided manually
+            if [ -n "${{ github.event.inputs.pr_number }}" ]; then
+              PR_NUMBER="${{ github.event.inputs.pr_number }}"
+              PR_TITLE="${{ github.event.inputs.pr_title }}"
+              PR_LABELS="${{ github.event.inputs.pr_labels }}"
+              
+              # If PR number provided but title is empty, fetch from GitHub API
+              if [ -z "$PR_TITLE" ]; then
+                echo "Fetching PR details from GitHub API..."
+                PR_DATA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER")
+                PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
+                if [ -z "$PR_LABELS" ]; then
+                  PR_LABELS=$(echo "$PR_DATA" | jq -r '[.labels[].name] | join(",")')
+                fi
+              fi
+            else
+              # Use auto-detected values
+              PR_NUMBER="${{ steps.auto_detect_pr.outputs.pr_number }}"
+              PR_TITLE="${{ steps.auto_detect_pr.outputs.pr_title }}"
+              PR_LABELS="${{ steps.auto_detect_pr.outputs.pr_labels }}"
+            fi
             VERSION="${{ github.event.inputs.version }}"
           else
+            # Automatic trigger from PR merge
             PR_NUMBER="${{ github.event.pull_request.number }}"
             PR_TITLE="${{ github.event.pull_request.title }}"
             PR_LABELS="${{ join(github.event.pull_request.labels.*.name, ',') }}"
@@ -72,7 +124,7 @@ jobs:
           echo "pr_labels=$PR_LABELS" >> $GITHUB_OUTPUT
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           
-          echo "Merged PR #$PR_NUMBER: $PR_TITLE"
+          echo "Processing PR #$PR_NUMBER: $PR_TITLE"
           echo "Labels: $PR_LABELS"
           if [ -n "$VERSION" ]; then
             echo "Using version: $VERSION"
