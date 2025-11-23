@@ -105,20 +105,16 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
     
     return {
       time: slot.timeSlot,
-      p10,
-      p25,
-      p75,
-      p90,
+      // Original values for reference
       p10_p90_min: p10,
       p10_p90_max: p90,
       p25_p75_min: p25,
       p25_p75_max: p75,
-      // For stacked rendering of 10-90% band
-      p10_p90_base: p10,  // Base height
-      p10_p90_height: p90 - p10,  // Height of the band
-      // For stacked rendering of 25-75% band
-      p25_p75_base: p25,  // Base height
-      p25_p75_height: p75 - p25,  // Height of the band
+      // Stacked values for proper rendering
+      p10_base: p10,  // Bottom of 10-90 band
+      p10_to_p25: p25 - p10,  // Height from p10 to p25 (lower outer band)
+      p25_to_p75: p75 - p25,  // Height from p25 to p75 (inner band)
+      p75_to_p90: p90 - p75,  // Height from p75 to p90 (upper outer band)
       median: convertGlucoseValue(slot.p50, glucoseUnit),
       lowest: convertGlucoseValue(slot.lowest, glucoseUnit),
       highest: convertGlucoseValue(slot.highest, glucoseUnit),
@@ -203,29 +199,47 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
             
             <Tooltip content={<CustomTooltip />} />
             
-            {/* 25-75 percentile range - the inner band (darker blue) */}
+            {/* Stack the bands from bottom to top to show all layers */}
+            {/* Using stackId to properly layer the areas */}
+            
+            {/* Invisible base to start stacking from p10 */}
             <Area
               type="monotone"
-              dataKey="p25"
+              dataKey="p10_base"
+              stackId="bands"
               stroke="none"
-              fill="url(#color25_75)"
-              baseLine={{ y: 0 }}
+              fill="transparent"
+              fillOpacity={0}
             />
             
-            {/* 10-90 percentile range - the outer band (light blue) */}
+            {/* Bottom of 10-90 band (p10 to p25) - light blue */}
             <Area
               type="monotone"
-              dataKey="p90"
+              dataKey="p10_to_p25"
+              stackId="bands"
               stroke="none"
               fill="url(#color10_90)"
-              baseLine="p10"
+              fillOpacity={1}
             />
+            
+            {/* Middle 25-75 band (p25 to p75) - darker blue */}
             <Area
               type="monotone"
-              dataKey="p75"
+              dataKey="p25_to_p75"
+              stackId="bands"
+              stroke="none"
+              fill="url(#color25_75)"
+              fillOpacity={1}
+            />
+            
+            {/* Top of 10-90 band (p75 to p90) - light blue */}
+            <Area
+              type="monotone"
+              dataKey="p75_to_p90"
+              stackId="bands"
               stroke="none"
               fill="url(#color10_90)"
-              baseLine="p25"
+              fillOpacity={1}
             />
             
             {/* Median line */}
