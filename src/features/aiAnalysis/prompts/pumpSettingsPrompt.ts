@@ -34,7 +34,7 @@ export function generatePumpSettingsPrompt(
   const bolusData = base64Decode(base64BolusData);
   const basalData = base64Decode(base64BasalData);
   const languageInstruction = getLanguageInstruction(language);
-  const disclaimerInstruction = getDisclaimerInstruction(provider);
+  const disclaimerInstruction = getDisclaimerInstruction(provider, language);
   
   // Unit-specific values
   const targetGlucose = unit === 'mg/dL' ? '110' : '6.1';

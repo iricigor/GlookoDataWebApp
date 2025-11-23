@@ -34,7 +34,7 @@ export function generateMealTimingPrompt(
   const bolusData = base64Decode(base64BolusData);
   const basalData = base64Decode(base64BasalData);
   const languageInstruction = getLanguageInstruction(language);
-  const disclaimerInstruction = getDisclaimerInstruction(provider);
+  const disclaimerInstruction = getDisclaimerInstruction(provider, language);
   
   // Unit-specific values for ranges
   const lowThreshold = unit === 'mg/dL' ? '70' : '3.9';
