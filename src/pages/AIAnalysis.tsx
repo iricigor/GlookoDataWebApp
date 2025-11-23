@@ -225,6 +225,7 @@ export function AIAnalysis({
   const [selectedTab, setSelectedTab] = useState<string>('fileInfo');
   
   const [inRangePercentage, setInRangePercentage] = useState<number | null>(null);
+  const [glucoseStats, setGlucoseStats] = useState<import('../types').GlucoseRangeStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
@@ -281,6 +282,7 @@ export function AIAnalysis({
   useEffect(() => {
     if (!selectedFile) {
       setInRangePercentage(null);
+      setGlucoseStats(null);
       setAiResponse(null);
       setError(null);
       setReadyForNewAnalysis(false);
@@ -331,6 +333,7 @@ export function AIAnalysis({
           const stats = calculateGlucoseRangeStats(readings, thresholds, 3);
           const percentage = calculatePercentage(stats.inRange, stats.total);
           setInRangePercentage(percentage);
+          setGlucoseStats(stats);
 
           // Generate combined dataset for second prompt
           const dailyGlucoseReports = groupByDate(readings, thresholds, 3);
@@ -372,12 +375,14 @@ export function AIAnalysis({
           }
         } else {
           setInRangePercentage(null);
+          setGlucoseStats(null);
           setCombinedDataset([]);
           setMealTimingDatasets({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
         }
       } catch (error) {
         console.error('Failed to calculate in-range percentage:', error);
         setInRangePercentage(null);
+        setGlucoseStats(null);
         setCombinedDataset([]);
         setMealTimingDatasets({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
       } finally {
@@ -462,7 +467,7 @@ export function AIAnalysis({
   };
 
   const handleAnalyzeClick = async () => {
-    if (!activeProvider || !hasApiKey || inRangePercentage === null) {
+    if (!activeProvider || !hasApiKey || inRangePercentage === null || !glucoseStats) {
       return;
     }
 
@@ -484,8 +489,8 @@ export function AIAnalysis({
     const previousResponse = aiResponse; // Keep previous response in case of error
 
     try {
-      // Generate the prompt with the TIR percentage
-      const prompt = generateTimeInRangePrompt(inRangePercentage, responseLanguage, glucoseUnit);
+      // Generate the prompt with the glucose stats and thresholds
+      const prompt = generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
@@ -877,7 +882,7 @@ export function AIAnalysis({
                   <AccordionHeader>View AI Prompt</AccordionHeader>
                   <AccordionPanel>
                     <div className={styles.promptTextContainer}>
-                      {generateTimeInRangePrompt(inRangePercentage, responseLanguage, glucoseUnit)}
+                      {glucoseStats && generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit)}
                     </div>
                   </AccordionPanel>
                 </AccordionItem>
