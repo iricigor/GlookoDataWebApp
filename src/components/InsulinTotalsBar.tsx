@@ -14,11 +14,11 @@ const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
-    width: '80px',
+    width: '60px',
     height: '100%',
     ...shorthands.padding('10px', '8px', '0', '8px'),
     '@media (max-width: 768px)': {
-      width: '50px',
+      width: 'clamp(30px, 7.5vw, 60px)',
       ...shorthands.padding('10px', '4px', '0', '4px'),
     },
   },

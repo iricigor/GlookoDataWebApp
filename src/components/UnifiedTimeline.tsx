@@ -78,7 +78,7 @@ const useStyles = makeStyles({
     height: '400px',
     ...shorthands.gap('4px'),
     '@media (max-width: 768px)': {
-      width: '40px',
+      width: 'clamp(30px, 7.5vw, 60px)',
     },
   },
   rangeBarSegment: {
