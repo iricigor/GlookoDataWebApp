@@ -23,7 +23,7 @@ import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils'
 export function generateGlucoseInsulinPrompt(base64CsvData: string, language: ResponseLanguage = 'english', unit: GlucoseUnit = 'mmol/L', provider?: AIProvider): string {
   const csvData = base64Decode(base64CsvData);
   const languageInstruction = getLanguageInstruction(language);
-  const disclaimerInstruction = getDisclaimerInstruction(provider);
+  const disclaimerInstruction = getDisclaimerInstruction(provider, language);
   
   const unitInstruction = unit === 'mg/dL'
     ? 'Remember that all glucose values are in mg/dL (not mmol/L).'
