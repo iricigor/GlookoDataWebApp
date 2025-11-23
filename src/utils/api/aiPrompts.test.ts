@@ -38,7 +38,7 @@ describe('aiPrompts', () => {
     });
 
     it('should include completion marker instruction', () => {
-      expect(AI_SYSTEM_PROMPT).toContain('--- END OF ANALYSIS ---');
+      expect(AI_SYSTEM_PROMPT).toContain('--- CONCLUSIO DATAE ---');
       expect(AI_SYSTEM_PROMPT).toContain('end your complete response');
     });
   });

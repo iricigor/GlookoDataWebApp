@@ -155,7 +155,7 @@ describe('mealTimingPrompt', () => {
       
       const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
       
-      expect(result).toContain('--- END OF ANALYSIS ---');
+      expect(result).toContain('--- CONCLUSIO DATAE ---');
       expect(result).toContain('End your response with');
     });
 

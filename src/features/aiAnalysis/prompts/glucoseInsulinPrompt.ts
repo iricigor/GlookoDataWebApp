@@ -8,7 +8,8 @@
 import { base64Decode } from '../../../utils/formatting';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit } from '../../../types';
-import { getLanguageInstruction } from './promptUtils';
+import type { AIProvider } from '../../../utils/api/aiApi';
+import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils';
 
 /**
  * Generate AI prompt for glucose and insulin analysis with tercile-based statistical analysis
@@ -16,11 +17,13 @@ import { getLanguageInstruction } from './promptUtils';
  * @param base64CsvData - Base64 encoded CSV data containing date, day of week, BG ranges, and insulin doses
  * @param language - Response language (english, czech, german, or serbian)
  * @param unit - Glucose unit (mmol/L or mg/dL)
+ * @param provider - AI provider being used (optional)
  * @returns Formatted prompt for AI analysis with tercile analysis, basal drift test, hypoglycemia risk, and variance analysis
  */
-export function generateGlucoseInsulinPrompt(base64CsvData: string, language: ResponseLanguage = 'english', unit: GlucoseUnit = 'mmol/L'): string {
+export function generateGlucoseInsulinPrompt(base64CsvData: string, language: ResponseLanguage = 'english', unit: GlucoseUnit = 'mmol/L', provider?: AIProvider): string {
   const csvData = base64Decode(base64CsvData);
   const languageInstruction = getLanguageInstruction(language);
+  const disclaimerInstruction = getDisclaimerInstruction(provider);
   
   const unitInstruction = unit === 'mg/dL'
     ? 'Remember that all glucose values are in mg/dL (not mmol/L).'
@@ -79,7 +82,5 @@ Perform the following specific analyses on provided data set and report the find
 ${csvData}
 \`\`\`
 
-${unitInstruction} Address me directly using "you/your" language. Keep your response clear and actionable. ${languageInstruction}
-
-IMPORTANT: End your response with "--- END OF ANALYSIS ---" on a new line to confirm your analysis is complete.`;
+${unitInstruction} Address me directly using "you/your" language. Keep your response clear and actionable. ${languageInstruction}${disclaimerInstruction}`;
 }

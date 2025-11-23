@@ -93,7 +93,7 @@ describe('glucoseInsulinPrompt', () => {
       const base64Data = base64Encode(sampleCsvData);
       const result = generateGlucoseInsulinPrompt(base64Data);
       
-      expect(result).toContain('--- END OF ANALYSIS ---');
+      expect(result).toContain('--- CONCLUSIO DATAE ---');
       expect(result).toContain('End your response with');
     });
 

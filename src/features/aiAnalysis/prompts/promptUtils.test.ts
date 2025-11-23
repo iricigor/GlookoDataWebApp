@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getLanguageInstruction } from './promptUtils';
+import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils';
 
 describe('promptUtils', () => {
   describe('getLanguageInstruction', () => {
@@ -31,6 +31,58 @@ describe('promptUtils', () => {
       const result = getLanguageInstruction('serbian');
       expect(result).toContain('Latin script');
       expect(result).toContain('latiničnim pismom');
+    });
+  });
+
+  describe('getDisclaimerInstruction', () => {
+    it('should return disclaimer with AI when no provider specified', () => {
+      const result = getDisclaimerInstruction();
+      expect(result).toContain('Data is provided by AI');
+      expect(result).toContain('it might not be correct');
+      expect(result).toContain('Always consult with your doctor');
+      expect(result).toContain('--- CONCLUSIO DATAE ---');
+    });
+
+    it('should return disclaimer with Perplexity when perplexity provider specified', () => {
+      const result = getDisclaimerInstruction('perplexity');
+      expect(result).toContain('Data is provided by Perplexity');
+      expect(result).toContain('it might not be correct');
+      expect(result).toContain('Always consult with your doctor');
+      expect(result).toContain('--- CONCLUSIO DATAE ---');
+    });
+
+    it('should return disclaimer with Google Gemini when gemini provider specified', () => {
+      const result = getDisclaimerInstruction('gemini');
+      expect(result).toContain('Data is provided by Google Gemini');
+      expect(result).toContain('it might not be correct');
+      expect(result).toContain('Always consult with your doctor');
+      expect(result).toContain('--- CONCLUSIO DATAE ---');
+    });
+
+    it('should return disclaimer with Grok AI when grok provider specified', () => {
+      const result = getDisclaimerInstruction('grok');
+      expect(result).toContain('Data is provided by Grok AI');
+      expect(result).toContain('it might not be correct');
+      expect(result).toContain('Always consult with your doctor');
+      expect(result).toContain('--- CONCLUSIO DATAE ---');
+    });
+
+    it('should return disclaimer with DeepSeek when deepseek provider specified', () => {
+      const result = getDisclaimerInstruction('deepseek');
+      expect(result).toContain('Data is provided by DeepSeek');
+      expect(result).toContain('it might not be correct');
+      expect(result).toContain('Always consult with your doctor');
+      expect(result).toContain('--- CONCLUSIO DATAE ---');
+    });
+
+    it('should include medical disclaimer', () => {
+      const result = getDisclaimerInstruction('perplexity');
+      expect(result).toContain('medical disclaimer');
+    });
+
+    it('should include healthcare provider advice', () => {
+      const result = getDisclaimerInstruction('gemini');
+      expect(result).toContain('healthcare provider');
     });
   });
 });

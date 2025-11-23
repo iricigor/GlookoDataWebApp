@@ -490,7 +490,7 @@ export function AIAnalysis({
 
     try {
       // Generate the prompt with the glucose stats and thresholds
-      const prompt = generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit);
+      const prompt = generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, activeProvider);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
@@ -553,7 +553,7 @@ export function AIAnalysis({
       const base64CsvData = base64Encode(csvData);
 
       // Generate the prompt with the base64 CSV data
-      const prompt = generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit);
+      const prompt = generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, activeProvider);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
@@ -623,7 +623,7 @@ export function AIAnalysis({
       const base64BasalData = base64Encode(basalCsv);
 
       // Generate the prompt with the base64 CSV data
-      const prompt = generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit);
+      const prompt = generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, activeProvider);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
@@ -740,7 +740,7 @@ export function AIAnalysis({
       const base64BasalData = base64Encode(basalCsv);
 
       // Generate the prompt with the base64 CSV data
-      const prompt = generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit);
+      const prompt = generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, activeProvider);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey
@@ -882,7 +882,7 @@ export function AIAnalysis({
                   <AccordionHeader>View AI Prompt</AccordionHeader>
                   <AccordionPanel>
                     <div className={styles.promptTextContainer}>
-                      {glucoseStats && generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit)}
+                      {glucoseStats && generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, activeProvider || undefined)}
                     </div>
                   </AccordionPanel>
                 </AccordionItem>
@@ -990,7 +990,7 @@ export function AIAnalysis({
                       {(() => {
                         const csvData = convertDailyReportsToCSV(combinedDataset);
                         const base64CsvData = base64Encode(csvData);
-                        return generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit);
+                        return generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, activeProvider || undefined);
                       })()}
                     </div>
                   </AccordionPanel>
@@ -1166,7 +1166,7 @@ export function AIAnalysis({
                         const base64CgmData = base64Encode(cgmCsv);
                         const base64BolusData = base64Encode(bolusCsv);
                         const base64BasalData = base64Encode(basalCsv);
-                        return generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit);
+                        return generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, activeProvider || undefined);
                       })()}
                     </div>
                   </AccordionPanel>
@@ -1317,7 +1317,7 @@ export function AIAnalysis({
                         const base64CgmData = base64Encode(cgmCsv);
                         const base64BolusData = base64Encode(bolusCsv);
                         const base64BasalData = base64Encode(basalCsv);
-                        return generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit);
+                        return generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, activeProvider || undefined);
                       })()}
                     </div>
                   </AccordionPanel>
