@@ -25,11 +25,24 @@ This page showcases the GlookoDataWebApp interface in **Dark Mode** on desktop d
 
 ---
 
+## Home Page (with Cookie Banner)
+
+![Home Page with Cookie Banner - Dark Mode](dark/01-home-with-cookies.png)
+
+The home page initially displays a cookie consent banner at the bottom in dark mode:
+- **Functional cookies only** message
+- Clear privacy information with dark theme styling
+- "Got it" button to accept and proceed
+- Learn more link for privacy details
+- High contrast for readability in low-light
+
+---
+
 ## Home Page
 
-![Home Page - Dark Mode](dark/01-home.png)
+![Home Page - Dark Mode](dark/02-home.png)
 
-The home page in dark mode features:
+After accepting cookies, the home page in dark mode features:
 - High contrast design with dark background
 - Reduced eye strain for low-light environments
 - Microsoft Fluent UI dark theme tokens
@@ -40,7 +53,7 @@ The home page in dark mode features:
 
 ## Data Upload
 
-![Data Upload Page - Dark Mode](dark/02-upload-with-file.png)
+![Data Upload Page - Dark Mode](dark/03-upload-with-file.png)
 
 The Data Upload page in dark mode displays:
 - Dark background with light text for readability
@@ -62,7 +75,7 @@ The Data Upload page in dark mode displays:
 
 ### Reports - File Info
 
-![Reports - File Info - Dark Mode](dark/03-reports-file-info.png)
+![Reports - File Info - Dark Mode](dark/04-reports-file-info.png)
 
 The File Info tab in dark mode shows:
 - Dark card backgrounds
@@ -73,7 +86,7 @@ The File Info tab in dark mode shows:
 
 ### Reports - Time in Range
 
-![Reports - Time in Range - Dark Mode](dark/04-reports-time-in-range.png)
+![Reports - Time in Range - Dark Mode](dark/05-reports-time-in-range.png)
 
 The Time in Range report in dark mode features:
 - Dark background for charts and graphs
@@ -91,7 +104,7 @@ The Time in Range report in dark mode features:
 
 ### Reports - AGP Data
 
-![Reports - AGP Data - Dark Mode](dark/05-reports-agp-data.png)
+![Reports - AGP Data - Dark Mode](dark/06-reports-agp-data.png)
 
 The AGP report in dark mode provides:
 - Dark chart background
@@ -102,7 +115,7 @@ The AGP report in dark mode provides:
 
 ### Reports - Detailed CGM
 
-![Reports - Detailed CGM - Dark Mode](dark/06-reports-detailed-cgm.png)
+![Reports - Detailed CGM - Dark Mode](dark/07-reports-detailed-cgm.png)
 
 The Detailed CGM tab in dark mode shows:
 - Dark table with alternating row colors
@@ -113,7 +126,7 @@ The Detailed CGM tab in dark mode shows:
 
 ### Reports - Detailed Insulin
 
-![Reports - Detailed Insulin - Dark Mode](dark/07-reports-detailed-insulin.png)
+![Reports - Detailed Insulin - Dark Mode](dark/08-reports-detailed-insulin.png)
 
 The Detailed Insulin report in dark mode displays:
 - Dark table backgrounds
@@ -128,13 +141,13 @@ The Detailed Insulin report in dark mode displays:
 
 ### AI Analysis - File Info
 
-![AI Analysis - File Info - Dark Mode](dark/08-ai-file-info.png)
+![AI Analysis - File Info - Dark Mode](dark/09-ai-file-info.png)
 
 The File Info tab maintains consistency with the Reports section, showing metadata in an easily readable dark theme format.
 
 ### AI Analysis - Time in Range
 
-![AI Analysis - Time in Range - Dark Mode](dark/09-ai-time-in-range.png)
+![AI Analysis - Time in Range - Dark Mode](dark/10-ai-time-in-range.png)
 
 The Time in Range AI analysis in dark mode features:
 - Dark "Analyze with AI" button with blue accent
@@ -145,7 +158,7 @@ The Time in Range AI analysis in dark mode features:
 
 ### AI Analysis - Glucose & Insulin
 
-![AI Analysis - Glucose & Insulin - Dark Mode](dark/10-ai-glucose-insulin.png)
+![AI Analysis - Glucose & Insulin - Dark Mode](dark/11-ai-glucose-insulin.png)
 
 The Glucose & Insulin analysis tab in dark mode:
 - Combined dataset view in dark table
@@ -156,7 +169,7 @@ The Glucose & Insulin analysis tab in dark mode:
 
 ### AI Analysis - Meal Timing
 
-![AI Analysis - Meal Timing - Dark Mode](dark/11-ai-meal-timing.png)
+![AI Analysis - Meal Timing - Dark Mode](dark/12-ai-meal-timing.png)
 
 The Meal Timing analysis in dark mode:
 - Meal data table with dark styling
@@ -167,7 +180,7 @@ The Meal Timing analysis in dark mode:
 
 ### AI Analysis - Pump Settings
 
-![AI Analysis - Pump Settings - Dark Mode](dark/12-ai-pump-settings.png)
+![AI Analysis - Pump Settings - Dark Mode](dark/13-ai-pump-settings.png)
 
 The Pump Settings analysis in dark mode:
 - Dark cards for pump configuration data
@@ -182,7 +195,7 @@ The Pump Settings analysis in dark mode:
 
 ### Settings - General
 
-![Settings - General - Dark Mode](dark/13-settings-general.png)
+![Settings - General - Dark Mode](dark/14-settings-general.png)
 
 The General settings in dark mode include:
 - **Dark Theme Selected**: Radio button shows current selection
@@ -195,7 +208,7 @@ The General settings in dark mode include:
 
 ### Settings - Data & AI
 
-![Settings - Data & AI - Dark Mode](dark/14-settings-data-ai.png)
+![Settings - Data & AI - Dark Mode](dark/15-settings-data-ai.png)
 
 The Data & AI settings in dark mode provide:
 - **Export Format Dropdown**: Dark dropdown menu
@@ -212,7 +225,7 @@ The Data & AI settings in dark mode provide:
 
 ### Settings - About
 
-![Settings - About - Dark Mode](dark/15-settings-about.png)
+![Settings - About - Dark Mode](dark/16-settings-about.png)
 
 The About tab in dark mode displays:
 - Version information in light text
@@ -265,6 +278,7 @@ Dark mode navigation features:
 
 ## Related Documentation
 
+- [All Screenshots (Single Page)](ALL_SCREENSHOTS.md)
 - [Light Mode Screenshots](SCREENSHOTS_LIGHT.md)
 - [Mobile Screenshots](SCREENSHOTS_MOBILE.md)
 - [Main Screenshots Overview](../SCREENSHOTS.md)

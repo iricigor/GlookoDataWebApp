@@ -25,11 +25,24 @@ This page showcases the GlookoDataWebApp interface on **mobile devices** (375x81
 
 ---
 
+## Home Page (with Cookie Banner)
+
+![Home Page with Cookie Banner - Mobile Dark](mobile/01-home-with-cookies.png)
+
+The mobile home page initially displays a cookie consent banner:
+- **Mobile-Optimized Banner**: Fits small screens without obscuring content
+- **Functional cookies only** message
+- Touch-friendly "Got it" button
+- Learn more link for privacy details
+- Compact single-column layout
+
+---
+
 ## Home Page
 
-![Home Page - Mobile Dark](mobile/01-home.png)
+![Home Page - Mobile Dark](mobile/02-home.png)
 
-The mobile home page features:
+After accepting cookies, the mobile home page features:
 - **Compact Layout**: Optimized for small screens
 - **Single Column**: Cards stack vertically
 - **Touch-Friendly**: Large tap targets (minimum 44x44 pixels)
@@ -50,7 +63,7 @@ The mobile home page features:
 
 ## Data Upload
 
-![Data Upload Page - Mobile Dark](mobile/02-upload-with-file.png)
+![Data Upload Page - Mobile Dark](mobile/03-upload-with-file.png)
 
 The mobile Data Upload page shows:
 - **Compact File List**: Stacked layout for uploaded files
@@ -72,7 +85,7 @@ The mobile Data Upload page shows:
 
 ### Reports - File Info
 
-![Reports - File Info - Mobile Dark](mobile/03-reports-file-info.png)
+![Reports - File Info - Mobile Dark](mobile/04-reports-file-info.png)
 
 The mobile File Info tab displays:
 - **Vertical Tab Layout**: Tabs arranged for mobile view
@@ -83,7 +96,7 @@ The mobile File Info tab displays:
 
 ### Reports - Time in Range
 
-![Reports - Time in Range - Mobile Dark](mobile/04-reports-time-in-range.png)
+![Reports - Time in Range - Mobile Dark](mobile/05-reports-time-in-range.png)
 
 The mobile Time in Range report features:
 - **Responsive Charts**: Charts scale to fit mobile screen
@@ -101,7 +114,7 @@ The mobile Time in Range report features:
 
 ### Reports - AGP Data
 
-![Reports - AGP Data - Mobile Dark](mobile/05-reports-agp-data.png)
+![Reports - AGP Data - Mobile Dark](mobile/06-reports-agp-data.png)
 
 The mobile AGP report shows:
 - **Scaled AGP Chart**: Fits perfectly in mobile viewport
@@ -112,7 +125,7 @@ The mobile AGP report shows:
 
 ### Reports - Detailed CGM
 
-![Reports - Detailed CGM - Mobile Dark](mobile/06-reports-detailed-cgm.png)
+![Reports - Detailed CGM - Mobile Dark](mobile/07-reports-detailed-cgm.png)
 
 The mobile Detailed CGM tab provides:
 - **Mobile-Optimized Table**: Horizontal scrolling for wide tables
@@ -123,7 +136,7 @@ The mobile Detailed CGM tab provides:
 
 ### Reports - Detailed Insulin
 
-![Reports - Detailed Insulin - Mobile Dark](mobile/07-reports-detailed-insulin.png)
+![Reports - Detailed Insulin - Mobile Dark](mobile/08-reports-detailed-insulin.png)
 
 The mobile Detailed Insulin report displays:
 - **Compact Table Layout**: Insulin data in mobile-friendly format
@@ -138,7 +151,7 @@ The mobile Detailed Insulin report displays:
 
 ### AI Analysis - File Info
 
-![AI Analysis - File Info - Mobile Dark](mobile/08-ai-file-info.png)
+![AI Analysis - File Info - Mobile Dark](mobile/09-ai-file-info.png)
 
 The mobile File Info tab in AI Analysis:
 - **Vertical Tabs**: Tabs optimized for mobile navigation
@@ -148,7 +161,7 @@ The mobile File Info tab in AI Analysis:
 
 ### AI Analysis - Time in Range
 
-![AI Analysis - Time in Range - Mobile Dark](mobile/09-ai-time-in-range.png)
+![AI Analysis - Time in Range - Mobile Dark](mobile/10-ai-time-in-range.png)
 
 The mobile Time in Range AI analysis features:
 - **Large Analyze Button**: Easy to tap on mobile
@@ -166,7 +179,7 @@ The mobile Time in Range AI analysis features:
 
 ### AI Analysis - Glucose & Insulin
 
-![AI Analysis - Glucose & Insulin - Mobile Dark](mobile/10-ai-glucose-insulin.png)
+![AI Analysis - Glucose & Insulin - Mobile Dark](mobile/11-ai-glucose-insulin.png)
 
 The mobile Glucose & Insulin analysis:
 - **Compact Dataset Preview**: Scrollable table in accordion
@@ -177,7 +190,7 @@ The mobile Glucose & Insulin analysis:
 
 ### AI Analysis - Meal Timing
 
-![AI Analysis - Meal Timing - Mobile Dark](mobile/11-ai-meal-timing.png)
+![AI Analysis - Meal Timing - Mobile Dark](mobile/12-ai-meal-timing.png)
 
 The mobile Meal Timing analysis:
 - **Mobile Table View**: Meal data in scrollable format
@@ -188,7 +201,7 @@ The mobile Meal Timing analysis:
 
 ### AI Analysis - Pump Settings
 
-![AI Analysis - Pump Settings - Mobile Dark](mobile/12-ai-pump-settings.png)
+![AI Analysis - Pump Settings - Mobile Dark](mobile/13-ai-pump-settings.png)
 
 The mobile Pump Settings analysis:
 - **Vertical Settings Cards**: Stacked for mobile view
@@ -203,7 +216,7 @@ The mobile Pump Settings analysis:
 
 ### Settings - General
 
-![Settings - General - Mobile Dark](mobile/13-settings-general.png)
+![Settings - General - Mobile Dark](mobile/14-settings-general.png)
 
 The mobile General settings include:
 - **Vertical Tab Layout**: Settings tabs optimized for mobile
@@ -221,7 +234,7 @@ The mobile General settings include:
 
 ### Settings - Data & AI
 
-![Settings - Data & AI - Mobile Dark](mobile/14-settings-data-ai.png)
+![Settings - Data & AI - Mobile Dark](mobile/15-settings-data-ai.png)
 
 The mobile Data & AI settings provide:
 - **Stacked Form Layout**: Vertical arrangement of options
@@ -240,7 +253,7 @@ The mobile Data & AI settings provide:
 
 ### Settings - About
 
-![Settings - About - Mobile Dark](mobile/15-settings-about.png)
+![Settings - About - Mobile Dark](mobile/16-settings-about.png)
 
 The mobile About tab displays:
 - **Vertical Information Layout**: Stacked content sections
@@ -316,6 +329,7 @@ The mobile About tab displays:
 
 ## Related Documentation
 
+- [All Screenshots (Single Page)](ALL_SCREENSHOTS.md)
 - [Light Mode Screenshots](SCREENSHOTS_LIGHT.md)
 - [Dark Mode Screenshots](SCREENSHOTS_DARK.md)
 - [Main Screenshots Overview](../SCREENSHOTS.md)

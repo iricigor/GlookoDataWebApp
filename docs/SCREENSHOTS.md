@@ -17,6 +17,22 @@ GlookoDataWebApp is a modern web application for importing, visualizing, and ana
 
 We've organized our screenshots into three comprehensive collections based on theme and device type:
 
+### 📋 [All Screenshots in One Page](screenshots/ALL_SCREENSHOTS.md)
+
+View **all 45 screenshots** from all themes and devices on a single page:
+
+- Desktop Light Mode (15 screenshots)
+- Desktop Dark Mode (15 screenshots)
+- Mobile Dark Theme (15 screenshots)
+- Each screenshot with a one-sentence description
+- Complete visual walkthrough of all features
+
+**Best for:** Complete overview, printing, offline reference, thorough documentation review
+
+[→ View All Screenshots](screenshots/ALL_SCREENSHOTS.md)
+
+---
+
 ### 📱 [Desktop - Light Mode](screenshots/SCREENSHOTS_LIGHT.md)
 
 View the complete application interface in **Light Mode** on desktop displays (1920x1080):
@@ -169,7 +185,7 @@ All pages feature consistent navigation with:
 
 ## Version Information
 
-Screenshots current as of version **1.2.1** (Build 220).
+Screenshots current as of version **1.4.0** (November 2024).
 
 For the latest updates and changes, see the [CHANGELOG](../CHANGELOG.md).
 
