@@ -14,12 +14,15 @@ The application features a modern, Microsoft Fluent UI-based interface with intu
 - **Comprehensive Reports** - View detailed analytics and trends
 - **AI Analysis** - Get intelligent insights using AI algorithms
 - **Settings** - Configure theme preferences and glucose thresholds
+- **User Authentication** - Sign in with Microsoft for a personalized experience
 
 📸 **[View all screenshots and interface examples →](docs/SCREENSHOTS.md)**
 
 ## 🔒 Privacy First
 
-All data processing happens locally in your browser. No files or data are transmitted to any server, ensuring complete privacy and security. All settings are stored locally in your browser.
+All data processing happens locally in your browser. No files or data are transmitted to any server, ensuring complete privacy and security.
+
+You can optionally sign in with your Microsoft account for a personalized experience. All settings remain stored locally in your browser.
 
 ## ✨ New Features
 

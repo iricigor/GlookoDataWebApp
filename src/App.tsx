@@ -28,7 +28,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const [isLoadingDemoData, setIsLoadingDemoData] = useState(true)
   
-  // Settings
+  // Settings (stored locally in browser cookies)
   const { theme, themeMode, setThemeMode } = useTheme()
   const { exportFormat, setExportFormat } = useExportFormat()
   const { responseLanguage, setResponseLanguage } = useResponseLanguage()

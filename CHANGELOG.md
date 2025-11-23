@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Table of Contents
 
-- [Unreleased](#unreleased---rollback-of-authentication-features)
+- [Unreleased](#unreleased---partial-rollback-of-cloud-features)
 - [Current Development - 1.3.x](#13x---current-development)
 - [Version 1.2.x](#12x---released)
 - [Version 1.1.x](#11x---released)
@@ -16,28 +16,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Version Format](#version-format)
 - [How to Update This File](#how-to-update-this-file)
 
-## [Unreleased] - Rollback of Authentication Features
+## [Unreleased] - Partial Rollback of Cloud Features
 
 ### Removed
 
-- **Microsoft Authentication**: All authentication functionality has been removed
-  - Removed MSAL integration and Microsoft login/logout flows
-  - Removed useAuth hook and authentication UI components (LoginDialog, LogoutDialog, WelcomeDialog)
-  - Removed Microsoft Graph API integration for user profiles
 - **Settings Synchronization**: Cloud-based settings sync removed
   - Removed Azure Table Storage integration
   - Removed userSettingsService and useSettingsSync hooks
+  - Removed WelcomeDialog for first-time login setup
   - Settings now stored locally in browser cookies only
 - **Data API Builder**: Removed API configuration from staticwebapp.config.json
 - **Deployment Infrastructure**: Removed all non-SWA deployment resources
-  - Removed deployment scripts for App Registration, Storage Account, and Table Storage
+  - Removed deployment scripts for Storage Account and Table Storage
   - Removed PowerShell deployment module
   - Removed CLI deployment scripts
   - Simplified documentation to focus only on Azure Static Web Apps
 
+### Retained
+
+- **Microsoft Authentication**: Basic login/logout functionality preserved
+  - MSAL integration for Microsoft sign-in
+  - LoginDialog and LogoutDialog UI components
+  - User profile display with name, email, and photo
+  - Authentication state management via useAuth hook
+
 ### Notes
 
-All data processing continues to happen client-side in the browser. The application is now fully local with no external API dependencies beyond AI analysis providers (Perplexity, Gemini, Grok, DeepSeek).
+All data processing continues to happen client-side in the browser. Settings are stored locally. Authentication is optional and provides a personalized experience without cloud storage dependencies. The application works fully offline after initial load.
 
 ## [1.3.x] - Current Development
 
