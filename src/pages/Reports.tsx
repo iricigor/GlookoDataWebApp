@@ -14,6 +14,7 @@ import { BGValuesReport } from '../components/BGValuesReport';
 import { InsulinDailyReport } from '../components/InsulinDailyReport';
 import { UnifiedDailyReport } from '../components/UnifiedDailyReport';
 import { IOBReport } from '../components/IOBReport';
+import { BGOverviewReport } from '../components/BGOverviewReport';
 import type { UploadedFile, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 
@@ -81,7 +82,7 @@ interface ReportsProps {
 export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDuration }: ReportsProps) {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState<string>(() => {
-    // Check URL hash for deep linking first (e.g., #reports/agp)
+    // Check URL hash for deep linking first (e.g., #reports/bgOverview)
     const hash = window.location.hash.slice(1);
     const parts = hash.split('/');
     if (parts.length > 1 && parts[0] === 'reports') {
@@ -89,7 +90,7 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
     }
     // Otherwise, load the last selected tab from localStorage
     const savedTab = localStorage.getItem('reports-selected-tab');
-    return savedTab || 'inRange';
+    return savedTab || 'bgOverview';
   });
 
   // Save the selected tab to localStorage whenever it changes
@@ -105,6 +106,8 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
             <SelectedFileMetadata selectedFile={selectedFile} />
           </div>
         );
+      case 'bgOverview':
+        return <BGOverviewReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
       case 'inRange':
         return <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
       case 'agp':
@@ -140,6 +143,7 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
         size="large"
       >
         <Tab value="fileInfo">File Info</Tab>
+        <Tab value="bgOverview">BG Overview</Tab>
         <Tab value="inRange">Time in Range</Tab>
         <Tab value="agp">AGP</Tab>
         <Tab value="detailedCgm">Detailed CGM</Tab>
@@ -158,6 +162,7 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
           appearance="subtle"
         >
           <Tab value="fileInfo">File Info</Tab>
+          <Tab value="bgOverview">BG Overview</Tab>
           <Tab value="inRange">Time in Range</Tab>
           <Tab value="agp">AGP</Tab>
           <Tab value="detailedCgm">Detailed CGM</Tab>
