@@ -5,6 +5,7 @@ import { Navigation, Footer, CookieConsent } from './components/shared'
 import { Home } from './pages/Home'
 import { DataUpload } from './pages/DataUpload'
 import { Reports } from './pages/Reports'
+import { BGOverview } from './pages/BGOverview'
 import { AIAnalysis } from './pages/AIAnalysis'
 import { Settings } from './pages/Settings'
 import { useTheme } from './hooks/useTheme'
@@ -23,7 +24,7 @@ import type { UploadedFile, AIAnalysisResult } from './types'
 import { extractZipMetadata } from './features/dataUpload/utils'
 
 // Page navigation order for swipe gestures
-const PAGE_ORDER = ['home', 'upload', 'reports', 'ai', 'settings'] as const
+const PAGE_ORDER = ['home', 'upload', 'bgOverview', 'reports', 'ai', 'settings'] as const
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
@@ -207,6 +208,8 @@ function App() {
             isLoadingDemoData={isLoadingDemoData}
           />
         )
+      case 'bgOverview':
+        return <BGOverview selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} onNavigate={handleNavigate} />
       case 'reports':
         return <Reports selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} />
       case 'ai':
