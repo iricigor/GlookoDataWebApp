@@ -142,12 +142,6 @@ export function Home({ onNavigate }: HomeProps) {
       page: 'reports',
     },
     {
-      title: 'AGP Report (Direct)',
-      description: 'Quick access to Ambulatory Glucose Profile visualization and data',
-      icon: <ChartMultipleRegular />,
-      page: 'reports/agp',
-    },
-    {
       title: 'AI Analysis',
       description: 'Get intelligent insights and recommendations using advanced AI algorithms',
       icon: <BrainCircuitRegular />,
