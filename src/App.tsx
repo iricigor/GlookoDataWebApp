@@ -209,7 +209,7 @@ function App() {
           />
         )
       case 'bgOverview':
-        return <BGOverview selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} onNavigate={handleNavigate} />
+        return <BGOverview selectedFile={selectedFile} glucoseUnit={glucoseUnit} onNavigate={handleNavigate} />
       case 'reports':
         return <Reports selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} />
       case 'ai':

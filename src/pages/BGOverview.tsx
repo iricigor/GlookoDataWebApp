@@ -35,7 +35,6 @@ import type {
   AGPDayOfWeekFilter,
   GlucoseUnit,
 } from '../types';
-import type { ExportFormat } from '../hooks/useExportFormat';
 import { extractGlucoseReadings } from '../utils/data';
 import { groupByDayOfWeek, calculatePercentage, GLUCOSE_RANGE_COLORS } from '../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
@@ -232,12 +231,11 @@ const useStyles = makeStyles({
 
 interface BGOverviewProps {
   selectedFile?: UploadedFile;
-  exportFormat: ExportFormat;
   glucoseUnit: GlucoseUnit;
   onNavigate: (page: string) => void;
 }
 
-export function BGOverview({ selectedFile, exportFormat, glucoseUnit, onNavigate }: BGOverviewProps) {
+export function BGOverview({ selectedFile, glucoseUnit, onNavigate }: BGOverviewProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
 
@@ -263,9 +261,6 @@ export function BGOverview({ selectedFile, exportFormat, glucoseUnit, onNavigate
     setDateRange,
     clearDateRange
   } = useDateRange(selectedFile?.id);
-
-  // Avoid unused variable warnings
-  void exportFormat;
 
   // Load data when file or filters change
   useEffect(() => {
