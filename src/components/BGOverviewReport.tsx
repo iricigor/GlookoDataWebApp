@@ -13,7 +13,6 @@ import {
   Button,
   Dropdown,
   Option,
-  Input,
   Accordion,
   AccordionItem,
   AccordionHeader,
@@ -49,6 +48,7 @@ import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualiza
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { useDateRange } from '../hooks/useDateRange';
 import { AGPGraph } from './AGPGraph';
+import { DateRangePicker } from './shared/DateRangePicker';
 
 const useStyles = makeStyles({
   container: {
@@ -551,105 +551,17 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
         </div>
 
         {minDate && maxDate && (
-          <>
-            <div className={styles.controlRow}>
-              <Text className={styles.controlLabel}>Date Range:</Text>
-              <div className={styles.datePickerGroup}>
-                <Input
-                  type="date"
-                  value={startDate}
-                  min={minDate}
-                  max={maxDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  appearance="outline"
-                />
-                <Text>to</Text>
-                <Input
-                  type="date"
-                  value={endDate}
-                  min={minDate}
-                  max={maxDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  appearance="outline"
-                />
-              </div>
-            </div>
-            <div className={styles.controlRow}>
-              <Text className={styles.controlLabel}>Select last:</Text>
-              <div className={styles.pillGroup}>
-                <Button
-                  appearance="outline"
-                  className={styles.pillButton}
-                  onClick={() => {
-                    const end = new Date(maxDate);
-                    const start = new Date(end);
-                    start.setDate(start.getDate() - 2);
-                    const startStr = start.toISOString().split('T')[0];
-                    setStartDate(startStr >= minDate ? startStr : minDate);
-                    setEndDate(maxDate);
-                  }}
-                >
-                  3 days
-                </Button>
-                <Button
-                  appearance="outline"
-                  className={styles.pillButton}
-                  onClick={() => {
-                    const end = new Date(maxDate);
-                    const start = new Date(end);
-                    start.setDate(start.getDate() - 6);
-                    const startStr = start.toISOString().split('T')[0];
-                    setStartDate(startStr >= minDate ? startStr : minDate);
-                    setEndDate(maxDate);
-                  }}
-                >
-                  7 days
-                </Button>
-                <Button
-                  appearance="outline"
-                  className={styles.pillButton}
-                  onClick={() => {
-                    const end = new Date(maxDate);
-                    const start = new Date(end);
-                    start.setDate(start.getDate() - 13);
-                    const startStr = start.toISOString().split('T')[0];
-                    setStartDate(startStr >= minDate ? startStr : minDate);
-                    setEndDate(maxDate);
-                  }}
-                >
-                  14 days
-                </Button>
-                <Button
-                  appearance="outline"
-                  className={styles.pillButton}
-                  onClick={() => {
-                    const end = new Date(maxDate);
-                    const start = new Date(end);
-                    start.setDate(start.getDate() - 27);
-                    const startStr = start.toISOString().split('T')[0];
-                    setStartDate(startStr >= minDate ? startStr : minDate);
-                    setEndDate(maxDate);
-                  }}
-                >
-                  28 days
-                </Button>
-                <Button
-                  appearance="outline"
-                  className={styles.pillButton}
-                  onClick={() => {
-                    const end = new Date(maxDate);
-                    const start = new Date(end);
-                    start.setDate(start.getDate() - 89);
-                    const startStr = start.toISOString().split('T')[0];
-                    setStartDate(startStr >= minDate ? startStr : minDate);
-                    setEndDate(maxDate);
-                  }}
-                >
-                  90 days
-                </Button>
-              </div>
-            </div>
-          </>
+          <div className={styles.controlRow}>
+            <Text className={styles.controlLabel}>Date Range:</Text>
+            <DateRangePicker
+              startDate={startDate}
+              endDate={endDate}
+              minDate={minDate}
+              maxDate={maxDate}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+            />
+          </div>
         )}
 
         <div className={styles.controlRow}>
