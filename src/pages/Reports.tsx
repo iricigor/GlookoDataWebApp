@@ -8,8 +8,6 @@ import {
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
-import { InRangeReport } from '../components/InRangeReport';
-import { AGPReport } from '../components/AGPReport';
 import { BGValuesReport } from '../components/BGValuesReport';
 import { InsulinDailyReport } from '../components/InsulinDailyReport';
 import { UnifiedDailyReport } from '../components/UnifiedDailyReport';
@@ -108,10 +106,6 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
         );
       case 'bgOverview':
         return <BGOverviewReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
-      case 'inRange':
-        return <InRangeReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
-      case 'agp':
-        return <AGPReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
       case 'detailedCgm':
         return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
       case 'detailedInsulin':
@@ -144,8 +138,6 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
       >
         <Tab value="fileInfo">File Info</Tab>
         <Tab value="bgOverview">BG Overview</Tab>
-        <Tab value="inRange">Time in Range</Tab>
-        <Tab value="agp">AGP</Tab>
         <Tab value="detailedCgm">Detailed CGM</Tab>
         <Tab value="detailedInsulin">Detailed Insulin</Tab>
         <Tab value="unifiedView">Unified View</Tab>
@@ -163,8 +155,6 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
         >
           <Tab value="fileInfo">File Info</Tab>
           <Tab value="bgOverview">BG Overview</Tab>
-          <Tab value="inRange">Time in Range</Tab>
-          <Tab value="agp">AGP</Tab>
           <Tab value="detailedCgm">Detailed CGM</Tab>
           <Tab value="detailedInsulin">Detailed Insulin</Tab>
           <Tab value="unifiedView">Unified View</Tab>

@@ -18,6 +18,12 @@ import {
   AccordionItem,
   AccordionHeader,
   AccordionPanel,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHeaderCell,
+  TableBody,
+  TableCell,
 } from '@fluentui/react-components';
 import {
   CalendarRegular,
@@ -34,8 +40,10 @@ import type {
   AGPTimeSlotStats,
   AGPDayOfWeekFilter,
   GlucoseUnit,
+  DayOfWeekReport,
+  WeeklyReport,
 } from '../types';
-import { extractGlucoseReadings } from '../utils/data';
+import { extractGlucoseReadings, groupByWeek, displayGlucoseValue, getUnitLabel } from '../utils/data';
 import { groupByDayOfWeek, calculatePercentage, GLUCOSE_RANGE_COLORS } from '../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
@@ -206,6 +214,42 @@ const useStyles = makeStyles({
     ...shorthands.padding('24px'),
     textAlign: 'center',
   },
+  inRangeCell: {
+    fontWeight: tokens.fontWeightBold,
+    color: tokens.colorBrandForeground1,
+  },
+  inRangeHeader: {
+    fontWeight: tokens.fontWeightBold,
+    color: tokens.colorBrandForeground1,
+  },
+  highlightedHeaderCell: {
+    fontWeight: tokens.fontWeightSemibold,
+    backgroundColor: tokens.colorNeutralBackground2,
+  },
+  highlightedCell: {
+    fontWeight: tokens.fontWeightRegular,
+    backgroundColor: tokens.colorNeutralBackground2,
+  },
+  timeCell: {
+    fontWeight: tokens.fontWeightSemibold,
+    fontFamily: 'monospace',
+    verticalAlign: 'middle',
+    textAlign: 'center',
+  },
+  valueCell: {
+    textAlign: 'center',
+    fontFamily: 'monospace',
+    verticalAlign: 'middle',
+  },
+  countCell: {
+    textAlign: 'center',
+    color: tokens.colorNeutralForeground2,
+    fontSize: tokens.fontSizeBase200,
+    verticalAlign: 'middle',
+  },
+  tableSection: {
+    marginTop: '16px',
+  },
 });
 
 interface BGOverviewReportProps {
@@ -227,6 +271,8 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
   const [error, setError] = useState<string | null>(null);
   const [readings, setReadings] = useState<GlucoseReading[]>([]);
   const [agpStats, setAgpStats] = useState<AGPTimeSlotStats[]>([]);
+  const [dayOfWeekReports, setDayOfWeekReports] = useState<DayOfWeekReport[]>([]);
+  const [weeklyReports, setWeeklyReports] = useState<WeeklyReport[]>([]);
 
   // Date range management
   const { 
@@ -261,6 +307,8 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
           setError(`No ${dataSource.toUpperCase()} data found in the selected file`);
           setReadings([]);
           setAgpStats([]);
+          setDayOfWeekReports([]);
+          setWeeklyReports([]);
           clearDateRange();
         } else {
           // Find min and max dates
@@ -292,11 +340,17 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
           const filteredReadings = filterReadingsByDayOfWeek(glucoseReadings, dayFilter);
           const stats = calculateAGPStats(filteredReadings);
           setAgpStats(stats);
+          
+          // Calculate day of week and weekly reports
+          setDayOfWeekReports(groupByDayOfWeek(glucoseReadings, thresholds, categoryMode));
+          setWeeklyReports(groupByWeek(glucoseReadings, thresholds, categoryMode));
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load glucose data');
         setReadings([]);
         setAgpStats([]);
+        setDayOfWeekReports([]);
+        setWeeklyReports([]);
         clearDateRange();
       } finally {
         setLoading(false);
@@ -304,7 +358,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     };
 
     loadData();
-  }, [selectedFile, dataSource, dayFilter, minDate, maxDate, startDate, endDate, setDateRange, clearDateRange]);
+  }, [selectedFile, dataSource, dayFilter, minDate, maxDate, startDate, endDate, setDateRange, clearDateRange, thresholds, categoryMode]);
 
   // Recalculate AGP stats when date range changes
   useEffect(() => {
@@ -324,13 +378,19 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
       if (filteredReadings.length === 0) {
         setError('No data matches the selected filters');
         setAgpStats([]);
+        setDayOfWeekReports([]);
+        setWeeklyReports([]);
       } else {
         setError(null);
         const stats = calculateAGPStats(filteredReadings);
         setAgpStats(stats);
+        
+        // Recalculate day of week and weekly reports with filtered data
+        setDayOfWeekReports(groupByDayOfWeek(filteredByDate, thresholds, categoryMode));
+        setWeeklyReports(groupByWeek(filteredByDate, thresholds, categoryMode));
       }
     }
-  }, [startDate, endDate, readings, dayFilter]);
+  }, [startDate, endDate, readings, dayFilter, thresholds, categoryMode]);
 
   // Calculate TIR statistics
   const calculateTIRStats = () => {
@@ -395,6 +455,45 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     }
   };
 
+  // Helper function to render stats row for day of week / weekly reports
+  const renderStatsRow = (
+    label: string,
+    stats: { veryLow?: number; low: number; inRange: number; high: number; veryHigh?: number; total: number }
+  ) => {
+    if (categoryMode === 5) {
+      return (
+        <TableRow key={label}>
+          <TableCell>{label}</TableCell>
+          <TableCell>{calculatePercentage(stats.veryLow ?? 0, stats.total)}% ({stats.veryLow ?? 0})</TableCell>
+          <TableCell>{calculatePercentage(stats.low, stats.total)}% ({stats.low})</TableCell>
+          <TableCell className={styles.inRangeCell}>{calculatePercentage(stats.inRange, stats.total)}% ({stats.inRange})</TableCell>
+          <TableCell>{calculatePercentage(stats.high, stats.total)}% ({stats.high})</TableCell>
+          <TableCell>{calculatePercentage(stats.veryHigh ?? 0, stats.total)}% ({stats.veryHigh ?? 0})</TableCell>
+          <TableCell>{stats.total}</TableCell>
+        </TableRow>
+      );
+    } else {
+      return (
+        <TableRow key={label}>
+          <TableCell>{label}</TableCell>
+          <TableCell>{calculatePercentage(stats.low, stats.total)}% ({stats.low})</TableCell>
+          <TableCell className={styles.inRangeCell}>{calculatePercentage(stats.inRange, stats.total)}% ({stats.inRange})</TableCell>
+          <TableCell>{calculatePercentage(stats.high, stats.total)}% ({stats.high})</TableCell>
+          <TableCell>{stats.total}</TableCell>
+        </TableRow>
+      );
+    }
+  };
+
+  // Helper function to format AGP values
+  const formatAGPValue = (value: number): string => {
+    if (value === 0) return '-';
+    return displayGlucoseValue(value, glucoseUnit);
+  };
+
+  // Filter AGP stats to only show time slots with data
+  const agpStatsWithData = agpStats.filter(stat => stat.count > 0);
+
   const tirStats = calculateTIRStats();
 
   if (!selectedFile) {
@@ -452,28 +551,134 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
         </div>
 
         {minDate && maxDate && (
-          <div className={styles.controlRow}>
-            <Text className={styles.controlLabel}>Date Range:</Text>
-            <div className={styles.datePickerGroup}>
-              <Input
-                type="date"
-                value={startDate}
-                min={minDate}
-                max={maxDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                appearance="outline"
-              />
-              <Text>to</Text>
-              <Input
-                type="date"
-                value={endDate}
-                min={minDate}
-                max={maxDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                appearance="outline"
-              />
+          <>
+            <div className={styles.controlRow}>
+              <Text className={styles.controlLabel}>Date Range:</Text>
+              <div className={styles.datePickerGroup}>
+                <Input
+                  type="date"
+                  value={startDate}
+                  min={minDate}
+                  max={maxDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  appearance="outline"
+                />
+                <Text>to</Text>
+                <Input
+                  type="date"
+                  value={endDate}
+                  min={minDate}
+                  max={maxDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  appearance="outline"
+                />
+              </div>
             </div>
-          </div>
+            <div className={styles.controlRow}>
+              <Text className={styles.controlLabel}>Quick Select:</Text>
+              <div className={styles.pillGroup}>
+                <Button
+                  appearance="outline"
+                  className={styles.pillButton}
+                  onClick={() => {
+                    const today = new Date();
+                    const dateStr = today.toISOString().split('T')[0];
+                    if (dateStr >= minDate && dateStr <= maxDate) {
+                      setStartDate(dateStr);
+                      setEndDate(dateStr);
+                    }
+                  }}
+                >
+                  Today
+                </Button>
+                <Button
+                  appearance="outline"
+                  className={styles.pillButton}
+                  onClick={() => {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const dateStr = yesterday.toISOString().split('T')[0];
+                    if (dateStr >= minDate && dateStr <= maxDate) {
+                      setStartDate(dateStr);
+                      setEndDate(dateStr);
+                    }
+                  }}
+                >
+                  Yesterday
+                </Button>
+                <Button
+                  appearance="outline"
+                  className={styles.pillButton}
+                  onClick={() => {
+                    const end = new Date(maxDate);
+                    const start = new Date(end);
+                    start.setDate(start.getDate() - 2);
+                    const startStr = start.toISOString().split('T')[0];
+                    setStartDate(startStr >= minDate ? startStr : minDate);
+                    setEndDate(maxDate);
+                  }}
+                >
+                  Last 3 Days
+                </Button>
+                <Button
+                  appearance="outline"
+                  className={styles.pillButton}
+                  onClick={() => {
+                    const end = new Date(maxDate);
+                    const start = new Date(end);
+                    start.setDate(start.getDate() - 6);
+                    const startStr = start.toISOString().split('T')[0];
+                    setStartDate(startStr >= minDate ? startStr : minDate);
+                    setEndDate(maxDate);
+                  }}
+                >
+                  Last 7 Days
+                </Button>
+                <Button
+                  appearance="outline"
+                  className={styles.pillButton}
+                  onClick={() => {
+                    const end = new Date(maxDate);
+                    const start = new Date(end);
+                    start.setDate(start.getDate() - 13);
+                    const startStr = start.toISOString().split('T')[0];
+                    setStartDate(startStr >= minDate ? startStr : minDate);
+                    setEndDate(maxDate);
+                  }}
+                >
+                  Last 14 Days
+                </Button>
+                <Button
+                  appearance="outline"
+                  className={styles.pillButton}
+                  onClick={() => {
+                    const end = new Date(maxDate);
+                    const start = new Date(end);
+                    start.setDate(start.getDate() - 27);
+                    const startStr = start.toISOString().split('T')[0];
+                    setStartDate(startStr >= minDate ? startStr : minDate);
+                    setEndDate(maxDate);
+                  }}
+                >
+                  Last 28 Days
+                </Button>
+                <Button
+                  appearance="outline"
+                  className={styles.pillButton}
+                  onClick={() => {
+                    const end = new Date(maxDate);
+                    const start = new Date(end);
+                    start.setDate(start.getDate() - 89);
+                    const startStr = start.toISOString().split('T')[0];
+                    setStartDate(startStr >= minDate ? startStr : minDate);
+                    setEndDate(maxDate);
+                  }}
+                >
+                  Last 90 Days
+                </Button>
+              </div>
+            </div>
+          </>
         )}
 
         <div className={styles.controlRow}>
@@ -642,7 +847,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
         <Card className={styles.agpCard}>
           <Text className={styles.cardTitle}>
             <DataLineRegular className={styles.cardIcon} />
-            Ambulatory Glucose Profile
+            Ambulatory Glucose Profile (AGP)
           </Text>
           <AGPGraph data={agpStats} glucoseUnit={glucoseUnit} />
         </Card>
@@ -650,46 +855,119 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
 
       {/* Detailed Breakdown Accordion */}
       {!loading && !error && tirStats.total > 0 && (
-        <Accordion collapsible className={styles.accordion}>
-          <AccordionItem value="detailed">
-            <AccordionHeader>Detailed Breakdown & Reports</AccordionHeader>
+        <Accordion collapsible className={styles.accordion} defaultOpenItems={[]}>
+          {/* Glucose Range by Day of Week */}
+          {dayOfWeekReports.length > 0 && (
+            <AccordionItem value="dayOfWeek">
+              <AccordionHeader>Glucose Range by Day of Week</AccordionHeader>
+              <AccordionPanel>
+                <div className={styles.tableSection}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHeaderCell className={styles.highlightedHeaderCell}>Day</TableHeaderCell>
+                        {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
+                        <TableHeaderCell>Low</TableHeaderCell>
+                        <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
+                        <TableHeaderCell>High</TableHeaderCell>
+                        {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
+                        <TableHeaderCell>Total</TableHeaderCell>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {dayOfWeekReports.map(report => renderStatsRow(report.day, report.stats))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </AccordionPanel>
+            </AccordionItem>
+          )}
+          
+          {/* Glucose Range by Week */}
+          {weeklyReports.length > 0 && (
+            <AccordionItem value="weekly">
+              <AccordionHeader>Glucose Range by Week</AccordionHeader>
+              <AccordionPanel>
+                <div className={styles.tableSection}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHeaderCell className={styles.highlightedHeaderCell}>Week</TableHeaderCell>
+                        {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
+                        <TableHeaderCell>Low</TableHeaderCell>
+                        <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
+                        <TableHeaderCell>High</TableHeaderCell>
+                        {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
+                        <TableHeaderCell>Total</TableHeaderCell>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {weeklyReports.map(report => renderStatsRow(report.weekLabel, report.stats))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </AccordionPanel>
+            </AccordionItem>
+          )}
+          
+          {/* Detailed AGP Time Slots */}
+          {agpStatsWithData.length > 0 && (
+            <AccordionItem value="agpTimeSlots">
+              <AccordionHeader>Detailed AGP Time Slots</AccordionHeader>
+              <AccordionPanel>
+                <div className={styles.tableSection}>
+                  <Text className={styles.noData} style={{ padding: '8px 0', fontSize: tokens.fontSizeBase200 }}>
+                    All values are in {getUnitLabel(glucoseUnit)}. Percentiles are calculated across all days for each 5-minute time slot.
+                  </Text>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHeaderCell className={styles.highlightedHeaderCell}>Time</TableHeaderCell>
+                        <TableHeaderCell>Lowest</TableHeaderCell>
+                        <TableHeaderCell>10%</TableHeaderCell>
+                        <TableHeaderCell>25%</TableHeaderCell>
+                        <TableHeaderCell className={styles.highlightedHeaderCell}>50% (Median)</TableHeaderCell>
+                        <TableHeaderCell>75%</TableHeaderCell>
+                        <TableHeaderCell>90%</TableHeaderCell>
+                        <TableHeaderCell>Highest</TableHeaderCell>
+                        <TableHeaderCell>Count</TableHeaderCell>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {agpStatsWithData.map((stat) => (
+                        <TableRow key={stat.timeSlot}>
+                          <TableCell className={`${styles.timeCell} ${styles.highlightedCell}`}>{stat.timeSlot}</TableCell>
+                          <TableCell className={styles.valueCell}>{formatAGPValue(stat.lowest)}</TableCell>
+                          <TableCell className={styles.valueCell}>{formatAGPValue(stat.p10)}</TableCell>
+                          <TableCell className={styles.valueCell}>{formatAGPValue(stat.p25)}</TableCell>
+                          <TableCell className={`${styles.valueCell} ${styles.highlightedCell}`}>{formatAGPValue(stat.p50)}</TableCell>
+                          <TableCell className={styles.valueCell}>{formatAGPValue(stat.p75)}</TableCell>
+                          <TableCell className={styles.valueCell}>{formatAGPValue(stat.p90)}</TableCell>
+                          <TableCell className={styles.valueCell}>{formatAGPValue(stat.highest)}</TableCell>
+                          <TableCell className={styles.countCell}>{stat.count}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </AccordionPanel>
+            </AccordionItem>
+          )}
+          
+          {/* Link to Detailed CGM Data */}
+          <AccordionItem value="cgmLink">
+            <AccordionHeader>Detailed CGM Data</AccordionHeader>
             <AccordionPanel>
               <div className={styles.accordionContent}>
+                <Text>For a complete view of all CGM readings with timestamps, please visit the Detailed CGM tab.</Text>
                 <Button
-                  appearance="subtle"
-                  className={styles.linkButton}
-                  onClick={() => {
-                    window.location.hash = 'reports/inRange';
-                  }}
-                >
-                  Glucose Range by Day of Week
-                </Button>
-                <Button
-                  appearance="subtle"
-                  className={styles.linkButton}
-                  onClick={() => {
-                    window.location.hash = 'reports/inRange';
-                  }}
-                >
-                  Glucose Range by Week
-                </Button>
-                <Button
-                  appearance="subtle"
-                  className={styles.linkButton}
-                  onClick={() => {
-                    window.location.hash = 'reports/agp';
-                  }}
-                >
-                  Detailed AGP Time Slots
-                </Button>
-                <Button
-                  appearance="subtle"
-                  className={styles.linkButton}
+                  appearance="primary"
                   onClick={() => {
                     window.location.hash = 'reports/detailedCgm';
                   }}
+                  style={{ marginTop: '12px' }}
                 >
-                  Detailed CGM Data
+                  Go to Detailed CGM
                 </Button>
               </div>
             </AccordionPanel>
