@@ -40,7 +40,7 @@ import { groupByDayOfWeek, calculatePercentage, GLUCOSE_RANGE_COLORS } from '../
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { useDateRange } from '../hooks/useDateRange';
-import { AGPGraph } from '../components/AGPGraph';
+import { AGPGraph } from './AGPGraph';
 
 const useStyles = makeStyles({
   container: {
