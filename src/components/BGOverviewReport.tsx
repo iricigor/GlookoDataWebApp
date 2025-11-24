@@ -575,37 +575,8 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
               </div>
             </div>
             <div className={styles.controlRow}>
-              <Text className={styles.controlLabel}>Quick Select:</Text>
+              <Text className={styles.controlLabel}>Select last:</Text>
               <div className={styles.pillGroup}>
-                <Button
-                  appearance="outline"
-                  className={styles.pillButton}
-                  onClick={() => {
-                    const today = new Date();
-                    const dateStr = today.toISOString().split('T')[0];
-                    if (dateStr >= minDate && dateStr <= maxDate) {
-                      setStartDate(dateStr);
-                      setEndDate(dateStr);
-                    }
-                  }}
-                >
-                  Today
-                </Button>
-                <Button
-                  appearance="outline"
-                  className={styles.pillButton}
-                  onClick={() => {
-                    const yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    const dateStr = yesterday.toISOString().split('T')[0];
-                    if (dateStr >= minDate && dateStr <= maxDate) {
-                      setStartDate(dateStr);
-                      setEndDate(dateStr);
-                    }
-                  }}
-                >
-                  Yesterday
-                </Button>
                 <Button
                   appearance="outline"
                   className={styles.pillButton}
@@ -618,7 +589,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                     setEndDate(maxDate);
                   }}
                 >
-                  Last 3 Days
+                  3 days
                 </Button>
                 <Button
                   appearance="outline"
@@ -632,7 +603,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                     setEndDate(maxDate);
                   }}
                 >
-                  Last 7 Days
+                  7 days
                 </Button>
                 <Button
                   appearance="outline"
@@ -646,7 +617,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                     setEndDate(maxDate);
                   }}
                 >
-                  Last 14 Days
+                  14 days
                 </Button>
                 <Button
                   appearance="outline"
@@ -660,7 +631,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                     setEndDate(maxDate);
                   }}
                 >
-                  Last 28 Days
+                  28 days
                 </Button>
                 <Button
                   appearance="outline"
@@ -674,7 +645,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                     setEndDate(maxDate);
                   }}
                 >
-                  Last 90 Days
+                  90 days
                 </Button>
               </div>
             </div>
