@@ -14,7 +14,6 @@ import {
   HomeRegular,
   CloudArrowUpRegular,
   ChartMultipleRegular,
-  DataAreaRegular,
   BrainCircuitRegular,
   SettingsRegular,
   NavigationRegular,
@@ -90,7 +89,6 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   const navItems = [
     { page: 'home', label: 'Home', icon: <HomeRegular /> },
     { page: 'upload', label: 'Data Upload', icon: <CloudArrowUpRegular /> },
-    { page: 'bgOverview', label: 'BG Overview', icon: <DataAreaRegular /> },
     { page: 'reports', label: 'Reports', icon: <ChartMultipleRegular /> },
     { page: 'ai', label: 'AI Analysis', icon: <BrainCircuitRegular /> },
     { page: 'settings', label: 'Settings', icon: <SettingsRegular /> },

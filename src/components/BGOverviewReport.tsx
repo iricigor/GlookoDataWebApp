@@ -1,5 +1,5 @@
 /**
- * BG Overview Page
+ * BG Overview Report Component
  * Unified view combining Time in Range and AGP reports with modern Fluent UI design
  */
 
@@ -46,28 +46,7 @@ const useStyles = makeStyles({
   container: {
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.padding('40px', '24px'),
-    maxWidth: '1400px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
     ...shorthands.gap('24px'),
-  },
-  header: {
-    marginBottom: '8px',
-  },
-  title: {
-    fontSize: tokens.fontSizeHero800,
-    fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground1,
-    marginBottom: '8px',
-    fontFamily: 'Segoe UI, sans-serif',
-    display: 'block',
-  },
-  description: {
-    fontSize: tokens.fontSizeBase400,
-    color: tokens.colorNeutralForeground2,
-    fontFamily: 'Segoe UI, sans-serif',
-    display: 'block',
   },
   controlBar: {
     display: 'flex',
@@ -229,13 +208,12 @@ const useStyles = makeStyles({
   },
 });
 
-interface BGOverviewProps {
+interface BGOverviewReportProps {
   selectedFile?: UploadedFile;
   glucoseUnit: GlucoseUnit;
-  onNavigate: (page: string) => void;
 }
 
-export function BGOverview({ selectedFile, glucoseUnit, onNavigate }: BGOverviewProps) {
+export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
 
@@ -422,12 +400,6 @@ export function BGOverview({ selectedFile, glucoseUnit, onNavigate }: BGOverview
   if (!selectedFile) {
     return (
       <div className={styles.container}>
-        <div className={styles.header}>
-          <Text className={styles.title}>BG Overview</Text>
-          <Text className={styles.description}>
-            Unified view of Time in Range and Ambulatory Glucose Profile
-          </Text>
-        </div>
         <Text className={styles.noData}>
           No data package selected. Please select a valid ZIP file from the Data Upload page.
         </Text>
@@ -437,14 +409,6 @@ export function BGOverview({ selectedFile, glucoseUnit, onNavigate }: BGOverview
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <Text className={styles.title}>BG Overview</Text>
-        <Text className={styles.description}>
-          Unified view of Time in Range and Ambulatory Glucose Profile
-        </Text>
-      </div>
-
       {/* Control Bar */}
       <div className={styles.controlBar}>
         <div className={styles.controlRow}>
@@ -696,7 +660,6 @@ export function BGOverview({ selectedFile, glucoseUnit, onNavigate }: BGOverview
                   className={styles.linkButton}
                   onClick={() => {
                     window.location.hash = 'reports/inRange';
-                    onNavigate('reports');
                   }}
                 >
                   Glucose Range by Day of Week
@@ -706,7 +669,6 @@ export function BGOverview({ selectedFile, glucoseUnit, onNavigate }: BGOverview
                   className={styles.linkButton}
                   onClick={() => {
                     window.location.hash = 'reports/inRange';
-                    onNavigate('reports');
                   }}
                 >
                   Glucose Range by Week
@@ -716,7 +678,6 @@ export function BGOverview({ selectedFile, glucoseUnit, onNavigate }: BGOverview
                   className={styles.linkButton}
                   onClick={() => {
                     window.location.hash = 'reports/agp';
-                    onNavigate('reports');
                   }}
                 >
                   Detailed AGP Time Slots
@@ -726,7 +687,6 @@ export function BGOverview({ selectedFile, glucoseUnit, onNavigate }: BGOverview
                   className={styles.linkButton}
                   onClick={() => {
                     window.location.hash = 'reports/detailedCgm';
-                    onNavigate('reports');
                   }}
                 >
                   Detailed CGM Data
