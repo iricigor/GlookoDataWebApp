@@ -1,22 +1,40 @@
 /**
  * Utility functions for Rate of Change (RoC) calculations
  * 
- * Medical standards for glucose Rate of Change:
- * - Good (stable): ≤0.06 mmol/L/min (≤1 mg/dL/min)
- * - Medium (moderate): 0.06-0.11 mmol/L/min (1-2 mg/dL/min)
- * - Bad (rapid): >0.11 mmol/L/min (>2 mg/dL/min)
+ * Medical standards for glucose Rate of Change (per 5 minutes):
+ * - Good (stable): ≤0.3 mmol/L/5min (≤5 mg/dL/5min)
+ * - Medium (moderate): 0.3-0.55 mmol/L/5min (5-10 mg/dL/5min)
+ * - Bad (rapid): >0.55 mmol/L/5min (>10 mg/dL/5min)
+ * 
+ * Note: Original per-minute thresholds (0.06, 0.11) are multiplied by 5
+ * to convert to per-5-minute units.
  * 
  * References:
  * - International consensus on use of CGM (Danne et al., 2017)
  * - Typical CGM arrow indicators use similar thresholds
  */
 
-import type { GlucoseReading, RoCDataPoint, RoCStats } from '../../types';
+import type { GlucoseReading, RoCDataPoint, RoCStats, GlucoseUnit } from '../../types';
 
 /**
- * Medical thresholds for Rate of Change (in mmol/L/min)
+ * Time span in minutes for RoC display (5 minutes is standard CGM interval)
+ */
+export const ROC_TIME_SPAN_MINUTES = 5;
+
+/**
+ * Medical thresholds for Rate of Change (in mmol/L/5min)
+ * These are the per-5-minute values used for display and categorization
  */
 export const ROC_THRESHOLDS = {
+  good: 0.3,     // ≤0.3 is stable/good (0.06 * 5)
+  medium: 0.55,  // 0.3-0.55 is moderate (0.11 * 5)
+  // >0.55 is rapid/bad
+} as const;
+
+/**
+ * Legacy thresholds in per-minute units (used internally for calculations)
+ */
+export const ROC_THRESHOLDS_PER_MIN = {
   good: 0.06,    // ≤0.06 is stable/good
   medium: 0.11,  // 0.06-0.11 is moderate
   // >0.11 is rapid/bad
@@ -30,6 +48,12 @@ export const ROC_COLORS = {
   medium: '#FFB300',  // Amber - moderate change
   bad: '#D32F2F',     // Red - rapid change
 } as const;
+
+/**
+ * Rapid change threshold for HSV color gradient (0.6 mmol/L/5min)
+ * Values at or above this threshold will be displayed as pure red
+ */
+export const ROC_RAPID_CHANGE_THRESHOLD = 0.6;
 
 /**
  * Convert HSV color values to an RGB color string.
@@ -74,33 +98,50 @@ function hsvToRgb(h: number, s: number, v: number): string {
 
 /**
  * Get color for RoC value using HSV spectrum
- * Green (low/slow) to Red (high/fast)
+ * Green (low/slow) to Red (high/fast) following the HSV color wheel
  * 
- * @param absRoC - Absolute rate of change in mmol/L/min
+ * Color gradient: Zero is green (hue 120), gradually transitions to red (hue 0)
+ * until the rapid change threshold (0.6 mmol/L/5min), above which it stays red.
+ * 
+ * @param absRoC - Absolute rate of change in mmol/L/5min
  * @returns RGB color string
  */
 export function getRoCColor(absRoC: number): string {
-  // Map RoC to hue: 0 (slow) -> 120 (green), >0.11+ -> 0 (red)
-  // Using inverse mapping: low values = green (120), high values = red (0)
-  const maxRoC = 0.15; // Cap for color calculation (anything above is deep red)
-  const normalizedRoC = Math.min(absRoC / maxRoC, 1);
+  // Normalize RoC to 0-1 range based on rapid change threshold
+  // Values at or above ROC_RAPID_CHANGE_THRESHOLD (0.6 mmol/L/5min) are capped at 1 (pure red)
+  const normalizedRoC = Math.min(absRoC / ROC_RAPID_CHANGE_THRESHOLD, 1);
   
   // Hue goes from 120 (green) to 0 (red) as RoC increases
+  // Following HSV color wheel: green (120°) → yellow (60°) → red (0°)
   const hue = 120 * (1 - normalizedRoC);
   
   return hsvToRgb(hue, 0.8, 0.9);
 }
 
 /**
- * Categorize RoC value based on medical standards
+ * Get color for RoC value using HSV spectrum (legacy per-minute version)
+ * Converts from per-minute to per-5-minute before applying color gradient
  * 
- * @param absRoC - Absolute rate of change in mmol/L/min
+ * @param absRoCPerMin - Absolute rate of change in mmol/L/min
+ * @returns RGB color string
+ */
+export function getRoCColorPerMin(absRoCPerMin: number): string {
+  // Convert per-minute to per-5-minute
+  const absRoC5Min = absRoCPerMin * ROC_TIME_SPAN_MINUTES;
+  return getRoCColor(absRoC5Min);
+}
+
+/**
+ * Categorize RoC value based on medical standards
+ * Uses per-5-minute thresholds for categorization
+ * 
+ * @param absRoC5min - Absolute rate of change in mmol/L/5min
  * @returns Category: 'good', 'medium', or 'bad'
  */
-export function categorizeRoC(absRoC: number): 'good' | 'medium' | 'bad' {
-  if (absRoC <= ROC_THRESHOLDS.good) {
+export function categorizeRoC(absRoC5min: number): 'good' | 'medium' | 'bad' {
+  if (absRoC5min <= ROC_THRESHOLDS.good) {
     return 'good';
-  } else if (absRoC <= ROC_THRESHOLDS.medium) {
+  } else if (absRoC5min <= ROC_THRESHOLDS.medium) {
     return 'medium';
   } else {
     return 'bad';
@@ -108,10 +149,24 @@ export function categorizeRoC(absRoC: number): 'good' | 'medium' | 'bad' {
 }
 
 /**
+ * Categorize RoC value based on medical standards (legacy per-minute version)
+ * Converts from per-minute to per-5-minute before categorizing
+ * 
+ * @param absRoCPerMin - Absolute rate of change in mmol/L/min
+ * @returns Category: 'good', 'medium', or 'bad'
+ */
+export function categorizeRoCPerMin(absRoCPerMin: number): 'good' | 'medium' | 'bad' {
+  // Convert per-minute to per-5-minute
+  const absRoC5Min = absRoCPerMin * ROC_TIME_SPAN_MINUTES;
+  return categorizeRoC(absRoC5Min);
+}
+
+/**
  * Calculate Rate of Change from consecutive glucose readings
+ * RoC values are stored in mmol/L/5min units for display
  * 
  * @param readings - Array of glucose readings sorted by timestamp
- * @returns Array of RoC data points
+ * @returns Array of RoC data points with values in mmol/L/5min
  */
 export function calculateRoC(readings: GlucoseReading[]): RoCDataPoint[] {
   if (readings.length < 2) {
@@ -142,8 +197,12 @@ export function calculateRoC(readings: GlucoseReading[]): RoCDataPoint[] {
     const glucoseChange = current.value - previous.value;
     
     // Calculate rate of change (mmol/L per minute)
-    const rocRaw = glucoseChange / timeDiffMin;
-    const absRoC = Math.abs(rocRaw);
+    const rocPerMin = glucoseChange / timeDiffMin;
+    const absRoCPerMin = Math.abs(rocPerMin);
+    
+    // Convert to per-5-minute values for storage and display
+    const roc5min = absRoCPerMin * ROC_TIME_SPAN_MINUTES;
+    const rocRaw5min = rocPerMin * ROC_TIME_SPAN_MINUTES;
     
     // Get time components for the data point (use midpoint)
     const hour = current.timestamp.getHours();
@@ -155,11 +214,11 @@ export function calculateRoC(readings: GlucoseReading[]): RoCDataPoint[] {
       timestamp: current.timestamp,
       timeDecimal,
       timeLabel,
-      roc: absRoC,
-      rocRaw,
+      roc: roc5min,  // Now in mmol/L/5min
+      rocRaw: rocRaw5min,  // Now in mmol/L/5min
       glucoseValue: current.value,
-      color: getRoCColor(absRoC),
-      category: categorizeRoC(absRoC),
+      color: getRoCColor(roc5min),  // Uses per-5-min value
+      category: categorizeRoC(roc5min),  // Uses per-5-min threshold
     });
   }
 
@@ -276,17 +335,27 @@ export function getUniqueDatesFromRoC(dataPoints: RoCDataPoint[]): string[] {
 }
 
 /**
- * Format RoC value for display
+ * Format RoC value for display based on unit
+ * mmol/L: 1 decimal place
+ * mg/dL: integers (RoC values are internally always in mmol/L units)
  * 
- * @param roc - Rate of change value in mmol/L/min
- * @returns Formatted string
+ * @param roc - Rate of change value in mmol/L/5min
+ * @param unit - Glucose unit for formatting ('mmol/L' or 'mg/dL')
+ * @returns Formatted string with appropriate precision
  */
-export function formatRoCValue(roc: number): string {
-  return roc.toFixed(3);
+export function formatRoCValue(roc: number, unit?: GlucoseUnit): string {
+  if (unit === 'mg/dL') {
+    // Convert to mg/dL and return as integer
+    const rocMgdl = roc * 18.018;
+    return Math.round(rocMgdl).toString();
+  }
+  // mmol/L: 1 decimal place
+  return roc.toFixed(1);
 }
 
 /**
  * Get description of RoC medical standards
+ * Thresholds are now in per-5-minute units
  * 
  * @returns Object with descriptions for each category
  */
@@ -297,15 +366,15 @@ export function getRoCMedicalStandards(): {
 } {
   return {
     good: {
-      threshold: '≤0.06 mmol/L/min',
+      threshold: '≤0.3 mmol/L/5min',
       description: 'Stable - glucose changing slowly',
     },
     medium: {
-      threshold: '0.06-0.11 mmol/L/min',
+      threshold: '0.3-0.55 mmol/L/5min',
       description: 'Moderate - glucose changing at moderate pace',
     },
     bad: {
-      threshold: '>0.11 mmol/L/min',
+      threshold: '>0.55 mmol/L/5min',
       description: 'Rapid - glucose changing quickly',
     },
   };
