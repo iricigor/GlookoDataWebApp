@@ -364,7 +364,10 @@ export function AGPReport({ selectedFile, exportFormat, glucoseUnit }: AGPReport
 
               {/* AGP Graph */}
               {!loading && !error && statsWithData.length > 0 && (
-                <AGPGraph data={agpStats} glucoseUnit={glucoseUnit} />
+                <>
+                  <Text className={styles.reportTitle}>Ambulatory Glucose Profile (AGP)</Text>
+                  <AGPGraph data={agpStats} glucoseUnit={glucoseUnit} />
+                </>
               )}
 
               {/* Info text */}

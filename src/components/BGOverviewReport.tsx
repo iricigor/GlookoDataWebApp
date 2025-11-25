@@ -23,6 +23,7 @@ import {
   TableHeaderCell,
   TableBody,
   TableCell,
+  Tooltip,
 } from '@fluentui/react-components';
 import {
   CalendarRegular,
@@ -141,30 +142,31 @@ const useStyles = makeStyles({
   },
   statsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    ...shorthands.gap('16px'),
-    marginTop: '16px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+    ...shorthands.gap('8px'),
+    marginTop: '12px',
   },
   statCard: {
-    ...shorthands.padding('16px'),
+    ...shorthands.padding('8px', '12px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorNeutralBackground2,
     textAlign: 'center',
+    cursor: 'default',
   },
   statLabel: {
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground2,
-    marginBottom: '4px',
+    marginBottom: '2px',
   },
   statValue: {
-    fontSize: tokens.fontSizeHero700,
+    fontSize: tokens.fontSizeBase500,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
   },
   statCount: {
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground3,
-    marginTop: '4px',
+    marginTop: '2px',
   },
   targetInfo: {
     ...shorthands.padding('12px'),
@@ -678,44 +680,49 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
           </div>
 
           <div className={styles.statsGrid}>
-            <div className={styles.statCard}>
-              <Text className={styles.statLabel}>In Range</Text>
-              <Text className={styles.statValue} style={{ color: getColorForCategory('inRange') }}>
-                {calculatePercentage(tirStats.inRange, tirStats.total)}%
-              </Text>
-              <Text className={styles.statCount}>{tirStats.inRange} readings</Text>
-            </div>
-            <div className={styles.statCard}>
-              <Text className={styles.statLabel}>High</Text>
-              <Text className={styles.statValue} style={{ color: getColorForCategory('high') }}>
-                {calculatePercentage(tirStats.high, tirStats.total)}%
-              </Text>
-              <Text className={styles.statCount}>{tirStats.high} readings</Text>
-            </div>
-            <div className={styles.statCard}>
-              <Text className={styles.statLabel}>Low</Text>
-              <Text className={styles.statValue} style={{ color: getColorForCategory('low') }}>
-                {calculatePercentage(tirStats.low, tirStats.total)}%
-              </Text>
-              <Text className={styles.statCount}>{tirStats.low} readings</Text>
-            </div>
             {categoryMode === 5 && (
-              <>
-                <div className={styles.statCard}>
-                  <Text className={styles.statLabel}>Very High</Text>
-                  <Text className={styles.statValue} style={{ color: getColorForCategory('veryHigh') }}>
-                    {calculatePercentage(tirStats.veryHigh ?? 0, tirStats.total)}%
-                  </Text>
-                  <Text className={styles.statCount}>{tirStats.veryHigh ?? 0} readings</Text>
-                </div>
+              <Tooltip content={`${tirStats.veryLow ?? 0} readings`} relationship="description" positioning="below">
                 <div className={styles.statCard}>
                   <Text className={styles.statLabel}>Very Low</Text>
                   <Text className={styles.statValue} style={{ color: getColorForCategory('veryLow') }}>
                     {calculatePercentage(tirStats.veryLow ?? 0, tirStats.total)}%
                   </Text>
-                  <Text className={styles.statCount}>{tirStats.veryLow ?? 0} readings</Text>
                 </div>
-              </>
+              </Tooltip>
+            )}
+            <Tooltip content={`${tirStats.low} readings`} relationship="description" positioning="below">
+              <div className={styles.statCard}>
+                <Text className={styles.statLabel}>Low</Text>
+                <Text className={styles.statValue} style={{ color: getColorForCategory('low') }}>
+                  {calculatePercentage(tirStats.low, tirStats.total)}%
+                </Text>
+              </div>
+            </Tooltip>
+            <Tooltip content={`${tirStats.inRange} readings`} relationship="description" positioning="below">
+              <div className={styles.statCard}>
+                <Text className={styles.statLabel}>In Range</Text>
+                <Text className={styles.statValue} style={{ color: getColorForCategory('inRange') }}>
+                  {calculatePercentage(tirStats.inRange, tirStats.total)}%
+                </Text>
+              </div>
+            </Tooltip>
+            <Tooltip content={`${tirStats.high} readings`} relationship="description" positioning="below">
+              <div className={styles.statCard}>
+                <Text className={styles.statLabel}>High</Text>
+                <Text className={styles.statValue} style={{ color: getColorForCategory('high') }}>
+                  {calculatePercentage(tirStats.high, tirStats.total)}%
+                </Text>
+              </div>
+            </Tooltip>
+            {categoryMode === 5 && (
+              <Tooltip content={`${tirStats.veryHigh ?? 0} readings`} relationship="description" positioning="below">
+                <div className={styles.statCard}>
+                  <Text className={styles.statLabel}>Very High</Text>
+                  <Text className={styles.statValue} style={{ color: getColorForCategory('veryHigh') }}>
+                    {calculatePercentage(tirStats.veryHigh ?? 0, tirStats.total)}%
+                  </Text>
+                </div>
+              </Tooltip>
             )}
           </div>
 

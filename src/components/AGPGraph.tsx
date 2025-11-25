@@ -28,12 +28,6 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     ...shorthands.gap('16px'),
   },
-  graphTitle: {
-    fontSize: tokens.fontSizeBase400,
-    fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground1,
-    marginBottom: '8px',
-  },
   chartContainer: {
     width: '100%',
     height: '400px',
@@ -87,7 +81,6 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
   if (filteredData.length === 0) {
     return (
       <div className={styles.container}>
-        <Text className={styles.graphTitle}>Ambulatory Glucose Profile (AGP)</Text>
         <Text style={{ color: tokens.colorNeutralForeground3, textAlign: 'center', padding: '24px' }}>
           No data available for visualization
         </Text>
@@ -156,17 +149,15 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
   // Format X-axis labels (show only key times)
   const formatXAxis = (value: string) => {
     const hour = parseInt(value.split(':')[0]);
-    if (hour === 0) return '12A';
-    if (hour === 6) return '6A';
-    if (hour === 12) return '12P';
-    if (hour === 18) return '6P';
+    if (hour === 0) return '12AM';
+    if (hour === 6) return '6AM';
+    if (hour === 12) return '12PM';
+    if (hour === 18) return '6PM';
     return '';
   };
 
   return (
     <div className={styles.container}>
-      <Text className={styles.graphTitle}>Ambulatory Glucose Profile (AGP)</Text>
-      
       <div className={styles.chartContainer}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -192,7 +183,7 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
             
             <YAxis 
               domain={[0, yAxisMax]}
-              label={{ value: `Glucose (${unitLabel})`, angle: -90, position: 'insideLeft', style: { fontSize: tokens.fontSizeBase200 } }}
+              label={{ value: `Glucose (${unitLabel})`, angle: -90, position: 'insideLeft', dx: 10, style: { fontSize: tokens.fontSizeBase200 } }}
               stroke={tokens.colorNeutralForeground2}
               style={{ fontSize: tokens.fontSizeBase200 }}
             />
