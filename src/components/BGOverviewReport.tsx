@@ -151,7 +151,6 @@ const useStyles = makeStyles({
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorNeutralBackground2,
     textAlign: 'center',
-    cursor: 'default',
   },
   statLabel: {
     fontSize: tokens.fontSizeBase200,
