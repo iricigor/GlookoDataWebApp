@@ -562,16 +562,16 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                 connectNulls
               />
               
-              {/* RoC line graph with colored line based on values */}
+              {/* RoC line graph - smooth natural spline curve */}
               <Line
                 yAxisId="roc"
-                type="monotone"
+                type="natural"
                 dataKey="roc"
                 name="Rate of Change"
                 stroke={tokens.colorBrandForeground1}
                 strokeWidth={2}
-                dot={{ fill: tokens.colorBrandForeground1, r: 3 }}
-                activeDot={{ r: 5, stroke: tokens.colorNeutralBackground1, strokeWidth: 2 }}
+                dot={false}
+                activeDot={{ r: 4, stroke: tokens.colorNeutralBackground1, strokeWidth: 2 }}
               />
             </ComposedChart>
           </ResponsiveContainer>
