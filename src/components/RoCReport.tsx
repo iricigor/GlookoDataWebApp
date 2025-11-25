@@ -28,8 +28,6 @@ import {
   ComposedChart,
   ReferenceLine,
   ReferenceArea,
-  Cell,
-  Scatter,
 } from 'recharts';
 import type { UploadedFile, GlucoseReading, RoCDataPoint, RoCStats, GlucoseUnit } from '../types';
 import {
@@ -471,21 +469,23 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
       {dayRoCData.length > 0 && (
         <div className={styles.chartContainer}>
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart margin={{ top: 10, right: 50, left: 10, bottom: 0 }}>
+            <ComposedChart margin={{ top: 10, right: 50, left: 10, bottom: 0 }} data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
               
-              {/* Night hours shading (22:00-06:00) */}
+              {/* Night hours shading (22:00-06:00) - more visible styling */}
               <ReferenceArea
                 x1={0}
                 x2={6}
-                fill={tokens.colorNeutralBackground3}
-                fillOpacity={0.5}
+                fill="#2d3748"
+                fillOpacity={0.25}
+                label={{ value: '🌙 Night', position: 'insideTop', fontSize: 11, fill: '#718096' }}
               />
               <ReferenceArea
                 x1={22}
                 x2={24}
-                fill={tokens.colorNeutralBackground3}
-                fillOpacity={0.5}
+                fill="#2d3748"
+                fillOpacity={0.25}
+                label={{ value: '🌙 Night', position: 'insideTop', fontSize: 11, fill: '#718096' }}
               />
               
               {/* Reference lines for RoC thresholds */}
@@ -562,17 +562,17 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                 connectNulls
               />
               
-              {/* RoC scatter plot with colored dots */}
-              <Scatter
+              {/* RoC line graph with colored line based on values */}
+              <Line
                 yAxisId="roc"
-                data={chartData}
+                type="monotone"
                 dataKey="roc"
                 name="Rate of Change"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Scatter>
+                stroke={tokens.colorBrandForeground1}
+                strokeWidth={2}
+                dot={{ fill: tokens.colorBrandForeground1, r: 3 }}
+                activeDot={{ r: 5, stroke: tokens.colorNeutralBackground1, strokeWidth: 2 }}
+              />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
