@@ -39,6 +39,8 @@ export function generateMealTimingPrompt(
   // Unit-specific values for ranges
   const lowThreshold = unit === 'mg/dL' ? '70' : '3.9';
   const highThreshold = unit === 'mg/dL' ? '180' : '10.0';
+  // Pre-bolus rise threshold: used to detect when glucose starts rising after a meal
+  // This is the minimum rise to consider a sustained glucose increase
   const preBolusRiseThreshold = unit === 'mg/dL' ? '27' : '1.5';
   
   return `**Data Context**
@@ -90,7 +92,7 @@ You are an expert Data Analyst and Diabetes Management Specialist. Analyze the p
    - **CRITICAL: Separate Analysis for Weekdays (Mon-Fri) vs Weekends (Sat-Sun)**
    - For EACH meal type (Breakfast, Lunch, Dinner):
      A. **Weekday Analysis (Mon-Fri):**
-        * Typical bolus time rounded to nearest 30 min (e.g., Breakfast: 07:30 ± 45 min on weekdays)
+        * Typical bolus time rounded to nearest 30 min (e.g., Breakfast: 07:30, with variance noted separately)
         * Average pre-bolus time (using true pre-bolus calculation from section 1)
         * % of meals with postprandial peak > ${highThreshold} ${unit}
         * Average peak height (${unit}) and time-to-peak (minutes)
