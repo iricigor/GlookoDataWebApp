@@ -32,12 +32,17 @@ export const ROC_COLORS = {
 } as const;
 
 /**
- * Convert HSV to RGB color string
+ * Convert HSV color values to an RGB color string.
  * 
- * @param h - Hue (0-360)
- * @param s - Saturation (0-1)
- * @param v - Value (0-1)
- * @returns RGB color string
+ * This function uses the standard HSV to RGB conversion algorithm:
+ * 1. Calculate chroma (c), intermediate value (x), and match value (m)
+ * 2. Determine RGB components based on which 60° sector of the hue wheel we're in
+ * 3. Apply the match value and scale to 0-255 range
+ * 
+ * @param h - Hue angle in degrees (0-360). 0/360 = red, 120 = green, 240 = blue
+ * @param s - Saturation (0-1). 0 = grayscale, 1 = fully saturated
+ * @param v - Value/brightness (0-1). 0 = black, 1 = full brightness
+ * @returns RGB color string in format 'rgb(r, g, b)' where r, g, b are 0-255
  */
 function hsvToRgb(h: number, s: number, v: number): string {
   const c = v * s;
@@ -179,6 +184,18 @@ export function filterRoCByDate(dataPoints: RoCDataPoint[], dateString: string):
 }
 
 /**
+ * Calculate percentage rounded to 1 decimal place
+ * 
+ * @param count - Count of items
+ * @param total - Total count
+ * @returns Percentage rounded to 1 decimal place
+ */
+function calculateRoundedPercentage(count: number, total: number): number {
+  if (total === 0) return 0;
+  return Math.round((count / total) * 1000) / 10;
+}
+
+/**
  * Calculate RoC statistics for a set of data points
  * 
  * @param dataPoints - Array of RoC data points
@@ -220,10 +237,10 @@ export function calculateRoCStats(dataPoints: RoCDataPoint[]): RoCStats {
   const mediumCount = dataPoints.filter(d => d.category === 'medium').length;
   const badCount = dataPoints.filter(d => d.category === 'bad').length;
   
-  // Calculate percentages
-  const goodPercentage = Math.round((goodCount / totalCount) * 1000) / 10;
-  const mediumPercentage = Math.round((mediumCount / totalCount) * 1000) / 10;
-  const badPercentage = Math.round((badCount / totalCount) * 1000) / 10;
+  // Calculate percentages using helper function
+  const goodPercentage = calculateRoundedPercentage(goodCount, totalCount);
+  const mediumPercentage = calculateRoundedPercentage(mediumCount, totalCount);
+  const badPercentage = calculateRoundedPercentage(badCount, totalCount);
 
   return {
     minRoC,

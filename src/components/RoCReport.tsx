@@ -49,6 +49,12 @@ import {
 import { DayNavigator } from './DayNavigator';
 import { useSelectedDate } from '../hooks/useSelectedDate';
 
+// Time labels for X-axis formatting (show every 3 hours)
+const TIME_LABELS: Record<number, string> = {
+  0: '12A', 3: '3A', 6: '6A', 9: '9A',
+  12: '12P', 15: '3P', 18: '6P', 21: '9P', 24: '12A'
+};
+
 const useStyles = makeStyles({
   container: {
     display: 'flex',
@@ -239,11 +245,7 @@ const CustomTooltip = ({
 // Format X-axis labels (show every 3 hours)
 const formatXAxis = (value: number) => {
   const hour = Math.floor(value);
-  const timeLabels: Record<number, string> = {
-    0: '12A', 3: '3A', 6: '6A', 9: '9A',
-    12: '12P', 15: '3P', 18: '6P', 21: '9P', 24: '12A'
-  };
-  return timeLabels[hour] || '';
+  return TIME_LABELS[hour] || '';
 };
 
 export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
