@@ -476,16 +476,16 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
               <ReferenceArea
                 x1={0}
                 x2={6}
-                fill="#2d3748"
-                fillOpacity={0.25}
-                label={{ value: '🌙 Night', position: 'insideTop', fontSize: 11, fill: '#718096' }}
+                fill={tokens.colorNeutralBackground6}
+                fillOpacity={0.4}
+                label={{ value: '🌙 Night', position: 'insideTop', fontSize: 11, fill: tokens.colorNeutralForeground3 }}
               />
               <ReferenceArea
                 x1={22}
                 x2={24}
-                fill="#2d3748"
-                fillOpacity={0.25}
-                label={{ value: '🌙 Night', position: 'insideTop', fontSize: 11, fill: '#718096' }}
+                fill={tokens.colorNeutralBackground6}
+                fillOpacity={0.4}
+                label={{ value: '🌙 Night', position: 'insideTop', fontSize: 11, fill: tokens.colorNeutralForeground3 }}
               />
               
               {/* Reference lines for RoC thresholds */}
