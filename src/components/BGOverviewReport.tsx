@@ -46,7 +46,7 @@ import type {
   HourlyTIRStats,
 } from '../types';
 import { extractGlucoseReadings, groupByWeek, displayGlucoseValue, getUnitLabel } from '../utils/data';
-import { groupByDayOfWeek, calculatePercentage, GLUCOSE_RANGE_COLORS, calculateTIRByTimePeriods, calculateHourlyTIR } from '../utils/data';
+import { groupByDayOfWeek, calculatePercentage, GLUCOSE_RANGE_COLORS, calculateTIRByTimePeriods, calculateHourlyTIR, MIN_PERCENTAGE_FOR_PERIOD_BAR } from '../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { useDateRange } from '../hooks/useDateRange';
@@ -578,6 +578,24 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     }
   };
 
+  // Helper function to format tooltip content for hourly TIR
+  const formatHourlyTooltipContent = (
+    hourLabel: string,
+    stats: { veryLow?: number; low: number; inRange: number; high: number; veryHigh?: number; total: number }
+  ): string => {
+    const total = stats.total;
+    const lowPct = calculatePercentage(stats.low, total);
+    const inRangePct = calculatePercentage(stats.inRange, total);
+    const highPct = calculatePercentage(stats.high, total);
+    
+    if (categoryMode === 5) {
+      const veryLowPct = calculatePercentage(stats.veryLow ?? 0, total);
+      const veryHighPct = calculatePercentage(stats.veryHigh ?? 0, total);
+      return `${hourLabel}\nVery Low: ${veryLowPct}%\nLow: ${lowPct}%\nIn Range: ${inRangePct}%\nHigh: ${highPct}%\nVery High: ${veryHighPct}%\nTotal: ${total}`;
+    }
+    return `${hourLabel}\nLow: ${lowPct}%\nIn Range: ${inRangePct}%\nHigh: ${highPct}%\nTotal: ${total}`;
+  };
+
   // Helper function to render stats row for day of week / weekly reports
   const renderStatsRow = (
     label: string,
@@ -887,7 +905,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                                   backgroundColor: getColorForCategory('veryLow'),
                                 }}
                               >
-                                {calculatePercentage(period.stats.veryLow ?? 0, period.stats.total) >= 8 && 
+                                {calculatePercentage(period.stats.veryLow ?? 0, period.stats.total) >= MIN_PERCENTAGE_FOR_PERIOD_BAR && 
                                   `${calculatePercentage(period.stats.veryLow ?? 0, period.stats.total)}%`}
                               </div>
                             </Tooltip>
@@ -901,7 +919,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                                   backgroundColor: getColorForCategory('low'),
                                 }}
                               >
-                                {calculatePercentage(period.stats.low, period.stats.total) >= 8 && 
+                                {calculatePercentage(period.stats.low, period.stats.total) >= MIN_PERCENTAGE_FOR_PERIOD_BAR && 
                                   `${calculatePercentage(period.stats.low, period.stats.total)}%`}
                               </div>
                             </Tooltip>
@@ -915,7 +933,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                                   backgroundColor: getColorForCategory('inRange'),
                                 }}
                               >
-                                {calculatePercentage(period.stats.inRange, period.stats.total) >= 8 && 
+                                {calculatePercentage(period.stats.inRange, period.stats.total) >= MIN_PERCENTAGE_FOR_PERIOD_BAR && 
                                   `${calculatePercentage(period.stats.inRange, period.stats.total)}%`}
                               </div>
                             </Tooltip>
@@ -929,7 +947,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                                   backgroundColor: getColorForCategory('high'),
                                 }}
                               >
-                                {calculatePercentage(period.stats.high, period.stats.total) >= 8 && 
+                                {calculatePercentage(period.stats.high, period.stats.total) >= MIN_PERCENTAGE_FOR_PERIOD_BAR && 
                                   `${calculatePercentage(period.stats.high, period.stats.total)}%`}
                               </div>
                             </Tooltip>
@@ -943,7 +961,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                                   backgroundColor: getColorForCategory('veryHigh'),
                                 }}
                               >
-                                {calculatePercentage(period.stats.veryHigh ?? 0, period.stats.total) >= 8 && 
+                                {calculatePercentage(period.stats.veryHigh ?? 0, period.stats.total) >= MIN_PERCENTAGE_FOR_PERIOD_BAR && 
                                   `${calculatePercentage(period.stats.veryHigh ?? 0, period.stats.total)}%`}
                               </div>
                             </Tooltip>
@@ -985,9 +1003,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                       const highPct = calculatePercentage(hourData.stats.high, total);
                       const veryHighPct = categoryMode === 5 ? calculatePercentage(hourData.stats.veryHigh ?? 0, total) : 0;
                       
-                      const tooltipContent = categoryMode === 5
-                        ? `${hourData.hourLabel}\nVery Low: ${veryLowPct}%\nLow: ${lowPct}%\nIn Range: ${inRangePct}%\nHigh: ${highPct}%\nVery High: ${veryHighPct}%\nTotal: ${total}`
-                        : `${hourData.hourLabel}\nLow: ${lowPct}%\nIn Range: ${inRangePct}%\nHigh: ${highPct}%\nTotal: ${total}`;
+                      const tooltipContent = formatHourlyTooltipContent(hourData.hourLabel, hourData.stats);
                       
                       return (
                         <Tooltip key={hourData.hour} content={tooltipContent} relationship="description">

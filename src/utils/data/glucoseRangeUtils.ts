@@ -34,6 +34,17 @@ export const GLUCOSE_RANGE_COLORS = {
 export const MIN_PERCENTAGE_TO_DISPLAY = 5;
 
 /**
+ * Minimum percentage threshold to display percentage text in period bars
+ * A higher threshold is used for period bars as they are narrower
+ */
+export const MIN_PERCENTAGE_FOR_PERIOD_BAR = 8;
+
+/**
+ * Milliseconds per day constant
+ */
+export const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+/**
  * Categorize a glucose reading based on thresholds
  * 
  * @param value - Glucose value in mmol/L
@@ -447,9 +458,9 @@ export function calculateTIRByTimePeriods(
   const timestamps = readings.map(r => r.timestamp.getTime());
   const minDate = new Date(Math.min(...timestamps));
   const maxDate = referenceDate ?? new Date(Math.max(...timestamps));
-  const totalDays = Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24));
+  const totalDays = Math.ceil((maxDate.getTime() - minDate.getTime()) / MS_PER_DAY);
   
-  // Filter periods to only include those smaller than total days
+  // Filter periods to only include those smaller than or equal to total days
   const applicablePeriods = periods.filter(p => p <= totalDays);
   
   // Calculate stats for each applicable period
