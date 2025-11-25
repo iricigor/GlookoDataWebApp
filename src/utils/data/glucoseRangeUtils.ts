@@ -11,6 +11,8 @@ import type {
   RangeCategoryMode,
   DayOfWeek,
   GlucoseThresholds,
+  TimePeriodTIRStats,
+  HourlyTIRStats,
 } from '../../types';
 
 /**
@@ -30,6 +32,17 @@ export const GLUCOSE_RANGE_COLORS = {
  * Minimum percentage threshold to display percentage text in summary bars
  */
 export const MIN_PERCENTAGE_TO_DISPLAY = 5;
+
+/**
+ * Minimum percentage threshold to display percentage text in period bars
+ * A higher threshold is used for period bars as they are narrower
+ */
+export const MIN_PERCENTAGE_FOR_PERIOD_BAR = 8;
+
+/**
+ * Milliseconds per day constant
+ */
+export const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 /**
  * Categorize a glucose reading based on thresholds
@@ -385,4 +398,161 @@ export function formatDateDisplay(dateString: string): string {
   const dayOfWeek = getDayOfWeek(date);
   const [year, month, day] = dateString.split('-');
   return `${dayOfWeek}, ${day}-${month}-${year}`;
+}
+
+/**
+ * Filter readings to only include those from the last N days relative to the data's max date
+ * 
+ * @param readings - Array of glucose readings
+ * @param days - Number of days to include
+ * @param referenceDate - Optional reference date (defaults to max date in readings)
+ * @returns Filtered array of readings
+ */
+export function filterReadingsToLastNDays(
+  readings: GlucoseReading[],
+  days: number,
+  referenceDate?: Date
+): GlucoseReading[] {
+  if (readings.length === 0) return [];
+  
+  // Use provided reference date or find max date from readings
+  const maxDate = referenceDate ?? new Date(Math.max(...readings.map(r => r.timestamp.getTime())));
+  
+  // Calculate the start date (days ago from max date)
+  const startDate = new Date(maxDate);
+  startDate.setDate(startDate.getDate() - days);
+  startDate.setHours(0, 0, 0, 0);
+  
+  // Set end of max date for comparison
+  const endDate = new Date(maxDate);
+  endDate.setHours(23, 59, 59, 999);
+  
+  return readings.filter(r => {
+    const timestamp = r.timestamp.getTime();
+    return timestamp >= startDate.getTime() && timestamp <= endDate.getTime();
+  });
+}
+
+/**
+ * Calculate TIR statistics for multiple time periods
+ * Returns stats for periods that are smaller than or equal to the total days in the data
+ * 
+ * @param readings - Array of glucose readings
+ * @param thresholds - Glucose thresholds
+ * @param mode - 3 or 5 category mode
+ * @param referenceDate - Optional reference date for calculating periods
+ * @returns Array of TimePeriodTIRStats for applicable periods
+ */
+export function calculateTIRByTimePeriods(
+  readings: GlucoseReading[],
+  thresholds: GlucoseThresholds,
+  mode: RangeCategoryMode = 3,
+  referenceDate?: Date
+): TimePeriodTIRStats[] {
+  if (readings.length === 0) return [];
+  
+  // Standard time periods to show
+  const periods = [90, 28, 14, 7, 3];
+  
+  // Calculate the total days span in the data
+  const timestamps = readings.map(r => r.timestamp.getTime());
+  const minDate = new Date(Math.min(...timestamps));
+  const maxDate = referenceDate ?? new Date(Math.max(...timestamps));
+  const totalDays = Math.ceil((maxDate.getTime() - minDate.getTime()) / MS_PER_DAY);
+  
+  // Filter periods to only include those smaller than or equal to total days
+  const applicablePeriods = periods.filter(p => p <= totalDays);
+  
+  // Calculate stats for each applicable period
+  const result: TimePeriodTIRStats[] = applicablePeriods.map(days => {
+    const periodReadings = filterReadingsToLastNDays(readings, days, maxDate);
+    const stats = calculateGlucoseRangeStats(periodReadings, thresholds, mode);
+    
+    return {
+      period: `${days} days`,
+      days,
+      stats,
+    };
+  });
+  
+  return result;
+}
+
+/**
+ * Calculate TIR statistics grouped by hour of day (0-23)
+ * 
+ * @param readings - Array of glucose readings
+ * @param thresholds - Glucose thresholds
+ * @param mode - 3 or 5 category mode
+ * @returns Array of 24 HourlyTIRStats, one for each hour
+ */
+export function calculateHourlyTIR(
+  readings: GlucoseReading[],
+  thresholds: GlucoseThresholds,
+  mode: RangeCategoryMode = 3
+): HourlyTIRStats[] {
+  // Initialize buckets for each hour
+  const hourlyBuckets: GlucoseReading[][] = Array.from({ length: 24 }, () => []);
+  
+  // Group readings by hour
+  readings.forEach(reading => {
+    const hour = reading.timestamp.getHours();
+    hourlyBuckets[hour].push(reading);
+  });
+  
+  // Calculate stats for each hour
+  return hourlyBuckets.map((hourReadings, hour) => {
+    const stats = calculateGlucoseRangeStats(hourReadings, thresholds, mode);
+    const hourLabel = `${hour.toString().padStart(2, '0')}:00`;
+    
+    return {
+      hour,
+      hourLabel,
+      stats,
+    };
+  });
+}
+
+/**
+ * Calculate TIR statistics grouped by hour ranges (e.g., 2-hour, 3-hour groups)
+ * 
+ * @param readings - Array of glucose readings
+ * @param thresholds - Glucose thresholds
+ * @param mode - 3 or 5 category mode
+ * @param groupSize - Number of hours per group (1, 2, 3, 4, or 6)
+ * @returns Array of HourlyTIRStats for each hour group
+ */
+export function calculateHourlyTIRGrouped(
+  readings: GlucoseReading[],
+  thresholds: GlucoseThresholds,
+  mode: RangeCategoryMode = 3,
+  groupSize: 1 | 2 | 3 | 4 | 6 = 1
+): HourlyTIRStats[] {
+  if (groupSize === 1) {
+    return calculateHourlyTIR(readings, thresholds, mode);
+  }
+  
+  const groupCount = 24 / groupSize;
+  const groupBuckets: GlucoseReading[][] = Array.from({ length: groupCount }, () => []);
+  
+  // Group readings by hour group
+  readings.forEach(reading => {
+    const hour = reading.timestamp.getHours();
+    const groupIndex = Math.floor(hour / groupSize);
+    groupBuckets[groupIndex].push(reading);
+  });
+  
+  // Calculate stats for each group
+  return groupBuckets.map((groupReadings, index) => {
+    const startHour = index * groupSize;
+    const endHour = startHour + groupSize - 1;
+    const stats = calculateGlucoseRangeStats(groupReadings, thresholds, mode);
+    const hourLabel = `${startHour.toString().padStart(2, '0')}:00-${endHour.toString().padStart(2, '0')}:59`;
+    
+    return {
+      hour: startHour,
+      hourLabel,
+      stats,
+    };
+  });
 }
