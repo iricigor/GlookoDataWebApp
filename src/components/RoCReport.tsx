@@ -686,13 +686,13 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                   legendType="none"
                 />
                 
-                {/* Single connected RoC line with gradient coloring */}
+                {/* Single connected RoC line - uses green as base color for stable glucose */}
                 <Line
                   yAxisId="roc"
                   type="monotone"
                   dataKey="roc"
                   name="Rate of Change"
-                  stroke="url(#rocGradient)"
+                  stroke={ROC_COLORS.good}
                   strokeWidth={2.5}
                   dot={false}
                   connectNulls
@@ -706,9 +706,7 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
           {/* Custom Legend */}
           <div className={styles.legendContainer}>
             <div className={styles.legendItem}>
-              <div className={styles.legendLine} style={{ 
-                background: `linear-gradient(90deg, ${ROC_COLORS.good}, ${ROC_COLORS.medium}, ${ROC_COLORS.bad})` 
-              }} />
+              <div className={styles.legendLine} style={{ backgroundColor: ROC_COLORS.good }} />
               <Text>Rate of Change (RoC)</Text>
             </div>
             <div className={styles.legendItem}>
