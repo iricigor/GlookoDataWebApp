@@ -13,9 +13,9 @@ import {
   Tooltip,
 } from '@fluentui/react-components';
 import {
-  ArrowTrendingRegular,
   TopSpeedRegular,
   DataHistogramRegular,
+  TimerRegular,
 } from '@fluentui/react-icons';
 import { useState, useEffect, useRef } from 'react';
 import {
@@ -43,6 +43,9 @@ import {
   convertGlucoseValue,
   getUnitLabel,
   filterReadingsByDate,
+  smoothRoCData,
+  getLongestCategoryPeriod,
+  formatDuration,
 } from '../utils/data';
 import { DayNavigator } from './DayNavigator';
 import { useSelectedDate } from '../hooks/useSelectedDate';
@@ -202,42 +205,49 @@ const CustomTooltip = ({
 }: {
   active?: boolean;
   payload?: Array<{
-    payload: RoCDataPoint & { glucoseDisplay?: number };
+    payload?: RoCDataPoint & { glucoseDisplay?: number };
   }>;
   glucoseUnit: GlucoseUnit;
 }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div style={{
-        backgroundColor: tokens.colorNeutralBackground1,
-        padding: '12px',
-        border: `1px solid ${tokens.colorNeutralStroke1}`,
-        borderRadius: tokens.borderRadiusMedium,
-        fontSize: tokens.fontSizeBase200,
-        boxShadow: tokens.shadow8,
-      }}>
-        <div style={{ fontWeight: tokens.fontWeightSemibold, marginBottom: '4px' }}>
-          {data.timeLabel}
-        </div>
-        <div style={{ color: data.color, fontWeight: tokens.fontWeightSemibold }}>
-          RoC: {formatRoCValue(data.roc)} mmol/L/min
-        </div>
-        <div style={{ color: tokens.colorNeutralForeground2, marginTop: '4px' }}>
-          Glucose: {data.glucoseDisplay?.toFixed(1) || data.glucoseValue.toFixed(1)} {getUnitLabel(glucoseUnit)}
-        </div>
-        <div style={{ 
-          marginTop: '4px',
-          color: data.category === 'good' ? ROC_COLORS.good : 
-                 data.category === 'medium' ? ROC_COLORS.medium : ROC_COLORS.bad,
-          fontStyle: 'italic',
-        }}>
-          {data.category === 'good' ? 'Stable' : data.category === 'medium' ? 'Moderate' : 'Rapid'}
-        </div>
-      </div>
-    );
+  // Guard against undefined payload or empty array
+  if (!active || !payload || payload.length === 0) {
+    return null;
   }
-  return null;
+  
+  // Guard against undefined data within payload
+  const data = payload[0]?.payload;
+  if (!data || !data.timeLabel) {
+    return null;
+  }
+  
+  return (
+    <div style={{
+      backgroundColor: tokens.colorNeutralBackground1,
+      padding: '12px',
+      border: `1px solid ${tokens.colorNeutralStroke1}`,
+      borderRadius: tokens.borderRadiusMedium,
+      fontSize: tokens.fontSizeBase200,
+      boxShadow: tokens.shadow8,
+    }}>
+      <div style={{ fontWeight: tokens.fontWeightSemibold, marginBottom: '4px' }}>
+        {data.timeLabel}
+      </div>
+      <div style={{ color: data.color, fontWeight: tokens.fontWeightSemibold }}>
+        RoC: {formatRoCValue(data.roc)} mmol/L/min
+      </div>
+      <div style={{ color: tokens.colorNeutralForeground2, marginTop: '4px' }}>
+        Glucose: {data.glucoseDisplay?.toFixed(1) || data.glucoseValue.toFixed(1)} {getUnitLabel(glucoseUnit)}
+      </div>
+      <div style={{ 
+        marginTop: '4px',
+        color: data.category === 'good' ? ROC_COLORS.good : 
+               data.category === 'medium' ? ROC_COLORS.medium : ROC_COLORS.bad,
+        fontStyle: 'italic',
+      }}>
+        {data.category === 'good' ? 'Stable' : data.category === 'medium' ? 'Moderate' : 'Rapid'}
+      </div>
+    </div>
+  );
 };
 
 // Format X-axis labels (show every 3 hours)
@@ -257,6 +267,7 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
   const [rocStats, setRocStats] = useState<RoCStats | null>(null);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
+  const [longestStablePeriod, setLongestStablePeriod] = useState(0);
   
   const loadedFileIdRef = useRef<string | undefined>(undefined);
   const hasAppliedSavedDateRef = useRef<boolean>(false);
@@ -361,13 +372,20 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
       const filteredRoC = filterRoCByDate(allRoCData, currentDate);
       const filteredGlucose = filterReadingsByDate(allReadings, currentDate);
       
-      setDayRoCData(filteredRoC);
+      // Apply 15-minute moving average smoothing to RoC data
+      const smoothedRoC = smoothRoCData(filteredRoC);
+      
+      setDayRoCData(smoothedRoC);
       setDayGlucoseReadings(filteredGlucose);
-      setRocStats(calculateRoCStats(filteredRoC));
+      setRocStats(calculateRoCStats(smoothedRoC));
+      
+      // Calculate longest stable (good) period
+      setLongestStablePeriod(getLongestCategoryPeriod(smoothedRoC, 'good'));
     } else {
       setDayRoCData([]);
       setDayGlucoseReadings([]);
       setRocStats(null);
+      setLongestStablePeriod(0);
     }
   }, [currentDateIndex, availableDates, allRoCData, allReadings]);
 
@@ -432,6 +450,10 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
     return {
       ...point,
       glucoseDisplay: Math.round(glucoseValue * 10) / 10,
+      // Create separate data keys for each category to enable colored rendering
+      rocGood: point.category === 'good' ? point.roc : null,
+      rocMedium: point.category === 'medium' ? point.roc : null,
+      rocBad: point.category === 'bad' ? point.roc : null,
     };
   });
 
@@ -476,16 +498,20 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
               <ReferenceArea
                 x1={0}
                 x2={6}
-                fill={tokens.colorNeutralBackground6}
-                fillOpacity={0.4}
-                label={{ value: '🌙 Night', position: 'insideTop', fontSize: 11, fill: tokens.colorNeutralForeground3 }}
+                yAxisId="roc"
+                fill="#1a237e"
+                fillOpacity={0.15}
+                stroke="#3949ab"
+                strokeOpacity={0.3}
               />
               <ReferenceArea
                 x1={22}
                 x2={24}
-                fill={tokens.colorNeutralBackground6}
-                fillOpacity={0.4}
-                label={{ value: '🌙 Night', position: 'insideTop', fontSize: 11, fill: tokens.colorNeutralForeground3 }}
+                yAxisId="roc"
+                fill="#1a237e"
+                fillOpacity={0.15}
+                stroke="#3949ab"
+                strokeOpacity={0.3}
               />
               
               {/* Reference lines for RoC thresholds */}
@@ -562,16 +588,54 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                 connectNulls
               />
               
-              {/* RoC line graph - smooth natural spline curve */}
+              {/* RoC line graph - colored by category */}
+              {/* Good (stable) - green */}
               <Line
                 yAxisId="roc"
-                type="natural"
+                type="monotone"
+                dataKey="rocGood"
+                name="Stable"
+                stroke={ROC_COLORS.good}
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 4, stroke: tokens.colorNeutralBackground1, strokeWidth: 2, fill: ROC_COLORS.good }}
+                connectNulls={false}
+              />
+              {/* Medium (moderate) - amber */}
+              <Line
+                yAxisId="roc"
+                type="monotone"
+                dataKey="rocMedium"
+                name="Moderate"
+                stroke={ROC_COLORS.medium}
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 4, stroke: tokens.colorNeutralBackground1, strokeWidth: 2, fill: ROC_COLORS.medium }}
+                connectNulls={false}
+              />
+              {/* Bad (rapid) - red */}
+              <Line
+                yAxisId="roc"
+                type="monotone"
+                dataKey="rocBad"
+                name="Rapid"
+                stroke={ROC_COLORS.bad}
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 4, stroke: tokens.colorNeutralBackground1, strokeWidth: 2, fill: ROC_COLORS.bad }}
+                connectNulls={false}
+              />
+              
+              {/* Main RoC line for tooltip reference (invisible stroke, shows on hover) */}
+              <Line
+                yAxisId="roc"
+                type="monotone"
                 dataKey="roc"
                 name="Rate of Change"
-                stroke={tokens.colorBrandForeground1}
-                strokeWidth={2}
+                stroke="transparent"
+                strokeWidth={0}
                 dot={false}
-                activeDot={{ r: 4, stroke: tokens.colorNeutralBackground1, strokeWidth: 2 }}
+                activeDot={{ r: 5, stroke: tokens.colorNeutralBackground1, strokeWidth: 2 }}
               />
             </ComposedChart>
           </ResponsiveContainer>
@@ -581,12 +645,12 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
       {/* Statistics Cards */}
       {rocStats && rocStats.totalCount > 0 && (
         <div className={styles.statsRow}>
-          <Tooltip content="Minimum absolute rate of glucose change (slowest)" relationship="description">
+          <Tooltip content="Longest continuous period with stable glucose (slow rate of change)" relationship="description">
             <Card className={styles.statCard}>
-              <ArrowTrendingRegular className={styles.statIcon} />
-              <Text className={styles.statLabel}>Min RoC</Text>
-              <Text className={styles.statValue}>{formatRoCValue(rocStats.minRoC)}</Text>
-              <Text className={styles.statUnit}>mmol/L/min</Text>
+              <TimerRegular className={styles.statIcon} />
+              <Text className={styles.statLabel}>Longest Stable</Text>
+              <Text className={styles.statValue}>{formatDuration(longestStablePeriod)}</Text>
+              <Text className={styles.statUnit}>continuous stable period</Text>
             </Card>
           </Tooltip>
           

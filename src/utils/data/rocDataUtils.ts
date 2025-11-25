@@ -310,3 +310,155 @@ export function getRoCMedicalStandards(): {
     },
   };
 }
+
+/**
+ * Apply 15-minute moving average smoothing to RoC data points.
+ * Values are clamped to a minimum of 0 to prevent negative display.
+ * Uses a sliding window approach for O(n) complexity.
+ * 
+ * @param dataPoints - Array of RoC data points
+ * @returns Array of smoothed RoC data points
+ */
+export function smoothRoCData(dataPoints: RoCDataPoint[]): RoCDataPoint[] {
+  if (dataPoints.length === 0) {
+    return [];
+  }
+
+  // Sort by timestamp
+  const sorted = [...dataPoints].sort(
+    (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+  );
+
+  // 15-minute window in milliseconds (7.5 min each side)
+  const halfWindowMs = 7.5 * 60 * 1000;
+
+  // Use sliding window approach for O(n) complexity
+  const result: RoCDataPoint[] = [];
+  let windowSum = 0;
+  let windowStart = 0;
+  let windowEnd = 0;
+
+  for (let i = 0; i < sorted.length; i++) {
+    const pointTime = sorted[i].timestamp.getTime();
+    const windowLower = pointTime - halfWindowMs;
+    const windowUpper = pointTime + halfWindowMs;
+
+    // Expand window end to include new points
+    while (windowEnd < sorted.length && sorted[windowEnd].timestamp.getTime() <= windowUpper) {
+      windowSum += sorted[windowEnd].roc;
+      windowEnd++;
+    }
+
+    // Shrink window start to exclude old points
+    while (windowStart < windowEnd && sorted[windowStart].timestamp.getTime() < windowLower) {
+      windowSum -= sorted[windowStart].roc;
+      windowStart++;
+    }
+
+    // Calculate average RoC for current window
+    const windowCount = windowEnd - windowStart;
+    const avgRoC = windowCount > 0 ? windowSum / windowCount : sorted[i].roc;
+
+    // Clamp to minimum of 0 to prevent negative values
+    const clampedRoC = Math.max(0, avgRoC);
+
+    // Re-categorize and re-color based on smoothed value
+    const category = categorizeRoC(clampedRoC);
+    const color = getRoCColor(clampedRoC);
+
+    result.push({
+      ...sorted[i],
+      roc: clampedRoC,
+      color,
+      category,
+    });
+  }
+
+  return result;
+}
+
+/**
+ * Calculate the longest continuous period in a specific category.
+ * 
+ * @param dataPoints - Array of RoC data points (should be sorted by time)
+ * @param category - The category to look for ('good', 'medium', or 'bad')
+ * @returns Duration in minutes of the longest continuous period in that category
+ */
+export function getLongestCategoryPeriod(
+  dataPoints: RoCDataPoint[],
+  category: 'good' | 'medium' | 'bad'
+): number {
+  if (dataPoints.length === 0) {
+    return 0;
+  }
+
+  // Sort by timestamp
+  const sorted = [...dataPoints].sort(
+    (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+  );
+
+  let longestDuration = 0;
+  let currentStreak: RoCDataPoint[] = [];
+
+  for (let i = 0; i < sorted.length; i++) {
+    const point = sorted[i];
+    
+    if (point.category === category) {
+      // Check if this point is consecutive (within 10 minutes of previous)
+      if (currentStreak.length === 0) {
+        currentStreak = [point];
+      } else {
+        const lastPoint = currentStreak[currentStreak.length - 1];
+        const timeDiff = point.timestamp.getTime() - lastPoint.timestamp.getTime();
+        
+        // Consider consecutive if within 10 minutes (allowing for CGM gaps)
+        if (timeDiff <= 10 * 60 * 1000) {
+          currentStreak.push(point);
+        } else {
+          // Gap too large, calculate duration and start new streak
+          if (currentStreak.length > 0) {
+            const duration = (currentStreak[currentStreak.length - 1].timestamp.getTime() - 
+                            currentStreak[0].timestamp.getTime()) / (60 * 1000);
+            longestDuration = Math.max(longestDuration, duration);
+          }
+          currentStreak = [point];
+        }
+      }
+    } else {
+      // Different category, calculate current streak duration
+      if (currentStreak.length > 0) {
+        const duration = (currentStreak[currentStreak.length - 1].timestamp.getTime() - 
+                        currentStreak[0].timestamp.getTime()) / (60 * 1000);
+        longestDuration = Math.max(longestDuration, duration);
+      }
+      currentStreak = [];
+    }
+  }
+
+  // Check final streak
+  if (currentStreak.length > 0) {
+    const duration = (currentStreak[currentStreak.length - 1].timestamp.getTime() - 
+                    currentStreak[0].timestamp.getTime()) / (60 * 1000);
+    longestDuration = Math.max(longestDuration, duration);
+  }
+
+  return Math.round(longestDuration);
+}
+
+/**
+ * Format minutes as hours and minutes string
+ * 
+ * @param minutes - Duration in minutes
+ * @returns Formatted string like "2h 30m" or "45m"
+ */
+export function formatDuration(minutes: number): string {
+  if (minutes < 60) {
+    return `${minutes}m`;
+  }
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (mins === 0) {
+    return `${hours}h`;
+  }
+  return `${hours}h ${mins}m`;
+}
