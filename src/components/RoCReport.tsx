@@ -57,8 +57,15 @@ const TIME_LABELS: Record<number, string> = {
   12: '12P', 15: '3P', 18: '6P', 21: '9P', 24: '12A'
 };
 
-// Default glucose thresholds (in mmol/L)
-const DEFAULT_THRESHOLDS: GlucoseThresholds = {
+/**
+ * Glucose thresholds for the RoC chart Y-axis scaling.
+ * These are intentionally different from the configurable thresholds used
+ * for time-in-range calculations. The RoC chart uses fixed values to ensure
+ * consistent visualization:
+ * - veryHigh/high: 22/16 mmol/L for the Y-axis maximum
+ * - low/veryLow: 3.9/3.0 mmol/L for the dashed reference line
+ */
+const CHART_GLUCOSE_THRESHOLDS: GlucoseThresholds = {
   veryHigh: 22,
   high: 16,
   low: 3.9,
@@ -464,9 +471,9 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
   const medicalStandards = getRoCMedicalStandards();
 
   // Calculate thresholds in the display unit
-  const glucoseHighThreshold = convertGlucoseValue(DEFAULT_THRESHOLDS.high, glucoseUnit);
-  const glucoseLowThreshold = convertGlucoseValue(DEFAULT_THRESHOLDS.low, glucoseUnit);
-  const glucoseMaxThreshold = convertGlucoseValue(DEFAULT_THRESHOLDS.veryHigh, glucoseUnit);
+  const glucoseHighThreshold = convertGlucoseValue(CHART_GLUCOSE_THRESHOLDS.high, glucoseUnit);
+  const glucoseLowThreshold = convertGlucoseValue(CHART_GLUCOSE_THRESHOLDS.low, glucoseUnit);
+  const glucoseMaxThreshold = convertGlucoseValue(CHART_GLUCOSE_THRESHOLDS.veryHigh, glucoseUnit);
 
   // Prepare chart data with connected RoC line and per-point coloring
   const chartData = useMemo(() => {

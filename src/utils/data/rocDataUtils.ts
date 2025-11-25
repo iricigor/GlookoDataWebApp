@@ -15,9 +15,17 @@
  */
 
 import type { GlucoseReading, RoCDataPoint, RoCStats, GlucoseUnit } from '../../types';
+import { MMOL_TO_MGDL } from './glucoseUnitUtils';
 
 /**
- * Time span in minutes for RoC display (5 minutes is standard CGM interval)
+ * Standard CGM measurement interval in minutes.
+ * 
+ * Most continuous glucose monitors (CGMs) take readings every 5 minutes.
+ * This constant is used to normalize Rate of Change values to a per-5-minute
+ * basis, making them more intuitive and comparable to CGM arrow indicators.
+ * 
+ * When RoC is expressed per minute (e.g., 0.1 mmol/L/min), multiplying by
+ * this value converts it to per-5-minute units (e.g., 0.5 mmol/L/5min).
  */
 export const ROC_TIME_SPAN_MINUTES = 5;
 
@@ -345,8 +353,8 @@ export function getUniqueDatesFromRoC(dataPoints: RoCDataPoint[]): string[] {
  */
 export function formatRoCValue(roc: number, unit?: GlucoseUnit): string {
   if (unit === 'mg/dL') {
-    // Convert to mg/dL and return as integer
-    const rocMgdl = roc * 18.018;
+    // Convert to mg/dL using the standard conversion factor and return as integer
+    const rocMgdl = roc * MMOL_TO_MGDL;
     return Math.round(rocMgdl).toString();
   }
   // mmol/L: 1 decimal place
