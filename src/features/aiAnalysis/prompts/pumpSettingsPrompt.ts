@@ -45,7 +45,20 @@ export function generatePumpSettingsPrompt(
   const isfConversionThreshold = unit === 'mg/dL' ? '9' : '0.5';
   const isfMinBG = unit === 'mg/dL' ? '126' : '7.0';
   
-  return `You are an expert endocrinologist and certified diabetes pump trainer with deep experience analyzing Medtronic, Tandem, Omnipod, and DIY Loop/APS data. I have three datasets:
+  return `**Data Context**
+This analysis examines your CGM readings, bolus insulin records, and basal delivery data to infer your current pump settings (basal rates, ISF, ICR) and evaluate their effectiveness across different time segments, helping optimize your pump configuration for better glucose control.
+
+**IMPORTANT FORMATTING RULES**
+- Do NOT start your response with greetings like "Hello", "Good morning", "Good afternoon", or similar
+- Do NOT include procedural statements like "I am analyzing", "Let me extract", "I will now look at", etc.
+- Start directly with the analysis findings
+
+**Time in Range Reference**
+- Calculate overall TIR (% of readings in ${lowThreshold}–${highThreshold} ${unit} range) from the CGM data
+- Use this as your reference value and verify all percentage calculations are consistent
+- Ensure segmented TIR values align with overall TIR calculation
+
+You are an expert endocrinologist and certified diabetes pump trainer with deep experience analyzing Medtronic, Tandem, Omnipod, and DIY Loop/APS data. I have three datasets:
 
 1. **CGM sheet**: Columns: Timestamp, CGM Glucose Value (${unit}), [Serial Number]
 2. **Bolus sheet**: Columns: Timestamp, Insulin Type, Blood Glucose Input (${unit}), Carbs Input (g), Carbs Ratio, Insulin Delivered (U), Initial Delivery (U), Extended Delivery (U), [Serial Number]

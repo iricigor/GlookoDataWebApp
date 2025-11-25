@@ -198,5 +198,41 @@ describe('glucoseInsulinPrompt', () => {
       expect(result).toContain('basal drift test');
       expect(result).toContain('hypoglycemia risk');
     });
+
+    it('should include data context explanation', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(result).toContain('Data Context');
+      expect(result).toContain('daily blood glucose ranges');
+      expect(result).toContain('insulin dosing patterns');
+    });
+
+    it('should include no-greetings instruction', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(result).toContain('Do NOT start your response with greetings');
+      expect(result).toContain('Hello');
+      expect(result).toContain('Good morning');
+    });
+
+    it('should include no-procedural-text instruction', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(result).toContain('Do NOT include procedural statements');
+      expect(result).toContain('I am analyzing');
+    });
+
+    it('should include TIR reference verification', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(result).toContain('Time in Range Reference');
+      expect(result).toContain('BG In Range (%)');
+      expect(result).toContain('authoritative Time in Range');
+      expect(result).toContain('verify');
+    });
   });
 });

@@ -51,5 +51,13 @@ export function generateTimeInRangePrompt(
     ? `${(thresholds.high * MMOL_TO_MGDL_FACTOR).toFixed(0)} mg/dL`
     : `${thresholds.high.toFixed(1)} mmol/L`;
   
-  return `My percent time-in-range (TIR) from continuous glucose monitoring is ${tirPercentage.toFixed(1)}%, based on a target range of ${targetRangeStr}. My Time Above Range (>${highThresholdStr}) is ${tarPercentage.toFixed(1)}%. Provide a brief assessment and 2-3 specific, actionable and behavioral recommendations to improve your glucose management. Be encouraging but realistic. ${unitInstruction} The target TIR for most adults with diabetes is 70% or higher. Keep your response concise (under 200 words) and practical. Address me directly using "you/your" language. ${languageInstruction} Respond only with the assessment + recommendations, no intro, no extra text.${disclaimerInstruction}`;
+  return `This analysis examines your continuous glucose monitoring (CGM) data to evaluate how well your blood glucose stays within the target range, helping identify areas for improvement in diabetes management.
+
+My percent time-in-range (TIR) from continuous glucose monitoring is ${tirPercentage.toFixed(1)}%, based on a target range of ${targetRangeStr}. My Time Above Range (>${highThresholdStr}) is ${tarPercentage.toFixed(1)}%. Provide a brief assessment and 2-3 specific, actionable and behavioral recommendations to improve your glucose management. Be encouraging but realistic. ${unitInstruction} The target TIR for most adults with diabetes is 70% or higher. Keep your response concise (under 200 words) and practical. Address me directly using "you/your" language. ${languageInstruction}
+
+IMPORTANT FORMATTING RULES:
+- Do NOT start your response with greetings like "Hello", "Good morning", "Good afternoon", or similar
+- Do NOT include procedural statements like "I am analyzing", "Let me extract", "I will now look at", etc.
+- Start directly with the assessment and recommendations
+- Respond only with the assessment + recommendations, no intro, no extra text${disclaimerInstruction}`;
 }

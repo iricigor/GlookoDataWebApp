@@ -54,5 +54,5 @@ export function getDisclaimerInstruction(provider?: AIProvider, language: Respon
       break;
   }
   
-  return `\n\nIMPORTANT: End your response with a medical disclaimer stating: "${disclaimerText}" Then on a new line, add the marker "--- CONCLUSIO DATAE ---" to confirm your analysis is complete.`;
+  return `\n\nIMPORTANT: End your response with a medical disclaimer stating: "${disclaimerText}" Then add the completion marker "--- CONCLUSIO DATAE ---" on its own separate line to confirm your analysis is complete.`;
 }
