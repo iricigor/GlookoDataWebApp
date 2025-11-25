@@ -5,12 +5,13 @@
 
 import { DateRangePicker as RSuiteDateRangePicker } from 'rsuite';
 import 'rsuite/dist/rsuite.min.css';
-import { makeStyles } from '@fluentui/react-components';
+import { makeStyles, tokens } from '@fluentui/react-components';
 
 const useStyles = makeStyles({
   pickerContainer: {
     '& .rs-picker-toggle': {
       minWidth: '280px',
+      borderRadius: tokens.borderRadiusMedium,
     },
   },
 });
