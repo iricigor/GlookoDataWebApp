@@ -428,25 +428,29 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
 
   const currentDate = availableDates[currentDateIndex];
 
-  // Prepare chart data with glucose overlay
-  const chartData = dayRoCData.map(point => ({
-    ...point,
-    glucoseDisplay: convertGlucoseValue(point.glucoseValue, glucoseUnit),
-  }));
+  // Prepare chart data with glucose overlay (round to avoid floating point issues)
+  const chartData = dayRoCData.map(point => {
+    const glucoseValue = convertGlucoseValue(point.glucoseValue, glucoseUnit);
+    return {
+      ...point,
+      glucoseDisplay: Math.round(glucoseValue * 10) / 10,
+    };
+  });
 
-  // Prepare glucose line data for overlay
+  // Prepare glucose line data for overlay (round to avoid floating point issues)
   const glucoseLineData = dayGlucoseReadings.map(reading => {
     const hour = reading.timestamp.getHours();
     const minute = reading.timestamp.getMinutes();
+    const glucoseValue = convertGlucoseValue(reading.value, glucoseUnit);
     return {
       timeDecimal: hour + minute / 60,
-      glucoseDisplay: convertGlucoseValue(reading.value, glucoseUnit),
+      glucoseDisplay: Math.round(glucoseValue * 10) / 10, // Round to 1 decimal place
     };
   }).sort((a, b) => a.timeDecimal - b.timeDecimal);
 
-  // Calculate max glucose for Y axis
+  // Calculate max glucose for Y axis (round to avoid floating point precision issues)
   const maxGlucoseValue = glucoseLineData.length > 0 
-    ? Math.max(...glucoseLineData.map(d => d.glucoseDisplay)) * 1.1
+    ? Math.ceil(Math.max(...glucoseLineData.map(d => d.glucoseDisplay)) * 1.1)
     : glucoseUnit === 'mg/dL' ? 300 : 16;
 
   return (
@@ -538,6 +542,7 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                 stroke={tokens.colorNeutralForeground3}
                 style={{ fontSize: tokens.fontSizeBase200 }}
                 domain={[0, maxGlucoseValue]}
+                tickFormatter={(value: number) => value.toFixed(1)}
               />
               
               <RechartsTooltip 
