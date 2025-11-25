@@ -276,3 +276,21 @@ export interface RoCStats {
   badCount: number;       // Count of bad readings
   totalCount: number;     // Total readings
 }
+
+/**
+ * Time in Range statistics for a specific time period
+ */
+export interface TimePeriodTIRStats {
+  period: string;         // e.g., "90 days", "28 days", "7 days"
+  days: number;           // Number of days in period
+  stats: GlucoseRangeStats;
+}
+
+/**
+ * Hourly Time in Range statistics (for 24-hour breakdown)
+ */
+export interface HourlyTIRStats {
+  hour: number;           // Hour of day (0-23)
+  hourLabel: string;      // Formatted hour label (e.g., "00:00", "06:00")
+  stats: GlucoseRangeStats;
+}

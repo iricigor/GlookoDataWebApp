@@ -42,9 +42,11 @@ import type {
   GlucoseUnit,
   DayOfWeekReport,
   WeeklyReport,
+  TimePeriodTIRStats,
+  HourlyTIRStats,
 } from '../types';
 import { extractGlucoseReadings, groupByWeek, displayGlucoseValue, getUnitLabel } from '../utils/data';
-import { groupByDayOfWeek, calculatePercentage, GLUCOSE_RANGE_COLORS } from '../utils/data';
+import { groupByDayOfWeek, calculatePercentage, GLUCOSE_RANGE_COLORS, calculateTIRByTimePeriods, calculateHourlyTIR } from '../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { useDateRange } from '../hooks/useDateRange';
@@ -255,6 +257,104 @@ const useStyles = makeStyles({
   tableSection: {
     marginTop: '16px',
   },
+  periodBarsContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('12px'),
+    marginTop: '8px',
+  },
+  periodBarRow: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+  },
+  periodLabel: {
+    minWidth: '70px',
+    fontSize: tokens.fontSizeBase300,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+  },
+  periodBarWrapper: {
+    flex: 1,
+  },
+  periodBar: {
+    display: 'flex',
+    height: '32px',
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.overflow('hidden'),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+  },
+  periodSegment: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForegroundOnBrand,
+    fontWeight: tokens.fontWeightSemibold,
+    transitionProperty: 'all',
+    transitionDuration: tokens.durationNormal,
+    transitionTimingFunction: tokens.curveEasyEase,
+    '&:hover': {
+      opacity: 0.85,
+    },
+  },
+  hourlyChartContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('8px'),
+    marginTop: '8px',
+  },
+  hourlyChartRow: {
+    display: 'flex',
+    alignItems: 'flex-end',
+    ...shorthands.gap('2px'),
+  },
+  hourlyBar: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+    minWidth: '20px',
+    maxWidth: '60px',
+    height: '180px',
+    ...shorthands.borderRadius(tokens.borderRadiusSmall, tokens.borderRadiusSmall, '0', '0'),
+    ...shorthands.overflow('hidden'),
+    cursor: 'pointer',
+    transitionProperty: 'all',
+    transitionDuration: tokens.durationNormal,
+    transitionTimingFunction: tokens.curveEasyEase,
+    '&:hover': {
+      opacity: 0.9,
+      transform: 'scaleY(1.02)',
+    },
+  },
+  hourlySegment: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: tokens.fontSizeBase100,
+    color: tokens.colorNeutralForegroundOnBrand,
+    fontWeight: tokens.fontWeightSemibold,
+    minHeight: '0',
+  },
+  hourlyLabels: {
+    display: 'flex',
+    ...shorthands.gap('2px'),
+  },
+  hourlyLabel: {
+    flex: 1,
+    minWidth: '20px',
+    maxWidth: '60px',
+    fontSize: tokens.fontSizeBase100,
+    color: tokens.colorNeutralForeground2,
+    textAlign: 'center',
+    paddingTop: '4px',
+  },
+  chartDescription: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+    textAlign: 'center',
+    paddingTop: '8px',
+  },
 });
 
 interface BGOverviewReportProps {
@@ -278,6 +378,8 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
   const [agpStats, setAgpStats] = useState<AGPTimeSlotStats[]>([]);
   const [dayOfWeekReports, setDayOfWeekReports] = useState<DayOfWeekReport[]>([]);
   const [weeklyReports, setWeeklyReports] = useState<WeeklyReport[]>([]);
+  const [periodStats, setPeriodStats] = useState<TimePeriodTIRStats[]>([]);
+  const [hourlyStats, setHourlyStats] = useState<HourlyTIRStats[]>([]);
 
   // Date range management
   const { 
@@ -297,6 +399,8 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
       setReadings([]);
       setAgpStats([]);
       setError(null);
+      setPeriodStats([]);
+      setHourlyStats([]);
       clearDateRange();
       return;
     }
@@ -314,6 +418,8 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
           setAgpStats([]);
           setDayOfWeekReports([]);
           setWeeklyReports([]);
+          setPeriodStats([]);
+          setHourlyStats([]);
           clearDateRange();
         } else {
           // Find min and max dates
@@ -349,6 +455,10 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
           // Calculate day of week and weekly reports
           setDayOfWeekReports(groupByDayOfWeek(glucoseReadings, thresholds, categoryMode));
           setWeeklyReports(groupByWeek(glucoseReadings, thresholds, categoryMode));
+          
+          // Calculate period-based TIR and hourly TIR
+          setPeriodStats(calculateTIRByTimePeriods(glucoseReadings, thresholds, categoryMode));
+          setHourlyStats(calculateHourlyTIR(glucoseReadings, thresholds, categoryMode));
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load glucose data');
@@ -356,6 +466,8 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
         setAgpStats([]);
         setDayOfWeekReports([]);
         setWeeklyReports([]);
+        setPeriodStats([]);
+        setHourlyStats([]);
         clearDateRange();
       } finally {
         setLoading(false);
@@ -385,6 +497,8 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
         setAgpStats([]);
         setDayOfWeekReports([]);
         setWeeklyReports([]);
+        setPeriodStats([]);
+        setHourlyStats([]);
       } else {
         setError(null);
         const stats = calculateAGPStats(filteredReadings);
@@ -393,6 +507,10 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
         // Recalculate day of week and weekly reports with filtered data
         setDayOfWeekReports(groupByDayOfWeek(filteredByDate, thresholds, categoryMode));
         setWeeklyReports(groupByWeek(filteredByDate, thresholds, categoryMode));
+        
+        // Recalculate period-based TIR and hourly TIR with filtered data
+        setPeriodStats(calculateTIRByTimePeriods(filteredByDate, thresholds, categoryMode, end));
+        setHourlyStats(calculateHourlyTIR(filteredByDate, thresholds, categoryMode));
       }
     }
   }, [startDate, endDate, readings, dayFilter, thresholds, categoryMode]);
@@ -749,6 +867,232 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
       {/* Detailed Breakdown Accordion */}
       {!loading && !error && tirStats.total > 0 && (
         <Accordion collapsible className={styles.accordion} defaultOpenItems={[]}>
+          {/* TIR by Time Period */}
+          {periodStats.length > 0 && (
+            <AccordionItem value="periodTIR">
+              <AccordionHeader>Time in Range by Period</AccordionHeader>
+              <AccordionPanel>
+                <div className={styles.periodBarsContainer}>
+                  {periodStats.map((period) => (
+                    <div key={period.period} className={styles.periodBarRow}>
+                      <Text className={styles.periodLabel}>{period.period}</Text>
+                      <div className={styles.periodBarWrapper}>
+                        <div className={styles.periodBar}>
+                          {categoryMode === 5 && (period.stats.veryLow ?? 0) > 0 && (
+                            <Tooltip content={`Very Low: ${calculatePercentage(period.stats.veryLow ?? 0, period.stats.total)}% (${period.stats.veryLow ?? 0})`} relationship="description">
+                              <div
+                                className={styles.periodSegment}
+                                style={{
+                                  width: `${calculatePercentage(period.stats.veryLow ?? 0, period.stats.total)}%`,
+                                  backgroundColor: getColorForCategory('veryLow'),
+                                }}
+                              >
+                                {calculatePercentage(period.stats.veryLow ?? 0, period.stats.total) >= 8 && 
+                                  `${calculatePercentage(period.stats.veryLow ?? 0, period.stats.total)}%`}
+                              </div>
+                            </Tooltip>
+                          )}
+                          {period.stats.low > 0 && (
+                            <Tooltip content={`Low: ${calculatePercentage(period.stats.low, period.stats.total)}% (${period.stats.low})`} relationship="description">
+                              <div
+                                className={styles.periodSegment}
+                                style={{
+                                  width: `${calculatePercentage(period.stats.low, period.stats.total)}%`,
+                                  backgroundColor: getColorForCategory('low'),
+                                }}
+                              >
+                                {calculatePercentage(period.stats.low, period.stats.total) >= 8 && 
+                                  `${calculatePercentage(period.stats.low, period.stats.total)}%`}
+                              </div>
+                            </Tooltip>
+                          )}
+                          {period.stats.inRange > 0 && (
+                            <Tooltip content={`In Range: ${calculatePercentage(period.stats.inRange, period.stats.total)}% (${period.stats.inRange})`} relationship="description">
+                              <div
+                                className={styles.periodSegment}
+                                style={{
+                                  width: `${calculatePercentage(period.stats.inRange, period.stats.total)}%`,
+                                  backgroundColor: getColorForCategory('inRange'),
+                                }}
+                              >
+                                {calculatePercentage(period.stats.inRange, period.stats.total) >= 8 && 
+                                  `${calculatePercentage(period.stats.inRange, period.stats.total)}%`}
+                              </div>
+                            </Tooltip>
+                          )}
+                          {period.stats.high > 0 && (
+                            <Tooltip content={`High: ${calculatePercentage(period.stats.high, period.stats.total)}% (${period.stats.high})`} relationship="description">
+                              <div
+                                className={styles.periodSegment}
+                                style={{
+                                  width: `${calculatePercentage(period.stats.high, period.stats.total)}%`,
+                                  backgroundColor: getColorForCategory('high'),
+                                }}
+                              >
+                                {calculatePercentage(period.stats.high, period.stats.total) >= 8 && 
+                                  `${calculatePercentage(period.stats.high, period.stats.total)}%`}
+                              </div>
+                            </Tooltip>
+                          )}
+                          {categoryMode === 5 && (period.stats.veryHigh ?? 0) > 0 && (
+                            <Tooltip content={`Very High: ${calculatePercentage(period.stats.veryHigh ?? 0, period.stats.total)}% (${period.stats.veryHigh ?? 0})`} relationship="description">
+                              <div
+                                className={styles.periodSegment}
+                                style={{
+                                  width: `${calculatePercentage(period.stats.veryHigh ?? 0, period.stats.total)}%`,
+                                  backgroundColor: getColorForCategory('veryHigh'),
+                                }}
+                              >
+                                {calculatePercentage(period.stats.veryHigh ?? 0, period.stats.total) >= 8 && 
+                                  `${calculatePercentage(period.stats.veryHigh ?? 0, period.stats.total)}%`}
+                              </div>
+                            </Tooltip>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </AccordionPanel>
+            </AccordionItem>
+          )}
+
+          {/* 24-Hour Hourly TIR Breakdown */}
+          {hourlyStats.length > 0 && (
+            <AccordionItem value="hourlyTIR">
+              <AccordionHeader>Time in Range - 24-Hour Hourly Breakdown</AccordionHeader>
+              <AccordionPanel>
+                <div className={styles.hourlyChartContainer}>
+                  {/* Hourly stacked bar chart */}
+                  <div className={styles.hourlyChartRow}>
+                    {hourlyStats.map((hourData) => {
+                      const total = hourData.stats.total;
+                      if (total === 0) {
+                        return (
+                          <Tooltip 
+                            key={hourData.hour} 
+                            content={`${hourData.hourLabel}: No data`} 
+                            relationship="description"
+                          >
+                            <div className={styles.hourlyBar} style={{ backgroundColor: tokens.colorNeutralBackground3 }} />
+                          </Tooltip>
+                        );
+                      }
+                      
+                      const veryLowPct = categoryMode === 5 ? calculatePercentage(hourData.stats.veryLow ?? 0, total) : 0;
+                      const lowPct = calculatePercentage(hourData.stats.low, total);
+                      const inRangePct = calculatePercentage(hourData.stats.inRange, total);
+                      const highPct = calculatePercentage(hourData.stats.high, total);
+                      const veryHighPct = categoryMode === 5 ? calculatePercentage(hourData.stats.veryHigh ?? 0, total) : 0;
+                      
+                      const tooltipContent = categoryMode === 5
+                        ? `${hourData.hourLabel}\nVery Low: ${veryLowPct}%\nLow: ${lowPct}%\nIn Range: ${inRangePct}%\nHigh: ${highPct}%\nVery High: ${veryHighPct}%\nTotal: ${total}`
+                        : `${hourData.hourLabel}\nLow: ${lowPct}%\nIn Range: ${inRangePct}%\nHigh: ${highPct}%\nTotal: ${total}`;
+                      
+                      return (
+                        <Tooltip key={hourData.hour} content={tooltipContent} relationship="description">
+                          <div className={styles.hourlyBar}>
+                            {/* Stack from bottom: veryHigh, high, inRange, low, veryLow */}
+                            {categoryMode === 5 && veryHighPct > 0 && (
+                              <div
+                                className={styles.hourlySegment}
+                                style={{
+                                  height: `${veryHighPct}%`,
+                                  backgroundColor: getColorForCategory('veryHigh'),
+                                }}
+                              />
+                            )}
+                            {highPct > 0 && (
+                              <div
+                                className={styles.hourlySegment}
+                                style={{
+                                  height: `${highPct}%`,
+                                  backgroundColor: getColorForCategory('high'),
+                                }}
+                              />
+                            )}
+                            {inRangePct > 0 && (
+                              <div
+                                className={styles.hourlySegment}
+                                style={{
+                                  height: `${inRangePct}%`,
+                                  backgroundColor: getColorForCategory('inRange'),
+                                }}
+                              />
+                            )}
+                            {lowPct > 0 && (
+                              <div
+                                className={styles.hourlySegment}
+                                style={{
+                                  height: `${lowPct}%`,
+                                  backgroundColor: getColorForCategory('low'),
+                                }}
+                              />
+                            )}
+                            {categoryMode === 5 && veryLowPct > 0 && (
+                              <div
+                                className={styles.hourlySegment}
+                                style={{
+                                  height: `${veryLowPct}%`,
+                                  backgroundColor: getColorForCategory('veryLow'),
+                                }}
+                              />
+                            )}
+                          </div>
+                        </Tooltip>
+                      );
+                    })}
+                  </div>
+                  {/* Hour labels */}
+                  <div className={styles.hourlyLabels}>
+                    {hourlyStats.map((hourData) => (
+                      <Text key={hourData.hour} className={styles.hourlyLabel}>
+                        {hourData.hour.toString().padStart(2, '0')}
+                      </Text>
+                    ))}
+                  </div>
+                  <Text className={styles.chartDescription}>
+                    Visualize hourly glucose patterns to identify trends and optimize management strategies.
+                  </Text>
+                </div>
+                
+                {/* Hourly TIR Data Table */}
+                <div className={styles.tableSection}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHeaderCell className={styles.highlightedHeaderCell}>Hour</TableHeaderCell>
+                        {categoryMode === 5 && <TableHeaderCell>Very Low</TableHeaderCell>}
+                        <TableHeaderCell>Low</TableHeaderCell>
+                        <TableHeaderCell className={styles.inRangeHeader}>In Range</TableHeaderCell>
+                        <TableHeaderCell>High</TableHeaderCell>
+                        {categoryMode === 5 && <TableHeaderCell>Very High</TableHeaderCell>}
+                        <TableHeaderCell>Total</TableHeaderCell>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {hourlyStats.map((hourData) => (
+                        <TableRow key={hourData.hour}>
+                          <TableCell className={styles.highlightedCell}>{hourData.hourLabel}</TableCell>
+                          {categoryMode === 5 && (
+                            <TableCell>{calculatePercentage(hourData.stats.veryLow ?? 0, hourData.stats.total)}% ({hourData.stats.veryLow ?? 0})</TableCell>
+                          )}
+                          <TableCell>{calculatePercentage(hourData.stats.low, hourData.stats.total)}% ({hourData.stats.low})</TableCell>
+                          <TableCell className={styles.inRangeCell}>{calculatePercentage(hourData.stats.inRange, hourData.stats.total)}% ({hourData.stats.inRange})</TableCell>
+                          <TableCell>{calculatePercentage(hourData.stats.high, hourData.stats.total)}% ({hourData.stats.high})</TableCell>
+                          {categoryMode === 5 && (
+                            <TableCell>{calculatePercentage(hourData.stats.veryHigh ?? 0, hourData.stats.total)}% ({hourData.stats.veryHigh ?? 0})</TableCell>
+                          )}
+                          <TableCell>{hourData.stats.total}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </AccordionPanel>
+            </AccordionItem>
+          )}
+
           {/* Glucose Range by Day of Week */}
           {dayOfWeekReports.length > 0 && (
             <AccordionItem value="dayOfWeek">
