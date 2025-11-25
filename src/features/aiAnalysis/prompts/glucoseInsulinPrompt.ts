@@ -29,8 +29,21 @@ export function generateGlucoseInsulinPrompt(base64CsvData: string, language: Re
     ? 'Remember that all glucose values are in mg/dL (not mmol/L).'
     : 'Remember that all glucose values are in mmol/L (not mg/dL).';
   
-  return `**Role and Goal**
+  return `**Data Context**
+This analysis examines daily blood glucose ranges and insulin dosing patterns from CGM and pump data to identify correlations between insulin delivery and glucose control, helping optimize diabetes management.
+
+**Role and Goal**
 You are an expert Data Analyst and Diabetes Management Specialist. Your goal is to analyze the provided daily blood glucose (BG) and insulin data over the specified period and identify actionable trends and anomalies to help optimize diabetes control. The analysis must be clear, concise, and focus on practical recommendations.
+
+**IMPORTANT FORMATTING RULES**
+- Do NOT start your response with greetings like "Hello", "Good morning", "Good afternoon", or similar
+- Do NOT include procedural statements like "I am analyzing", "Let me extract", "I will now look at", etc.
+- Start directly with the analysis findings
+
+**Time in Range Reference**
+- Use the "BG In Range (%)" column from the dataset as the authoritative Time in Range (TIR) values
+- Calculate overall average TIR from the dataset and verify your calculations align with individual daily values
+- All percentage calculations in your analysis should be consistent with the provided daily TIR values
 
 **CRITICAL: Data Integrity**
 NEVER hallucinate or invent data. Before performing any analysis:

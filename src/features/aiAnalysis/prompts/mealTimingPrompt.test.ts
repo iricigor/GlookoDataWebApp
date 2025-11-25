@@ -52,9 +52,8 @@ describe('mealTimingPrompt', () => {
       const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
       
       expect(result).toContain('Detailed Meal Analysis');
-      expect(result).toContain('Last 5 Days');
-      expect(result).toContain('5 COMPLETE days');
-      expect(result).toContain('meal events');
+      expect(result).toContain('Last 3 Complete Days');
+      expect(result).toContain('3 COMPLETE days');
     });
 
     it('should include temporal trends requirement', () => {
@@ -105,15 +104,16 @@ describe('mealTimingPrompt', () => {
       expect(result).toContain('00:00-06:00');
     });
 
-    it('should include actionable summary requirement', () => {
+    it('should include split output structure', () => {
       const base64Cgm = base64Encode(sampleCgmData);
       const base64Bolus = base64Encode(sampleBolusData);
       const base64Basal = base64Encode(sampleBasalData);
       
       const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
       
-      expect(result).toContain('Actionable Summary and Recommendations');
+      expect(result).toContain('Output Structure');
       expect(result).toContain('3-Point Summary');
+      expect(result).toContain('Actionable Insights');
     });
 
     it('should include all three dataset sections', () => {
@@ -217,7 +217,7 @@ describe('mealTimingPrompt', () => {
       expect(result).not.toContain('Respond in English');
     });
 
-    it('should include meal detection criteria', () => {
+    it('should include meal detection criteria with stricter bolus threshold', () => {
       const base64Cgm = base64Encode(sampleCgmData);
       const base64Bolus = base64Encode(sampleBolusData);
       const base64Basal = base64Encode(sampleBasalData);
@@ -225,21 +225,20 @@ describe('mealTimingPrompt', () => {
       const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
       
       expect(result).toContain('Meal Detection Criteria');
-      expect(result).toContain('≥ 2.0 U');
-      expect(result).toContain('≥ 2.5 U within 30 minutes');
-      expect(result).toContain('DO NOT count correction boluses');
+      expect(result).toContain('≥ 3.0 U');
+      expect(result).toContain('DO NOT count correction boluses or snacks');
     });
 
-    it('should include true pre-bolus calculation', () => {
+    it('should include pre-bolus explanation', () => {
       const base64Cgm = base64Encode(sampleCgmData);
       const base64Bolus = base64Encode(sampleBolusData);
       const base64Basal = base64Encode(sampleBasalData);
       
       const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
       
-      expect(result).toContain('True pre-bolus time');
-      expect(result).toContain('Positive value = bolus before rise');
-      expect(result).toContain('Negative value = reactive bolusing');
+      expect(result).toContain('Pre-bolus');
+      expect(result).toContain('Positive values (+)');
+      expect(result).toContain('Negative values (-)');
     });
 
     it('should include hypoglycemia risk analysis', () => {
@@ -265,14 +264,14 @@ describe('mealTimingPrompt', () => {
       expect(result).toContain('basal data is incomplete or missing');
     });
 
-    it('should include ranked recommendations format', () => {
+    it('should include recommendations format', () => {
       const base64Cgm = base64Encode(sampleCgmData);
       const base64Bolus = base64Encode(sampleBolusData);
       const base64Basal = base64Encode(sampleBasalData);
       
       const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
       
-      expect(result).toContain('Ranked Actionable Recommendations');
+      expect(result).toContain('Actionable Insights');
       expect(result).toContain('Extremely specific');
       expect(result).toContain('Ranked by expected impact on TIR');
       expect(result).toContain('Include expected improvement');
@@ -299,7 +298,6 @@ describe('mealTimingPrompt', () => {
       
       expect(result).toContain('3.9');
       expect(result).toContain('10.0');
-      expect(result).toContain('2.5');
       expect(result).toContain('1.5');
     });
 
@@ -312,8 +310,92 @@ describe('mealTimingPrompt', () => {
       
       expect(result).toContain('70');
       expect(result).toContain('180');
-      expect(result).toContain('45');
       expect(result).toContain('27');
+    });
+
+    it('should include data context explanation', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Data Context');
+      expect(result).toContain('CGM glucose readings');
+      expect(result).toContain('bolus insulin timing');
+    });
+
+    it('should include no-greetings instruction', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Do NOT start your response with greetings');
+      expect(result).toContain('Hello');
+    });
+
+    it('should include no-procedural-text instruction', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Do NOT include procedural statements');
+    });
+
+    it('should include TIR reference verification', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Time in Range Reference');
+      expect(result).toContain('Calculate overall TIR');
+      expect(result).toContain('verify');
+    });
+
+    it('should include table format requirements', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Table Format Requirements');
+      expect(result).toContain('ddd MMM-dd');
+      expect(result).toContain('Round to nearest 30 minutes');
+      expect(result).toContain('ONE decimal place');
+      expect(result).toContain('Peak Height');
+      expect(result).toContain('Time to Peak');
+    });
+
+    it('should include pre-bolus explanation instruction', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Add an explanation row under the table');
+      expect(result).toContain('Positive values (+)');
+      expect(result).toContain('Negative values (-)');
+      expect(result).toContain('BEFORE glucose rise');
+      expect(result).toContain('AFTER glucose rise');
+    });
+
+    it('should filter out snacks from meal analysis', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('MAIN MEALS ONLY (no snacks)');
+      expect(result).toContain('Breakfast/Lunch/Dinner only (no snacks)');
     });
   });
 });

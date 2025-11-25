@@ -39,32 +39,45 @@ export function generateMealTimingPrompt(
   // Unit-specific values for ranges
   const lowThreshold = unit === 'mg/dL' ? '70' : '3.9';
   const highThreshold = unit === 'mg/dL' ? '180' : '10.0';
-  const mealRiseThreshold = unit === 'mg/dL' ? '45' : '2.5';
+  // Pre-bolus rise threshold: used to detect when glucose starts rising after a meal
+  // This is the minimum rise to consider a sustained glucose increase
   const preBolusRiseThreshold = unit === 'mg/dL' ? '27' : '1.5';
   
-  return `**Role and Goal**
+  return `**Data Context**
+This analysis examines your CGM glucose readings, bolus insulin timing, and basal insulin patterns to identify meal-specific and day-of-week patterns, helping optimize pre-bolus timing and insulin dosing for better glucose control.
+
+**Role and Goal**
 You are an expert Data Analyst and Diabetes Management Specialist. Analyze the provided time-series data to provide a day-of-the-week specific and meal-specific optimization report. The analysis must identify Basal, Bolus, and Timing issues to offer practical, specific recommendations for improving time-in-range (TIR).
+
+**IMPORTANT FORMATTING RULES**
+- Do NOT start your response with greetings like "Hello", "Good morning", "Good afternoon", or similar
+- Do NOT include procedural statements like "I am analyzing", "Let me extract", "I will now look at", etc.
+- Start directly with the analysis findings
+
+**Time in Range Reference**
+- Calculate overall TIR (% of readings in ${lowThreshold}-${highThreshold} ${unit} range) from the CGM data
+- Use this as your reference value and verify all percentage calculations are consistent
+- Ensure daily TIR values align with overall TIR calculation
 
 **Required Analysis and Findings**
 
-1. **Detailed Meal Analysis for Last 5 Days**
-   - Goal: Provide a comprehensive, day-by-day breakdown of meals and insulin timing for the most recent 5 COMPLETE days in the dataset.
+1. **Detailed Meal Analysis for Last 3 Complete Days**
+   - Goal: Provide a comprehensive, day-by-day breakdown of MAIN MEALS ONLY (no snacks) for the most recent 3 COMPLETE days in the dataset.
    - **Meal Detection Criteria (CRITICAL - Follow Precisely):**
-     * A meal bolus is defined as ANY bolus ≥ 2.0 U OR a cluster of boluses totaling ≥ 2.5 U within 30 minutes
-     * **DO NOT count correction boluses as meals** unless they clearly coincide with a carbohydrate-related rise (>${mealRiseThreshold} ${unit} rise within 2 hours after the bolus)
-     * This ensures accurate meal detection and avoids counting corrections as meals
-   - For each of the last 5 days, identify and report:
-     - All meal events (using the criteria above)
-     - For each meal:
-       * Date and time of the bolus insulin dose
-       * Amount of insulin delivered (units)
-       * Estimated meal type (Breakfast/Lunch/Dinner/Snack) based on time of day
-       * **True pre-bolus time** = time from first meal-related bolus to the start of the BG rise (>${preBolusRiseThreshold} ${unit} sustained rise)
-         - Positive value = bolus before rise (good)
-         - 0-10 min = neutral
-         - Negative value = reactive bolusing (bad)
-       * Post-meal BG pattern including peak height and time-to-peak
-   - Present this information in a clear, structured format (table or list) showing the chronological sequence of meals and insulin for each day.
+     * A meal bolus is defined as a bolus ≥ 3.0 U (this filters out corrections and snacks)
+     * **DO NOT count correction boluses or snacks** - only main meals with ≥ 3.0 U boluses
+     * Cluster boluses within 15 minutes as a single meal event
+     * This ensures only significant meal events (Breakfast, Lunch, Dinner) are captured
+   - **Table Format Requirements:**
+     * Present as a table with the following columns (split post-meal data into TWO separate columns):
+       - Date: Format as "ddd MMM-dd" (e.g., "Mon Jan-15", "Tue Jan-16")
+       - Time: Round to nearest 30 minutes (e.g., 07:30, 12:00, 18:30)
+       - Meal Type: Breakfast/Lunch/Dinner only (no snacks)
+       - Bolus (U): Display with ONE decimal place (e.g., 5.2, 8.0)
+       - Pre-bolus (min): Time before/after glucose rise starts
+       - Peak Height (${unit}): Post-meal peak glucose value
+       - Time to Peak (min): Minutes from bolus to peak glucose
+     * Add an explanation row under the table: "Pre-bolus column: Positive values (+) = bolus given BEFORE glucose rise (good timing). Negative values (-) = bolus given AFTER glucose rise started (reactive/late bolusing). Zero or small values = bolus given at meal start."
    - Note any patterns such as: consistent pre-bolusing, reactive bolusing (after BG rise), or missed meal coverage.
 
 2. **Temporal Trends (Day-Specific Performance)**
@@ -79,7 +92,7 @@ You are an expert Data Analyst and Diabetes Management Specialist. Analyze the p
    - **CRITICAL: Separate Analysis for Weekdays (Mon-Fri) vs Weekends (Sat-Sun)**
    - For EACH meal type (Breakfast, Lunch, Dinner):
      A. **Weekday Analysis (Mon-Fri):**
-        * Typical bolus time (e.g., Breakfast: 07:20 ± 45 min on weekdays)
+        * Typical bolus time rounded to nearest 30 min (e.g., Breakfast: 07:30, with variance noted separately)
         * Average pre-bolus time (using true pre-bolus calculation from section 1)
         * % of meals with postprandial peak > ${highThreshold} ${unit}
         * Average peak height (${unit}) and time-to-peak (minutes)
@@ -118,11 +131,12 @@ You are an expert Data Analyst and Diabetes Management Specialist. Analyze the p
    - Identify any correlation between high pre-bolus times and subsequent hypoglycemia
    - Note time periods with highest hypoglycemia risk
 
-**Actionable Summary and Recommendations**
-Provide a structured, clinically-focused final report:
-1. **3-Point Summary:** Summarize the three most significant findings from all analyses, including insights from the detailed 5-day meal review (e.g., "In the last 5 days, you consistently bolused 10 minutes after meals," "Tuesday is the worst day for TIR," "The average time to peak after Lunch is 31 minutes," "BG drifts up overnight on Weekends").
+**Output Structure**
 
-2. **Ranked Actionable Recommendations (3-5 recommendations):**
+1. **3-Point Summary**
+   Summarize the three most significant findings from all analyses, including insights from the detailed 3-day meal review (e.g., "In the last 3 days, you consistently bolused 10 minutes after meals," "Tuesday is the worst day for TIR," "The average time to peak after Lunch is 31 minutes," "BG drifts up overnight on Weekends").
+
+2. **Actionable Insights (3-5 recommendations)**
    Each recommendation MUST be:
    - **Extremely specific** with precise timing, values, and context
      * Good example: "Move weekday breakfast bolus from 07:45 to 07:15 (15-20 min pre-bolus)"
@@ -132,7 +146,7 @@ Provide a structured, clinically-focused final report:
    - **Include expected improvement** where possible (e.g., "+8-12% TIR", "+6-10% TIR")
    
    Categories to address (select most impactful):
-   - **Recent Patterns:** Highlight any concerning patterns from the last 5 days' detailed meal analysis (e.g., late bolusing, missed meals, inadequate doses)
+   - **Recent Patterns:** Highlight any concerning patterns from the last 3 days' detailed meal analysis (e.g., late bolusing, missed meals, inadequate doses)
    - **Timing:** Adjust pre-bolus times for specific meals based on weekday/weekend patterns
    - **Basal:** Adjust overnight, dawn phenomenon, or daytime basal rates, with specific time segments and rate changes
    - **Dosing:** Address high-dose/low-TIR situations with specific meal or correction adjustments

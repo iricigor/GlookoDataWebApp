@@ -437,5 +437,51 @@ describe('pumpSettingsPrompt', () => {
       
       expect(result).toContain('Analyze rigorously with maximum statistical detail');
     });
+
+    it('should include data context explanation', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Data Context');
+      expect(result).toContain('CGM readings');
+      expect(result).toContain('bolus insulin records');
+      expect(result).toContain('basal delivery data');
+    });
+
+    it('should include no-greetings instruction', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Do NOT start your response with greetings');
+      expect(result).toContain('Hello');
+    });
+
+    it('should include no-procedural-text instruction', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Do NOT include procedural statements');
+    });
+
+    it('should include TIR reference verification', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Time in Range Reference');
+      expect(result).toContain('Calculate overall TIR');
+      expect(result).toContain('verify');
+    });
   });
 });

@@ -213,5 +213,28 @@ describe('timeInRangePrompt', () => {
       expect(result).toContain('mogu biti netačni');
       expect(result).toContain('Uvek se konsultujte sa svojim lekarom');
     });
+
+    it('should include data context explanation', () => {
+      const result = generateTimeInRangePrompt(mockStats, mockThresholds);
+      
+      expect(result).toContain('This analysis examines');
+      expect(result).toContain('continuous glucose monitoring');
+      expect(result).toContain('CGM');
+    });
+
+    it('should include no-greetings instruction', () => {
+      const result = generateTimeInRangePrompt(mockStats, mockThresholds);
+      
+      expect(result).toContain('Do NOT start your response with greetings');
+      expect(result).toContain('Hello');
+      expect(result).toContain('Good morning');
+    });
+
+    it('should include no-procedural-text instruction', () => {
+      const result = generateTimeInRangePrompt(mockStats, mockThresholds);
+      
+      expect(result).toContain('Do NOT include procedural statements');
+      expect(result).toContain('I am analyzing');
+    });
   });
 });
