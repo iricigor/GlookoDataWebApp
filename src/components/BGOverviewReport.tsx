@@ -63,7 +63,7 @@ const useStyles = makeStyles({
     ...shorthands.gap('16px'),
     ...shorthands.padding('20px'),
     backgroundColor: tokens.colorNeutralBackground2,
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
     boxShadow: tokens.shadow4,
   },
   controlRow: {
@@ -84,7 +84,7 @@ const useStyles = makeStyles({
     flexWrap: 'wrap',
   },
   pillButton: {
-    ...shorthands.borderRadius(tokens.borderRadiusCircular),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
     minWidth: '100px',
   },
   datePickerGroup: {
@@ -94,8 +94,8 @@ const useStyles = makeStyles({
     flexWrap: 'wrap',
   },
   tirCard: {
-    ...shorthands.padding('24px'),
-    ...shorthands.borderRadius(tokens.borderRadiusXLarge),
+    ...shorthands.padding('20px'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
     boxShadow: tokens.shadow16,
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
@@ -114,8 +114,8 @@ const useStyles = makeStyles({
     color: tokens.colorBrandForeground1,
   },
   tirBarContainer: {
-    marginTop: '16px',
-    marginBottom: '16px',
+    marginTop: '12px',
+    marginBottom: '12px',
   },
   tirBar: {
     display: 'flex',
@@ -144,9 +144,12 @@ const useStyles = makeStyles({
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
     ...shorthands.gap('8px'),
-    marginTop: '12px',
+    marginTop: '8px',
   },
   statCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
     ...shorthands.padding('8px', '12px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorNeutralBackground2,
@@ -155,12 +158,14 @@ const useStyles = makeStyles({
   statLabel: {
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground2,
-    marginBottom: '2px',
+    marginBottom: '4px',
+    display: 'block',
   },
   statValue: {
     fontSize: tokens.fontSizeBase500,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
+    display: 'block',
   },
   statCount: {
     fontSize: tokens.fontSizeBase200,
@@ -171,20 +176,20 @@ const useStyles = makeStyles({
     ...shorthands.padding('12px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorBrandBackground2,
-    marginTop: '16px',
+    marginTop: '12px',
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
     textAlign: 'center',
   },
   agpCard: {
-    ...shorthands.padding('24px'),
-    ...shorthands.borderRadius(tokens.borderRadiusXLarge),
+    ...shorthands.padding('20px'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
     boxShadow: tokens.shadow16,
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
   accordion: {
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
   accordionContent: {
