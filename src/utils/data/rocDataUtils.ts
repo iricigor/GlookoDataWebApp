@@ -127,6 +127,24 @@ export function getRoCColor(absRoC: number): string {
 }
 
 /**
+ * Get slightly darker background color for RoC value using HSV spectrum
+ * Same color gradient as getRoCColor but with lower brightness for background shading.
+ * 
+ * @param absRoC - Absolute rate of change in mmol/L/5min
+ * @returns RGB color string with reduced brightness
+ */
+export function getRoCBackgroundColor(absRoC: number): string {
+  // Normalize RoC to 0-1 range based on rapid change threshold
+  const normalizedRoC = Math.min(absRoC / ROC_RAPID_CHANGE_THRESHOLD, 1);
+  
+  // Hue goes from 120 (green) to 0 (red) as RoC increases
+  const hue = 120 * (1 - normalizedRoC);
+  
+  // Use lower value (0.5 instead of 0.9) for darker background
+  return hsvToRgb(hue, 0.8, 0.5);
+}
+
+/**
  * Get color for RoC value using HSV spectrum (legacy per-minute version)
  * Converts from per-minute to per-5-minute before applying color gradient
  * 

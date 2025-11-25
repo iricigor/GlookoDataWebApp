@@ -47,6 +47,7 @@ import {
   getLongestCategoryPeriod,
   formatDuration,
   getRoCColor,
+  getRoCBackgroundColor,
 } from '../utils/data';
 import { DayNavigator } from './DayNavigator';
 import { useSelectedDate } from '../hooks/useSelectedDate';
@@ -489,6 +490,8 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
           : Math.round(glucoseValue * 10) / 10,
         // Store color for each data point for gradient coloring
         pointColor: getRoCColor(point.roc),
+        // Store background color for each data point
+        backgroundColor: getRoCBackgroundColor(point.roc),
         // Previous values for interpolation
         prevRoc: prevPoint?.roc ?? null,
         prevTimeDecimal: prevPoint?.timeDecimal ?? null,
@@ -498,6 +501,26 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
       };
     });
   }, [dayRoCData, glucoseUnit]);
+
+  // Generate gradient stops for the RoC line based on time positions
+  const rocGradientStops = useMemo(() => {
+    if (chartData.length === 0) return [];
+    
+    return chartData.map(point => ({
+      offset: `${(point.timeDecimal / 24) * 100}%`,
+      color: point.pointColor,
+    }));
+  }, [chartData]);
+
+  // Generate gradient stops for the background shading (slightly darker)
+  const rocBackgroundGradientStops = useMemo(() => {
+    if (chartData.length === 0) return [];
+    
+    return chartData.map(point => ({
+      offset: `${(point.timeDecimal / 24) * 100}%`,
+      color: point.backgroundColor,
+    }));
+  }, [chartData]);
 
   // Prepare glucose line data for overlay
   const glucoseLineData = useMemo(() => {
@@ -582,6 +605,18 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                     <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
                     <stop offset="100%" stopColor="#1a237e" stopOpacity="0.25" />
                   </linearGradient>
+                  {/* RoC line gradient - follows HSV color scale based on RoC value */}
+                  <linearGradient id="rocLineGradient" x1="0" y1="0" x2="1" y2="0">
+                    {rocGradientStops.map((stop, index) => (
+                      <stop key={index} offset={stop.offset} stopColor={stop.color} />
+                    ))}
+                  </linearGradient>
+                  {/* RoC background gradient - same colors but darker for background shading */}
+                  <linearGradient id="rocBackgroundGradient" x1="0" y1="0" x2="1" y2="0">
+                    {rocBackgroundGradientStops.map((stop, index) => (
+                      <stop key={index} offset={stop.offset} stopColor={stop.color} stopOpacity="0.3" />
+                    ))}
+                  </linearGradient>
                 </defs>
                 
                 <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
@@ -600,23 +635,30 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                   yAxisId="roc"
                   fill="url(#nightGradientRight)"
                 />
+                {/* Background shading based on RoC values - follows HSV color scale */}
+                <ReferenceArea
+                  x1={0}
+                  x2={24}
+                  yAxisId="roc"
+                  fill="url(#rocBackgroundGradient)"
+                />
                 
-                {/* Reference lines for RoC thresholds */}
+                {/* Reference lines for RoC thresholds - labels on left axis */}
                 <ReferenceLine
                   y={ROC_THRESHOLDS.good}
                   yAxisId="roc"
                   stroke={ROC_COLORS.good}
                   strokeDasharray="5 5"
                   strokeWidth={1}
-                  label={{ value: 'Stable', position: 'right', fill: ROC_COLORS.good, fontSize: 10 }}
+                  label={{ value: 'Stable', position: 'left', fill: ROC_COLORS.good, fontSize: 10 }}
                 />
                 <ReferenceLine
                   y={ROC_THRESHOLDS.medium}
                   yAxisId="roc"
-                  stroke={ROC_COLORS.medium}
+                  stroke={ROC_COLORS.bad}
                   strokeDasharray="5 5"
                   strokeWidth={1}
-                  label={{ value: 'Moderate', position: 'right', fill: ROC_COLORS.medium, fontSize: 10 }}
+                  label={{ value: 'Rapid', position: 'left', fill: ROC_COLORS.bad, fontSize: 10 }}
                 />
                 
                 <XAxis
@@ -693,13 +735,13 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                   legendType="none"
                 />
                 
-                {/* Single connected RoC line - uses green as base color for stable glucose */}
+                {/* RoC line with gradient color - changes from green to red based on RoC value */}
                 <Line
                   yAxisId="roc"
                   type="monotone"
                   dataKey="roc"
                   name="Rate of Change"
-                  stroke={ROC_COLORS.good}
+                  stroke="url(#rocLineGradient)"
                   strokeWidth={2.5}
                   dot={false}
                   connectNulls
@@ -713,7 +755,12 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
           {/* Custom Legend */}
           <div className={styles.legendContainer}>
             <div className={styles.legendItem}>
-              <div className={styles.legendLine} style={{ backgroundColor: ROC_COLORS.good }} />
+              <div 
+                className={styles.legendLine} 
+                style={{ 
+                  background: `linear-gradient(to right, ${ROC_COLORS.good}, ${ROC_COLORS.medium}, ${ROC_COLORS.bad})` 
+                }} 
+              />
               <Text>Rate of Change (RoC)</Text>
             </div>
             <div className={styles.legendItem}>

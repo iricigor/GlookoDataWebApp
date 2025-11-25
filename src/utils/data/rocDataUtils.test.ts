@@ -10,6 +10,7 @@ import {
   getUniqueDatesFromRoC,
   categorizeRoC,
   getRoCColor,
+  getRoCBackgroundColor,
   formatRoCValue,
   getRoCMedicalStandards,
   ROC_THRESHOLDS,
@@ -240,6 +241,37 @@ describe('rocDataUtils', () => {
       const color = getRoCColor(0.2);
       expect(color).toMatch(/^rgb\(/);
       // High RoC should shift towards red
+    });
+  });
+
+  describe('getRoCBackgroundColor', () => {
+    it('should return green-ish color for low RoC', () => {
+      const color = getRoCBackgroundColor(0);
+      expect(color).toMatch(/^rgb\(/);
+      // Pure green at 0 RoC should have high G value
+    });
+
+    it('should return red-ish color for high RoC (>=0.6)', () => {
+      const color = getRoCBackgroundColor(0.6);
+      expect(color).toMatch(/^rgb\(/);
+      // High RoC should be red
+    });
+
+    it('should return darker color than getRoCColor for same RoC value', () => {
+      // Parse RGB values from color strings
+      const parseRgb = (color: string) => {
+        const match = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (!match) return { r: 0, g: 0, b: 0 };
+        return { r: Number(match[1]), g: Number(match[2]), b: Number(match[3]) };
+      };
+      
+      const lineColor = parseRgb(getRoCColor(0.3));
+      const bgColor = parseRgb(getRoCBackgroundColor(0.3));
+      
+      // Background color should have lower RGB values (darker)
+      const lineBrightness = lineColor.r + lineColor.g + lineColor.b;
+      const bgBrightness = bgColor.r + bgColor.g + bgColor.b;
+      expect(bgBrightness).toBeLessThan(lineBrightness);
     });
   });
 
