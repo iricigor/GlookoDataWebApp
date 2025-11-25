@@ -245,3 +245,34 @@ export interface AIAnalysisResult {
   timestamp: Date;
   inRangePercentage: number;
 }
+
+/**
+ * Rate of Change (RoC) data point for glucose
+ * Represents the speed of glucose change at a given time
+ */
+export interface RoCDataPoint {
+  timestamp: Date;
+  timeDecimal: number;    // Hour + minutes/60 for chart positioning
+  timeLabel: string;      // Formatted time (e.g., "14:30")
+  roc: number;            // Rate of change in mmol/L/min (absolute value)
+  rocRaw: number;         // Original RoC value (can be negative)
+  glucoseValue: number;   // Original glucose value in mmol/L
+  color: string;          // Color based on RoC intensity (green to red)
+  category: 'good' | 'medium' | 'bad';  // Medical category
+}
+
+/**
+ * RoC statistics for a day
+ */
+export interface RoCStats {
+  minRoC: number;         // Minimum absolute RoC (slowest change)
+  maxRoC: number;         // Maximum absolute RoC (fastest change)
+  sdRoC: number;          // Standard deviation of RoC
+  goodPercentage: number; // Percentage of time with good (slow) RoC
+  mediumPercentage: number; // Percentage of time with medium RoC
+  badPercentage: number;  // Percentage of time with bad (fast) RoC
+  goodCount: number;      // Count of good readings
+  mediumCount: number;    // Count of medium readings
+  badCount: number;       // Count of bad readings
+  totalCount: number;     // Total readings
+}
