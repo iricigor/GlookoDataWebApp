@@ -71,6 +71,14 @@ const CHART_GLUCOSE_THRESHOLDS = {
   veryLow: 3.0,
 } as const;
 
+/**
+ * Max glucose values for Y-axis toggle (matching other reports)
+ */
+const MAX_GLUCOSE_VALUES = {
+  mmol: { low: 16.0, high: 22.0 },
+  mgdl: { low: 288, high: 396 },
+} as const;
+
 const useStyles = makeStyles({
   container: {
     display: 'flex',
@@ -341,7 +349,7 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
   const [longestStablePeriod, setLongestStablePeriod] = useState(0);
   const [maxGlucose, setMaxGlucose] = useState<number>(
-    glucoseUnit === 'mg/dL' ? 396 : 22.0
+    glucoseUnit === 'mg/dL' ? MAX_GLUCOSE_VALUES.mgdl.high : MAX_GLUCOSE_VALUES.mmol.high
   );
   
   const loadedFileIdRef = useRef<string | undefined>(undefined);
@@ -488,8 +496,8 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
 
   const medicalStandards = getRoCMedicalStandards();
 
-  // Calculate thresholds in the display unit - high threshold for reference line (16 mmol/L)
-  const glucoseHighThreshold = glucoseUnit === 'mg/dL' ? 288 : 16.0;
+  // Calculate thresholds in the display unit - high threshold for reference line (16 mmol/L / 288 mg/dL)
+  const glucoseHighThreshold = glucoseUnit === 'mg/dL' ? MAX_GLUCOSE_VALUES.mgdl.low : MAX_GLUCOSE_VALUES.mmol.low;
   const glucoseLowThreshold = convertGlucoseValue(CHART_GLUCOSE_THRESHOLDS.low, glucoseUnit);
 
   // Prepare chart data with connected RoC line and per-point coloring
@@ -597,27 +605,27 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
           <TabList
             selectedValue={
               glucoseUnit === 'mg/dL'
-                ? (maxGlucose === 288 ? '288' : '396')
-                : (maxGlucose === 16.0 ? '16.0' : '22.0')
+                ? (maxGlucose === MAX_GLUCOSE_VALUES.mgdl.low ? String(MAX_GLUCOSE_VALUES.mgdl.low) : String(MAX_GLUCOSE_VALUES.mgdl.high))
+                : (maxGlucose === MAX_GLUCOSE_VALUES.mmol.low ? String(MAX_GLUCOSE_VALUES.mmol.low) : String(MAX_GLUCOSE_VALUES.mmol.high))
             }
             onTabSelect={(_, data) => {
               if (glucoseUnit === 'mg/dL') {
-                setMaxGlucose(data.value === '288' ? 288 : 396);
+                setMaxGlucose(data.value === String(MAX_GLUCOSE_VALUES.mgdl.low) ? MAX_GLUCOSE_VALUES.mgdl.low : MAX_GLUCOSE_VALUES.mgdl.high);
               } else {
-                setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0);
+                setMaxGlucose(data.value === String(MAX_GLUCOSE_VALUES.mmol.low) ? MAX_GLUCOSE_VALUES.mmol.low : MAX_GLUCOSE_VALUES.mmol.high);
               }
             }}
             size="small"
           >
             {glucoseUnit === 'mg/dL' ? (
               <>
-                <Tab value="288">288</Tab>
-                <Tab value="396">396</Tab>
+                <Tab value={String(MAX_GLUCOSE_VALUES.mgdl.low)}>{MAX_GLUCOSE_VALUES.mgdl.low}</Tab>
+                <Tab value={String(MAX_GLUCOSE_VALUES.mgdl.high)}>{MAX_GLUCOSE_VALUES.mgdl.high}</Tab>
               </>
             ) : (
               <>
-                <Tab value="16.0">16.0</Tab>
-                <Tab value="22.0">22.0</Tab>
+                <Tab value={String(MAX_GLUCOSE_VALUES.mmol.low)}>{MAX_GLUCOSE_VALUES.mmol.low}</Tab>
+                <Tab value={String(MAX_GLUCOSE_VALUES.mmol.high)}>{MAX_GLUCOSE_VALUES.mmol.high}</Tab>
               </>
             )}
           </TabList>
