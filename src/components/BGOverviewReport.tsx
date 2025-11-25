@@ -114,8 +114,8 @@ const useStyles = makeStyles({
     color: tokens.colorBrandForeground1,
   },
   tirBarContainer: {
-    marginTop: '12px',
-    marginBottom: '12px',
+    marginTop: '8px',
+    marginBottom: '8px',
   },
   tirBar: {
     display: 'flex',
@@ -144,12 +144,13 @@ const useStyles = makeStyles({
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
     ...shorthands.gap('8px'),
-    marginTop: '8px',
+    marginTop: '4px',
   },
   statCard: {
     display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'center',
     ...shorthands.padding('8px', '12px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorNeutralBackground2,
@@ -158,14 +159,12 @@ const useStyles = makeStyles({
   statLabel: {
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground2,
-    marginBottom: '4px',
-    display: 'block',
+    marginRight: '4px',
   },
   statValue: {
     fontSize: tokens.fontSizeBase500,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
-    display: 'block',
   },
   statCount: {
     fontSize: tokens.fontSizeBase200,
@@ -176,7 +175,7 @@ const useStyles = makeStyles({
     ...shorthands.padding('12px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorBrandBackground2,
-    marginTop: '12px',
+    marginTop: '8px',
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
     textAlign: 'center',
