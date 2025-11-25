@@ -17,7 +17,7 @@ import {
   DataHistogramRegular,
   TimerRegular,
 } from '@fluentui/react-icons';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   XAxis,
   YAxis,
@@ -29,7 +29,7 @@ import {
   ReferenceLine,
   ReferenceArea,
 } from 'recharts';
-import type { UploadedFile, GlucoseReading, RoCDataPoint, RoCStats, GlucoseUnit } from '../types';
+import type { UploadedFile, GlucoseReading, RoCDataPoint, RoCStats, GlucoseUnit, GlucoseThresholds } from '../types';
 import {
   extractGlucoseReadings,
   calculateRoC,
@@ -46,6 +46,7 @@ import {
   smoothRoCData,
   getLongestCategoryPeriod,
   formatDuration,
+  getRoCColor,
 } from '../utils/data';
 import { DayNavigator } from './DayNavigator';
 import { useSelectedDate } from '../hooks/useSelectedDate';
@@ -54,6 +55,21 @@ import { useSelectedDate } from '../hooks/useSelectedDate';
 const TIME_LABELS: Record<number, string> = {
   0: '12A', 3: '3A', 6: '6A', 9: '9A',
   12: '12P', 15: '3P', 18: '6P', 21: '9P', 24: '12A'
+};
+
+/**
+ * Glucose thresholds for the RoC chart Y-axis scaling.
+ * These are intentionally different from the configurable thresholds used
+ * for time-in-range calculations. The RoC chart uses fixed values to ensure
+ * consistent visualization:
+ * - veryHigh/high: 22/16 mmol/L for the Y-axis maximum
+ * - low/veryLow: 3.9/3.0 mmol/L for the dashed reference line
+ */
+const CHART_GLUCOSE_THRESHOLDS: GlucoseThresholds = {
+  veryHigh: 22,
+  high: 16,
+  low: 3.9,
+  veryLow: 3.0,
 };
 
 const useStyles = makeStyles({
@@ -89,28 +105,38 @@ const useStyles = makeStyles({
     ...shorthands.gap('16px'),
   },
   statCard: {
-    ...shorthands.padding('16px'),
+    ...shorthands.padding('12px', '16px'),
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
     boxShadow: tokens.shadow4,
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
-    ...shorthands.gap('8px'),
+    ...shorthands.gap('12px'),
   },
   statIcon: {
     fontSize: '24px',
     color: tokens.colorBrandForeground1,
+    flexShrink: 0,
+  },
+  statContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: 0,
   },
   statLabel: {
     fontSize: tokens.fontSizeBase300,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground2,
-    textAlign: 'center',
+  },
+  statValueRow: {
+    display: 'flex',
+    alignItems: 'baseline',
+    ...shorthands.gap('4px'),
   },
   statValue: {
-    fontSize: tokens.fontSizeHero700,
+    fontSize: tokens.fontSizeBase600,
     fontWeight: tokens.fontWeightBold,
     color: tokens.colorNeutralForeground1,
     fontFamily: 'monospace',
@@ -190,6 +216,31 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
     flex: 1,
   },
+  legendContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    ...shorthands.gap('16px'),
+    ...shorthands.padding('12px', '16px'),
+    backgroundColor: tokens.colorNeutralBackground2,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    marginTop: '8px',
+    fontSize: tokens.fontSizeBase200,
+  },
+  legendItem: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
+  legendLine: {
+    width: '20px',
+    height: '3px',
+    ...shorthands.borderRadius('2px'),
+  },
+  legendDashedLine: {
+    width: '20px',
+    height: '0',
+    borderTop: `2px dashed ${tokens.colorNeutralStroke1}`,
+  },
 });
 
 interface RoCReportProps {
@@ -220,6 +271,12 @@ const CustomTooltip = ({
     return null;
   }
   
+  // Format glucose value based on unit
+  const glucoseValue = data.glucoseDisplay ?? data.glucoseValue;
+  const glucoseDisplay = glucoseUnit === 'mg/dL' 
+    ? Math.round(glucoseValue).toString()
+    : glucoseValue.toFixed(1);
+  
   return (
     <div style={{
       backgroundColor: tokens.colorNeutralBackground1,
@@ -233,10 +290,10 @@ const CustomTooltip = ({
         {data.timeLabel}
       </div>
       <div style={{ color: data.color, fontWeight: tokens.fontWeightSemibold }}>
-        RoC: {formatRoCValue(data.roc)} mmol/L/min
+        RoC: {formatRoCValue(data.roc, glucoseUnit)} {glucoseUnit === 'mg/dL' ? 'mg/dL' : 'mmol/L'}/5 min
       </div>
       <div style={{ color: tokens.colorNeutralForeground2, marginTop: '4px' }}>
-        Glucose: {data.glucoseDisplay?.toFixed(1) || data.glucoseValue.toFixed(1)} {getUnitLabel(glucoseUnit)}
+        Glucose: {glucoseDisplay} {getUnitLabel(glucoseUnit)}
       </div>
       <div style={{ 
         marginTop: '4px',
@@ -413,6 +470,59 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
 
   const medicalStandards = getRoCMedicalStandards();
 
+  // Calculate thresholds in the display unit
+  const glucoseHighThreshold = convertGlucoseValue(CHART_GLUCOSE_THRESHOLDS.high, glucoseUnit);
+  const glucoseLowThreshold = convertGlucoseValue(CHART_GLUCOSE_THRESHOLDS.low, glucoseUnit);
+  const glucoseMaxThreshold = convertGlucoseValue(CHART_GLUCOSE_THRESHOLDS.veryHigh, glucoseUnit);
+
+  // Prepare chart data with connected RoC line and per-point coloring
+  const chartData = useMemo(() => {
+    return dayRoCData.map((point, index) => {
+      const glucoseValue = convertGlucoseValue(point.glucoseValue, glucoseUnit);
+      const prevPoint = index > 0 ? dayRoCData[index - 1] : null;
+      const prevGlucose = prevPoint ? convertGlucoseValue(prevPoint.glucoseValue, glucoseUnit) : null;
+      
+      return {
+        ...point,
+        glucoseDisplay: glucoseUnit === 'mg/dL' 
+          ? Math.round(glucoseValue)
+          : Math.round(glucoseValue * 10) / 10,
+        // Store color for each data point for gradient coloring
+        pointColor: getRoCColor(point.roc),
+        // Previous values for interpolation
+        prevRoc: prevPoint?.roc ?? null,
+        prevTimeDecimal: prevPoint?.timeDecimal ?? null,
+        prevGlucoseDisplay: prevGlucose ? (glucoseUnit === 'mg/dL' 
+          ? Math.round(prevGlucose)
+          : Math.round(prevGlucose * 10) / 10) : null,
+      };
+    });
+  }, [dayRoCData, glucoseUnit]);
+
+  // Prepare glucose line data for overlay
+  const glucoseLineData = useMemo(() => {
+    return dayGlucoseReadings.map(reading => {
+      const hour = reading.timestamp.getHours();
+      const minute = reading.timestamp.getMinutes();
+      const glucoseValue = convertGlucoseValue(reading.value, glucoseUnit);
+      return {
+        timeDecimal: hour + minute / 60,
+        glucoseDisplay: glucoseUnit === 'mg/dL' 
+          ? Math.round(glucoseValue)
+          : Math.round(glucoseValue * 10) / 10,
+      };
+    }).sort((a, b) => a.timeDecimal - b.timeDecimal);
+  }, [dayGlucoseReadings, glucoseUnit]);
+
+  // Fixed Y-axis max based on unit (16/22 mmol/L or equivalent)
+  const maxGlucoseValue = glucoseMaxThreshold;
+
+  // RoC unit label
+  const rocUnitLabel = glucoseUnit === 'mg/dL' ? 'mg/dL/5 min' : 'mmol/L/5 min';
+
+  // Current date for navigation
+  const currentDate = availableDates[currentDateIndex] ?? '';
+
   if (!selectedFile) {
     return (
       <div className={styles.container}>
@@ -442,37 +552,6 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
     );
   }
 
-  const currentDate = availableDates[currentDateIndex];
-
-  // Prepare chart data with glucose overlay (round to avoid floating point issues)
-  const chartData = dayRoCData.map(point => {
-    const glucoseValue = convertGlucoseValue(point.glucoseValue, glucoseUnit);
-    return {
-      ...point,
-      glucoseDisplay: Math.round(glucoseValue * 10) / 10,
-      // Create separate data keys for each category to enable colored rendering
-      rocGood: point.category === 'good' ? point.roc : null,
-      rocMedium: point.category === 'medium' ? point.roc : null,
-      rocBad: point.category === 'bad' ? point.roc : null,
-    };
-  });
-
-  // Prepare glucose line data for overlay (round to avoid floating point issues)
-  const glucoseLineData = dayGlucoseReadings.map(reading => {
-    const hour = reading.timestamp.getHours();
-    const minute = reading.timestamp.getMinutes();
-    const glucoseValue = convertGlucoseValue(reading.value, glucoseUnit);
-    return {
-      timeDecimal: hour + minute / 60,
-      glucoseDisplay: Math.round(glucoseValue * 10) / 10, // Round to 1 decimal place
-    };
-  }).sort((a, b) => a.timeDecimal - b.timeDecimal);
-
-  // Calculate max glucose for Y axis (round to avoid floating point precision issues)
-  const maxGlucoseValue = glucoseLineData.length > 0 
-    ? Math.ceil(Math.max(...glucoseLineData.map(d => d.glucoseDisplay)) * 1.1)
-    : glucoseUnit === 'mg/dL' ? 300 : 16;
-
   return (
     <div className={styles.container}>
       {/* Navigation Bar */}
@@ -489,157 +568,164 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
 
       {/* RoC Graph */}
       {dayRoCData.length > 0 && (
-        <div className={styles.chartContainer}>
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart margin={{ top: 10, right: 50, left: 10, bottom: 0 }} data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
-              
-              {/* Night hours shading (22:00-06:00) - more visible styling */}
-              <ReferenceArea
-                x1={0}
-                x2={6}
-                yAxisId="roc"
-                fill="#1a237e"
-                fillOpacity={0.15}
-                stroke="#3949ab"
-                strokeOpacity={0.3}
-              />
-              <ReferenceArea
-                x1={22}
-                x2={24}
-                yAxisId="roc"
-                fill="#1a237e"
-                fillOpacity={0.15}
-                stroke="#3949ab"
-                strokeOpacity={0.3}
-              />
-              
-              {/* Reference lines for RoC thresholds */}
-              <ReferenceLine
-                y={ROC_THRESHOLDS.good}
-                yAxisId="roc"
-                stroke={ROC_COLORS.good}
-                strokeDasharray="5 5"
-                strokeWidth={1}
-                label={{ value: 'Good', position: 'right', fill: ROC_COLORS.good, fontSize: 10 }}
-              />
-              <ReferenceLine
-                y={ROC_THRESHOLDS.medium}
-                yAxisId="roc"
-                stroke={ROC_COLORS.medium}
-                strokeDasharray="5 5"
-                strokeWidth={1}
-                label={{ value: 'Medium', position: 'right', fill: ROC_COLORS.medium, fontSize: 10 }}
-              />
-              
-              <XAxis
-                type="number"
-                dataKey="timeDecimal"
-                domain={[0, 24]}
-                ticks={[0, 3, 6, 9, 12, 15, 18, 21, 24]}
-                tickFormatter={formatXAxis}
-                stroke={tokens.colorNeutralForeground2}
-                style={{ fontSize: tokens.fontSizeBase200 }}
-                allowDuplicatedCategory={false}
-              />
-              
-              <YAxis
-                yAxisId="roc"
-                label={{ 
-                  value: 'Rate of Change (mmol/L/min)', 
-                  angle: -90, 
-                  position: 'insideLeft', 
-                  style: { fontSize: tokens.fontSizeBase200 } 
-                }}
-                stroke={tokens.colorNeutralForeground2}
-                style={{ fontSize: tokens.fontSizeBase200 }}
-                domain={[0, 'auto']}
-              />
-              
-              <YAxis
-                yAxisId="glucose"
-                orientation="right"
-                label={{ 
-                  value: `Glucose (${getUnitLabel(glucoseUnit)})`, 
-                  angle: 90, 
-                  position: 'insideRight', 
-                  style: { fontSize: tokens.fontSizeBase200 } 
-                }}
-                stroke={tokens.colorNeutralForeground3}
-                style={{ fontSize: tokens.fontSizeBase200 }}
-                domain={[0, maxGlucoseValue]}
-                tickFormatter={(value: number) => value.toFixed(1)}
-              />
-              
-              <RechartsTooltip 
-                content={<CustomTooltip glucoseUnit={glucoseUnit} />} 
-              />
-              
-              {/* Glucose line overlay (monochrome) */}
-              <Line
-                yAxisId="glucose"
-                type="monotone"
-                data={glucoseLineData}
-                dataKey="glucoseDisplay"
-                name="Glucose"
-                stroke={tokens.colorNeutralStroke1}
-                strokeWidth={1.5}
-                dot={false}
-                connectNulls
-              />
-              
-              {/* RoC line graph - colored by category */}
-              {/* Good (stable) - green */}
-              <Line
-                yAxisId="roc"
-                type="monotone"
-                dataKey="rocGood"
-                name="Stable"
-                stroke={ROC_COLORS.good}
-                strokeWidth={2.5}
-                dot={false}
-                activeDot={{ r: 4, stroke: tokens.colorNeutralBackground1, strokeWidth: 2, fill: ROC_COLORS.good }}
-                connectNulls={false}
-              />
-              {/* Medium (moderate) - amber */}
-              <Line
-                yAxisId="roc"
-                type="monotone"
-                dataKey="rocMedium"
-                name="Moderate"
-                stroke={ROC_COLORS.medium}
-                strokeWidth={2.5}
-                dot={false}
-                activeDot={{ r: 4, stroke: tokens.colorNeutralBackground1, strokeWidth: 2, fill: ROC_COLORS.medium }}
-                connectNulls={false}
-              />
-              {/* Bad (rapid) - red */}
-              <Line
-                yAxisId="roc"
-                type="monotone"
-                dataKey="rocBad"
-                name="Rapid"
-                stroke={ROC_COLORS.bad}
-                strokeWidth={2.5}
-                dot={false}
-                activeDot={{ r: 4, stroke: tokens.colorNeutralBackground1, strokeWidth: 2, fill: ROC_COLORS.bad }}
-                connectNulls={false}
-              />
-              
-              {/* Main RoC line for tooltip reference (invisible stroke, shows on hover) */}
-              <Line
-                yAxisId="roc"
-                type="monotone"
-                dataKey="roc"
-                name="Rate of Change"
-                stroke="transparent"
-                strokeWidth={0}
-                dot={false}
-                activeDot={{ r: 5, stroke: tokens.colorNeutralBackground1, strokeWidth: 2 }}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
+        <>
+          <div className={styles.chartContainer}>
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart margin={{ top: 10, right: 50, left: 10, bottom: 0 }} data={chartData}>
+                <defs>
+                  {/* Gradual night shading gradients */}
+                  <linearGradient id="nightGradientLeft" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#1a237e" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient id="nightGradientRight" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
+                    <stop offset="100%" stopColor="#1a237e" stopOpacity="0.25" />
+                  </linearGradient>
+                </defs>
+                
+                <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
+                
+                {/* Gradual night hours shading - midnight to 8AM (darkest at midnight) */}
+                <ReferenceArea
+                  x1={0}
+                  x2={8}
+                  yAxisId="roc"
+                  fill="url(#nightGradientLeft)"
+                />
+                {/* Gradual night hours shading - 8PM to midnight (darkest at midnight) */}
+                <ReferenceArea
+                  x1={20}
+                  x2={24}
+                  yAxisId="roc"
+                  fill="url(#nightGradientRight)"
+                />
+                
+                {/* Reference lines for RoC thresholds */}
+                <ReferenceLine
+                  y={ROC_THRESHOLDS.good}
+                  yAxisId="roc"
+                  stroke={ROC_COLORS.good}
+                  strokeDasharray="5 5"
+                  strokeWidth={1}
+                  label={{ value: 'Stable', position: 'right', fill: ROC_COLORS.good, fontSize: 10 }}
+                />
+                <ReferenceLine
+                  y={ROC_THRESHOLDS.medium}
+                  yAxisId="roc"
+                  stroke={ROC_COLORS.medium}
+                  strokeDasharray="5 5"
+                  strokeWidth={1}
+                  label={{ value: 'Moderate', position: 'right', fill: ROC_COLORS.medium, fontSize: 10 }}
+                />
+                
+                <XAxis
+                  type="number"
+                  dataKey="timeDecimal"
+                  domain={[0, 24]}
+                  ticks={[0, 3, 6, 9, 12, 15, 18, 21, 24]}
+                  tickFormatter={formatXAxis}
+                  stroke={tokens.colorNeutralForeground2}
+                  style={{ fontSize: tokens.fontSizeBase200 }}
+                  allowDuplicatedCategory={false}
+                />
+                
+                <YAxis
+                  yAxisId="roc"
+                  label={{ 
+                    value: `Rate of Change (${rocUnitLabel})`, 
+                    angle: -90, 
+                    position: 'insideLeft', 
+                    style: { fontSize: tokens.fontSizeBase200 } 
+                  }}
+                  stroke={tokens.colorNeutralForeground2}
+                  style={{ fontSize: tokens.fontSizeBase200 }}
+                  domain={[0, 'auto']}
+                  tickFormatter={(value: number) => formatRoCValue(value, glucoseUnit)}
+                />
+                
+                <YAxis
+                  yAxisId="glucose"
+                  orientation="right"
+                  label={{ 
+                    value: `Glucose (${getUnitLabel(glucoseUnit)})`, 
+                    angle: 90, 
+                    position: 'insideRight', 
+                    style: { fontSize: tokens.fontSizeBase200 } 
+                  }}
+                  stroke={tokens.colorNeutralForeground3}
+                  style={{ fontSize: tokens.fontSizeBase200 }}
+                  domain={[0, maxGlucoseValue]}
+                  tickFormatter={(value: number) => glucoseUnit === 'mg/dL' ? Math.round(value).toString() : value.toFixed(1)}
+                />
+                
+                {/* Dashed reference lines for glucose thresholds */}
+                <ReferenceLine
+                  y={glucoseHighThreshold}
+                  yAxisId="glucose"
+                  stroke={tokens.colorNeutralStroke1}
+                  strokeDasharray="5 5"
+                  strokeWidth={1}
+                />
+                <ReferenceLine
+                  y={glucoseLowThreshold}
+                  yAxisId="glucose"
+                  stroke={tokens.colorNeutralStroke1}
+                  strokeDasharray="5 5"
+                  strokeWidth={1}
+                />
+                
+                <RechartsTooltip 
+                  content={<CustomTooltip glucoseUnit={glucoseUnit} />} 
+                />
+                
+                {/* Glucose line overlay (monochrome) */}
+                <Line
+                  yAxisId="glucose"
+                  type="monotone"
+                  data={glucoseLineData}
+                  dataKey="glucoseDisplay"
+                  name="Glucose"
+                  stroke={tokens.colorNeutralStroke1}
+                  strokeWidth={1.5}
+                  dot={false}
+                  connectNulls
+                  legendType="none"
+                />
+                
+                {/* Single connected RoC line - uses green as base color for stable glucose */}
+                <Line
+                  yAxisId="roc"
+                  type="monotone"
+                  dataKey="roc"
+                  name="Rate of Change"
+                  stroke={ROC_COLORS.good}
+                  strokeWidth={2.5}
+                  dot={false}
+                  connectNulls
+                  activeDot={{ r: 5, stroke: tokens.colorNeutralBackground1, strokeWidth: 2 }}
+                  legendType="none"
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Custom Legend */}
+          <div className={styles.legendContainer}>
+            <div className={styles.legendItem}>
+              <div className={styles.legendLine} style={{ backgroundColor: ROC_COLORS.good }} />
+              <Text>Rate of Change (RoC)</Text>
+            </div>
+            <div className={styles.legendItem}>
+              <div className={styles.legendLine} style={{ backgroundColor: tokens.colorNeutralStroke1 }} />
+              <Text>Glucose</Text>
+            </div>
+            <div className={styles.legendItem}>
+              <div className={styles.legendDashedLine} />
+              <Text>Target Range ({glucoseUnit === 'mg/dL' ? `${Math.round(glucoseLowThreshold)}-${Math.round(glucoseHighThreshold)}` : `${glucoseLowThreshold.toFixed(1)}-${glucoseHighThreshold.toFixed(1)}`} {getUnitLabel(glucoseUnit)})</Text>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Statistics Cards */}
@@ -648,27 +734,38 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
           <Tooltip content="Longest continuous period with stable glucose (slow rate of change)" relationship="description">
             <Card className={styles.statCard}>
               <TimerRegular className={styles.statIcon} />
-              <Text className={styles.statLabel}>Longest Stable</Text>
-              <Text className={styles.statValue}>{formatDuration(longestStablePeriod)}</Text>
-              <Text className={styles.statUnit}>continuous stable period</Text>
+              <div className={styles.statContent}>
+                <Text className={styles.statLabel}>Longest Stable</Text>
+                <div className={styles.statValueRow}>
+                  <Text className={styles.statValue}>{formatDuration(longestStablePeriod)}</Text>
+                </div>
+              </div>
             </Card>
           </Tooltip>
           
           <Tooltip content="Maximum absolute rate of glucose change (fastest)" relationship="description">
             <Card className={styles.statCard}>
               <TopSpeedRegular className={styles.statIcon} />
-              <Text className={styles.statLabel}>Max RoC</Text>
-              <Text className={styles.statValue}>{formatRoCValue(rocStats.maxRoC)}</Text>
-              <Text className={styles.statUnit}>mmol/L/min</Text>
+              <div className={styles.statContent}>
+                <Text className={styles.statLabel}>Max RoC</Text>
+                <div className={styles.statValueRow}>
+                  <Text className={styles.statValue}>{formatRoCValue(rocStats.maxRoC, glucoseUnit)}</Text>
+                  <Text className={styles.statUnit}>{rocUnitLabel}</Text>
+                </div>
+              </div>
             </Card>
           </Tooltip>
           
-          <Tooltip content="Standard deviation of RoC - measures variability in glucose change speed" relationship="description">
+          <Tooltip content="Standard Deviation of Rate of Change - measures variability in glucose change speed" relationship="description">
             <Card className={styles.statCard}>
               <DataHistogramRegular className={styles.statIcon} />
-              <Text className={styles.statLabel}>SDRoC</Text>
-              <Text className={styles.statValue}>{formatRoCValue(rocStats.sdRoC)}</Text>
-              <Text className={styles.statUnit}>mmol/L/min</Text>
+              <div className={styles.statContent}>
+                <Text className={styles.statLabel}>StDev RoC</Text>
+                <div className={styles.statValueRow}>
+                  <Text className={styles.statValue}>{formatRoCValue(rocStats.sdRoC, glucoseUnit)}</Text>
+                  <Text className={styles.statUnit}>{rocUnitLabel}</Text>
+                </div>
+              </div>
             </Card>
           </Tooltip>
         </div>
