@@ -903,7 +903,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                   Time in Range by Period
                   {dayFilter !== 'All Days' && (
                     <Tooltip content={`Filtered by: ${dayFilter}`} relationship="description">
-                      <FilterRegular className={styles.filterIcon} />
+                      <FilterRegular className={styles.filterIcon} aria-label="Filter indicator" />
                     </Tooltip>
                   )}
                 </span>
@@ -1002,7 +1002,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                   Time in Range - 24-Hour Hourly Breakdown
                   {dayFilter !== 'All Days' && (
                     <Tooltip content={`Filtered by: ${dayFilter}`} relationship="description">
-                      <FilterRegular className={styles.filterIcon} />
+                      <FilterRegular className={styles.filterIcon} aria-label="Filter indicator" />
                     </Tooltip>
                   )}
                 </span>
@@ -1199,7 +1199,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                   Detailed AGP Time Slots
                   {dayFilter !== 'All Days' && (
                     <Tooltip content={`Filtered by: ${dayFilter}`} relationship="description">
-                      <FilterRegular className={styles.filterIcon} />
+                      <FilterRegular className={styles.filterIcon} aria-label="Filter indicator" />
                     </Tooltip>
                   )}
                 </span>
