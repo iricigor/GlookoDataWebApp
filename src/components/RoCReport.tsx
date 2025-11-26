@@ -11,6 +11,8 @@ import {
   Spinner,
   Card,
   Tooltip,
+  TabList,
+  Tab,
 } from '@fluentui/react-components';
 import {
   TopSpeedRegular,
@@ -29,7 +31,7 @@ import {
   ReferenceLine,
   ReferenceArea,
 } from 'recharts';
-import type { UploadedFile, GlucoseReading, RoCDataPoint, RoCStats, GlucoseUnit, GlucoseThresholds } from '../types';
+import type { UploadedFile, GlucoseReading, RoCDataPoint, RoCStats, GlucoseUnit } from '../types';
 import {
   extractGlucoseReadings,
   calculateRoC,
@@ -62,15 +64,20 @@ const TIME_LABELS: Record<number, string> = {
  * These are intentionally different from the configurable thresholds used
  * for time-in-range calculations. The RoC chart uses fixed values to ensure
  * consistent visualization:
- * - veryHigh/high: 22/16 mmol/L for the Y-axis maximum
  * - low/veryLow: 3.9/3.0 mmol/L for the dashed reference line
  */
-const CHART_GLUCOSE_THRESHOLDS: GlucoseThresholds = {
-  veryHigh: 22,
-  high: 16,
+const CHART_GLUCOSE_THRESHOLDS = {
   low: 3.9,
   veryLow: 3.0,
-};
+} as const;
+
+/**
+ * Max glucose values for Y-axis toggle (matching other reports)
+ */
+const MAX_GLUCOSE_VALUES = {
+  mmol: { low: 16.0, high: 22.0 },
+  mgdl: { low: 288, high: 396 },
+} as const;
 
 const useStyles = makeStyles({
   container: {
@@ -241,6 +248,22 @@ const useStyles = makeStyles({
     height: '0',
     borderTop: `2px dashed ${tokens.colorNeutralStroke1}`,
   },
+  controlsRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    marginBottom: '8px',
+    ...shorthands.gap('16px'),
+  },
+  maxValueContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
+  maxValueLabel: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+  },
 });
 
 interface RoCReportProps {
@@ -325,6 +348,9 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
   const [availableDates, setAvailableDates] = useState<string[]>([]);
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
   const [longestStablePeriod, setLongestStablePeriod] = useState(0);
+  const [maxGlucose, setMaxGlucose] = useState<number>(
+    glucoseUnit === 'mg/dL' ? MAX_GLUCOSE_VALUES.mgdl.high : MAX_GLUCOSE_VALUES.mmol.high
+  );
   
   const loadedFileIdRef = useRef<string | undefined>(undefined);
   const hasAppliedSavedDateRef = useRef<boolean>(false);
@@ -470,10 +496,9 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
 
   const medicalStandards = getRoCMedicalStandards();
 
-  // Calculate thresholds in the display unit
-  const glucoseHighThreshold = convertGlucoseValue(CHART_GLUCOSE_THRESHOLDS.high, glucoseUnit);
+  // Calculate thresholds in the display unit - high threshold for reference line (16 mmol/L / 288 mg/dL)
+  const glucoseHighThreshold = glucoseUnit === 'mg/dL' ? MAX_GLUCOSE_VALUES.mgdl.low : MAX_GLUCOSE_VALUES.mmol.low;
   const glucoseLowThreshold = convertGlucoseValue(CHART_GLUCOSE_THRESHOLDS.low, glucoseUnit);
-  const glucoseMaxThreshold = convertGlucoseValue(CHART_GLUCOSE_THRESHOLDS.veryHigh, glucoseUnit);
 
   // Prepare chart data with connected RoC line and per-point coloring
   const chartData = useMemo(() => {
@@ -499,6 +524,16 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
     });
   }, [dayRoCData, glucoseUnit]);
 
+  // Generate gradient stops for the RoC line based on time positions
+  const rocGradientStops = useMemo(() => {
+    if (chartData.length === 0) return [];
+    
+    return chartData.map(point => ({
+      offset: `${(point.timeDecimal / 24) * 100}%`,
+      color: point.pointColor,
+    }));
+  }, [chartData]);
+
   // Prepare glucose line data for overlay
   const glucoseLineData = useMemo(() => {
     return dayGlucoseReadings.map(reading => {
@@ -513,9 +548,6 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
       };
     }).sort((a, b) => a.timeDecimal - b.timeDecimal);
   }, [dayGlucoseReadings, glucoseUnit]);
-
-  // Fixed Y-axis max based on unit (16/22 mmol/L or equivalent)
-  const maxGlucoseValue = glucoseMaxThreshold;
 
   // RoC unit label
   const rocUnitLabel = glucoseUnit === 'mg/dL' ? 'mg/dL/5 min' : 'mmol/L/5 min';
@@ -566,6 +598,40 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
         maxDate={maxDate}
       />
 
+      {/* Controls Row */}
+      <div className={styles.controlsRow}>
+        <div className={styles.maxValueContainer}>
+          <Text className={styles.maxValueLabel}>Max BG:</Text>
+          <TabList
+            selectedValue={
+              glucoseUnit === 'mg/dL'
+                ? (maxGlucose === MAX_GLUCOSE_VALUES.mgdl.low ? String(MAX_GLUCOSE_VALUES.mgdl.low) : String(MAX_GLUCOSE_VALUES.mgdl.high))
+                : (maxGlucose === MAX_GLUCOSE_VALUES.mmol.low ? String(MAX_GLUCOSE_VALUES.mmol.low) : String(MAX_GLUCOSE_VALUES.mmol.high))
+            }
+            onTabSelect={(_, data) => {
+              if (glucoseUnit === 'mg/dL') {
+                setMaxGlucose(data.value === String(MAX_GLUCOSE_VALUES.mgdl.low) ? MAX_GLUCOSE_VALUES.mgdl.low : MAX_GLUCOSE_VALUES.mgdl.high);
+              } else {
+                setMaxGlucose(data.value === String(MAX_GLUCOSE_VALUES.mmol.low) ? MAX_GLUCOSE_VALUES.mmol.low : MAX_GLUCOSE_VALUES.mmol.high);
+              }
+            }}
+            size="small"
+          >
+            {glucoseUnit === 'mg/dL' ? (
+              <>
+                <Tab value={String(MAX_GLUCOSE_VALUES.mgdl.low)}>{MAX_GLUCOSE_VALUES.mgdl.low}</Tab>
+                <Tab value={String(MAX_GLUCOSE_VALUES.mgdl.high)}>{MAX_GLUCOSE_VALUES.mgdl.high}</Tab>
+              </>
+            ) : (
+              <>
+                <Tab value={String(MAX_GLUCOSE_VALUES.mmol.low)}>{MAX_GLUCOSE_VALUES.mmol.low}</Tab>
+                <Tab value={String(MAX_GLUCOSE_VALUES.mmol.high)}>{MAX_GLUCOSE_VALUES.mmol.high}</Tab>
+              </>
+            )}
+          </TabList>
+        </div>
+      </div>
+
       {/* RoC Graph */}
       {dayRoCData.length > 0 && (
         <>
@@ -581,6 +647,12 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                   <linearGradient id="nightGradientRight" x1="0" y1="0" x2="1" y2="0">
                     <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
                     <stop offset="100%" stopColor="#1a237e" stopOpacity="0.25" />
+                  </linearGradient>
+                  {/* RoC line gradient - follows HSV color scale based on RoC value */}
+                  <linearGradient id="rocLineGradient" x1="0" y1="0" x2="1" y2="0">
+                    {rocGradientStops.map((stop, index) => (
+                      <stop key={index} offset={stop.offset} stopColor={stop.color} />
+                    ))}
                   </linearGradient>
                 </defs>
                 
@@ -601,22 +673,22 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                   fill="url(#nightGradientRight)"
                 />
                 
-                {/* Reference lines for RoC thresholds */}
+                {/* Reference lines for RoC thresholds - labels on left axis */}
                 <ReferenceLine
                   y={ROC_THRESHOLDS.good}
                   yAxisId="roc"
                   stroke={ROC_COLORS.good}
                   strokeDasharray="5 5"
                   strokeWidth={1}
-                  label={{ value: 'Stable', position: 'right', fill: ROC_COLORS.good, fontSize: 10 }}
+                  label={{ value: 'Stable', position: 'left', fill: ROC_COLORS.good, fontSize: 10 }}
                 />
                 <ReferenceLine
                   y={ROC_THRESHOLDS.medium}
                   yAxisId="roc"
-                  stroke={ROC_COLORS.medium}
+                  stroke={ROC_COLORS.bad}
                   strokeDasharray="5 5"
                   strokeWidth={1}
-                  label={{ value: 'Moderate', position: 'right', fill: ROC_COLORS.medium, fontSize: 10 }}
+                  label={{ value: 'Rapid', position: 'left', fill: ROC_COLORS.bad, fontSize: 10 }}
                 />
                 
                 <XAxis
@@ -655,7 +727,7 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                   }}
                   stroke={tokens.colorNeutralForeground3}
                   style={{ fontSize: tokens.fontSizeBase200 }}
-                  domain={[0, maxGlucoseValue]}
+                  domain={[0, maxGlucose]}
                   tickFormatter={(value: number) => glucoseUnit === 'mg/dL' ? Math.round(value).toString() : value.toFixed(1)}
                 />
                 
@@ -693,13 +765,13 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                   legendType="none"
                 />
                 
-                {/* Single connected RoC line - uses green as base color for stable glucose */}
+                {/* RoC line with gradient color - changes from green to red based on RoC value */}
                 <Line
                   yAxisId="roc"
                   type="monotone"
                   dataKey="roc"
                   name="Rate of Change"
-                  stroke={ROC_COLORS.good}
+                  stroke="url(#rocLineGradient)"
                   strokeWidth={2.5}
                   dot={false}
                   connectNulls
@@ -713,7 +785,12 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
           {/* Custom Legend */}
           <div className={styles.legendContainer}>
             <div className={styles.legendItem}>
-              <div className={styles.legendLine} style={{ backgroundColor: ROC_COLORS.good }} />
+              <div 
+                className={styles.legendLine} 
+                style={{ 
+                  background: `linear-gradient(to right, ${ROC_COLORS.good}, ${ROC_COLORS.medium}, ${ROC_COLORS.bad})` 
+                }} 
+              />
               <Text>Rate of Change (RoC)</Text>
             </div>
             <div className={styles.legendItem}>
