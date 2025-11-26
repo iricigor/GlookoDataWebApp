@@ -114,22 +114,18 @@ describe('rocDataUtils', () => {
     });
 
     it('should calculate RoC over 60-minute interval', () => {
+      const baseTime = new Date('2024-01-01T10:00:00').getTime();
       const readings: GlucoseReading[] = [];
+      
       // Create readings every 5 minutes for 70 minutes
-      for (let i = 0; i <= 70; i += 5) {
+      for (let i = 0; i <= 14; i++) {
         readings.push({
-          timestamp: new Date(`2024-01-01T10:${String(i).padStart(2, '0')}:00`),
-          value: 5.0 + (i / 100),  // Gradual increase
+          timestamp: new Date(baseTime + i * 5 * 60 * 1000),
+          value: 5.0 + (i * 5 / 100),  // Gradual increase
         });
       }
-      // Fix timestamps - need to handle hours properly
-      const baseTime = new Date('2024-01-01T10:00:00').getTime();
-      const fixedReadings = readings.map((_, idx) => ({
-        timestamp: new Date(baseTime + idx * 5 * 60 * 1000),
-        value: 5.0 + (idx * 5 / 100),
-      }));
       
-      const result = calculateRoCWithInterval(fixedReadings, 60);
+      const result = calculateRoCWithInterval(readings, 60);
       
       // Should have points starting around 60min into the data
       expect(result.length).toBeGreaterThan(0);
