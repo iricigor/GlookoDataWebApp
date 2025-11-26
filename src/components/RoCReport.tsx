@@ -284,9 +284,9 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground1,
     minWidth: '40px',
   },
-  // Responsive chart container - base margins
+  // Responsive chart container - minimal margins for mobile
   chartContainerMobile: {
-    ...shorthands.padding('8px', '4px'),
+    ...shorthands.padding('4px', '0px'),
   },
 });
 
@@ -403,19 +403,19 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
     // Gradually reduce margins as screen gets narrower
     // Full width (>1200px): margins 10 left, 50 right
     // Medium (768-1200px): margins scaled down proportionally
-    // Mobile (<768px): minimal margins 5 left, 30 right
+    // Mobile (<768px): minimal margins 0 left, 15 right
     if (windowWidth >= 1200) {
       return { top: 10, right: 50, left: 10, bottom: 0 };
     } else if (windowWidth >= 768) {
       const factor = (windowWidth - 768) / (1200 - 768);
       return {
         top: 10,
-        right: Math.round(30 + 20 * factor),
-        left: Math.round(5 + 5 * factor),
+        right: Math.round(15 + 35 * factor),
+        left: Math.round(0 + 10 * factor),
         bottom: 0,
       };
     } else {
-      return { top: 10, right: 30, left: 5, bottom: 0 };
+      return { top: 10, right: 15, left: 0, bottom: 0 };
     }
   }, [windowWidth]);
 
