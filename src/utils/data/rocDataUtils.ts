@@ -252,6 +252,104 @@ export function calculateRoC(readings: GlucoseReading[]): RoCDataPoint[] {
 }
 
 /**
+ * Valid RoC calculation interval options in minutes.
+ * These represent the time window over which glucose change is measured:
+ * - 15min: Short-term changes (3 CGM readings)
+ * - 30min: Medium-term changes (6 CGM readings)
+ * - 60min: Long-term changes (12 CGM readings)
+ * - 120min: Extended changes (24 CGM readings)
+ */
+export type RoCIntervalMinutes = 15 | 30 | 60 | 120;
+
+/**
+ * Calculate Rate of Change from glucose readings over a specified time interval.
+ * 
+ * This function finds the glucose reading closest to the target interval before each reading
+ * and calculates the rate of change between them. This allows for analyzing glucose trends
+ * over longer time periods (15min, 30min, 1h, 2h) rather than just consecutive readings.
+ * 
+ * RoC values are stored in mmol/L/5min units for display to maintain consistency with
+ * the standard CGM arrow indicators.
+ * 
+ * @param readings - Array of glucose readings sorted by timestamp
+ * @param intervalMinutes - Time interval in minutes over which to calculate RoC (15, 30, 60, or 120)
+ * @returns Array of RoC data points with values in mmol/L/5min
+ */
+export function calculateRoCWithInterval(readings: GlucoseReading[], intervalMinutes: RoCIntervalMinutes): RoCDataPoint[] {
+  if (readings.length < 2) {
+    return [];
+  }
+
+  // Sort readings by timestamp
+  const sortedReadings = [...readings].sort(
+    (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+  );
+
+  const rocDataPoints: RoCDataPoint[] = [];
+  const intervalMs = intervalMinutes * 60 * 1000;
+  // Allow 20% tolerance for finding matching readings
+  const toleranceMs = intervalMs * 0.2;
+
+  for (let i = 0; i < sortedReadings.length; i++) {
+    const current = sortedReadings[i];
+    const targetTime = current.timestamp.getTime() - intervalMs;
+    
+    // Find the reading closest to the target time within tolerance
+    let bestMatch: GlucoseReading | null = null;
+    let bestTimeDiff = Infinity;
+    
+    for (let j = 0; j < i; j++) {
+      const candidate = sortedReadings[j];
+      const timeDiff = Math.abs(candidate.timestamp.getTime() - targetTime);
+      
+      if (timeDiff < bestTimeDiff && timeDiff <= toleranceMs) {
+        bestMatch = candidate;
+        bestTimeDiff = timeDiff;
+      }
+    }
+    
+    // Skip if no suitable reading found
+    if (!bestMatch) {
+      continue;
+    }
+    
+    // Calculate time difference in minutes
+    const timeDiffMs = current.timestamp.getTime() - bestMatch.timestamp.getTime();
+    const timeDiffMin = timeDiffMs / (1000 * 60);
+    
+    // Calculate glucose change
+    const glucoseChange = current.value - bestMatch.value;
+    
+    // Calculate rate of change (mmol/L per minute)
+    const rocPerMin = glucoseChange / timeDiffMin;
+    const absRoCPerMin = Math.abs(rocPerMin);
+    
+    // Convert to per-5-minute values for storage and display
+    const roc5min = absRoCPerMin * ROC_TIME_SPAN_MINUTES;
+    const rocRaw5min = rocPerMin * ROC_TIME_SPAN_MINUTES;
+    
+    // Get time components for the data point
+    const hour = current.timestamp.getHours();
+    const minute = current.timestamp.getMinutes();
+    const timeDecimal = hour + minute / 60;
+    const timeLabel = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    
+    rocDataPoints.push({
+      timestamp: current.timestamp,
+      timeDecimal,
+      timeLabel,
+      roc: roc5min,
+      rocRaw: rocRaw5min,
+      glucoseValue: current.value,
+      color: getRoCColor(roc5min),
+      category: categorizeRoC(roc5min),
+    });
+  }
+
+  return rocDataPoints;
+}
+
+/**
  * Filter RoC data points for a specific date
  * 
  * @param dataPoints - Array of RoC data points
