@@ -31,6 +31,7 @@ import {
   HomeRegular,
   CheckmarkCircleRegular,
   DataLineRegular,
+  FilterRegular,
 } from '@fluentui/react-icons';
 import type { 
   UploadedFile, 
@@ -355,6 +356,15 @@ const useStyles = makeStyles({
     textAlign: 'center',
     paddingTop: '8px',
   },
+  filterIcon: {
+    color: tokens.colorBrandForeground1,
+    marginLeft: '8px',
+    fontSize: '16px',
+  },
+  accordionHeaderContent: {
+    display: 'flex',
+    alignItems: 'center',
+  },
 });
 
 interface BGOverviewReportProps {
@@ -456,9 +466,9 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
           setDayOfWeekReports(groupByDayOfWeek(glucoseReadings, thresholds, categoryMode));
           setWeeklyReports(groupByWeek(glucoseReadings, thresholds, categoryMode));
           
-          // Calculate period-based TIR and hourly TIR
-          setPeriodStats(calculateTIRByTimePeriods(glucoseReadings, thresholds, categoryMode));
-          setHourlyStats(calculateHourlyTIR(glucoseReadings, thresholds, categoryMode));
+          // Calculate period-based TIR and hourly TIR (apply day filter)
+          setPeriodStats(calculateTIRByTimePeriods(filteredReadings, thresholds, categoryMode));
+          setHourlyStats(calculateHourlyTIR(filteredReadings, thresholds, categoryMode));
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load glucose data');
@@ -508,9 +518,9 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
         setDayOfWeekReports(groupByDayOfWeek(filteredByDate, thresholds, categoryMode));
         setWeeklyReports(groupByWeek(filteredByDate, thresholds, categoryMode));
         
-        // Recalculate period-based TIR and hourly TIR with filtered data
-        setPeriodStats(calculateTIRByTimePeriods(filteredByDate, thresholds, categoryMode, end));
-        setHourlyStats(calculateHourlyTIR(filteredByDate, thresholds, categoryMode));
+        // Recalculate period-based TIR and hourly TIR with day filter applied
+        setPeriodStats(calculateTIRByTimePeriods(filteredReadings, thresholds, categoryMode, end));
+        setHourlyStats(calculateHourlyTIR(filteredReadings, thresholds, categoryMode));
       }
     }
   }, [startDate, endDate, readings, dayFilter, thresholds, categoryMode]);
@@ -888,7 +898,16 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
           {/* TIR by Time Period */}
           {periodStats.length > 0 && (
             <AccordionItem value="periodTIR">
-              <AccordionHeader>Time in Range by Period</AccordionHeader>
+              <AccordionHeader>
+                <span className={styles.accordionHeaderContent}>
+                  Time in Range by Period
+                  {dayFilter !== 'All Days' && (
+                    <Tooltip content={`Filtered by: ${dayFilter}`} relationship="description">
+                      <FilterRegular className={styles.filterIcon} aria-label="Filter indicator" />
+                    </Tooltip>
+                  )}
+                </span>
+              </AccordionHeader>
               <AccordionPanel>
                 <div className={styles.periodBarsContainer}>
                   {periodStats.map((period) => (
@@ -978,7 +997,16 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
           {/* 24-Hour Hourly TIR Breakdown */}
           {hourlyStats.length > 0 && (
             <AccordionItem value="hourlyTIR">
-              <AccordionHeader>Time in Range - 24-Hour Hourly Breakdown</AccordionHeader>
+              <AccordionHeader>
+                <span className={styles.accordionHeaderContent}>
+                  Time in Range - 24-Hour Hourly Breakdown
+                  {dayFilter !== 'All Days' && (
+                    <Tooltip content={`Filtered by: ${dayFilter}`} relationship="description">
+                      <FilterRegular className={styles.filterIcon} aria-label="Filter indicator" />
+                    </Tooltip>
+                  )}
+                </span>
+              </AccordionHeader>
               <AccordionPanel>
                 <div className={styles.hourlyChartContainer}>
                   {/* Hourly stacked bar chart */}
@@ -1166,7 +1194,16 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
           {/* Detailed AGP Time Slots */}
           {agpStatsWithData.length > 0 && (
             <AccordionItem value="agpTimeSlots">
-              <AccordionHeader>Detailed AGP Time Slots</AccordionHeader>
+              <AccordionHeader>
+                <span className={styles.accordionHeaderContent}>
+                  Detailed AGP Time Slots
+                  {dayFilter !== 'All Days' && (
+                    <Tooltip content={`Filtered by: ${dayFilter}`} relationship="description">
+                      <FilterRegular className={styles.filterIcon} aria-label="Filter indicator" />
+                    </Tooltip>
+                  )}
+                </span>
+              </AccordionHeader>
               <AccordionPanel>
                 <div className={styles.tableSection}>
                   <Text className={styles.noData} style={{ padding: '8px 0', fontSize: tokens.fontSizeBase200 }}>
