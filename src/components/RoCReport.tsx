@@ -13,13 +13,15 @@ import {
   Tooltip,
   TabList,
   Tab,
+  Slider,
+  mergeClasses,
 } from '@fluentui/react-components';
 import {
   TopSpeedRegular,
   DataHistogramRegular,
   TimerRegular,
 } from '@fluentui/react-icons';
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   XAxis,
   YAxis,
@@ -35,7 +37,7 @@ import type { UploadedFile, GlucoseReading, RoCDataPoint, RoCStats, GlucoseUnit 
 import {
   extractGlucoseReadings,
   calculateRoC,
-  filterRoCByDate,
+  calculateRoCWithInterval,
   calculateRoCStats,
   getUniqueDatesFromRoC,
   ROC_COLORS,
@@ -50,13 +52,13 @@ import {
   formatDuration,
   getRoCColor,
 } from '../utils/data';
+import type { RoCIntervalMinutes } from '../utils/data/rocDataUtils';
 import { DayNavigator } from './DayNavigator';
 import { useSelectedDate } from '../hooks/useSelectedDate';
 
-// Time labels for X-axis formatting (show every 3 hours)
+// Time labels for X-axis formatting (show every 6 hours)
 const TIME_LABELS: Record<number, string> = {
-  0: '12A', 3: '3A', 6: '6A', 9: '9A',
-  12: '12P', 15: '3P', 18: '6P', 21: '9P', 24: '12A'
+  0: '12AM', 6: '6AM', 12: '12PM', 18: '6PM', 24: '12AM'
 };
 
 /**
@@ -254,6 +256,7 @@ const useStyles = makeStyles({
     justifyContent: 'flex-end',
     marginBottom: '8px',
     ...shorthands.gap('16px'),
+    flexWrap: 'wrap',
   },
   maxValueContainer: {
     display: 'flex',
@@ -263,6 +266,27 @@ const useStyles = makeStyles({
   maxValueLabel: {
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground2,
+  },
+  sliderContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+    minWidth: '180px',
+  },
+  sliderLabel: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+    whiteSpace: 'nowrap',
+  },
+  sliderValue: {
+    fontSize: tokens.fontSizeBase200,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    minWidth: '40px',
+  },
+  // Responsive chart container - minimal margins for mobile
+  chartContainerMobile: {
+    ...shorthands.padding('4px', '0px'),
   },
 });
 
@@ -330,18 +354,25 @@ const CustomTooltip = ({
   );
 };
 
-// Format X-axis labels (show every 3 hours)
+// Format X-axis labels (show every 6 hours)
 const formatXAxis = (value: number) => {
   const hour = Math.floor(value);
   return TIME_LABELS[hour] || '';
 };
+
+// RoC interval options mapping slider value to minutes
+const ROC_INTERVAL_OPTIONS: { value: number; label: string; minutes: RoCIntervalMinutes }[] = [
+  { value: 0, label: '15min', minutes: 15 },
+  { value: 1, label: '30min', minutes: 30 },
+  { value: 2, label: '1h', minutes: 60 },
+  { value: 3, label: '2h', minutes: 120 },
+];
 
 export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
   const styles = useStyles();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
   const [loading, setLoading] = useState(false);
   const [allReadings, setAllReadings] = useState<GlucoseReading[]>([]);
-  const [allRoCData, setAllRoCData] = useState<RoCDataPoint[]>([]);
   const [dayRoCData, setDayRoCData] = useState<RoCDataPoint[]>([]);
   const [dayGlucoseReadings, setDayGlucoseReadings] = useState<GlucoseReading[]>([]);
   const [rocStats, setRocStats] = useState<RoCStats | null>(null);
@@ -351,9 +382,44 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
   const [maxGlucose, setMaxGlucose] = useState<number>(
     glucoseUnit === 'mg/dL' ? MAX_GLUCOSE_VALUES.mgdl.high : MAX_GLUCOSE_VALUES.mmol.high
   );
+  const [rocIntervalIndex, setRocIntervalIndex] = useState(0); // 0 = 15min (default)
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   
   const loadedFileIdRef = useRef<string | undefined>(undefined);
   const hasAppliedSavedDateRef = useRef<boolean>(false);
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+
+  // Track window width for responsive margins
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Calculate responsive margins based on window width
+  const getChartMargins = useCallback(() => {
+    // Gradually reduce margins as screen gets narrower
+    // Full width (>1200px): margins 10 left, 50 right
+    // Medium (768-1200px): margins scaled down proportionally
+    // Mobile (<768px): minimal margins 0 left, 15 right
+    if (windowWidth >= 1200) {
+      return { top: 10, right: 50, left: 10, bottom: 0 };
+    } else if (windowWidth >= 768) {
+      const factor = (windowWidth - 768) / (1200 - 768);
+      return {
+        top: 10,
+        right: Math.round(15 + 35 * factor),
+        left: Math.round(0 + 10 * factor),
+        bottom: 0,
+      };
+    } else {
+      return { top: 10, right: 15, left: 0, bottom: 0 };
+    }
+  }, [windowWidth]);
+
+  const chartMargins = useMemo(() => getChartMargins(), [getChartMargins]);
 
   // Extract glucose data and calculate RoC when file changes
   useEffect(() => {
@@ -361,7 +427,6 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
       setAvailableDates([]);
       setCurrentDateIndex(0);
       setAllReadings([]);
-      setAllRoCData([]);
       setDayRoCData([]);
       setDayGlucoseReadings([]);
       setRocStats(null);
@@ -401,9 +466,8 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
         if (readings.length > 0) {
           setAllReadings(readings);
           
-          // Calculate RoC for all readings
+          // Calculate RoC to get available dates
           const rocData = calculateRoC(readings);
-          setAllRoCData(rocData);
           
           // Extract unique dates from RoC data
           const dates = getUniqueDatesFromRoC(rocData);
@@ -418,7 +482,6 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
           }
         } else {
           setAllReadings([]);
-          setAllRoCData([]);
           setAvailableDates([]);
         }
         
@@ -448,15 +511,29 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDateIndex, availableDates]);
 
+  // Get current interval settings
+  const currentInterval = ROC_INTERVAL_OPTIONS[rocIntervalIndex];
+
   // Filter RoC data for the selected date and calculate stats
+  // Recalculates when interval changes
   useEffect(() => {
-    if (availableDates.length > 0 && allRoCData.length > 0) {
+    if (availableDates.length > 0 && allReadings.length > 0) {
       const currentDate = availableDates[currentDateIndex];
-      const filteredRoC = filterRoCByDate(allRoCData, currentDate);
       const filteredGlucose = filterReadingsByDate(allReadings, currentDate);
       
-      // Apply 15-minute moving average smoothing to RoC data
-      const smoothedRoC = smoothRoCData(filteredRoC);
+      // Calculate RoC based on selected interval
+      let rocData: RoCDataPoint[];
+      if (currentInterval.minutes === 15) {
+        // For 15min interval, use the standard consecutive reading calculation
+        // Then apply smoothing for display consistency
+        rocData = calculateRoC(filteredGlucose);
+      } else {
+        // For longer intervals (30min, 1h, 2h), use the interval-based calculation
+        rocData = calculateRoCWithInterval(filteredGlucose, currentInterval.minutes);
+      }
+      
+      // Apply smoothing to RoC data
+      const smoothedRoC = smoothRoCData(rocData);
       
       setDayRoCData(smoothedRoC);
       setDayGlucoseReadings(filteredGlucose);
@@ -470,7 +547,7 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
       setRocStats(null);
       setLongestStablePeriod(0);
     }
-  }, [currentDateIndex, availableDates, allRoCData, allReadings]);
+  }, [currentDateIndex, availableDates, allReadings, currentInterval.minutes]);
 
   const handlePreviousDay = () => {
     if (currentDateIndex > 0) {
@@ -600,6 +677,20 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
 
       {/* Controls Row */}
       <div className={styles.controlsRow}>
+        <Tooltip content="Time window for calculating glucose rate of change" relationship="description">
+          <div className={styles.sliderContainer}>
+            <Text className={styles.sliderLabel}>RoC Interval:</Text>
+            <Slider
+              min={0}
+              max={3}
+              step={1}
+              value={rocIntervalIndex}
+              onChange={(_, data) => setRocIntervalIndex(data.value)}
+              style={{ minWidth: '80px' }}
+            />
+            <Text className={styles.sliderValue}>{currentInterval.label}</Text>
+          </div>
+        </Tooltip>
         <div className={styles.maxValueContainer}>
           <Text className={styles.maxValueLabel}>Max BG:</Text>
           <TabList
@@ -635,9 +726,15 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
       {/* RoC Graph */}
       {dayRoCData.length > 0 && (
         <>
-          <div className={styles.chartContainer}>
+          <div 
+            ref={chartContainerRef}
+            className={mergeClasses(
+              styles.chartContainer,
+              windowWidth < 768 && styles.chartContainerMobile
+            )}
+          >
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart margin={{ top: 10, right: 50, left: 10, bottom: 0 }} data={chartData}>
+              <ComposedChart margin={chartMargins} data={chartData}>
                 <defs>
                   {/* Gradual night shading gradients */}
                   <linearGradient id="nightGradientLeft" x1="0" y1="0" x2="1" y2="0">
@@ -695,7 +792,7 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                   type="number"
                   dataKey="timeDecimal"
                   domain={[0, 24]}
-                  ticks={[0, 3, 6, 9, 12, 15, 18, 21, 24]}
+                  ticks={[0, 6, 12, 18, 24]}
                   tickFormatter={formatXAxis}
                   stroke={tokens.colorNeutralForeground2}
                   style={{ fontSize: tokens.fontSizeBase200 }}

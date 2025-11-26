@@ -5,6 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   calculateRoC,
+  calculateRoCWithInterval,
   filterRoCByDate,
   calculateRoCStats,
   getUniqueDatesFromRoC,
@@ -80,6 +81,101 @@ describe('rocDataUtils', () => {
       const result = calculateRoC(readings);
       expect(result).toHaveLength(1);
       expect(result[0].roc).toBeCloseTo(0.5, 3);  // 0.5 mmol/L/5min
+    });
+  });
+
+  describe('calculateRoCWithInterval', () => {
+    it('should return empty array for less than 2 readings', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-01T10:00:00'), value: 5.5 },
+      ];
+      const result = calculateRoCWithInterval(readings, 30);
+      expect(result).toEqual([]);
+    });
+
+    it('should calculate RoC over 30-minute interval', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-01T10:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-01T10:05:00'), value: 5.1 },
+        { timestamp: new Date('2024-01-01T10:10:00'), value: 5.2 },
+        { timestamp: new Date('2024-01-01T10:15:00'), value: 5.3 },
+        { timestamp: new Date('2024-01-01T10:20:00'), value: 5.4 },
+        { timestamp: new Date('2024-01-01T10:25:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-01T10:30:00'), value: 5.6 },
+      ];
+      const result = calculateRoCWithInterval(readings, 30);
+      
+      // Should find readings approximately 30 min apart
+      // At 10:30, looking back 30min finds 10:00 (value 5.0)
+      // Change: 5.6 - 5.0 = 0.6 over 30min = 0.02 mmol/L/min = 0.1 mmol/L/5min
+      expect(result.length).toBeGreaterThan(0);
+      const lastPoint = result[result.length - 1];
+      expect(lastPoint.roc).toBeCloseTo(0.1, 2);  // 0.1 mmol/L/5min
+    });
+
+    it('should calculate RoC over 60-minute interval', () => {
+      const baseTime = new Date('2024-01-01T10:00:00').getTime();
+      const readings: GlucoseReading[] = [];
+      
+      // Create readings every 5 minutes for 70 minutes
+      for (let i = 0; i <= 14; i++) {
+        readings.push({
+          timestamp: new Date(baseTime + i * 5 * 60 * 1000),
+          value: 5.0 + (i * 5 / 100),  // Gradual increase
+        });
+      }
+      
+      const result = calculateRoCWithInterval(readings, 60);
+      
+      // Should have points starting around 60min into the data
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('should handle 120-minute interval', () => {
+      const baseTime = new Date('2024-01-01T08:00:00').getTime();
+      const readings: GlucoseReading[] = [];
+      
+      // Create readings every 5 minutes for 130 minutes
+      for (let i = 0; i <= 130; i += 5) {
+        readings.push({
+          timestamp: new Date(baseTime + i * 60 * 1000),
+          value: 5.0 + (i / 200),  // Gradual increase
+        });
+      }
+      
+      const result = calculateRoCWithInterval(readings, 120);
+      
+      // Should have points starting around 120min into the data
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('should return empty when no readings within interval tolerance', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-01T10:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-01T10:05:00'), value: 5.5 },
+      ];
+      // 30-min interval with only 5-min gap readings - no match within tolerance
+      const result = calculateRoCWithInterval(readings, 30);
+      expect(result).toHaveLength(0);
+    });
+
+    it('should sort readings by timestamp before calculation', () => {
+      const baseTime = new Date('2024-01-01T10:00:00').getTime();
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date(baseTime + 30 * 60 * 1000), value: 6.0 },  // 10:30
+        { timestamp: new Date(baseTime + 15 * 60 * 1000), value: 5.5 },  // 10:15
+        { timestamp: new Date(baseTime), value: 5.0 },  // 10:00
+      ];
+      
+      const result = calculateRoCWithInterval(readings, 30);
+      
+      // Should work despite unsorted input
+      if (result.length > 0) {
+        // Verify we calculated from sorted data
+        expect(result[result.length - 1].timestamp.getTime()).toBeGreaterThanOrEqual(
+          result[0].timestamp.getTime()
+        );
+      }
     });
   });
 
