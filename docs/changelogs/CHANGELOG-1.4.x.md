@@ -204,6 +204,13 @@ Version 1.4 focuses on advanced glucose analysis features, enhanced reporting ca
 
 ### Other
 
+<details>
+<summary>463 Refactor changelog into version-specific files</summary>
+
+[#463](../../pull/463) Refactor changelog into version-specific files
+  - [Auto-generated entry from PR merge]
+</details>
+
 ---
 
 [← Back to Main Changelog](../../CHANGELOG.md)
