@@ -205,6 +205,13 @@ Version 1.4 focuses on advanced glucose analysis features, enhanced reporting ca
 ### Other
 
 <details>
+<summary>483 Add Epic issue template</summary>
+
+[#483](../../pull/483) Add Epic issue template
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>481 Fix Grok API 404 by updating model from grok-beta to grok-3-mini</summary>
 
 [#481](../../pull/481) Fix Grok API 404 by updating model from grok-beta to grok-3-mini
