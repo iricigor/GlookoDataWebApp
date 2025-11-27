@@ -66,7 +66,7 @@ export async function callGrokApi(
   return callOpenAICompatibleApi(
     {
       url: 'https://api.x.ai/v1/chat/completions',
-      model: 'grok-beta',
+      model: 'grok-3',
       finishReasonTruncated: 'length',
     },
     apiKey,
