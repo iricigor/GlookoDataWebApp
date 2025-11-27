@@ -23,6 +23,11 @@ import {
   calculateTIRByTimePeriods,
   calculateHourlyTIR,
   calculateHourlyTIRGrouped,
+  calculateAverageGlucose,
+  calculateEstimatedHbA1c,
+  convertHbA1cToMmolMol,
+  calculateDaysWithData,
+  MIN_DAYS_FOR_RELIABLE_HBA1C,
 } from './glucoseRangeUtils';
 import type { GlucoseReading, GlucoseThresholds } from '../../types';
 
@@ -596,6 +601,102 @@ describe('glucoseRangeUtils', () => {
       const resultHourly = calculateHourlyTIR(readings, standardThresholds, 3);
       
       expect(resultGrouped).toEqual(resultHourly);
+    });
+  });
+
+  describe('calculateAverageGlucose', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateAverageGlucose([])).toBeNull();
+    });
+
+    it('should calculate average glucose correctly', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 7.0 },
+      ];
+      expect(calculateAverageGlucose(readings)).toBe(6.0);
+    });
+
+    it('should handle single reading', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+      ];
+      expect(calculateAverageGlucose(readings)).toBe(5.5);
+    });
+  });
+
+  describe('calculateEstimatedHbA1c', () => {
+    it('should calculate estimated HbA1c using ADA formula', () => {
+      // For average glucose of 5.4 mmol/L (about 97 mg/dL), HbA1c should be around 5.0%
+      // Formula: (5.4 + 2.59) / 1.59 = 5.03
+      const result = calculateEstimatedHbA1c(5.4);
+      expect(result).toBeCloseTo(5.03, 1);
+    });
+
+    it('should calculate correct HbA1c for higher glucose levels', () => {
+      // For average glucose of 8.6 mmol/L (about 155 mg/dL), HbA1c should be around 7.0%
+      // Formula: (8.6 + 2.59) / 1.59 = 7.04
+      const result = calculateEstimatedHbA1c(8.6);
+      expect(result).toBeCloseTo(7.04, 1);
+    });
+
+    it('should calculate correct HbA1c for low average glucose', () => {
+      // For average glucose of 3.5 mmol/L (about 63 mg/dL)
+      // Formula: (3.5 + 2.59) / 1.59 = 3.83
+      const result = calculateEstimatedHbA1c(3.5);
+      expect(result).toBeCloseTo(3.83, 1);
+    });
+  });
+
+  describe('convertHbA1cToMmolMol', () => {
+    it('should convert HbA1c 5.0% to approximately 31 mmol/mol', () => {
+      // Formula: (5.0 - 2.15) × 10.929 = 31.15
+      const result = convertHbA1cToMmolMol(5.0);
+      expect(result).toBeCloseTo(31.15, 0);
+    });
+
+    it('should convert HbA1c 7.0% to approximately 53 mmol/mol', () => {
+      // Formula: (7.0 - 2.15) × 10.929 = 53.0
+      const result = convertHbA1cToMmolMol(7.0);
+      expect(result).toBeCloseTo(53.0, 0);
+    });
+
+    it('should convert HbA1c 6.5% to approximately 48 mmol/mol', () => {
+      // Formula: (6.5 - 2.15) × 10.929 = 47.5
+      const result = convertHbA1cToMmolMol(6.5);
+      expect(result).toBeCloseTo(47.5, 0);
+    });
+  });
+
+  describe('calculateDaysWithData', () => {
+    it('should return 0 for empty readings', () => {
+      expect(calculateDaysWithData([])).toBe(0);
+    });
+
+    it('should count unique days correctly', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-16T09:00:00'), value: 5.8 },
+        { timestamp: new Date('2024-01-16T14:00:00'), value: 6.2 },
+        { timestamp: new Date('2024-01-17T08:00:00'), value: 5.9 },
+      ];
+      expect(calculateDaysWithData(readings)).toBe(3);
+    });
+
+    it('should handle single day', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+      ];
+      expect(calculateDaysWithData(readings)).toBe(1);
+    });
+  });
+
+  describe('MIN_DAYS_FOR_RELIABLE_HBA1C', () => {
+    it('should be 60 days', () => {
+      expect(MIN_DAYS_FOR_RELIABLE_HBA1C).toBe(60);
     });
   });
 });
