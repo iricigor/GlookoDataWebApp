@@ -225,7 +225,8 @@ GlookoDataWebApp/
 ├── public/               # Public static files
 ├── dist/                 # Production build output (generated, not committed)
 ├── docs/                 # Documentation
-├── CHANGELOG.md          # Version history and change log
+│   └── changelogs/       # Version-specific changelog files
+├── CHANGELOG.md          # Version history summary with links to detailed changelogs
 ├── package.json          # Dependencies and scripts
 ├── tsconfig.json         # TypeScript configuration
 ├── vite.config.ts        # Vite build configuration
@@ -271,10 +272,12 @@ GlookoDataWebApp/
 
 ### Before Committing
 
-1. **Do NOT update CHANGELOG.md manually** unless you're making documentation fixes
-   - For feature/bug PRs, CHANGELOG updates are handled automatically by a dedicated pipeline AFTER the PR is merged
+1. **Do NOT update changelog files manually** unless you're making documentation fixes
+   - For feature/bug PRs, changelog updates are handled automatically by a dedicated pipeline AFTER the PR is merged
    - The automated system will generate the changelog entry based on your PR title and description
-   - **If you do need to manually update CHANGELOG.md**, use the proper format (see CHANGELOG Format section below)
+   - Changelog entries are added to version-specific files in `docs/changelogs/` (e.g., `CHANGELOG-1.4.x.md`)
+   - The main `CHANGELOG.md` contains only summaries and links to detailed changelogs
+   - **If you do need to manually update a changelog**, use the proper format (see CHANGELOG Format section below)
 
 2. **Run tests**
    ```bash
@@ -306,7 +309,11 @@ GlookoDataWebApp/
 
 ### CHANGELOG Format
 
-When manually adding or updating entries in CHANGELOG.md, use the following format for versions 1.2.x and 1.1.x:
+Changelogs are now split into version-specific files in `docs/changelogs/`:
+- `CHANGELOG-1.4.x.md` - Current development
+- `CHANGELOG-1.3.x.md`, `CHANGELOG-1.2.x.md`, etc. - Released versions
+
+When manually adding or updating entries in version-specific changelog files, use the following format:
 
 ```markdown
 <details>
@@ -481,7 +488,8 @@ zip.forEach((relativePath, zipEntry) => {
 - [README.md](../README.md) - Project overview and quick start
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Detailed contribution guidelines
 - [QUICKSTART.md](../QUICKSTART.md) - Quick start guide
-- [CHANGELOG.md](../CHANGELOG.md) - Version history and change log
+- [CHANGELOG.md](../CHANGELOG.md) - Version history summary with links to detailed changelogs
+- [docs/changelogs/](../docs/changelogs/) - Version-specific detailed changelog files
 - [docs/DATA_UPLOAD.md](../docs/DATA_UPLOAD.md) - Data upload feature documentation
 
 ### Related Projects
