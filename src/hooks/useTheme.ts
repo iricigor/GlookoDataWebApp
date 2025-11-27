@@ -76,12 +76,12 @@ function isThemeDark(mode: ThemeMode): boolean {
 /**
  * Custom hook for managing theme preferences
  * 
- * @returns Theme mode, resolved theme, and setter function
+ * @returns Theme mode, resolved theme, isDarkTheme flag, and setter function
  * 
  * @example
  * ```tsx
  * function App() {
- *   const { theme, themeMode, setThemeMode } = useTheme();
+ *   const { theme, themeMode, isDarkTheme, setThemeMode } = useTheme();
  *   return (
  *     <FluentProvider theme={theme}>
  *       <YourApp />
