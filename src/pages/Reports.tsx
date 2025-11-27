@@ -14,6 +14,7 @@ import { UnifiedDailyReport } from '../components/UnifiedDailyReport';
 import { IOBReport } from '../components/IOBReport';
 import { BGOverviewReport } from '../components/BGOverviewReport';
 import { RoCReport } from '../components/RoCReport';
+import { HyposReport } from '../components/HyposReport';
 import type { UploadedFile, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 
@@ -117,6 +118,8 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
         return <IOBReport selectedFile={selectedFile} insulinDuration={insulinDuration} />;
       case 'roc':
         return <RoCReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
+      case 'hypos':
+        return <HyposReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
       default:
         return null;
     }
@@ -146,6 +149,7 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
         <Tab value="unifiedView">Unified View</Tab>
         <Tab value="iob">IOB</Tab>
         <Tab value="roc">RoC</Tab>
+        <Tab value="hypos">Hypos</Tab>
       </TabList>
 
       <div className={styles.contentWrapper}>
@@ -164,6 +168,7 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
           <Tab value="unifiedView">Unified View</Tab>
           <Tab value="iob">IOB</Tab>
           <Tab value="roc">RoC</Tab>
+          <Tab value="hypos">Hypos</Tab>
         </TabList>
 
         <div className={styles.contentArea}>
