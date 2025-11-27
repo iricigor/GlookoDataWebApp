@@ -205,6 +205,13 @@ Version 1.4 focuses on advanced glucose analysis features, enhanced reporting ca
 ### Other
 
 <details>
+<summary>476 Fix RSuite DatePicker to follow Fluent UI dark theme</summary>
+
+[#476](../../pull/476) Fix RSuite DatePicker to follow Fluent UI dark theme
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>475 Improve AI prompts: formal language mode, tabular formatting, TIR verification, estimation uncertainty</summary>
 
 [#475](../../pull/475) Improve AI prompts: formal language mode, tabular formatting, TIR verification, estimation uncertainty
