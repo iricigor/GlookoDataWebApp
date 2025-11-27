@@ -25,6 +25,10 @@ The GlucoStats Python library provides 59 CGM-derived statistics organized into 
 | Rate of Change (RoC) | Related to variability | `rocDataUtils.ts` | ✅ Comprehensive implementation |
 | Hypoglycemia Detection | Related to control stats | `hypoDataUtils.ts` | ✅ Implemented with episode detection |
 | Percentiles (p10, p25, p50, p75, p90) | `quartile_*` | `AGPGraph.tsx` → AGP report | ✅ Implemented for AGP visualization |
+| LBGI (Low Blood Glucose Index) | `lbgi` | `glucoseRangeUtils.ts` → `calculateLBGI()` | ✅ Implemented - hypoglycemia risk index |
+| HBGI (High Blood Glucose Index) | `hbgi` | `glucoseRangeUtils.ts` → `calculateHBGI()` | ✅ Implemented - hyperglycemia risk index |
+| BGRI (Blood Glucose Risk Index) | `bgri` | `glucoseRangeUtils.ts` → `calculateBGRI()` | ✅ Implemented - combined LBGI + HBGI |
+| J-Index | `j_index` | `glucoseRangeUtils.ts` → `calculateJIndex()` | ✅ Implemented - composite control metric |
 
 ### 🔶 Partially Implemented / Could Be Enhanced
 
@@ -37,22 +41,22 @@ The GlucoStats Python library provides 59 CGM-derived statistics organized into 
 
 #### Priority 1: High Clinical Value, Low Implementation Complexity
 
-| Statistic | Description | Clinical Value | Complexity |
-|-----------|-------------|----------------|------------|
-| **Glucose Management Indicator (GMI)** | Already have `calculateEstimatedHbA1c()`, same formula | High - display standardization | Low |
-| **LBGI (Low Blood Glucose Index)** | Risk index for hypoglycemia | High - risk assessment | Medium |
-| **HBGI (High Blood Glucose Index)** | Risk index for hyperglycemia | High - risk assessment | Medium |
-| **BGRI (Blood Glucose Risk Index)** | LBGI + HBGI combined | High - overall risk | Low (after LBGI/HBGI) |
+| Statistic | Description | Clinical Value | Complexity | Status |
+|-----------|-------------|----------------|------------|--------|
+| **Glucose Management Indicator (GMI)** | Already have `calculateEstimatedHbA1c()`, same formula | High - display standardization | Low | ✅ Already implemented as `calculateEstimatedHbA1c()` |
+| **LBGI (Low Blood Glucose Index)** | Risk index for hypoglycemia | High - risk assessment | Medium | ✅ **DONE** - `calculateLBGI()` |
+| **HBGI (High Blood Glucose Index)** | Risk index for hyperglycemia | High - risk assessment | Medium | ✅ **DONE** - `calculateHBGI()` |
+| **BGRI (Blood Glucose Risk Index)** | LBGI + HBGI combined | High - overall risk | Low (after LBGI/HBGI) | ✅ **DONE** - `calculateBGRI()` |
 
 #### Priority 2: Medium Clinical Value, Medium Implementation Complexity
 
-| Statistic | Description | Clinical Value | Complexity |
-|-----------|-------------|----------------|------------|
-| **MAGE (Mean Amplitude of Glycemic Excursions)** | Average of significant glucose swings | Medium - variability metric | Medium |
-| **J-Index** | 0.001 × (Mean + SD)² | Medium - combined control metric | Low |
-| **GRI (Glycemia Risk Index)** | Weighted hypo/hyper risk score | Medium - composite risk | Medium |
-| **GRADE (Glycemic Risk Assessment)** | Risk score with hypo/eu/hyper breakdown | Medium - risk stratification | Medium |
-| **MAG (Mean Absolute Glucose change)** | Sum of |ΔG| / total time | Medium - variability | Low |
+| Statistic | Description | Clinical Value | Complexity | Status |
+|-----------|-------------|----------------|------------|--------|
+| **MAGE (Mean Amplitude of Glycemic Excursions)** | Average of significant glucose swings | Medium - variability metric | Medium | ❌ Not implemented |
+| **J-Index** | 0.001 × (Mean + SD)² | Medium - combined control metric | Low | ✅ **DONE** - `calculateJIndex()` |
+| **GRI (Glycemia Risk Index)** | Weighted hypo/hyper risk score | Medium - composite risk | Medium | ❌ Not implemented |
+| **GRADE (Glycemic Risk Assessment)** | Risk score with hypo/eu/hyper breakdown | Medium - risk stratification | Medium | ❌ Not implemented |
+| **MAG (Mean Absolute Glucose change)** | Sum of |ΔG| / total time | Medium - variability | Low | ❌ Not implemented |
 
 #### Priority 3: Advanced/Research Metrics
 
@@ -156,14 +160,14 @@ export function calculateJIndex(readings: GlucoseReading[]): number | null {
 
 ## Implementation Roadmap
 
-### Phase 1: Quick Wins (Low complexity, High value)
-1. ✅ CV% - Add to BGOverviewReport
-2. ✅ Standardize GMI display (already have formula)
-3. ✅ J-Index - Simple calculation
+### Phase 1: Quick Wins (Low complexity, High value) ✅ COMPLETED
+1. ✅ CV% - Implemented in `calculateCV()`
+2. ✅ Standardize GMI display - Already implemented as `calculateEstimatedHbA1c()`
+3. ✅ J-Index - Implemented in `calculateJIndex()`
 
-### Phase 2: Risk Indices (Medium complexity, High value)
-1. LBGI/HBGI/BGRI - New risk assessment section
-2. GRI - Weighted risk score
+### Phase 2: Risk Indices (Medium complexity, High value) ✅ COMPLETED
+1. ✅ LBGI/HBGI/BGRI - Implemented in `calculateLBGI()`, `calculateHBGI()`, `calculateBGRI()`
+2. GRI - Weighted risk score (not yet implemented)
 
 ### Phase 3: Advanced Variability (Medium-High complexity)
 1. MAGE - Peak detection algorithm

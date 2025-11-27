@@ -30,7 +30,12 @@ import {
   MIN_DAYS_FOR_RELIABLE_HBA1C,
   calculateCV,
   CV_TARGET_THRESHOLD,
+  calculateBGRI,
+  calculateLBGI,
+  calculateHBGI,
+  calculateJIndex,
 } from './glucoseRangeUtils';
+import { MMOL_TO_MGDL } from './glucoseUnitUtils';
 import type { GlucoseReading, GlucoseThresholds } from '../../types';
 
 // Standard thresholds in mmol/L
@@ -785,6 +790,261 @@ describe('glucoseRangeUtils', () => {
       const cv = calculateCV(readings);
       expect(cv).not.toBeNull();
       expect(cv!).toBeGreaterThan(CV_TARGET_THRESHOLD);
+    });
+  });
+
+  describe('MMOL_TO_MGDL', () => {
+    it('should be approximately 18.018', () => {
+      expect(MMOL_TO_MGDL).toBeCloseTo(18.018, 3);
+    });
+  });
+
+  describe('calculateBGRI', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateBGRI([])).toBeNull();
+    });
+
+    it('should calculate LBGI, HBGI, and BGRI for normal glucose values', () => {
+      // Readings around 100 mg/dL (5.5 mmol/L) - near euglycemic level
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.5 },
+      ];
+      const result = calculateBGRI(readings);
+      
+      expect(result).not.toBeNull();
+      expect(result!.lbgi).toBeGreaterThanOrEqual(0);
+      expect(result!.hbgi).toBeGreaterThanOrEqual(0);
+      expect(result!.bgri).toBeCloseTo(result!.lbgi + result!.hbgi, 5);
+    });
+
+    it('should calculate higher LBGI for hypoglycemic readings', () => {
+      // Low glucose readings (hypoglycemia range)
+      const lowReadings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 3.0 },  // ~54 mg/dL
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 3.5 },  // ~63 mg/dL
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 3.2 },  // ~58 mg/dL
+      ];
+      
+      // Normal glucose readings
+      const normalReadings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.8 },
+      ];
+      
+      const lowResult = calculateBGRI(lowReadings);
+      const normalResult = calculateBGRI(normalReadings);
+      
+      expect(lowResult!.lbgi).toBeGreaterThan(normalResult!.lbgi);
+    });
+
+    it('should calculate higher HBGI for hyperglycemic readings', () => {
+      // High glucose readings (hyperglycemia range)
+      const highReadings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 15.0 },  // ~270 mg/dL
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 16.0 },  // ~288 mg/dL
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 14.0 },  // ~252 mg/dL
+      ];
+      
+      // Normal glucose readings
+      const normalReadings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.8 },
+      ];
+      
+      const highResult = calculateBGRI(highReadings);
+      const normalResult = calculateBGRI(normalReadings);
+      
+      expect(highResult!.hbgi).toBeGreaterThan(normalResult!.hbgi);
+    });
+
+    it('should have BGRI equal to LBGI + HBGI', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 3.5 },  // Low
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.5 },  // Normal
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 12.0 }, // High
+      ];
+      const result = calculateBGRI(readings);
+      
+      expect(result).not.toBeNull();
+      expect(result!.bgri).toBeCloseTo(result!.lbgi + result!.hbgi, 10);
+    });
+
+    it('should handle mixed readings correctly', () => {
+      // Mix of low, normal, and high readings
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T08:00:00'), value: 2.8 },   // Very low
+        { timestamp: new Date('2024-01-15T09:00:00'), value: 5.5 },   // Normal
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 7.0 },   // Normal
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 15.0 },  // High
+      ];
+      const result = calculateBGRI(readings);
+      
+      expect(result).not.toBeNull();
+      // Both LBGI and HBGI should be > 0 due to mixed values
+      expect(result!.lbgi).toBeGreaterThan(0);
+      expect(result!.hbgi).toBeGreaterThan(0);
+    });
+
+    it('should return low risk values for well-controlled readings', () => {
+      // Well-controlled glucose around 100 mg/dL (5.5 mmol/L)
+      const readings: GlucoseReading[] = Array.from({ length: 10 }, (_, i) => ({
+        timestamp: new Date(`2024-01-15T${(10 + i).toString().padStart(2, '0')}:00:00`),
+        value: 5.5 + (i % 2 === 0 ? 0.2 : -0.2),  // Small variation around 5.5
+      }));
+      
+      const result = calculateBGRI(readings);
+      
+      expect(result).not.toBeNull();
+      // Low risk indices for well-controlled glucose
+      expect(result!.lbgi).toBeLessThan(2.5);  // Low hypoglycemia risk
+      expect(result!.hbgi).toBeLessThan(4.5);  // Low hyperglycemia risk
+    });
+  });
+
+  describe('calculateLBGI', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateLBGI([])).toBeNull();
+    });
+
+    it('should return LBGI value', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+      ];
+      const lbgi = calculateLBGI(readings);
+      
+      expect(lbgi).not.toBeNull();
+      expect(typeof lbgi).toBe('number');
+    });
+  });
+
+  describe('calculateHBGI', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateHBGI([])).toBeNull();
+    });
+
+    it('should return HBGI value', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+      ];
+      const hbgi = calculateHBGI(readings);
+      
+      expect(hbgi).not.toBeNull();
+      expect(typeof hbgi).toBe('number');
+    });
+  });
+
+  describe('calculateJIndex', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateJIndex([])).toBeNull();
+    });
+
+    it('should return null for single reading (need at least 2)', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+      ];
+      expect(calculateJIndex(readings)).toBeNull();
+    });
+
+    it('should calculate J-Index for multiple readings', () => {
+      // Readings: 5.0, 6.0, 7.0 mmol/L
+      // Mean = 6.0 mmol/L = 108 mg/dL
+      // SD = 1.0 mmol/L = 18 mg/dL
+      // J-Index = 0.001 × (108 + 18)² = 0.001 × 15876 = 15.876
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 7.0 },
+      ];
+      const jIndex = calculateJIndex(readings);
+      
+      expect(jIndex).not.toBeNull();
+      expect(jIndex).toBeGreaterThan(0);
+      // Expected: ~15.9 (accounting for exact conversion factor)
+      expect(jIndex!).toBeCloseTo(15.9, 0);
+    });
+
+    it('should return lower J-Index for stable readings', () => {
+      // All readings close to 5.5 mmol/L (low variability)
+      const stableReadings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.4 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.6 },
+      ];
+      
+      // Readings with higher variability
+      const variableReadings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 4.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 7.0 },
+      ];
+      
+      const stableJIndex = calculateJIndex(stableReadings);
+      const variableJIndex = calculateJIndex(variableReadings);
+      
+      expect(stableJIndex).not.toBeNull();
+      expect(variableJIndex).not.toBeNull();
+      expect(stableJIndex!).toBeLessThan(variableJIndex!);
+    });
+
+    it('should return higher J-Index for higher mean glucose', () => {
+      // Normal mean (~5.5 mmol/L)
+      const normalReadings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 6.0 },
+      ];
+      
+      // High mean (~10 mmol/L)
+      const highReadings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 9.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 10.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 10.5 },
+      ];
+      
+      const normalJIndex = calculateJIndex(normalReadings);
+      const highJIndex = calculateJIndex(highReadings);
+      
+      expect(normalJIndex).not.toBeNull();
+      expect(highJIndex).not.toBeNull();
+      expect(highJIndex!).toBeGreaterThan(normalJIndex!);
+    });
+
+    it('should calculate J-Index correctly for typical diabetes range', () => {
+      // Mean ~8.6 mmol/L (~155 mg/dL), SD ~1.5 mmol/L (~27 mg/dL)
+      // J-Index = 0.001 × (155 + 27)² = 0.001 × 33124 = 33.12
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 7.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 8.6 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 10.2 },
+      ];
+      const jIndex = calculateJIndex(readings);
+      
+      expect(jIndex).not.toBeNull();
+      // J-Index > 30 indicates fair-to-poor control
+      expect(jIndex!).toBeGreaterThan(25);
+      expect(jIndex!).toBeLessThan(40);
+    });
+
+    it('should be 0 when all readings are identical (but SD would be 0)', () => {
+      // All readings identical - SD = 0
+      // J-Index = 0.001 × (Mean + 0)² = 0.001 × Mean²
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.5 },
+      ];
+      const jIndex = calculateJIndex(readings);
+      
+      expect(jIndex).not.toBeNull();
+      // Mean = 5.5 mmol/L = ~99 mg/dL, SD = 0
+      // J-Index = 0.001 × 99² = ~9.8
+      expect(jIndex!).toBeCloseTo(9.8, 0);
     });
   });
 });
