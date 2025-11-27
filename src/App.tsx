@@ -31,6 +31,18 @@ function App() {
   
   // Settings (stored locally in browser cookies)
   const { theme, themeMode, setThemeMode } = useTheme()
+  const isDark = isDarkTheme(themeMode)
+  
+  // Sync theme with body class for RSuite popup theming
+  useEffect(() => {
+    if (isDark) {
+      document.body.classList.add('dark-theme');
+      document.body.classList.remove('light-theme');
+    } else {
+      document.body.classList.add('light-theme');
+      document.body.classList.remove('dark-theme');
+    }
+  }, [isDark]);
   const { exportFormat, setExportFormat } = useExportFormat()
   const { responseLanguage, setResponseLanguage } = useResponseLanguage()
   const { glucoseUnit, setGlucoseUnit } = useGlucoseUnit()
@@ -259,7 +271,7 @@ function App() {
   }
 
   return (
-    <FluentProvider theme={theme} className="app-container">
+    <FluentProvider theme={theme} className="app-container" data-theme={isDark ? 'dark' : 'light'}>
       <Navigation 
         currentPage={currentPage} 
         onNavigate={handleNavigate} 
