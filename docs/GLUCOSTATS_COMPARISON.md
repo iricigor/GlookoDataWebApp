@@ -1,5 +1,7 @@
 # GlucoStats Library Comparison
 
+**Analysis Date:** November 27, 2025
+
 This document compares the statistics implemented in GlookoDataWebApp with the [GlucoStats Python library](https://glucostats.readthedocs.io/en/latest/), identifying gaps and recommending the most useful statistics to implement.
 
 ## Overview
