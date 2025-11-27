@@ -64,6 +64,15 @@ function App() {
     }))
   }, [])
 
+  // Toggle between light and dark theme (skips system option when using quick toggle)
+  const handleThemeToggle = useCallback(() => {
+    // Determine current effective theme
+    const isCurrentlyDark = themeMode === 'dark' || 
+      (themeMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    // Toggle to the opposite explicit mode
+    setThemeMode(isCurrentlyDark ? 'light' : 'dark')
+  }, [themeMode, setThemeMode])
+
   // Load demo data on app startup (Joshua dataset)
   useEffect(() => {
     const loadDemoData = async () => {
@@ -254,7 +263,12 @@ function App() {
 
   return (
     <FluentProvider theme={theme} className="app-container">
-      <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
+      <Navigation 
+        currentPage={currentPage} 
+        onNavigate={handleNavigate} 
+        themeMode={themeMode}
+        onThemeToggle={handleThemeToggle}
+      />
       <main ref={mainContentRef} className="main-content">
         {renderPage()}
       </main>
