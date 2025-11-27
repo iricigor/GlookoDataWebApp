@@ -12,25 +12,30 @@ describe('promptUtils', () => {
       expect(result).toBe('Respond in English.');
     });
 
-    it('should return Czech instruction for czech language', () => {
+    it('should return Czech instruction for czech language with formal mode', () => {
       const result = getLanguageInstruction('czech');
-      expect(result).toBe('Respond in Czech language (česky).');
+      expect(result).toContain('Respond in Czech language (česky)');
+      expect(result).toContain('formal mode');
+      expect(result).toContain('vykání');
+      expect(result).toContain('Vy/Váš');
     });
 
-    it('should return German instruction for german language', () => {
+    it('should return German instruction for german language with formal mode', () => {
       const result = getLanguageInstruction('german');
-      expect(result).toBe('Respond in German language (auf Deutsch).');
+      expect(result).toContain('Respond in German language (auf Deutsch)');
+      expect(result).toContain('formal mode');
+      expect(result).toContain('Siezen');
+      expect(result).toContain('Sie/Ihr');
     });
 
-    it('should return Serbian instruction for serbian language', () => {
+    it('should return Serbian instruction for serbian language with formal mode', () => {
       const result = getLanguageInstruction('serbian');
-      expect(result).toBe('Respond in Serbian language using Latin script (na srpskom latiničnim pismom).');
-    });
-
-    it('should include Latin script specification for serbian', () => {
-      const result = getLanguageInstruction('serbian');
+      expect(result).toContain('Respond in Serbian language');
       expect(result).toContain('Latin script');
       expect(result).toContain('latiničnim pismom');
+      expect(result).toContain('formal mode');
+      expect(result).toContain('persiranje');
+      expect(result).toContain('Vi/Vaš');
     });
   });
 

@@ -58,11 +58,11 @@ describe('glucoseInsulinPrompt', () => {
       expect(result).toContain('3 worst days');
     });
 
-    it('should include actionable summary requirement', () => {
+    it('should include output structure requirement', () => {
       const base64Data = base64Encode(sampleCsvData);
       const result = generateGlucoseInsulinPrompt(base64Data);
       
-      expect(result).toContain('Actionable Summary');
+      expect(result).toContain('Output Structure');
       expect(result).toContain('3-point summary');
     });
 
@@ -149,17 +149,6 @@ describe('glucoseInsulinPrompt', () => {
       expect(result).toContain('missing or incomplete');
     });
 
-    it('should include basal drift test instructions', () => {
-      const base64Data = base64Encode(sampleCsvData);
-      const result = generateGlucoseInsulinPrompt(base64Data);
-      
-      expect(result).toContain('Basal Drift Test');
-      expect(result).toContain('overnight periods');
-      expect(result).toContain('10 PM – 6 AM');
-      expect(result).toContain('fasting periods');
-      expect(result).toContain('30-50 mg/dL');
-    });
-
     it('should include hypoglycemia risk analysis', () => {
       const base64Data = base64Encode(sampleCsvData);
       const result = generateGlucoseInsulinPrompt(base64Data);
@@ -188,15 +177,22 @@ describe('glucoseInsulinPrompt', () => {
       expect(result).toContain('not mmol/L');
     });
 
-    it('should include actionable recommendations with tercile context', () => {
+    it('should include separate Summary and Recommendations sections', () => {
       const base64Data = base64Encode(sampleCsvData);
       const result = generateGlucoseInsulinPrompt(base64Data);
       
-      expect(result).toContain('Actionable Summary');
-      expect(result).toContain('tercile analysis');
-      expect(result).toContain('variance analysis');
-      expect(result).toContain('basal drift test');
-      expect(result).toContain('hypoglycemia risk');
+      expect(result).toContain('5. Summary:');
+      expect(result).toContain('6. Recommendations:');
+      expect(result).toContain('3-point summary');
+      expect(result).toContain('specific, actionable recommendations');
+    });
+
+    it('should include table formatting instruction', () => {
+      const base64Data = base64Encode(sampleCsvData);
+      const result = generateGlucoseInsulinPrompt(base64Data);
+      
+      expect(result).toContain('Use tables wherever possible');
+      expect(result).toContain('table format');
     });
 
     it('should include data context explanation', () => {

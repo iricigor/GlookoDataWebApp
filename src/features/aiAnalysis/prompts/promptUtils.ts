@@ -15,11 +15,11 @@ import { getProviderDisplayName } from '../../../utils/api/aiApi';
 export function getLanguageInstruction(language: ResponseLanguage): string {
   switch (language) {
     case 'czech':
-      return 'Respond in Czech language (česky).';
+      return 'Respond in Czech language (česky). IMPORTANT: Use formal mode of address (vykání - use "Vy/Váš" instead of "ty/tvůj").';
     case 'german':
-      return 'Respond in German language (auf Deutsch).';
+      return 'Respond in German language (auf Deutsch). IMPORTANT: Use formal mode of address (Siezen - use "Sie/Ihr" instead of "du/dein").';
     case 'serbian':
-      return 'Respond in Serbian language using Latin script (na srpskom latiničnim pismom).';
+      return 'Respond in Serbian language using Latin script (na srpskom latiničnim pismom). IMPORTANT: Use formal mode of address (persiranje - use "Vi/Vaš" instead of "ti/tvoj").';
     case 'english':
     default:
       return 'Respond in English.';

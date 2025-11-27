@@ -483,5 +483,60 @@ describe('pumpSettingsPrompt', () => {
       expect(result).toContain('Calculate overall TIR');
       expect(result).toContain('verify');
     });
+
+    it('should include table formatting instruction', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Use tables wherever possible');
+    });
+
+    it('should include estimation uncertainty note for overall analysis', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('IMPORTANT NOTE ON ESTIMATED SETTINGS');
+      expect(result).toContain('inherent uncertainty');
+    });
+
+    it('should include timing estimation uncertainty explanation', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Timing Estimation');
+      expect(result).toContain('day/night boundary is EARLIER');
+      expect(result).toContain('day/night boundary is LATER');
+    });
+
+    it('should include basal rate estimation uncertainty explanation', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('estimated basal rate is HIGHER');
+      expect(result).toContain('estimated basal rate is LOWER');
+    });
+
+    it('should include ISF estimation uncertainty explanation', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generatePumpSettingsPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('estimated ISF is HIGHER');
+      expect(result).toContain('estimated ISF is LOWER');
+    });
   });
 });
