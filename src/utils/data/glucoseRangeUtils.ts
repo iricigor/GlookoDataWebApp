@@ -556,3 +556,53 @@ export function calculateHourlyTIRGrouped(
     };
   });
 }
+
+/**
+ * Calculate average glucose from readings
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns Average glucose value in mmol/L, or null if no readings
+ */
+export function calculateAverageGlucose(readings: GlucoseReading[]): number | null {
+  if (readings.length === 0) return null;
+  
+  const sum = readings.reduce((acc, reading) => acc + reading.value, 0);
+  return sum / readings.length;
+}
+
+/**
+ * Calculate estimated HbA1c from average glucose
+ * Uses the standard medical formula: HbA1c (%) = (eAG mmol/L + 2.59) / 1.59
+ * This is the ADA-endorsed formula for converting average glucose to HbA1c
+ * 
+ * @param averageGlucoseMmol - Average glucose in mmol/L
+ * @returns Estimated HbA1c percentage
+ */
+export function calculateEstimatedHbA1c(averageGlucoseMmol: number): number {
+  // Formula: HbA1c (%) = (average glucose mmol/L + 2.59) / 1.59
+  // Source: American Diabetes Association (ADA)
+  return (averageGlucoseMmol + 2.59) / 1.59;
+}
+
+/**
+ * Calculate the number of unique days in glucose readings
+ * 
+ * @param readings - Array of glucose readings
+ * @returns Number of unique days with readings
+ */
+export function calculateDaysWithData(readings: GlucoseReading[]): number {
+  if (readings.length === 0) return 0;
+  
+  const uniqueDays = new Set<string>();
+  readings.forEach(reading => {
+    const dateKey = formatDate(reading.timestamp);
+    uniqueDays.add(dateKey);
+  });
+  
+  return uniqueDays.size;
+}
+
+/**
+ * Minimum number of days recommended for reliable HbA1c estimation
+ */
+export const MIN_DAYS_FOR_RELIABLE_HBA1C = 60;

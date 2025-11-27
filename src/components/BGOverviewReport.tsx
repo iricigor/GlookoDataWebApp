@@ -32,6 +32,8 @@ import {
   CheckmarkCircleRegular,
   DataLineRegular,
   FilterRegular,
+  HeartPulseRegular,
+  WarningRegular,
 } from '@fluentui/react-icons';
 import type { 
   UploadedFile, 
@@ -47,7 +49,7 @@ import type {
   HourlyTIRStats,
 } from '../types';
 import { extractGlucoseReadings, groupByWeek, displayGlucoseValue, getUnitLabel } from '../utils/data';
-import { groupByDayOfWeek, calculatePercentage, GLUCOSE_RANGE_COLORS, calculateTIRByTimePeriods, calculateHourlyTIR, MIN_PERCENTAGE_FOR_PERIOD_BAR } from '../utils/data';
+import { groupByDayOfWeek, calculatePercentage, GLUCOSE_RANGE_COLORS, calculateTIRByTimePeriods, calculateHourlyTIR, MIN_PERCENTAGE_FOR_PERIOD_BAR, calculateAverageGlucose, calculateEstimatedHbA1c, calculateDaysWithData, MIN_DAYS_FOR_RELIABLE_HBA1C } from '../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { useDateRange } from '../hooks/useDateRange';
@@ -182,6 +184,69 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
     textAlign: 'center',
+  },
+  hba1cCard: {
+    ...shorthands.padding('20px'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    boxShadow: tokens.shadow16,
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+  },
+  hba1cContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+    marginTop: '16px',
+  },
+  hba1cValue: {
+    fontSize: '48px',
+    fontWeight: tokens.fontWeightBold,
+    color: tokens.colorBrandForeground1,
+    lineHeight: '1',
+  },
+  hba1cUnit: {
+    fontSize: tokens.fontSizeBase400,
+    color: tokens.colorNeutralForeground2,
+  },
+  hba1cDetails: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    ...shorthands.gap('16px'),
+    marginTop: '12px',
+  },
+  hba1cDetailItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    ...shorthands.padding('8px', '16px'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    backgroundColor: tokens.colorNeutralBackground2,
+  },
+  hba1cDetailLabel: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+  },
+  hba1cDetailValue: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+  },
+  hba1cWarning: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+    ...shorthands.padding('12px'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    backgroundColor: tokens.colorStatusWarningBackground1,
+    marginTop: '12px',
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorStatusWarningForeground1,
+  },
+  hba1cWarningIcon: {
+    fontSize: '20px',
+    flexShrink: 0,
   },
   agpCard: {
     ...shorthands.padding('20px'),
@@ -577,6 +642,40 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     return totals;
   };
 
+  // Calculate HbA1c estimate with current filters applied
+  const calculateHbA1cStats = () => {
+    if (readings.length === 0) {
+      return { hba1c: null, averageGlucose: null, daysWithData: 0 };
+    }
+
+    // Filter by date range and day of week (same as TIR)
+    let filteredReadings = readings;
+    
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      
+      filteredReadings = readings.filter(r => {
+        const timestamp = r.timestamp.getTime();
+        return timestamp >= start.getTime() && timestamp <= end.getTime();
+      });
+    }
+
+    filteredReadings = filterReadingsByDayOfWeek(filteredReadings, dayFilter);
+
+    if (filteredReadings.length === 0) {
+      return { hba1c: null, averageGlucose: null, daysWithData: 0 };
+    }
+
+    const averageGlucose = calculateAverageGlucose(filteredReadings);
+    const daysWithData = calculateDaysWithData(filteredReadings);
+    const hba1c = averageGlucose !== null ? calculateEstimatedHbA1c(averageGlucose) : null;
+
+    return { hba1c, averageGlucose, daysWithData };
+  };
+
   const getColorForCategory = (category: string): string => {
     switch (category) {
       case 'veryLow': return GLUCOSE_RANGE_COLORS.veryLow;
@@ -646,6 +745,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
   const agpStatsWithData = agpStats.filter(stat => stat.count > 0);
 
   const tirStats = calculateTIRStats();
+  const hba1cStats = calculateHbA1cStats();
 
   if (!selectedFile) {
     return (
@@ -877,6 +977,52 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
 
           <div className={styles.targetInfo}>
             <strong>Target:</strong> 70% Time in Range (TIR) is generally considered a good target for glucose management
+          </div>
+        </Card>
+      )}
+
+      {/* HbA1c Estimate Card */}
+      {!loading && !error && hba1cStats.hba1c !== null && (
+        <Card className={styles.hba1cCard}>
+          <Text className={styles.cardTitle}>
+            <HeartPulseRegular className={styles.cardIcon} />
+            Estimated HbA1c
+          </Text>
+          
+          <div className={styles.hba1cContent}>
+            <Text className={styles.hba1cValue}>
+              {hba1cStats.hba1c.toFixed(1)}
+            </Text>
+            <Text className={styles.hba1cUnit}>% (estimated)</Text>
+          </div>
+          
+          <div className={styles.hba1cDetails}>
+            <div className={styles.hba1cDetailItem}>
+              <Text className={styles.hba1cDetailLabel}>Average Glucose</Text>
+              <Text className={styles.hba1cDetailValue}>
+                {hba1cStats.averageGlucose !== null 
+                  ? displayGlucoseValue(hba1cStats.averageGlucose, glucoseUnit) 
+                  : '-'} {getUnitLabel(glucoseUnit)}
+              </Text>
+            </div>
+            <div className={styles.hba1cDetailItem}>
+              <Text className={styles.hba1cDetailLabel}>Days Analyzed</Text>
+              <Text className={styles.hba1cDetailValue}>{hba1cStats.daysWithData}</Text>
+            </div>
+          </div>
+
+          {hba1cStats.daysWithData < MIN_DAYS_FOR_RELIABLE_HBA1C && (
+            <div className={styles.hba1cWarning}>
+              <WarningRegular className={styles.hba1cWarningIcon} />
+              <Text>
+                Note: This estimate is based on {hba1cStats.daysWithData} day{hba1cStats.daysWithData !== 1 ? 's' : ''} of data.
+                For a more reliable HbA1c estimate, at least {MIN_DAYS_FOR_RELIABLE_HBA1C} days of glucose data is recommended.
+              </Text>
+            </div>
+          )}
+
+          <div className={styles.targetInfo}>
+            <strong>Formula:</strong> HbA1c (%) = (Average Glucose in mmol/L + 2.59) / 1.59 — ADA-endorsed formula
           </div>
         </Card>
       )}
