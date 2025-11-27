@@ -1,0 +1,46 @@
+name: 🔥 Epic
+description: Create an Epic to group related issues as subtasks
+title: "[EPIC] 🔥 "
+labels: ["🔥 Epic"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚠️ Important: This is an Epic Issue
+
+        **Epics are parent issues that group related subtasks together.** 
+        
+        - ❌ **Do NOT assign this Epic to Copilot** - Epics cannot be implemented directly
+        - ❌ **Do NOT create PRs from this Epic** - Work should be done in subtasks
+        - ✅ **Add sub-issues** using the "Create sub-issue" button below this description after creating the Epic
+
+  - type: textarea
+    id: epic-goal
+    attributes:
+      label: Epic Goal
+      description: Describe the overall goal of this Epic. What is the big picture objective?
+      placeholder: Describe the high-level goal that this Epic aims to achieve...
+    validations:
+      required: true
+
+  - type: input
+    id: estimated-subtasks
+    attributes:
+      label: Estimated Number of Subtasks
+      description: How many subtasks do you estimate this Epic will have? (optional)
+      placeholder: "e.g., 5-10"
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        
+        ### 📋 Next Steps After Creating This Epic
+        
+        1. Click **"Create sub-issue"** in the issue sidebar to add subtasks
+        2. Link existing issues as subtasks using the issue sidebar
+        3. Track progress as subtasks are completed
+        
+        > 💡 **Tip:** Each subtask should be a small, actionable work item that can be assigned and completed independently.
