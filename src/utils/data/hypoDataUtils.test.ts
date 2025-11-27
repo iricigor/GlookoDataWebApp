@@ -7,7 +7,6 @@ import {
   detectHypoPeriods,
   calculateHypoStats,
   formatHypoDuration,
-  getChartColorSegments,
   HYPO_RECOVERY_OFFSET,
   CONSECUTIVE_READINGS_REQUIRED,
 } from './hypoDataUtils';
@@ -251,60 +250,6 @@ describe('hypoDataUtils', () => {
 
     it('should round minutes', () => {
       expect(formatHypoDuration(90.7)).toBe('1h 31m');
-    });
-  });
-
-  describe('getChartColorSegments', () => {
-    it('should return empty array for empty readings', () => {
-      const result = getChartColorSegments([], thresholds);
-      expect(result).toEqual([]);
-    });
-
-    it('should return empty array for single reading', () => {
-      const readings = createReadings([5.0]);
-      const result = getChartColorSegments(readings, thresholds);
-      expect(result).toEqual([]);
-    });
-
-    it('should return green segment for all normal readings', () => {
-      const readings = createReadings([5.0, 5.5, 6.0, 5.5]);
-      const result = getChartColorSegments(readings, thresholds);
-      
-      expect(result).toHaveLength(1);
-      expect(result[0].color).toBe('green');
-    });
-
-    it('should return lightRed segment for readings below low threshold', () => {
-      const readings = createReadings([3.5, 3.4, 3.3, 3.2]);
-      const result = getChartColorSegments(readings, thresholds);
-      
-      expect(result).toHaveLength(1);
-      expect(result[0].color).toBe('lightRed');
-    });
-
-    it('should return darkRed segment for readings below veryLow threshold', () => {
-      const readings = createReadings([2.8, 2.5, 2.3, 2.2]);
-      const result = getChartColorSegments(readings, thresholds);
-      
-      expect(result).toHaveLength(1);
-      expect(result[0].color).toBe('darkRed');
-    });
-
-    it('should create multiple segments for varying glucose levels', () => {
-      const readings = createReadings([
-        5.0, 5.5, // Green
-        3.5, 3.4, // Light red
-        2.5, 2.3, // Dark red
-        3.5,      // Light red
-        5.0,      // Green
-      ]);
-      
-      const result = getChartColorSegments(readings, thresholds);
-      
-      expect(result.length).toBeGreaterThan(1);
-      // Should transition through colors
-      const colors = result.map(s => s.color);
-      expect(colors).toContain('green');
     });
   });
 

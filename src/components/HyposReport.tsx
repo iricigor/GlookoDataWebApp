@@ -411,14 +411,53 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
       .sort((a, b) => a.timeMinutes - b.timeMinutes);
   }, [smoothedReadings, glucoseUnit, maxGlucose, thresholds]);
 
-  // Create gradient stops for the glucose line
+  // Create optimized gradient stops for the glucose line
+  // Merges consecutive points with the same color to reduce DOM elements
   const gradientStops = useMemo(() => {
     if (chartData.length < 2) return [];
     
-    return chartData.map(point => ({
-      offset: `${(point.timeDecimal / 24) * 100}%`,
-      color: point.color,
-    }));
+    const stops: Array<{ offset: string; color: string }> = [];
+    let prevColor = chartData[0].color;
+    
+    // Always add first point
+    stops.push({
+      offset: `${(chartData[0].timeDecimal / 24) * 100}%`,
+      color: chartData[0].color,
+    });
+    
+    // Add stops only when color changes
+    for (let i = 1; i < chartData.length; i++) {
+      const point = chartData[i];
+      if (point.color !== prevColor) {
+        // Add a stop at the previous point with the old color (to ensure clean transition)
+        const prevPoint = chartData[i - 1];
+        const prevOffset = `${(prevPoint.timeDecimal / 24) * 100}%`;
+        if (stops[stops.length - 1].offset !== prevOffset) {
+          stops.push({
+            offset: prevOffset,
+            color: prevColor,
+          });
+        }
+        // Add a stop at the current point with the new color
+        stops.push({
+          offset: `${(point.timeDecimal / 24) * 100}%`,
+          color: point.color,
+        });
+        prevColor = point.color;
+      }
+    }
+    
+    // Always add last point
+    const lastPoint = chartData[chartData.length - 1];
+    const lastOffset = `${(lastPoint.timeDecimal / 24) * 100}%`;
+    if (stops[stops.length - 1].offset !== lastOffset) {
+      stops.push({
+        offset: lastOffset,
+        color: lastPoint.color,
+      });
+    }
+    
+    return stops;
   }, [chartData]);
 
   // Get nadir points from hypo periods for scatter plot
