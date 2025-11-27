@@ -481,13 +481,32 @@ export function formatRoCValue(roc: number, unit?: GlucoseUnit): string {
  * Get description of RoC medical standards
  * Thresholds are now in per-5-minute units
  * 
+ * @param unit - Glucose unit for formatting ('mmol/L' or 'mg/dL'). Defaults to 'mmol/L'.
  * @returns Object with descriptions for each category
  */
-export function getRoCMedicalStandards(): {
+export function getRoCMedicalStandards(unit?: GlucoseUnit): {
   good: { threshold: string; description: string };
   medium: { threshold: string; description: string };
   bad: { threshold: string; description: string };
 } {
+  if (unit === 'mg/dL') {
+    // Convert thresholds: 0.3 * 18 ≈ 5, 0.55 * 18 ≈ 10
+    return {
+      good: {
+        threshold: '≤5 mg/dL/5min',
+        description: 'Stable - glucose changing slowly',
+      },
+      medium: {
+        threshold: '5-10 mg/dL/5min',
+        description: 'Moderate - glucose changing at moderate pace',
+      },
+      bad: {
+        threshold: '>10 mg/dL/5min',
+        description: 'Rapid - glucose changing quickly',
+      },
+    };
+  }
+  
   return {
     good: {
       threshold: '≤0.3 mmol/L/5min',

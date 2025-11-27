@@ -571,7 +571,7 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
   const minDate = availableDates.length > 0 ? availableDates[0] : undefined;
   const maxDate = availableDates.length > 0 ? availableDates[availableDates.length - 1] : undefined;
 
-  const medicalStandards = getRoCMedicalStandards();
+  const medicalStandards = getRoCMedicalStandards(glucoseUnit);
 
   // Calculate thresholds in the display unit - high threshold for reference line (16 mmol/L / 288 mg/dL)
   const glucoseHighThreshold = glucoseUnit === 'mg/dL' ? MAX_GLUCOSE_VALUES.mgdl.low : MAX_GLUCOSE_VALUES.mmol.low;
