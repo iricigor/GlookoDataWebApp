@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
 /**
- * Script to automatically update CHANGELOG.md after PR merges
+ * Script to automatically update version-specific changelog files after PR merges
  * 
  * This script is triggered by GitHub Actions when a PR is merged to main.
- * It adds entries to CHANGELOG.md in the collapsible details format.
+ * It adds entries to the version-specific changelog file (e.g., docs/changelogs/CHANGELOG-1.3.x.md)
+ * in the collapsible details format.
  * 
  * Usage: node update-changelog.cjs <pr_number> <pr_title> [pr_labels] [version]
  * 
@@ -65,8 +66,16 @@ console.log(`Processing PR #${prNumber}: ${prTitle}`);
 console.log(`Labels: ${labels.join(', ') || 'none'}`);
 console.log(`Using version: ${version}.x`);
 
-// Read CHANGELOG.md
-const changelogPath = path.join(__dirname, '../../CHANGELOG.md');
+// Read the version-specific changelog file
+const changelogPath = path.join(__dirname, `../../docs/changelogs/CHANGELOG-${version}.x.md`);
+
+// Check if the version-specific changelog exists
+if (!fs.existsSync(changelogPath)) {
+  console.error(`Error: Version-specific changelog not found: ${changelogPath}`);
+  console.error('Please create the changelog file first or check the version number.');
+  process.exit(1);
+}
+
 let changelog = fs.readFileSync(changelogPath, 'utf8');
 
 /**
@@ -100,27 +109,18 @@ function createChangelogEntry(prNum, title) {
 }
 
 /**
- * Add new entry to the appropriate category in the current development version
+ * Add new entry to the appropriate category in the version-specific changelog
  */
-function addEntryToChangelog(content, prNum, title, lbls, ver) {
+function addEntryToChangelog(content, prNum, title, lbls) {
   const category = getCategoryFromLabels(lbls);
   const newEntry = createChangelogEntry(prNum, title);
   
-  // Find the version section
-  const versionMarker = `## [${ver}.x] - Current Development`;
-  const versionIndex = content.indexOf(versionMarker);
-  
-  if (versionIndex === -1) {
-    console.error(`Error: Could not find version ${ver}.x section`);
-    return content;
-  }
-  
   // Find the category section
   const categoryMarker = `### ${category}`;
-  const categoryIndex = content.indexOf(categoryMarker, versionIndex);
+  const categoryIndex = content.indexOf(categoryMarker);
   
   if (categoryIndex === -1) {
-    console.error(`Error: Could not find ${category} section in version ${ver}.x`);
+    console.error(`Error: Could not find ${category} section in changelog`);
     return content;
   }
   
@@ -132,8 +132,12 @@ function addEntryToChangelog(content, prNum, title, lbls, ver) {
   for (let i = 0; i < lines.length; i++) {
     if (lines[i].includes(categoryMarker)) {
       // Found the category, now find the right insertion point
-      // Skip past the category header
+      // Skip past the category header and any blank line
       insertLine = i + 1;
+      // Skip blank line after header if present
+      if (insertLine < lines.length && lines[insertLine].trim() === '') {
+        insertLine++;
+      }
       
       // Insert at the beginning of the category (after header)
       // This ensures newest entries appear first
@@ -152,10 +156,10 @@ function addEntryToChangelog(content, prNum, title, lbls, ver) {
   return content;
 }
 
-// Update CHANGELOG
-changelog = addEntryToChangelog(changelog, prNumber, prTitle, labels, version);
+// Update the version-specific changelog
+changelog = addEntryToChangelog(changelog, prNumber, prTitle, labels);
 
-// Write updated CHANGELOG
+// Write updated changelog
 fs.writeFileSync(changelogPath, changelog, 'utf8');
 
-console.log('✅ CHANGELOG update complete');
+console.log(`✅ Changelog update complete: ${changelogPath}`);

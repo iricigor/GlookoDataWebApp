@@ -177,22 +177,29 @@ jobs:
               "${{ steps.pr_info.outputs.pr_title }}" \
               "${{ steps.pr_info.outputs.pr_labels }}" \
               "$VERSION_ARG"
+            echo "version=$VERSION_ARG" >> $GITHUB_OUTPUT
           else
             node .github/scripts/update-changelog.cjs \
               "${{ steps.pr_info.outputs.pr_number }}" \
               "${{ steps.pr_info.outputs.pr_title }}" \
               "${{ steps.pr_info.outputs.pr_labels }}"
+            # Extract version from package.json for the output
+            VERSION=$(node -p "require('./package.json').version.match(/^(\\d+\\.\\d+)/)[1]")
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
           fi
 
       - name: Check for changes
         id: check_changes
         run: |
-          if git diff --quiet CHANGELOG.md; then
+          VERSION="${{ steps.update_changelog.outputs.version }}"
+          CHANGELOG_FILE="docs/changelogs/CHANGELOG-${VERSION}.x.md"
+          if git diff --quiet "$CHANGELOG_FILE"; then
             echo "changed=false" >> $GITHUB_OUTPUT
-            echo "No CHANGELOG changes needed"
+            echo "No changelog changes needed"
           else
             echo "changed=true" >> $GITHUB_OUTPUT
-            echo "CHANGELOG has been updated"
+            echo "changelog_file=$CHANGELOG_FILE" >> $GITHUB_OUTPUT
+            echo "Changelog has been updated: $CHANGELOG_FILE"
           fi
 
       - name: Commit and push changes
@@ -200,6 +207,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git commit -m "docs: auto-update CHANGELOG after PR #${{ steps.pr_info.outputs.pr_number }} merge [skip ci]"
+          git add "${{ steps.check_changes.outputs.changelog_file }}"
+          git commit -m "docs: auto-update changelog after PR #${{ steps.pr_info.outputs.pr_number }} merge [skip ci]"
           git push
