@@ -619,3 +619,34 @@ export function calculateDaysWithData(readings: GlucoseReading[]): number {
  * Minimum number of days recommended for reliable HbA1c estimation
  */
 export const MIN_DAYS_FOR_RELIABLE_HBA1C = 60;
+
+/**
+ * Target CV% threshold for stable glycemic control
+ * Values ≤36% indicate stable control, >36% indicates high glycemic variability
+ */
+export const CV_TARGET_THRESHOLD = 36;
+
+/**
+ * Calculate Coefficient of Variation (CV%) from glucose readings
+ * CV% = (Standard Deviation / Mean) × 100
+ * 
+ * This is a standard CGM metric recommended by international consensus.
+ * Target: ≤36% indicates stable glycemic control
+ * >36% indicates high glycemic variability and increased hypoglycemia risk
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns CV% value, or null if insufficient readings (need at least 2)
+ */
+export function calculateCV(readings: GlucoseReading[]): number | null {
+  // Need at least 2 readings to calculate standard deviation
+  if (readings.length < 2) return null;
+  
+  const mean = calculateAverageGlucose(readings);
+  if (!mean || mean === 0) return null;
+  
+  // Calculate sample standard deviation (using n-1 for sample variance - Bessel's correction)
+  const sumSquaredDiffs = readings.reduce((sum, r) => sum + Math.pow(r.value - mean, 2), 0);
+  const sd = Math.sqrt(sumSquaredDiffs / (readings.length - 1));
+  
+  return (sd / mean) * 100;
+}

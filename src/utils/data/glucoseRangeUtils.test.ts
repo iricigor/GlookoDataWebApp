@@ -28,6 +28,8 @@ import {
   convertHbA1cToMmolMol,
   calculateDaysWithData,
   MIN_DAYS_FOR_RELIABLE_HBA1C,
+  calculateCV,
+  CV_TARGET_THRESHOLD,
 } from './glucoseRangeUtils';
 import type { GlucoseReading, GlucoseThresholds } from '../../types';
 
@@ -697,6 +699,92 @@ describe('glucoseRangeUtils', () => {
   describe('MIN_DAYS_FOR_RELIABLE_HBA1C', () => {
     it('should be 60 days', () => {
       expect(MIN_DAYS_FOR_RELIABLE_HBA1C).toBe(60);
+    });
+  });
+
+  describe('CV_TARGET_THRESHOLD', () => {
+    it('should be 36%', () => {
+      expect(CV_TARGET_THRESHOLD).toBe(36);
+    });
+  });
+
+  describe('calculateCV', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateCV([])).toBeNull();
+    });
+
+    it('should return null for single reading (need at least 2)', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+      ];
+      expect(calculateCV(readings)).toBeNull();
+    });
+
+    it('should calculate CV% correctly for two readings', () => {
+      // Two readings: 4.0 and 6.0 mmol/L
+      // Mean = 5.0, SD = sqrt(((4-5)^2 + (6-5)^2) / 1) = sqrt(2) ≈ 1.414
+      // CV = (1.414 / 5.0) * 100 ≈ 28.28%
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 4.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+      ];
+      const cv = calculateCV(readings);
+      expect(cv).toBeCloseTo(28.28, 1);
+    });
+
+    it('should calculate CV% correctly for multiple readings', () => {
+      // Readings: 5.0, 6.0, 7.0 mmol/L
+      // Mean = 6.0
+      // Variance = ((5-6)^2 + (6-6)^2 + (7-6)^2) / 2 = (1 + 0 + 1) / 2 = 1
+      // SD = sqrt(1) = 1.0
+      // CV = (1.0 / 6.0) * 100 ≈ 16.67%
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 7.0 },
+      ];
+      const cv = calculateCV(readings);
+      expect(cv).toBeCloseTo(16.67, 1);
+    });
+
+    it('should return 0 for identical readings (no variability)', () => {
+      // All readings are 5.5 mmol/L
+      // SD = 0, CV = 0%
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.5 },
+      ];
+      const cv = calculateCV(readings);
+      expect(cv).toBe(0);
+    });
+
+    it('should indicate stable control when CV ≤ 36%', () => {
+      // Readings with low variability
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-15T13:00:00'), value: 5.8 },
+        { timestamp: new Date('2024-01-15T14:00:00'), value: 5.2 },
+      ];
+      const cv = calculateCV(readings);
+      expect(cv).not.toBeNull();
+      expect(cv!).toBeLessThanOrEqual(CV_TARGET_THRESHOLD);
+    });
+
+    it('should indicate high variability when CV > 36%', () => {
+      // Readings with high variability
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 3.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 8.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 4.0 },
+        { timestamp: new Date('2024-01-15T13:00:00'), value: 12.0 },
+        { timestamp: new Date('2024-01-15T14:00:00'), value: 5.0 },
+      ];
+      const cv = calculateCV(readings);
+      expect(cv).not.toBeNull();
+      expect(cv!).toBeGreaterThan(CV_TARGET_THRESHOLD);
     });
   });
 });
