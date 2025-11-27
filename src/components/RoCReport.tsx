@@ -629,10 +629,11 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
   // RoC unit label
   const rocUnitLabel = glucoseUnit === 'mg/dL' ? 'mg/dL/5 min' : 'mmol/L/5 min';
 
-  // Calculate minimum RoC Y-axis max (rapid threshold + 20%)
-  // This ensures the Y-axis always shows at least up to the rapid threshold for context
+  // Calculate minimum RoC Y-axis max based on the "rapid" threshold + 20%
+  // ROC_THRESHOLDS.medium (0.55 mmol/L/5min) is the boundary between moderate and rapid categories
+  // Values above this threshold are considered "rapid" rate of change
   // RoC values are always stored in mmol/L/5min internally, so this is in mmol/L units
-  const minRocYAxisMax = ROC_THRESHOLDS.medium * 1.2; // 0.55 * 1.2 = 0.66 mmol/L/5min
+  const minRocYAxisMax = ROC_THRESHOLDS.medium * 1.2; // 0.55 * 1.2 = 0.66 mmol/L/5min (~12 mg/dL/5min)
 
   // Calculate actual RoC Y-axis domain (in mmol/L units, display conversion handled by tickFormatter)
   const rocYAxisDomain = useMemo((): [number, number] => {
