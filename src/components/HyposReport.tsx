@@ -357,15 +357,16 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
     return null;
   };
 
+  // Time labels for X-axis formatting (show every 6 hours)
+  // Using "Noon" instead of "12PM" for clarity
+  const TIME_LABELS: Record<number, string> = {
+    0: '12AM', 6: '6AM', 12: 'Noon', 18: '6PM', 24: '12AM'
+  };
+
   // Format X-axis labels (show only key times)
-  const formatXAxis = (value: string) => {
-    const hour = parseInt(value.split(':')[0]);
-    if (hour === 0) return '00:00';
-    if (hour === 6) return '06:00';
-    if (hour === 12) return '12:00';
-    if (hour === 18) return '18:00';
-    if (hour === 23) return '23:59';
-    return '';
+  const formatXAxis = (value: number) => {
+    const hour = Math.floor(value);
+    return TIME_LABELS[hour] || '';
   };
 
   if (!selectedFile) {
@@ -526,20 +527,22 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
               
               {/* Gradual night hours shading - midnight to 8AM (darkest at midnight) */}
               <ReferenceArea
-                x1="00:00"
-                x2="08:00"
+                x1={0}
+                x2={8}
                 fill="url(#hyposNightGradientLeft)"
               />
               {/* Gradual night hours shading - 8PM to midnight (darkest at midnight) */}
               <ReferenceArea
-                x1="20:00"
-                x2="23:59"
+                x1={20}
+                x2={24}
                 fill="url(#hyposNightGradientRight)"
               />
               
               <XAxis
-                dataKey="time"
-                domain={['00:00', '23:59']}
+                type="number"
+                dataKey="timeDecimal"
+                domain={[0, 24]}
+                ticks={[0, 6, 12, 18, 24]}
                 tickFormatter={formatXAxis}
                 stroke={tokens.colorNeutralStroke1}
                 tick={{ 
