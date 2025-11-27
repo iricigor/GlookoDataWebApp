@@ -13,23 +13,16 @@ vi.mock('../utils/data', () => ({
   extractInsulinReadings: vi.fn(),
   extractGlucoseReadings: vi.fn(),
   prepareInsulinTimelineData: vi.fn(),
+  filterReadingsByDate: vi.fn(),
 }));
 
 // Mock the child components
-vi.mock('./InsulinTimeline', () => ({
-  InsulinTimeline: () => <div data-testid="insulin-timeline">Insulin Timeline</div>,
-}));
-
 vi.mock('./UnifiedTimeline', () => ({
   UnifiedTimeline: () => <div data-testid="unified-timeline">Unified Timeline</div>,
 }));
 
 vi.mock('./DayNavigator', () => ({
   DayNavigator: () => <div data-testid="day-navigator">Day Navigator</div>,
-}));
-
-vi.mock('./InsulinSummaryCards', () => ({
-  InsulinSummaryCards: () => <div data-testid="summary-cards">Summary Cards</div>,
 }));
 
 describe('UnifiedDailyReport', () => {
@@ -89,7 +82,7 @@ describe('UnifiedDailyReport', () => {
     });
   });
 
-  it('should render day navigator and summary cards when data is available', async () => {
+  it('should render day navigator and unified timeline when data is available', async () => {
     vi.mocked(dataUtils.extractInsulinReadings).mockResolvedValue(mockInsulinReadings);
     vi.mocked(dataUtils.extractGlucoseReadings).mockResolvedValue(mockGlucoseReadings);
     vi.mocked(dataUtils.prepareInsulinTimelineData).mockReturnValue([
@@ -100,55 +93,17 @@ describe('UnifiedDailyReport', () => {
         bolusTotal: 5.0,
       },
     ]);
+    vi.mocked(dataUtils.filterReadingsByDate).mockReturnValue(mockGlucoseReadings);
 
     render(<UnifiedDailyReport selectedFile={mockFile} glucoseUnit="mmol/L" />);
     
     await waitFor(() => {
       expect(screen.getByTestId('day-navigator')).toBeInTheDocument();
-      expect(screen.getByTestId('summary-cards')).toBeInTheDocument();
+      expect(screen.getByTestId('unified-timeline')).toBeInTheDocument();
     });
   });
 
-  it('should render CGM toggle switch', async () => {
-    vi.mocked(dataUtils.extractInsulinReadings).mockResolvedValue(mockInsulinReadings);
-    vi.mocked(dataUtils.extractGlucoseReadings).mockResolvedValue(mockGlucoseReadings);
-    vi.mocked(dataUtils.prepareInsulinTimelineData).mockReturnValue([
-      {
-        hour: 10,
-        timeLabel: '10:00',
-        basalRate: 1.0,
-        bolusTotal: 5.0,
-      },
-    ]);
-
-    render(<UnifiedDailyReport selectedFile={mockFile} glucoseUnit="mmol/L" />);
-    
-    await waitFor(() => {
-      expect(screen.getByRole('switch', { name: /show cgm data/i })).toBeInTheDocument();
-    });
-  });
-
-  it('should render insulin timeline by default (switch off)', async () => {
-    vi.mocked(dataUtils.extractInsulinReadings).mockResolvedValue(mockInsulinReadings);
-    vi.mocked(dataUtils.extractGlucoseReadings).mockResolvedValue(mockGlucoseReadings);
-    vi.mocked(dataUtils.prepareInsulinTimelineData).mockReturnValue([
-      {
-        hour: 10,
-        timeLabel: '10:00',
-        basalRate: 1.0,
-        bolusTotal: 5.0,
-      },
-    ]);
-
-    render(<UnifiedDailyReport selectedFile={mockFile} glucoseUnit="mmol/L" />);
-    
-    await waitFor(() => {
-      expect(screen.getByTestId('insulin-timeline')).toBeInTheDocument();
-      expect(screen.queryByTestId('unified-timeline')).not.toBeInTheDocument();
-    });
-  });
-
-  it('should show message when no CGM data is available', async () => {
+  it('should render unified timeline with insulin data when glucose data extraction fails', async () => {
     vi.mocked(dataUtils.extractInsulinReadings).mockResolvedValue(mockInsulinReadings);
     vi.mocked(dataUtils.extractGlucoseReadings).mockRejectedValue(new Error('No CGM data'));
     vi.mocked(dataUtils.prepareInsulinTimelineData).mockReturnValue([
@@ -163,7 +118,8 @@ describe('UnifiedDailyReport', () => {
     render(<UnifiedDailyReport selectedFile={mockFile} glucoseUnit="mmol/L" />);
     
     await waitFor(() => {
-      expect(screen.getByText(/no cgm data available/i)).toBeInTheDocument();
+      expect(screen.getByTestId('day-navigator')).toBeInTheDocument();
+      expect(screen.getByTestId('unified-timeline')).toBeInTheDocument();
     });
   });
 });
