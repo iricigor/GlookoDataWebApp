@@ -391,7 +391,7 @@ describe('rocDataUtils', () => {
   });
 
   describe('getRoCMedicalStandards', () => {
-    it('should return medical standards object with per-5-min thresholds', () => {
+    it('should return medical standards object with per-5-min thresholds in mmol/L by default', () => {
       const standards = getRoCMedicalStandards();
       expect(standards.good).toBeDefined();
       expect(standards.medium).toBeDefined();
@@ -399,6 +399,29 @@ describe('rocDataUtils', () => {
       expect(standards.good.threshold).toBe('≤0.3 mmol/L/5min');
       expect(standards.medium.threshold).toBe('0.3-0.55 mmol/L/5min');
       expect(standards.bad.threshold).toBe('>0.55 mmol/L/5min');
+    });
+
+    it('should return medical standards in mmol/L when unit is mmol/L', () => {
+      const standards = getRoCMedicalStandards('mmol/L');
+      expect(standards.good.threshold).toBe('≤0.3 mmol/L/5min');
+      expect(standards.medium.threshold).toBe('0.3-0.55 mmol/L/5min');
+      expect(standards.bad.threshold).toBe('>0.55 mmol/L/5min');
+    });
+
+    it('should return medical standards in mg/dL when unit is mg/dL', () => {
+      const standards = getRoCMedicalStandards('mg/dL');
+      expect(standards.good.threshold).toBe('≤5 mg/dL/5min');
+      expect(standards.medium.threshold).toBe('5-10 mg/dL/5min');
+      expect(standards.bad.threshold).toBe('>10 mg/dL/5min');
+    });
+
+    it('should have consistent descriptions regardless of unit', () => {
+      const mmolStandards = getRoCMedicalStandards('mmol/L');
+      const mgdlStandards = getRoCMedicalStandards('mg/dL');
+      
+      expect(mmolStandards.good.description).toBe(mgdlStandards.good.description);
+      expect(mmolStandards.medium.description).toBe(mgdlStandards.medium.description);
+      expect(mmolStandards.bad.description).toBe(mgdlStandards.bad.description);
     });
   });
 

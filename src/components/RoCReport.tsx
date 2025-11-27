@@ -571,7 +571,7 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
   const minDate = availableDates.length > 0 ? availableDates[0] : undefined;
   const maxDate = availableDates.length > 0 ? availableDates[availableDates.length - 1] : undefined;
 
-  const medicalStandards = getRoCMedicalStandards();
+  const medicalStandards = getRoCMedicalStandards(glucoseUnit);
 
   // Calculate thresholds in the display unit - high threshold for reference line (16 mmol/L / 288 mg/dL)
   const glucoseHighThreshold = glucoseUnit === 'mg/dL' ? MAX_GLUCOSE_VALUES.mgdl.low : MAX_GLUCOSE_VALUES.mmol.low;
@@ -628,6 +628,27 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
 
   // RoC unit label
   const rocUnitLabel = glucoseUnit === 'mg/dL' ? 'mg/dL/5 min' : 'mmol/L/5 min';
+
+  // Calculate minimum RoC Y-axis max based on the "rapid" threshold + 20%
+  // ROC_THRESHOLDS.medium (0.55 mmol/L/5min) is the boundary between moderate and rapid categories
+  // Values above this threshold are considered "rapid" rate of change
+  // RoC values are always stored in mmol/L/5min internally, so this is in mmol/L units
+  const minRocYAxisMax = ROC_THRESHOLDS.medium * 1.2; // 0.55 * 1.2 = 0.66 mmol/L/5min (~12 mg/dL/5min)
+
+  // Calculate actual RoC Y-axis domain (in mmol/L units, display conversion handled by tickFormatter)
+  const rocYAxisDomain = useMemo((): [number, number] => {
+    if (chartData.length === 0) {
+      return [0, minRocYAxisMax];
+    }
+    
+    // Find the max RoC value in the current data (already in mmol/L/5min)
+    const maxDataRoC = Math.max(...chartData.map(d => d.roc));
+    
+    // Use the larger of actual max data or minimum threshold
+    const yAxisMax = Math.max(maxDataRoC, minRocYAxisMax);
+    
+    return [0, yAxisMax];
+  }, [chartData, minRocYAxisMax]);
 
   // Current date for navigation
   const currentDate = availableDates[currentDateIndex] ?? '';
@@ -809,7 +830,7 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                   }}
                   stroke={tokens.colorNeutralForeground2}
                   style={{ fontSize: tokens.fontSizeBase200 }}
-                  domain={[0, 'auto']}
+                  domain={rocYAxisDomain}
                   tickFormatter={(value: number) => formatRoCValue(value, glucoseUnit)}
                 />
                 
