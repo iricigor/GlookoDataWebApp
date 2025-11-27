@@ -8,7 +8,7 @@
 
 ### Overview
 
-Version 1.4 focuses on improving maintainability, enhanced reporting, and hypoglycemia analysis features.
+Version 1.4 focuses on advanced glucose analysis features, enhanced reporting capabilities, and improved maintainability.
 
 ### New Features
 
