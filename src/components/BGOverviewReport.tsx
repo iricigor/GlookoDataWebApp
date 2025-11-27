@@ -64,6 +64,8 @@ import {
   convertHbA1cToMmolMol,
   calculateDaysWithData,
   MIN_DAYS_FOR_RELIABLE_HBA1C,
+  calculateCV,
+  CV_TARGET_THRESHOLD,
 } from '../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
@@ -679,7 +681,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
   // Calculate HbA1c estimate with current filters applied
   const calculateHbA1cStats = () => {
     if (readings.length === 0) {
-      return { hba1c: null, averageGlucose: null, daysWithData: 0 };
+      return { hba1c: null, averageGlucose: null, daysWithData: 0, cv: null };
     }
 
     // Filter by date range and day of week (same as TIR)
@@ -700,14 +702,15 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     filteredReadings = filterReadingsByDayOfWeek(filteredReadings, dayFilter);
 
     if (filteredReadings.length === 0) {
-      return { hba1c: null, averageGlucose: null, daysWithData: 0 };
+      return { hba1c: null, averageGlucose: null, daysWithData: 0, cv: null };
     }
 
     const averageGlucose = calculateAverageGlucose(filteredReadings);
     const daysWithData = calculateDaysWithData(filteredReadings);
     const hba1c = averageGlucose !== null ? calculateEstimatedHbA1c(averageGlucose) : null;
+    const cv = calculateCV(filteredReadings);
 
-    return { hba1c, averageGlucose, daysWithData };
+    return { hba1c, averageGlucose, daysWithData, cv };
   };
 
   const getColorForCategory = (category: string): string => {
@@ -1046,6 +1049,24 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
                     : '-'} {getUnitLabel(glucoseUnit)}
                 </Text>
               </div>
+              <Tooltip 
+                content={`CV% (Coefficient of Variation) measures glucose variability. Target: ≤${CV_TARGET_THRESHOLD}% for stable control`}
+                relationship="description"
+              >
+                <div className={styles.hba1cDetailItem}>
+                  <Text className={styles.hba1cDetailLabel}>CV%</Text>
+                  <Text 
+                    className={styles.hba1cDetailValue}
+                    style={{ 
+                      color: hba1cStats.cv !== null && hba1cStats.cv > CV_TARGET_THRESHOLD 
+                        ? tokens.colorStatusDangerForeground1 
+                        : tokens.colorStatusSuccessForeground1 
+                    }}
+                  >
+                    {hba1cStats.cv !== null ? `${hba1cStats.cv.toFixed(1)}%` : '-'}
+                  </Text>
+                </div>
+              </Tooltip>
               <div className={styles.hba1cDetailItem}>
                 <Text className={styles.hba1cDetailLabel}>Days</Text>
                 <Text className={styles.hba1cDetailValue}>{hba1cStats.daysWithData}</Text>

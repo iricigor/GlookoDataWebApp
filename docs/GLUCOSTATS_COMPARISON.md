@@ -21,7 +21,7 @@ The GlucoStats Python library provides 59 CGM-derived statistics organized into 
 | Time Above Range (TAR) | `pt_ar` | `glucoseRangeUtils.ts` | ✅ Implemented (high/veryHigh) |
 | Time Below Range (TBR) | `pt_br` | `glucoseRangeUtils.ts` | ✅ Implemented (low/veryLow) |
 | Estimated HbA1c (GMI) | `gmi`, `eA1C` | `glucoseRangeUtils.ts` → `calculateEstimatedHbA1c()` | ✅ Implemented |
-| Coefficient of Variation (CV) | `cv` | Derivable from existing stats | ⚠️ Partially - could add explicit calculation |
+| Coefficient of Variation (CV) | `cv` | `glucoseRangeUtils.ts` → `calculateCV()` | ✅ Implemented with target threshold (≤36%) |
 | Rate of Change (RoC) | Related to variability | `rocDataUtils.ts` | ✅ Comprehensive implementation |
 | Hypoglycemia Detection | Related to control stats | `hypoDataUtils.ts` | ✅ Implemented with episode detection |
 | Percentiles (p10, p25, p50, p75, p90) | `quartile_*` | `AGPGraph.tsx` → AGP report | ✅ Implemented for AGP visualization |
@@ -30,7 +30,6 @@ The GlucoStats Python library provides 59 CGM-derived statistics organized into 
 
 | Statistic | GlucoStats Name | Current State | Enhancement Needed |
 |-----------|-----------------|---------------|-------------------|
-| CV% | `cv` | Derivable from existing stats | Add explicit CV calculation and display |
 | IQR (Interquartile Range) | `iqr` | Calculated in AGP but not displayed | Add as summary metric |
 | Daily Pattern Analysis | `time_in_ranges` with windowing | Basic day-of-week grouping exists | Add temporal pattern analysis |
 
@@ -40,7 +39,6 @@ The GlucoStats Python library provides 59 CGM-derived statistics organized into 
 
 | Statistic | Description | Clinical Value | Complexity |
 |-----------|-------------|----------------|------------|
-| **Coefficient of Variation (CV%)** | SD/Mean × 100, target ≤36% | High - standard CGM metric | Low |
 | **Glucose Management Indicator (GMI)** | Already have `calculateEstimatedHbA1c()`, same formula | High - display standardization | Low |
 | **LBGI (Low Blood Glucose Index)** | Risk index for hypoglycemia | High - risk assessment | Medium |
 | **HBGI (High Blood Glucose Index)** | Risk index for hyperglycemia | High - risk assessment | Medium |
