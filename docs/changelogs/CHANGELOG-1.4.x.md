@@ -205,6 +205,13 @@ Version 1.4 focuses on advanced glucose analysis features, enhanced reporting ca
 ### Other
 
 <details>
+<summary>473 Add GlucoStats Python library comparison documentation</summary>
+
+[#473](../../pull/473) Add GlucoStats Python library comparison documentation
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>471 Add theme toggle and settings shortcuts for logged-in users</summary>
 
 [#471](../../pull/471) Add theme toggle and settings shortcuts for logged-in users
