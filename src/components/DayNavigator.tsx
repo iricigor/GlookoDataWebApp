@@ -1,21 +1,29 @@
 /**
  * DayNavigator component
  * Reusable navigation bar for browsing through different days
+ * 
+ * Uses RSuite DatePicker wrapped with Fluent UI-styled navigation buttons.
+ * 
+ * Alternative date picker components for future exploration:
+ * 1. @fluentui/react-datepicker-compat - Fluent UI's DatePicker from v8, compatible with v9
+ *    https://react.fluentui.dev/?path=/docs/compat-components-datepicker--docs
+ * 2. react-day-picker - A flexible date picker component for React
+ *    https://react-day-picker.js.org/
  */
 
 import {
   makeStyles,
-  Text,
   Button,
   Spinner,
   tokens,
   shorthands,
-  Input,
 } from '@fluentui/react-components';
 import {
   ChevronLeftRegular,
   ChevronRightRegular,
 } from '@fluentui/react-icons';
+import { DatePicker } from 'rsuite';
+import 'rsuite/dist/rsuite.min.css';
 
 const useStyles = makeStyles({
   navigationBar: {
@@ -34,12 +42,17 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('12px'),
-    fontSize: tokens.fontSizeBase500,
-    fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground1,
   },
-  dateInput: {
-    minWidth: '150px',
+  datePickerContainer: {
+    '& .rs-picker-toggle': {
+      borderRadius: tokens.borderRadiusMedium,
+      minWidth: '220px',
+      fontSize: tokens.fontSizeBase400,
+      fontWeight: tokens.fontWeightSemibold,
+    },
+    '& .rs-picker-toggle-value': {
+      color: tokens.colorNeutralForeground1,
+    },
   },
 });
 
@@ -68,8 +81,23 @@ export function DayNavigator({
 }: DayNavigatorProps) {
   const styles = useStyles();
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+  // Convert string dates to Date objects for RSuite DatePicker
+  const currentDateObj = new Date(currentDate + 'T00:00:00');
+  const minDateObj = minDate ? new Date(minDate + 'T00:00:00') : undefined;
+  const maxDateObj = maxDate ? new Date(maxDate + 'T00:00:00') : undefined;
+
+  // Handle date change from RSuite DatePicker
+  const handleDateChange = (value: Date | null) => {
+    if (value && onDateSelect) {
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const day = String(value.getDate()).padStart(2, '0');
+      onDateSelect(`${year}-${month}-${day}`);
+    }
+  };
+
+  // Format date for display (weekday, month day, year)
+  const formatDisplayDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -93,21 +121,27 @@ export function DayNavigator({
       
       <div className={styles.dateDisplay}>
         {loading && <Spinner size="tiny" />}
-        <Text>
-          {formatDate(currentDate)}
-        </Text>
-        {onDateSelect && minDate && maxDate && (
-          <Input
-            type="date"
-            value={currentDate}
-            min={minDate}
-            max={maxDate}
-            onChange={(e) => onDateSelect(e.target.value)}
-            appearance="outline"
-            className={styles.dateInput}
-            size="small"
-          />
-        )}
+        {onDateSelect && minDate && maxDate ? (
+          <div className={styles.datePickerContainer}>
+            <DatePicker
+              value={currentDateObj}
+              onChange={handleDateChange}
+              oneTap
+              format="EEEE, MMMM d, yyyy"
+              shouldDisableDate={(date) => {
+                if (!date) return false;
+                if (minDateObj && date < minDateObj) return true;
+                if (maxDateObj && date > maxDateObj) return true;
+                return false;
+              }}
+              cleanable={false}
+              placement="bottom"
+              renderValue={(value) => {
+                return value ? formatDisplayDate(value) : '';
+              }}
+            />
+          </div>
+        ) : null}
       </div>
       
       <div className={styles.navigationButtons}>
