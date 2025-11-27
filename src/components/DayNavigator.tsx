@@ -22,8 +22,9 @@ import {
   ChevronLeftRegular,
   ChevronRightRegular,
 } from '@fluentui/react-icons';
-import { DatePicker } from 'rsuite';
+import { DatePicker, CustomProvider } from 'rsuite';
 import 'rsuite/dist/rsuite.min.css';
+import { useIsDarkMode } from '../hooks/useIsDarkMode';
 
 const useStyles = makeStyles({
   navigationBar: {
@@ -80,6 +81,7 @@ export function DayNavigator({
   maxDate,
 }: DayNavigatorProps) {
   const styles = useStyles();
+  const isDarkMode = useIsDarkMode();
 
   // Convert string dates to Date objects for RSuite DatePicker
   const currentDateObj = new Date(currentDate + 'T00:00:00');
@@ -107,54 +109,56 @@ export function DayNavigator({
   };
 
   return (
-    <div className={styles.navigationBar}>
-      <div className={styles.navigationButtons}>
-        <Button
-          appearance="subtle"
-          icon={<ChevronLeftRegular />}
-          onClick={onPreviousDay}
-          disabled={!canGoPrevious || loading}
-        >
-          Previous Day
-        </Button>
+    <CustomProvider theme={isDarkMode ? 'dark' : 'light'}>
+      <div className={styles.navigationBar}>
+        <div className={styles.navigationButtons}>
+          <Button
+            appearance="subtle"
+            icon={<ChevronLeftRegular />}
+            onClick={onPreviousDay}
+            disabled={!canGoPrevious || loading}
+          >
+            Previous Day
+          </Button>
+        </div>
+        
+        <div className={styles.dateDisplay}>
+          {loading && <Spinner size="tiny" />}
+          {onDateSelect && minDate && maxDate ? (
+            <div className={styles.datePickerContainer}>
+              <DatePicker
+                value={currentDateObj}
+                onChange={handleDateChange}
+                oneTap
+                format="EEEE, MMMM d, yyyy"
+                shouldDisableDate={(date) => {
+                  if (!date) return false;
+                  if (minDateObj && date < minDateObj) return true;
+                  if (maxDateObj && date > maxDateObj) return true;
+                  return false;
+                }}
+                cleanable={false}
+                placement="bottom"
+                renderValue={(value) => {
+                  return value ? formatDisplayDate(value) : '';
+                }}
+              />
+            </div>
+          ) : null}
+        </div>
+        
+        <div className={styles.navigationButtons}>
+          <Button
+            appearance="subtle"
+            icon={<ChevronRightRegular />}
+            iconPosition="after"
+            onClick={onNextDay}
+            disabled={!canGoNext || loading}
+          >
+            Next Day
+          </Button>
+        </div>
       </div>
-      
-      <div className={styles.dateDisplay}>
-        {loading && <Spinner size="tiny" />}
-        {onDateSelect && minDate && maxDate ? (
-          <div className={styles.datePickerContainer}>
-            <DatePicker
-              value={currentDateObj}
-              onChange={handleDateChange}
-              oneTap
-              format="EEEE, MMMM d, yyyy"
-              shouldDisableDate={(date) => {
-                if (!date) return false;
-                if (minDateObj && date < minDateObj) return true;
-                if (maxDateObj && date > maxDateObj) return true;
-                return false;
-              }}
-              cleanable={false}
-              placement="bottom"
-              renderValue={(value) => {
-                return value ? formatDisplayDate(value) : '';
-              }}
-            />
-          </div>
-        ) : null}
-      </div>
-      
-      <div className={styles.navigationButtons}>
-        <Button
-          appearance="subtle"
-          icon={<ChevronRightRegular />}
-          iconPosition="after"
-          onClick={onNextDay}
-          disabled={!canGoNext || loading}
-        >
-          Next Day
-        </Button>
-      </div>
-    </div>
+    </CustomProvider>
   );
 }
