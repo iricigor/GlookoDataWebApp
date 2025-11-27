@@ -629,6 +629,26 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
   // RoC unit label
   const rocUnitLabel = glucoseUnit === 'mg/dL' ? 'mg/dL/5 min' : 'mmol/L/5 min';
 
+  // Calculate minimum RoC Y-axis max (rapid threshold + 20%)
+  // This ensures the Y-axis always shows at least up to the rapid threshold for context
+  // RoC values are always stored in mmol/L/5min internally, so this is in mmol/L units
+  const minRocYAxisMax = ROC_THRESHOLDS.medium * 1.2; // 0.55 * 1.2 = 0.66 mmol/L/5min
+
+  // Calculate actual RoC Y-axis domain (in mmol/L units, display conversion handled by tickFormatter)
+  const rocYAxisDomain = useMemo((): [number, number] => {
+    if (chartData.length === 0) {
+      return [0, minRocYAxisMax];
+    }
+    
+    // Find the max RoC value in the current data (already in mmol/L/5min)
+    const maxDataRoC = Math.max(...chartData.map(d => d.roc));
+    
+    // Use the larger of actual max data or minimum threshold
+    const yAxisMax = Math.max(maxDataRoC, minRocYAxisMax);
+    
+    return [0, yAxisMax];
+  }, [chartData, minRocYAxisMax]);
+
   // Current date for navigation
   const currentDate = availableDates[currentDateIndex] ?? '';
 
@@ -809,7 +829,7 @@ export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
                   }}
                   stroke={tokens.colorNeutralForeground2}
                   style={{ fontSize: tokens.fontSizeBase200 }}
-                  domain={[0, 'auto']}
+                  domain={rocYAxisDomain}
                   tickFormatter={(value: number) => formatRoCValue(value, glucoseUnit)}
                 />
                 
