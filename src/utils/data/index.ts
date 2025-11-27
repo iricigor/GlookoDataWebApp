@@ -6,3 +6,4 @@ export * from './metadataUtils';
 export * from './glucoseUnitUtils';
 export * from './columnMapper';
 export * from './rocDataUtils';
+export * from './hypoDataUtils';

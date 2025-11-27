@@ -1,7 +1,8 @@
 /**
  * HyposReport component
  * Displays Hypoglycemia analysis with daily glucose values graph
- * Placeholder component with graph displaying monochrome coloring and day/night shading
+ * Features color-coded line (green/light red/dark red) based on glucose levels
+ * and comprehensive hypo statistics including duration, nadir values, and counts
  */
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
@@ -14,23 +15,40 @@ import {
   TabList,
   Tab,
   mergeClasses,
+  Tooltip,
 } from '@fluentui/react-components';
 import {
-  LineChart,
+  WarningRegular,
+  HeartPulseWarningRegular,
+  ArrowTrendingDownRegular,
+  TimerRegular,
+  ClockRegular,
+} from '@fluentui/react-icons';
+import {
   Line,
   XAxis,
   YAxis,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   ResponsiveContainer,
   ReferenceLine,
   ReferenceArea,
+  Scatter,
+  ComposedChart,
 } from 'recharts';
 import type { UploadedFile, GlucoseReading, GlucoseDataSource, GlucoseUnit } from '../types';
-import { extractGlucoseReadings, smoothGlucoseValues, displayGlucoseValue, getUnitLabel, convertGlucoseValue, formatGlucoseValue } from '../utils/data';
 import { 
+  extractGlucoseReadings, 
+  smoothGlucoseValues, 
+  displayGlucoseValue, 
+  getUnitLabel, 
+  convertGlucoseValue, 
+  formatGlucoseValue,
   getUniqueDates, 
-  filterReadingsByDate, 
+  filterReadingsByDate,
+  calculateHypoStats,
+  formatHypoDuration,
 } from '../utils/data';
+import type { HypoStats } from '../utils/data/hypoDataUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { DayNavigator } from './DayNavigator';
 import { useSelectedDate } from '../hooks/useSelectedDate';
@@ -41,6 +59,16 @@ import { useSelectedDate } from '../hooks/useSelectedDate';
 const MAX_GLUCOSE_VALUES = {
   mmol: { low: 16.0, high: 22.0 },
   mgdl: { low: 288, high: 396 },
+} as const;
+
+/**
+ * Colors for hypo chart visualization
+ */
+const HYPO_CHART_COLORS = {
+  normal: '#4CAF50',     // Green for normal glucose
+  low: '#FF6B6B',        // Light red for below low threshold
+  veryLow: '#8B0000',    // Dark red for below veryLow threshold
+  nadirDot: '#8B0000',   // Dark red for nadir dots
 } as const;
 
 const useStyles = makeStyles({
@@ -67,32 +95,71 @@ const useStyles = makeStyles({
   },
   summarySection: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
     ...shorthands.gap('16px'),
   },
   summaryCard: {
     ...shorthands.padding('16px'),
     backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.border('1px', 'dashed', tokens.colorNeutralStroke1),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    boxShadow: tokens.shadow4,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+  },
+  summaryCardSuccess: {
+    ...shorthands.border('1px', 'solid', tokens.colorPaletteGreenBorder1),
+  },
+  summaryCardWarning: {
+    ...shorthands.border('1px', 'solid', tokens.colorPaletteMarigoldBorder1),
+  },
+  summaryCardDanger: {
+    ...shorthands.border('1px', 'solid', tokens.colorPaletteRedBorder1),
+  },
+  summaryIcon: {
+    fontSize: '28px',
+    flexShrink: 0,
+  },
+  summaryIconSuccess: {
+    color: tokens.colorPaletteGreenForeground1,
+  },
+  summaryIconWarning: {
+    color: tokens.colorPaletteMarigoldForeground1,
+  },
+  summaryIconDanger: {
+    color: tokens.colorPaletteRedForeground1,
+  },
+  summaryContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: 0,
   },
   summaryLabel: {
     fontSize: tokens.fontSizeBase300,
-    color: tokens.colorNeutralForeground3,
+    color: tokens.colorNeutralForeground2,
     fontFamily: tokens.fontFamilyBase,
     marginBottom: '4px',
+  },
+  summaryValueRow: {
+    display: 'flex',
+    alignItems: 'baseline',
+    ...shorthands.gap('4px'),
   },
   summaryValue: {
     fontSize: tokens.fontSizeHero700,
     fontWeight: tokens.fontWeightSemibold,
     fontFamily: tokens.fontFamilyBase,
-    color: tokens.colorNeutralForeground3,
+    color: tokens.colorNeutralForeground1,
   },
-  summarySubtext: {
+  summaryValueSuccess: {
+    color: tokens.colorPaletteGreenForeground1,
+    fontSize: tokens.fontSizeHero900,
+  },
+  summaryUnit: {
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground3,
-    fontFamily: tokens.fontFamilyBase,
-    marginTop: '4px',
-    fontStyle: 'italic',
   },
   chartCard: {
     ...shorthands.padding('24px'),
@@ -125,6 +192,36 @@ const useStyles = makeStyles({
     padding: '40px',
     color: tokens.colorNeutralForeground3,
     fontSize: tokens.fontSizeBase400,
+  },
+  legendContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    ...shorthands.gap('16px'),
+    ...shorthands.padding('12px', '16px'),
+    backgroundColor: tokens.colorNeutralBackground2,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    marginTop: '8px',
+    fontSize: tokens.fontSizeBase200,
+  },
+  legendItem: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
+  legendLine: {
+    width: '20px',
+    height: '3px',
+    ...shorthands.borderRadius('2px'),
+  },
+  legendDot: {
+    width: '8px',
+    height: '8px',
+    ...shorthands.borderRadius('50%'),
+  },
+  legendDashedLine: {
+    width: '20px',
+    height: '0',
+    borderTop: `2px dashed ${tokens.colorNeutralStroke1}`,
   },
 });
 
@@ -261,34 +358,123 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate]);
   
-  // Filter readings for current date
-  const currentReadings = currentDate ? filterReadingsByDate(allReadings, currentDate) : [];
+  // Filter readings for current date (sorted by timestamp)
+  const currentReadings = useMemo(() => {
+    const filtered = currentDate ? filterReadingsByDate(allReadings, currentDate) : [];
+    return filtered.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  }, [allReadings, currentDate]);
+
+  // Calculate hypo statistics for current day
+  const hypoStats: HypoStats | null = useMemo(() => {
+    if (currentReadings.length === 0) return null;
+    return calculateHypoStats(currentReadings, thresholds);
+  }, [currentReadings, thresholds]);
 
   // Apply smoothing to glucose values
   const smoothedReadings = smoothGlucoseValues(currentReadings);
 
-  // Prepare chart data
-  const chartData = smoothedReadings
-    .map(reading => {
-      const time = reading.timestamp;
-      const hours = time.getHours();
-      const minutes = time.getMinutes();
-      const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-      
-      // Convert to display unit
-      const convertedValue = convertGlucoseValue(reading.value, glucoseUnit);
-      // Clamp value to maxGlucose (in display unit)
-      const clampedValue = Math.min(convertedValue, maxGlucose);
-      
+  // Prepare chart data with color information for each segment
+  const chartData = useMemo(() => {
+    return smoothedReadings
+      .map((reading, index) => {
+        const time = reading.timestamp;
+        const hours = time.getHours();
+        const minutes = time.getMinutes();
+        const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        
+        // Convert to display unit
+        const convertedValue = convertGlucoseValue(reading.value, glucoseUnit);
+        // Clamp value to maxGlucose (in display unit)
+        const clampedValue = Math.min(convertedValue, maxGlucose);
+        
+        // Determine color based on glucose level (using mmol/L thresholds)
+        let color: string;
+        if (reading.value < thresholds.veryLow) {
+          color = HYPO_CHART_COLORS.veryLow;
+        } else if (reading.value < thresholds.low) {
+          color = HYPO_CHART_COLORS.low;
+        } else {
+          color = HYPO_CHART_COLORS.normal;
+        }
+        
+        return {
+          time: timeString,
+          timeMinutes: hours * 60 + minutes, // For sorting
+          timeDecimal: hours + minutes / 60, // For X-axis positioning
+          value: clampedValue,
+          originalValue: convertedValue, // Keep original (converted) for tooltip
+          rawValue: reading.value, // Keep raw mmol/L value
+          color,
+          index,
+        };
+      })
+      .sort((a, b) => a.timeMinutes - b.timeMinutes);
+  }, [smoothedReadings, glucoseUnit, maxGlucose, thresholds]);
+
+  // Create optimized gradient stops for the glucose line
+  // Merges consecutive points with the same color to reduce DOM elements
+  const gradientStops = useMemo(() => {
+    if (chartData.length < 2) return [];
+    
+    const stops: Array<{ offset: string; color: string }> = [];
+    let prevColor = chartData[0].color;
+    
+    // Always add first point
+    stops.push({
+      offset: `${(chartData[0].timeDecimal / 24) * 100}%`,
+      color: chartData[0].color,
+    });
+    
+    // Add stops only when color changes
+    for (let i = 1; i < chartData.length; i++) {
+      const point = chartData[i];
+      if (point.color !== prevColor) {
+        // Add a stop at the previous point with the old color (to ensure clean transition)
+        const prevPoint = chartData[i - 1];
+        const prevOffset = `${(prevPoint.timeDecimal / 24) * 100}%`;
+        if (stops[stops.length - 1].offset !== prevOffset) {
+          stops.push({
+            offset: prevOffset,
+            color: prevColor,
+          });
+        }
+        // Add a stop at the current point with the new color
+        stops.push({
+          offset: `${(point.timeDecimal / 24) * 100}%`,
+          color: point.color,
+        });
+        prevColor = point.color;
+      }
+    }
+    
+    // Always add last point
+    const lastPoint = chartData[chartData.length - 1];
+    const lastOffset = `${(lastPoint.timeDecimal / 24) * 100}%`;
+    if (stops[stops.length - 1].offset !== lastOffset) {
+      stops.push({
+        offset: lastOffset,
+        color: lastPoint.color,
+      });
+    }
+    
+    return stops;
+  }, [chartData]);
+
+  // Get nadir points from hypo periods for scatter plot
+  const nadirPoints = useMemo(() => {
+    if (!hypoStats || hypoStats.hypoPeriods.length === 0) return [];
+    
+    return hypoStats.hypoPeriods.map(period => {
+      const convertedNadir = convertGlucoseValue(period.nadir, glucoseUnit);
       return {
-        time: timeString,
-        timeMinutes: hours * 60 + minutes, // For sorting
-        timeDecimal: hours + minutes / 60, // For X-axis positioning
-        value: clampedValue,
-        originalValue: convertedValue, // Keep original (converted) for tooltip
+        timeDecimal: period.nadirTimeDecimal,
+        value: Math.min(convertedNadir, maxGlucose),
+        originalValue: convertedNadir,
+        nadir: period.nadir,
+        isSevere: period.isSevere,
       };
-    })
-    .sort((a, b) => a.timeMinutes - b.timeMinutes);
+    });
+  }, [hypoStats, glucoseUnit, maxGlucose]);
 
   // Navigation handlers
   const handlePreviousDate = () => {
@@ -324,12 +510,38 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
   const maxDate = availableDates.length > 0 ? availableDates[availableDates.length - 1] : undefined;
 
   // Custom tooltip with Fluent UI styling
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string; value: number; originalValue: number } }> }) => {
+  const CustomTooltip = ({ active, payload }: { 
+    active?: boolean; 
+    payload?: Array<{ 
+      payload: { 
+        time: string; 
+        value: number; 
+        originalValue: number;
+        rawValue?: number;
+        color?: string;
+      } 
+    }> 
+  }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       const displayValue = data.originalValue > maxGlucose 
         ? `${formatGlucoseValue(data.originalValue, glucoseUnit)} (clamped to ${formatGlucoseValue(maxGlucose, glucoseUnit)})`
         : formatGlucoseValue(data.value, glucoseUnit);
+      
+      // Determine status text
+      let statusText = '';
+      let statusColor: string = HYPO_CHART_COLORS.normal;
+      if (data.rawValue !== undefined) {
+        if (data.rawValue < thresholds.veryLow) {
+          statusText = 'Severe Hypo';
+          statusColor = HYPO_CHART_COLORS.veryLow;
+        } else if (data.rawValue < thresholds.low) {
+          statusText = 'Hypoglycemia';
+          statusColor = HYPO_CHART_COLORS.low;
+        } else {
+          statusText = 'In Range';
+        }
+      }
       
       return (
         <div style={{
@@ -351,6 +563,15 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
           <div style={{ color: tokens.colorNeutralForeground2 }}>
             Glucose: {displayValue} {getUnitLabel(glucoseUnit)}
           </div>
+          {statusText && (
+            <div style={{ 
+              color: statusColor, 
+              fontStyle: 'italic',
+              marginTop: '4px',
+            }}>
+              {statusText}
+            </div>
+          )}
         </div>
       );
     }
@@ -423,39 +644,160 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
         maxDate={maxDate}
       />
 
-      {/* Empty Stats Cards - Placeholder for future implementation */}
+      {/* Stats Cards */}
       <div className={styles.summarySection}>
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Hypo Events</Text>
-          <div>
-            <Text className={styles.summaryValue}>—</Text>
-          </div>
-          <Text className={styles.summarySubtext}>Coming soon</Text>
-        </Card>
-
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Time Below Range</Text>
-          <div>
-            <Text className={styles.summaryValue}>—</Text>
-          </div>
-          <Text className={styles.summarySubtext}>Coming soon</Text>
-        </Card>
-
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Lowest Reading</Text>
-          <div>
-            <Text className={styles.summaryValue}>—</Text>
-          </div>
-          <Text className={styles.summarySubtext}>Coming soon</Text>
-        </Card>
-
-        <Card className={styles.summaryCard}>
-          <Text className={styles.summaryLabel}>Average Duration</Text>
-          <div>
-            <Text className={styles.summaryValue}>—</Text>
-          </div>
-          <Text className={styles.summarySubtext}>Coming soon</Text>
-        </Card>
+        {/* Show smiley when no hypos */}
+        {hypoStats && hypoStats.totalCount === 0 ? (
+          <>
+            <Tooltip content="No hypoglycemic events detected today" relationship="description">
+              <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
+                <Text className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)}>😊</Text>
+                <div className={styles.summaryContent}>
+                  <Text className={styles.summaryLabel}>Severe Hypos</Text>
+                  <div className={styles.summaryValueRow}>
+                    <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSuccess)}>0</Text>
+                  </div>
+                </div>
+              </Card>
+            </Tooltip>
+            
+            <Tooltip content="No hypoglycemic events detected today" relationship="description">
+              <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
+                <Text className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)}>😊</Text>
+                <div className={styles.summaryContent}>
+                  <Text className={styles.summaryLabel}>Non-Severe Hypos</Text>
+                  <div className={styles.summaryValueRow}>
+                    <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSuccess)}>0</Text>
+                  </div>
+                </div>
+              </Card>
+            </Tooltip>
+            
+            <Tooltip content="No hypoglycemic events - great control!" relationship="description">
+              <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
+                <Text className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)}>😊</Text>
+                <div className={styles.summaryContent}>
+                  <Text className={styles.summaryLabel}>Lowest Hypo Value</Text>
+                  <div className={styles.summaryValueRow}>
+                    <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSuccess)}>N/A</Text>
+                  </div>
+                </div>
+              </Card>
+            </Tooltip>
+            
+            <Tooltip content="No time spent in hypoglycemia" relationship="description">
+              <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
+                <Text className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)}>😊</Text>
+                <div className={styles.summaryContent}>
+                  <Text className={styles.summaryLabel}>Total Hypo Time</Text>
+                  <div className={styles.summaryValueRow}>
+                    <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSuccess)}>0m</Text>
+                  </div>
+                </div>
+              </Card>
+            </Tooltip>
+          </>
+        ) : hypoStats ? (
+          <>
+            {/* Severe Hypos Count */}
+            <Tooltip content="Number of hypoglycemic events below very low threshold" relationship="description">
+              <Card className={mergeClasses(
+                styles.summaryCard, 
+                hypoStats.severeCount > 0 ? styles.summaryCardDanger : styles.summaryCardSuccess
+              )}>
+                <HeartPulseWarningRegular className={mergeClasses(
+                  styles.summaryIcon,
+                  hypoStats.severeCount > 0 ? styles.summaryIconDanger : styles.summaryIconSuccess
+                )} />
+                <div className={styles.summaryContent}>
+                  <Text className={styles.summaryLabel}>Severe Hypos</Text>
+                  <div className={styles.summaryValueRow}>
+                    <Text className={styles.summaryValue}>{hypoStats.severeCount}</Text>
+                  </div>
+                </div>
+              </Card>
+            </Tooltip>
+            
+            {/* Non-Severe Hypos Count */}
+            <Tooltip content="Number of hypoglycemic events below low threshold but above very low" relationship="description">
+              <Card className={mergeClasses(
+                styles.summaryCard,
+                hypoStats.nonSevereCount > 0 ? styles.summaryCardWarning : styles.summaryCardSuccess
+              )}>
+                <WarningRegular className={mergeClasses(
+                  styles.summaryIcon,
+                  hypoStats.nonSevereCount > 0 ? styles.summaryIconWarning : styles.summaryIconSuccess
+                )} />
+                <div className={styles.summaryContent}>
+                  <Text className={styles.summaryLabel}>Non-Severe Hypos</Text>
+                  <div className={styles.summaryValueRow}>
+                    <Text className={styles.summaryValue}>{hypoStats.nonSevereCount}</Text>
+                  </div>
+                </div>
+              </Card>
+            </Tooltip>
+            
+            {/* Lowest Hypo Value */}
+            <Tooltip content="Lowest glucose reading during a hypoglycemic event" relationship="description">
+              <Card className={mergeClasses(
+                styles.summaryCard,
+                hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
+                  ? styles.summaryCardDanger 
+                  : styles.summaryCardWarning
+              )}>
+                <ArrowTrendingDownRegular className={mergeClasses(
+                  styles.summaryIcon,
+                  hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
+                    ? styles.summaryIconDanger 
+                    : styles.summaryIconWarning
+                )} />
+                <div className={styles.summaryContent}>
+                  <Text className={styles.summaryLabel}>Lowest Hypo Value</Text>
+                  <div className={styles.summaryValueRow}>
+                    <Text className={styles.summaryValue}>
+                      {hypoStats.lowestValue !== null 
+                        ? displayGlucoseValue(hypoStats.lowestValue, glucoseUnit)
+                        : 'N/A'}
+                    </Text>
+                    {hypoStats.lowestValue !== null && (
+                      <Text className={styles.summaryUnit}>{getUnitLabel(glucoseUnit)}</Text>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </Tooltip>
+            
+            {/* Longest Hypo Duration */}
+            <Tooltip content="Duration of the longest hypoglycemic event" relationship="description">
+              <Card className={mergeClasses(styles.summaryCard, styles.summaryCardWarning)}>
+                <TimerRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconWarning)} />
+                <div className={styles.summaryContent}>
+                  <Text className={styles.summaryLabel}>Longest Hypo</Text>
+                  <div className={styles.summaryValueRow}>
+                    <Text className={styles.summaryValue}>
+                      {formatHypoDuration(hypoStats.longestDurationMinutes)}
+                    </Text>
+                  </div>
+                </div>
+              </Card>
+            </Tooltip>
+            
+            {/* Total Hypo Duration */}
+            <Tooltip content="Total time spent in hypoglycemia during the day" relationship="description">
+              <Card className={mergeClasses(styles.summaryCard, styles.summaryCardWarning)}>
+                <ClockRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconWarning)} />
+                <div className={styles.summaryContent}>
+                  <Text className={styles.summaryLabel}>Total Hypo Time</Text>
+                  <div className={styles.summaryValueRow}>
+                    <Text className={styles.summaryValue}>
+                      {formatHypoDuration(hypoStats.totalDurationMinutes)}
+                    </Text>
+                  </div>
+                </div>
+              </Card>
+            </Tooltip>
+          </>
+        ) : null}
       </div>
 
       {/* Chart */}
@@ -512,7 +854,7 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
           windowWidth < 768 && styles.chartContainerMobile
         )}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={chartMargins}>
+            <ComposedChart data={chartData} margin={chartMargins}>
               <defs>
                 {/* Gradual night shading gradients - more intensive than RoC report */}
                 <linearGradient id="hyposNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
@@ -522,6 +864,12 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
                 <linearGradient id="hyposNightGradientRight" x1="0" y1="0" x2="1" y2="0">
                   <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
                   <stop offset="100%" stopColor="#1a237e" stopOpacity="0.35" />
+                </linearGradient>
+                {/* Glucose line gradient based on hypo status */}
+                <linearGradient id="glucoseLineGradient" x1="0" y1="0" x2="1" y2="0">
+                  {gradientStops.map((stop, index) => (
+                    <stop key={index} offset={stop.offset} stopColor={stop.color} />
+                  ))}
                 </linearGradient>
               </defs>
               
@@ -576,12 +924,29 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
                 tickLine={false}
               />
               
-              <Tooltip content={<CustomTooltip />} />
+              <RechartsTooltip content={<CustomTooltip />} />
               
-              {/* Target range reference lines */}
+              {/* Very low threshold reference line */}
+              <ReferenceLine 
+                y={convertGlucoseValue(thresholds.veryLow, glucoseUnit)} 
+                stroke={HYPO_CHART_COLORS.veryLow}
+                strokeDasharray="5 5" 
+                strokeWidth={1.5}
+                label={{ 
+                  value: `V.Low (${displayGlucoseValue(thresholds.veryLow, glucoseUnit)})`, 
+                  position: 'insideBottomLeft', 
+                  style: { 
+                    fontSize: tokens.fontSizeBase200,
+                    fontFamily: tokens.fontFamilyBase,
+                    fill: HYPO_CHART_COLORS.veryLow,
+                  } 
+                }}
+              />
+              
+              {/* Low threshold reference line */}
               <ReferenceLine 
                 y={convertGlucoseValue(thresholds.low, glucoseUnit)} 
-                stroke={tokens.colorPaletteRedBorder1}
+                stroke={HYPO_CHART_COLORS.low}
                 strokeDasharray="5 5" 
                 strokeWidth={1.5}
                 label={{ 
@@ -590,10 +955,12 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
                   style: { 
                     fontSize: tokens.fontSizeBase200,
                     fontFamily: tokens.fontFamilyBase,
-                    fill: tokens.colorPaletteRedForeground1,
+                    fill: HYPO_CHART_COLORS.low,
                   } 
                 }}
               />
+              
+              {/* High threshold reference line */}
               <ReferenceLine 
                 y={convertGlucoseValue(thresholds.high, glucoseUnit)} 
                 stroke={tokens.colorPaletteMarigoldBorder1}
@@ -610,22 +977,69 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
                 }}
               />
               
-              {/* Glucose values line - monochrome coloring */}
+              {/* Glucose values line with gradient coloring based on hypo state */}
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke={tokens.colorBrandForeground1}
-                strokeWidth={2}
+                stroke="url(#glucoseLineGradient)"
+                strokeWidth={2.5}
                 dot={false}
                 activeDot={{ 
-                  r: 4, 
+                  r: 5, 
                   strokeWidth: 2,
                   stroke: tokens.colorNeutralBackground1,
                   fill: tokens.colorBrandForeground1,
                 }}
+                connectNulls
               />
-            </LineChart>
+              
+              {/* Nadir dots for each hypo period */}
+              {nadirPoints.length > 0 && (
+                <Scatter
+                  data={nadirPoints}
+                  dataKey="value"
+                  fill={HYPO_CHART_COLORS.nadirDot}
+                  shape={(props: unknown) => {
+                    const { cx, cy } = props as { cx: number; cy: number };
+                    return (
+                      <circle
+                        cx={cx}
+                        cy={cy}
+                        r={6}
+                        fill={HYPO_CHART_COLORS.nadirDot}
+                        stroke={tokens.colorNeutralBackground1}
+                        strokeWidth={2}
+                      />
+                    );
+                  }}
+                />
+              )}
+            </ComposedChart>
           </ResponsiveContainer>
+        </div>
+        
+        {/* Chart Legend */}
+        <div className={styles.legendContainer}>
+          <div className={styles.legendItem}>
+            <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.normal }} />
+            <Text>Normal Range</Text>
+          </div>
+          <div className={styles.legendItem}>
+            <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.low }} />
+            <Text>Hypoglycemia</Text>
+          </div>
+          <div className={styles.legendItem}>
+            <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.veryLow }} />
+            <Text>Severe Hypoglycemia</Text>
+          </div>
+          <div className={styles.legendItem}>
+            <div className={styles.legendDot} style={{ backgroundColor: HYPO_CHART_COLORS.nadirDot }} />
+            <Text>Nadir (Lowest Point)</Text>
+          </div>
+          <div className={styles.legendItem}>
+            <div className={styles.legendDashedLine} />
+            <Text>Thresholds</Text>
+          </div>
         </div>
       </Card>
     </div>
