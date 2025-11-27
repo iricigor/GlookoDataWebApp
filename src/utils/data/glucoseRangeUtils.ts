@@ -585,6 +585,19 @@ export function calculateEstimatedHbA1c(averageGlucoseMmol: number): number {
 }
 
 /**
+ * Convert HbA1c from percentage (NGSP) to mmol/mol (IFCC)
+ * Uses the standard conversion formula: mmol/mol = (HbA1c % - 2.15) × 10.929
+ * 
+ * @param hba1cPercent - HbA1c value in percentage (NGSP units)
+ * @returns HbA1c value in mmol/mol (IFCC units)
+ */
+export function convertHbA1cToMmolMol(hba1cPercent: number): number {
+  // Formula: mmol/mol = (HbA1c % - 2.15) × 10.929
+  // Source: IFCC standardization
+  return (hba1cPercent - 2.15) * 10.929;
+}
+
+/**
  * Calculate the number of unique days in glucose readings
  * 
  * @param readings - Array of glucose readings

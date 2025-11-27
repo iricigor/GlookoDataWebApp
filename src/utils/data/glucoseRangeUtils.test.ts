@@ -25,6 +25,7 @@ import {
   calculateHourlyTIRGrouped,
   calculateAverageGlucose,
   calculateEstimatedHbA1c,
+  convertHbA1cToMmolMol,
   calculateDaysWithData,
   MIN_DAYS_FOR_RELIABLE_HBA1C,
 } from './glucoseRangeUtils';
@@ -645,6 +646,26 @@ describe('glucoseRangeUtils', () => {
       // Formula: (3.5 + 2.59) / 1.59 = 3.83
       const result = calculateEstimatedHbA1c(3.5);
       expect(result).toBeCloseTo(3.83, 1);
+    });
+  });
+
+  describe('convertHbA1cToMmolMol', () => {
+    it('should convert HbA1c 5.0% to approximately 31 mmol/mol', () => {
+      // Formula: (5.0 - 2.15) × 10.929 = 31.15
+      const result = convertHbA1cToMmolMol(5.0);
+      expect(result).toBeCloseTo(31.15, 0);
+    });
+
+    it('should convert HbA1c 7.0% to approximately 53 mmol/mol', () => {
+      // Formula: (7.0 - 2.15) × 10.929 = 53.0
+      const result = convertHbA1cToMmolMol(7.0);
+      expect(result).toBeCloseTo(53.0, 0);
+    });
+
+    it('should convert HbA1c 6.5% to approximately 48 mmol/mol', () => {
+      // Formula: (6.5 - 2.15) × 10.929 = 47.5
+      const result = convertHbA1cToMmolMol(6.5);
+      expect(result).toBeCloseTo(47.5, 0);
     });
   });
 

@@ -48,8 +48,23 @@ import type {
   TimePeriodTIRStats,
   HourlyTIRStats,
 } from '../types';
-import { extractGlucoseReadings, groupByWeek, displayGlucoseValue, getUnitLabel } from '../utils/data';
-import { groupByDayOfWeek, calculatePercentage, GLUCOSE_RANGE_COLORS, calculateTIRByTimePeriods, calculateHourlyTIR, MIN_PERCENTAGE_FOR_PERIOD_BAR, calculateAverageGlucose, calculateEstimatedHbA1c, calculateDaysWithData, MIN_DAYS_FOR_RELIABLE_HBA1C } from '../utils/data';
+import {
+  extractGlucoseReadings,
+  groupByWeek,
+  displayGlucoseValue,
+  getUnitLabel,
+  groupByDayOfWeek,
+  calculatePercentage,
+  GLUCOSE_RANGE_COLORS,
+  calculateTIRByTimePeriods,
+  calculateHourlyTIR,
+  MIN_PERCENTAGE_FOR_PERIOD_BAR,
+  calculateAverageGlucose,
+  calculateEstimatedHbA1c,
+  convertHbA1cToMmolMol,
+  calculateDaysWithData,
+  MIN_DAYS_FOR_RELIABLE_HBA1C,
+} from '../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { useDateRange } from '../hooks/useDateRange';
@@ -186,50 +201,60 @@ const useStyles = makeStyles({
     textAlign: 'center',
   },
   hba1cCard: {
-    ...shorthands.padding('20px'),
+    ...shorthands.padding('16px', '20px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     boxShadow: tokens.shadow16,
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
-  hba1cContent: {
+  hba1cMainRow: {
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    ...shorthands.gap('16px'),
+    marginTop: '8px',
+  },
+  hba1cValueSection: {
+    display: 'flex',
+    alignItems: 'baseline',
     ...shorthands.gap('8px'),
-    marginTop: '16px',
   },
   hba1cValue: {
-    fontSize: '48px',
+    fontSize: '36px',
     fontWeight: tokens.fontWeightBold,
     color: tokens.colorBrandForeground1,
     lineHeight: '1',
   },
   hba1cUnit: {
-    fontSize: tokens.fontSizeBase400,
+    fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
+  },
+  hba1cMmolMol: {
+    fontSize: tokens.fontSizeBase400,
+    color: tokens.colorNeutralForeground1,
+    fontWeight: tokens.fontWeightSemibold,
   },
   hba1cDetails: {
     display: 'flex',
     flexWrap: 'wrap',
-    justifyContent: 'center',
-    ...shorthands.gap('16px'),
-    marginTop: '12px',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
   },
   hba1cDetailItem: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    ...shorthands.padding('8px', '16px'),
+    ...shorthands.padding('6px', '12px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorNeutralBackground2,
   },
   hba1cDetailLabel: {
-    fontSize: tokens.fontSizeBase200,
+    fontSize: tokens.fontSizeBase100,
     color: tokens.colorNeutralForeground2,
   },
   hba1cDetailValue: {
-    fontSize: tokens.fontSizeBase400,
+    fontSize: tokens.fontSizeBase300,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
   },
@@ -237,15 +262,15 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('8px'),
-    ...shorthands.padding('12px'),
+    ...shorthands.padding('8px', '12px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorStatusWarningBackground1,
-    marginTop: '12px',
-    fontSize: tokens.fontSizeBase300,
+    marginTop: '8px',
+    fontSize: tokens.fontSizeBase200,
     color: tokens.colorStatusWarningForeground1,
   },
   hba1cWarningIcon: {
-    fontSize: '20px',
+    fontSize: '16px',
     flexShrink: 0,
   },
   agpCard: {
@@ -989,25 +1014,29 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
             Estimated HbA1c
           </Text>
           
-          <div className={styles.hba1cContent}>
-            <Text className={styles.hba1cValue}>
-              {hba1cStats.hba1c.toFixed(1)}
-            </Text>
-            <Text className={styles.hba1cUnit}>% (estimated)</Text>
-          </div>
-          
-          <div className={styles.hba1cDetails}>
-            <div className={styles.hba1cDetailItem}>
-              <Text className={styles.hba1cDetailLabel}>Average Glucose</Text>
-              <Text className={styles.hba1cDetailValue}>
-                {hba1cStats.averageGlucose !== null 
-                  ? displayGlucoseValue(hba1cStats.averageGlucose, glucoseUnit) 
-                  : '-'} {getUnitLabel(glucoseUnit)}
+          <div className={styles.hba1cMainRow}>
+            <div className={styles.hba1cValueSection}>
+              <Text className={styles.hba1cValue}>
+                {hba1cStats.hba1c.toFixed(1)}%
+              </Text>
+              <Text className={styles.hba1cMmolMol}>
+                ({Math.round(convertHbA1cToMmolMol(hba1cStats.hba1c))} mmol/mol)
               </Text>
             </div>
-            <div className={styles.hba1cDetailItem}>
-              <Text className={styles.hba1cDetailLabel}>Days Analyzed</Text>
-              <Text className={styles.hba1cDetailValue}>{hba1cStats.daysWithData}</Text>
+            
+            <div className={styles.hba1cDetails}>
+              <div className={styles.hba1cDetailItem}>
+                <Text className={styles.hba1cDetailLabel}>Avg Glucose</Text>
+                <Text className={styles.hba1cDetailValue}>
+                  {hba1cStats.averageGlucose !== null 
+                    ? displayGlucoseValue(hba1cStats.averageGlucose, glucoseUnit) 
+                    : '-'} {getUnitLabel(glucoseUnit)}
+                </Text>
+              </div>
+              <div className={styles.hba1cDetailItem}>
+                <Text className={styles.hba1cDetailLabel}>Days</Text>
+                <Text className={styles.hba1cDetailValue}>{hba1cStats.daysWithData}</Text>
+              </div>
             </div>
           </div>
 
@@ -1015,15 +1044,10 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
             <div className={styles.hba1cWarning}>
               <WarningRegular className={styles.hba1cWarningIcon} />
               <Text>
-                Note: This estimate is based on {hba1cStats.daysWithData} day{hba1cStats.daysWithData !== 1 ? 's' : ''} of data.
-                For a more reliable HbA1c estimate, at least {MIN_DAYS_FOR_RELIABLE_HBA1C} days of glucose data is recommended.
+                Based on {hba1cStats.daysWithData} days of data. At least {MIN_DAYS_FOR_RELIABLE_HBA1C} days recommended for reliable estimate.
               </Text>
             </div>
           )}
-
-          <div className={styles.targetInfo}>
-            <strong>Formula:</strong> HbA1c (%) = (Average Glucose in mmol/L + 2.59) / 1.59 — ADA-endorsed formula
-          </div>
         </Card>
       )}
 
