@@ -7,7 +7,7 @@ import { DataUpload } from './pages/DataUpload'
 import { Reports } from './pages/Reports'
 import { AIAnalysis } from './pages/AIAnalysis'
 import { Settings } from './pages/Settings'
-import { useTheme } from './hooks/useTheme'
+import { useTheme, isDarkTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
 import { useResponseLanguage } from './hooks/useResponseLanguage'
 import { useGlucoseUnit } from './hooks/useGlucoseUnit'
@@ -63,6 +63,12 @@ function App() {
       }
     }))
   }, [])
+
+  // Toggle between light and dark theme (skips system option when using quick toggle)
+  const handleThemeToggle = useCallback(() => {
+    // Determine current effective theme and toggle to the opposite explicit mode
+    setThemeMode(isDarkTheme(themeMode) ? 'light' : 'dark')
+  }, [themeMode, setThemeMode])
 
   // Load demo data on app startup (Joshua dataset)
   useEffect(() => {
@@ -254,7 +260,12 @@ function App() {
 
   return (
     <FluentProvider theme={theme} className="app-container">
-      <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
+      <Navigation 
+        currentPage={currentPage} 
+        onNavigate={handleNavigate} 
+        themeMode={themeMode}
+        onThemeToggle={handleThemeToggle}
+      />
       <main ref={mainContentRef} className="main-content">
         {renderPage()}
       </main>

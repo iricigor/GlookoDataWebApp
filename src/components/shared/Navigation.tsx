@@ -9,6 +9,7 @@ import {
   MenuPopover,
   MenuList,
   MenuItem,
+  Tooltip,
 } from '@fluentui/react-components';
 import { 
   HomeRegular,
@@ -17,10 +18,13 @@ import {
   BrainCircuitRegular,
   SettingsRegular,
   NavigationRegular,
+  WeatherSunnyRegular,
+  WeatherMoonRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { LoginDialog } from './LoginDialog';
 import { LogoutDialog } from './LogoutDialog';
+import { type ThemeMode, isDarkTheme } from '../../hooks/useTheme';
 
 const useStyles = makeStyles({
   nav: {
@@ -80,11 +84,16 @@ const useStyles = makeStyles({
 interface NavigationProps {
   currentPage: string;
   onNavigate: (page: string) => void;
+  themeMode?: ThemeMode;
+  onThemeToggle?: () => void;
 }
 
-export function Navigation({ currentPage, onNavigate }: NavigationProps) {
+export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }: NavigationProps) {
   const styles = useStyles();
   const { isLoggedIn, userName, userEmail, userPhoto, login, logout } = useAuth();
+
+  // Determine if we're in dark mode (either explicitly dark or system-dark)
+  const isDarkMode = themeMode ? isDarkTheme(themeMode) : false;
 
   const navItems = [
     { page: 'home', label: 'Home', icon: <HomeRegular /> },
@@ -145,12 +154,35 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
       {/* Auth Section */}
       <div className={styles.rightSection}>
         {isLoggedIn && userName ? (
-          <LogoutDialog 
-            userName={userName} 
-            userEmail={userEmail}
-            userPhoto={userPhoto}
-            onLogout={logout} 
-          />
+          <>
+            {onThemeToggle && (
+              <Tooltip 
+                content={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'} 
+                relationship="label"
+              >
+                <Button
+                  appearance="subtle"
+                  icon={isDarkMode ? <WeatherSunnyRegular /> : <WeatherMoonRegular />}
+                  onClick={onThemeToggle}
+                  aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                />
+              </Tooltip>
+            )}
+            <Tooltip content="Settings" relationship="label">
+              <Button
+                appearance="subtle"
+                icon={<SettingsRegular />}
+                onClick={() => onNavigate('settings')}
+                aria-label="Settings"
+              />
+            </Tooltip>
+            <LogoutDialog 
+              userName={userName} 
+              userEmail={userEmail}
+              userPhoto={userPhoto}
+              onLogout={logout} 
+            />
+          </>
         ) : (
           <LoginDialog onLogin={login} />
         )}
