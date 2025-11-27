@@ -27,6 +27,11 @@ on:
         required: false
         type: string
         default: ''
+      create_if_missing:
+        description: 'Create changelog file if missing (default: false to prevent random file generation)'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   update-changelog:
@@ -171,18 +176,22 @@ jobs:
         id: update_changelog
         run: |
           VERSION_ARG="${{ steps.pr_info.outputs.version }}"
+          CREATE_IF_MISSING="${{ github.event.inputs.create_if_missing || 'false' }}"
           if [ -n "$VERSION_ARG" ]; then
             node .github/scripts/update-changelog.cjs \
               "${{ steps.pr_info.outputs.pr_number }}" \
               "${{ steps.pr_info.outputs.pr_title }}" \
               "${{ steps.pr_info.outputs.pr_labels }}" \
-              "$VERSION_ARG"
+              "$VERSION_ARG" \
+              "$CREATE_IF_MISSING"
             echo "version=$VERSION_ARG" >> $GITHUB_OUTPUT
           else
             node .github/scripts/update-changelog.cjs \
               "${{ steps.pr_info.outputs.pr_number }}" \
               "${{ steps.pr_info.outputs.pr_title }}" \
-              "${{ steps.pr_info.outputs.pr_labels }}"
+              "${{ steps.pr_info.outputs.pr_labels }}" \
+              "" \
+              "$CREATE_IF_MISSING"
             # Extract version from package.json for the output
             VERSION=$(node -p "require('./package.json').version.match(/^(\\d+\\.\\d+)/)[1]")
             echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -193,13 +202,14 @@ jobs:
         run: |
           VERSION="${{ steps.update_changelog.outputs.version }}"
           CHANGELOG_FILE="docs/changelogs/CHANGELOG-${VERSION}.x.md"
-          if git diff --quiet "$CHANGELOG_FILE"; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "No changelog changes needed"
-          else
+          # Check if file is new (untracked) or modified
+          if git status --porcelain "$CHANGELOG_FILE" | grep -q .; then
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "changelog_file=$CHANGELOG_FILE" >> $GITHUB_OUTPUT
-            echo "Changelog has been updated: $CHANGELOG_FILE"
+            echo "Changelog has been updated or created: $CHANGELOG_FILE"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changelog changes needed"
           fi
 
       - name: Commit and push changes

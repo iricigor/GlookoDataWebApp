@@ -55,10 +55,16 @@ All data processing continues to happen client-side in the browser. Settings are
 
 ### Summary
 
-Version 1.4 focuses on improving maintainability and organization of the codebase.
+Version 1.4 focuses on advanced glucose analysis features, enhanced reporting capabilities, and improved maintainability.
 
 ### Major Features
 
+- **Rate of Change (RoC) Analysis** - New report tab with gradient-colored line visualization, interval slider, and statistical summary
+- **Hypoglycemia Analysis** - Detection, statistics cards, and color-coded visualization with nadir markers
+- **HbA1c Estimate** - Estimated HbA1c calculation with NGSP (%) and IFCC (mmol/mol) units
+- **BG Overview Consolidation** - Unified Time in Range and AGP visualization with period breakdown and hourly charts
+- **Horizontal Pivot Tabs** - Desktop-optimized horizontal tab navigation matching Microsoft 365 patterns
+- **RSuite DatePicker** - Enhanced date selection with Fluent UI styling
 - **Changelog Reorganization** - Split large changelog into version-specific files for better maintainability
 
 ---
