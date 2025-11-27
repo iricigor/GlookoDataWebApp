@@ -41,7 +41,7 @@ describe('grokApi', () => {
         id: 'chatcmpl-123',
         object: 'chat.completion',
         created: 1234567890,
-        model: 'grok-beta',
+        model: 'grok-3-mini',
         choices: [
           {
             index: 0,
@@ -71,7 +71,7 @@ describe('grokApi', () => {
         id: 'chatcmpl-123',
         object: 'chat.completion',
         created: 1234567890,
-        model: 'grok-beta',
+        model: 'grok-3-mini',
         choices: [
           {
             index: 0,
@@ -232,7 +232,7 @@ describe('grokApi', () => {
       });
     });
 
-    it('should send correct request body with grok-beta model', async () => {
+    it('should send correct request body with grok-3-mini model', async () => {
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
@@ -246,7 +246,7 @@ describe('grokApi', () => {
       const callArgs = mockFetch.mock.calls[0][1];
       const body = JSON.parse(callArgs.body);
       
-      expect(body.model).toBe('grok-beta');
+      expect(body.model).toBe('grok-3-mini');
       expect(body.messages).toHaveLength(2);
       expect(body.messages[0].role).toBe('system');
       expect(body.messages[1].role).toBe('user');
