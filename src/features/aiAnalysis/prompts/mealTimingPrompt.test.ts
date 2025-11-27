@@ -358,7 +358,7 @@ describe('mealTimingPrompt', () => {
       expect(result).toContain('verify');
     });
 
-    it('should include table format requirements', () => {
+    it('should include table format requirements with date digits and day of week column', () => {
       const base64Cgm = base64Encode(sampleCgmData);
       const base64Bolus = base64Encode(sampleBolusData);
       const base64Basal = base64Encode(sampleBasalData);
@@ -366,11 +366,47 @@ describe('mealTimingPrompt', () => {
       const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
       
       expect(result).toContain('Table Format Requirements');
-      expect(result).toContain('ddd MMM-dd');
+      expect(result).toContain('DD-MM');
+      expect(result).toContain('Day of week');
       expect(result).toContain('Round to nearest 30 minutes');
       expect(result).toContain('ONE decimal place');
       expect(result).toContain('Peak Height');
       expect(result).toContain('Time to Peak');
+    });
+
+    it('should include timestamp ascending sort instruction', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Sort table rows by timestamp in ascending order');
+      expect(result).toContain('earliest event first');
+      expect(result).toContain('latest event last');
+    });
+
+    it('should include TIR verification instruction', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('CRITICAL TIR VERIFICATION');
+      expect(result).toContain('counting the actual CGM readings');
+      expect(result).toContain('Count total readings');
+      expect(result).toContain('Count readings within');
+    });
+
+    it('should include table formatting instruction', () => {
+      const base64Cgm = base64Encode(sampleCgmData);
+      const base64Bolus = base64Encode(sampleBolusData);
+      const base64Basal = base64Encode(sampleBasalData);
+      
+      const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
+      
+      expect(result).toContain('Use tables wherever possible');
     });
 
     it('should include pre-bolus explanation instruction', () => {

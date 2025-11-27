@@ -52,11 +52,15 @@ This analysis examines your CGM readings, bolus insulin records, and basal deliv
 - Do NOT start your response with greetings like "Hello", "Good morning", "Good afternoon", or similar
 - Do NOT include procedural statements like "I am analyzing", "Let me extract", "I will now look at", etc.
 - Start directly with the analysis findings
+- **Use tables wherever possible** to present data comparisons, statistics, and findings in a clear and structured format
 
 **Time in Range Reference**
 - Calculate overall TIR (% of readings in ${lowThreshold}–${highThreshold} ${unit} range) from the CGM data
 - Use this as your reference value and verify all percentage calculations are consistent
 - Ensure segmented TIR values align with overall TIR calculation
+
+**IMPORTANT NOTE ON ESTIMATED SETTINGS**
+This analysis estimates your pump settings from observed data. Since we are inferring these values rather than reading them directly from your pump, there is inherent uncertainty. For each estimated value, consider the implications if our estimate is higher or lower than your actual setting:
 
 You are an expert endocrinologist and certified diabetes pump trainer with deep experience analyzing Medtronic, Tandem, Omnipod, and DIY Loop/APS data. I have three datasets:
 
@@ -78,7 +82,7 @@ Standard ranges:
 
 ---
 
-### STEP 1: Detect Day/Night Split
+### STEP 1: Detect Day/Night Split (Timing Estimation)
 - From "basal" sheet, extract all "Scheduled" entries with Rate > 0.
 - Convert every 5–15 min delivery to instantaneous rate: Rate = Insulin Delivered / (time delta in hours).
 - Round time to nearest 30 min, find the two most common rate clusters using simple mode per time-of-day bin.
@@ -86,6 +90,9 @@ Standard ranges:
   - **Day period**: higher basal rate block (contiguous)
   - **Night period**: lower basal rate block (contiguous)
 - Report exact switch times: "Detected Day: HH:MM–HH:MM | Night: HH:MM–HH:MM"
+- **Estimation Uncertainty**: Include a note explaining:
+  - If the estimated day/night boundary is EARLIER than actual: Recommendations may incorrectly apply day settings during night hours, potentially causing hypoglycemia
+  - If the estimated day/night boundary is LATER than actual: Recommendations may incorrectly apply night settings during day hours, potentially causing hyperglycemia
 
 ---
 
@@ -93,6 +100,9 @@ Standard ranges:
 - Using detected Day/Night periods:
   - Compute **median Rate (U/h)** in each period (not mode — median is more robust).
   - Report to two decimals: Day basal = ?.?? U/h, Night basal = ?.?? U/h
+- **Estimation Uncertainty**: Include a note explaining:
+  - If the estimated basal rate is HIGHER than actual: The patient may be receiving more insulin than we think, so recommendations to increase basal could cause hypoglycemia
+  - If the estimated basal rate is LOWER than actual: The patient may be receiving less insulin than we think, so recommendations to decrease basal could cause hyperglycemia
 
 ---
 
@@ -109,6 +119,9 @@ Standard ranges:
 - If difference < ${isfConversionThreshold} ${unit} per U → report as **same ISF**
 - Report: ISF = ?.? ${unit} per U (same / Day: ?.? / Night: ?.?)
 - Also report 25th–75th percentile range and number of corrections used
+- **Estimation Uncertainty**: Include a note explaining:
+  - If the estimated ISF is HIGHER than actual: The patient is more sensitive than we think; correction recommendations may cause hypoglycemia
+  - If the estimated ISF is LOWER than actual: The patient is less sensitive than we think; correction recommendations may be insufficient and cause hyperglycemia
 
 ---
 
