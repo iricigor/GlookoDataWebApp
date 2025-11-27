@@ -3,9 +3,10 @@
  * Wrapper around RSuite DateRangePicker for consistent styling with Fluent UI
  */
 
-import { DateRangePicker as RSuiteDateRangePicker } from 'rsuite';
+import { DateRangePicker as RSuiteDateRangePicker, CustomProvider } from 'rsuite';
 import 'rsuite/dist/rsuite.min.css';
 import { makeStyles, tokens } from '@fluentui/react-components';
+import { useIsDarkMode } from '../../hooks/useIsDarkMode';
 
 const useStyles = makeStyles({
   pickerContainer: {
@@ -34,6 +35,7 @@ export function DateRangePicker({
   onEndDateChange,
 }: DateRangePickerProps) {
   const styles = useStyles();
+  const isDarkMode = useIsDarkMode();
 
   const handleChange = (value: [Date, Date] | null) => {
     if (value && value[0] && value[1]) {
@@ -102,18 +104,20 @@ export function DateRangePicker({
   ];
 
   return (
-    <div className={styles.pickerContainer}>
-      <RSuiteDateRangePicker
-        format="dd/MM/yyyy"
-        value={currentValue}
-        onChange={handleChange}
-        ranges={ranges}
-        shouldDisableDate={(date) => {
-          return date < minDateObj || date > maxDateObj;
-        }}
-        placeholder="Select date range"
-        showOneCalendar={false}
-      />
-    </div>
+    <CustomProvider theme={isDarkMode ? 'dark' : 'light'}>
+      <div className={styles.pickerContainer}>
+        <RSuiteDateRangePicker
+          format="dd/MM/yyyy"
+          value={currentValue}
+          onChange={handleChange}
+          ranges={ranges}
+          shouldDisableDate={(date) => {
+            return date < minDateObj || date > maxDateObj;
+          }}
+          placeholder="Select date range"
+          showOneCalendar={false}
+        />
+      </div>
+    </CustomProvider>
   );
 }

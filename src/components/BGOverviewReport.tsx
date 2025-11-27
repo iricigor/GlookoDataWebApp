@@ -86,6 +86,15 @@ const useStyles = makeStyles({
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     boxShadow: tokens.shadow4,
   },
+  controlGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr',
+    ...shorthands.gap('16px'),
+    // On wider screens, show first two filters in first row, last two in second row
+    '@media (min-width: 768px)': {
+      gridTemplateColumns: '1fr 1fr',
+    },
+  },
   controlRow: {
     display: 'flex',
     alignItems: 'center',
@@ -786,88 +795,92 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     <div className={styles.container}>
       {/* Control Bar */}
       <div className={styles.controlBar}>
-        <div className={styles.controlRow}>
-          <Text className={styles.controlLabel}>Data Source:</Text>
-          <div className={styles.pillGroup}>
-            <Button
-              appearance={dataSource === 'cgm' ? 'primary' : 'outline'}
-              className={styles.pillButton}
-              onClick={() => setDataSource('cgm')}
-            >
-              CGM
-            </Button>
-            <Button
-              appearance={dataSource === 'bg' ? 'primary' : 'outline'}
-              className={styles.pillButton}
-              onClick={() => setDataSource('bg')}
-            >
-              BG
-            </Button>
-          </div>
-        </div>
-
-        <div className={styles.controlRow}>
-          <Text className={styles.controlLabel}>Categories:</Text>
-          <div className={styles.pillGroup}>
-            <Button
-              appearance={categoryMode === 3 ? 'primary' : 'outline'}
-              className={styles.pillButton}
-              onClick={() => setCategoryMode(3)}
-            >
-              3 Categories
-            </Button>
-            <Button
-              appearance={categoryMode === 5 ? 'primary' : 'outline'}
-              className={styles.pillButton}
-              onClick={() => setCategoryMode(5)}
-            >
-              5 Categories
-            </Button>
-          </div>
-        </div>
-
-        {minDate && maxDate && (
+        <div className={styles.controlGrid}>
+          {/* First row on wide screens: Data Source + Categories */}
           <div className={styles.controlRow}>
-            <Text className={styles.controlLabel}>Date Range:</Text>
-            <DateRangePicker
-              startDate={startDate}
-              endDate={endDate}
-              minDate={minDate}
-              maxDate={maxDate}
-              onStartDateChange={setStartDate}
-              onEndDateChange={setEndDate}
-            />
+            <Text className={styles.controlLabel}>Data Source:</Text>
+            <div className={styles.pillGroup}>
+              <Button
+                appearance={dataSource === 'cgm' ? 'primary' : 'outline'}
+                className={styles.pillButton}
+                onClick={() => setDataSource('cgm')}
+              >
+                CGM
+              </Button>
+              <Button
+                appearance={dataSource === 'bg' ? 'primary' : 'outline'}
+                className={styles.pillButton}
+                onClick={() => setDataSource('bg')}
+              >
+                BG
+              </Button>
+            </div>
           </div>
-        )}
 
-        <div className={styles.controlRow}>
-          <Text className={styles.controlLabel}>Day Filter:</Text>
-          <Dropdown
-            placeholder="Select days"
-            value={dayFilter}
-            selectedOptions={[dayFilter]}
-            onOptionSelect={(_, data) => setDayFilter(data.optionValue as AGPDayOfWeekFilter)}
-            appearance="outline"
-          >
-            <Option text="Common Views" disabled>Common Views</Option>
-            <Option value="All Days" text="All Days">
-              <CalendarRegular /> All Days
-            </Option>
-            <Option value="Workday" text="Weekdays">
-              <BriefcaseRegular /> Weekdays
-            </Option>
-            <Option value="Weekend" text="Weekend">
-              <HomeRegular /> Weekend
-            </Option>
-            <Option text="Individual Days" disabled>Individual Days</Option>
-            <Option value="Monday" text="Monday">Monday</Option>
-            <Option value="Tuesday" text="Tuesday">Tuesday</Option>
-            <Option value="Wednesday" text="Wednesday">Wednesday</Option>
-            <Option value="Thursday" text="Thursday">Thursday</Option>
-            <Option value="Friday" text="Friday">Friday</Option>
-            <Option value="Saturday" text="Saturday">Saturday</Option>
-            <Option value="Sunday" text="Sunday">Sunday</Option>
-          </Dropdown>
+          <div className={styles.controlRow}>
+            <Text className={styles.controlLabel}>Categories:</Text>
+            <div className={styles.pillGroup}>
+              <Button
+                appearance={categoryMode === 3 ? 'primary' : 'outline'}
+                className={styles.pillButton}
+                onClick={() => setCategoryMode(3)}
+              >
+                3 Categories
+              </Button>
+              <Button
+                appearance={categoryMode === 5 ? 'primary' : 'outline'}
+                className={styles.pillButton}
+                onClick={() => setCategoryMode(5)}
+              >
+                5 Categories
+              </Button>
+            </div>
+          </div>
+
+          {/* Second row on wide screens: Date Range + Day Filter */}
+          {minDate && maxDate && (
+            <div className={styles.controlRow}>
+              <Text className={styles.controlLabel}>Date Range:</Text>
+              <DateRangePicker
+                startDate={startDate}
+                endDate={endDate}
+                minDate={minDate}
+                maxDate={maxDate}
+                onStartDateChange={setStartDate}
+                onEndDateChange={setEndDate}
+              />
+            </div>
+          )}
+
+          <div className={styles.controlRow}>
+            <Text className={styles.controlLabel}>Day Filter:</Text>
+            <Dropdown
+              placeholder="Select days"
+              value={dayFilter}
+              selectedOptions={[dayFilter]}
+              onOptionSelect={(_, data) => setDayFilter(data.optionValue as AGPDayOfWeekFilter)}
+              appearance="outline"
+            >
+              <Option text="Common Views" disabled>Common Views</Option>
+              <Option value="All Days" text="All Days">
+                <CalendarRegular /> All Days
+              </Option>
+              <Option value="Workday" text="Weekdays">
+                <BriefcaseRegular /> Weekdays
+              </Option>
+              <Option value="Weekend" text="Weekend">
+                <HomeRegular /> Weekend
+              </Option>
+              <Option text="Individual Days" disabled>Individual Days</Option>
+              <Option value="Monday" text="Monday">Monday</Option>
+              <Option value="Tuesday" text="Tuesday">Tuesday</Option>
+              <Option value="Wednesday" text="Wednesday">Wednesday</Option>
+              <Option value="Thursday" text="Thursday">Thursday</Option>
+              <Option value="Friday" text="Friday">Friday</Option>
+              <Option value="Saturday" text="Saturday">Saturday</Option>
+              <Option value="Sunday" text="Sunday">Sunday</Option>
+            </Dropdown>
+          </div>
         </div>
       </div>
 
