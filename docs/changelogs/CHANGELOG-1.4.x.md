@@ -205,6 +205,13 @@ Version 1.4 focuses on advanced glucose analysis features, enhanced reporting ca
 ### Other
 
 <details>
+<summary>475 Improve AI prompts: formal language mode, tabular formatting, TIR verification, estimation uncertainty</summary>
+
+[#475](../../pull/475) Improve AI prompts: formal language mode, tabular formatting, TIR verification, estimation uncertainty
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>473 Add GlucoStats Python library comparison documentation</summary>
 
 [#473](../../pull/473) Add GlucoStats Python library comparison documentation
