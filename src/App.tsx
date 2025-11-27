@@ -30,7 +30,7 @@ function App() {
   const [isLoadingDemoData, setIsLoadingDemoData] = useState(true)
   
   // Settings (stored locally in browser cookies)
-  const { theme, themeMode, setThemeMode } = useTheme()
+  const { theme, themeMode, isDarkTheme, setThemeMode } = useTheme()
   const { exportFormat, setExportFormat } = useExportFormat()
   const { responseLanguage, setResponseLanguage } = useResponseLanguage()
   const { glucoseUnit, setGlucoseUnit } = useGlucoseUnit()
@@ -38,6 +38,17 @@ function App() {
   
   // Cookie consent management
   const { hasConsented, acknowledgeConsent } = useCookieConsent()
+
+  // Sync theme with body class for RSuite popup theming
+  useEffect(() => {
+    if (isDarkTheme) {
+      document.body.classList.add('dark-theme');
+      document.body.classList.remove('light-theme');
+    } else {
+      document.body.classList.add('light-theme');
+      document.body.classList.remove('dark-theme');
+    }
+  }, [isDarkTheme]);
   
   // API Keys (stored in browser cookies)
   const { apiKey: perplexityApiKey, setApiKey: setPerplexityApiKey } = usePerplexityApiKey()
@@ -253,7 +264,7 @@ function App() {
   }
 
   return (
-    <FluentProvider theme={theme} className="app-container">
+    <FluentProvider theme={theme} className="app-container" data-theme={isDarkTheme ? 'dark' : 'light'}>
       <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
       <main ref={mainContentRef} className="main-content">
         {renderPage()}

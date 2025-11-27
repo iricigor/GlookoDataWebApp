@@ -13,6 +13,7 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 export interface UseThemeReturn {
   themeMode: ThemeMode;
   theme: Theme;
+  isDarkTheme: boolean;
   setThemeMode: (mode: ThemeMode) => void;
 }
 
@@ -63,6 +64,16 @@ function resolveTheme(mode: ThemeMode): Theme {
 }
 
 /**
+ * Check if the resolved theme is dark
+ */
+function isThemeDark(mode: ThemeMode): boolean {
+  if (mode === 'system') {
+    return getSystemPrefersDark();
+  }
+  return mode === 'dark';
+}
+
+/**
  * Custom hook for managing theme preferences
  * 
  * @returns Theme mode, resolved theme, and setter function
@@ -86,10 +97,12 @@ export function useTheme(): UseThemeReturn {
   });
 
   const [theme, setTheme] = useState<Theme>(() => resolveTheme(themeMode));
+  const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => isThemeDark(themeMode));
 
   // Update theme when themeMode changes
   useEffect(() => {
     setTheme(resolveTheme(themeMode));
+    setIsDarkTheme(isThemeDark(themeMode));
   }, [themeMode]);
 
   // Listen for system theme changes when in 'system' mode
@@ -99,6 +112,7 @@ export function useTheme(): UseThemeReturn {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
       setTheme(resolveTheme('system'));
+      setIsDarkTheme(isThemeDark('system'));
     };
 
     mediaQuery.addEventListener('change', handleChange);
@@ -113,6 +127,7 @@ export function useTheme(): UseThemeReturn {
   return {
     themeMode,
     theme,
+    isDarkTheme,
     setThemeMode,
   };
 }

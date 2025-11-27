@@ -38,20 +38,50 @@ const useStyles = makeStyles({
     display: 'flex',
     ...shorthands.gap('8px'),
   },
+  navButton: {
+    backgroundColor: tokens.colorNeutralBackground3,
+    boxShadow: tokens.shadow4,
+    ':hover': {
+      backgroundColor: tokens.colorNeutralBackground3Hover,
+    },
+    ':disabled': {
+      backgroundColor: tokens.colorNeutralBackgroundDisabled,
+      color: tokens.colorNeutralForegroundDisabled,
+      boxShadow: 'none',
+    },
+  },
   dateDisplay: {
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('12px'),
   },
   datePickerContainer: {
+    // Override RSuite DatePicker styles to follow Fluent UI theme
     '& .rs-picker-toggle': {
       borderRadius: tokens.borderRadiusMedium,
       minWidth: '220px',
       fontSize: tokens.fontSizeBase400,
       fontWeight: tokens.fontWeightSemibold,
+      backgroundColor: tokens.colorNeutralBackground1,
+      borderTopColor: tokens.colorNeutralStroke1,
+      borderRightColor: tokens.colorNeutralStroke1,
+      borderBottomColor: tokens.colorNeutralStroke1,
+      borderLeftColor: tokens.colorNeutralStroke1,
+      boxShadow: tokens.shadow4,
+      ':hover': {
+        borderTopColor: tokens.colorNeutralStroke1Hover,
+        borderRightColor: tokens.colorNeutralStroke1Hover,
+        borderBottomColor: tokens.colorNeutralStroke1Hover,
+        borderLeftColor: tokens.colorNeutralStroke1Hover,
+        backgroundColor: tokens.colorNeutralBackground1Hover,
+      },
     },
     '& .rs-picker-toggle-value': {
       color: tokens.colorNeutralForeground1,
+    },
+    // Style the calendar icon
+    '& .rs-picker-toggle-caret': {
+      color: tokens.colorNeutralForeground2,
     },
   },
 });
@@ -111,6 +141,7 @@ export function DayNavigator({
       <div className={styles.navigationButtons}>
         <Button
           appearance="subtle"
+          className={styles.navButton}
           icon={<ChevronLeftRegular />}
           onClick={onPreviousDay}
           disabled={!canGoPrevious || loading}
@@ -147,6 +178,7 @@ export function DayNavigator({
       <div className={styles.navigationButtons}>
         <Button
           appearance="subtle"
+          className={styles.navButton}
           icon={<ChevronRightRegular />}
           iconPosition="after"
           onClick={onNextDay}
