@@ -53,6 +53,20 @@ function getSystemPrefersDark(): boolean {
 }
 
 /**
+ * Determine if the current theme mode results in a dark theme
+ * This considers both explicit dark mode and system preference when in 'system' mode
+ * 
+ * @param themeMode - The current theme mode setting
+ * @returns true if the effective theme is dark, false otherwise
+ */
+export function isDarkTheme(themeMode: ThemeMode): boolean {
+  if (themeMode === 'dark') return true;
+  if (themeMode === 'light') return false;
+  // System mode: check system preference
+  return getSystemPrefersDark();
+}
+
+/**
  * Resolve the actual theme based on theme mode
  */
 function resolveTheme(mode: ThemeMode): Theme {

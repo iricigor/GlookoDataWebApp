@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useTheme } from './useTheme';
+import { useTheme, isDarkTheme } from './useTheme';
 
 // Mock window.matchMedia
 const mockMatchMedia = (matches: boolean) => {
@@ -166,5 +166,30 @@ describe('useTheme', () => {
       expect(result.current.theme.colorNeutralForeground1).toBeDefined();
       expect(result.current.theme.colorBrandForeground1).toBeDefined();
     });
+  });
+});
+
+describe('isDarkTheme', () => {
+  beforeEach(() => {
+    // Default to light system preference
+    mockMatchMedia(false);
+  });
+
+  it('should return true for dark theme mode', () => {
+    expect(isDarkTheme('dark')).toBe(true);
+  });
+
+  it('should return false for light theme mode', () => {
+    expect(isDarkTheme('light')).toBe(false);
+  });
+
+  it('should return false for system mode when system prefers light', () => {
+    mockMatchMedia(false); // System prefers light
+    expect(isDarkTheme('system')).toBe(false);
+  });
+
+  it('should return true for system mode when system prefers dark', () => {
+    mockMatchMedia(true); // System prefers dark
+    expect(isDarkTheme('system')).toBe(true);
   });
 });

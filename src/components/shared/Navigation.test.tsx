@@ -7,9 +7,17 @@ vi.mock('../../hooks/useAuth', () => ({
   useAuth: vi.fn(),
 }));
 
-// Import the mocked module
+// Mock the isDarkTheme function
+vi.mock('../../hooks/useTheme', () => ({
+  isDarkTheme: vi.fn(),
+}));
+
+// Import the mocked modules
 import { useAuth } from '../../hooks/useAuth';
+import { isDarkTheme } from '../../hooks/useTheme';
+
 const mockUseAuth = vi.mocked(useAuth);
+const mockIsDarkTheme = vi.mocked(isDarkTheme);
 
 describe('Navigation', () => {
   const defaultAuthState = {
@@ -25,6 +33,7 @@ describe('Navigation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseAuth.mockReturnValue(defaultAuthState);
+    mockIsDarkTheme.mockReturnValue(false); // Default to light mode
   });
 
   describe('when user is not logged in', () => {
@@ -134,6 +143,7 @@ describe('Navigation', () => {
     });
 
     it('should show sun icon in dark mode', () => {
+      mockIsDarkTheme.mockReturnValue(true); // Mock dark mode
       render(
         <Navigation 
           currentPage="home" 
@@ -147,6 +157,7 @@ describe('Navigation', () => {
     });
 
     it('should show moon icon in light mode', () => {
+      mockIsDarkTheme.mockReturnValue(false); // Mock light mode
       render(
         <Navigation 
           currentPage="home" 

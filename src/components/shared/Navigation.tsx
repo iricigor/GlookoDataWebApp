@@ -24,7 +24,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { LoginDialog } from './LoginDialog';
 import { LogoutDialog } from './LogoutDialog';
-import type { ThemeMode } from '../../hooks/useTheme';
+import { type ThemeMode, isDarkTheme } from '../../hooks/useTheme';
 
 const useStyles = makeStyles({
   nav: {
@@ -93,8 +93,7 @@ export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }
   const { isLoggedIn, userName, userEmail, userPhoto, login, logout } = useAuth();
 
   // Determine if we're in dark mode (either explicitly dark or system-dark)
-  const isDarkMode = themeMode === 'dark' || 
-    (themeMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const isDarkMode = themeMode ? isDarkTheme(themeMode) : false;
 
   const navItems = [
     { page: 'home', label: 'Home', icon: <HomeRegular /> },
