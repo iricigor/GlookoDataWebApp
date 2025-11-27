@@ -63,7 +63,7 @@ export function useIsDarkMode(): boolean {
   });
 
   useEffect(() => {
-    // Update when cookie might have changed (e.g., on window focus)
+    // Update when cookie might have changed (e.g., on window focus or visibility change)
     const updateDarkMode = () => {
       const themeMode = getThemeFromCookie() ?? 'system';
       setIsDarkMode(resolveIsDarkMode(themeMode));
@@ -78,13 +78,32 @@ export function useIsDarkMode(): boolean {
       }
     };
 
-    // Check for theme changes periodically (cookie changes don't have events)
-    const interval = setInterval(updateDarkMode, 1000);
+    // Listen for window focus to detect theme changes made in settings
+    const handleFocus = () => {
+      updateDarkMode();
+    };
 
+    // Listen for visibility change (when user switches back to the tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        updateDarkMode();
+      }
+    };
+
+    // Listen for storage events (in case theme is changed in another tab)
+    const handleStorage = () => {
+      updateDarkMode();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('storage', handleStorage);
     mediaQuery.addEventListener('change', handleSystemChange);
     
     return () => {
-      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('storage', handleStorage);
       mediaQuery.removeEventListener('change', handleSystemChange);
     };
   }, []);

@@ -31,10 +31,13 @@ describe('useIsDarkMode', () => {
     originalCookie = document.cookie;
     // Mock matchMedia to return light theme by default
     mockMatchMedia(false);
-    // Clear all cookies
-    document.cookie.split(';').forEach((cookie) => {
+    // Clear all cookies (only if there are cookies to clear)
+    const cookies = document.cookie.split(';');
+    cookies.forEach((cookie) => {
       const name = cookie.split('=')[0].trim();
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+      if (name) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+      }
     });
   });
 
@@ -61,7 +64,7 @@ describe('useIsDarkMode', () => {
     expect(result.current).toBe(false);
   });
 
-  it('should update when cookie changes', async () => {
+  it('should update when window focus event fires after cookie change', async () => {
     document.cookie = 'glooko-theme-preference=light; path=/';
     const { result } = renderHook(() => useIsDarkMode());
     
@@ -70,9 +73,9 @@ describe('useIsDarkMode', () => {
     // Update cookie to dark
     document.cookie = 'glooko-theme-preference=dark; path=/';
     
-    // Wait for the interval to pick up the change (hook uses 1s interval)
+    // Trigger a focus event to simulate the user switching back to the window
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 1100));
+      window.dispatchEvent(new Event('focus'));
     });
     
     expect(result.current).toBe(true);
