@@ -205,6 +205,13 @@ Version 1.4 focuses on advanced glucose analysis features, enhanced reporting ca
 ### Other
 
 <details>
+<summary>471 Add theme toggle and settings shortcuts for logged-in users</summary>
+
+[#471](../../pull/471) Add theme toggle and settings shortcuts for logged-in users
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>463 Refactor changelog into version-specific files</summary>
 
 [#463](../../pull/463) Refactor changelog into version-specific files
