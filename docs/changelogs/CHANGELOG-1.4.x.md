@@ -205,6 +205,13 @@ Version 1.4 focuses on advanced glucose analysis features, enhanced reporting ca
 ### Other
 
 <details>
+<summary>479 Add Coefficient of Variation (CV%) metric to BG Overview Report</summary>
+
+[#479](../../pull/479) Add Coefficient of Variation (CV%) metric to BG Overview Report
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>476 Fix RSuite DatePicker to follow Fluent UI dark theme</summary>
 
 [#476](../../pull/476) Fix RSuite DatePicker to follow Fluent UI dark theme
