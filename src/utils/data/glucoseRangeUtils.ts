@@ -670,7 +670,8 @@ export interface BGRIResult {
  */
 function calculateRiskValue(glucoseMgdl: number): number {
   // The risk function is based on logarithmic transformation
-  // Formula: risk = ((ln(glucose)^1.084) - 5.381) * 1.509
+  // Formula: risk = ((ln(glucose) ** 1.084) - 5.381) * 1.509
+  // where ** represents exponentiation (Math.pow)
   // This creates a symmetric risk scale where:
   // - Negative values indicate hypoglycemia risk
   // - Positive values indicate hyperglycemia risk
