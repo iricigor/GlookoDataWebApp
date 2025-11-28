@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>504 docs: document large files in repository with splitting recommendations</summary>
+
+[#504](../../pull/504) docs: document large files in repository with splitting recommendations
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>499 Add Azure Infrastructure Deployment Scripts documentation to copilot instructions</summary>
 
 [#499](../../pull/499) Add Azure Infrastructure Deployment Scripts documentation to copilot instructions
