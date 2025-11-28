@@ -37,6 +37,7 @@ cd scripts/deployment-cli
 |--------|-------------|
 | `config-lib.sh` | Shared configuration library (sourced by other scripts) |
 | `config.template.json` | Configuration template with default values |
+| `deploy-azure-managed-identity.sh` | Deploys User-Assigned Managed Identity |
 | `deploy-azure-function.sh` | Deploys Azure Function App with managed identity |
 
 ## Configuration
@@ -83,6 +84,43 @@ Or use the `--save` flag to save current settings:
 ```
 
 ## Script Details
+
+### deploy-azure-managed-identity.sh
+
+Creates and configures a user-assigned managed identity for passwordless authentication across Azure resources.
+
+**Features:**
+- Creates a user-assigned managed identity
+- Displays identity properties (Client ID, Principal ID, Resource ID)
+- Idempotent - safe to run multiple times
+
+**Options:**
+```
+  -h, --help                  Show help message
+  -n, --name NAME             Managed identity name
+  -g, --resource-group RG     Resource group name
+  -l, --location LOCATION     Azure region
+  -c, --config FILE           Custom configuration file path
+  -s, --save                  Save configuration after deployment
+  -v, --verbose               Enable verbose output
+```
+
+**Examples:**
+```bash
+# Deploy with defaults
+./deploy-azure-managed-identity.sh
+
+# Deploy with custom name and location
+./deploy-azure-managed-identity.sh --name my-identity --location westus2
+
+# Deploy and save configuration
+./deploy-azure-managed-identity.sh --save
+```
+
+**Next Steps after creation:**
+- Deploy Storage Account (for function app storage)
+- Deploy Key Vault (for secrets management)
+- Deploy Function App (which will use this identity)
 
 ### deploy-azure-function.sh
 

@@ -125,6 +125,7 @@ else {
         @{ Path = "GlookoDeployment.psd1"; Dest = "" }
         @{ Path = "GlookoDeployment.psm1"; Dest = "" }
         @{ Path = "Public/Config-Functions.ps1"; Dest = "Public" }
+        @{ Path = "Public/Set-GlookoManagedIdentity.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoAzureFunction.ps1"; Dest = "Public" }
         @{ Path = "Public/Invoke-GlookoDeployment.ps1"; Dest = "Public" }
         @{ Path = "Private/Output-Functions.ps1"; Dest = "Private" }

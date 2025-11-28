@@ -13,6 +13,9 @@
     PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
     Reference: https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle
 
+.PARAMETER ManagedIdentity
+    Deploy only the User-Assigned Managed Identity.
+
 .PARAMETER FunctionApp
     Deploy only the Azure Function App.
 
@@ -24,6 +27,10 @@
 
 .PARAMETER SkipPrerequisites
     Skip prerequisite checks (use with caution).
+
+.EXAMPLE
+    Invoke-GlookoDeployment -ManagedIdentity
+    Deploys only the User-Assigned Managed Identity.
 
 .EXAMPLE
     Invoke-GlookoDeployment -FunctionApp
@@ -45,6 +52,9 @@ function Invoke-GlookoDeployment {
     [CmdletBinding()]
     [Alias("Invoke-GD")]
     param(
+        [Parameter()]
+        [switch]$ManagedIdentity,
+
         [Parameter()]
         [switch]$FunctionApp,
 
@@ -94,6 +104,10 @@ function Invoke-GlookoDeployment {
             if ($DryRun) {
                 Write-SectionHeader "Deployment Plan"
                 
+                if ($All -or $ManagedIdentity) {
+                    Write-InfoMessage "Would deploy: User-Assigned Managed Identity ($($config.managedIdentityName))"
+                }
+                
                 if ($All -or $FunctionApp) {
                     Write-InfoMessage "Would deploy: Azure Function App ($($config.functionAppName))"
                 }
@@ -103,7 +117,20 @@ function Invoke-GlookoDeployment {
                 return
             }
             
-            # Deploy resources
+            # Deploy resources in dependency order
+            # 1. Managed Identity (needed by other resources)
+            if ($All -or $ManagedIdentity) {
+                Write-SectionHeader "Deploying User-Assigned Managed Identity"
+                $result = Set-GlookoManagedIdentity
+                $deployedResources += @{
+                    Type   = "Managed Identity"
+                    Name   = $result.Name
+                    Url    = $null
+                    Status = if ($result.Created) { "Created" } else { "Already Existed" }
+                }
+            }
+            
+            # 2. Function App (depends on Managed Identity)
             if ($All -or $FunctionApp) {
                 Write-SectionHeader "Deploying Azure Function App"
                 $result = Set-GlookoAzureFunction -UseManagedIdentity
@@ -120,7 +147,7 @@ function Invoke-GlookoDeployment {
             
             if ($deployedResources.Count -eq 0) {
                 Write-WarningMessage "No resources were specified for deployment"
-                Write-InfoMessage "Use -FunctionApp or -All to deploy resources"
+                Write-InfoMessage "Use -ManagedIdentity, -FunctionApp, or -All to deploy resources"
             }
             else {
                 Write-SuccessMessage "Deployed $($deployedResources.Count) resource(s)"
