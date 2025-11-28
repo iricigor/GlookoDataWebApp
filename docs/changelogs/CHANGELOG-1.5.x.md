@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>502 Add first API call for checking first-time user login</summary>
+
+[#502](../../pull/502) Add first API call for checking first-time user login
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>504 docs: document large files in repository with splitting recommendations</summary>
 
 [#504](../../pull/504) docs: document large files in repository with splitting recommendations
