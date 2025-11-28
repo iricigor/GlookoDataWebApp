@@ -10,7 +10,6 @@ jobs:
     permissions:
       contents: write  # Changed from read to write for creating releases
       pull-requests: write
-      id-token: write  # Required for Azure login with OIDC
     steps:
       - uses: actions/checkout@v3
         with:
@@ -41,13 +40,6 @@ jobs:
           ###### End of Repository/Build Configurations ######
       
       # Deploy API to Azure Function App
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      
       - name: Install API dependencies
         working-directory: ./api
         run: npm ci
@@ -61,6 +53,7 @@ jobs:
         with:
           app-name: glookodatawebapp-func
           package: ./api
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
