@@ -40,6 +40,7 @@ cd scripts/deployment-cli
 | `deploy-azure-storage-account.sh` | Deploys Azure Storage Account |
 | `deploy-azure-managed-identity.sh` | Deploys User-Assigned Managed Identity |
 | `deploy-azure-function.sh` | Deploys Azure Function App with managed identity |
+| `test-azure-resources.sh` | Verifies deployment state of all Azure resources |
 
 ## Configuration
 
@@ -202,6 +203,47 @@ Creates and configures an Azure Function App that serves as the API backend for 
 - Storage Account must exist (for function app storage)
 - Managed Identity should exist (for RBAC authentication)
 - Key Vault is optional but recommended
+
+### test-azure-resources.sh
+
+Verifies the deployment state of all Azure resources for GlookoDataWebApp. For each resource, it reports one of three states:
+- **not existing** - Resource does not exist
+- **existing, misconfigured** - Resource exists but has incorrect configuration
+- **existing, configured properly** - Resource exists with correct configuration
+
+**Features:**
+- Verifies all key resources (Resource Group, Storage Account, Managed Identity, Function App, Key Vault, Static Web App)
+- Checks RBAC role assignments for managed identity
+- Supports JSON output for automation
+- Verbose mode for detailed misconfiguration information
+
+**Options:**
+```
+  -h, --help              Show help message
+  -g, --resource-group RG Resource group name
+  -c, --config FILE       Custom configuration file path
+  -v, --verbose           Enable verbose output
+  --json                  Output results in JSON format
+```
+
+**Examples:**
+```bash
+# Verify all resources with default configuration
+./test-azure-resources.sh
+
+# Verify with verbose output to see misconfiguration details
+./test-azure-resources.sh --verbose
+
+# Output results as JSON for automation
+./test-azure-resources.sh --json
+
+# Verify a specific resource group
+./test-azure-resources.sh --resource-group my-rg
+```
+
+**Exit Codes:**
+- `0` - All resources are properly configured
+- `1` - Some resources are missing or misconfigured
 
 ## Configuration Library (config-lib.sh)
 
