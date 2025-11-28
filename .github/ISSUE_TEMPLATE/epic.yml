@@ -1,6 +1,6 @@
 name: 🔥 Epic
 description: Create an Epic to group related issues as subtasks
-title: "[EPIC] 🔥 "
+title: "[EPIC]: 🔥 "
 labels: ["🔥 Epic"]
 body:
   - type: markdown
@@ -44,3 +44,10 @@ body:
         3. Track progress as subtasks are completed
         
         > 💡 **Tip:** Each subtask should be a small, actionable work item that can be assigned and completed independently.
+
+  - type: markdown
+    attributes:
+      value: |
+        ### Create sub issues here
+        
+        👇👇👇
