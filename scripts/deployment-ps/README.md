@@ -90,6 +90,7 @@ Invoke-GlookoDeployment -All
 
 | Function | Alias | Description |
 |----------|-------|-------------|
+| `Set-GlookoManagedIdentity` | `Set-GMI` | Deploy User-Assigned Managed Identity |
 | `Set-GlookoAzureFunction` | `Set-GAF` | Deploy Azure Function App |
 | `Invoke-GlookoDeployment` | `Invoke-GD` | Orchestrate full deployment |
 
@@ -130,6 +131,27 @@ Initialize-GlookoConfig -Merge
 
 ## Function Details
 
+### Set-GlookoManagedIdentity
+
+Creates and configures a user-assigned managed identity for passwordless authentication.
+
+**Parameters:**
+- `-Name` - Managed identity name (optional, uses config)
+- `-ResourceGroup` - Resource group (optional, uses config)
+- `-Location` - Azure region (optional, uses config)
+
+**Examples:**
+```powershell
+# Deploy with defaults
+Set-GlookoManagedIdentity
+
+# Deploy with custom name and location
+Set-GlookoManagedIdentity -Name "my-identity" -Location "westus2"
+
+# Deploy in custom resource group
+Set-GlookoManagedIdentity -ResourceGroup "my-rg"
+```
+
 ### Set-GlookoAzureFunction
 
 Creates and configures an Azure Function App.
@@ -163,6 +185,7 @@ Set-GlookoAzureFunction -UseManagedIdentity
 Orchestrates complete infrastructure deployment.
 
 **Parameters:**
+- `-ManagedIdentity` - Deploy only Managed Identity
 - `-FunctionApp` - Deploy only Function App
 - `-All` - Deploy all resources
 - `-DryRun` - Show plan without deploying
@@ -176,6 +199,9 @@ Invoke-GlookoDeployment -All
 # Preview what would be deployed
 Invoke-GlookoDeployment -All -DryRun
 
+# Deploy only Managed Identity
+Invoke-GlookoDeployment -ManagedIdentity
+
 # Deploy only Function App
 Invoke-GlookoDeployment -FunctionApp
 ```
@@ -188,6 +214,7 @@ GlookoDeployment/
 ├── GlookoDeployment.psm1        # Module loader
 ├── Public/                       # Exported functions
 │   ├── Config-Functions.ps1     # Configuration management
+│   ├── Set-GlookoManagedIdentity.ps1
 │   ├── Set-GlookoAzureFunction.ps1
 │   └── Invoke-GlookoDeployment.ps1
 └── Private/                      # Internal functions
