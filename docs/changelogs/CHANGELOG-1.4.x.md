@@ -1,10 +1,10 @@
-# Changelog - Version 1.4.x (Current Development)
+# Changelog - Version 1.4.x (Released)
 
 [← Back to Main Changelog](../../CHANGELOG.md)
 
 ---
 
-## [1.4.x] - Current Development
+## [1.4.x] - Released
 
 ### Overview
 
