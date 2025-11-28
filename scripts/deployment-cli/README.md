@@ -38,6 +38,7 @@ cd scripts/deployment-cli
 | `config-lib.sh` | Shared configuration library (sourced by other scripts) |
 | `config.template.json` | Configuration template with default values |
 | `deploy-azure-storage-account.sh` | Deploys Azure Storage Account |
+| `deploy-azure-managed-identity.sh` | Deploys User-Assigned Managed Identity |
 | `deploy-azure-function.sh` | Deploys Azure Function App with managed identity |
 
 ## Configuration
@@ -107,6 +108,24 @@ Creates and configures an Azure Storage Account for the GlookoDataWebApp applica
   --sku SKU               Storage SKU (Standard_LRS, Standard_GRS, etc.)
   --kind KIND             Storage kind (StorageV2, BlobStorage, etc.)
   --access-tier TIER      Access tier (Hot, Cool)
+### deploy-azure-managed-identity.sh
+
+Creates and configures a user-assigned managed identity for passwordless authentication across Azure resources.
+
+**Features:**
+- Creates a user-assigned managed identity
+- Displays identity properties (Client ID, Principal ID, Resource ID)
+- Idempotent - safe to run multiple times
+
+**Options:**
+```
+  -h, --help                  Show help message
+  -n, --name NAME             Managed identity name
+  -g, --resource-group RG     Resource group name
+  -l, --location LOCATION     Azure region
+  -c, --config FILE           Custom configuration file path
+  -s, --save                  Save configuration after deployment
+  -v, --verbose               Enable verbose output
 ```
 
 **Examples:**
@@ -123,6 +142,20 @@ Creates and configures an Azure Storage Account for the GlookoDataWebApp applica
 # Deploy and save configuration
 ./deploy-azure-storage-account.sh --save
 ```
+
+./deploy-azure-managed-identity.sh
+
+# Deploy with custom name and location
+./deploy-azure-managed-identity.sh --name my-identity --location westus2
+
+# Deploy and save configuration
+./deploy-azure-managed-identity.sh --save
+```
+
+**Next Steps after creation:**
+- Deploy Storage Account (for function app storage)
+- Deploy Key Vault (for secrets management)
+- Deploy Function App (which will use this identity)
 
 ### deploy-azure-function.sh
 

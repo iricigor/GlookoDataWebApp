@@ -50,6 +50,7 @@ Export-ModuleMember -Function @(
     'Test-GlookoConfig',
     'Initialize-GlookoConfig',
     'Set-GlookoStorageAccount',
+    'Set-GlookoManagedIdentity',
     'Set-GlookoAzureFunction',
     'Invoke-GlookoDeployment'
 )
@@ -61,6 +62,7 @@ Export-ModuleMember -Alias @(
     'Test-GC',
     'Initialize-GC',
     'Set-GSA',
+    'Set-GMI',
     'Set-GAF',
     'Invoke-GD'
 )
