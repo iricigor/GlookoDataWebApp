@@ -1,4 +1,4 @@
-#Requires -Version 7.0
+#Requires -Version 7.4
 
 <#
 .SYNOPSIS
@@ -6,6 +6,9 @@
 
 .DESCRIPTION
     These functions provide consistent output formatting for the GlookoDeployment module
+    
+    PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
+    Reference: https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle
 #>
 
 # Output colors

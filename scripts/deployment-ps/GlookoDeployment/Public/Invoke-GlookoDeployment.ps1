@@ -1,4 +1,4 @@
-#Requires -Version 7.0
+#Requires -Version 7.4
 
 <#
 .SYNOPSIS
@@ -8,6 +8,8 @@
     This function orchestrates the deployment of all Azure resources needed for
     GlookoDataWebApp. It can deploy individual resources or all resources in the
     correct dependency order.
+    
+    PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
 
 .PARAMETER FunctionApp
     Deploy only the Azure Function App.

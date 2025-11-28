@@ -6,7 +6,8 @@
     RootModule = 'GlookoDeployment.psm1'
 
     # Version number of this module
-    ModuleVersion = '1.0.0'
+    # NOTE: Bump this version when adding/updating scripts (see copilot-instructions.md)
+    ModuleVersion = '1.0.1'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -24,7 +25,9 @@
     Description = 'PowerShell module for deploying Azure infrastructure for GlookoDataWebApp'
 
     # Minimum version of the PowerShell engine required by this module
-    PowerShellVersion = '7.0'
+    # PowerShell 7.4+ required for security (earlier versions have known vulnerabilities)
+    # Reference: https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle
+    PowerShellVersion = '7.4'
 
     # Functions to export from this module
     FunctionsToExport = @(

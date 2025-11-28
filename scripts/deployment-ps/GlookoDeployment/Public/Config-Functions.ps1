@@ -1,8 +1,13 @@
-#Requires -Version 7.0
+#Requires -Version 7.4
 
 <#
 .SYNOPSIS
     Configuration management functions for GlookoDeployment module
+
+.DESCRIPTION
+    Functions for managing deployment configuration stored at ~/.glookodata/config.json
+    
+    PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
 #>
 
 # Configuration file location

@@ -1046,6 +1046,28 @@ scripts/
 └── README.md                 # Main scripts directory overview
 ```
 
+### PowerShell Module Versioning
+
+When adding or updating deployment scripts:
+1. **Bump the module version** in `GlookoDeployment.psd1` (ModuleVersion field)
+2. Use semantic versioning: MAJOR.MINOR.PATCH
+   - PATCH: Bug fixes, documentation updates
+   - MINOR: New scripts/functions added
+   - MAJOR: Breaking changes to existing scripts
+
+### Why Azure CLI Instead of Azure PowerShell Cmdlets
+
+The PowerShell scripts use Azure CLI (`az`) instead of Azure PowerShell cmdlets for these reasons:
+1. **Azure Cloud Shell compatibility** - Azure CLI is pre-installed in Azure Cloud Shell
+2. **Consistency** - Same syntax between bash and PowerShell versions of scripts
+3. **Cross-platform** - Better support for local development on Windows, macOS, and Linux
+4. **Maintainability** - Single set of Azure commands to maintain across both script types
+
+To use Azure PowerShell cmdlets instead, you would replace commands like:
+- `az functionapp create` → `New-AzFunctionApp`
+- `az identity show` → `Get-AzUserAssignedIdentity`
+- `az role assignment create` → `New-AzRoleAssignment`
+
 ### Configuration System
 
 #### Configuration File Location

@@ -1,4 +1,4 @@
-#Requires -Version 7.0
+#Requires -Version 7.4
 
 <#
 .SYNOPSIS
@@ -8,6 +8,18 @@
     This function creates and configures an Azure Function App for the
     GlookoDataWebApp application. The function app serves as the API backend
     for the Static Web App. It is idempotent and safe to run multiple times.
+    
+    This script uses Azure CLI (az) instead of Azure PowerShell cmdlets because:
+    1. Azure CLI is pre-installed in Azure Cloud Shell (primary target environment)
+    2. Consistent syntax between bash and PowerShell versions of scripts
+    3. Azure CLI has better cross-platform support for local development
+    4. Easier to maintain single set of Azure commands across both script types
+    
+    To use Azure PowerShell cmdlets instead, you would replace:
+    - `az functionapp create` → `New-AzFunctionApp`
+    - `az identity show` → `Get-AzUserAssignedIdentity`
+    - `az role assignment create` → `New-AzRoleAssignment`
+    - etc.
 
 .PARAMETER Name
     The name of the function app. If not provided, uses value from configuration.
@@ -25,7 +37,8 @@
     The runtime version. Default: 20 (for Node.js)
 
 .PARAMETER UseManagedIdentity
-    Configure the function app to use managed identity for authentication.
+    Configure the function app to use a user-assigned managed identity for authentication.
+    The identity must be pre-created (see managedIdentityName in configuration).
 
 .PARAMETER SkipRbacAssignment
     Skip RBAC role assignments (useful if you want to manage RBAC separately).
@@ -44,15 +57,17 @@
 
 .EXAMPLE
     Set-GlookoAzureFunction -UseManagedIdentity
-    Creates a function app with managed identity configured.
+    Creates a function app with user-assigned managed identity configured.
 
 .NOTES
     Requires Azure CLI to be installed and logged in.
     Run in Azure Cloud Shell for best experience.
     
+    PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
+    
     Prerequisites:
     - Storage Account must exist
-    - Managed Identity should exist (for RBAC authentication)
+    - User-Assigned Managed Identity should exist (for RBAC authentication)
     - Key Vault is optional but recommended
 #>
 function Set-GlookoAzureFunction {
@@ -183,25 +198,40 @@ function Set-GlookoAzureFunction {
             }
 
             # Assign managed identity
+            # This script uses USER-ASSIGNED managed identity for these reasons:
+            # 1. Can be pre-created and shared across multiple resources
+            # 2. RBAC roles can be assigned before the function app is created
+            # 3. Identity lifecycle is independent of the function app
+            # 4. Easier to manage in IaC scenarios
+            #
+            # Alternative: SYSTEM-ASSIGNED managed identity
+            # - Created automatically with the resource
+            # - Tied to the resource lifecycle (deleted when resource is deleted)
+            # - To use system-assigned, you would:
+            #   - Use `az functionapp identity assign --name $functionName --resource-group $rg` (no --identities param)
+            #   - Get principal ID from the response to assign RBAC roles
+            # - Security: Both types are equally secure; choice depends on management preference
             if ($useMI -and $miExists) {
-                Write-SectionHeader "Configuring Managed Identity"
+                Write-SectionHeader "Configuring User-Assigned Managed Identity"
                 
-                # Get managed identity resource ID
+                # Get managed identity resource ID (user-assigned identity)
                 $identityId = & az identity show `
                     --name $identityName `
                     --resource-group $rg `
                     --query id `
                     --output tsv
                 
-                Write-InfoMessage "Assigning managed identity to function app..."
+                Write-InfoMessage "Assigning user-assigned managed identity to function app..."
                 
+                # Assign user-assigned managed identity to the function app
+                # The --identities parameter specifies user-assigned identity (vs system-assigned)
                 & az functionapp identity assign `
                     --name $functionName `
                     --resource-group $rg `
                     --identities $identityId `
                     --output none
                 
-                Write-SuccessMessage "Managed identity assigned"
+                Write-SuccessMessage "User-assigned managed identity assigned"
                 
                 # Configure RBAC roles
                 if (-not $SkipRbacAssignment) {

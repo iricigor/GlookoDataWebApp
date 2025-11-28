@@ -1,11 +1,19 @@
-#Requires -Version 7.0
+#Requires -Version 7.4
 
 <#
 .SYNOPSIS
     Private helper functions for Azure CLI validation
 
 .DESCRIPTION
-    These functions validate Azure CLI installation and authentication
+    These functions validate Azure CLI installation and authentication.
+    
+    This module uses Azure CLI (az) instead of Azure PowerShell cmdlets because:
+    1. Azure CLI is pre-installed in Azure Cloud Shell (primary target environment)
+    2. Consistent syntax between bash and PowerShell versions of scripts
+    3. Azure CLI has better cross-platform support for local development
+    4. Easier to maintain single set of Azure commands across both script types
+    
+    PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
 #>
 
 function Test-AzureCli {

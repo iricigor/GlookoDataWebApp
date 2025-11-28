@@ -1,12 +1,19 @@
-#Requires -Version 7.0
+#Requires -Version 7.4
 
 <#
 .SYNOPSIS
-    Installs the GlookoDeployment PowerShell module.
+    Installs the GlookoDeployment PowerShell module to the user's modules directory.
 
 .DESCRIPTION
-    Downloads and installs the GlookoDeployment module from GitHub or a local path.
-    The module is installed to the user's PowerShell modules directory.
+    Downloads the GlookoDeployment module from GitHub and copies it to the user's
+    PowerShell modules directory, making it available for import with Import-Module.
+    
+    This is an INSTALLATION script (not import). It:
+    1. Downloads module files from GitHub (or copies from local path)
+    2. Places them in the PowerShell modules directory (~/.local/share/powershell/Modules on Linux)
+    3. After installation, you can import the module with: Import-Module GlookoDeployment
+    
+    PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
 
 .PARAMETER LocalPath
     Install from a local directory instead of downloading from GitHub.
@@ -50,11 +57,11 @@ $ModuleName = 'GlookoDeployment'
 $GitHubRepo = 'iricigor/GlookoDataWebApp'
 $GitHubBasePath = "scripts/deployment-ps/GlookoDeployment"
 
-# Colors for output
-function Write-Info { param($Message) Write-Host "ℹ️  $Message" -ForegroundColor Cyan }
-function Write-Success { param($Message) Write-Host "✅ $Message" -ForegroundColor Green }
-function Write-Warn { param($Message) Write-Host "⚠️  $Message" -ForegroundColor Yellow }
-function Write-Err { param($Message) Write-Host "❌ $Message" -ForegroundColor Red }
+# Simple output functions (standalone - not using module's functions since module isn't installed yet)
+function Write-InstallInfo { param($Message) Write-Host "ℹ️  $Message" -ForegroundColor Cyan }
+function Write-InstallSuccess { param($Message) Write-Host "✅ $Message" -ForegroundColor Green }
+function Write-InstallWarning { param($Message) Write-Host "⚠️  $Message" -ForegroundColor Yellow }
+function Write-InstallError { param($Message) Write-Host "❌ $Message" -ForegroundColor Red }
 
 # Get module installation path
 $ModulesPath = if ($IsWindows) {
@@ -73,29 +80,29 @@ Write-Host ""
 
 # Check if module already exists
 if ((Test-Path $InstallPath) -and -not $Force) {
-    Write-Warn "Module already installed at: $InstallPath"
-    Write-Info "Use -Force to overwrite"
+    Write-InstallWarning "Module already installed at: $InstallPath"
+    Write-InstallInfo "Use -Force to overwrite"
     return
 }
 
 # Remove existing installation if Force
 if ((Test-Path $InstallPath) -and $Force) {
-    Write-Info "Removing existing installation..."
+    Write-InstallInfo "Removing existing installation..."
     Remove-Item -Path $InstallPath -Recurse -Force
 }
 
 # Create modules directory if it doesn't exist
 if (-not (Test-Path $ModulesPath)) {
-    Write-Info "Creating modules directory: $ModulesPath"
+    Write-InstallInfo "Creating modules directory: $ModulesPath"
     New-Item -ItemType Directory -Path $ModulesPath -Force | Out-Null
 }
 
 if ($LocalPath) {
     # Install from local path
-    Write-Info "Installing from local path: $LocalPath"
+    Write-InstallInfo "Installing from local path: $LocalPath"
     
     if (-not (Test-Path $LocalPath)) {
-        Write-Err "Local path not found: $LocalPath"
+        Write-InstallError "Local path not found: $LocalPath"
         return
     }
     
@@ -103,7 +110,7 @@ if ($LocalPath) {
 }
 else {
     # Download from GitHub
-    Write-Info "Downloading from GitHub: $GitHubRepo (branch: $Branch)"
+    Write-InstallInfo "Downloading from GitHub: $GitHubRepo (branch: $Branch)"
     
     # Create install directory
     New-Item -ItemType Directory -Path $InstallPath -Force | Out-Null
@@ -129,13 +136,13 @@ else {
         $DestPath = Join-Path $DestDir (Split-Path $File.Path -Leaf)
         
         try {
-            Write-Info "Downloading: $($File.Path)"
+            Write-InstallInfo "Downloading: $($File.Path)"
             $content = Invoke-RestMethod -Uri $Url -ErrorAction Stop
             $content | Out-File -FilePath $DestPath -Encoding UTF8 -Force
         }
         catch {
-            Write-Err "Failed to download: $($File.Path)"
-            Write-Err $_.Exception.Message
+            Write-InstallError "Failed to download: $($File.Path)"
+            Write-InstallError $_.Exception.Message
             
             # Clean up partial installation
             if (Test-Path $InstallPath) {
@@ -146,7 +153,7 @@ else {
     }
 }
 
-Write-Success "Module installed successfully!"
+Write-InstallSuccess "Module installed successfully!"
 Write-Host ""
 Write-Host "  Installation path: $InstallPath"
 Write-Host ""
@@ -165,9 +172,9 @@ Write-Host ""
 # Try to import the module
 try {
     Import-Module GlookoDeployment -Force -ErrorAction Stop
-    Write-Success "Module imported successfully!"
+    Write-InstallSuccess "Module imported successfully!"
 }
 catch {
-    Write-Warn "Module installed but could not be imported automatically."
-    Write-Info "Run: Import-Module GlookoDeployment"
+    Write-InstallWarning "Module installed but could not be imported automatically."
+    Write-InstallInfo "Run: Import-Module GlookoDeployment"
 }

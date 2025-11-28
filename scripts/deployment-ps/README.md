@@ -4,13 +4,15 @@ This directory contains the GlookoDeployment PowerShell module for deploying Azu
 
 ## Prerequisites
 
-- PowerShell 7.0 or later
+- PowerShell 7.4 or later (required for security - earlier versions have known vulnerabilities)
 - Azure CLI installed and logged in (`az login`)
 - Appropriate permissions to create Azure resources
 
 ## Quick Start
 
 ### Installation
+
+The installer script downloads module files to your PowerShell modules directory, making the module available for import.
 
 #### One-Liner Install (Recommended)
 
@@ -32,7 +34,9 @@ iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/script
 ./Install-GlookoDeploymentModule.ps1 -LocalPath ./GlookoDeployment
 ```
 
-### Usage
+### After Installation
+
+Once installed, import the module to use its functions:
 
 ```powershell
 # Import the module
