@@ -1,14 +1,14 @@
-# Changelog - Version 1.4.x (Current Development)
+# Changelog - Version 1.4.x (Released)
 
 [← Back to Main Changelog](../../CHANGELOG.md)
 
 ---
 
-## [1.4.x] - Current Development
+## [1.4.x] - Released
 
-### Overview
+### Summary
 
-Version 1.4 focuses on advanced glucose analysis features, enhanced reporting capabilities, and improved maintainability.
+Version 1.4 introduces comprehensive glucose analytics with Rate of Change (RoC) analysis featuring gradient-colored visualizations, Hypoglycemia detection with statistics and nadir markers, and HbA1c estimation in both NGSP and IFCC units. The BG Overview page now consolidates Time in Range and AGP visualizations with period breakdowns. UI improvements include horizontal pivot tabs for desktop, RSuite DatePicker with Fluent UI styling, and Coefficient of Variation (CV%) metrics. The changelog was reorganized into version-specific files for better maintainability.
 
 ### New Features
 

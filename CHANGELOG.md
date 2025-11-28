@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of Contents
 
 - [Unreleased](#unreleased---partial-rollback-of-cloud-features)
-- [Current Development - 1.4.x](#14x---current-development)
+- [Current Development - 1.5.x](#15x---current-development)
+- [Version 1.4.x](#14x---released)
 - [Version 1.3.x](#13x---released)
 - [Version 1.2.x](#12x---released)
 - [Version 1.1.x](#11x---released)
@@ -49,13 +50,29 @@ All data processing continues to happen client-side in the browser. Settings are
 
 ---
 
-## [1.4.x] - Current Development
+## [1.5.x] - Current Development
+
+> **📖 Full Details:** [View complete 1.5.x changelog](docs/changelogs/CHANGELOG-1.5.x.md)
+
+### Summary
+
+Version 1.5 will introduce new functionality for logged-in users. Users will be able to save their settings in the cloud, enabling cross-device synchronization and persistent preferences.
+
+### Planned Features
+
+- **Cloud-Based Settings Storage** - Save user preferences to the cloud for persistent storage
+- **Cross-Device Synchronization** - Access settings from any device when logged in
+- **User Profile Settings** - Enhanced settings management for authenticated users
+
+---
+
+## [1.4.x] - Released
 
 > **📖 Full Details:** [View complete 1.4.x changelog](docs/changelogs/CHANGELOG-1.4.x.md)
 
 ### Summary
 
-Version 1.4 focuses on advanced glucose analysis features, enhanced reporting capabilities, and improved maintainability.
+Version 1.4 introduces comprehensive glucose analytics with Rate of Change (RoC) analysis featuring gradient-colored visualizations, Hypoglycemia detection with statistics and nadir markers, and HbA1c estimation in both NGSP and IFCC units. The BG Overview page now consolidates Time in Range and AGP visualizations with period breakdowns. UI improvements include horizontal pivot tabs for desktop, RSuite DatePicker with Fluent UI styling, and Coefficient of Variation (CV%) metrics. The changelog was reorganized into version-specific files for better maintainability.
 
 ### Major Features
 
