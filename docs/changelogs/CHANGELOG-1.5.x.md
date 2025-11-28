@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>520 Fix: Support :GLOOKO_INSTALL_FORCE for iex usage of PowerShell installer</summary>
+
+[#520](../../pull/520) Fix: Support :GLOOKO_INSTALL_FORCE for iex usage of PowerShell installer
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>516 Add Azure Storage Tables deployment scripts with managed identity RBAC</summary>
 
 [#516](../../pull/516) Add Azure Storage Tables deployment scripts with managed identity RBAC
