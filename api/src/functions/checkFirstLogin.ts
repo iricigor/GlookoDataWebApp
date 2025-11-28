@@ -27,9 +27,18 @@ interface UserSettingsEntity {
 }
 
 /**
- * Extract and validate the user ID from the access token
- * In production, this would validate the JWT properly
- * For now, we extract the 'oid' (object ID) claim from the token
+ * Extract user ID from the access token
+ * 
+ * SECURITY NOTE: In production, configure Azure Function with Easy Auth
+ * (Azure AD authentication) at the infrastructure level, which validates
+ * tokens before requests reach the function. This implementation extracts
+ * user claims assuming the token has been validated by Azure AD.
+ * 
+ * The token is expected to be a Microsoft identity platform (Azure AD) JWT.
+ * See: https://learn.microsoft.com/en-us/azure/active-directory/develop/access-tokens
+ * 
+ * @param authHeader - The Authorization header value
+ * @returns The user's object ID (oid) or subject (sub) claim, or null if invalid
  */
 function extractUserIdFromToken(authHeader: string | null): string | null {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -40,6 +49,7 @@ function extractUserIdFromToken(authHeader: string | null): string | null {
   
   try {
     // JWT tokens are base64url encoded with 3 parts separated by dots
+    // Requires Node.js 16.14.0+ for base64url encoding support
     const parts = token.split('.');
     if (parts.length !== 3) {
       return null;
@@ -172,18 +182,30 @@ async function checkFirstLogin(request: HttpRequest, context: InvocationContext)
   } catch (error: unknown) {
     context.error('Error checking first login:', error);
     
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    // Check for specific Azure SDK error types
+    const isAzureError = error && typeof error === 'object' && 'statusCode' in error;
+    const statusCode = isAzureError ? (error as { statusCode: number }).statusCode : undefined;
     
-    // Check if it's a connection/infrastructure error
-    if (errorMessage.includes('STORAGE_ACCOUNT_NAME') ||
-        errorMessage.includes('connection') ||
-        errorMessage.includes('Table')) {
+    // Check for configuration errors (missing environment variables)
+    if (error instanceof Error && error.message.includes('STORAGE_ACCOUNT_NAME')) {
       return {
         status: 503,
         jsonBody: {
-          error: 'Service unavailable - infrastructure not configured',
+          error: 'Service unavailable - storage not configured',
           errorType: 'infrastructure',
-          code: 'STORAGE_CONNECTION_FAILED',
+          code: 'STORAGE_NOT_CONFIGURED',
+        },
+      };
+    }
+    
+    // Check for authentication/authorization errors from Azure Storage
+    if (statusCode === 401 || statusCode === 403) {
+      return {
+        status: 503,
+        jsonBody: {
+          error: 'Service unavailable - storage access denied',
+          errorType: 'infrastructure',
+          code: 'STORAGE_ACCESS_DENIED',
         },
       };
     }
