@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>498 Hypos report: fix card count, reduce smileys, improve chart rendering</summary>
+
+[#498](../../pull/498) Hypos report: fix card count, reduce smileys, improve chart rendering
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>485 Implement LBGI, HBGI, BGRI, and J-Index glucose statistics with UI display</summary>
 
 [#485](../../pull/485) Implement LBGI, HBGI, BGRI, and J-Index glucose statistics with UI display
