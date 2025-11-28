@@ -37,6 +37,7 @@ cd scripts/deployment-cli
 |--------|-------------|
 | `config-lib.sh` | Shared configuration library (sourced by other scripts) |
 | `config.template.json` | Configuration template with default values |
+| `deploy-azure-resource-group.sh` | Deploys Azure Resource Group |
 | `deploy-azure-storage-account.sh` | Deploys Azure Storage Account |
 | `deploy-azure-storage-tables.sh` | Deploys Azure Storage Tables with optional managed identity RBAC |
 | `deploy-azure-managed-identity.sh` | Deploys User-Assigned Managed Identity |
@@ -87,6 +88,37 @@ Or use the `--save` flag to save current settings:
 ```
 
 ## Script Details
+
+### deploy-azure-resource-group.sh
+
+Creates and configures an Azure Resource Group for the GlookoDataWebApp application.
+
+**Features:**
+- Creates an Azure Resource Group with configurable location
+- Applies standard tags for resource management
+- Idempotent - safe to run multiple times
+
+**Options:**
+```
+  -h, --help              Show help message
+  -n, --name NAME         Resource group name
+  -l, --location LOCATION Azure region
+  -c, --config FILE       Custom configuration file path
+  -s, --save              Save configuration after deployment
+  -v, --verbose           Enable verbose output
+```
+
+**Examples:**
+```bash
+# Deploy with defaults
+./deploy-azure-resource-group.sh
+
+# Deploy with custom name and location
+./deploy-azure-resource-group.sh --name my-rg --location westus2
+
+# Deploy and save configuration
+./deploy-azure-resource-group.sh --save
+```
 
 ### deploy-azure-storage-account.sh
 
