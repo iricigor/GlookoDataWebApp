@@ -46,6 +46,12 @@ scripts/deployment/.deploy-temp/
 scripts/deployment/config.json
 .glookodata/
 
+# Azure Functions API
+api/node_modules
+api/dist
+api/local.settings.json
+api/.vscode
+
 # Source data files (too large for git)
 **/CGM Records.zip
 CGM Records.zip
