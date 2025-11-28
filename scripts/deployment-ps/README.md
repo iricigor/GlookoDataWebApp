@@ -96,6 +96,7 @@ Invoke-GlookoDeployment -All
 
 | Function | Alias | Description |
 |----------|-------|-------------|
+| `Set-GlookoResourceGroup` | `Set-GRG` | Deploy Azure Resource Group |
 | `Set-GlookoStorageAccount` | `Set-GSA` | Deploy Azure Storage Account |
 | `Set-GlookoTableStorage` | `Set-GTS` | Deploy Azure Storage Tables with optional managed identity RBAC |
 | `Set-GlookoManagedIdentity` | `Set-GMI` | Deploy User-Assigned Managed Identity |
@@ -139,6 +140,26 @@ Initialize-GlookoConfig -Merge
 ```
 
 ## Function Details
+
+### Set-GlookoResourceGroup
+
+Creates and configures an Azure Resource Group.
+
+**Parameters:**
+- `-Name` - Resource group name (optional, uses config)
+- `-Location` - Azure region (optional, uses config)
+
+**Examples:**
+```powershell
+# Deploy with defaults
+Set-GlookoResourceGroup
+
+# Deploy with custom name and location
+Set-GlookoResourceGroup -Name "my-rg" -Location "westus2"
+
+# Use alias
+Set-GRG -Name "my-rg"
+```
 
 ### Set-GlookoStorageAccount
 
@@ -316,6 +337,7 @@ GlookoDeployment/
 ├── GlookoDeployment.psm1        # Module loader
 ├── Public/                       # Exported functions
 │   ├── Config-Functions.ps1     # Configuration management
+│   ├── Set-GlookoResourceGroup.ps1
 │   ├── Set-GlookoStorageAccount.ps1
 │   ├── Set-GlookoTableStorage.ps1
 │   ├── Set-GlookoManagedIdentity.ps1

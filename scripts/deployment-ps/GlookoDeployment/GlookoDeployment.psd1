@@ -7,7 +7,7 @@
 
     # Version number of this module
     # NOTE: Bump this version when adding/updating scripts (see copilot-instructions.md)
-    ModuleVersion = '1.0.7'
+    ModuleVersion = '1.0.8'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -46,6 +46,7 @@
         'Set-GlookoConfig',
         'Test-GlookoConfig',
         'Initialize-GlookoConfig',
+        'Set-GlookoResourceGroup',
         'Set-GlookoStorageAccount',
         'Set-GlookoTableStorage',
         'Set-GlookoManagedIdentity',
@@ -60,6 +61,7 @@
         'Set-GC',
         'Test-GC',
         'Initialize-GC',
+        'Set-GRG',
         'Set-GSA',
         'Set-GTS',
         'Set-GMI',
@@ -88,6 +90,7 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
+v1.0.8 - Added Set-GlookoResourceGroup for creating Azure Resource Groups
 v1.0.7 - Fixed CORS configuration in Set-GlookoAzureFunction using Azure CLI instead of non-existent Set-AzWebApp parameter
 v1.0.6 - Fixed Install-GlookoDeploymentModule to download all public functions including Test-GlookoDeployment, Set-GlookoStorageAccount, and Set-GlookoTableStorage
 v1.0.5 - Added Test-GlookoDeployment for verifying Azure deployment state

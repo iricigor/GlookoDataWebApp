@@ -140,6 +140,7 @@ else {
         @{ Path = "Public/Invoke-GlookoDeployment.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoAzureFunction.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoManagedIdentity.ps1"; Dest = "Public" }
+        @{ Path = "Public/Set-GlookoResourceGroup.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoStorageAccount.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoTableStorage.ps1"; Dest = "Public" }
         @{ Path = "Public/Test-GlookoDeployment.ps1"; Dest = "Public" }
