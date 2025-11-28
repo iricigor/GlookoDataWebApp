@@ -7,7 +7,7 @@
 
     # Version number of this module
     # NOTE: Bump this version when adding/updating scripts (see copilot-instructions.md)
-    ModuleVersion = '1.1.0'
+    ModuleVersion = '1.0.1'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -80,8 +80,7 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
-v1.1.0 - Migrated from Azure CLI to native Az PowerShell cmdlets
-v1.0.1 - Added versioning guidelines, PowerShell 7.4+ requirement
+v1.0.1 - Migrated from Azure CLI to native Az PowerShell cmdlets, added versioning guidelines, PowerShell 7.4+ requirement
 v1.0.0 - Initial release with Azure Function App deployment support
 "@
         }
