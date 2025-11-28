@@ -7,7 +7,7 @@
 
     # Version number of this module
     # NOTE: Bump this version when adding/updating scripts (see copilot-instructions.md)
-    ModuleVersion = '1.0.1'
+    ModuleVersion = '1.1.0'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -46,6 +46,7 @@
         'Set-GlookoConfig',
         'Test-GlookoConfig',
         'Initialize-GlookoConfig',
+        'Set-GlookoStorageAccount',
         'Set-GlookoAzureFunction',
         'Invoke-GlookoDeployment'
     )
@@ -56,6 +57,7 @@
         'Set-GC',
         'Test-GC',
         'Initialize-GC',
+        'Set-GSA',
         'Set-GAF',
         'Invoke-GD'
     )
@@ -80,6 +82,7 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
+v1.1.0 - Added Set-GlookoStorageAccount for Azure Storage Account deployment
 v1.0.1 - Migrated from Azure CLI to native Az PowerShell cmdlets, added versioning guidelines, PowerShell 7.4+ requirement
 v1.0.0 - Initial release with Azure Function App deployment support
 "@

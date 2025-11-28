@@ -90,6 +90,7 @@ Invoke-GlookoDeployment -All
 
 | Function | Alias | Description |
 |----------|-------|-------------|
+| `Set-GlookoStorageAccount` | `Set-GSA` | Deploy Azure Storage Account |
 | `Set-GlookoAzureFunction` | `Set-GAF` | Deploy Azure Function App |
 | `Invoke-GlookoDeployment` | `Invoke-GD` | Orchestrate full deployment |
 
@@ -129,6 +130,33 @@ Initialize-GlookoConfig -Merge
 ```
 
 ## Function Details
+
+### Set-GlookoStorageAccount
+
+Creates and configures an Azure Storage Account.
+
+**Parameters:**
+- `-Name` - Storage account name (optional, uses config)
+- `-ResourceGroup` - Resource group (optional, uses config)
+- `-Location` - Azure region (optional, uses config)
+- `-Sku` - Storage SKU: Standard_LRS, Standard_GRS, etc. (default: Standard_LRS)
+- `-Kind` - Storage kind: StorageV2, BlobStorage, etc. (default: StorageV2)
+- `-AccessTier` - Access tier: Hot, Cool (default: Hot)
+
+**Examples:**
+```powershell
+# Deploy with defaults
+Set-GlookoStorageAccount
+
+# Deploy with custom settings
+Set-GlookoStorageAccount -Name "mystorageacct" -Location "westus2"
+
+# Deploy with geo-redundant storage
+Set-GlookoStorageAccount -Sku "Standard_GRS"
+
+# Deploy with cool access tier
+Set-GlookoStorageAccount -AccessTier "Cool"
+```
 
 ### Set-GlookoAzureFunction
 
@@ -188,6 +216,7 @@ GlookoDeployment/
 ├── GlookoDeployment.psm1        # Module loader
 ├── Public/                       # Exported functions
 │   ├── Config-Functions.ps1     # Configuration management
+│   ├── Set-GlookoStorageAccount.ps1
 │   ├── Set-GlookoAzureFunction.ps1
 │   └── Invoke-GlookoDeployment.ps1
 └── Private/                      # Internal functions
