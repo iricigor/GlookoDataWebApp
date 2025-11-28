@@ -312,18 +312,6 @@ function Set-GlookoAzureFunction {
             Write-SectionHeader "Configuring CORS"
             
             Write-InfoMessage "Setting CORS allowed origins..."
-            # Get current web app configuration
-            $webApp = Get-AzWebApp -ResourceGroupName $rg -Name $functionName
-            $corsSettings = $webApp.SiteConfig.Cors
-            
-            if ($null -eq $corsSettings) {
-                $corsSettings = New-Object Microsoft.Azure.Management.WebSites.Models.CorsSettings
-                $corsSettings.AllowedOrigins = @($webAppUrl)
-            }
-            elseif ($corsSettings.AllowedOrigins -notcontains $webAppUrl) {
-                $corsSettings.AllowedOrigins += $webAppUrl
-            }
-            
             Set-AzWebApp -ResourceGroupName $rg -Name $functionName -CorsAllowedOrigin @($webAppUrl) | Out-Null
             
             Write-SuccessMessage "CORS configured for $webAppUrl"
