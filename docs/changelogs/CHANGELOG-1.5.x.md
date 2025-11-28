@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>499 Add Azure Infrastructure Deployment Scripts documentation to copilot instructions</summary>
+
+[#499](../../pull/499) Add Azure Infrastructure Deployment Scripts documentation to copilot instructions
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>498 Hypos report: fix card count, reduce smileys, improve chart rendering</summary>
 
 [#498](../../pull/498) Hypos report: fix card count, reduce smileys, improve chart rendering
