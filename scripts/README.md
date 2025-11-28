@@ -44,6 +44,9 @@ Install and use the GlookoDeployment module:
 # One-liner install
 iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
 
+# Force reinstall (overwrite existing)
+$env:GLOOKO_INSTALL_FORCE=1; iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
+
 # Deploy Storage Account
 Set-GlookoStorageAccount
 

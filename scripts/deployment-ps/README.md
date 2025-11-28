@@ -42,6 +42,9 @@ $script | Out-File -FilePath .\Install-GlookoDeploymentModule.ps1
 
 # Option 2: Direct installation (for trusted environments only)
 iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
+
+# Option 3: Force reinstall (overwrite existing installation)
+$env:GLOOKO_INSTALL_FORCE=1; iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
 ```
 
 #### Local Install
@@ -49,6 +52,9 @@ iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/script
 ```powershell
 # From the repository
 ./Install-GlookoDeploymentModule.ps1 -LocalPath ./GlookoDeployment
+
+# Force reinstall from local path
+./Install-GlookoDeploymentModule.ps1 -LocalPath ./GlookoDeployment -Force
 ```
 
 ### After Installation
@@ -267,7 +273,7 @@ GlookoDeployment/
 
 3. **"Module not found"**
    - Ensure PowerShell 7.4+ is installed
-   - Run the installer again with `-Force`
+   - Run the installer again with `-Force` (or `$env:GLOOKO_INSTALL_FORCE=1` for iex usage)
 
 4. **"Storage account not found"**
    - Create the storage account first
