@@ -7,7 +7,7 @@
 
     # Version number of this module
     # NOTE: Bump this version when adding/updating scripts (see copilot-instructions.md)
-    ModuleVersion = '1.0.4'
+    ModuleVersion = '1.0.5'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -50,7 +50,8 @@
         'Set-GlookoTableStorage',
         'Set-GlookoManagedIdentity',
         'Set-GlookoAzureFunction',
-        'Invoke-GlookoDeployment'
+        'Invoke-GlookoDeployment',
+        'Test-GlookoDeployment'
     )
 
     # Aliases to export from this module
@@ -63,7 +64,8 @@
         'Set-GTS',
         'Set-GMI',
         'Set-GAF',
-        'Invoke-GD'
+        'Invoke-GD',
+        'Test-GD'
     )
 
     # Variables to export from this module
@@ -86,6 +88,7 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
+v1.0.5 - Added Test-GlookoDeployment for verifying Azure deployment state
 v1.0.4 - Added Set-GlookoTableStorage for Azure Storage Tables deployment with managed identity RBAC support
 v1.0.3 - Added Set-GlookoStorageAccount for Azure Storage Account deployment
 v1.0.2 - Added Set-GlookoManagedIdentity function for creating user-assigned managed identities

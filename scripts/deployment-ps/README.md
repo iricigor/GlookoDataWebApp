@@ -101,6 +101,7 @@ Invoke-GlookoDeployment -All
 | `Set-GlookoManagedIdentity` | `Set-GMI` | Deploy User-Assigned Managed Identity |
 | `Set-GlookoAzureFunction` | `Set-GAF` | Deploy Azure Function App |
 | `Invoke-GlookoDeployment` | `Invoke-GD` | Orchestrate full deployment |
+| `Test-GlookoDeployment` | `Test-GD` | Verify deployment state of all resources |
 
 ## Configuration
 
@@ -273,6 +274,40 @@ Invoke-GlookoDeployment -ManagedIdentity
 Invoke-GlookoDeployment -FunctionApp
 ```
 
+### Test-GlookoDeployment
+
+Verifies the deployment state of all Azure resources for GlookoDataWebApp. For each resource, it reports one of three states:
+- **not existing** - Resource does not exist
+- **existing, misconfigured** - Resource exists but has incorrect configuration
+- **existing, configured properly** - Resource exists with correct configuration
+
+**Parameters:**
+- `-ResourceGroup` - Resource group to verify (optional, uses config)
+- `-OutputFormat` - Output format: 'Console' or 'Object' (default: Console)
+- `-Verbose` - Enable verbose output with misconfiguration details
+
+**Examples:**
+```powershell
+# Verify all resources with default configuration
+Test-GlookoDeployment
+
+# Verify with verbose output to see misconfiguration details
+Test-GlookoDeployment -Verbose
+
+# Get results as a PowerShell object for pipeline processing
+$results = Test-GlookoDeployment -OutputFormat Object
+
+# Output results as JSON for automation
+Test-GlookoDeployment -OutputFormat Object | ConvertTo-Json -Depth 5
+
+# Verify a specific resource group
+Test-GlookoDeployment -ResourceGroup "my-rg"
+```
+
+**Return Values:**
+- Console mode: Returns `$true` if all resources are properly configured, `$false` otherwise
+- Object mode: Returns a PSCustomObject with Summary, Resources, and Configuration properties
+
 ## Module Structure
 
 ```
@@ -285,7 +320,8 @@ GlookoDeployment/
 │   ├── Set-GlookoTableStorage.ps1
 │   ├── Set-GlookoManagedIdentity.ps1
 │   ├── Set-GlookoAzureFunction.ps1
-│   └── Invoke-GlookoDeployment.ps1
+│   ├── Invoke-GlookoDeployment.ps1
+│   └── Test-GlookoDeployment.ps1
 └── Private/                      # Internal functions
     ├── Output-Functions.ps1     # Output formatting
     └── Azure-Helpers.ps1        # Azure PowerShell helpers
