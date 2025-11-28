@@ -177,9 +177,7 @@ $ModuleVersion = "unknown"
 if (Test-Path $ManifestPath) {
     try {
         $ManifestContent = Import-PowerShellDataFile -Path $ManifestPath -ErrorAction Stop
-        if ($ManifestContent.ModuleVersion) {
-            $ModuleVersion = $ManifestContent.ModuleVersion
-        }
+        $ModuleVersion = $ManifestContent.ModuleVersion
     }
     catch {
         Write-InstallWarning "Could not read module version from manifest"
