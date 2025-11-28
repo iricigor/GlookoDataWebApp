@@ -106,7 +106,7 @@ Creates and configures an Azure Storage Account for the GlookoDataWebApp applica
   -v, --verbose           Enable verbose output
   --sku SKU               Storage SKU (Standard_LRS, Standard_GRS, etc.)
   --kind KIND             Storage kind (StorageV2, BlobStorage, etc.)
-  --access-tier TIER      Access tier (Hot, Cool, Archive)
+  --access-tier TIER      Access tier (Hot, Cool)
 ```
 
 **Examples:**
