@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>517 Add deployment verification scripts for Azure resources</summary>
+
+[#517](../../pull/517) Add deployment verification scripts for Azure resources
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>518 Refactor AIAnalysis.tsx into modular components</summary>
 
 [#518](../../pull/518) Refactor AIAnalysis.tsx into modular components
