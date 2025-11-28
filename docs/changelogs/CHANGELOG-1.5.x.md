@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>526 Fix CORS configuration in Set-GlookoAzureFunction</summary>
+
+[#526](../../pull/526) Fix CORS configuration in Set-GlookoAzureFunction
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>522 Fix Install-GlookoDeploymentModule to download all public functions</summary>
 
 [#522](../../pull/522) Fix Install-GlookoDeploymentModule to download all public functions
