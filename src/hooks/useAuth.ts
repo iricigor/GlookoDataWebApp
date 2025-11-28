@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { PublicClientApplication } from '@azure/msal-browser';
 import type { AccountInfo } from '@azure/msal-browser';
 import { msalConfig, loginRequest } from '../config/msalConfig';
@@ -13,6 +13,7 @@ export interface AuthState {
   userEmail: string | null;
   userPhoto: string | null;
   account: AccountInfo | null;
+  accessToken: string | null;
 }
 
 /**
@@ -28,8 +29,13 @@ export function useAuth() {
     userEmail: null,
     userPhoto: null,
     account: null,
+    accessToken: null,
   });
   const [isInitialized, setIsInitialized] = useState(false);
+  const [justLoggedIn, setJustLoggedIn] = useState(false);
+  
+  // Track if this is a fresh login vs. restoring a session
+  const isFreshLoginRef = useRef(false);
 
   // Initialize MSAL and check for existing authentication
   useEffect(() => {
@@ -41,13 +47,15 @@ export function useAuth() {
         const response = await msalInstance.handleRedirectPromise();
         
         if (response) {
-          // User just logged in via redirect
+          // User just logged in via redirect - this is a fresh login
           const account = response.account;
           if (account) {
+            isFreshLoginRef.current = true;
             await updateAuthState(account, response.accessToken);
+            setJustLoggedIn(true);
           }
         } else {
-          // Check if user is already logged in
+          // Check if user is already logged in (restoring session)
           const accounts = msalInstance.getAllAccounts();
           if (accounts.length > 0) {
             const account = accounts[0];
@@ -58,6 +66,8 @@ export function useAuth() {
                 ...loginRequest,
                 account: account,
               });
+              // This is restoring a session, not a fresh login
+              isFreshLoginRef.current = false;
               await updateAuthState(account, tokenResponse.accessToken);
             } catch (error) {
               // If silent token acquisition fails, user needs to login again
@@ -68,6 +78,7 @@ export function useAuth() {
                 userEmail: null,
                 userPhoto: null,
                 account: null,
+                accessToken: null,
               });
             }
           }
@@ -102,6 +113,7 @@ export function useAuth() {
         userEmail: email,
         userPhoto: photoUrl,
         account: account,
+        accessToken: accessToken,
       });
     } catch (error) {
       console.error('Failed to update auth state:', error);
@@ -112,6 +124,7 @@ export function useAuth() {
         userEmail: getUserEmail(account),
         userPhoto: null,
         account: account,
+        accessToken: accessToken,
       });
     }
   };
@@ -122,7 +135,10 @@ export function useAuth() {
       const response = await msalInstance.loginPopup(loginRequest);
       
       if (response && response.account) {
+        // This is a fresh login via popup
+        isFreshLoginRef.current = true;
         await updateAuthState(response.account, response.accessToken);
+        setJustLoggedIn(true);
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -147,7 +163,10 @@ export function useAuth() {
         userEmail: null,
         userPhoto: null,
         account: null,
+        accessToken: null,
       });
+      setJustLoggedIn(false);
+      isFreshLoginRef.current = false;
 
       // Logout from Microsoft
       if (account) {
@@ -158,13 +177,22 @@ export function useAuth() {
     }
   }, [authState.userPhoto, authState.account]);
 
+  // Clear the justLoggedIn flag after it has been consumed
+  const acknowledgeLogin = useCallback(() => {
+    setJustLoggedIn(false);
+    isFreshLoginRef.current = false;
+  }, []);
+
   return {
     isLoggedIn: authState.isLoggedIn,
     userName: authState.userName,
     userEmail: authState.userEmail,
     userPhoto: authState.userPhoto,
+    accessToken: authState.accessToken,
     isInitialized,
+    justLoggedIn,
     login,
     logout,
+    acknowledgeLogin,
   };
 }

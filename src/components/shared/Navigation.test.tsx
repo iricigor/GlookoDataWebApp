@@ -7,6 +7,11 @@ vi.mock('../../hooks/useAuth', () => ({
   useAuth: vi.fn(),
 }));
 
+// Mock the useFirstLoginCheck hook
+vi.mock('../../hooks/useFirstLoginCheck', () => ({
+  useFirstLoginCheck: vi.fn(),
+}));
+
 // Mock the isDarkTheme function
 vi.mock('../../hooks/useTheme', () => ({
   isDarkTheme: vi.fn(),
@@ -14,9 +19,11 @@ vi.mock('../../hooks/useTheme', () => ({
 
 // Import the mocked modules
 import { useAuth } from '../../hooks/useAuth';
+import { useFirstLoginCheck } from '../../hooks/useFirstLoginCheck';
 import { isDarkTheme } from '../../hooks/useTheme';
 
 const mockUseAuth = vi.mocked(useAuth);
+const mockUseFirstLoginCheck = vi.mocked(useFirstLoginCheck);
 const mockIsDarkTheme = vi.mocked(isDarkTheme);
 
 describe('Navigation', () => {
@@ -25,14 +32,30 @@ describe('Navigation', () => {
     userName: null,
     userEmail: null,
     userPhoto: null,
+    accessToken: null,
     isInitialized: true,
+    justLoggedIn: false,
     login: vi.fn(),
     logout: vi.fn(),
+    acknowledgeLogin: vi.fn(),
+  };
+
+  const defaultFirstLoginCheckState = {
+    isChecking: false,
+    hasChecked: false,
+    isFirstLogin: false,
+    hasError: false,
+    errorMessage: null,
+    errorType: null,
+    performCheck: vi.fn(),
+    resetState: vi.fn(),
+    clearError: vi.fn(),
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseAuth.mockReturnValue(defaultAuthState);
+    mockUseFirstLoginCheck.mockReturnValue(defaultFirstLoginCheckState);
     mockIsDarkTheme.mockReturnValue(false); // Default to light mode
   });
 
@@ -78,6 +101,7 @@ describe('Navigation', () => {
         isLoggedIn: true,
         userName: 'John Doe',
         userEmail: 'john@example.com',
+        accessToken: 'test-token',
         logout: vi.fn().mockResolvedValue(undefined),
       });
     });
@@ -203,6 +227,107 @@ describe('Navigation', () => {
       const reportsButton = screen.getByRole('button', { name: /reports/i });
       // The current page button should have "primary" appearance (implemented via class)
       expect(reportsButton).toBeInTheDocument();
+    });
+  });
+
+  describe('first login check', () => {
+    it('should trigger performCheck when user just logged in', () => {
+      const performCheck = vi.fn();
+      mockUseAuth.mockReturnValue({
+        ...defaultAuthState,
+        isLoggedIn: true,
+        userName: 'John Doe',
+        accessToken: 'test-token',
+        justLoggedIn: true,
+      });
+      mockUseFirstLoginCheck.mockReturnValue({
+        ...defaultFirstLoginCheckState,
+        performCheck,
+      });
+
+      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+
+      expect(performCheck).toHaveBeenCalledWith('test-token');
+    });
+
+    it('should not trigger performCheck when restoring session', () => {
+      const performCheck = vi.fn();
+      mockUseAuth.mockReturnValue({
+        ...defaultAuthState,
+        isLoggedIn: true,
+        userName: 'John Doe',
+        accessToken: 'test-token',
+        justLoggedIn: false, // Not a fresh login
+      });
+      mockUseFirstLoginCheck.mockReturnValue({
+        ...defaultFirstLoginCheckState,
+        performCheck,
+      });
+
+      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+
+      expect(performCheck).not.toHaveBeenCalled();
+    });
+
+    it('should show welcome dialog for first-time users', () => {
+      mockUseAuth.mockReturnValue({
+        ...defaultAuthState,
+        isLoggedIn: true,
+        userName: 'John Doe',
+        accessToken: 'test-token',
+        justLoggedIn: true,
+      });
+      mockUseFirstLoginCheck.mockReturnValue({
+        ...defaultFirstLoginCheckState,
+        hasChecked: true,
+        isFirstLogin: true,
+      });
+
+      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+
+      expect(screen.getByText('Welcome!')).toBeInTheDocument();
+      expect(screen.getByText('Welcome, John Doe!')).toBeInTheDocument();
+    });
+
+    it('should not show welcome dialog for returning users', () => {
+      mockUseAuth.mockReturnValue({
+        ...defaultAuthState,
+        isLoggedIn: true,
+        userName: 'John Doe',
+        accessToken: 'test-token',
+        justLoggedIn: true,
+      });
+      mockUseFirstLoginCheck.mockReturnValue({
+        ...defaultFirstLoginCheckState,
+        hasChecked: true,
+        isFirstLogin: false,
+      });
+
+      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+
+      expect(screen.queryByText('Welcome!')).not.toBeInTheDocument();
+    });
+
+    it('should show error dialog when infrastructure error occurs', () => {
+      mockUseAuth.mockReturnValue({
+        ...defaultAuthState,
+        isLoggedIn: true,
+        userName: 'John Doe',
+        accessToken: 'test-token',
+        justLoggedIn: true,
+      });
+      mockUseFirstLoginCheck.mockReturnValue({
+        ...defaultFirstLoginCheckState,
+        hasChecked: true,
+        hasError: true,
+        errorMessage: 'Cannot connect to Table Storage',
+        errorType: 'infrastructure',
+      });
+
+      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+
+      expect(screen.getAllByText('Service Unavailable').length).toBeGreaterThan(0);
+      expect(screen.getByText('Cannot connect to Table Storage')).toBeInTheDocument();
     });
   });
 });

@@ -5,3 +5,5 @@ export { InfoCard } from './InfoCard';
 export { LoginDialog } from './LoginDialog';
 export { LogoutDialog } from './LogoutDialog';
 export { CookieConsent } from './CookieConsent';
+export { WelcomeDialog } from './WelcomeDialog';
+export { InfrastructureErrorDialog } from './InfrastructureErrorDialog';
