@@ -119,6 +119,35 @@ function Initialize-GlookoResourceGroup {
     
     if (Test-AzureResource -ResourceType 'group' -Name $Name) {
         Write-InfoMessage "Resource group '$Name' already exists"
+        
+        # Check and update tags if provided and missing
+        if ($Tags -and $Tags.Count -gt 0) {
+            $existingRg = Get-AzResourceGroup -Name $Name -ErrorAction Stop
+            $existingTags = $existingRg.Tags
+            if ($null -eq $existingTags) {
+                $existingTags = @{}
+            }
+            
+            $missingTags = @{}
+            foreach ($key in $Tags.Keys) {
+                if (-not $existingTags.ContainsKey($key)) {
+                    $missingTags[$key] = $Tags[$key]
+                }
+            }
+            
+            if ($missingTags.Count -gt 0) {
+                Write-InfoMessage "Adding missing tags: $($missingTags.Keys -join ', ')"
+                
+                # Merge existing tags with missing tags
+                $updatedTags = $existingTags.Clone()
+                foreach ($key in $missingTags.Keys) {
+                    $updatedTags[$key] = $missingTags[$key]
+                }
+                
+                Set-AzResourceGroup -Name $Name -Tag $updatedTags | Out-Null
+                Write-SuccessMessage "Tags updated on resource group"
+            }
+        }
     }
     else {
         Write-InfoMessage "Creating resource group '$Name' in '$Location'..."

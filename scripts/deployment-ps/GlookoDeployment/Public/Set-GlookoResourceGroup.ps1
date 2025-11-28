@@ -76,12 +76,47 @@ function Set-GlookoResourceGroup {
             Write-SectionHeader "Creating Azure Resource Group"
             
             $created = $false
+            $expectedTags = @{
+                Application = "GlookoDataWebApp"
+                Environment = "Production"
+                ManagedBy   = "AzureDeploymentScripts"
+            }
+            
             if (Test-AzureResource -ResourceType 'group' -Name $rgName) {
                 Write-WarningMessage "Resource group '$rgName' already exists"
                 
                 # Get existing resource group details
                 $existingRg = Get-AzResourceGroup -Name $rgName -ErrorAction Stop
                 Write-InfoMessage "Existing resource group location: $($existingRg.Location)"
+                
+                # Check and update tags if missing
+                $existingTags = $existingRg.Tags
+                if ($null -eq $existingTags) {
+                    $existingTags = @{}
+                }
+                
+                $missingTags = @{}
+                foreach ($key in $expectedTags.Keys) {
+                    if (-not $existingTags.ContainsKey($key)) {
+                        $missingTags[$key] = $expectedTags[$key]
+                    }
+                }
+                
+                if ($missingTags.Count -gt 0) {
+                    Write-InfoMessage "Adding missing tags: $($missingTags.Keys -join ', ')"
+                    
+                    # Merge existing tags with missing tags
+                    $updatedTags = $existingTags.Clone()
+                    foreach ($key in $missingTags.Keys) {
+                        $updatedTags[$key] = $missingTags[$key]
+                    }
+                    
+                    Set-AzResourceGroup -Name $rgName -Tag $updatedTags | Out-Null
+                    Write-SuccessMessage "Tags updated successfully"
+                }
+                else {
+                    Write-InfoMessage "All expected tags are present"
+                }
             }
             else {
                 Write-InfoMessage "Creating resource group '$rgName' in '$loc'..."
@@ -89,11 +124,7 @@ function Set-GlookoResourceGroup {
                 $resourceGroupParams = @{
                     Name     = $rgName
                     Location = $loc
-                    Tag      = @{
-                        Application = "GlookoDataWebApp"
-                        Environment = "Production"
-                        ManagedBy   = "AzureDeploymentScripts"
-                    }
+                    Tag      = $expectedTags
                 }
                 
                 New-AzResourceGroup @resourceGroupParams | Out-Null
