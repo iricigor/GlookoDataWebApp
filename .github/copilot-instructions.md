@@ -1512,12 +1512,17 @@ The test script should verify:
 
 ### Installation
 
+> **Security Note:** When downloading and executing scripts from the internet, always review the script content first. For production environments, consider cloning the repository and reviewing the scripts before execution, or use tagged releases for version control.
+
 #### Bash Scripts (Direct Download)
 
 ```bash
-# Download master script
+# Download master script (review content before executing)
 curl -o deploy-azure-master.sh https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-cli/deploy-azure-master.sh
 chmod +x deploy-azure-master.sh
+
+# Review the script before running
+cat deploy-azure-master.sh | less
 
 # Deploy all resources
 ./deploy-azure-master.sh --all
@@ -1526,14 +1531,31 @@ chmod +x deploy-azure-master.sh
 #### PowerShell Module (One-liner Install)
 
 ```powershell
-# Install from GitHub
+# Option 1: Download and review before executing (recommended)
+$script = irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1
+$script | Out-File -FilePath .\Install-GlookoDeploymentModule.ps1
+# Review the script, then run:
+.\Install-GlookoDeploymentModule.ps1
+
+# Option 2: Direct installation (for trusted environments only)
 iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
 
-# Or local install
+# Or local install from cloned repository
 ./Install-GlookoDeploymentModule.ps1 -LocalPath ./GlookoDeployment
 
 # Deploy all resources
 Invoke-GlookoDeployment -All
+```
+
+#### Alternative: Clone Repository (Most Secure)
+
+```bash
+# Clone repository to review all scripts
+git clone https://github.com/iricigor/GlookoDataWebApp.git
+cd GlookoDataWebApp/scripts/deployment-cli
+
+# Review and run
+./deploy-azure-master.sh --all
 ```
 
 ### Related Documentation
