@@ -315,13 +315,18 @@ function Set-GlookoAzureFunction {
             Write-SectionHeader "Configuring CORS"
             
             Write-InfoMessage "Setting CORS allowed origins..."
-            az functionapp cors add `
+            $corsResult = az functionapp cors add `
                 --name $functionName `
                 --resource-group $rg `
                 --allowed-origins $webAppUrl `
-                --output none 2>$null
+                --output none 2>&1
             
-            Write-SuccessMessage "CORS configured for $webAppUrl"
+            if ($LASTEXITCODE -eq 0) {
+                Write-SuccessMessage "CORS configured for $webAppUrl"
+            }
+            else {
+                Write-WarningMessage "Failed to configure CORS: $corsResult"
+            }
 
             # Get function app URL
             $functionApp = Get-AzFunctionApp -ResourceGroupName $rg -Name $functionName
