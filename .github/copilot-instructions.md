@@ -1046,6 +1046,24 @@ scripts/
 └── README.md                 # Main scripts directory overview
 ```
 
+### PowerShell Module Versioning
+
+When adding or updating deployment scripts:
+1. **Bump the module version** in `GlookoDeployment.psd1` (ModuleVersion field)
+2. Use semantic versioning: MAJOR.MINOR.PATCH
+   - PATCH: Bug fixes, documentation updates
+   - MINOR: New scripts/functions added
+   - MAJOR: Breaking changes to existing scripts
+
+### Script Language Alignment
+
+- **Bash scripts** (`deployment-cli/`): Use Azure CLI (`az`) commands for portability
+- **PowerShell module** (`deployment-ps/`): Use native Az PowerShell cmdlets for native experience
+
+This separation allows:
+1. **Bash scripts**: Use Azure CLI for consistency with shell scripting
+2. **PowerShell module**: Use Az cmdlets which are pre-installed in Azure Cloud Shell (PowerShell flavor)
+
 ### Configuration System
 
 #### Configuration File Location

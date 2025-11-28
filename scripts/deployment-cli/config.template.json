@@ -1,0 +1,20 @@
+{
+  "resourceGroup": "glookodatawebapp-rg",
+  "location": "eastus",
+  "appName": "glookodatawebapp",
+  "storageAccountName": "glookodatawebappstorage",
+  "managedIdentityName": "glookodatawebapp-identity",
+  "staticWebAppName": "glookodatawebapp-swa",
+  "staticWebAppSku": "Standard",
+  "keyVaultName": "glookodatawebapp-kv",
+  "functionAppName": "glookodatawebapp-func",
+  "webAppUrl": "https://glooko.iric.online",
+  "appRegistrationName": "GlookoDataWebApp",
+  "signInAudience": "PersonalMicrosoftAccount",
+  "useManagedIdentity": true,
+  "tags": {
+    "Application": "GlookoDataWebApp",
+    "Environment": "Production",
+    "ManagedBy": "AzureDeploymentScripts"
+  }
+}
