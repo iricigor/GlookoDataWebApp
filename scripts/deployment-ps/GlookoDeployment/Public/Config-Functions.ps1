@@ -233,12 +233,13 @@ function Test-GlookoConfig {
         }
     }
     
-    # Validate location
-    $validLocations = @('eastus', 'eastus2', 'westus', 'westus2', 'westus3', 'centralus', 
+    # Validate location - just a helpful hint, not blocking validation
+    # Azure adds new regions frequently, so we just show common ones as a reference
+    $commonLocations = @('eastus', 'eastus2', 'westus', 'westus2', 'westus3', 'centralus', 
                         'northeurope', 'westeurope', 'uksouth', 'ukwest', 
                         'australiaeast', 'southeastasia', 'japaneast')
-    if ($config.location -and $config.location -notin $validLocations) {
-        Write-WarningMessage "Location '$($config.location)' may not be valid. Common locations: $($validLocations -join ', ')"
+    if ($config.location -and $config.location -notin $commonLocations) {
+        Write-InfoMessage "Location '$($config.location)' is not in common locations list but may still be valid. Run 'az account list-locations' to see all available locations."
     }
     
     if ($isValid) {

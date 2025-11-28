@@ -223,21 +223,37 @@ function Set-GlookoAzureFunction {
                     
                     # Assign Storage Table Data Contributor
                     Write-InfoMessage "Assigning 'Storage Table Data Contributor' role..."
-                    & az role assignment create `
+                    $result = & az role assignment create `
                         --assignee $principalId `
                         --role "Storage Table Data Contributor" `
                         --scope $storageId `
-                        --output none 2>$null
-                    Write-SuccessMessage "Storage Table Data Contributor role assigned"
+                        --output json 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-SuccessMessage "Storage Table Data Contributor role assigned"
+                    }
+                    elseif ($result -match "already exists") {
+                        Write-WarningMessage "Storage Table Data Contributor role already assigned"
+                    }
+                    else {
+                        Write-WarningMessage "Failed to assign Storage Table Data Contributor role"
+                    }
                     
                     # Assign Storage Blob Data Contributor
                     Write-InfoMessage "Assigning 'Storage Blob Data Contributor' role..."
-                    & az role assignment create `
+                    $result = & az role assignment create `
                         --assignee $principalId `
                         --role "Storage Blob Data Contributor" `
                         --scope $storageId `
-                        --output none 2>$null
-                    Write-SuccessMessage "Storage Blob Data Contributor role assigned"
+                        --output json 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-SuccessMessage "Storage Blob Data Contributor role assigned"
+                    }
+                    elseif ($result -match "already exists") {
+                        Write-WarningMessage "Storage Blob Data Contributor role already assigned"
+                    }
+                    else {
+                        Write-WarningMessage "Failed to assign Storage Blob Data Contributor role"
+                    }
                     
                     # Assign Key Vault access if KV exists
                     if ($kvExists) {
@@ -248,12 +264,20 @@ function Set-GlookoAzureFunction {
                             --output tsv
                         
                         Write-InfoMessage "Assigning 'Key Vault Secrets User' role..."
-                        & az role assignment create `
+                        $result = & az role assignment create `
                             --assignee $principalId `
                             --role "Key Vault Secrets User" `
                             --scope $kvId `
-                            --output none 2>$null
-                        Write-SuccessMessage "Key Vault Secrets User role assigned"
+                            --output json 2>&1
+                        if ($LASTEXITCODE -eq 0) {
+                            Write-SuccessMessage "Key Vault Secrets User role assigned"
+                        }
+                        elseif ($result -match "already exists") {
+                            Write-WarningMessage "Key Vault Secrets User role already assigned"
+                        }
+                        else {
+                            Write-WarningMessage "Failed to assign Key Vault Secrets User role"
+                        }
                     }
                 }
             }

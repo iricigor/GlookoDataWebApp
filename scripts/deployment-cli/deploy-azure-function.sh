@@ -285,27 +285,34 @@ configure_rbac_roles() {
         -o tsv)
     
     # Assign Storage Table Data Contributor role
+    # Note: stderr is suppressed for idempotent behavior - Azure CLI outputs an error when role already exists
+    # We handle both success (new assignment) and "already exists" as acceptable outcomes
     print_info "Assigning 'Storage Table Data Contributor' role..."
-    if az role assignment create \
+    local role_output
+    if role_output=$(az role assignment create \
         --assignee "${principal_id}" \
         --role "Storage Table Data Contributor" \
         --scope "${storage_id}" \
-        --output none 2>/dev/null; then
+        --output json 2>&1); then
         print_success "Storage Table Data Contributor role assigned"
+    elif echo "${role_output}" | grep -q "already exists"; then
+        print_warning "Storage Table Data Contributor role already assigned"
     else
-        print_warning "Role may already be assigned or assignment failed"
+        print_warning "Role assignment failed: check permissions"
     fi
     
     # Assign Storage Blob Data Contributor role
     print_info "Assigning 'Storage Blob Data Contributor' role..."
-    if az role assignment create \
+    if role_output=$(az role assignment create \
         --assignee "${principal_id}" \
         --role "Storage Blob Data Contributor" \
         --scope "${storage_id}" \
-        --output none 2>/dev/null; then
+        --output json 2>&1); then
         print_success "Storage Blob Data Contributor role assigned"
+    elif echo "${role_output}" | grep -q "already exists"; then
+        print_warning "Storage Blob Data Contributor role already assigned"
     else
-        print_warning "Role may already be assigned or assignment failed"
+        print_warning "Role assignment failed: check permissions"
     fi
     
     # Assign Key Vault access if Key Vault exists
@@ -318,14 +325,16 @@ configure_rbac_roles() {
             -o tsv)
         
         print_info "Assigning 'Key Vault Secrets User' role..."
-        if az role assignment create \
+        if role_output=$(az role assignment create \
             --assignee "${principal_id}" \
             --role "Key Vault Secrets User" \
             --scope "${keyvault_id}" \
-            --output none 2>/dev/null; then
+            --output json 2>&1); then
             print_success "Key Vault Secrets User role assigned"
+        elif echo "${role_output}" | grep -q "already exists"; then
+            print_warning "Key Vault Secrets User role already assigned"
         else
-            print_warning "Role may already be assigned or assignment failed"
+            print_warning "Role assignment failed: check permissions"
         fi
     fi
 }
@@ -334,31 +343,32 @@ configure_rbac_roles() {
 configure_app_settings() {
     print_section "Configuring Application Settings"
     
-    # Get managed identity client ID if using managed identity
-    local settings=""
+    # Use an array to safely handle settings
+    local -a settings_array=()
     
     if [ "${USE_MANAGED_IDENTITY}" = "true" ]; then
         local identity_client_id
         identity_client_id=$(get_managed_identity_id)
         
-        settings="AZURE_CLIENT_ID=${identity_client_id}"
-        settings="${settings} STORAGE_ACCOUNT_NAME=${STORAGE_ACCOUNT_NAME}"
+        if [ -n "${identity_client_id}" ]; then
+            settings_array+=("AZURE_CLIENT_ID=${identity_client_id}")
+        fi
+        settings_array+=("STORAGE_ACCOUNT_NAME=${STORAGE_ACCOUNT_NAME}")
         
         if [ "${KEY_VAULT_EXISTS}" = true ]; then
-            settings="${settings} KEY_VAULT_NAME=${KEY_VAULT_NAME}"
+            settings_array+=("KEY_VAULT_NAME=${KEY_VAULT_NAME}")
         fi
     fi
     
     # Add CORS settings for Static Web App
-    settings="${settings} CORS_ALLOWED_ORIGINS=${WEB_APP_URL}"
+    settings_array+=("CORS_ALLOWED_ORIGINS=${WEB_APP_URL}")
     
-    if [ -n "${settings}" ]; then
+    if [ ${#settings_array[@]} -gt 0 ]; then
         print_info "Setting application configuration..."
-        # shellcheck disable=SC2086
         az functionapp config appsettings set \
             --name "${FUNCTION_APP_NAME}" \
             --resource-group "${RESOURCE_GROUP}" \
-            --settings ${settings} \
+            --settings "${settings_array[@]}" \
             --output none
         
         print_success "Application settings configured"
