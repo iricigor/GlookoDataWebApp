@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>537 Fix Set-GlookoResourceGroup to add missing tags on existing resource groups</summary>
+
+[#537](../../pull/537) Fix Set-GlookoResourceGroup to add missing tags on existing resource groups
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>535 Fix API deployment by restoring file permissions after Docker container</summary>
 
 [#535](../../pull/535) Fix API deployment by restoring file permissions after Docker container
