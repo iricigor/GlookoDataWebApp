@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>485 Implement LBGI, HBGI, BGRI, and J-Index glucose statistics with UI display</summary>
+
+[#485](../../pull/485) Implement LBGI, HBGI, BGRI, and J-Index glucose statistics with UI display
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>495 Bump version to 1.5</summary>
 
 [#495](../../pull/495) Bump version to 1.5
