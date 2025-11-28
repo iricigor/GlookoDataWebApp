@@ -26,15 +26,15 @@ import {
   Tooltip,
 } from '@fluentui/react-components';
 import {
-  CalendarRegular,
   BriefcaseRegular,
-  HomeRegular,
+  CalendarRegular,
   CheckmarkCircleRegular,
   DataLineRegular,
   FilterRegular,
   HeartPulseRegular,
-  WarningRegular,
+  HomeRegular,
   ShieldRegular,
+  WarningRegular,
 } from '@fluentui/react-icons';
 import type { 
   UploadedFile, 
@@ -812,23 +812,28 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     };
   };
 
+  // Risk threshold constants for LBGI, HBGI, and J-Index
+  const LBGI_THRESHOLDS = { low: 2.5, moderate: 5 };
+  const HBGI_THRESHOLDS = { low: 4.5, moderate: 9 };
+  const JINDEX_THRESHOLDS = { excellent: 20, good: 30, fair: 40 };
+
   // Helper functions for risk interpretation
   const getLBGIInterpretation = (lbgi: number): { text: string; level: 'low' | 'moderate' | 'high' } => {
-    if (lbgi < 2.5) return { text: 'Low Risk', level: 'low' };
-    if (lbgi <= 5) return { text: 'Moderate Risk', level: 'moderate' };
+    if (lbgi < LBGI_THRESHOLDS.low) return { text: 'Low Risk', level: 'low' };
+    if (lbgi <= LBGI_THRESHOLDS.moderate) return { text: 'Moderate Risk', level: 'moderate' };
     return { text: 'High Risk', level: 'high' };
   };
 
   const getHBGIInterpretation = (hbgi: number): { text: string; level: 'low' | 'moderate' | 'high' } => {
-    if (hbgi < 4.5) return { text: 'Low Risk', level: 'low' };
-    if (hbgi <= 9) return { text: 'Moderate Risk', level: 'moderate' };
+    if (hbgi < HBGI_THRESHOLDS.low) return { text: 'Low Risk', level: 'low' };
+    if (hbgi <= HBGI_THRESHOLDS.moderate) return { text: 'Moderate Risk', level: 'moderate' };
     return { text: 'High Risk', level: 'high' };
   };
 
   const getJIndexInterpretation = (jIndex: number): { text: string; level: 'low' | 'moderate' | 'high' } => {
-    if (jIndex < 20) return { text: 'Excellent', level: 'low' };
-    if (jIndex <= 30) return { text: 'Good', level: 'low' };
-    if (jIndex <= 40) return { text: 'Fair', level: 'moderate' };
+    if (jIndex < JINDEX_THRESHOLDS.excellent) return { text: 'Excellent', level: 'low' };
+    if (jIndex <= JINDEX_THRESHOLDS.good) return { text: 'Good', level: 'low' };
+    if (jIndex <= JINDEX_THRESHOLDS.fair) return { text: 'Fair', level: 'moderate' };
     return { text: 'Poor', level: 'high' };
   };
 
@@ -1281,9 +1286,9 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
           </div>
           
           <div className={styles.riskDescription}>
-            <strong>Risk Thresholds:</strong> LBGI (&lt;2.5 low, 2.5-5 moderate, &gt;5 high) | 
-            HBGI (&lt;4.5 low, 4.5-9 moderate, &gt;9 high) | 
-            J-Index (&lt;20 excellent, 20-30 good, 30-40 fair, &gt;40 poor)
+            <strong>Risk Thresholds:</strong> LBGI (&lt;{LBGI_THRESHOLDS.low} low, {LBGI_THRESHOLDS.low}-{LBGI_THRESHOLDS.moderate} moderate, &gt;{LBGI_THRESHOLDS.moderate} high) | 
+            HBGI (&lt;{HBGI_THRESHOLDS.low} low, {HBGI_THRESHOLDS.low}-{HBGI_THRESHOLDS.moderate} moderate, &gt;{HBGI_THRESHOLDS.moderate} high) | 
+            J-Index (&lt;{JINDEX_THRESHOLDS.excellent} excellent, {JINDEX_THRESHOLDS.excellent}-{JINDEX_THRESHOLDS.good} good, {JINDEX_THRESHOLDS.good}-{JINDEX_THRESHOLDS.fair} fair, &gt;{JINDEX_THRESHOLDS.fair} poor)
           </div>
         </Card>
       )}
