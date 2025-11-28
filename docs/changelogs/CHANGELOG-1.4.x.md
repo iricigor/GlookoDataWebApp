@@ -205,6 +205,13 @@ Version 1.4 focuses on advanced glucose analysis features, enhanced reporting ca
 ### Other
 
 <details>
+<summary>489 Update epic template with semicolon and visual sub-issue guidance</summary>
+
+[#489](../../pull/489) Update epic template with semicolon and visual sub-issue guidance
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>483 Add Epic issue template</summary>
 
 [#483](../../pull/483) Add Epic issue template
