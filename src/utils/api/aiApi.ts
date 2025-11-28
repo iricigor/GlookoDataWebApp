@@ -21,6 +21,27 @@ export type AIProvider = 'perplexity' | 'gemini' | 'grok' | 'deepseek';
 export type AIResult = PerplexityResult | GeminiResult | GrokResult | DeepSeekResult;
 
 /**
+ * Helper function to detect if an error is related to request size being too large
+ * @param errorMessage - The error message from the API
+ * @returns true if the error is related to request size
+ */
+export function isRequestTooLargeError(errorMessage: string | undefined): boolean {
+  if (!errorMessage) return false;
+  
+  const lowerMessage = errorMessage.toLowerCase();
+  return (
+    lowerMessage.includes('too large') ||
+    lowerMessage.includes('too long') ||
+    lowerMessage.includes('exceeds') ||
+    lowerMessage.includes('maximum') ||
+    lowerMessage.includes('limit') ||
+    lowerMessage.includes('token') && (lowerMessage.includes('limit') || lowerMessage.includes('exceed')) ||
+    lowerMessage.includes('payload') && lowerMessage.includes('large') ||
+    lowerMessage.includes('request') && lowerMessage.includes('size')
+  );
+}
+
+/**
  * Call the appropriate AI API based on provider selection
  * 
  * @param provider - The AI provider to use ('perplexity', 'gemini', 'grok', or 'deepseek')
