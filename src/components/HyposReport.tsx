@@ -155,7 +155,10 @@ const useStyles = makeStyles({
   },
   summaryValueSuccess: {
     color: tokens.colorPaletteGreenForeground1,
-    fontSize: tokens.fontSizeHero900,
+  },
+  summaryValueSmiley: {
+    color: tokens.colorPaletteGreenForeground1,
+    fontSize: tokens.fontSizeBase500,
   },
   summaryUnit: {
     fontSize: tokens.fontSizeBase200,
@@ -705,7 +708,7 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
                 <div className={styles.summaryContent}>
                   <Text className={styles.summaryLabel}>Total Hypo Time</Text>
                   <div className={styles.summaryValueRow}>
-                    <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSuccess)}>😊</Text>
+                    <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSmiley)}>😊</Text>
                   </div>
                 </div>
               </Card>
