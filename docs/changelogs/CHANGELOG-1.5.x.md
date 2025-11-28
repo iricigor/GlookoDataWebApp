@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>524 Add Azure Functions API deployment to workflow</summary>
+
+[#524](../../pull/524) Add Azure Functions API deployment to workflow
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>526 Fix CORS configuration in Set-GlookoAzureFunction</summary>
 
 [#526](../../pull/526) Fix CORS configuration in Set-GlookoAzureFunction
