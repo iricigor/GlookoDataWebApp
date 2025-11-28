@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>514 Refactor BGOverviewReport.tsx into modular components</summary>
+
+[#514](../../pull/514) Refactor BGOverviewReport.tsx into modular components
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>500 Add Azure Function deployment scripts (bash & PowerShell)</summary>
 
 [#500](../../pull/500) Add Azure Function deployment scripts (bash & PowerShell)
