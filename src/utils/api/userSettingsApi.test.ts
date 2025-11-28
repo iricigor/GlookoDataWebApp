@@ -88,6 +88,7 @@ describe('userSettingsApi', () => {
         success: false,
         error: 'Unauthorized access. Please log in again.',
         errorType: 'unauthorized',
+        statusCode: 401,
       });
     });
 
@@ -103,6 +104,7 @@ describe('userSettingsApi', () => {
         success: false,
         error: 'Unauthorized access. Please log in again.',
         errorType: 'unauthorized',
+        statusCode: 403,
       });
     });
 
@@ -118,6 +120,7 @@ describe('userSettingsApi', () => {
         success: false,
         error: 'Internal server error. The infrastructure may not be ready or there are access issues.',
         errorType: 'infrastructure',
+        statusCode: 500,
       });
     });
 
@@ -133,6 +136,7 @@ describe('userSettingsApi', () => {
         success: false,
         error: 'Internal server error. The infrastructure may not be ready or there are access issues.',
         errorType: 'infrastructure',
+        statusCode: 503,
       });
     });
 
@@ -149,6 +153,7 @@ describe('userSettingsApi', () => {
         success: false,
         error: 'Cannot connect to Table Storage',
         errorType: 'infrastructure',
+        statusCode: 400,
       });
     });
 
@@ -165,6 +170,7 @@ describe('userSettingsApi', () => {
         success: false,
         error: 'Database connection failed',
         errorType: 'infrastructure',
+        statusCode: 400,
       });
     });
 
@@ -181,6 +187,7 @@ describe('userSettingsApi', () => {
         success: false,
         error: 'Invalid request format',
         errorType: 'unknown',
+        statusCode: 400,
       });
     });
 
@@ -198,6 +205,7 @@ describe('userSettingsApi', () => {
         success: false,
         error: 'API error: 400 Bad Request',
         errorType: 'unknown',
+        statusCode: 400,
       });
     });
 
@@ -254,6 +262,7 @@ describe('userSettingsApi', () => {
         success: false,
         error: 'Error from message field',
         errorType: 'unknown',
+        statusCode: 400,
       });
     });
 
@@ -270,6 +279,27 @@ describe('userSettingsApi', () => {
         success: false,
         error: 'infrastructure error occurred',
         errorType: 'infrastructure',
+        statusCode: 400,
+      });
+    });
+
+    it('should use structured errorType from API response when available', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: () => Promise.resolve({ 
+          error: 'Some error message',
+          errorType: 'infrastructure' 
+        }),
+      });
+
+      const result = await checkFirstLogin('valid-token');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Some error message',
+        errorType: 'infrastructure',
+        statusCode: 400,
       });
     });
   });

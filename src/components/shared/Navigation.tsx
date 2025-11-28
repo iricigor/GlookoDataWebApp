@@ -112,6 +112,7 @@ export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }
     hasError,
     errorMessage,
     errorType,
+    statusCode,
     performCheck,
     resetState,
     clearError,
@@ -134,6 +135,12 @@ export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }
   const handleErrorClose = () => {
     clearError();
     acknowledgeLogin();
+  };
+
+  // Handle logout: reset first login check state, then logout
+  const handleLogout = async () => {
+    resetState();
+    await logout();
   };
 
   // Determine if we're in dark mode (either explicitly dark or system-dark)
@@ -225,7 +232,7 @@ export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }
                 userName={userName} 
                 userEmail={userEmail}
                 userPhoto={userPhoto}
-                onLogout={logout} 
+                onLogout={handleLogout} 
               />
             </>
           ) : (
@@ -247,6 +254,7 @@ export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }
         onClose={handleErrorClose}
         errorMessage={errorMessage || ''}
         errorType={errorType || 'unknown'}
+        statusCode={statusCode}
       />
     </>
   );

@@ -13,6 +13,8 @@ export interface FirstLoginCheckResult {
   isFirstLogin?: boolean;
   error?: string;
   errorType?: 'unauthorized' | 'infrastructure' | 'network' | 'unknown';
+  /** HTTP status code when available */
+  statusCode?: number;
 }
 
 /**
@@ -72,11 +74,14 @@ export async function checkFirstLogin(
 
     // Handle HTTP errors
     if (!response.ok) {
+      const statusCode = response.status;
+      
       if (response.status === 401 || response.status === 403) {
         return {
           success: false,
           error: 'Unauthorized access. Please log in again.',
           errorType: 'unauthorized',
+          statusCode,
         };
       }
 
@@ -86,6 +91,7 @@ export async function checkFirstLogin(
           success: false,
           error: 'Internal server error. The infrastructure may not be ready or there are access issues.',
           errorType: 'infrastructure',
+          statusCode,
         };
       }
 
@@ -94,28 +100,44 @@ export async function checkFirstLogin(
         const errorData = await response.json();
         const errorMessage = errorData.error || errorData.message || `API error: ${response.status}`;
         
-        // Check if the error indicates infrastructure issues
-        if (errorMessage.includes('Table') || 
-            errorMessage.includes('Storage') || 
-            errorMessage.includes('connection') ||
-            errorMessage.includes('infrastructure')) {
+        // Prefer structured error type/code from API response if available
+        const apiErrorType = errorData.errorType || errorData.code || errorData.type;
+        
+        if (apiErrorType === 'infrastructure') {
           return {
             success: false,
             error: errorMessage,
             errorType: 'infrastructure',
+            statusCode,
+          };
+        }
+        
+        // Fallback: substring matching only if no structured error type
+        if (!apiErrorType && (
+            errorMessage.includes('Table') || 
+            errorMessage.includes('Storage') || 
+            errorMessage.includes('connection') ||
+            errorMessage.includes('infrastructure'))) {
+          return {
+            success: false,
+            error: errorMessage,
+            errorType: 'infrastructure',
+            statusCode,
           };
         }
         
         return {
           success: false,
           error: errorMessage,
-          errorType: 'unknown',
+          errorType: apiErrorType || 'unknown',
+          statusCode,
         };
       } catch {
         return {
           success: false,
           error: `API error: ${response.status} ${response.statusText}`,
           errorType: 'unknown',
+          statusCode,
         };
       }
     }

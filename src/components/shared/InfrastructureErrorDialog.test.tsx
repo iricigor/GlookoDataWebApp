@@ -40,7 +40,7 @@ describe('InfrastructureErrorDialog', () => {
       />
     );
     
-    // Title appears in header and in the content
+    // Title appears in header
     expect(screen.getAllByText('Something went wrong').length).toBeGreaterThan(0);
   });
 
@@ -117,6 +117,22 @@ describe('InfrastructureErrorDialog', () => {
     );
     
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
+  });
+
+  it('should display error with status code when provided', () => {
+    const onClose = vi.fn();
+    renderWithProvider(
+      <InfrastructureErrorDialog 
+        open={true} 
+        onClose={onClose} 
+        errorMessage="Internal server error"
+        errorType="infrastructure"
+        statusCode={500}
+      />
+    );
+    
+    // Should show "Error 500: Internal server error"
+    expect(screen.getByText('Error 500: Internal server error')).toBeInTheDocument();
   });
 
   it('should call onClose when OK button is clicked', () => {

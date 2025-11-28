@@ -5,7 +5,7 @@
  * with the useAuth hook to trigger the check after successful login.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { checkFirstLogin, type FirstLoginCheckResult } from '../utils/api/userSettingsApi';
 
 /**
@@ -24,6 +24,8 @@ export interface FirstLoginCheckState {
   errorMessage: string | null;
   /** Type of error that occurred */
   errorType: 'unauthorized' | 'infrastructure' | 'network' | 'unknown' | null;
+  /** HTTP status code when available */
+  statusCode: number | null;
 }
 
 /**
@@ -48,6 +50,7 @@ const initialState: FirstLoginCheckState = {
   hasError: false,
   errorMessage: null,
   errorType: null,
+  statusCode: null,
 };
 
 /**
@@ -62,6 +65,10 @@ const initialState: FirstLoginCheckState = {
  */
 export function useFirstLoginCheck(): UseFirstLoginCheckReturn {
   const [state, setState] = useState<FirstLoginCheckState>(initialState);
+  
+  // Use refs to track check state to avoid stale closure issues
+  const isCheckingRef = useRef(false);
+  const hasCheckedRef = useRef(false);
 
   /**
    * Perform the first login check
@@ -69,10 +76,13 @@ export function useFirstLoginCheck(): UseFirstLoginCheckReturn {
    * @param accessToken - Access token from MSAL authentication
    */
   const performCheck = useCallback(async (accessToken: string) => {
-    // Don't check again if already checking or already checked
-    if (state.isChecking || state.hasChecked) {
+    // Don't check again if already checking or already checked (using refs for current values)
+    if (isCheckingRef.current || hasCheckedRef.current) {
       return;
     }
+
+    // Set refs immediately to prevent race conditions
+    isCheckingRef.current = true;
 
     setState(prev => ({
       ...prev,
@@ -80,10 +90,15 @@ export function useFirstLoginCheck(): UseFirstLoginCheckReturn {
       hasError: false,
       errorMessage: null,
       errorType: null,
+      statusCode: null,
     }));
 
     try {
       const result: FirstLoginCheckResult = await checkFirstLogin(accessToken);
+
+      // Mark as checked
+      hasCheckedRef.current = true;
+      isCheckingRef.current = false;
 
       if (result.success) {
         setState({
@@ -93,6 +108,7 @@ export function useFirstLoginCheck(): UseFirstLoginCheckReturn {
           hasError: false,
           errorMessage: null,
           errorType: null,
+          statusCode: null,
         });
       } else {
         setState({
@@ -102,9 +118,13 @@ export function useFirstLoginCheck(): UseFirstLoginCheckReturn {
           hasError: true,
           errorMessage: result.error ?? 'Unknown error occurred',
           errorType: result.errorType ?? 'unknown',
+          statusCode: result.statusCode ?? null,
         });
       }
     } catch (error) {
+      hasCheckedRef.current = true;
+      isCheckingRef.current = false;
+
       setState({
         isChecking: false,
         hasChecked: true,
@@ -112,15 +132,18 @@ export function useFirstLoginCheck(): UseFirstLoginCheckReturn {
         hasError: true,
         errorMessage: error instanceof Error ? error.message : 'Unexpected error occurred',
         errorType: 'unknown',
+        statusCode: null,
       });
     }
-  }, [state.isChecking, state.hasChecked]);
+  }, []); // No dependencies needed - using refs for mutable state
 
   /**
    * Reset the state to initial values
-   * Call this after the user acknowledges the welcome message
+   * Call this after the user acknowledges the welcome message or on logout
    */
   const resetState = useCallback(() => {
+    isCheckingRef.current = false;
+    hasCheckedRef.current = false;
     setState(initialState);
   }, []);
 
@@ -133,6 +156,7 @@ export function useFirstLoginCheck(): UseFirstLoginCheckReturn {
       hasError: false,
       errorMessage: null,
       errorType: null,
+      statusCode: null,
     }));
   }, []);
 

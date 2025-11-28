@@ -33,6 +33,7 @@ describe('useFirstLoginCheck', () => {
     expect(result.current.hasError).toBe(false);
     expect(result.current.errorMessage).toBeNull();
     expect(result.current.errorType).toBeNull();
+    expect(result.current.statusCode).toBeNull();
   });
 
   it('should set isChecking to true during check', async () => {

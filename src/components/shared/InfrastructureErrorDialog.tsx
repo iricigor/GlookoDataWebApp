@@ -77,6 +77,8 @@ interface InfrastructureErrorDialogProps {
   errorMessage: string;
   /** Type of error for appropriate messaging */
   errorType?: 'infrastructure' | 'network' | 'unauthorized' | 'unknown';
+  /** HTTP status code when available */
+  statusCode?: number | null;
 }
 
 /**
@@ -86,7 +88,8 @@ export function InfrastructureErrorDialog({
   open, 
   onClose, 
   errorMessage,
-  errorType = 'unknown' 
+  errorType = 'unknown',
+  statusCode
 }: InfrastructureErrorDialogProps) {
   const styles = useStyles();
 
@@ -111,6 +114,11 @@ export function InfrastructureErrorDialog({
       break;
   }
 
+  // Format error details with status code if available
+  const errorDetails = statusCode 
+    ? `Error ${statusCode}: ${errorMessage}`
+    : errorMessage;
+
   return (
     <Dialog open={open} onOpenChange={(_, data) => !data.open && onClose()}>
       <DialogSurface>
@@ -123,10 +131,9 @@ export function InfrastructureErrorDialog({
             <div className={styles.iconContainer}>
               <ErrorCircleRegular />
             </div>
-            <Text className={styles.title}>{title}</Text>
             <Text className={styles.message}>{description}</Text>
-            {errorMessage && (
-              <Text className={styles.errorDetails}>{errorMessage}</Text>
+            {errorDetails && (
+              <Text className={styles.errorDetails}>{errorDetails}</Text>
             )}
           </DialogContent>
         </DialogBody>
