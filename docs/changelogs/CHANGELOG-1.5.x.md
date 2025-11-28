@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>532 Refactor HyposReport.tsx into modular component structure</summary>
+
+[#532](../../pull/532) Refactor HyposReport.tsx into modular component structure
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>530 Fix API deployment permission error after Static Web App deploy</summary>
 
 [#530](../../pull/530) Fix API deployment permission error after Static Web App deploy
