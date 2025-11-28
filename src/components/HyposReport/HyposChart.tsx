@@ -36,6 +36,8 @@ import {
   HYPO_CHART_COLORS, 
   TIME_LABELS,
   type HyposChartProps,
+  type ScatterShapeProps,
+  type ChartTooltipProps,
 } from './types';
 
 export function HyposChart({
@@ -74,18 +76,7 @@ export function HyposChart({
   }, []);
 
   // Custom tooltip with Fluent UI styling
-  const CustomTooltip = ({ active, payload }: { 
-    active?: boolean; 
-    payload?: Array<{ 
-      payload: { 
-        time: string; 
-        value: number; 
-        originalValue: number;
-        rawValue?: number;
-        color?: string;
-      } 
-    }> 
-  }) => {
+  const CustomTooltip = ({ active, payload }: ChartTooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       const displayValue = data.originalValue > maxGlucose 
@@ -326,11 +317,12 @@ export function HyposChart({
                 dataKey="value"
                 fill={HYPO_CHART_COLORS.nadirDot}
                 shape={(props: unknown) => {
-                  const { cx, cy } = props as { cx: number; cy: number };
+                  // Recharts passes unknown props, safely extract position coordinates
+                  const shapeProps = props as ScatterShapeProps;
                   return (
                     <circle
-                      cx={cx}
-                      cy={cy}
+                      cx={shapeProps.cx}
+                      cy={shapeProps.cy}
                       r={6}
                       fill={HYPO_CHART_COLORS.nadirDot}
                       stroke={tokens.colorNeutralBackground1}

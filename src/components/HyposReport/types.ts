@@ -100,3 +100,30 @@ export interface HyposChartProps {
  * Currently no props needed, but interface defined for extensibility
  */
 export type HyposChartLegendProps = Record<string, never>;
+
+/**
+ * Recharts scatter shape props with position coordinates
+ */
+export interface ScatterShapeProps {
+  cx: number;
+  cy: number;
+}
+
+/**
+ * Tooltip payload data structure for chart tooltips
+ */
+export interface TooltipPayloadData {
+  time: string;
+  value: number;
+  originalValue: number;
+  rawValue?: number;
+  color?: string;
+}
+
+/**
+ * Props for the custom chart tooltip component
+ */
+export interface ChartTooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: TooltipPayloadData }>;
+}
