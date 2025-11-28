@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>522 Fix Install-GlookoDeploymentModule to download all public functions</summary>
+
+[#522](../../pull/522) Fix Install-GlookoDeploymentModule to download all public functions
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>517 Add deployment verification scripts for Azure resources</summary>
 
 [#517](../../pull/517) Add deployment verification scripts for Azure resources
