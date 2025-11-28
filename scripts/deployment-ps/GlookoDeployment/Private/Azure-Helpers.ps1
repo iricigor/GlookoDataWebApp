@@ -1,50 +1,34 @@
 #Requires -Version 7.4
+#Requires -Modules Az.Accounts, Az.Resources, Az.Storage, Az.Functions, Az.KeyVault, Az.ManagedServiceIdentity
 
 <#
 .SYNOPSIS
-    Private helper functions for Azure CLI validation
+    Private helper functions for Azure PowerShell validation
 
 .DESCRIPTION
-    These functions validate Azure CLI installation and authentication.
+    These functions validate Azure PowerShell module availability and authentication.
     
-    This module uses Azure CLI (az) instead of Azure PowerShell cmdlets because:
-    1. Azure CLI is pre-installed in Azure Cloud Shell (primary target environment)
-    2. Consistent syntax between bash and PowerShell versions of scripts
-    3. Azure CLI has better cross-platform support for local development
-    4. Easier to maintain single set of Azure commands across both script types
+    This module uses native Azure PowerShell cmdlets (Az module) for:
+    1. Native PowerShell experience in Azure Cloud Shell PowerShell flavor
+    2. Better integration with PowerShell objects and pipeline
+    3. Consistent with PowerShell best practices
+    4. Full support for PowerShell error handling and verbose output
     
     PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
     Reference: https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle
 #>
 
-function Test-AzureCli {
+function Test-AzureConnection {
     <#
     .SYNOPSIS
-        Tests if Azure CLI is installed and available
+        Tests if Az module is available and user is logged in to Azure
     #>
     [CmdletBinding()]
     param()
     
     try {
-        $null = & az --version 2>&1
-        return $true
-    }
-    catch {
-        return $false
-    }
-}
-
-function Test-AzureLogin {
-    <#
-    .SYNOPSIS
-        Tests if user is logged in to Azure
-    #>
-    [CmdletBinding()]
-    param()
-    
-    try {
-        $account = & az account show --output json 2>&1 | ConvertFrom-Json
-        return $null -ne $account.id
+        $context = Get-AzContext -ErrorAction Stop
+        return $null -ne $context -and $null -ne $context.Account
     }
     catch {
         return $false
@@ -81,26 +65,26 @@ function Test-AzureResource {
     try {
         $result = switch ($ResourceType) {
             'storage' {
-                & az storage account show --name $Name --resource-group $ResourceGroup --output json 2>&1
+                Get-AzStorageAccount -ResourceGroupName $ResourceGroup -Name $Name -ErrorAction Stop
             }
             'functionapp' {
-                & az functionapp show --name $Name --resource-group $ResourceGroup --output json 2>&1
+                Get-AzFunctionApp -ResourceGroupName $ResourceGroup -Name $Name -ErrorAction Stop
             }
             'keyvault' {
-                & az keyvault show --name $Name --resource-group $ResourceGroup --output json 2>&1
+                Get-AzKeyVault -ResourceGroupName $ResourceGroup -VaultName $Name -ErrorAction Stop
             }
             'identity' {
-                & az identity show --name $Name --resource-group $ResourceGroup --output json 2>&1
+                Get-AzUserAssignedIdentity -ResourceGroupName $ResourceGroup -Name $Name -ErrorAction Stop
             }
             'staticwebapp' {
-                & az staticwebapp show --name $Name --resource-group $ResourceGroup --output json 2>&1
+                Get-AzStaticWebApp -ResourceGroupName $ResourceGroup -Name $Name -ErrorAction Stop
             }
             'group' {
-                & az group show --name $Name --output json 2>&1
+                Get-AzResourceGroup -Name $Name -ErrorAction Stop
             }
         }
         
-        return $LASTEXITCODE -eq 0
+        return $null -ne $result
     }
     catch {
         return $false
@@ -139,19 +123,16 @@ function Initialize-GlookoResourceGroup {
     else {
         Write-InfoMessage "Creating resource group '$Name' in '$Location'..."
         
-        $tagString = if ($Tags) {
-            ($Tags.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join ' '
-        }
-        else {
-            ""
+        $params = @{
+            Name     = $Name
+            Location = $Location
         }
         
-        if ($tagString) {
-            & az group create --name $Name --location $Location --tags $tagString --output none
+        if ($Tags -and $Tags.Count -gt 0) {
+            $params['Tag'] = $Tags
         }
-        else {
-            & az group create --name $Name --location $Location --output none
-        }
+        
+        New-AzResourceGroup @params | Out-Null
         
         Write-SuccessMessage "Resource group created"
     }

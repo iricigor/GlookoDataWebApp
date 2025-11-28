@@ -7,7 +7,7 @@
 
     # Version number of this module
     # NOTE: Bump this version when adding/updating scripts (see copilot-instructions.md)
-    ModuleVersion = '1.0.1'
+    ModuleVersion = '1.1.0'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -28,6 +28,17 @@
     # PowerShell 7.4+ required for security (earlier versions have known vulnerabilities)
     # Reference: https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle
     PowerShellVersion = '7.4'
+
+    # Modules that must be imported into the global environment prior to importing this module
+    RequiredModules = @(
+        @{ ModuleName = 'Az.Accounts'; ModuleVersion = '2.0.0' }
+        @{ ModuleName = 'Az.Resources'; ModuleVersion = '6.0.0' }
+        @{ ModuleName = 'Az.Storage'; ModuleVersion = '5.0.0' }
+        @{ ModuleName = 'Az.Functions'; ModuleVersion = '4.0.0' }
+        @{ ModuleName = 'Az.KeyVault'; ModuleVersion = '4.0.0' }
+        @{ ModuleName = 'Az.ManagedServiceIdentity'; ModuleVersion = '1.0.0' }
+        @{ ModuleName = 'Az.Websites'; ModuleVersion = '3.0.0' }
+    )
 
     # Functions to export from this module
     FunctionsToExport = @(
@@ -68,7 +79,11 @@
             ProjectUri = 'https://github.com/iricigor/GlookoDataWebApp'
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'Initial release with Azure Function App deployment support'
+            ReleaseNotes = @"
+v1.1.0 - Migrated from Azure CLI to native Az PowerShell cmdlets
+v1.0.1 - Added versioning guidelines, PowerShell 7.4+ requirement
+v1.0.0 - Initial release with Azure Function App deployment support
+"@
         }
     }
 }

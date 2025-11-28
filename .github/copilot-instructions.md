@@ -1055,18 +1055,14 @@ When adding or updating deployment scripts:
    - MINOR: New scripts/functions added
    - MAJOR: Breaking changes to existing scripts
 
-### Why Azure CLI Instead of Azure PowerShell Cmdlets
+### Script Language Alignment
 
-The PowerShell scripts use Azure CLI (`az`) instead of Azure PowerShell cmdlets for these reasons:
-1. **Azure Cloud Shell compatibility** - Azure CLI is pre-installed in Azure Cloud Shell
-2. **Consistency** - Same syntax between bash and PowerShell versions of scripts
-3. **Cross-platform** - Better support for local development on Windows, macOS, and Linux
-4. **Maintainability** - Single set of Azure commands to maintain across both script types
+- **Bash scripts** (`deployment-cli/`): Use Azure CLI (`az`) commands for portability
+- **PowerShell module** (`deployment-ps/`): Use native Az PowerShell cmdlets for native experience
 
-To use Azure PowerShell cmdlets instead, you would replace commands like:
-- `az functionapp create` → `New-AzFunctionApp`
-- `az identity show` → `Get-AzUserAssignedIdentity`
-- `az role assignment create` → `New-AzRoleAssignment`
+This separation allows:
+1. **Bash scripts**: Use Azure CLI for consistency with shell scripting
+2. **PowerShell module**: Use Az cmdlets which are pre-installed in Azure Cloud Shell (PowerShell flavor)
 
 ### Configuration System
 

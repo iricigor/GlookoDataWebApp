@@ -5,8 +5,25 @@ This directory contains the GlookoDeployment PowerShell module for deploying Azu
 ## Prerequisites
 
 - PowerShell 7.4 or later (required for security - earlier versions have known vulnerabilities)
-- Azure CLI installed and logged in (`az login`)
+- Az PowerShell modules (installed automatically in Azure Cloud Shell PowerShell)
+- Connected to Azure (`Connect-AzAccount`)
 - Appropriate permissions to create Azure resources
+
+### Required Az Modules
+
+The module requires the following Az PowerShell modules:
+- Az.Accounts
+- Az.Resources
+- Az.Storage
+- Az.Functions
+- Az.KeyVault
+- Az.ManagedServiceIdentity
+- Az.Websites
+
+These are pre-installed in Azure Cloud Shell (PowerShell flavor). For local use:
+```powershell
+Install-Module -Name Az -Scope CurrentUser -Repository PSGallery -Force
+```
 
 ## Quick Start
 
@@ -39,6 +56,9 @@ iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/script
 Once installed, import the module to use its functions:
 
 ```powershell
+# Connect to Azure (if not in Cloud Shell)
+Connect-AzAccount
+
 # Import the module
 Import-Module GlookoDeployment
 
@@ -172,7 +192,7 @@ GlookoDeployment/
 │   └── Invoke-GlookoDeployment.ps1
 └── Private/                      # Internal functions
     ├── Output-Functions.ps1     # Output formatting
-    └── Azure-Helpers.ps1        # Azure CLI helpers
+    └── Azure-Helpers.ps1        # Azure PowerShell helpers
 ```
 
 ## Security Notes
@@ -188,15 +208,15 @@ GlookoDeployment/
 
 ### Common Issues
 
-1. **"Azure CLI not installed"**
-   - Install Azure CLI: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
-   - Or use Azure Cloud Shell which has Azure CLI pre-installed
+1. **"Az module not found"**
+   - Install Az module: `Install-Module -Name Az -Scope CurrentUser`
+   - Or use Azure Cloud Shell (PowerShell flavor) which has Az modules pre-installed
 
-2. **"Not logged in to Azure"**
-   - Run `az login` to authenticate
+2. **"Not connected to Azure"**
+   - Run `Connect-AzAccount` to authenticate
 
 3. **"Module not found"**
-   - Ensure PowerShell 7.0+ is installed
+   - Ensure PowerShell 7.4+ is installed
    - Run the installer again with `-Force`
 
 4. **"Storage account not found"**

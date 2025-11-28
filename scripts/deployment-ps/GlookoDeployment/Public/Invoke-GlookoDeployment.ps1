@@ -1,4 +1,5 @@
 #Requires -Version 7.4
+#Requires -Modules Az.Accounts, Az.Resources, Az.Storage, Az.Functions, Az.KeyVault, Az.ManagedServiceIdentity
 
 <#
 .SYNOPSIS
@@ -37,8 +38,8 @@
     Shows what would be deployed without deploying.
 
 .NOTES
-    Requires Azure CLI to be installed and logged in.
-    Run in Azure Cloud Shell for best experience.
+    Requires Az PowerShell modules to be installed.
+    Run in Azure Cloud Shell (PowerShell) for best experience.
 #>
 function Invoke-GlookoDeployment {
     [CmdletBinding()]
@@ -76,15 +77,10 @@ function Invoke-GlookoDeployment {
             if (-not $SkipPrerequisites) {
                 Write-SectionHeader "Checking Prerequisites"
                 
-                if (-not (Test-AzureCli)) {
-                    throw "Azure CLI is not available. Please install Azure CLI."
+                if (-not (Test-AzureConnection)) {
+                    throw "Not connected to Azure. Please run 'Connect-AzAccount'"
                 }
-                Write-SuccessMessage "Azure CLI is installed"
-                
-                if (-not (Test-AzureLogin)) {
-                    throw "Not logged in to Azure. Please run 'az login'"
-                }
-                Write-SuccessMessage "Logged in to Azure"
+                Write-SuccessMessage "Connected to Azure"
                 
                 # Validate configuration
                 if (-not (Test-GlookoConfig)) {

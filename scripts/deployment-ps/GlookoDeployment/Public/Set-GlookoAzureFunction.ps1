@@ -1,4 +1,5 @@
 #Requires -Version 7.4
+#Requires -Modules Az.Accounts, Az.Resources, Az.Storage, Az.Functions, Az.KeyVault, Az.ManagedServiceIdentity
 
 <#
 .SYNOPSIS
@@ -9,17 +10,11 @@
     GlookoDataWebApp application. The function app serves as the API backend
     for the Static Web App. It is idempotent and safe to run multiple times.
     
-    This script uses Azure CLI (az) instead of Azure PowerShell cmdlets because:
-    1. Azure CLI is pre-installed in Azure Cloud Shell (primary target environment)
-    2. Consistent syntax between bash and PowerShell versions of scripts
-    3. Azure CLI has better cross-platform support for local development
-    4. Easier to maintain single set of Azure commands across both script types
-    
-    To use Azure PowerShell cmdlets instead, you would replace:
-    - `az functionapp create` → `New-AzFunctionApp`
-    - `az identity show` → `Get-AzUserAssignedIdentity`
-    - `az role assignment create` → `New-AzRoleAssignment`
-    - etc.
+    This script uses native Azure PowerShell cmdlets (Az module) for:
+    1. Native PowerShell experience in Azure Cloud Shell PowerShell flavor
+    2. Better integration with PowerShell objects and pipeline
+    3. Consistent with PowerShell best practices
+    4. Full support for PowerShell error handling and verbose output
 
 .PARAMETER Name
     The name of the function app. If not provided, uses value from configuration.
@@ -60,8 +55,8 @@
     Creates a function app with user-assigned managed identity configured.
 
 .NOTES
-    Requires Azure CLI to be installed and logged in.
-    Run in Azure Cloud Shell for best experience.
+    Requires Az PowerShell modules to be installed.
+    Run in Azure Cloud Shell (PowerShell) for best experience.
     
     PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
     Reference: https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle
@@ -124,15 +119,10 @@ function Set-GlookoAzureFunction {
             # Check prerequisites
             Write-SectionHeader "Checking Prerequisites"
             
-            if (-not (Test-AzureCli)) {
-                throw "Azure CLI is not available. Please install Azure CLI."
+            if (-not (Test-AzureConnection)) {
+                throw "Not connected to Azure. Please run 'Connect-AzAccount'"
             }
-            Write-SuccessMessage "Azure CLI is installed"
-            
-            if (-not (Test-AzureLogin)) {
-                throw "Not logged in to Azure. Please run 'az login'"
-            }
-            Write-SuccessMessage "Logged in to Azure"
+            Write-SuccessMessage "Connected to Azure"
             
             # Verify storage account exists
             if (-not (Test-AzureResource -ResourceType 'storage' -Name $storageName -ResourceGroup $rg)) {
@@ -178,21 +168,26 @@ function Set-GlookoAzureFunction {
             else {
                 Write-InfoMessage "Creating function app '$functionName'..."
                 
-                & az functionapp create `
-                    --name $functionName `
-                    --resource-group $rg `
-                    --storage-account $storageName `
-                    --consumption-plan-location $loc `
-                    --runtime $Runtime `
-                    --runtime-version $RuntimeVersion `
-                    --functions-version "4" `
-                    --os-type "Linux" `
-                    --tags Application=GlookoDataWebApp Environment=Production ManagedBy=AzureDeploymentScripts `
-                    --output none
+                # Get storage account for connection
+                $storageAccount = Get-AzStorageAccount -ResourceGroupName $rg -Name $storageName
                 
-                if ($LASTEXITCODE -ne 0) {
-                    throw "Failed to create function app"
+                $functionAppParams = @{
+                    Name                       = $functionName
+                    ResourceGroupName          = $rg
+                    Location                   = $loc
+                    StorageAccountName         = $storageName
+                    Runtime                    = $Runtime
+                    RuntimeVersion             = $RuntimeVersion
+                    FunctionsVersion           = '4'
+                    OSType                     = 'Linux'
+                    Tag                        = @{
+                        Application = "GlookoDataWebApp"
+                        Environment = "Production"
+                        ManagedBy   = "AzureDeploymentScripts"
+                    }
                 }
+                
+                New-AzFunctionApp @functionAppParams | Out-Null
                 
                 Write-SuccessMessage "Function app created successfully"
                 $created = $true
@@ -209,28 +204,22 @@ function Set-GlookoAzureFunction {
             # - Created automatically with the resource
             # - Tied to the resource lifecycle (deleted when resource is deleted)
             # - To use system-assigned, you would:
-            #   - Use `az functionapp identity assign --name $functionName --resource-group $rg` (no --identities param)
+            #   - Use Update-AzFunctionApp -IdentityType SystemAssigned
             #   - Get principal ID from the response to assign RBAC roles
             # - Security: Both types are equally secure; choice depends on management preference
             if ($useMI -and $miExists) {
                 Write-SectionHeader "Configuring User-Assigned Managed Identity"
                 
-                # Get managed identity resource ID (user-assigned identity)
-                $identityId = & az identity show `
-                    --name $identityName `
-                    --resource-group $rg `
-                    --query id `
-                    --output tsv
+                # Get managed identity
+                $identity = Get-AzUserAssignedIdentity -ResourceGroupName $rg -Name $identityName
+                $identityId = $identity.Id
+                $principalId = $identity.PrincipalId
+                $clientId = $identity.ClientId
                 
                 Write-InfoMessage "Assigning user-assigned managed identity to function app..."
                 
                 # Assign user-assigned managed identity to the function app
-                # The --identities parameter specifies user-assigned identity (vs system-assigned)
-                & az functionapp identity assign `
-                    --name $functionName `
-                    --resource-group $rg `
-                    --identities $identityId `
-                    --output none
+                Update-AzFunctionApp -Name $functionName -ResourceGroupName $rg -IdentityType UserAssigned -IdentityId $identityId | Out-Null
                 
                 Write-SuccessMessage "User-assigned managed identity assigned"
                 
@@ -238,76 +227,60 @@ function Set-GlookoAzureFunction {
                 if (-not $SkipRbacAssignment) {
                     Write-SectionHeader "Configuring RBAC Roles"
                     
-                    # Get principal ID
-                    $principalId = & az identity show `
-                        --name $identityName `
-                        --resource-group $rg `
-                        --query principalId `
-                        --output tsv
-                    
                     # Get storage account ID
-                    $storageId = & az storage account show `
-                        --name $storageName `
-                        --resource-group $rg `
-                        --query id `
-                        --output tsv
+                    $storageAccount = Get-AzStorageAccount -ResourceGroupName $rg -Name $storageName
+                    $storageId = $storageAccount.Id
                     
                     # Assign Storage Table Data Contributor
                     Write-InfoMessage "Assigning 'Storage Table Data Contributor' role..."
-                    $result = & az role assignment create `
-                        --assignee $principalId `
-                        --role "Storage Table Data Contributor" `
-                        --scope $storageId `
-                        --output json 2>&1
-                    if ($LASTEXITCODE -eq 0) {
-                        Write-SuccessMessage "Storage Table Data Contributor role assigned"
+                    try {
+                        $existingAssignment = Get-AzRoleAssignment -ObjectId $principalId -RoleDefinitionName "Storage Table Data Contributor" -Scope $storageId -ErrorAction SilentlyContinue
+                        if ($existingAssignment) {
+                            Write-WarningMessage "Storage Table Data Contributor role already assigned"
+                        }
+                        else {
+                            New-AzRoleAssignment -ObjectId $principalId -RoleDefinitionName "Storage Table Data Contributor" -Scope $storageId | Out-Null
+                            Write-SuccessMessage "Storage Table Data Contributor role assigned"
+                        }
                     }
-                    elseif ($result -match "already exists") {
-                        Write-WarningMessage "Storage Table Data Contributor role already assigned"
-                    }
-                    else {
-                        Write-WarningMessage "Failed to assign Storage Table Data Contributor role"
+                    catch {
+                        Write-WarningMessage "Failed to assign Storage Table Data Contributor role: $_"
                     }
                     
                     # Assign Storage Blob Data Contributor
                     Write-InfoMessage "Assigning 'Storage Blob Data Contributor' role..."
-                    $result = & az role assignment create `
-                        --assignee $principalId `
-                        --role "Storage Blob Data Contributor" `
-                        --scope $storageId `
-                        --output json 2>&1
-                    if ($LASTEXITCODE -eq 0) {
-                        Write-SuccessMessage "Storage Blob Data Contributor role assigned"
+                    try {
+                        $existingAssignment = Get-AzRoleAssignment -ObjectId $principalId -RoleDefinitionName "Storage Blob Data Contributor" -Scope $storageId -ErrorAction SilentlyContinue
+                        if ($existingAssignment) {
+                            Write-WarningMessage "Storage Blob Data Contributor role already assigned"
+                        }
+                        else {
+                            New-AzRoleAssignment -ObjectId $principalId -RoleDefinitionName "Storage Blob Data Contributor" -Scope $storageId | Out-Null
+                            Write-SuccessMessage "Storage Blob Data Contributor role assigned"
+                        }
                     }
-                    elseif ($result -match "already exists") {
-                        Write-WarningMessage "Storage Blob Data Contributor role already assigned"
-                    }
-                    else {
-                        Write-WarningMessage "Failed to assign Storage Blob Data Contributor role"
+                    catch {
+                        Write-WarningMessage "Failed to assign Storage Blob Data Contributor role: $_"
                     }
                     
                     # Assign Key Vault access if KV exists
                     if ($kvExists) {
-                        $kvId = & az keyvault show `
-                            --name $keyVaultName `
-                            --resource-group $rg `
-                            --query id `
-                            --output tsv
+                        $keyVault = Get-AzKeyVault -ResourceGroupName $rg -VaultName $keyVaultName
+                        $kvId = $keyVault.ResourceId
                         
                         Write-InfoMessage "Assigning 'Key Vault Secrets User' role..."
-                        $result = & az role assignment create `
-                            --assignee $principalId `
-                            --role "Key Vault Secrets User" `
-                            --scope $kvId `
-                            --output json 2>&1
-                        if ($LASTEXITCODE -eq 0) {
-                            Write-SuccessMessage "Key Vault Secrets User role assigned"
+                        try {
+                            $existingAssignment = Get-AzRoleAssignment -ObjectId $principalId -RoleDefinitionName "Key Vault Secrets User" -Scope $kvId -ErrorAction SilentlyContinue
+                            if ($existingAssignment) {
+                                Write-WarningMessage "Key Vault Secrets User role already assigned"
+                            }
+                            else {
+                                New-AzRoleAssignment -ObjectId $principalId -RoleDefinitionName "Key Vault Secrets User" -Scope $kvId | Out-Null
+                                Write-SuccessMessage "Key Vault Secrets User role assigned"
+                            }
                         }
-                        elseif ($result -match "already exists") {
-                            Write-WarningMessage "Key Vault Secrets User role already assigned"
-                        }
-                        else {
-                            Write-WarningMessage "Failed to assign Key Vault Secrets User role"
+                        catch {
+                            Write-WarningMessage "Failed to assign Key Vault Secrets User role: $_"
                         }
                     }
                 }
@@ -316,33 +289,22 @@ function Set-GlookoAzureFunction {
             # Configure app settings
             Write-SectionHeader "Configuring Application Settings"
             
-            $settings = @()
+            $appSettings = @{
+                "CORS_ALLOWED_ORIGINS" = $webAppUrl
+            }
             
             if ($useMI -and $miExists) {
-                $clientId = & az identity show `
-                    --name $identityName `
-                    --resource-group $rg `
-                    --query clientId `
-                    --output tsv
-                
-                $settings += "AZURE_CLIENT_ID=$clientId"
-                $settings += "STORAGE_ACCOUNT_NAME=$storageName"
+                $appSettings["AZURE_CLIENT_ID"] = $clientId
+                $appSettings["STORAGE_ACCOUNT_NAME"] = $storageName
                 
                 if ($kvExists) {
-                    $settings += "KEY_VAULT_NAME=$keyVaultName"
+                    $appSettings["KEY_VAULT_NAME"] = $keyVaultName
                 }
             }
             
-            $settings += "CORS_ALLOWED_ORIGINS=$webAppUrl"
-            
-            if ($settings.Count -gt 0) {
+            if ($appSettings.Count -gt 0) {
                 Write-InfoMessage "Setting application configuration..."
-                & az functionapp config appsettings set `
-                    --name $functionName `
-                    --resource-group $rg `
-                    --settings @settings `
-                    --output none
-                
+                Update-AzFunctionAppSetting -Name $functionName -ResourceGroupName $rg -AppSetting $appSettings | Out-Null
                 Write-SuccessMessage "Application settings configured"
             }
 
@@ -350,20 +312,25 @@ function Set-GlookoAzureFunction {
             Write-SectionHeader "Configuring CORS"
             
             Write-InfoMessage "Setting CORS allowed origins..."
-            & az functionapp cors add `
-                --name $functionName `
-                --resource-group $rg `
-                --allowed-origins $webAppUrl `
-                --output none 2>$null
+            # Get current web app configuration
+            $webApp = Get-AzWebApp -ResourceGroupName $rg -Name $functionName
+            $corsSettings = $webApp.SiteConfig.Cors
+            
+            if ($null -eq $corsSettings) {
+                $corsSettings = New-Object Microsoft.Azure.Management.WebSites.Models.CorsSettings
+                $corsSettings.AllowedOrigins = @($webAppUrl)
+            }
+            elseif ($corsSettings.AllowedOrigins -notcontains $webAppUrl) {
+                $corsSettings.AllowedOrigins += $webAppUrl
+            }
+            
+            Set-AzWebApp -ResourceGroupName $rg -Name $functionName -CorsAllowedOrigin @($webAppUrl) | Out-Null
             
             Write-SuccessMessage "CORS configured for $webAppUrl"
 
             # Get function app URL
-            $functionUrl = & az functionapp show `
-                --name $functionName `
-                --resource-group $rg `
-                --query defaultHostName `
-                --output tsv
+            $functionApp = Get-AzFunctionApp -ResourceGroupName $rg -Name $functionName
+            $functionUrl = $functionApp.DefaultHostName
 
             # Display summary
             Write-SectionHeader "Deployment Summary"
