@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>528 Add resource group deployment scripts for bash and PowerShell</summary>
+
+[#528](../../pull/528) Add resource group deployment scripts for bash and PowerShell
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>524 Add Azure Functions API deployment to workflow</summary>
 
 [#524](../../pull/524) Add Azure Functions API deployment to workflow
