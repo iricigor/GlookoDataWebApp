@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>513 Add Azure Storage Account deployment scripts</summary>
+
+[#513](../../pull/513) Add Azure Storage Account deployment scripts
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>512 Add managed identity deployment scripts</summary>
 
 [#512](../../pull/512) Add managed identity deployment scripts
