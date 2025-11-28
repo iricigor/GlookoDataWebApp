@@ -37,6 +37,7 @@ cd scripts/deployment-cli
 |--------|-------------|
 | `config-lib.sh` | Shared configuration library (sourced by other scripts) |
 | `config.template.json` | Configuration template with default values |
+| `deploy-azure-storage-account.sh` | Deploys Azure Storage Account |
 | `deploy-azure-managed-identity.sh` | Deploys User-Assigned Managed Identity |
 | `deploy-azure-function.sh` | Deploys Azure Function App with managed identity |
 
@@ -85,6 +86,28 @@ Or use the `--save` flag to save current settings:
 
 ## Script Details
 
+### deploy-azure-storage-account.sh
+
+Creates and configures an Azure Storage Account for the GlookoDataWebApp application.
+
+**Features:**
+- Creates a StorageV2 account with secure defaults
+- Configures TLS 1.2 minimum
+- Disables public blob access
+- Enables blob soft delete for data protection
+
+**Options:**
+```
+  -h, --help              Show help message
+  -n, --name NAME         Storage account name
+  -g, --resource-group RG Resource group name
+  -l, --location LOCATION Azure region
+  -c, --config FILE       Custom configuration file path
+  -s, --save              Save configuration after deployment
+  -v, --verbose           Enable verbose output
+  --sku SKU               Storage SKU (Standard_LRS, Standard_GRS, etc.)
+  --kind KIND             Storage kind (StorageV2, BlobStorage, etc.)
+  --access-tier TIER      Access tier (Hot, Cool)
 ### deploy-azure-managed-identity.sh
 
 Creates and configures a user-assigned managed identity for passwordless authentication across Azure resources.
@@ -108,6 +131,18 @@ Creates and configures a user-assigned managed identity for passwordless authent
 **Examples:**
 ```bash
 # Deploy with defaults
+./deploy-azure-storage-account.sh
+
+# Deploy with custom name and location
+./deploy-azure-storage-account.sh --name mystorageacct --location westus2
+
+# Deploy with geo-redundant storage
+./deploy-azure-storage-account.sh --sku Standard_GRS
+
+# Deploy and save configuration
+./deploy-azure-storage-account.sh --save
+```
+
 ./deploy-azure-managed-identity.sh
 
 # Deploy with custom name and location

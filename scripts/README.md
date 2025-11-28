@@ -8,25 +8,10 @@ This directory contains utility scripts and tools for the GlookoDataWebApp proje
 scripts/
 ├── README.md                        # This file
 ├── deployment-cli/                  # Bash scripts for Azure deployment
-│   ├── config-lib.sh               # Shared configuration library
-│   ├── config.template.json        # Configuration template
-│   ├── deploy-azure-function.sh    # Azure Function App deployment
-│   └── README.md                   # Bash scripts documentation
+│   └── ...                         # See deployment-cli/README.md
 ├── deployment-ps/                   # PowerShell module for Azure deployment
-│   ├── GlookoDeployment/           # PowerShell module
-│   │   ├── GlookoDeployment.psd1   # Module manifest
-│   │   ├── GlookoDeployment.psm1   # Module loader
-│   │   ├── Public/                 # Exported functions
-│   │   └── Private/                # Internal helper functions
-│   ├── Install-GlookoDeploymentModule.ps1  # One-liner installer
-│   └── README.md                   # PowerShell module documentation
-├── capture-screenshots.ts           # Screenshot capture tool
-├── generate-demo-data.js            # Demo data generator
-├── generate-demo-from-real-data.js
-├── generate-german-demo-data.js
-├── test-demo-loading.mjs
-├── test-german-demo-data.mjs
-└── test-german-import-e2e.mjs
+│   └── ...                         # See deployment-ps/README.md
+└── ...                             # Other utility scripts
 ```
 
 ## 🚀 Azure Deployment Scripts
@@ -38,7 +23,12 @@ Scripts for deploying Azure infrastructure for GlookoDataWebApp.
 Run in Azure Cloud Shell or any environment with Azure CLI:
 
 ```bash
-# Download and run
+# Deploy Storage Account
+curl -o deploy-azure-storage-account.sh https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-cli/deploy-azure-storage-account.sh
+chmod +x deploy-azure-storage-account.sh
+./deploy-azure-storage-account.sh
+
+# Deploy Function App
 curl -o deploy-azure-function.sh https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-cli/deploy-azure-function.sh
 chmod +x deploy-azure-function.sh
 ./deploy-azure-function.sh
@@ -53,6 +43,9 @@ Install and use the GlookoDeployment module:
 ```powershell
 # One-liner install
 iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
+
+# Deploy Storage Account
+Set-GlookoStorageAccount
 
 # Deploy Azure Function
 Set-GlookoAzureFunction
