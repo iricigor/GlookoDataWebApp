@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>530 Fix API deployment permission error after Static Web App deploy</summary>
+
+[#530](../../pull/530) Fix API deployment permission error after Static Web App deploy
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>528 Add resource group deployment scripts for bash and PowerShell</summary>
 
 [#528](../../pull/528) Add resource group deployment scripts for bash and PowerShell
