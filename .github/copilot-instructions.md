@@ -994,6 +994,556 @@ When adding a new AI prompt tab, ensure you have:
 
 ---
 
+## Azure Infrastructure Deployment Scripts
+
+This section provides guidelines for creating and maintaining Azure deployment scripts for GlookoDataWebApp infrastructure. The scripts are designed to run in Azure Cloud Shell (both bash and PowerShell) and follow consistent patterns.
+
+### Core Requirements
+
+All Azure deployment scripts must follow these requirements:
+
+1. **Azure CLI Compatibility** - Scripts must run in Azure Cloud Shell using Azure CLI commands
+2. **Dual Language Support** - Provide both bash and PowerShell versions for each script
+3. **Idempotent Execution** - Scripts must be safe to run multiple times without side effects
+4. **Complete Configuration** - Each script fully configures its target resource
+5. **Single Resource Focus** - One script creates/modifies only one resource type
+6. **Self-Sufficient** - If dependent on existing resources, fetch required properties automatically
+7. **Configuration File Support** - Load values from config file if not provided as parameters
+
+### Scripts Required for Azure Infrastructure
+
+The following scripts are needed for the complete Azure infrastructure:
+
+| Resource Type | Bash Script | PowerShell Function |
+|--------------|-------------|---------------------|
+| Storage Account | `deploy-azure-storage-account.sh` | `Set-GlookoStorageAccount` |
+| Table Storage (UserSettings) | `deploy-azure-user-settings-table.sh` | `Set-GlookoTableStorage` |
+| Table Storage (ProUsers) | `deploy-azure-pro-users-table.sh` | `Set-GlookoTableStorage` |
+| Key Vault | `deploy-azure-key-vault.sh` | `Set-GlookoKeyVault` |
+| Azure Function | `deploy-azure-function.sh` | `Set-GlookoAzureFunction` |
+| Managed Identity | `deploy-azure-managed-identity.sh` | `Set-GlookoManagedIdentity` |
+| Static Web App | `deploy-azure-static-web-app.sh` | `Set-GlookoStaticWebApp` |
+| App Registration | `deploy-azure-app-registration.sh` | `Set-GlookoAppRegistration` |
+| Verification Test | `test-azure-resources.sh` | `Test-GlookoDeployment` |
+
+### Directory Structure
+
+```
+scripts/
+├── deployment-cli/           # Bash scripts for Azure CLI
+│   ├── config-lib.sh         # Shared configuration library
+│   ├── config.template.json  # Configuration template
+│   ├── deploy-azure-master.sh
+│   ├── deploy-azure-storage-account.sh
+│   ├── deploy-azure-user-settings-table.sh
+│   ├── deploy-azure-pro-users-table.sh
+│   ├── deploy-azure-key-vault.sh
+│   ├── deploy-azure-function.sh
+│   ├── deploy-azure-managed-identity.sh
+│   ├── deploy-azure-static-web-app.sh
+│   ├── deploy-azure-app-registration.sh
+│   ├── test-azure-resources.sh
+│   └── README.md
+├── deployment-ps/            # PowerShell module and scripts
+│   ├── GlookoDeployment/     # PowerShell module
+│   │   ├── GlookoDeployment.psd1  # Module manifest
+│   │   ├── GlookoDeployment.psm1  # Module loader
+│   │   ├── Public/           # Exported functions
+│   │   │   ├── Set-GlookoStorageAccount.ps1
+│   │   │   ├── Set-GlookoTableStorage.ps1
+│   │   │   ├── Set-GlookoKeyVault.ps1
+│   │   │   ├── Set-GlookoAzureFunction.ps1
+│   │   │   ├── Set-GlookoManagedIdentity.ps1
+│   │   │   ├── Set-GlookoStaticWebApp.ps1
+│   │   │   ├── Set-GlookoAppRegistration.ps1
+│   │   │   ├── Invoke-GlookoDeployment.ps1
+│   │   │   ├── Get-GlookoConfig.ps1
+│   │   │   ├── Set-GlookoConfig.ps1
+│   │   │   └── Test-GlookoDeployment.ps1
+│   │   └── Private/          # Internal helper functions
+│   │       ├── Write-GlookoMessage.ps1
+│   │       ├── Test-AzureCli.ps1
+│   │       └── Initialize-GlookoResourceGroup.ps1
+│   ├── Install-GlookoDeploymentModule.ps1  # One-liner installer
+│   └── README.md
+└── README.md                 # Main scripts directory overview
+```
+
+### Configuration System
+
+#### Configuration File Location
+
+All scripts use a centralized configuration file at: `~/.glookodata/config.json`
+
+This location persists in Azure Cloud Shell across sessions.
+
+#### Configuration Precedence
+
+Configuration values are resolved in this order (highest to lowest priority):
+
+1. **Command-line arguments** (highest priority)
+   ```bash
+   ./deploy-azure-storage-account.sh --name myaccount --location westus2
+   ```
+
+2. **Environment variables**
+   ```bash
+   LOCATION=westus2 STORAGE_ACCOUNT_NAME=myaccount ./deploy-azure-storage-account.sh
+   ```
+
+3. **Configuration file** (`~/.glookodata/config.json`)
+   ```json
+   {
+     "location": "eastus",
+     "storageAccountName": "glookodatawebappstorage"
+   }
+   ```
+
+4. **Script defaults** (lowest priority)
+
+#### Configuration File Schema
+
+```json
+{
+  "resourceGroup": "glookodatawebapp-rg",
+  "location": "eastus",
+  "appName": "glookodatawebapp",
+  "storageAccountName": "glookodatawebappstorage",
+  "managedIdentityName": "glookodatawebapp-identity",
+  "staticWebAppName": "glookodatawebapp-swa",
+  "staticWebAppSku": "Standard",
+  "keyVaultName": "glookodatawebapp-kv",
+  "functionAppName": "glookodatawebapp-func",
+  "webAppUrl": "https://glooko.iric.online",
+  "appRegistrationName": "GlookoDataWebApp",
+  "signInAudience": "PersonalMicrosoftAccount",
+  "useManagedIdentity": true,
+  "tags": {
+    "Application": "GlookoDataWebApp",
+    "Environment": "Production",
+    "ManagedBy": "AzureDeploymentScripts"
+  }
+}
+```
+
+### Bash Script Template
+
+All bash scripts should follow this template:
+
+```bash
+#!/bin/bash
+
+################################################################################
+# Azure [Resource Name] Deployment Script
+# 
+# This script creates and configures [resource description] for the
+# GlookoDataWebApp application.
+#
+# Prerequisites:
+#   - Run this script in Azure Cloud Shell (bash) or with Azure CLI installed
+#   - Must have appropriate permissions to create resources
+#   - [List any dependent resources]
+#
+# Usage:
+#   ./deploy-azure-[resource].sh [OPTIONS]
+#
+# Options:
+#   -h, --help              Show this help message
+#   -n, --name NAME         Resource name (default from config)
+#   -g, --resource-group RG Resource group name (default from config)
+#   -l, --location LOCATION Azure region (default from config)
+#   -c, --config FILE       Custom configuration file path
+#   -s, --save              Save configuration after deployment
+#   -v, --verbose           Enable verbose output
+#
+# Examples:
+#   ./deploy-azure-[resource].sh
+#   ./deploy-azure-[resource].sh --name my-resource --location westus2
+#
+################################################################################
+
+set -e  # Exit on error
+set -u  # Exit on undefined variable
+
+# Get script directory for sourcing config-lib
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source configuration library
+if [ -f "${SCRIPT_DIR}/config-lib.sh" ]; then
+    source "${SCRIPT_DIR}/config-lib.sh"
+else
+    echo "ERROR: config-lib.sh not found in ${SCRIPT_DIR}"
+    exit 1
+fi
+
+################################################################################
+# ARGUMENT PARSING
+################################################################################
+
+show_help() {
+    cat << EOF
+[Script description and usage details]
+EOF
+}
+
+parse_arguments() {
+    SAVE_CONFIG=false
+    VERBOSE=false
+    
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            # Add more argument cases
+            *)
+                print_error "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+    done
+}
+
+################################################################################
+# RESOURCE DEPLOYMENT FUNCTIONS
+################################################################################
+
+# Check if resource exists (idempotent check)
+check_existing_resource() {
+    # Implementation
+}
+
+# Create or update the resource
+create_resource() {
+    print_section "Creating [Resource Name]"
+    
+    # Check existing
+    if resource_exists "[type]" "${RESOURCE_NAME}" "${RESOURCE_GROUP}"; then
+        print_warning "Resource already exists"
+        RESOURCE_EXISTS=true
+    else
+        # Create resource
+        az [command] create \
+            --name "${RESOURCE_NAME}" \
+            --resource-group "${RESOURCE_GROUP}" \
+            --location "${LOCATION}" \
+            --tags ${CONFIG_TAGS}
+        
+        print_success "Resource created successfully"
+        RESOURCE_EXISTS=false
+    fi
+}
+
+# Display deployment summary
+display_summary() {
+    print_section "Deployment Summary"
+    
+    print_success "[Resource] configured successfully!"
+    # Display details
+}
+
+################################################################################
+# MAIN EXECUTION
+################################################################################
+
+main() {
+    parse_arguments "$@"
+    load_config
+    
+    print_section "Azure [Resource] Deployment"
+    
+    check_prerequisites
+    ensure_resource_group
+    create_resource
+    
+    save_configuration
+    display_summary
+    
+    print_section "Deployment Complete"
+}
+
+main "$@"
+```
+
+### PowerShell Function Template
+
+All PowerShell public functions should follow this template:
+
+```powershell
+#Requires -Version 7.0
+
+<#
+.SYNOPSIS
+    Creates or updates Azure [Resource] for GlookoDataWebApp.
+
+.DESCRIPTION
+    This function creates and configures [resource description] for the
+    GlookoDataWebApp application. It is idempotent and safe to run multiple times.
+
+.PARAMETER Name
+    The name of the resource. If not provided, uses value from configuration.
+
+.PARAMETER ResourceGroup
+    The Azure resource group name. If not provided, uses value from configuration.
+
+.PARAMETER Location
+    The Azure region. If not provided, uses value from configuration.
+
+.PARAMETER UseManagedIdentity
+    Configure the resource to use managed identity for authentication.
+
+.EXAMPLE
+    Set-GlookoResource
+
+.EXAMPLE
+    Set-GlookoResource -Name "my-resource" -Location "westus2"
+
+.EXAMPLE
+    Set-GlookoResource -UseManagedIdentity
+
+.NOTES
+    Requires Azure CLI to be installed and logged in.
+    Run in Azure Cloud Shell for best experience.
+#>
+function Set-GlookoResource {
+    [CmdletBinding()]
+    [Alias("Set-GR")]  # Short alias using capital letters
+    param(
+        [Parameter()]
+        [string]$Name,
+
+        [Parameter()]
+        [string]$ResourceGroup,
+
+        [Parameter()]
+        [string]$Location,
+
+        [Parameter()]
+        [switch]$UseManagedIdentity
+    )
+
+    begin {
+        Write-InfoMessage "Starting [Resource] deployment..."
+        
+        # Load configuration
+        $config = Get-GlookoConfig
+        
+        # Apply configuration precedence
+        $resourceName = if ($Name) { $Name } else { $config.resourceName }
+        $rg = if ($ResourceGroup) { $ResourceGroup } else { $config.resourceGroup }
+        $loc = if ($Location) { $Location } else { $config.location }
+    }
+
+    process {
+        try {
+            # Check prerequisites
+            if (-not (Test-AzureCli)) {
+                throw "Azure CLI is not available"
+            }
+
+            # Ensure resource group exists
+            Initialize-GlookoResourceGroup -Name $rg -Location $loc
+
+            # Check if resource exists (idempotent)
+            $existing = az [command] show --name $resourceName --resource-group $rg 2>$null
+            if ($existing) {
+                Write-WarningMessage "Resource '$resourceName' already exists"
+                $created = $false
+            }
+            else {
+                # Create resource
+                Write-InfoMessage "Creating resource: $resourceName"
+                $result = az [command] create `
+                    --name $resourceName `
+                    --resource-group $rg `
+                    --location $loc `
+                    --output json | ConvertFrom-Json
+
+                Write-SuccessMessage "Resource created successfully"
+                $created = $true
+            }
+
+            # Return deployment details
+            return @{
+                Name = $resourceName
+                ResourceGroup = $rg
+                Location = $loc
+                Created = $created
+            }
+        }
+        catch {
+            Write-ErrorMessage "Failed to create resource: $_"
+            throw
+        }
+    }
+
+    end {
+        Write-InfoMessage "Deployment complete"
+    }
+}
+```
+
+### Shared Configuration Library (Bash)
+
+The `config-lib.sh` file provides shared functionality:
+
+```bash
+# Output functions
+print_info()    # Blue info message with ℹ️
+print_success() # Green success message with ✅
+print_warning() # Yellow warning message with ⚠️
+print_error()   # Red error message with ❌
+print_section() # Section header with separator lines
+
+# Configuration functions
+get_config_value()      # Get value from JSON config
+load_config()           # Load all config with precedence
+save_config_value()     # Save value to config file
+ensure_config_dir()     # Create config directory if needed
+
+# Azure validation
+check_azure_cli()       # Verify Azure CLI is available
+check_azure_login()     # Verify user is logged in
+check_prerequisites()   # Run all prerequisite checks
+
+# Resource management
+ensure_resource_group() # Create resource group if needed
+resource_exists()       # Check if resource exists
+
+# Managed identity
+get_managed_identity_id()           # Get client ID
+get_managed_identity_principal_id() # Get principal ID
+```
+
+### Key Vault Script Guidelines
+
+For the Key Vault deployment script specifically:
+
+1. **Secret Management**:
+   - Script should create the Key Vault but only add dummy/placeholder secrets
+   - Real secrets are added manually by the administrator
+   - Document which secrets are expected
+
+2. **Access Control**:
+   - Use RBAC for access control (not access policies)
+   - Script creator should have write access
+   - Application should have read-only access via managed identity
+
+3. **Example Usage**:
+   ```bash
+   ./deploy-azure-key-vault.sh
+   # Then manually:
+   az keyvault secret set --vault-name mykeyvault --name "ApiKey" --value "actual-secret-value"
+   ```
+
+### Azure Function Script Guidelines
+
+For the Azure Function deployment script:
+
+1. **Managed Identity Integration**:
+   - Assign user-assigned managed identity to the function
+   - Configure RBAC roles for Storage Account access
+   - Configure RBAC roles for Key Vault access
+
+2. **Required Configuration**:
+   ```bash
+   # Function app should have:
+   # - Managed identity assigned
+   # - Storage Table Data Contributor on Storage Account
+   # - Key Vault Secrets User on Key Vault
+   ```
+
+3. **Application Settings**:
+   - Configure connection to Storage Account (via managed identity)
+   - Configure connection to Key Vault (via managed identity)
+
+### Test Script Guidelines
+
+The test script should verify:
+
+1. **Resource Existence**:
+   - All expected resources exist
+   - Resources are in the expected resource group
+
+2. **Access Verification**:
+   - Managed identity has proper RBAC roles
+   - Function app can access Storage Account
+   - Function app can read from Key Vault
+
+3. **Output Format**:
+   ```
+   ✅ Storage Account: exists
+   ✅ Key Vault: exists
+   ✅ Function App: exists
+   ✅ Managed Identity: exists
+   ✅ Storage access: verified
+   ✅ Key Vault access: verified
+   
+   All checks passed!
+   ```
+
+### Best Practices
+
+1. **Security**:
+   - Never store secrets in scripts or config files
+   - Use managed identity for authentication when possible
+   - Apply least-privilege access principles
+
+2. **Idempotency**:
+   - Always check if resource exists before creating
+   - Use `--tags` for resource tracking
+   - Handle "already exists" gracefully
+
+3. **Error Handling**:
+   - Use `set -e` in bash scripts
+   - Provide clear error messages
+   - Include troubleshooting tips in output
+
+4. **Documentation**:
+   - Include header with usage examples
+   - Document all parameters
+   - Provide next steps after deployment
+
+5. **Testing**:
+   - Test scripts in clean environment
+   - Test idempotency (run twice)
+   - Test with different configuration sources
+
+### Installation
+
+#### Bash Scripts (Direct Download)
+
+```bash
+# Download master script
+curl -o deploy-azure-master.sh https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-cli/deploy-azure-master.sh
+chmod +x deploy-azure-master.sh
+
+# Deploy all resources
+./deploy-azure-master.sh --all
+```
+
+#### PowerShell Module (One-liner Install)
+
+```powershell
+# Install from GitHub
+iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
+
+# Or local install
+./Install-GlookoDeploymentModule.ps1 -LocalPath ./GlookoDeployment
+
+# Deploy all resources
+Invoke-GlookoDeployment -All
+```
+
+### Related Documentation
+
+- [DEPLOYMENT.md](../docs/DEPLOYMENT.md) - Comprehensive deployment guide
+- [scripts/deployment-cli/README.md](../scripts/deployment-cli/README.md) - Bash scripts documentation
+- [scripts/deployment-ps/README.md](../scripts/deployment-ps/README.md) - PowerShell module documentation
+
+---
+
 ## Questions or Issues?
 
 - Check existing code patterns in the repository
