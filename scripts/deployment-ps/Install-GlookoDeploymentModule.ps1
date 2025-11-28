@@ -30,6 +30,10 @@
     iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
 
 .EXAMPLE
+    # Force reinstall from GitHub (one-liner)
+    $env:GLOOKO_INSTALL_FORCE=1; iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
+
+.EXAMPLE
     # Install from local path
     ./Install-GlookoDeploymentModule.ps1 -LocalPath ./GlookoDeployment
 
@@ -58,6 +62,14 @@ $ModuleName = 'GlookoDeployment'
 $GitHubRepo = 'iricigor/GlookoDataWebApp'
 $GitHubBasePath = "scripts/deployment-ps/GlookoDeployment"
 
+# Support -Force via environment variable for iex (irm ...) usage
+# When using iex, parameters can't be passed directly, so use $env:GLOOKO_INSTALL_FORCE=1
+if ($env:GLOOKO_INSTALL_FORCE) {
+    $Force = $true
+    # Clear the environment variable after reading it
+    $env:GLOOKO_INSTALL_FORCE = $null
+}
+
 # Simple output functions (standalone - not using module's functions since module isn't installed yet)
 function Write-InstallInfo { param($Message) Write-Host "ℹ️  $Message" -ForegroundColor Cyan }
 function Write-InstallSuccess { param($Message) Write-Host "✅ $Message" -ForegroundColor Green }
@@ -82,7 +94,7 @@ Write-Host ""
 # Check if module already exists
 if ((Test-Path $InstallPath) -and -not $Force) {
     Write-InstallWarning "Module already installed at: $InstallPath"
-    Write-InstallInfo "Use -Force to overwrite"
+    Write-InstallInfo 'Use -Force to overwrite, or for iex usage: $env:GLOOKO_INSTALL_FORCE=1; iex (irm ...)'
     return
 }
 

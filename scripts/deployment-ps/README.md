@@ -42,6 +42,9 @@ $script | Out-File -FilePath .\Install-GlookoDeploymentModule.ps1
 
 # Option 2: Direct installation (for trusted environments only)
 iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
+
+# Option 3: Force reinstall (overwrite existing installation)
+$env:GLOOKO_INSTALL_FORCE=1; iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/scripts/deployment-ps/Install-GlookoDeploymentModule.ps1)
 ```
 
 #### Local Install
@@ -49,6 +52,9 @@ iex (irm https://raw.githubusercontent.com/iricigor/GlookoDataWebApp/main/script
 ```powershell
 # From the repository
 ./Install-GlookoDeploymentModule.ps1 -LocalPath ./GlookoDeployment
+
+# Force reinstall from local path
+./Install-GlookoDeploymentModule.ps1 -LocalPath ./GlookoDeployment -Force
 ```
 
 ### After Installation
@@ -91,6 +97,7 @@ Invoke-GlookoDeployment -All
 | Function | Alias | Description |
 |----------|-------|-------------|
 | `Set-GlookoStorageAccount` | `Set-GSA` | Deploy Azure Storage Account |
+| `Set-GlookoTableStorage` | `Set-GTS` | Deploy Azure Storage Tables with optional managed identity RBAC |
 | `Set-GlookoManagedIdentity` | `Set-GMI` | Deploy User-Assigned Managed Identity |
 | `Set-GlookoAzureFunction` | `Set-GAF` | Deploy Azure Function App |
 | `Invoke-GlookoDeployment` | `Invoke-GD` | Orchestrate full deployment |
@@ -144,14 +151,6 @@ Creates and configures an Azure Storage Account.
 - `-Sku` - Storage SKU: Standard_LRS, Standard_GRS, etc. (default: Standard_LRS)
 - `-Kind` - Storage kind: StorageV2, BlobStorage, etc. (default: StorageV2)
 - `-AccessTier` - Access tier: Hot, Cool (default: Hot)
-### Set-GlookoManagedIdentity
-
-Creates and configures a user-assigned managed identity for passwordless authentication.
-
-**Parameters:**
-- `-Name` - Managed identity name (optional, uses config)
-- `-ResourceGroup` - Resource group (optional, uses config)
-- `-Location` - Azure region (optional, uses config)
 
 **Examples:**
 ```powershell
@@ -166,6 +165,52 @@ Set-GlookoStorageAccount -Sku "Standard_GRS"
 
 # Deploy with cool access tier
 Set-GlookoStorageAccount -AccessTier "Cool"
+```
+
+### Set-GlookoTableStorage
+
+Creates Azure Storage Tables inside an existing Storage Account. Optionally assigns RBAC roles to a managed identity if one uniquely exists in the resource group.
+
+**Parameters:**
+- `-StorageAccountName` - Storage account name (optional, uses config)
+- `-ResourceGroup` - Resource group (optional, uses config)
+- `-TableNames` - Array of table names to create (default: @('UserSettings', 'ProUsers'))
+- `-AssignIdentity` - Assign Storage Table Data Contributor role to managed identity
+
+**Examples:**
+```powershell
+# Deploy with defaults (creates UserSettings and ProUsers tables)
+Set-GlookoTableStorage
+
+# Deploy with custom storage account
+Set-GlookoTableStorage -StorageAccountName "mystorageacct"
+
+# Create custom tables
+Set-GlookoTableStorage -TableNames @('CustomTable1', 'CustomTable2')
+
+# Deploy and assign RBAC to managed identity
+Set-GlookoTableStorage -AssignIdentity
+
+# Use alias
+Set-GTS -AssignIdentity
+```
+
+**Prerequisites:**
+- Storage Account must exist (run Set-GlookoStorageAccount first)
+- For RBAC assignment: Managed Identity should exist (run Set-GlookoManagedIdentity)
+
+### Set-GlookoManagedIdentity
+
+Creates and configures a user-assigned managed identity for passwordless authentication.
+
+**Parameters:**
+- `-Name` - Managed identity name (optional, uses config)
+- `-ResourceGroup` - Resource group (optional, uses config)
+- `-Location` - Azure region (optional, uses config)
+
+**Examples:**
+```powershell
+# Deploy with defaults
 Set-GlookoManagedIdentity
 
 # Deploy with custom name and location
@@ -272,6 +317,7 @@ GlookoDeployment/
 ├── Public/                       # Exported functions
 │   ├── Config-Functions.ps1     # Configuration management
 │   ├── Set-GlookoStorageAccount.ps1
+│   ├── Set-GlookoTableStorage.ps1
 │   ├── Set-GlookoManagedIdentity.ps1
 │   ├── Set-GlookoAzureFunction.ps1
 │   ├── Invoke-GlookoDeployment.ps1
@@ -303,7 +349,7 @@ GlookoDeployment/
 
 3. **"Module not found"**
    - Ensure PowerShell 7.4+ is installed
-   - Run the installer again with `-Force`
+   - Run the installer again with `-Force` (or `$env:GLOOKO_INSTALL_FORCE=1` for iex usage)
 
 4. **"Storage account not found"**
    - Create the storage account first

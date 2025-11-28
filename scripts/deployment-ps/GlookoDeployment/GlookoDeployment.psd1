@@ -47,6 +47,7 @@
         'Test-GlookoConfig',
         'Initialize-GlookoConfig',
         'Set-GlookoStorageAccount',
+        'Set-GlookoTableStorage',
         'Set-GlookoManagedIdentity',
         'Set-GlookoAzureFunction',
         'Invoke-GlookoDeployment',
@@ -60,6 +61,7 @@
         'Test-GC',
         'Initialize-GC',
         'Set-GSA',
+        'Set-GTS',
         'Set-GMI',
         'Set-GAF',
         'Invoke-GD',
@@ -86,7 +88,8 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
-v1.0.4 - Added Test-GlookoDeployment for verifying Azure deployment state
+v1.0.5 - Added Test-GlookoDeployment for verifying Azure deployment state
+v1.0.4 - Added Set-GlookoTableStorage for Azure Storage Tables deployment with managed identity RBAC support
 v1.0.3 - Added Set-GlookoStorageAccount for Azure Storage Account deployment
 v1.0.2 - Added Set-GlookoManagedIdentity function for creating user-assigned managed identities
 v1.0.1 - Migrated from Azure CLI to native Az PowerShell cmdlets, added versioning guidelines, PowerShell 7.4+ requirement

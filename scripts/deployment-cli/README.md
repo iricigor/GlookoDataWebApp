@@ -38,6 +38,7 @@ cd scripts/deployment-cli
 | `config-lib.sh` | Shared configuration library (sourced by other scripts) |
 | `config.template.json` | Configuration template with default values |
 | `deploy-azure-storage-account.sh` | Deploys Azure Storage Account |
+| `deploy-azure-storage-tables.sh` | Deploys Azure Storage Tables with optional managed identity RBAC |
 | `deploy-azure-managed-identity.sh` | Deploys User-Assigned Managed Identity |
 | `deploy-azure-function.sh` | Deploys Azure Function App with managed identity |
 | `test-azure-resources.sh` | Verifies deployment state of all Azure resources |
@@ -109,6 +110,68 @@ Creates and configures an Azure Storage Account for the GlookoDataWebApp applica
   --sku SKU               Storage SKU (Standard_LRS, Standard_GRS, etc.)
   --kind KIND             Storage kind (StorageV2, BlobStorage, etc.)
   --access-tier TIER      Access tier (Hot, Cool)
+```
+
+**Examples:**
+```bash
+# Deploy with defaults
+./deploy-azure-storage-account.sh
+
+# Deploy with custom name and location
+./deploy-azure-storage-account.sh --name mystorageacct --location westus2
+
+# Deploy with geo-redundant storage
+./deploy-azure-storage-account.sh --sku Standard_GRS
+
+# Deploy and save configuration
+./deploy-azure-storage-account.sh --save
+```
+
+### deploy-azure-storage-tables.sh
+
+Creates Azure Storage Tables inside an existing Storage Account. Optionally assigns RBAC roles to a managed identity if one uniquely exists in the resource group.
+
+**Features:**
+- Creates UserSettings and ProUsers tables by default
+- Supports custom table names via `--table` option
+- Assigns Storage Table Data Contributor role to managed identity
+- Automatically detects unique managed identity in resource group
+- Idempotent - safe to run multiple times
+
+**Options:**
+```
+  -h, --help                  Show help message
+  -a, --storage-account NAME  Storage account name
+  -g, --resource-group RG     Resource group name
+  -c, --config FILE           Custom configuration file path
+  -s, --save                  Save configuration after deployment
+  -v, --verbose               Enable verbose output
+  --table NAME                Create specific table (can be repeated)
+  --assign-identity           Assign RBAC to managed identity if uniquely exists
+```
+
+**Examples:**
+```bash
+# Deploy with defaults (creates UserSettings and ProUsers tables)
+./deploy-azure-storage-tables.sh
+
+# Deploy with custom storage account
+./deploy-azure-storage-tables.sh --storage-account mystorageacct
+
+# Create specific tables
+./deploy-azure-storage-tables.sh --table CustomTable1 --table CustomTable2
+
+# Deploy and assign RBAC to managed identity
+./deploy-azure-storage-tables.sh --assign-identity
+
+# Deploy with custom settings and RBAC assignment
+./deploy-azure-storage-tables.sh --storage-account mystorageacct --assign-identity --save
+```
+
+**Prerequisites:**
+- Storage Account must exist (run deploy-azure-storage-account.sh first)
+- For RBAC assignment: Managed Identity should exist (run deploy-azure-managed-identity.sh)
+
 ### deploy-azure-managed-identity.sh
 
 Creates and configures a user-assigned managed identity for passwordless authentication across Azure resources.
@@ -132,18 +195,6 @@ Creates and configures a user-assigned managed identity for passwordless authent
 **Examples:**
 ```bash
 # Deploy with defaults
-./deploy-azure-storage-account.sh
-
-# Deploy with custom name and location
-./deploy-azure-storage-account.sh --name mystorageacct --location westus2
-
-# Deploy with geo-redundant storage
-./deploy-azure-storage-account.sh --sku Standard_GRS
-
-# Deploy and save configuration
-./deploy-azure-storage-account.sh --save
-```
-
 ./deploy-azure-managed-identity.sh
 
 # Deploy with custom name and location
