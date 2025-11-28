@@ -8,26 +8,10 @@ This directory contains utility scripts and tools for the GlookoDataWebApp proje
 scripts/
 ├── README.md                        # This file
 ├── deployment-cli/                  # Bash scripts for Azure deployment
-│   ├── config-lib.sh               # Shared configuration library
-│   ├── config.template.json        # Configuration template
-│   ├── deploy-azure-storage-account.sh  # Azure Storage Account deployment
-│   ├── deploy-azure-function.sh    # Azure Function App deployment
-│   └── README.md                   # Bash scripts documentation
+│   └── ...                         # See deployment-cli/README.md
 ├── deployment-ps/                   # PowerShell module for Azure deployment
-│   ├── GlookoDeployment/           # PowerShell module
-│   │   ├── GlookoDeployment.psd1   # Module manifest
-│   │   ├── GlookoDeployment.psm1   # Module loader
-│   │   ├── Public/                 # Exported functions
-│   │   └── Private/                # Internal helper functions
-│   ├── Install-GlookoDeploymentModule.ps1  # One-liner installer
-│   └── README.md                   # PowerShell module documentation
-├── capture-screenshots.ts           # Screenshot capture tool
-├── generate-demo-data.js            # Demo data generator
-├── generate-demo-from-real-data.js
-├── generate-german-demo-data.js
-├── test-demo-loading.mjs
-├── test-german-demo-data.mjs
-└── test-german-import-e2e.mjs
+│   └── ...                         # See deployment-ps/README.md
+└── ...                             # Other utility scripts
 ```
 
 ## 🚀 Azure Deployment Scripts
