@@ -70,7 +70,7 @@ export function useFirstLoginCheck(): UseFirstLoginCheckReturn {
    */
   const performCheck = useCallback(async (accessToken: string) => {
     // Don't check again if already checking or already checked
-    if (state.isChecking) {
+    if (state.isChecking || state.hasChecked) {
       return;
     }
 
@@ -114,7 +114,7 @@ export function useFirstLoginCheck(): UseFirstLoginCheckReturn {
         errorType: 'unknown',
       });
     }
-  }, [state.isChecking]);
+  }, [state.isChecking, state.hasChecked]);
 
   /**
    * Reset the state to initial values

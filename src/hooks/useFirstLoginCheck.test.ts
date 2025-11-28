@@ -259,6 +259,32 @@ describe('useFirstLoginCheck', () => {
     expect(mockCheckFirstLogin).toHaveBeenCalledTimes(1);
   });
 
+  it('should not make duplicate calls after check has completed', async () => {
+    mockCheckFirstLogin.mockResolvedValue({
+      success: true,
+      isFirstLogin: true,
+    });
+
+    const { result } = renderHook(() => useFirstLoginCheck());
+    
+    // First check
+    await act(async () => {
+      await result.current.performCheck('test-token');
+    });
+    
+    await waitFor(() => {
+      expect(result.current.hasChecked).toBe(true);
+    });
+    
+    // Try to start second check after first has completed
+    await act(async () => {
+      await result.current.performCheck('test-token');
+    });
+    
+    // Should only have been called once
+    expect(mockCheckFirstLogin).toHaveBeenCalledTimes(1);
+  });
+
   it('should handle undefined isFirstLogin in response', async () => {
     mockCheckFirstLogin.mockResolvedValueOnce({
       success: true,

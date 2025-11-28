@@ -138,15 +138,6 @@ export async function checkFirstLogin(
       };
     }
 
-    // For 404 errors (API endpoint not deployed yet), treat as infrastructure error
-    if (error instanceof Error && error.message.includes('404')) {
-      return {
-        success: false,
-        error: 'API endpoint not available. The infrastructure may not be deployed yet.',
-        errorType: 'infrastructure',
-      };
-    }
-
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',

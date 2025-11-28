@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PublicClientApplication } from '@azure/msal-browser';
 import type { AccountInfo } from '@azure/msal-browser';
 import { msalConfig, loginRequest } from '../config/msalConfig';
@@ -33,9 +33,6 @@ export function useAuth() {
   });
   const [isInitialized, setIsInitialized] = useState(false);
   const [justLoggedIn, setJustLoggedIn] = useState(false);
-  
-  // Track if this is a fresh login vs. restoring a session
-  const isFreshLoginRef = useRef(false);
 
   // Initialize MSAL and check for existing authentication
   useEffect(() => {
@@ -50,7 +47,6 @@ export function useAuth() {
           // User just logged in via redirect - this is a fresh login
           const account = response.account;
           if (account) {
-            isFreshLoginRef.current = true;
             await updateAuthState(account, response.accessToken);
             setJustLoggedIn(true);
           }
@@ -66,8 +62,7 @@ export function useAuth() {
                 ...loginRequest,
                 account: account,
               });
-              // This is restoring a session, not a fresh login
-              isFreshLoginRef.current = false;
+              // This is restoring a session, not a fresh login - don't set justLoggedIn
               await updateAuthState(account, tokenResponse.accessToken);
             } catch (error) {
               // If silent token acquisition fails, user needs to login again
@@ -136,7 +131,6 @@ export function useAuth() {
       
       if (response && response.account) {
         // This is a fresh login via popup
-        isFreshLoginRef.current = true;
         await updateAuthState(response.account, response.accessToken);
         setJustLoggedIn(true);
       }
@@ -166,7 +160,6 @@ export function useAuth() {
         accessToken: null,
       });
       setJustLoggedIn(false);
-      isFreshLoginRef.current = false;
 
       // Logout from Microsoft
       if (account) {
@@ -180,7 +173,6 @@ export function useAuth() {
   // Clear the justLoggedIn flag after it has been consumed
   const acknowledgeLogin = useCallback(() => {
     setJustLoggedIn(false);
-    isFreshLoginRef.current = false;
   }, []);
 
   return {
