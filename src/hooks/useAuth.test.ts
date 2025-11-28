@@ -115,8 +115,93 @@ describe('useAuth', () => {
     expect(result.current).toHaveProperty('userName');
     expect(result.current).toHaveProperty('userEmail');
     expect(result.current).toHaveProperty('userPhoto');
+    expect(result.current).toHaveProperty('accessToken');
     expect(result.current).toHaveProperty('isInitialized');
+    expect(result.current).toHaveProperty('justLoggedIn');
     expect(result.current).toHaveProperty('login');
     expect(result.current).toHaveProperty('logout');
+    expect(result.current).toHaveProperty('acknowledgeLogin');
+  });
+
+  it('should set justLoggedIn to true after login', async () => {
+    const { result } = renderHook(() => useAuth());
+    
+    await waitFor(() => {
+      expect(result.current.isInitialized).toBe(true);
+    });
+    
+    expect(result.current.justLoggedIn).toBe(false);
+    
+    await act(async () => {
+      await result.current.login();
+    });
+    
+    await waitFor(() => {
+      expect(result.current.justLoggedIn).toBe(true);
+    });
+  });
+
+  it('should clear justLoggedIn when acknowledgeLogin is called', async () => {
+    const { result } = renderHook(() => useAuth());
+    
+    await waitFor(() => {
+      expect(result.current.isInitialized).toBe(true);
+    });
+    
+    await act(async () => {
+      await result.current.login();
+    });
+    
+    await waitFor(() => {
+      expect(result.current.justLoggedIn).toBe(true);
+    });
+    
+    act(() => {
+      result.current.acknowledgeLogin();
+    });
+    
+    expect(result.current.justLoggedIn).toBe(false);
+  });
+
+  it('should provide access token after login', async () => {
+    const { result } = renderHook(() => useAuth());
+    
+    await waitFor(() => {
+      expect(result.current.isInitialized).toBe(true);
+    });
+    
+    expect(result.current.accessToken).toBeNull();
+    
+    await act(async () => {
+      await result.current.login();
+    });
+    
+    await waitFor(() => {
+      expect(result.current.accessToken).toBe('test-access-token');
+    });
+  });
+
+  it('should clear accessToken on logout', async () => {
+    const { result } = renderHook(() => useAuth());
+    
+    await waitFor(() => {
+      expect(result.current.isInitialized).toBe(true);
+    });
+    
+    await act(async () => {
+      await result.current.login();
+    });
+    
+    await waitFor(() => {
+      expect(result.current.accessToken).toBe('test-access-token');
+    });
+    
+    await act(async () => {
+      await result.current.logout();
+    });
+    
+    await waitFor(() => {
+      expect(result.current.accessToken).toBeNull();
+    });
   });
 });

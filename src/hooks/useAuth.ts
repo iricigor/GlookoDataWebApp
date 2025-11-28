@@ -13,6 +13,7 @@ export interface AuthState {
   userEmail: string | null;
   userPhoto: string | null;
   account: AccountInfo | null;
+  accessToken: string | null;
 }
 
 /**
@@ -28,8 +29,10 @@ export function useAuth() {
     userEmail: null,
     userPhoto: null,
     account: null,
+    accessToken: null,
   });
   const [isInitialized, setIsInitialized] = useState(false);
+  const [justLoggedIn, setJustLoggedIn] = useState(false);
 
   // Initialize MSAL and check for existing authentication
   useEffect(() => {
@@ -41,13 +44,14 @@ export function useAuth() {
         const response = await msalInstance.handleRedirectPromise();
         
         if (response) {
-          // User just logged in via redirect
+          // User just logged in via redirect - this is a fresh login
           const account = response.account;
           if (account) {
             await updateAuthState(account, response.accessToken);
+            setJustLoggedIn(true);
           }
         } else {
-          // Check if user is already logged in
+          // Check if user is already logged in (restoring session)
           const accounts = msalInstance.getAllAccounts();
           if (accounts.length > 0) {
             const account = accounts[0];
@@ -58,6 +62,7 @@ export function useAuth() {
                 ...loginRequest,
                 account: account,
               });
+              // This is restoring a session, not a fresh login - don't set justLoggedIn
               await updateAuthState(account, tokenResponse.accessToken);
             } catch (error) {
               // If silent token acquisition fails, user needs to login again
@@ -68,6 +73,7 @@ export function useAuth() {
                 userEmail: null,
                 userPhoto: null,
                 account: null,
+                accessToken: null,
               });
             }
           }
@@ -102,6 +108,7 @@ export function useAuth() {
         userEmail: email,
         userPhoto: photoUrl,
         account: account,
+        accessToken: accessToken,
       });
     } catch (error) {
       console.error('Failed to update auth state:', error);
@@ -112,6 +119,7 @@ export function useAuth() {
         userEmail: getUserEmail(account),
         userPhoto: null,
         account: account,
+        accessToken: accessToken,
       });
     }
   };
@@ -122,7 +130,9 @@ export function useAuth() {
       const response = await msalInstance.loginPopup(loginRequest);
       
       if (response && response.account) {
+        // This is a fresh login via popup
         await updateAuthState(response.account, response.accessToken);
+        setJustLoggedIn(true);
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -147,7 +157,9 @@ export function useAuth() {
         userEmail: null,
         userPhoto: null,
         account: null,
+        accessToken: null,
       });
+      setJustLoggedIn(false);
 
       // Logout from Microsoft
       if (account) {
@@ -158,13 +170,21 @@ export function useAuth() {
     }
   }, [authState.userPhoto, authState.account]);
 
+  // Clear the justLoggedIn flag after it has been consumed
+  const acknowledgeLogin = useCallback(() => {
+    setJustLoggedIn(false);
+  }, []);
+
   return {
     isLoggedIn: authState.isLoggedIn,
     userName: authState.userName,
     userEmail: authState.userEmail,
     userPhoto: authState.userPhoto,
+    accessToken: authState.accessToken,
     isInitialized,
+    justLoggedIn,
     login,
     logout,
+    acknowledgeLogin,
   };
 }

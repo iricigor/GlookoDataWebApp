@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { 
   makeStyles, 
   Button,
@@ -22,8 +23,11 @@ import {
   WeatherMoonRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../hooks/useAuth';
+import { useFirstLoginCheck } from '../../hooks/useFirstLoginCheck';
 import { LoginDialog } from './LoginDialog';
 import { LogoutDialog } from './LogoutDialog';
+import { WelcomeDialog } from './WelcomeDialog';
+import { InfrastructureErrorDialog } from './InfrastructureErrorDialog';
 import { type ThemeMode, isDarkTheme } from '../../hooks/useTheme';
 
 const useStyles = makeStyles({
@@ -90,7 +94,54 @@ interface NavigationProps {
 
 export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }: NavigationProps) {
   const styles = useStyles();
-  const { isLoggedIn, userName, userEmail, userPhoto, login, logout } = useAuth();
+  const { 
+    isLoggedIn, 
+    userName, 
+    userEmail, 
+    userPhoto, 
+    accessToken, 
+    justLoggedIn, 
+    login, 
+    logout, 
+    acknowledgeLogin 
+  } = useAuth();
+  
+  const {
+    isFirstLogin,
+    hasChecked,
+    hasError,
+    errorMessage,
+    errorType,
+    statusCode,
+    performCheck,
+    resetState,
+    clearError,
+  } = useFirstLoginCheck();
+
+  // Trigger first login check when user just logged in
+  useEffect(() => {
+    if (justLoggedIn && accessToken && !hasChecked) {
+      performCheck(accessToken);
+    }
+  }, [justLoggedIn, accessToken, hasChecked, performCheck]);
+
+  // Handle welcome dialog close
+  const handleWelcomeClose = () => {
+    resetState();
+    acknowledgeLogin();
+  };
+
+  // Handle error dialog close
+  const handleErrorClose = () => {
+    clearError();
+    acknowledgeLogin();
+  };
+
+  // Handle logout: reset first login check state, then logout
+  const handleLogout = async () => {
+    resetState();
+    await logout();
+  };
 
   // Determine if we're in dark mode (either explicitly dark or system-dark)
   const isDarkMode = themeMode ? isDarkTheme(themeMode) : false;
@@ -104,89 +155,107 @@ export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }
   ];
 
   return (
-    <nav className={styles.nav}>
-      <div className={styles.brand}>
-        <Text className={styles.brandText}>Glooko Insights</Text>
-      </div>
-      
-      <div className={styles.centerSection}>
-        {/* Desktop Navigation */}
-        <div className={styles.navItems}>
-          {navItems.map((item) => (
-            <Button
-              key={item.page}
-              appearance={currentPage === item.page ? 'primary' : 'subtle'}
-              icon={item.icon}
-              onClick={() => onNavigate(item.page)}
-            >
-              {item.label}
-            </Button>
-          ))}
+    <>
+      <nav className={styles.nav}>
+        <div className={styles.brand}>
+          <Text className={styles.brandText}>Glooko Insights</Text>
         </div>
-
-        {/* Mobile Hamburger Menu */}
-        <div className={styles.hamburgerMenu}>
-          <Menu inline>
-            <MenuTrigger disableButtonEnhancement>
-              <Button 
-                appearance="subtle" 
-                icon={<NavigationRegular />}
-                aria-label="Navigation menu"
-              />
-            </MenuTrigger>
-            <MenuPopover>
-              <MenuList>
-                {navItems.map((item) => (
-                  <MenuItem
-                    key={item.page}
-                    icon={item.icon}
-                    onClick={() => onNavigate(item.page)}
-                  >
-                    {item.label}
-                  </MenuItem>
-                ))}
-              </MenuList>
-            </MenuPopover>
-          </Menu>
-        </div>
-      </div>
-
-      {/* Auth Section */}
-      <div className={styles.rightSection}>
-        {isLoggedIn && userName ? (
-          <>
-            {onThemeToggle && (
-              <Tooltip 
-                content={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'} 
-                relationship="label"
+        
+        <div className={styles.centerSection}>
+          {/* Desktop Navigation */}
+          <div className={styles.navItems}>
+            {navItems.map((item) => (
+              <Button
+                key={item.page}
+                appearance={currentPage === item.page ? 'primary' : 'subtle'}
+                icon={item.icon}
+                onClick={() => onNavigate(item.page)}
               >
+                {item.label}
+              </Button>
+            ))}
+          </div>
+
+          {/* Mobile Hamburger Menu */}
+          <div className={styles.hamburgerMenu}>
+            <Menu inline>
+              <MenuTrigger disableButtonEnhancement>
+                <Button 
+                  appearance="subtle" 
+                  icon={<NavigationRegular />}
+                  aria-label="Navigation menu"
+                />
+              </MenuTrigger>
+              <MenuPopover>
+                <MenuList>
+                  {navItems.map((item) => (
+                    <MenuItem
+                      key={item.page}
+                      icon={item.icon}
+                      onClick={() => onNavigate(item.page)}
+                    >
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              </MenuPopover>
+            </Menu>
+          </div>
+        </div>
+
+        {/* Auth Section */}
+        <div className={styles.rightSection}>
+          {isLoggedIn && userName ? (
+            <>
+              {onThemeToggle && (
+                <Tooltip 
+                  content={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'} 
+                  relationship="label"
+                >
+                  <Button
+                    appearance="subtle"
+                    icon={isDarkMode ? <WeatherSunnyRegular /> : <WeatherMoonRegular />}
+                    onClick={onThemeToggle}
+                    aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                  />
+                </Tooltip>
+              )}
+              <Tooltip content="Settings" relationship="label">
                 <Button
                   appearance="subtle"
-                  icon={isDarkMode ? <WeatherSunnyRegular /> : <WeatherMoonRegular />}
-                  onClick={onThemeToggle}
-                  aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                  icon={<SettingsRegular />}
+                  onClick={() => onNavigate('settings')}
+                  aria-label="Settings"
                 />
               </Tooltip>
-            )}
-            <Tooltip content="Settings" relationship="label">
-              <Button
-                appearance="subtle"
-                icon={<SettingsRegular />}
-                onClick={() => onNavigate('settings')}
-                aria-label="Settings"
+              <LogoutDialog 
+                userName={userName} 
+                userEmail={userEmail}
+                userPhoto={userPhoto}
+                onLogout={handleLogout} 
               />
-            </Tooltip>
-            <LogoutDialog 
-              userName={userName} 
-              userEmail={userEmail}
-              userPhoto={userPhoto}
-              onLogout={logout} 
-            />
-          </>
-        ) : (
-          <LoginDialog onLogin={login} />
-        )}
-      </div>
-    </nav>
+            </>
+          ) : (
+            <LoginDialog onLogin={login} />
+          )}
+        </div>
+      </nav>
+
+      {/* Welcome dialog for first-time users */}
+      <WelcomeDialog
+        open={hasChecked && isFirstLogin && !hasError}
+        onClose={handleWelcomeClose}
+        userName={userName}
+      />
+
+      {/* Error dialog for infrastructure/access issues */}
+      <InfrastructureErrorDialog
+        open={hasChecked && hasError}
+        onClose={handleErrorClose}
+        errorMessage={errorMessage || ''}
+        errorType={errorType || 'unknown'}
+        statusCode={statusCode}
+      />
+    </>
   );
 }
