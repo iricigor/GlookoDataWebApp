@@ -1033,37 +1033,14 @@ scripts/
 ├── deployment-cli/           # Bash scripts for Azure CLI
 │   ├── config-lib.sh         # Shared configuration library
 │   ├── config.template.json  # Configuration template
-│   ├── deploy-azure-master.sh
-│   ├── deploy-azure-storage-account.sh
-│   ├── deploy-azure-user-settings-table.sh
-│   ├── deploy-azure-pro-users-table.sh
-│   ├── deploy-azure-key-vault.sh
-│   ├── deploy-azure-function.sh
-│   ├── deploy-azure-managed-identity.sh
-│   ├── deploy-azure-static-web-app.sh
-│   ├── deploy-azure-app-registration.sh
-│   ├── test-azure-resources.sh
+│   ├── ...                   # deploy-azure-*.sh scripts (see Scripts table above)
 │   └── README.md
 ├── deployment-ps/            # PowerShell module and scripts
 │   ├── GlookoDeployment/     # PowerShell module
 │   │   ├── GlookoDeployment.psd1  # Module manifest
 │   │   ├── GlookoDeployment.psm1  # Module loader
-│   │   ├── Public/           # Exported functions
-│   │   │   ├── Set-GlookoStorageAccount.ps1
-│   │   │   ├── Set-GlookoTableStorage.ps1
-│   │   │   ├── Set-GlookoKeyVault.ps1
-│   │   │   ├── Set-GlookoAzureFunction.ps1
-│   │   │   ├── Set-GlookoManagedIdentity.ps1
-│   │   │   ├── Set-GlookoStaticWebApp.ps1
-│   │   │   ├── Set-GlookoAppRegistration.ps1
-│   │   │   ├── Invoke-GlookoDeployment.ps1
-│   │   │   ├── Get-GlookoConfig.ps1
-│   │   │   ├── Set-GlookoConfig.ps1
-│   │   │   └── Test-GlookoDeployment.ps1
+│   │   ├── Public/           # Exported functions (Set-Glooko*.ps1, Get-Glooko*.ps1, etc.)
 │   │   └── Private/          # Internal helper functions
-│   │       ├── Write-GlookoMessage.ps1
-│   │       ├── Test-AzureCli.ps1
-│   │       └── Initialize-GlookoResourceGroup.ps1
 │   ├── Install-GlookoDeploymentModule.ps1  # One-liner installer
 │   └── README.md
 └── README.md                 # Main scripts directory overview
