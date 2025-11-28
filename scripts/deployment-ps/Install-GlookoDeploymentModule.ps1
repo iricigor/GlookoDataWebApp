@@ -65,7 +65,7 @@ $GitHubBasePath = "scripts/deployment-ps/GlookoDeployment"
 # Support -Force via environment variable for iex (irm ...) usage
 # When using iex, parameters can't be passed directly, so use $env:GLOOKO_INSTALL_FORCE=1
 if ($env:GLOOKO_INSTALL_FORCE) {
-    $Force = [switch]$true
+    $Force = $true
     # Clear the environment variable after reading it
     $env:GLOOKO_INSTALL_FORCE = $null
 }
@@ -94,7 +94,7 @@ Write-Host ""
 # Check if module already exists
 if ((Test-Path $InstallPath) -and -not $Force) {
     Write-InstallWarning "Module already installed at: $InstallPath"
-    Write-InstallInfo "Use -Force to overwrite, or for iex usage: `$env:GLOOKO_INSTALL_FORCE=1; iex (irm ...)"
+    Write-InstallInfo 'Use -Force to overwrite, or for iex usage: $env:GLOOKO_INSTALL_FORCE=1; iex (irm ...)'
     return
 }
 
