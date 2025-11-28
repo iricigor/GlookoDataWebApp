@@ -64,6 +64,7 @@
     Run in Azure Cloud Shell for best experience.
     
     PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
+    Reference: https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle
     
     Prerequisites:
     - Storage Account must exist

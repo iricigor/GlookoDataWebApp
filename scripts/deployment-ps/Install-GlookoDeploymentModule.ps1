@@ -14,6 +14,7 @@
     3. After installation, you can import the module with: Import-Module GlookoDeployment
     
     PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
+    Reference: https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle
 
 .PARAMETER LocalPath
     Install from a local directory instead of downloading from GitHub.

@@ -10,6 +10,7 @@
     correct dependency order.
     
     PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
+    Reference: https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle
 
 .PARAMETER FunctionApp
     Deploy only the Azure Function App.

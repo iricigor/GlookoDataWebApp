@@ -14,6 +14,7 @@
     4. Easier to maintain single set of Azure commands across both script types
     
     PowerShell Version: Requires 7.4+ for security (earlier versions have known vulnerabilities)
+    Reference: https://learn.microsoft.com/en-us/powershell/scripting/install/powershell-support-lifecycle
 #>
 
 function Test-AzureCli {
