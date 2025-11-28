@@ -11,7 +11,7 @@ import {
   AccordionPanel,
 } from '@fluentui/react-components';
 import { generateMealTimingPrompt } from '../../../features/aiAnalysis/prompts';
-import { callAIApi } from '../../../utils/api';
+import { callAIApi, isRequestTooLargeError } from '../../../utils/api';
 import { 
   convertGlucoseReadingsToCSV, 
   convertBolusReadingsToCSV, 
@@ -33,25 +33,6 @@ import {
 } from '../AnalysisComponents';
 import type { MealTimingTabProps } from '../types';
 import type { GlucoseReading, InsulinReading } from '../../../types';
-
-/**
- * Helper function to detect if an error is related to request size being too large
- */
-function isRequestTooLargeError(errorMessage: string | undefined): boolean {
-  if (!errorMessage) return false;
-  
-  const lowerMessage = errorMessage.toLowerCase();
-  return (
-    lowerMessage.includes('too large') ||
-    lowerMessage.includes('too long') ||
-    lowerMessage.includes('exceeds') ||
-    lowerMessage.includes('maximum') ||
-    lowerMessage.includes('limit') ||
-    lowerMessage.includes('token') && (lowerMessage.includes('limit') || lowerMessage.includes('exceed')) ||
-    lowerMessage.includes('payload') && lowerMessage.includes('large') ||
-    lowerMessage.includes('request') && lowerMessage.includes('size')
-  );
-}
 
 export function MealTimingTab({
   loading,

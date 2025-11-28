@@ -4,7 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useAnalysisState } from './useAnalysisState';
+import { useAnalysisState, DEFAULT_COOLDOWN_DURATION } from './useAnalysisState';
 
 describe('useAnalysisState', () => {
   beforeEach(() => {
@@ -25,6 +25,10 @@ describe('useAnalysisState', () => {
     expect(result.current.cooldownSeconds).toBe(0);
     expect(result.current.ready).toBe(false);
     expect(result.current.retryInfo).toBeNull();
+  });
+
+  it('should export default cooldown duration', () => {
+    expect(DEFAULT_COOLDOWN_DURATION).toBe(3);
   });
 
   it('should start analysis correctly', () => {
@@ -172,5 +176,16 @@ describe('useAnalysisState', () => {
     });
     
     expect(result.current.retryInfo).toBeNull();
+  });
+
+  it('should use custom cooldown duration when provided', () => {
+    const { result } = renderHook(() => useAnalysisState({ cooldownDuration: 5 }));
+    
+    act(() => {
+      result.current.triggerCooldown();
+    });
+    
+    expect(result.current.cooldownActive).toBe(true);
+    expect(result.current.cooldownSeconds).toBe(5);
   });
 });

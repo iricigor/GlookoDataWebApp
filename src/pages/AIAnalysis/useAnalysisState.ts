@@ -6,7 +6,13 @@ import { useState, useEffect, useCallback } from 'react';
 import type { AnalysisState } from './types';
 import { initialAnalysisState } from './types';
 
-const COOLDOWN_DURATION = 3;
+/** Default cooldown duration in seconds */
+export const DEFAULT_COOLDOWN_DURATION = 3;
+
+interface UseAnalysisStateOptions {
+  /** Cooldown duration in seconds (default: 3) */
+  cooldownDuration?: number;
+}
 
 interface UseAnalysisStateReturn extends AnalysisState {
   startAnalysis: () => void;
@@ -19,8 +25,11 @@ interface UseAnalysisStateReturn extends AnalysisState {
 
 /**
  * Hook to manage the state of an AI analysis prompt including cooldown
+ * @param options - Configuration options for the hook
+ * @param options.cooldownDuration - Cooldown duration in seconds (default: 3)
  */
-export function useAnalysisState(): UseAnalysisStateReturn {
+export function useAnalysisState(options: UseAnalysisStateOptions = {}): UseAnalysisStateReturn {
+  const { cooldownDuration = DEFAULT_COOLDOWN_DURATION } = options;
   const [state, setState] = useState<AnalysisState>(initialAnalysisState);
 
   // Handle cooldown timer
@@ -77,9 +86,9 @@ export function useAnalysisState(): UseAnalysisStateReturn {
     setState(prev => ({
       ...prev,
       cooldownActive: true,
-      cooldownSeconds: COOLDOWN_DURATION,
+      cooldownSeconds: cooldownDuration,
     }));
-  }, []);
+  }, [cooldownDuration]);
 
   const reset = useCallback(() => {
     setState(initialAnalysisState);

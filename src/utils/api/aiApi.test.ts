@@ -9,6 +9,7 @@ import {
   determineActiveProvider, 
   getActiveProvider,
   getAvailableProviders,
+  isRequestTooLargeError,
   type AIProvider 
 } from './aiApi';
 import * as perplexityApi from './perplexityApi';
@@ -243,6 +244,59 @@ describe('aiApi', () => {
     it('should return providers in priority order', () => {
       const result = getAvailableProviders('', 'gemini-key', 'grok-key', 'deepseek-key');
       expect(result).toEqual(['grok', 'deepseek', 'gemini']);
+    });
+  });
+
+  describe('isRequestTooLargeError', () => {
+    it('should return false for undefined error', () => {
+      expect(isRequestTooLargeError(undefined)).toBe(false);
+    });
+
+    it('should return false for empty string', () => {
+      expect(isRequestTooLargeError('')).toBe(false);
+    });
+
+    it('should return false for unrelated error', () => {
+      expect(isRequestTooLargeError('Network connection failed')).toBe(false);
+    });
+
+    it('should return true for "too large" error', () => {
+      expect(isRequestTooLargeError('Request body too large')).toBe(true);
+    });
+
+    it('should return true for "too long" error', () => {
+      expect(isRequestTooLargeError('Input text too long')).toBe(true);
+    });
+
+    it('should return true for "exceeds" error', () => {
+      expect(isRequestTooLargeError('Input exceeds the allowed size')).toBe(true);
+    });
+
+    it('should return true for "maximum" error', () => {
+      expect(isRequestTooLargeError('Reached maximum input length')).toBe(true);
+    });
+
+    it('should return true for "limit" error', () => {
+      expect(isRequestTooLargeError('Size limit reached')).toBe(true);
+    });
+
+    it('should return true for token limit errors', () => {
+      expect(isRequestTooLargeError('Token limit exceeded')).toBe(true);
+      expect(isRequestTooLargeError('Max token limit')).toBe(true);
+    });
+
+    it('should return true for payload size errors', () => {
+      expect(isRequestTooLargeError('Payload too large')).toBe(true);
+    });
+
+    it('should return true for request size errors', () => {
+      expect(isRequestTooLargeError('Request size exceeded')).toBe(true);
+    });
+
+    it('should be case insensitive', () => {
+      expect(isRequestTooLargeError('TOO LARGE')).toBe(true);
+      expect(isRequestTooLargeError('Too Long')).toBe(true);
+      expect(isRequestTooLargeError('EXCEEDS')).toBe(true);
     });
   });
 });
