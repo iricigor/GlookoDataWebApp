@@ -646,12 +646,12 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
 
       {/* Stats Cards */}
       <div className={styles.summarySection}>
-        {/* Show smiley when no hypos */}
+        {/* Show success state when no hypos - use icons instead of smileys for first 4 cards, smiley only for Total Hypo Time */}
         {hypoStats && hypoStats.totalCount === 0 ? (
           <>
             <Tooltip content="No hypoglycemic events detected today" relationship="description">
               <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
-                <Text className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)}>😊</Text>
+                <HeartPulseWarningRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)} />
                 <div className={styles.summaryContent}>
                   <Text className={styles.summaryLabel}>Severe Hypos</Text>
                   <div className={styles.summaryValueRow}>
@@ -663,7 +663,7 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
             
             <Tooltip content="No hypoglycemic events detected today" relationship="description">
               <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
-                <Text className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)}>😊</Text>
+                <WarningRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)} />
                 <div className={styles.summaryContent}>
                   <Text className={styles.summaryLabel}>Non-Severe Hypos</Text>
                   <div className={styles.summaryValueRow}>
@@ -675,7 +675,7 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
             
             <Tooltip content="No hypoglycemic events - great control!" relationship="description">
               <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
-                <Text className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)}>😊</Text>
+                <ArrowTrendingDownRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)} />
                 <div className={styles.summaryContent}>
                   <Text className={styles.summaryLabel}>Lowest Hypo Value</Text>
                   <div className={styles.summaryValueRow}>
@@ -685,13 +685,27 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
               </Card>
             </Tooltip>
             
+            {/* Longest Hypo Duration - add 5th card */}
+            <Tooltip content="No hypoglycemic events - great control!" relationship="description">
+              <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
+                <TimerRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)} />
+                <div className={styles.summaryContent}>
+                  <Text className={styles.summaryLabel}>Longest Hypo</Text>
+                  <div className={styles.summaryValueRow}>
+                    <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSuccess)}>0m</Text>
+                  </div>
+                </div>
+              </Card>
+            </Tooltip>
+            
+            {/* Total Hypo Time - use smiley as the value */}
             <Tooltip content="No time spent in hypoglycemia" relationship="description">
               <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
-                <Text className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)}>😊</Text>
+                <ClockRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)} />
                 <div className={styles.summaryContent}>
                   <Text className={styles.summaryLabel}>Total Hypo Time</Text>
                   <div className={styles.summaryValueRow}>
-                    <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSuccess)}>0m</Text>
+                    <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSuccess)}>😊</Text>
                   </div>
                 </div>
               </Card>
@@ -977,23 +991,7 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
                 }}
               />
               
-              {/* Glucose values line with gradient coloring based on hypo state */}
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="url(#glucoseLineGradient)"
-                strokeWidth={2.5}
-                dot={false}
-                activeDot={{ 
-                  r: 5, 
-                  strokeWidth: 2,
-                  stroke: tokens.colorNeutralBackground1,
-                  fill: tokens.colorBrandForeground1,
-                }}
-                connectNulls
-              />
-              
-              {/* Nadir dots for each hypo period */}
+              {/* Nadir dots for each hypo period - rendered BEFORE the line so they appear behind it */}
               {nadirPoints.length > 0 && (
                 <Scatter
                   data={nadirPoints}
@@ -1014,16 +1012,28 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
                   }}
                 />
               )}
+              
+              {/* Glucose values line with gradient coloring based on hypo state */}
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="url(#glucoseLineGradient)"
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ 
+                  r: 5, 
+                  strokeWidth: 2,
+                  stroke: tokens.colorNeutralBackground1,
+                  fill: tokens.colorBrandForeground1,
+                }}
+                connectNulls
+              />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
         
         {/* Chart Legend */}
         <div className={styles.legendContainer}>
-          <div className={styles.legendItem}>
-            <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.normal }} />
-            <Text>Normal Range</Text>
-          </div>
           <div className={styles.legendItem}>
             <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.low }} />
             <Text>Hypoglycemia</Text>
@@ -1035,10 +1045,6 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
           <div className={styles.legendItem}>
             <div className={styles.legendDot} style={{ backgroundColor: HYPO_CHART_COLORS.nadirDot }} />
             <Text>Nadir (Lowest Point)</Text>
-          </div>
-          <div className={styles.legendItem}>
-            <div className={styles.legendDashedLine} />
-            <Text>Thresholds</Text>
           </div>
         </div>
       </Card>
