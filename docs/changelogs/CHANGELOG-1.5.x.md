@@ -30,6 +30,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 
 ### Other
 
+<details>
+<summary>495 Bump version to 1.5</summary>
+
+[#495](../../pull/495) Bump version to 1.5
+  - [Auto-generated entry from PR merge]
+</details>
+
 *(To be added as development progresses)*
 
 ---
