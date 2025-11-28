@@ -260,13 +260,27 @@ function Test-GlookoDeployment {
                 }
                 
                 # Check CORS configuration
-                if ($funcApp.CorsAllowedOrigin) {
-                    if (-not ($funcApp.CorsAllowedOrigin -contains $webAppUrl)) {
-                        $issues += "Web app URL not in CORS origins"
+                # Note: Azure PowerShell doesn't have native cmdlets for CORS.
+                # We use Azure CLI 'az functionapp cors show' to check CORS settings.
+                try {
+                    $corsOutput = az functionapp cors show --name $functionAppName --resource-group $rg --output json 2>$null
+                    if ($corsOutput) {
+                        $corsSettings = $corsOutput | ConvertFrom-Json
+                        if ($corsSettings.allowedOrigins) {
+                            if (-not ($corsSettings.allowedOrigins -contains $webAppUrl)) {
+                                $issues += "Web app URL not in CORS origins"
+                            }
+                        }
+                        else {
+                            $issues += "No CORS origins configured"
+                        }
+                    }
+                    else {
+                        $issues += "No CORS origins configured"
                     }
                 }
-                else {
-                    $issues += "No CORS origins configured"
+                catch {
+                    $issues += "Unable to verify CORS configuration"
                 }
                 
                 if ($issues.Count -gt 0) {

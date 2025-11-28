@@ -309,12 +309,24 @@ function Set-GlookoAzureFunction {
             }
 
             # Configure CORS
+            # Note: The Az.Websites module's Set-AzWebApp cmdlet does not have a direct
+            # parameter for CORS configuration. We use Azure CLI for CORS settings as it
+            # provides a reliable and well-documented approach (same as the bash scripts).
             Write-SectionHeader "Configuring CORS"
             
             Write-InfoMessage "Setting CORS allowed origins..."
-            Set-AzWebApp -ResourceGroupName $rg -Name $functionName -CorsAllowedOrigin @($webAppUrl) | Out-Null
+            $corsResult = az functionapp cors add `
+                --name $functionName `
+                --resource-group $rg `
+                --allowed-origins $webAppUrl `
+                --output none 2>&1
             
-            Write-SuccessMessage "CORS configured for $webAppUrl"
+            if ($LASTEXITCODE -eq 0) {
+                Write-SuccessMessage "CORS configured for $webAppUrl"
+            }
+            else {
+                Write-WarningMessage "Failed to configure CORS: $corsResult"
+            }
 
             # Get function app URL
             $functionApp = Get-AzFunctionApp -ResourceGroupName $rg -Name $functionName
