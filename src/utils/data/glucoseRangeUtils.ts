@@ -14,6 +14,7 @@ import type {
   TimePeriodTIRStats,
   HourlyTIRStats,
 } from '../../types';
+import { MMOL_TO_MGDL } from './glucoseUnitUtils';
 
 /**
  * Glucose range category colors (matching Glooko style)
@@ -649,4 +650,152 @@ export function calculateCV(readings: GlucoseReading[]): number | null {
   const sd = Math.sqrt(sumSquaredDiffs / (readings.length - 1));
   
   return (sd / mean) * 100;
+}
+
+/**
+ * Blood Glucose Risk Index result containing LBGI, HBGI, and BGRI
+ */
+export interface BGRIResult {
+  lbgi: number;   // Low Blood Glucose Index (hypoglycemia risk)
+  hbgi: number;   // High Blood Glucose Index (hyperglycemia risk)
+  bgri: number;   // Blood Glucose Risk Index (LBGI + HBGI)
+}
+
+/**
+ * Calculate the symmetric risk function for a glucose value
+ * Based on the Kovatchev et al. risk function
+ * 
+ * @param glucoseMgdl - Glucose value in mg/dL (must be > 0)
+ * @returns Risk value (negative = hypo risk, positive = hyper risk)
+ */
+function calculateRiskValue(glucoseMgdl: number): number {
+  // The risk function is based on logarithmic transformation
+  // Formula: risk = ((ln(glucose) ** 1.084) - 5.381) * 1.509
+  // where ** represents exponentiation (Math.pow)
+  // This creates a symmetric risk scale where:
+  // - Negative values indicate hypoglycemia risk
+  // - Positive values indicate hyperglycemia risk
+  // - Zero is approximately at euglycemic level (~112.5 mg/dL)
+  return (Math.pow(Math.log(glucoseMgdl), 1.084) - 5.381) * 1.509;
+}
+
+/**
+ * Calculate Low Blood Glucose Index (LBGI), High Blood Glucose Index (HBGI),
+ * and Blood Glucose Risk Index (BGRI) from glucose readings.
+ * 
+ * LBGI: Measures the risk/severity of hypoglycemia
+ * HBGI: Measures the risk/severity of hyperglycemia
+ * BGRI: Combined risk index (LBGI + HBGI)
+ * 
+ * These are validated risk indices used in diabetes research:
+ * - LBGI predicts future hypoglycemic events
+ * - HBGI correlates with HbA1c and long-term complications
+ * - Both use a symmetric transformation of the glucose scale
+ * 
+ * Risk interpretation:
+ * - LBGI < 2.5: Low hypoglycemia risk
+ * - LBGI 2.5-5: Moderate hypoglycemia risk
+ * - LBGI > 5: High hypoglycemia risk
+ * - HBGI < 4.5: Low hyperglycemia risk
+ * - HBGI 4.5-9: Moderate hyperglycemia risk
+ * - HBGI > 9: High hyperglycemia risk
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns Object containing LBGI, HBGI, and BGRI values, or null if no valid readings
+ */
+export function calculateBGRI(readings: GlucoseReading[]): BGRIResult | null {
+  if (readings.length === 0) return null;
+  
+  let totalLbgi = 0;
+  let totalHbgi = 0;
+  let validCount = 0;
+  
+  for (const reading of readings) {
+    // Convert mmol/L to mg/dL for the standard formula
+    const glucoseMgdl = reading.value * MMOL_TO_MGDL;
+    
+    // Skip invalid values (must be positive for logarithm)
+    if (glucoseMgdl <= 0) continue;
+    
+    const risk = calculateRiskValue(glucoseMgdl);
+    
+    // LBGI component: 10 * risk^2 when risk < 0 (hypoglycemia)
+    // HBGI component: 10 * risk^2 when risk > 0 (hyperglycemia)
+    if (risk < 0) {
+      totalLbgi += 10 * Math.pow(risk, 2);
+    } else {
+      totalHbgi += 10 * Math.pow(risk, 2);
+    }
+    
+    validCount++;
+  }
+  
+  if (validCount === 0) return null;
+  
+  const lbgi = totalLbgi / validCount;
+  const hbgi = totalHbgi / validCount;
+  const bgri = lbgi + hbgi;
+  
+  return { lbgi, hbgi, bgri };
+}
+
+/**
+ * Calculate Low Blood Glucose Index (LBGI) from glucose readings
+ * Convenience function that returns only LBGI
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns LBGI value, or null if no valid readings
+ */
+export function calculateLBGI(readings: GlucoseReading[]): number | null {
+  const result = calculateBGRI(readings);
+  return result?.lbgi ?? null;
+}
+
+/**
+ * Calculate High Blood Glucose Index (HBGI) from glucose readings
+ * Convenience function that returns only HBGI
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns HBGI value, or null if no valid readings
+ */
+export function calculateHBGI(readings: GlucoseReading[]): number | null {
+  const result = calculateBGRI(readings);
+  return result?.hbgi ?? null;
+}
+
+/**
+ * Calculate J-Index from glucose readings
+ * J-Index = 0.001 × (Mean + SD)²
+ * 
+ * The J-Index is a simple composite metric that combines average glucose
+ * and variability into a single number. Higher values indicate poorer
+ * glycemic control.
+ * 
+ * Reference ranges (approximate):
+ * - < 20: Excellent control
+ * - 20-30: Good control
+ * - 30-40: Fair control
+ * - > 40: Poor control
+ * 
+ * Note: The formula uses mg/dL units for standard interpretation
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns J-Index value, or null if insufficient readings (need at least 2)
+ */
+export function calculateJIndex(readings: GlucoseReading[]): number | null {
+  // Need at least 2 readings to calculate standard deviation
+  if (readings.length < 2) return null;
+  
+  const mean = calculateAverageGlucose(readings);
+  if (!mean || mean === 0) return null;
+  
+  // Calculate sample standard deviation (using n-1 for sample variance)
+  const sumSquaredDiffs = readings.reduce((sum, r) => sum + Math.pow(r.value - mean, 2), 0);
+  const sd = Math.sqrt(sumSquaredDiffs / (readings.length - 1));
+  
+  // Convert to mg/dL for standard J-index calculation
+  const meanMgdl = mean * MMOL_TO_MGDL;
+  const sdMgdl = sd * MMOL_TO_MGDL;
+  
+  return 0.001 * Math.pow(meanMgdl + sdMgdl, 2);
 }

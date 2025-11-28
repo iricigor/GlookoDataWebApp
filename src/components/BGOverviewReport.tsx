@@ -26,13 +26,14 @@ import {
   Tooltip,
 } from '@fluentui/react-components';
 import {
-  CalendarRegular,
   BriefcaseRegular,
-  HomeRegular,
+  CalendarRegular,
   CheckmarkCircleRegular,
   DataLineRegular,
   FilterRegular,
   HeartPulseRegular,
+  HomeRegular,
+  ShieldRegular,
   WarningRegular,
 } from '@fluentui/react-icons';
 import type { 
@@ -66,6 +67,8 @@ import {
   MIN_DAYS_FOR_RELIABLE_HBA1C,
   calculateCV,
   CV_TARGET_THRESHOLD,
+  calculateBGRI,
+  calculateJIndex,
 } from '../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../utils/visualization';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
@@ -283,6 +286,64 @@ const useStyles = makeStyles({
   hba1cWarningIcon: {
     fontSize: '16px',
     flexShrink: 0,
+  },
+  riskCard: {
+    ...shorthands.padding('16px', '20px'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    boxShadow: tokens.shadow16,
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+  },
+  riskGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+    ...shorthands.gap('16px'),
+    marginTop: '12px',
+  },
+  riskItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.padding('12px'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    backgroundColor: tokens.colorNeutralBackground2,
+  },
+  riskLabel: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+    marginBottom: '4px',
+  },
+  riskValue: {
+    fontSize: tokens.fontSizeBase500,
+    fontWeight: tokens.fontWeightSemibold,
+    lineHeight: '1.2',
+  },
+  riskInterpretation: {
+    fontSize: tokens.fontSizeBase100,
+    marginTop: '4px',
+    ...shorthands.padding('2px', '6px'),
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    display: 'inline-block',
+    width: 'fit-content',
+  },
+  riskLow: {
+    color: tokens.colorStatusSuccessForeground1,
+    backgroundColor: tokens.colorStatusSuccessBackground1,
+  },
+  riskModerate: {
+    color: tokens.colorStatusWarningForeground1,
+    backgroundColor: tokens.colorStatusWarningBackground1,
+  },
+  riskHigh: {
+    color: tokens.colorStatusDangerForeground1,
+    backgroundColor: tokens.colorStatusDangerBackground1,
+  },
+  riskDescription: {
+    ...shorthands.padding('12px'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    backgroundColor: tokens.colorNeutralBackground3,
+    marginTop: '12px',
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
   },
   agpCard: {
     ...shorthands.padding('20px'),
@@ -713,6 +774,77 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     return { hba1c, averageGlucose, daysWithData, cv };
   };
 
+  // Calculate Risk Assessment stats (LBGI, HBGI, BGRI, J-Index) with current filters applied
+  const calculateRiskStats = () => {
+    if (readings.length === 0) {
+      return { lbgi: null, hbgi: null, bgri: null, jIndex: null };
+    }
+
+    // Filter by date range and day of week (same as TIR)
+    let filteredReadings = readings;
+    
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      
+      filteredReadings = readings.filter(r => {
+        const timestamp = r.timestamp.getTime();
+        return timestamp >= start.getTime() && timestamp <= end.getTime();
+      });
+    }
+
+    filteredReadings = filterReadingsByDayOfWeek(filteredReadings, dayFilter);
+
+    if (filteredReadings.length === 0) {
+      return { lbgi: null, hbgi: null, bgri: null, jIndex: null };
+    }
+
+    const bgriResult = calculateBGRI(filteredReadings);
+    const jIndex = calculateJIndex(filteredReadings);
+
+    return {
+      lbgi: bgriResult?.lbgi ?? null,
+      hbgi: bgriResult?.hbgi ?? null,
+      bgri: bgriResult?.bgri ?? null,
+      jIndex,
+    };
+  };
+
+  // Risk threshold constants for LBGI, HBGI, and J-Index
+  const LBGI_THRESHOLDS = { low: 2.5, moderate: 5 };
+  const HBGI_THRESHOLDS = { low: 4.5, moderate: 9 };
+  const JINDEX_THRESHOLDS = { excellent: 20, good: 30, fair: 40 };
+
+  // Helper functions for risk interpretation
+  const getLBGIInterpretation = (lbgi: number): { text: string; level: 'low' | 'moderate' | 'high' } => {
+    if (lbgi < LBGI_THRESHOLDS.low) return { text: 'Low Risk', level: 'low' };
+    if (lbgi <= LBGI_THRESHOLDS.moderate) return { text: 'Moderate Risk', level: 'moderate' };
+    return { text: 'High Risk', level: 'high' };
+  };
+
+  const getHBGIInterpretation = (hbgi: number): { text: string; level: 'low' | 'moderate' | 'high' } => {
+    if (hbgi < HBGI_THRESHOLDS.low) return { text: 'Low Risk', level: 'low' };
+    if (hbgi <= HBGI_THRESHOLDS.moderate) return { text: 'Moderate Risk', level: 'moderate' };
+    return { text: 'High Risk', level: 'high' };
+  };
+
+  const getJIndexInterpretation = (jIndex: number): { text: string; level: 'low' | 'moderate' | 'high' } => {
+    if (jIndex < JINDEX_THRESHOLDS.excellent) return { text: 'Excellent', level: 'low' };
+    if (jIndex <= JINDEX_THRESHOLDS.good) return { text: 'Good', level: 'low' };
+    if (jIndex <= JINDEX_THRESHOLDS.fair) return { text: 'Fair', level: 'moderate' };
+    return { text: 'Poor', level: 'high' };
+  };
+
+  const getRiskStyleClass = (level: 'low' | 'moderate' | 'high'): string => {
+    switch (level) {
+      case 'low': return styles.riskLow;
+      case 'moderate': return styles.riskModerate;
+      case 'high': return styles.riskHigh;
+    }
+  };
+
   const getColorForCategory = (category: string): string => {
     switch (category) {
       case 'veryLow': return GLUCOSE_RANGE_COLORS.veryLow;
@@ -783,6 +915,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
 
   const tirStats = calculateTIRStats();
   const hba1cStats = calculateHbA1cStats();
+  const riskStats = calculateRiskStats();
 
   if (!selectedFile) {
     return (
@@ -1082,6 +1215,81 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
               </Text>
             </div>
           )}
+        </Card>
+      )}
+
+      {/* Risk Assessment Card */}
+      {!loading && !error && (riskStats.lbgi !== null || riskStats.hbgi !== null || riskStats.jIndex !== null) && (
+        <Card className={styles.riskCard}>
+          <Text className={styles.cardTitle}>
+            <ShieldRegular className={styles.cardIcon} />
+            Risk Assessment
+          </Text>
+          
+          <div className={styles.riskGrid}>
+            {riskStats.lbgi !== null && (
+              <Tooltip 
+                content="Low Blood Glucose Index (LBGI) - Predicts hypoglycemia risk based on glucose variability in the low range"
+                relationship="description"
+              >
+                <div className={styles.riskItem}>
+                  <Text className={styles.riskLabel}>LBGI (Hypo Risk)</Text>
+                  <Text className={styles.riskValue}>{riskStats.lbgi.toFixed(1)}</Text>
+                  <Text className={`${styles.riskInterpretation} ${getRiskStyleClass(getLBGIInterpretation(riskStats.lbgi).level)}`}>
+                    {getLBGIInterpretation(riskStats.lbgi).text}
+                  </Text>
+                </div>
+              </Tooltip>
+            )}
+            
+            {riskStats.hbgi !== null && (
+              <Tooltip 
+                content="High Blood Glucose Index (HBGI) - Predicts hyperglycemia risk and correlates with HbA1c"
+                relationship="description"
+              >
+                <div className={styles.riskItem}>
+                  <Text className={styles.riskLabel}>HBGI (Hyper Risk)</Text>
+                  <Text className={styles.riskValue}>{riskStats.hbgi.toFixed(1)}</Text>
+                  <Text className={`${styles.riskInterpretation} ${getRiskStyleClass(getHBGIInterpretation(riskStats.hbgi).level)}`}>
+                    {getHBGIInterpretation(riskStats.hbgi).text}
+                  </Text>
+                </div>
+              </Tooltip>
+            )}
+            
+            {riskStats.bgri !== null && (
+              <Tooltip 
+                content="Blood Glucose Risk Index (BGRI) - Combined overall glycemic risk (LBGI + HBGI)"
+                relationship="description"
+              >
+                <div className={styles.riskItem}>
+                  <Text className={styles.riskLabel}>BGRI (Overall)</Text>
+                  <Text className={styles.riskValue}>{riskStats.bgri.toFixed(1)}</Text>
+                </div>
+              </Tooltip>
+            )}
+            
+            {riskStats.jIndex !== null && (
+              <Tooltip 
+                content="J-Index combines mean glucose and variability into a single metric. Lower values indicate better control."
+                relationship="description"
+              >
+                <div className={styles.riskItem}>
+                  <Text className={styles.riskLabel}>J-Index</Text>
+                  <Text className={styles.riskValue}>{riskStats.jIndex.toFixed(1)}</Text>
+                  <Text className={`${styles.riskInterpretation} ${getRiskStyleClass(getJIndexInterpretation(riskStats.jIndex).level)}`}>
+                    {getJIndexInterpretation(riskStats.jIndex).text}
+                  </Text>
+                </div>
+              </Tooltip>
+            )}
+          </div>
+          
+          <div className={styles.riskDescription}>
+            <strong>Risk Thresholds:</strong> LBGI (&lt;{LBGI_THRESHOLDS.low} low, {LBGI_THRESHOLDS.low}-{LBGI_THRESHOLDS.moderate} moderate, &gt;{LBGI_THRESHOLDS.moderate} high) | 
+            HBGI (&lt;{HBGI_THRESHOLDS.low} low, {HBGI_THRESHOLDS.low}-{HBGI_THRESHOLDS.moderate} moderate, &gt;{HBGI_THRESHOLDS.moderate} high) | 
+            J-Index (&lt;{JINDEX_THRESHOLDS.excellent} excellent, {JINDEX_THRESHOLDS.excellent}-{JINDEX_THRESHOLDS.good} good, {JINDEX_THRESHOLDS.good}-{JINDEX_THRESHOLDS.fair} fair, &gt;{JINDEX_THRESHOLDS.fair} poor)
+          </div>
         </Card>
       )}
 
