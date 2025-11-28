@@ -41,7 +41,7 @@
     Returns results as a PowerShell object for pipeline processing.
 
 .EXAMPLE
-    Test-GlookoDeployment | ConvertTo-Json
+    Test-GlookoDeployment -OutputFormat Object | ConvertTo-Json -Depth 5
     Outputs verification results as JSON.
 
 .NOTES

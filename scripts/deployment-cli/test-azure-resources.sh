@@ -111,8 +111,8 @@ parse_arguments() {
                 shift 2
                 ;;
             -c|--config)
-                # shellcheck disable=SC2034
-                CONFIG_FILE="$2"  # Used by config-lib.sh
+                # shellcheck disable=SC2034 -- CONFIG_FILE is used by sourced config-lib.sh
+                CONFIG_FILE="$2"
                 shift 2
                 ;;
             -v|--verbose)
