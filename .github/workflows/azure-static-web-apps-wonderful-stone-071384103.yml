@@ -39,12 +39,11 @@ jobs:
           output_location: "dist" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
       
-      # Re-checkout the repository to get clean files with correct permissions
-      # (Docker container in Static Web App deploy changes file ownership)
-      - name: Re-checkout for API build
-        uses: actions/checkout@v3
-        with:
-          clean: false
+      # Fix file permissions after Docker container changed ownership
+      # This is necessary because Azure/static-web-apps-deploy@v1 runs in a Docker
+      # container that changes file ownership, causing subsequent git and npm operations to fail
+      - name: Fix file permissions
+        run: sudo chown -R $USER:$USER .
       
       # Deploy API to Azure Function App
       - name: Install API dependencies
