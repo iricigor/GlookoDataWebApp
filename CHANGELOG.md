@@ -72,7 +72,7 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 
 ### Summary
 
-Version 1.4 focuses on advanced glucose analysis features, enhanced reporting capabilities, and improved maintainability.
+Version 1.4 introduces comprehensive glucose analytics with Rate of Change (RoC) analysis featuring gradient-colored visualizations, Hypoglycemia detection with statistics and nadir markers, and HbA1c estimation in both NGSP and IFCC units. The BG Overview page now consolidates Time in Range and AGP visualizations with period breakdowns. UI improvements include horizontal pivot tabs for desktop, RSuite DatePicker with Fluent UI styling, and Coefficient of Variation (CV%) metrics. The changelog was reorganized into version-specific files for better maintainability.
 
 ### Major Features
 
