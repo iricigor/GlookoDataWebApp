@@ -65,6 +65,7 @@ export function getJIndexInterpretation(jIndex: number): RiskInterpretation {
 }
 
 /** Common props for TIR-related components */
+// Note: This interface is available for future use when components need to share these common props
 export interface TIRComponentProps {
   categoryMode: RangeCategoryMode;
   glucoseUnit: GlucoseUnit;

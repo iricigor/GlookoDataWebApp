@@ -316,6 +316,13 @@ export const useBGOverviewStyles = makeStyles({
     ...shorthands.padding('24px'),
     textAlign: 'center',
   },
+  agpTableDescription: {
+    ...shorthands.padding('8px', '0'),
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground3,
+    fontStyle: 'italic',
+    textAlign: 'center',
+  },
   inRangeCell: {
     fontWeight: tokens.fontWeightBold,
     color: tokens.colorBrandForeground1,

@@ -445,7 +445,7 @@ export function DetailedBreakdownAccordion({
           </AccordionHeader>
           <AccordionPanel>
             <div className={styles.tableSection}>
-              <Text className={styles.noData} style={{ padding: '8px 0', fontSize: tokens.fontSizeBase200 }}>
+              <Text className={styles.agpTableDescription}>
                 All values are in {getUnitLabel(glucoseUnit)}. Percentiles are calculated across all days for each 5-minute time slot.
               </Text>
               <Table>
@@ -489,6 +489,7 @@ export function DetailedBreakdownAccordion({
         <AccordionPanel>
           <div className={styles.accordionContent}>
             <Text>For a complete view of all CGM readings with timestamps, please visit the Detailed CGM tab.</Text>
+            {/* TODO: Consider using React Router navigation when available */}
             <Button
               appearance="primary"
               onClick={() => {

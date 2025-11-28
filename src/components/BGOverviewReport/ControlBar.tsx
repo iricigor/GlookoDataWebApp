@@ -94,6 +94,7 @@ export function ControlBar({
         </div>
 
         {/* Second row on wide screens: Date Range + Day Filter */}
+        {/* Truthy checks narrow string | null to string for TypeScript */}
         {minDate && maxDate && startDate && endDate && (
           <div className={styles.controlRow}>
             <Text className={styles.controlLabel}>Date Range:</Text>
