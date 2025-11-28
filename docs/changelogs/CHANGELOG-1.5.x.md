@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>512 Add managed identity deployment scripts</summary>
+
+[#512](../../pull/512) Add managed identity deployment scripts
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>514 Refactor BGOverviewReport.tsx into modular components</summary>
 
 [#514](../../pull/514) Refactor BGOverviewReport.tsx into modular components
