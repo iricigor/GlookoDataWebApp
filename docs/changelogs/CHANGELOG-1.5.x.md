@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>518 Refactor AIAnalysis.tsx into modular components</summary>
+
+[#518](../../pull/518) Refactor AIAnalysis.tsx into modular components
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>520 Fix: Support :GLOOKO_INSTALL_FORCE for iex usage of PowerShell installer</summary>
 
 [#520](../../pull/520) Fix: Support :GLOOKO_INSTALL_FORCE for iex usage of PowerShell installer
