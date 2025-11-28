@@ -1051,9 +1051,9 @@ scripts/
 When adding or updating deployment scripts:
 1. **Bump the module version** in `GlookoDeployment.psd1` (ModuleVersion field)
 2. Use semantic versioning: MAJOR.MINOR.PATCH
-   - PATCH: Bug fixes, documentation updates
-   - MINOR: New scripts/functions added
-   - MAJOR: Breaking changes to existing scripts
+   - PATCH: Bug fixes, documentation updates, **new scripts/functions added**
+   - MINOR: Reserved for future use (coordinate with maintainer)
+   - MAJOR: Breaking changes to existing scripts (coordinate with maintainer)
 
 ### Script Language Alignment
 
