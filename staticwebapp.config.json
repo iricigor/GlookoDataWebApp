@@ -2,12 +2,19 @@
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": [
+      "/api/*",
       "/assets/*",
       "/demo-data.zip",
       "/demo-data/*"
     ]
   },
   "routes": [
+    {
+      "route": "/api/*",
+      "headers": {
+        "Cache-Control": "no-store, no-cache, must-revalidate"
+      }
+    },
     {
       "route": "/demo-data/*.zip",
       "headers": {
