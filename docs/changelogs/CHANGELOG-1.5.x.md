@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>552 Fix API 401 by using ID token instead of access token for authentication</summary>
+
+[#552](../../pull/552) Fix API 401 by using ID token instead of access token for authentication
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>550 Fix SWA backend commands and add Set-GlookoStaticWebApp</summary>
 
 [#550](../../pull/550) Fix SWA backend commands and add Set-GlookoStaticWebApp
