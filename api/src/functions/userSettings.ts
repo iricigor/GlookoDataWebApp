@@ -24,6 +24,7 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { extractUserIdFromToken, getTableClient, isNotFoundError } from "../utils/azureUtils";
+import { createRequestLogger } from "../utils/logger";
 
 /**
  * Cloud user settings type (should match frontend type)
@@ -66,77 +67,67 @@ interface UserSettingsEntity {
  * GET handler - Load user settings
  */
 async function getUserSettings(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
-  context.log('Processing GET user/settings request');
+  const requestLogger = createRequestLogger(request, context);
+  requestLogger.logStart();
 
   const authHeader = request.headers.get('authorization');
   const userId = await extractUserIdFromToken(authHeader, context);
 
   if (!userId) {
-    return {
-      status: 401,
-      jsonBody: {
-        error: 'Unauthorized access. Please log in again.',
-        errorType: 'unauthorized',
-      },
-    };
+    requestLogger.logAuth(false, undefined, 'Invalid or missing token');
+    return requestLogger.logError('Unauthorized access. Please log in again.', 401, 'unauthorized');
   }
+
+  requestLogger.logAuth(true, userId);
 
   try {
     const tableClient = getTableClient();
     
     try {
       const entity = await tableClient.getEntity<UserSettingsEntity>('users', userId);
+      requestLogger.logStorage('getEntity', true, { userId });
       
       if (!entity.settingsJson) {
         // User exists but has no settings saved yet
-        return {
+        requestLogger.logInfo('User found but no settings saved', { userId });
+        return requestLogger.logSuccess({
           status: 404,
           jsonBody: {
             error: 'No settings found',
             errorType: 'not_found',
           },
-        };
+        });
       }
 
       const settings: CloudUserSettings = JSON.parse(entity.settingsJson);
+      requestLogger.logInfo('Settings loaded successfully', { userId, settingsFound: true });
       
-      return {
+      return requestLogger.logSuccess({
         status: 200,
         jsonBody: { settings },
-      };
+      });
     } catch (error: unknown) {
       // 404 means user doesn't exist
       if (isNotFoundError(error)) {
-        return {
+        requestLogger.logInfo('User not found in storage', { userId });
+        return requestLogger.logSuccess({
           status: 404,
           jsonBody: {
             error: 'No settings found',
             errorType: 'not_found',
           },
-        };
+        });
       }
       throw error;
     }
   } catch (error: unknown) {
-    context.error('Error loading user settings:', error);
-    
     if (error instanceof Error && error.message.includes('STORAGE_ACCOUNT_NAME')) {
-      return {
-        status: 503,
-        jsonBody: {
-          error: 'Service unavailable - storage not configured',
-          errorType: 'infrastructure',
-        },
-      };
+      requestLogger.logStorage('getTableClient', false, { error: 'STORAGE_ACCOUNT_NAME not configured' });
+      return requestLogger.logError('Service unavailable - storage not configured', 503, 'infrastructure');
     }
 
-    return {
-      status: 500,
-      jsonBody: {
-        error: 'Internal server error',
-        errorType: 'infrastructure',
-      },
-    };
+    requestLogger.logStorage('getEntity', false, { error: error instanceof Error ? error.message : 'Unknown error' });
+    return requestLogger.logError(error, 500, 'infrastructure');
   }
 }
 
@@ -144,32 +135,25 @@ async function getUserSettings(request: HttpRequest, context: InvocationContext)
  * PUT handler - Save user settings
  */
 async function putUserSettings(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
-  context.log('Processing PUT user/settings request');
+  const requestLogger = createRequestLogger(request, context);
+  requestLogger.logStart();
 
   const authHeader = request.headers.get('authorization');
   const userId = await extractUserIdFromToken(authHeader, context);
 
   if (!userId) {
-    return {
-      status: 401,
-      jsonBody: {
-        error: 'Unauthorized access. Please log in again.',
-        errorType: 'unauthorized',
-      },
-    };
+    requestLogger.logAuth(false, undefined, 'Invalid or missing token');
+    return requestLogger.logError('Unauthorized access. Please log in again.', 401, 'unauthorized');
   }
+
+  requestLogger.logAuth(true, userId);
 
   try {
     const body = await request.json() as SaveSettingsRequest;
     
     if (!body.settings) {
-      return {
-        status: 400,
-        jsonBody: {
-          error: 'Missing settings in request body',
-          errorType: 'validation',
-        },
-      };
+      requestLogger.logWarn('Missing settings in request body');
+      return requestLogger.logError('Missing settings in request body', 400, 'validation');
     }
 
     const tableClient = getTableClient();
@@ -177,11 +161,15 @@ async function putUserSettings(request: HttpRequest, context: InvocationContext)
 
     // Try to get existing entity to preserve firstLoginDate
     let firstLoginDate = now;
+    let isNewUser = true;
     try {
       const existing = await tableClient.getEntity<UserSettingsEntity>('users', userId);
       firstLoginDate = existing.firstLoginDate || now;
+      isNewUser = false;
+      requestLogger.logStorage('getEntity', true, { userId, existingUser: true });
     } catch {
       // Entity doesn't exist, use current time as firstLoginDate
+      requestLogger.logInfo('New user - will create entity', { userId });
     }
 
     // Upsert the entity (create or update)
@@ -195,34 +183,22 @@ async function putUserSettings(request: HttpRequest, context: InvocationContext)
     };
 
     await tableClient.upsertEntity(entity, 'Replace');
+    requestLogger.logStorage('upsertEntity', true, { userId, isNewUser });
+    requestLogger.logInfo('Settings saved successfully', { userId });
     
-    context.log(`Settings saved for user ${userId}`);
-    
-    return {
+    return requestLogger.logSuccess({
       status: 200,
       jsonBody: { success: true },
-    };
+    });
 
   } catch (error: unknown) {
-    context.error('Error saving user settings:', error);
-    
     if (error instanceof Error && error.message.includes('STORAGE_ACCOUNT_NAME')) {
-      return {
-        status: 503,
-        jsonBody: {
-          error: 'Service unavailable - storage not configured',
-          errorType: 'infrastructure',
-        },
-      };
+      requestLogger.logStorage('getTableClient', false, { error: 'STORAGE_ACCOUNT_NAME not configured' });
+      return requestLogger.logError('Service unavailable - storage not configured', 503, 'infrastructure');
     }
 
-    return {
-      status: 500,
-      jsonBody: {
-        error: 'Internal server error',
-        errorType: 'infrastructure',
-      },
-    };
+    requestLogger.logStorage('upsertEntity', false, { error: error instanceof Error ? error.message : 'Unknown error' });
+    return requestLogger.logError(error, 500, 'infrastructure');
   }
 }
 
@@ -235,10 +211,8 @@ async function userSettingsHandler(request: HttpRequest, context: InvocationCont
   } else if (request.method === 'PUT') {
     return putUserSettings(request, context);
   } else {
-    return {
-      status: 405,
-      jsonBody: { error: 'Method not allowed' },
-    };
+    const requestLogger = createRequestLogger(request, context);
+    return requestLogger.logError('Method not allowed', 405, 'validation');
   }
 }
 
