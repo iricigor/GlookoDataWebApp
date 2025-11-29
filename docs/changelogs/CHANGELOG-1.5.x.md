@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>564 Add CodeRabbit badge and configuration</summary>
+
+[#564](../../pull/564) Add CodeRabbit badge and configuration
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>559 Fix 401 error by restoring hardcoded client ID fallback</summary>
 
 [#559](../../pull/559) Fix 401 error by restoring hardcoded client ID fallback
