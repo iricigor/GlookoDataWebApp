@@ -95,8 +95,15 @@ function Set-GlookoKeyVault {
             Write-SuccessMessage "Connected to Azure"
             
             # Validate Key Vault name
-            if ($keyVaultName -notmatch '^[a-zA-Z][a-zA-Z0-9-]{1,22}[a-zA-Z0-9]$' -and $keyVaultName -notmatch '^[a-zA-Z][a-zA-Z0-9]{1,2}$') {
-                throw "Key Vault name must be 3-24 characters, alphanumeric and hyphens only. Must start with a letter and end with a letter or number. Current name: $keyVaultName"
+            # Key Vault names must be 3-24 characters, alphanumeric and hyphens only
+            # Must start with a letter and end with a letter or number
+            $kvLength = $keyVaultName.Length
+            if ($kvLength -lt 3 -or $kvLength -gt 24) {
+                throw "Key Vault name must be 3-24 characters (current: $kvLength). Name: $keyVaultName"
+            }
+            # Check format: starts with letter, contains only alphanumeric and hyphens, ends with alphanumeric
+            if ($keyVaultName -notmatch '^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$' -and $keyVaultName -notmatch '^[a-zA-Z][a-zA-Z0-9]?$') {
+                throw "Key Vault name must start with a letter, contain only alphanumeric and hyphens, and end with a letter or number. Current name: $keyVaultName"
             }
             Write-SuccessMessage "Key Vault name is valid"
 

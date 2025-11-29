@@ -148,12 +148,24 @@ validate_key_vault_name() {
     
     # Key Vault names must be 3-24 characters, alphanumeric and hyphens only
     # Must start with a letter and end with a letter or number
-    if [[ ! "${name}" =~ ^[a-zA-Z][a-zA-Z0-9-]{1,22}[a-zA-Z0-9]$ ]] && [[ ! "${name}" =~ ^[a-zA-Z][a-zA-Z0-9]{1,2}$ ]]; then
-        print_error "Key Vault name must be 3-24 characters, alphanumeric and hyphens only"
-        print_info "Must start with a letter and end with a letter or number"
+    # Pattern: start with letter, then 1-22 alphanumeric/hyphens, end with alphanumeric
+    # OR: start with letter followed by 1-2 alphanumerics (for 2-3 char names)
+    local length=${#name}
+    
+    # Check length
+    if [ "$length" -lt 3 ] || [ "$length" -gt 24 ]; then
+        print_error "Key Vault name must be 3-24 characters (current: $length)"
         print_info "Current name: ${name}"
         return 1
     fi
+    
+    # Check format: starts with letter, contains only alphanumeric and hyphens, ends with alphanumeric
+    if [[ ! "${name}" =~ ^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$ ]] && [[ ! "${name}" =~ ^[a-zA-Z][a-zA-Z0-9]?$ ]]; then
+        print_error "Key Vault name must start with a letter, contain only alphanumeric and hyphens, and end with a letter or number"
+        print_info "Current name: ${name}"
+        return 1
+    fi
+    
     return 0
 }
 
