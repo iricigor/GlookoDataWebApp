@@ -118,7 +118,7 @@ export function APIDocs() {
       try {
         const response = await fetch('/api-docs/openapi.json')
         if (!response.ok) {
-          throw new Error(`Failed to load OpenAPI specification: ${response.statusText}`)
+          throw new Error(`Failed to load OpenAPI specification (${response.status}): ${response.statusText}`)
         }
         const spec = await response.json()
         setSwaggerSpec(spec)
@@ -133,7 +133,10 @@ export function APIDocs() {
   // Custom request interceptor to add Bearer token
   const requestInterceptor = useCallback((request: Record<string, unknown>) => {
     if (idToken) {
-      const headers = request.headers as Record<string, string> || {}
+      const existingHeaders = request.headers
+      const headers: Record<string, string> = typeof existingHeaders === 'object' && existingHeaders !== null
+        ? { ...(existingHeaders as Record<string, string>) }
+        : {}
       headers['Authorization'] = `Bearer ${idToken}`
       request.headers = headers
     }
