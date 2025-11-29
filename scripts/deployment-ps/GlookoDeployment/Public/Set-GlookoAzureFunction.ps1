@@ -304,7 +304,8 @@ function Set-GlookoAzureFunction {
             
             if ($appSettings.Count -gt 0) {
                 Write-InfoMessage "Setting application configuration..."
-                Update-AzFunctionAppSetting -Name $functionName -ResourceGroupName $rg -AppSetting $appSettings | Out-Null
+                # Suppress the warning about redacted app settings by using -WarningAction SilentlyContinue
+                Update-AzFunctionAppSetting -Name $functionName -ResourceGroupName $rg -AppSetting $appSettings -WarningAction SilentlyContinue | Out-Null
                 Write-SuccessMessage "Application settings configured"
             }
 
