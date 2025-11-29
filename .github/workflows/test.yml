@@ -10,7 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  lint:
+    name: 🔍 Lint
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -31,13 +32,65 @@ jobs:
       - name: Run linter
         run: npm run lint
 
+  build:
+    name: 🏗️ Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
       - name: Build project
         run: npm run build
 
-      - name: Run unit tests with JSON reporter
-        run: npm test -- --run --reporter=json > test-results.json 2>&1 || true
+  unit-tests:
+    name: 🧪 Unit Tests (Shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run unit tests with JSON reporter (shard ${{ matrix.shard }}/3)
+        id: run-tests
+        run: |
+          # Run tests and capture exit code
+          set +e
+          npm test -- --run --reporter=json --shard=${{ matrix.shard }}/3 > test-results.json 2>&1
+          TEST_EXIT_CODE=$?
+          set -e
+          
+          # Save exit code for later steps
+          echo "exit_code=$TEST_EXIT_CODE" >> $GITHUB_OUTPUT
 
       - name: Extract Test Statistics
+        id: extract-stats
         if: always()
         run: |
           # Extract test count from JSON output
@@ -49,7 +102,102 @@ jobs:
           echo "TESTS_PASSED=$TEST_PASSED" >> $GITHUB_ENV
           echo "TESTS_FAILED=$TEST_FAILED" >> $GITHUB_ENV
           
-          echo "::notice::Tests: $TEST_PASSED/$TEST_COUNT passed"
+          echo "::notice::Shard ${{ matrix.shard }}: $TEST_PASSED/$TEST_COUNT passed, $TEST_FAILED failed"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results-shard-${{ matrix.shard }}
+          path: test-results.json
+          retention-days: 7
+      
+      - name: Fail if tests failed
+        if: always() && steps.run-tests.outputs.exit_code != '0'
+        run: |
+          echo "::error::Tests failed with exit code ${{ steps.run-tests.outputs.exit_code }}"
+          exit 1
+
+  # Summary job that runs after all parallel jobs complete
+  summary:
+    name: 📊 Summary
+    runs-on: ubuntu-latest
+    needs: [lint, build, unit-tests]
+    if: always()
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: unit-test-results-shard-*
+          path: ./results
+          merge-multiple: false
+
+      - name: Aggregate results from all shards
+        run: |
+          # Initialize counters
+          TOTAL_TESTS=0
+          TOTAL_PASSED=0
+          TOTAL_FAILED=0
+          SHARDS_FOUND=0
+          EXPECTED_SHARDS=3
+          
+          # Process each shard's results
+          for shard_dir in ./results/unit-test-results-shard-*; do
+            if [ -f "$shard_dir/test-results.json" ]; then
+              SHARDS_FOUND=$((SHARDS_FOUND + 1))
+              SHARD_TOTAL=$(grep -o '"numTotalTests":[0-9]*' "$shard_dir/test-results.json" | head -1 | grep -o '[0-9]*' || echo "0")
+              SHARD_PASSED=$(grep -o '"numPassedTests":[0-9]*' "$shard_dir/test-results.json" | head -1 | grep -o '[0-9]*' || echo "0")
+              SHARD_FAILED=$(grep -o '"numFailedTests":[0-9]*' "$shard_dir/test-results.json" | head -1 | grep -o '[0-9]*' || echo "0")
+              
+              TOTAL_TESTS=$((TOTAL_TESTS + SHARD_TOTAL))
+              TOTAL_PASSED=$((TOTAL_PASSED + SHARD_PASSED))
+              TOTAL_FAILED=$((TOTAL_FAILED + SHARD_FAILED))
+              
+              echo "$(basename $shard_dir): $SHARD_PASSED/$SHARD_TOTAL passed"
+            fi
+          done
+          
+          # Warn if not all shards were found
+          if [ "$SHARDS_FOUND" -lt "$EXPECTED_SHARDS" ]; then
+            echo "::warning::Only found $SHARDS_FOUND/$EXPECTED_SHARDS test shard results"
+          fi
+          
+          echo "TESTS_TOTAL=$TOTAL_TESTS" >> $GITHUB_ENV
+          echo "TESTS_PASSED=$TOTAL_PASSED" >> $GITHUB_ENV
+          echo "TESTS_FAILED=$TOTAL_FAILED" >> $GITHUB_ENV
+          
+          echo "::notice::Total Tests: $TOTAL_PASSED/$TOTAL_TESTS passed ($SHARDS_FOUND shards)"
+
+      - name: Check job statuses
+        run: |
+          # Array of job results
+          jobs=("lint:${{ needs.lint.result }}" "build:${{ needs.build.result }}" "unit-tests:${{ needs.unit-tests.result }}")
+          failed=false
+          
+          for job in "${jobs[@]}"; do
+            name="${job%%:*}"
+            result="${job#*:}"
+            echo "$name: $result"
+            if [[ "$result" == "failure" ]]; then
+              failed=true
+            fi
+          done
+          
+          if [[ "$failed" == "true" ]]; then
+            echo "::error::One or more jobs failed"
+            exit 1
+          fi
+
+      - name: Check for test failures
+        run: |
+          if [ "${{ env.TESTS_FAILED }}" != "0" ] && [ -n "${{ env.TESTS_FAILED }}" ]; then
+            echo "::error::${{ env.TESTS_FAILED }} tests failed across all shards"
+            exit 1
+          fi
+          echo "All tests passed!"
 
       - name: Update Test Count Badge
         uses: schneegans/dynamic-badges-action@v1.7.0
