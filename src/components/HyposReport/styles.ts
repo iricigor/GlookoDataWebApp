@@ -163,4 +163,24 @@ export const useHyposStyles = makeStyles({
     height: '0',
     borderTop: `2px dashed ${tokens.colorNeutralStroke1}`,
   },
+  riskInterpretation: {
+    fontSize: tokens.fontSizeBase100,
+    marginTop: '4px',
+    ...shorthands.padding('2px', '6px'),
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    display: 'inline-block',
+    width: 'fit-content',
+  },
+  riskLow: {
+    color: tokens.colorStatusSuccessForeground1,
+    backgroundColor: tokens.colorStatusSuccessBackground1,
+  },
+  riskModerate: {
+    color: tokens.colorStatusWarningForeground1,
+    backgroundColor: tokens.colorStatusWarningBackground1,
+  },
+  riskHigh: {
+    color: tokens.colorStatusDangerForeground1,
+    backgroundColor: tokens.colorStatusDangerBackground1,
+  },
 });

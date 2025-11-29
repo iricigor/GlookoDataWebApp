@@ -15,15 +15,73 @@ import {
   ArrowTrendingDownRegular,
   TimerRegular,
   ClockRegular,
+  ShieldRegular,
 } from '@fluentui/react-icons';
 import { displayGlucoseValue, getUnitLabel, formatHypoDuration } from '../../utils/data';
 import { useHyposStyles } from './styles';
 import type { HyposStatsCardsProps } from './types';
+import { getLBGIInterpretation, LBGI_THRESHOLDS } from './types';
 
-export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit }: HyposStatsCardsProps) {
+export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: HyposStatsCardsProps) {
   const styles = useHyposStyles();
 
   if (!hypoStats) return null;
+
+  // Helper function to get risk style class based on level
+  const getRiskStyleClass = (level: 'low' | 'moderate' | 'high'): string => {
+    switch (level) {
+      case 'low': return styles.riskLow;
+      case 'moderate': return styles.riskModerate;
+      case 'high': return styles.riskHigh;
+    }
+  };
+
+  // Helper function to get card border style based on LBGI risk level
+  const getLBGICardStyle = (): string => {
+    if (lbgi === null) return styles.summaryCardSuccess;
+    const interpretation = getLBGIInterpretation(lbgi);
+    switch (interpretation.level) {
+      case 'low': return styles.summaryCardSuccess;
+      case 'moderate': return styles.summaryCardWarning;
+      case 'high': return styles.summaryCardDanger;
+    }
+  };
+
+  // Helper function to get icon style based on LBGI risk level
+  const getLBGIIconStyle = (): string => {
+    if (lbgi === null) return styles.summaryIconSuccess;
+    const interpretation = getLBGIInterpretation(lbgi);
+    switch (interpretation.level) {
+      case 'low': return styles.summaryIconSuccess;
+      case 'moderate': return styles.summaryIconWarning;
+      case 'high': return styles.summaryIconDanger;
+    }
+  };
+
+  // LBGI Card component (used in both states)
+  const renderLBGICard = () => (
+    <Tooltip 
+      content={`Low Blood Glucose Index (LBGI) - Predicts hypoglycemia risk. Thresholds: <${LBGI_THRESHOLDS.low} low, ${LBGI_THRESHOLDS.low}-${LBGI_THRESHOLDS.moderate} moderate, >${LBGI_THRESHOLDS.moderate} high`}
+      relationship="description"
+    >
+      <Card className={mergeClasses(styles.summaryCard, getLBGICardStyle())}>
+        <ShieldRegular className={mergeClasses(styles.summaryIcon, getLBGIIconStyle())} />
+        <div className={styles.summaryContent}>
+          <Text className={styles.summaryLabel}>LBGI (Hypo Risk)</Text>
+          <div className={styles.summaryValueRow}>
+            <Text className={styles.summaryValue}>
+              {lbgi !== null ? lbgi.toFixed(1) : 'N/A'}
+            </Text>
+          </div>
+          {lbgi !== null && (
+            <Text className={mergeClasses(styles.riskInterpretation, getRiskStyleClass(getLBGIInterpretation(lbgi).level))}>
+              {getLBGIInterpretation(lbgi).text}
+            </Text>
+          )}
+        </div>
+      </Card>
+    </Tooltip>
+  );
 
   // No hypos - show success state
   if (hypoStats.totalCount === 0) {
@@ -90,6 +148,9 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit }: HyposSta
             </div>
           </Card>
         </Tooltip>
+
+        {/* LBGI Card */}
+        {renderLBGICard()}
       </div>
     );
   }
@@ -194,6 +255,9 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit }: HyposSta
           </div>
         </Card>
       </Tooltip>
+
+      {/* LBGI Card */}
+      {renderLBGICard()}
     </div>
   );
 }

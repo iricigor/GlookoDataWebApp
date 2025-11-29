@@ -15,6 +15,7 @@ import {
   getUniqueDates, 
   filterReadingsByDate,
   calculateHypoStats,
+  calculateLBGI,
 } from '../../utils/data';
 import type { HypoStats } from '../../utils/data/hypoDataUtils';
 import { useGlucoseThresholds } from '../../hooks/useGlucoseThresholds';
@@ -152,6 +153,12 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
     if (currentReadings.length === 0) return null;
     return calculateHypoStats(currentReadings, thresholds);
   }, [currentReadings, thresholds]);
+
+  // Calculate LBGI (Low Blood Glucose Index) for current day's readings
+  const lbgi: number | null = useMemo(() => {
+    if (currentReadings.length === 0) return null;
+    return calculateLBGI(currentReadings);
+  }, [currentReadings]);
 
   // Apply smoothing to glucose values
   const smoothedReadings = smoothGlucoseValues(currentReadings);
@@ -351,6 +358,7 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
         hypoStats={hypoStats}
         thresholds={thresholds}
         glucoseUnit={glucoseUnit}
+        lbgi={lbgi}
       />
 
       {/* Chart */}
