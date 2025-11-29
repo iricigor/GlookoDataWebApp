@@ -171,8 +171,22 @@ else {
     }
 }
 
+# Read and display the module version
+$ManifestPath = Join-Path $InstallPath "GlookoDeployment.psd1"
+$ModuleVersion = "unknown"
+if (Test-Path $ManifestPath) {
+    try {
+        $ManifestContent = Import-PowerShellDataFile -Path $ManifestPath -ErrorAction Stop
+        $ModuleVersion = $ManifestContent.ModuleVersion
+    }
+    catch {
+        Write-InstallWarning "Could not read module version from manifest"
+    }
+}
+
 Write-InstallSuccess "Module installed successfully!"
 Write-Host ""
+Write-Host "  Version: $ModuleVersion" -ForegroundColor Green
 Write-Host "  Installation path: $InstallPath"
 Write-Host ""
 Write-Host "Usage:" -ForegroundColor Yellow
