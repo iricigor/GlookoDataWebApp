@@ -868,7 +868,11 @@ export function Settings({
                     View on GitHub
                   </Button>
                 </Link>
-                <Link href="#api-docs">
+                <Link 
+                  href="#api-docs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Button 
                     appearance="secondary" 
                     icon={<DocumentBulletListRegular />}

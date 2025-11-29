@@ -114,20 +114,23 @@ export function APIDocs() {
 
   // Load OpenAPI spec
   useEffect(() => {
+    const controller = new AbortController()
     const loadSpec = async () => {
       try {
-        const response = await fetch('/api-docs/openapi.json')
+        const response = await fetch('/api-docs/openapi.json', { signal: controller.signal })
         if (!response.ok) {
           throw new Error(`Failed to load OpenAPI specification (${response.status}): ${response.statusText}`)
         }
         const spec = await response.json()
         setSwaggerSpec(spec)
       } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return
         console.error('Failed to load OpenAPI spec:', error)
         setSpecError(error instanceof Error ? error.message : 'Failed to load API documentation')
       }
     }
     loadSpec()
+    return () => controller.abort()
   }, [])
 
   // Custom request interceptor to add Bearer token
@@ -222,6 +225,7 @@ export function APIDocs() {
 
         {swaggerSpec ? (
           <SwaggerUI
+            key={idToken ? 'authenticated' : 'anonymous'}
             spec={swaggerSpec}
             requestInterceptor={requestInterceptor}
             docExpansion="list"

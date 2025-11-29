@@ -25,6 +25,11 @@
       "description": "User management operations"
     }
   ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
   "paths": {
     "/user/check-first-login": {
       "get": {
@@ -412,6 +417,7 @@
       },
       "SuccessResponse": {
         "type": "object",
+        "required": ["success"],
         "properties": {
           "success": {
             "type": "boolean",
