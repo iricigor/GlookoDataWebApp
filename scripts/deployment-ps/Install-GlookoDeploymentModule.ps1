@@ -139,9 +139,11 @@ else {
         @{ Path = "Public/Config-Functions.ps1"; Dest = "Public" }
         @{ Path = "Public/Invoke-GlookoDeployment.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoAzureFunction.ps1"; Dest = "Public" }
+        @{ Path = "Public/Set-GlookoKeyVault.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoManagedIdentity.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoResourceGroup.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoStorageAccount.ps1"; Dest = "Public" }
+        @{ Path = "Public/Set-GlookoSwaBackend.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoTableStorage.ps1"; Dest = "Public" }
         @{ Path = "Public/Test-GlookoDeployment.ps1"; Dest = "Public" }
         @{ Path = "Private/Azure-Helpers.ps1"; Dest = "Private" }
