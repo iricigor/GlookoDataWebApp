@@ -180,12 +180,12 @@ export async function checkFirstLogin(
         };
       } catch {
         const errorMessage = `API error: ${response.status} ${response.statusText}`;
-        apiLogger.logError(errorMessage, 'unknown', statusCode);
+        apiLogger.logError(errorMessage, 'unknown', response.status);
         return {
           success: false,
           error: errorMessage,
           errorType: 'unknown',
-          statusCode,
+          statusCode: response.status,
         };
       }
     }
@@ -299,12 +299,12 @@ export async function saveUserSettings(
         };
       } catch {
         const errorMessage = `API error: ${response.status} ${response.statusText}`;
-        apiLogger.logError(errorMessage, 'unknown', statusCode);
+        apiLogger.logError(errorMessage, 'unknown', response.status);
         return {
           success: false,
           error: errorMessage,
           errorType: 'unknown',
-          statusCode,
+          statusCode: response.status,
         };
       }
     }
@@ -414,12 +414,12 @@ export async function loadUserSettings(
         };
       } catch {
         const errorMessage = `API error: ${response.status} ${response.statusText}`;
-        apiLogger.logError(errorMessage, 'unknown', statusCode);
+        apiLogger.logError(errorMessage, 'unknown', response.status);
         return {
           success: false,
           error: errorMessage,
           errorType: 'unknown',
-          statusCode,
+          statusCode: response.status,
         };
       }
     }

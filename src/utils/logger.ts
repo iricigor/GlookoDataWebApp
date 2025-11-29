@@ -83,11 +83,18 @@ const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
 
 /**
  * Generate a unique correlation ID for tracking related operations
- * Format: 8 character hex string with timestamp component
+ * Uses crypto.randomUUID() for reliable unique ID generation, falling back
+ * to a custom implementation for older browsers.
  * 
- * @returns Unique correlation ID string
+ * @returns Unique correlation ID string (8 characters)
  */
 export function generateCorrelationId(): string {
+  // Use crypto.randomUUID() if available (modern browsers)
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    // Take first 8 characters of UUID for shorter ID
+    return crypto.randomUUID().replace(/-/g, '').slice(0, 8);
+  }
+  // Fallback for older environments
   const timestamp = Date.now().toString(16).slice(-4);
   const random = Math.random().toString(16).slice(2, 6);
   return `${timestamp}${random}`;
@@ -100,7 +107,7 @@ export function generateCorrelationId(): string {
  * @returns Logger object with log methods
  */
 export function createLogger(config: LoggerConfig = {}) {
-  const isDevelopment = import.meta.env?.DEV === true;
+  const isDevelopment = import.meta.env.DEV === true;
   const defaultMinLevel: LogLevel = isDevelopment ? 'debug' : 'info';
   
   const {

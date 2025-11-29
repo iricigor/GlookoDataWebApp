@@ -27,6 +27,7 @@
  */
 
 import { InvocationContext, HttpRequest, HttpResponseInit } from "@azure/functions";
+import { randomUUID } from "crypto";
 
 /**
  * Context data for log entries
@@ -56,14 +57,12 @@ export interface LogContext {
 
 /**
  * Generate a unique correlation ID for tracking related operations
- * Format: 8 character hex string with timestamp component
+ * Uses crypto.randomUUID() for reliable unique ID generation.
  * 
- * @returns Unique correlation ID string
+ * @returns Unique correlation ID string (8 characters)
  */
 export function generateCorrelationId(): string {
-  const timestamp = Date.now().toString(16).slice(-4);
-  const random = Math.random().toString(16).slice(2, 6);
-  return `${timestamp}${random}`;
+  return randomUUID().replace(/-/g, '').slice(0, 8);
 }
 
 /**
