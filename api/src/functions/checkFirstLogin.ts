@@ -23,6 +23,7 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { extractUserIdFromToken, getTableClient, isNotFoundError } from "../utils/azureUtils";
+import { createRequestLogger } from "../utils/logger";
 
 interface UserSettingsEntity {
   partitionKey: string;
@@ -82,22 +83,19 @@ async function updateLastLogin(tableClient: ReturnType<typeof getTableClient>, u
  * Main HTTP handler for check-first-login endpoint
  */
 async function checkFirstLogin(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
-  context.log('Processing check-first-login request');
+  const requestLogger = createRequestLogger(request, context);
+  requestLogger.logStart();
 
   // Validate authorization header and extract user ID from ID token
   const authHeader = request.headers.get('authorization');
   const userId = await extractUserIdFromToken(authHeader, context);
 
   if (!userId) {
-    context.warn('Unauthorized request - invalid or missing token');
-    return {
-      status: 401,
-      jsonBody: {
-        error: 'Unauthorized access. Please log in again.',
-        errorType: 'unauthorized',
-      },
-    };
+    requestLogger.logAuth(false, undefined, 'Invalid or missing token');
+    return requestLogger.logError('Unauthorized access. Please log in again.', 401, 'unauthorized');
   }
+
+  requestLogger.logAuth(true, userId);
 
   try {
     const tableClient = getTableClient();
@@ -106,66 +104,49 @@ async function checkFirstLogin(request: HttpRequest, context: InvocationContext)
     if (userExists) {
       // User exists - update last login and return
       await updateLastLogin(tableClient, userId);
-      context.log(`User ${userId} returning user`);
+      requestLogger.logStorage('updateLastLogin', true, { userId });
+      requestLogger.logInfo('Returning user detected', { userId, isFirstLogin: false });
       
-      return {
+      return requestLogger.logSuccess({
         status: 200,
         jsonBody: {
           isFirstLogin: false,
           userId: userId,
         },
-      };
+      });
     } else {
       // New user - create record and return first login
       await createUserRecord(tableClient, userId);
-      context.log(`User ${userId} first login`);
+      requestLogger.logStorage('createUserRecord', true, { userId });
+      requestLogger.logInfo('First login detected', { userId, isFirstLogin: true });
       
-      return {
+      return requestLogger.logSuccess({
         status: 200,
         jsonBody: {
           isFirstLogin: true,
           userId: userId,
         },
-      };
+      });
     }
   } catch (error: unknown) {
-    context.error('Error checking first login:', error);
-    
     // Check for specific Azure SDK error types
     const isAzureError = error && typeof error === 'object' && 'statusCode' in error;
     const statusCode = isAzureError ? (error as { statusCode: number }).statusCode : undefined;
     
     // Check for configuration errors (missing environment variables)
     if (error instanceof Error && error.message.includes('STORAGE_ACCOUNT_NAME')) {
-      return {
-        status: 503,
-        jsonBody: {
-          error: 'Service unavailable - storage not configured',
-          errorType: 'infrastructure',
-          code: 'STORAGE_NOT_CONFIGURED',
-        },
-      };
+      requestLogger.logStorage('getTableClient', false, { error: 'STORAGE_ACCOUNT_NAME not configured' });
+      return requestLogger.logError('Service unavailable - storage not configured', 503, 'infrastructure', { code: 'STORAGE_NOT_CONFIGURED' });
     }
     
     // Check for authentication/authorization errors from Azure Storage
     if (statusCode === 401 || statusCode === 403) {
-      return {
-        status: 503,
-        jsonBody: {
-          error: 'Service unavailable - storage access denied',
-          errorType: 'infrastructure',
-          code: 'STORAGE_ACCESS_DENIED',
-        },
-      };
+      requestLogger.logStorage('tableOperation', false, { error: 'Storage access denied', azureStatusCode: statusCode });
+      return requestLogger.logError('Service unavailable - storage access denied', 503, 'infrastructure', { code: 'STORAGE_ACCESS_DENIED' });
     }
 
-    return {
-      status: 500,
-      jsonBody: {
-        error: 'Internal server error',
-        errorType: 'infrastructure',
-      },
-    };
+    requestLogger.logStorage('tableOperation', false, { error: error instanceof Error ? error.message : 'Unknown error' });
+    return requestLogger.logError(error, 500, 'infrastructure');
   }
 }
 

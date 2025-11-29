@@ -7,6 +7,7 @@
  */
 
 import type { CloudUserSettings } from '../../types';
+import { createApiLogger } from '../logger';
 
 /**
  * Result of checking if a user is a first-time user
@@ -87,8 +88,12 @@ export async function checkFirstLogin(
   idToken: string,
   config: UserSettingsApiConfig = defaultConfig
 ): Promise<FirstLoginCheckResult> {
+  const endpoint = `${config.baseUrl}/user/check-first-login`;
+  const apiLogger = createApiLogger(endpoint);
+  
   // Validate ID token
   if (!idToken || idToken.trim() === '') {
+    apiLogger.logError('Authentication required - missing token', 'unauthorized');
     return {
       success: false,
       error: 'Authentication required',
@@ -96,12 +101,15 @@ export async function checkFirstLogin(
     };
   }
 
+  apiLogger.logStart('GET');
+
   try {
-    const response = await fetch(`${config.baseUrl}/user/check-first-login`, {
+    const response = await fetch(endpoint, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${idToken}`,
         'Content-Type': 'application/json',
+        'x-correlation-id': apiLogger.correlationId,
       },
     });
 
@@ -110,6 +118,7 @@ export async function checkFirstLogin(
       const statusCode = response.status;
       
       if (response.status === 401 || response.status === 403) {
+        apiLogger.logError('Unauthorized access', 'unauthorized', statusCode);
         return {
           success: false,
           error: 'Unauthorized access. Please log in again.',
@@ -120,6 +129,7 @@ export async function checkFirstLogin(
 
       // Handle infrastructure errors (e.g., can't reach table storage)
       if (response.status >= 500) {
+        apiLogger.logError('Internal server error', 'infrastructure', statusCode);
         return {
           success: false,
           error: 'Internal server error. The infrastructure may not be ready or there are access issues.',
@@ -137,6 +147,7 @@ export async function checkFirstLogin(
         const apiErrorType = errorData.errorType || errorData.code || errorData.type;
         
         if (apiErrorType === 'infrastructure') {
+          apiLogger.logError(errorMessage, 'infrastructure', statusCode);
           return {
             success: false,
             error: errorMessage,
@@ -151,6 +162,7 @@ export async function checkFirstLogin(
             errorMessage.includes('Storage') || 
             errorMessage.includes('connection') ||
             errorMessage.includes('infrastructure'))) {
+          apiLogger.logError(errorMessage, 'infrastructure', statusCode);
           return {
             success: false,
             error: errorMessage,
@@ -159,6 +171,7 @@ export async function checkFirstLogin(
           };
         }
         
+        apiLogger.logError(errorMessage, apiErrorType || 'unknown', statusCode);
         return {
           success: false,
           error: errorMessage,
@@ -166,9 +179,11 @@ export async function checkFirstLogin(
           statusCode,
         };
       } catch {
+        const errorMessage = `API error: ${response.status} ${response.statusText}`;
+        apiLogger.logError(errorMessage, 'unknown', statusCode);
         return {
           success: false,
-          error: `API error: ${response.status} ${response.statusText}`,
+          error: errorMessage,
           errorType: 'unknown',
           statusCode,
         };
@@ -178,6 +193,7 @@ export async function checkFirstLogin(
     // Parse successful response
     const data: UserCheckApiResponse = await response.json();
     
+    apiLogger.logSuccess(200, { isFirstLogin: data.isFirstLogin });
     return {
       success: true,
       isFirstLogin: data.isFirstLogin,
@@ -186,6 +202,7 @@ export async function checkFirstLogin(
   } catch (error) {
     // Handle network errors
     if (error instanceof TypeError && error.message.includes('fetch')) {
+      apiLogger.logError('Network error. Please check your internet connection.', 'network');
       return {
         success: false,
         error: 'Network error. Please check your internet connection.',
@@ -193,9 +210,11 @@ export async function checkFirstLogin(
       };
     }
 
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    apiLogger.logError(errorMessage, 'unknown');
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      error: errorMessage,
       errorType: 'unknown',
     };
   }
@@ -218,8 +237,12 @@ export async function saveUserSettings(
   email: string,
   config: UserSettingsApiConfig = defaultConfig
 ): Promise<SaveSettingsResult> {
+  const endpoint = `${config.baseUrl}/user/settings`;
+  const apiLogger = createApiLogger(endpoint);
+  
   // Validate ID token
   if (!idToken || idToken.trim() === '') {
+    apiLogger.logError('Authentication required - missing token', 'unauthorized');
     return {
       success: false,
       error: 'Authentication required',
@@ -227,12 +250,15 @@ export async function saveUserSettings(
     };
   }
 
+  apiLogger.logStart('PUT');
+
   try {
-    const response = await fetch(`${config.baseUrl}/user/settings`, {
+    const response = await fetch(endpoint, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${idToken}`,
         'Content-Type': 'application/json',
+        'x-correlation-id': apiLogger.correlationId,
       },
       body: JSON.stringify({ settings, email }),
     });
@@ -242,6 +268,7 @@ export async function saveUserSettings(
       const statusCode = response.status;
       
       if (response.status === 401 || response.status === 403) {
+        apiLogger.logError('Unauthorized access', 'unauthorized', statusCode);
         return {
           success: false,
           error: 'Unauthorized access. Please log in again.',
@@ -251,6 +278,7 @@ export async function saveUserSettings(
       }
 
       if (response.status >= 500) {
+        apiLogger.logError('Internal server error. Settings could not be saved.', 'infrastructure', statusCode);
         return {
           success: false,
           error: 'Internal server error. Settings could not be saved.',
@@ -261,26 +289,32 @@ export async function saveUserSettings(
 
       try {
         const errorData = await response.json();
+        const errorMessage = errorData.error || errorData.message || `API error: ${response.status}`;
+        apiLogger.logError(errorMessage, errorData.errorType || 'unknown', statusCode);
         return {
           success: false,
-          error: errorData.error || errorData.message || `API error: ${response.status}`,
+          error: errorMessage,
           errorType: errorData.errorType || 'unknown',
           statusCode,
         };
       } catch {
+        const errorMessage = `API error: ${response.status} ${response.statusText}`;
+        apiLogger.logError(errorMessage, 'unknown', statusCode);
         return {
           success: false,
-          error: `API error: ${response.status} ${response.statusText}`,
+          error: errorMessage,
           errorType: 'unknown',
           statusCode,
         };
       }
     }
 
+    apiLogger.logSuccess(200);
     return { success: true };
 
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('fetch')) {
+      apiLogger.logError('Network error. Please check your internet connection.', 'network');
       return {
         success: false,
         error: 'Network error. Please check your internet connection.',
@@ -288,9 +322,11 @@ export async function saveUserSettings(
       };
     }
 
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    apiLogger.logError(errorMessage, 'unknown');
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      error: errorMessage,
       errorType: 'unknown',
     };
   }
@@ -309,8 +345,12 @@ export async function loadUserSettings(
   idToken: string,
   config: UserSettingsApiConfig = defaultConfig
 ): Promise<LoadSettingsResult> {
+  const endpoint = `${config.baseUrl}/user/settings`;
+  const apiLogger = createApiLogger(endpoint);
+  
   // Validate ID token
   if (!idToken || idToken.trim() === '') {
+    apiLogger.logError('Authentication required - missing token', 'unauthorized');
     return {
       success: false,
       error: 'Authentication required',
@@ -318,11 +358,14 @@ export async function loadUserSettings(
     };
   }
 
+  apiLogger.logStart('GET');
+
   try {
-    const response = await fetch(`${config.baseUrl}/user/settings`, {
+    const response = await fetch(endpoint, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${idToken}`,
+        'x-correlation-id': apiLogger.correlationId,
       },
     });
 
@@ -331,6 +374,7 @@ export async function loadUserSettings(
       const statusCode = response.status;
       
       if (response.status === 401 || response.status === 403) {
+        apiLogger.logError('Unauthorized access', 'unauthorized', statusCode);
         return {
           success: false,
           error: 'Unauthorized access. Please log in again.',
@@ -341,6 +385,7 @@ export async function loadUserSettings(
 
       // 404 means no settings saved yet - this is OK, return empty success
       if (response.status === 404) {
+        apiLogger.logSuccess(404, { settingsFound: false });
         return {
           success: true,
           settings: undefined,
@@ -348,6 +393,7 @@ export async function loadUserSettings(
       }
 
       if (response.status >= 500) {
+        apiLogger.logError('Internal server error. Settings could not be loaded.', 'infrastructure', statusCode);
         return {
           success: false,
           error: 'Internal server error. Settings could not be loaded.',
@@ -358,16 +404,20 @@ export async function loadUserSettings(
 
       try {
         const errorData = await response.json();
+        const errorMessage = errorData.error || errorData.message || `API error: ${response.status}`;
+        apiLogger.logError(errorMessage, errorData.errorType || 'unknown', statusCode);
         return {
           success: false,
-          error: errorData.error || errorData.message || `API error: ${response.status}`,
+          error: errorMessage,
           errorType: errorData.errorType || 'unknown',
           statusCode,
         };
       } catch {
+        const errorMessage = `API error: ${response.status} ${response.statusText}`;
+        apiLogger.logError(errorMessage, 'unknown', statusCode);
         return {
           success: false,
-          error: `API error: ${response.status} ${response.statusText}`,
+          error: errorMessage,
           errorType: 'unknown',
           statusCode,
         };
@@ -377,6 +427,7 @@ export async function loadUserSettings(
     // Parse successful response
     const data: LoadSettingsApiResponse = await response.json();
     
+    apiLogger.logSuccess(200, { settingsFound: true });
     return {
       success: true,
       settings: data.settings,
@@ -384,6 +435,7 @@ export async function loadUserSettings(
 
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('fetch')) {
+      apiLogger.logError('Network error. Please check your internet connection.', 'network');
       return {
         success: false,
         error: 'Network error. Please check your internet connection.',
@@ -391,9 +443,11 @@ export async function loadUserSettings(
       };
     }
 
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    apiLogger.logError(errorMessage, 'unknown');
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      error: errorMessage,
       errorType: 'unknown',
     };
   }

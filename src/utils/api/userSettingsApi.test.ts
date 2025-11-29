@@ -69,13 +69,13 @@ describe('userSettingsApi', () => {
         success: true,
         isFirstLogin: true,
       });
-      expect(mockFetch).toHaveBeenCalledWith('/api/user/check-first-login', {
+      expect(mockFetch).toHaveBeenCalledWith('/api/user/check-first-login', expect.objectContaining({
         method: 'GET',
-        headers: {
+        headers: expect.objectContaining({
           'Authorization': 'Bearer valid-token',
           'Content-Type': 'application/json',
-        },
-      });
+        }),
+      }));
     });
 
     it('should return success with isFirstLogin=false for returning user', async () => {
@@ -341,14 +341,14 @@ describe('userSettingsApi', () => {
       const result = await saveUserSettings('valid-token', sampleSettings, 'test@example.com');
       
       expect(result).toEqual({ success: true });
-      expect(mockFetch).toHaveBeenCalledWith('/api/user/settings', {
+      expect(mockFetch).toHaveBeenCalledWith('/api/user/settings', expect.objectContaining({
         method: 'PUT',
-        headers: {
+        headers: expect.objectContaining({
           'Authorization': 'Bearer valid-token',
           'Content-Type': 'application/json',
-        },
+        }),
         body: JSON.stringify({ settings: sampleSettings, email: 'test@example.com' }),
-      });
+      }));
     });
 
     it('should return unauthorized error for 401 response', async () => {
@@ -421,12 +421,12 @@ describe('userSettingsApi', () => {
         success: true,
         settings: sampleSettings,
       });
-      expect(mockFetch).toHaveBeenCalledWith('/api/user/settings', {
+      expect(mockFetch).toHaveBeenCalledWith('/api/user/settings', expect.objectContaining({
         method: 'GET',
-        headers: {
+        headers: expect.objectContaining({
           'Authorization': 'Bearer valid-token',
-        },
-      });
+        }),
+      }));
     });
 
     it('should return success with undefined settings for 404 response', async () => {
