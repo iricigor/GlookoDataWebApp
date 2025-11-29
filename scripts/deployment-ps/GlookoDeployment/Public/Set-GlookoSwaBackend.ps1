@@ -125,17 +125,25 @@ function Set-GlookoSwaBackend {
             # Note: Az.Websites doesn't have native cmdlets for SWA backends
             Write-InfoMessage "Checking existing backend..."
             
-            $existingBackend = az staticwebapp backends list `
+            $existingBackendOutput = az staticwebapp backends list `
                 --name $swaName `
                 --resource-group $rg `
                 --query "[?backendResourceId!=null].backendResourceId" `
-                --output tsv 2>$null
+                --output tsv 2>&1
+            
+            if ($LASTEXITCODE -ne 0) {
+                Write-WarningMessage "Could not query existing backends: $existingBackendOutput"
+                $existingBackend = $null
+            }
+            else {
+                $existingBackend = $existingBackendOutput
+            }
             
             $backendLinked = $false
             
             if ($existingBackend) {
-                # Check if it's the correct backend
-                if ($existingBackend -match $funcName) {
+                # Check if it's the correct backend using -like for safe string matching
+                if ($existingBackend -like "*$funcName*") {
                     Write-WarningMessage "Correct backend already linked: $existingBackend"
                     $backendLinked = $true
                 }
@@ -177,17 +185,24 @@ function Set-GlookoSwaBackend {
             # Verify the backend is linked
             Write-SectionHeader "Verifying Backend Link"
             
-            $verifyBackend = az staticwebapp backends list `
+            $verifyBackendOutput = az staticwebapp backends list `
                 --name $swaName `
                 --resource-group $rg `
                 --query "[?backendResourceId!=null].backendResourceId" `
-                --output tsv 2>$null
+                --output tsv 2>&1
+            
+            if ($LASTEXITCODE -ne 0) {
+                throw "Backend verification failed - could not query backends: $verifyBackendOutput"
+            }
+            
+            $verifyBackend = $verifyBackendOutput
             
             if (-not $verifyBackend) {
                 throw "Backend verification failed - no backend is linked"
             }
             
-            if ($verifyBackend -match $funcName) {
+            # Use -like for safe string matching (avoids regex metacharacter issues)
+            if ($verifyBackend -like "*$funcName*") {
                 Write-SuccessMessage "Backend verified: $verifyBackend"
             }
             else {
