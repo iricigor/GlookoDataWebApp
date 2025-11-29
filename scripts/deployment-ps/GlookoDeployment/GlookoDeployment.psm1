@@ -54,6 +54,7 @@ Export-ModuleMember -Function @(
     'Set-GlookoTableStorage',
     'Set-GlookoManagedIdentity',
     'Set-GlookoAzureFunction',
+    'Set-GlookoSwaBackend',
     'Invoke-GlookoDeployment',
     'Test-GlookoDeployment'
 )
@@ -69,6 +70,7 @@ Export-ModuleMember -Alias @(
     'Set-GTS',
     'Set-GMI',
     'Set-GAF',
+    'Set-GSB',
     'Invoke-GD',
     'Test-GD'
 )

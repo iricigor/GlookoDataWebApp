@@ -7,7 +7,7 @@
 
     # Version number of this module
     # NOTE: Bump this version when adding/updating scripts (see copilot-instructions.md)
-    ModuleVersion = '1.0.12'
+    ModuleVersion = '1.0.13'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -92,6 +92,7 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
+v1.0.13 - Fixed Install-GlookoDeploymentModule to download Set-GlookoSwaBackend.ps1; fixed module exports for Set-GlookoSwaBackend and Set-GSB alias
 v1.0.12 - Added SWA backend linking verification to Test-GlookoDeployment
 v1.0.11 - Added Set-GlookoSwaBackend for linking Azure Function App to Static Web App as backend
 v1.0.10 - Added version display when downloading/installing the module
