@@ -11,6 +11,11 @@ jobs:
       contents: write  # Changed from read to write for creating releases
       pull-requests: write
       id-token: write  # Required for Azure Login with OIDC
+    env:
+      AZURE_RESOURCE_GROUP: glookodatawebapp-rg
+      AZURE_STATIC_WEB_APP_NAME: wonderful-stone-071384103
+      AZURE_FUNCTION_APP_NAME: glookodatawebapp-func
+      AZURE_LOCATION: eastus
     steps:
       - uses: actions/checkout@v3
         with:
@@ -58,7 +63,7 @@ jobs:
       - name: Deploy API to Azure Function
         uses: Azure/functions-action@v1
         with:
-          app-name: glookodatawebapp-func
+          app-name: ${{ env.AZURE_FUNCTION_APP_NAME }}
           package: ./api
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
 
@@ -73,20 +78,20 @@ jobs:
         run: |
           # Check if backend is already linked
           EXISTING_BACKEND=$(az staticwebapp backends list \
-            --name wonderful-stone-071384103 \
-            --resource-group glookodatawebapp-rg \
+            --name "$AZURE_STATIC_WEB_APP_NAME" \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
             --query "[?backendResourceId!=null].backendResourceId" \
             -o tsv 2>/dev/null || echo "")
           
-          FUNCTION_RESOURCE_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/glookodatawebapp-rg/providers/Microsoft.Web/sites/glookodatawebapp-func"
+          FUNCTION_RESOURCE_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/$AZURE_RESOURCE_GROUP/providers/Microsoft.Web/sites/$AZURE_FUNCTION_APP_NAME"
           
           if [ -z "$EXISTING_BACKEND" ]; then
             echo "Linking Function App to Static Web App..."
             az staticwebapp backends link \
-              --name wonderful-stone-071384103 \
-              --resource-group glookodatawebapp-rg \
+              --name "$AZURE_STATIC_WEB_APP_NAME" \
+              --resource-group "$AZURE_RESOURCE_GROUP" \
               --backend-resource-id "$FUNCTION_RESOURCE_ID" \
-              --backend-region eastus
+              --backend-region "$AZURE_LOCATION"
             echo "Backend linked successfully!"
           else
             echo "Backend already linked: $EXISTING_BACKEND"

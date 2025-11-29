@@ -66,9 +66,11 @@ The deployment workflow requires the following secrets to be configured in GitHu
 # Create a service principal with Contributor role
 az ad sp create-for-rbac --name "GlookoDataWebApp-Deploy" \
   --role Contributor \
-  --scopes /subscriptions/{subscription-id}/resourceGroups/glookodatawebapp-rg \
+  --scopes /subscriptions/<YOUR_SUBSCRIPTION_ID>/resourceGroups/glookodatawebapp-rg \
   --sdk-auth
 ```
+
+Replace `<YOUR_SUBSCRIPTION_ID>` with your actual Azure subscription ID.
 
 Copy the JSON output to the `AZURE_CREDENTIALS` secret.
 
@@ -109,10 +111,11 @@ If the backend is not linked, `/api/*` requests will return 404. To link manuall
 az login
 
 # Link the Function App to the Static Web App
+# Replace <YOUR_SUBSCRIPTION_ID> with your actual subscription ID
 az staticwebapp backends link \
   --name wonderful-stone-071384103 \
   --resource-group glookodatawebapp-rg \
-  --backend-resource-id "/subscriptions/{subscription-id}/resourceGroups/glookodatawebapp-rg/providers/Microsoft.Web/sites/glookodatawebapp-func" \
+  --backend-resource-id "/subscriptions/<YOUR_SUBSCRIPTION_ID>/resourceGroups/glookodatawebapp-rg/providers/Microsoft.Web/sites/glookodatawebapp-func" \
   --backend-region eastus
 
 # Verify the link
