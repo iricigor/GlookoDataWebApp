@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>570 Add API Swagger documentation page with Microsoft authentication</summary>
+
+[#570](../../pull/570) Add API Swagger documentation page with Microsoft authentication
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>569 Add centralized logging with correlation IDs for UI and API</summary>
 
 [#569](../../pull/569) Add centralized logging with correlation IDs for UI and API
