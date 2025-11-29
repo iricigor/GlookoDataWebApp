@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>569 Add centralized logging with correlation IDs for UI and API</summary>
+
+[#569](../../pull/569) Add centralized logging with correlation IDs for UI and API
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>574 Add appRegistrationClientId verification to test scripts</summary>
 
 [#574](../../pull/574) Add appRegistrationClientId verification to test scripts
