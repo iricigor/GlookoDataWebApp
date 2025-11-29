@@ -17,20 +17,21 @@ $script:ConfigPath = Join-Path $script:ConfigDir "config.json"
 
 # Default configuration values
 $script:DefaultConfig = @{
-    resourceGroup        = "glookodatawebapp-rg"
-    location             = "eastus"
-    appName              = "glookodatawebapp"
-    storageAccountName   = "glookodatawebappstorage"
-    managedIdentityName  = "glookodatawebapp-identity"
-    staticWebAppName     = "glookodatawebapp-swa"
-    staticWebAppSku      = "Standard"
-    keyVaultName         = "glookodatawebapp-kv"
-    functionAppName      = "glookodatawebapp-func"
-    webAppUrl            = "https://glooko.iric.online"
-    appRegistrationName  = "GlookoDataWebApp"
-    signInAudience       = "PersonalMicrosoftAccount"
-    useManagedIdentity   = $true
-    tags                 = @{
+    resourceGroup             = "glookodatawebapp-rg"
+    location                  = "eastus"
+    appName                   = "glookodatawebapp"
+    storageAccountName        = "glookodatawebappstorage"
+    managedIdentityName       = "glookodatawebapp-identity"
+    staticWebAppName          = "glookodatawebapp-swa"
+    staticWebAppSku           = "Standard"
+    keyVaultName              = "glookodatawebapp-kv"
+    functionAppName           = "glookodatawebapp-func"
+    webAppUrl                 = "https://glooko.iric.online"
+    appRegistrationName       = "GlookoDataWebApp"
+    appRegistrationClientId   = ""
+    signInAudience            = "PersonalMicrosoftAccount"
+    useManagedIdentity        = $true
+    tags                      = @{
         Application = "GlookoDataWebApp"
         Environment = "Production"
         ManagedBy   = "AzureDeploymentScripts"
@@ -219,7 +220,7 @@ function Test-GlookoConfig {
     Write-SectionHeader "Validating Configuration"
     
     # Check required values
-    $requiredFields = @('resourceGroup', 'location', 'functionAppName', 'storageAccountName')
+    $requiredFields = @('resourceGroup', 'location', 'functionAppName', 'storageAccountName', 'appRegistrationClientId')
     
     foreach ($field in $requiredFields) {
         if (-not $config[$field] -or $config[$field] -eq '') {
@@ -235,6 +236,14 @@ function Test-GlookoConfig {
     if ($config.storageAccountName) {
         if ($config.storageAccountName -notmatch '^[a-z0-9]{3,24}$') {
             Write-ErrorMessage "Storage account name must be 3-24 lowercase letters and numbers only"
+            $isValid = $false
+        }
+    }
+    
+    # Validate appRegistrationClientId format (must be a valid GUID)
+    if ($config.appRegistrationClientId) {
+        if ($config.appRegistrationClientId -notmatch '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') {
+            Write-ErrorMessage "appRegistrationClientId must be a valid GUID format (e.g., 00000000-0000-0000-0000-000000000000)"
             $isValid = $false
         }
     }

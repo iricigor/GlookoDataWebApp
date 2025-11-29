@@ -454,6 +454,35 @@ verify_rbac_roles() {
     fi
 }
 
+# Verify App Registration Client ID
+verify_app_registration() {
+    local client_id="${APP_REGISTRATION_CLIENT_ID}"
+    
+    # Check if client ID is configured
+    if [ -z "${client_id}" ]; then
+        record_result "App Registration Client ID" "appRegistration" "${STATUS_NOT_EXISTING}" "appRegistrationClientId not configured"
+        return 1
+    fi
+    
+    # Validate GUID format
+    if ! echo "${client_id}" | grep -qE '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'; then
+        record_result "App Registration Client ID" "appRegistration" "${STATUS_MISCONFIGURED}" "Invalid GUID format"
+        return 1
+    fi
+    
+    # Verify app registration exists in Azure AD
+    local app_id
+    app_id=$(az ad app show --id "${client_id}" --query "appId" -o tsv 2>/dev/null)
+    
+    if [ "${app_id}" = "${client_id}" ]; then
+        record_result "App Registration Client ID '${client_id}'" "appRegistration" "${STATUS_CONFIGURED}"
+    else
+        record_result "App Registration Client ID '${client_id}'" "appRegistration" "${STATUS_MISCONFIGURED}" "App registration not found in Azure AD"
+    fi
+    
+    return 0
+}
+
 ################################################################################
 # OUTPUT FUNCTIONS
 ################################################################################
@@ -489,7 +518,8 @@ output_json() {
     echo "    \"managedIdentityName\": \"${MANAGED_IDENTITY_NAME}\","
     echo "    \"functionAppName\": \"${FUNCTION_APP_NAME}\","
     echo "    \"keyVaultName\": \"${KEY_VAULT_NAME}\","
-    echo "    \"staticWebAppName\": \"${STATIC_WEB_APP_NAME}\""
+    echo "    \"staticWebAppName\": \"${STATIC_WEB_APP_NAME}\","
+    echo "    \"appRegistrationClientId\": \"${APP_REGISTRATION_CLIENT_ID}\""
     echo "  }"
     echo "}"
 }
@@ -549,6 +579,7 @@ main() {
     verify_key_vault
     verify_static_web_app
     verify_rbac_roles
+    verify_app_registration
     
     # Output results
     if [ "${OUTPUT_JSON}" = true ]; then
