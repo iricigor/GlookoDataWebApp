@@ -17,6 +17,7 @@ import {
 } from '@fluentui/react-icons'
 import SwaggerUI from 'swagger-ui-react'
 import 'swagger-ui-react/swagger-ui.css'
+import './APIDocs.css'
 import { useAuth } from '../hooks/useAuth'
 
 const useStyles = makeStyles({
