@@ -7,7 +7,7 @@
 
     # Version number of this module
     # NOTE: Bump this version when adding/updating scripts (see copilot-instructions.md)
-    ModuleVersion = '1.0.18'
+    ModuleVersion = '1.0.19'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -96,6 +96,7 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
+v1.0.19 - Added appRegistrationClientId verification to Test-GlookoConfig and Test-GlookoDeployment
 v1.0.18 - Changed AZURE_AD_CLIENT_ID to require explicit configuration instead of dynamic lookup to avoid ambiguity with multiple app registrations
 v1.0.17 - Added AZURE_AD_CLIENT_ID configuration for JWT audience validation with full signature verification
 v1.0.16 - Fixed missing Set-GlookoStaticWebApp function and Set-GSWA alias exports in GlookoDeployment.psm1

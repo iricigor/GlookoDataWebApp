@@ -96,6 +96,7 @@ function Test-GlookoDeployment {
         $webAppUrl = $config.webAppUrl
         $useManagedIdentity = $config.useManagedIdentity
         $location = $config.location
+        $appRegistrationClientId = $config.appRegistrationClientId
 
         # Store configuration in results
         $results.Configuration = @{
@@ -106,6 +107,7 @@ function Test-GlookoDeployment {
             functionAppName = $functionAppName
             keyVaultName = $keyVaultName
             staticWebAppName = $staticWebAppName
+            appRegistrationClientId = $appRegistrationClientId
         }
 
         # Helper function to record results
@@ -418,6 +420,29 @@ function Test-GlookoDeployment {
             }
             catch {
                 # Managed identity doesn't exist, skip RBAC check
+            }
+
+            # Verify App Registration Client ID
+            if ([string]::IsNullOrEmpty($appRegistrationClientId)) {
+                Record-Result -ResourceName "App Registration Client ID" -ResourceType "appRegistration" -Status $STATUS_NOT_EXISTING -Details "appRegistrationClientId not configured"
+            }
+            elseif ($appRegistrationClientId -notmatch '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$') {
+                Record-Result -ResourceName "App Registration Client ID" -ResourceType "appRegistration" -Status $STATUS_MISCONFIGURED -Details "Invalid GUID format"
+            }
+            else {
+                # Verify app registration exists in Azure AD using Azure CLI
+                try {
+                    $appOutput = az ad app show --id $appRegistrationClientId --query "appId" --output tsv 2>$null
+                    if ($LASTEXITCODE -eq 0 -and $appOutput -eq $appRegistrationClientId) {
+                        Record-Result -ResourceName "App Registration Client ID '$appRegistrationClientId'" -ResourceType "appRegistration" -Status $STATUS_CONFIGURED
+                    }
+                    else {
+                        Record-Result -ResourceName "App Registration Client ID '$appRegistrationClientId'" -ResourceType "appRegistration" -Status $STATUS_MISCONFIGURED -Details "App registration not found in Azure AD"
+                    }
+                }
+                catch {
+                    Record-Result -ResourceName "App Registration Client ID '$appRegistrationClientId'" -ResourceType "appRegistration" -Status $STATUS_MISCONFIGURED -Details "Unable to verify app registration: $_"
+                }
             }
 
             # Display summary
