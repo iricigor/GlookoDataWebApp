@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>543 Fix API 404 by linking Function App backend to Static Web App</summary>
+
+[#543](../../pull/543) Fix API 404 by linking Function App backend to Static Web App
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>539 Display module version when downloading GlookoDeployment module</summary>
 
 [#539](../../pull/539) Display module version when downloading GlookoDeployment module
