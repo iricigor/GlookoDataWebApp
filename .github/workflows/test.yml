@@ -115,7 +115,6 @@ jobs:
           path: ./results
 
       - name: Aggregate results
-        id: aggregate
         run: |
           # Extract test count from JSON output
           TEST_COUNT=$(grep -o '"numTotalTests":[0-9]*' ./results/test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
@@ -130,12 +129,20 @@ jobs:
 
       - name: Check job statuses
         run: |
-          echo "Lint: ${{ needs.lint.result }}"
-          echo "Build: ${{ needs.build.result }}"
-          echo "Unit Tests: ${{ needs.unit-tests.result }}"
+          # Array of job results
+          jobs=("lint:${{ needs.lint.result }}" "build:${{ needs.build.result }}" "unit-tests:${{ needs.unit-tests.result }}")
+          failed=false
           
-          # Fail if any job failed
-          if [[ "${{ needs.lint.result }}" == "failure" || "${{ needs.build.result }}" == "failure" || "${{ needs.unit-tests.result }}" == "failure" ]]; then
+          for job in "${jobs[@]}"; do
+            name="${job%%:*}"
+            result="${job#*:}"
+            echo "$name: $result"
+            if [[ "$result" == "failure" ]]; then
+              failed=true
+            fi
+          done
+          
+          if [[ "$failed" == "true" ]]; then
             echo "::error::One or more jobs failed"
             exit 1
           fi
