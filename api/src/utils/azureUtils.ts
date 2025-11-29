@@ -101,25 +101,22 @@ interface TokenClaims {
 /**
  * Validate the issuer claim against expected Microsoft identity platform issuers.
  * 
+ * The issuer (iss) claim in Microsoft tokens contains the tenant ID.
+ * We validate that the issuer matches one of Microsoft's known patterns.
+ * 
  * @param issuer - The issuer claim from the token
- * @param tenantId - The tenant ID from the token (optional, will check consumer tenant if not provided)
+ * @param tenantId - The tenant ID from the token (required for proper validation)
  * @returns True if the issuer is valid
  */
 function validateIssuer(issuer: string, tenantId?: string): boolean {
-  // If tenant ID is provided, check against patterns with that tenant
-  const tenantsToCheck = tenantId ? [tenantId] : [CONSUMER_TENANT_ID];
+  // If no tenant ID is provided in the token, we can't validate the issuer properly
+  // Accept consumer tenant as fallback for personal Microsoft accounts
+  const tid = tenantId || CONSUMER_TENANT_ID;
   
-  // Also allow the actual consumer tenant ID if a specific tenant is provided
-  if (tenantId && tenantId !== CONSUMER_TENANT_ID) {
-    tenantsToCheck.push(CONSUMER_TENANT_ID);
-  }
-  
-  for (const tid of tenantsToCheck) {
-    for (const pattern of VALID_ISSUER_PATTERNS) {
-      const expectedIssuer = pattern.replace('{tenantid}', tid);
-      if (issuer === expectedIssuer) {
-        return true;
-      }
+  for (const pattern of VALID_ISSUER_PATTERNS) {
+    const expectedIssuer = pattern.replace('{tenantid}', tid);
+    if (issuer === expectedIssuer) {
+      return true;
     }
   }
   
@@ -163,8 +160,15 @@ export async function extractUserIdFromToken(authHeader: string | null, context:
     
     // Verify the token signature and decode the payload
     const expectedAudiences = getExpectedAudiences();
-    // Use the first audience as the primary, since jsonwebtoken expects a string or non-empty array
-    const audience = expectedAudiences.length === 1 ? expectedAudiences[0] : expectedAudiences as [string, ...string[]];
+    // Ensure audience is never empty - jsonwebtoken requires string or non-empty array
+    if (expectedAudiences.length === 0) {
+      context.warn('No expected audiences configured');
+      return null;
+    }
+    // Use single string for one audience, or cast to tuple for multiple
+    const audience: string | [string, ...string[]] = expectedAudiences.length === 1 
+      ? expectedAudiences[0] 
+      : [expectedAudiences[0], ...expectedAudiences.slice(1)];
     const verifiedPayload = jwt.verify(token, publicKey, {
       algorithms: ['RS256'], // Microsoft uses RS256 for ID tokens
       audience: audience,
