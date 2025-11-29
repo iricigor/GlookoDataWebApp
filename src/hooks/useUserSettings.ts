@@ -82,12 +82,17 @@ export function useUserSettings(
     setSyncError(null);
 
     const savePromise = saveUserSettings(idToken, settings, userEmail);
+    // Store reference to this save promise for race condition detection
     pendingSaveRef.current = savePromise;
 
     try {
       const result = await savePromise;
       
-      // Only update status if this is still the latest save operation
+      // Race condition check: Only update status if this is still the latest save operation.
+      // When multiple rapid saves occur (e.g., user quickly changing multiple settings),
+      // earlier saves may complete after later ones started. This check ensures that
+      // only the result from the most recent save operation updates the UI state,
+      // preventing stale results from overwriting more recent status.
       if (pendingSaveRef.current === savePromise) {
         if (result.success) {
           setSyncStatus('success');
@@ -103,6 +108,7 @@ export function useUserSettings(
       
       return result;
     } catch (error) {
+      // Same race condition check for error handling
       if (pendingSaveRef.current === savePromise) {
         setSyncStatus('error');
         setSyncError(error instanceof Error ? error.message : 'Unknown error');

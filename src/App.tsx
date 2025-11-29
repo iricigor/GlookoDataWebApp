@@ -110,8 +110,16 @@ function App() {
         const result = await loadSettings()
         if (result.success && result.settings) {
           applyCloudSettings(result.settings)
+          // Only mark as loaded when we successfully retrieved settings
+          // This allows retry on next login if loading fails
+          setHasLoadedCloudSettings(true)
+        } else if (result.success && !result.settings) {
+          // 404 - no settings found, which is OK for new users
+          // Mark as loaded so we can start saving changes
+          setHasLoadedCloudSettings(true)
         }
-        setHasLoadedCloudSettings(true)
+        // If loading failed with an error, don't set the flag
+        // so we can retry on next render or login
       }
     }
     
@@ -126,6 +134,11 @@ function App() {
   }, [isLoggedIn])
 
   // Track previous settings to detect changes
+  // Using JSON.stringify for comparison is reliable here because:
+  // 1. The settings object has a consistent structure
+  // 2. Property order is determined by getCurrentSettings() which always 
+  //    creates objects with the same property order
+  // 3. All values are primitives or simple nested objects
   const prevSettingsRef = useRef<string>('')
   
   // Save settings when they change (async, fire and forget)

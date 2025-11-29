@@ -23,17 +23,7 @@
  */
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import { TableClient } from "@azure/data-tables";
-import { DefaultAzureCredential } from "@azure/identity";
-
-/**
- * Get expected audiences for ID token validation.
- * Uses environment variable if set, otherwise falls back to default client ID.
- */
-function getExpectedAudiences(): string[] {
-  const clientId = process.env.AZURE_AD_CLIENT_ID || '656dc9c9-bae3-4ed0-a550-0c3e8aa3f26c';
-  return [clientId];
-}
+import { extractUserIdFromToken, getTableClient, isNotFoundError } from "../utils/azureUtils";
 
 /**
  * Cloud user settings type (should match frontend type)
@@ -60,13 +50,6 @@ interface SaveSettingsRequest {
   email: string;
 }
 
-interface TokenClaims {
-  aud?: string;
-  oid?: string;
-  sub?: string;
-  exp?: number;
-}
-
 /**
  * User settings entity stored in Table Storage
  */
@@ -77,80 +60,6 @@ interface UserSettingsEntity {
   firstLoginDate?: string;
   lastLoginDate?: string;
   settingsJson?: string; // Compact JSON string of CloudUserSettings
-}
-
-/**
- * Validate and extract user ID from the ID token.
- * 
- * SECURITY NOTE: This validates basic JWT claims (audience, expiration, structure)
- * but does not perform full signature verification. For production environments,
- * consider using Azure Static Web Apps built-in authentication or Azure AD Easy Auth
- * which provides full token validation at the infrastructure level.
- */
-function extractUserIdFromToken(authHeader: string | null, context: InvocationContext): string | null {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    context.warn('Missing or invalid Authorization header format');
-    return null;
-  }
-
-  const token = authHeader.substring(7);
-  
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      context.warn('Invalid JWT structure - expected 3 parts');
-      return null;
-    }
-
-    const payload = Buffer.from(parts[1], 'base64url').toString('utf-8');
-    const claims: TokenClaims = JSON.parse(payload);
-
-    if (!claims.aud) {
-      context.warn('Token missing audience (aud) claim');
-      return null;
-    }
-
-    const expectedAudiences = getExpectedAudiences();
-    if (!expectedAudiences.includes(claims.aud)) {
-      context.warn(`Token audience mismatch. Expected one of: ${expectedAudiences.join(', ')}, got: ${claims.aud}`);
-      return null;
-    }
-
-    if (claims.exp) {
-      const now = Math.floor(Date.now() / 1000);
-      if (claims.exp < now) {
-        context.warn('Token has expired');
-        return null;
-      }
-    }
-
-    const userId = claims.oid || claims.sub;
-    if (!userId) {
-      context.warn('Token missing user identifier (oid or sub claim)');
-      return null;
-    }
-
-    return userId;
-  } catch (error) {
-    context.warn('Failed to parse token:', error);
-    return null;
-  }
-}
-
-/**
- * Get Table Storage client using managed identity
- */
-function getTableClient(): TableClient {
-  const storageAccountName = process.env.STORAGE_ACCOUNT_NAME;
-  
-  if (!storageAccountName) {
-    throw new Error('STORAGE_ACCOUNT_NAME environment variable is not set');
-  }
-
-  const tableUrl = `https://${storageAccountName}.table.core.windows.net`;
-  const credential = new DefaultAzureCredential();
-  
-  return new TableClient(tableUrl, 'UserSettings', credential);
 }
 
 /**
@@ -197,7 +106,7 @@ async function getUserSettings(request: HttpRequest, context: InvocationContext)
       };
     } catch (error: unknown) {
       // 404 means user doesn't exist
-      if (error && typeof error === 'object' && 'statusCode' in error && (error as { statusCode: number }).statusCode === 404) {
+      if (isNotFoundError(error)) {
         return {
           status: 404,
           jsonBody: {
