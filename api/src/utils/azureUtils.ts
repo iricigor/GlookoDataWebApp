@@ -10,21 +10,27 @@ import { TableClient } from "@azure/data-tables";
 import { DefaultAzureCredential } from "@azure/identity";
 
 /**
- * Expected audiences for ID token validation.
- * Set from environment variable at module load time.
+ * GlookoDataWebApp client ID - hardcoded fallback for when environment variable is not set.
+ * This is the Application (client) ID from Azure App Registration.
+ * 
+ * Note: Client IDs are not secrets and are safe to include in source code.
+ * This is standard practice for SPAs using MSAL authentication.
+ * See: https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-client-application-configuration
  */
-const EXPECTED_AUDIENCES: string[] = process.env.AZURE_AD_CLIENT_ID 
-  ? [process.env.AZURE_AD_CLIENT_ID] 
-  : [];
+const GLOOKO_CLIENT_ID = '656dc9c9-bae3-4ed0-a550-0c3e8aa3f26c';
+
+/**
+ * Expected audiences for ID token validation.
+ * Uses environment variable if set, otherwise falls back to hardcoded client ID.
+ * This ensures the application works even if the environment variable is not configured.
+ */
+const EXPECTED_AUDIENCES: string[] = [process.env.AZURE_AD_CLIENT_ID || GLOOKO_CLIENT_ID];
 
 /**
  * Get expected audiences for ID token validation.
- * Throws error if not configured.
+ * Returns the configured audiences (from env variable or hardcoded fallback).
  */
 export function getExpectedAudiences(): string[] {
-  if (EXPECTED_AUDIENCES.length === 0) {
-    throw new Error('AZURE_AD_CLIENT_ID environment variable is not set');
-  }
   return EXPECTED_AUDIENCES;
 }
 
