@@ -148,6 +148,25 @@ describe('Navigation', () => {
       expect(screen.getByRole('button', { name: /syncing settings/i })).toBeInTheDocument();
     });
 
+    it('should keep settings icon clickable and functional during syncing', () => {
+      const onNavigate = vi.fn();
+      render(
+        <Navigation 
+          currentPage="home" 
+          onNavigate={onNavigate} 
+          syncStatus="syncing"
+        />
+      );
+      
+      // The settings shortcut button should still be present and clickable during syncing
+      const syncingButton = screen.getByRole('button', { name: /syncing settings/i });
+      expect(syncingButton).toBeInTheDocument();
+      
+      // Click the settings button and verify navigation still works
+      fireEvent.click(syncingButton);
+      expect(onNavigate).toHaveBeenCalledWith('settings');
+    });
+
     it('should call onThemeToggle when theme button is clicked', () => {
       const onThemeToggle = vi.fn();
       render(
