@@ -5,7 +5,8 @@
       "/api/*",
       "/assets/*",
       "/demo-data.zip",
-      "/demo-data/*"
+      "/demo-data/*",
+      "/api-docs/*"
     ]
   },
   "routes": [
@@ -19,6 +20,12 @@
       "route": "/demo-data/*.zip",
       "headers": {
         "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "route": "/api-docs/*",
+      "headers": {
+        "Cache-Control": "public, max-age=3600"
       }
     }
   ],

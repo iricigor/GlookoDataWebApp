@@ -22,6 +22,7 @@ import {
   NavigationRegular,
   WeatherSunnyRegular,
   WeatherMoonRegular,
+  CodeRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useFirstLoginCheck } from '../../hooks/useFirstLoginCheck';
@@ -211,6 +212,7 @@ export function Navigation({
     { page: 'reports', label: 'Reports', icon: <ChartMultipleRegular /> },
     { page: 'ai', label: 'AI Analysis', icon: <BrainCircuitRegular /> },
     { page: 'settings', label: 'Settings', icon: <SettingsRegular /> },
+    { page: 'api-docs', label: 'API', icon: <CodeRegular /> },
   ];
 
   return (

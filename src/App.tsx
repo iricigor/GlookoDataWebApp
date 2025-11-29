@@ -7,6 +7,7 @@ import { DataUpload } from './pages/DataUpload'
 import { Reports } from './pages/Reports'
 import { AIAnalysis } from './pages/AIAnalysis'
 import { Settings } from './pages/Settings'
+import { APIDocs } from './pages/APIDocs'
 import { useTheme, isDarkTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
 import { useResponseLanguage } from './hooks/useResponseLanguage'
@@ -376,6 +377,8 @@ function App() {
           selectedProvider={selectedProvider}
           onSelectedProviderChange={setSelectedProvider}
         />
+      case 'api-docs':
+        return <APIDocs />
       default:
         return <Home onNavigate={handleNavigate} />
     }
