@@ -163,11 +163,12 @@ verify_prerequisites() {
 ################################################################################
 
 # Get the current linked backend (if any)
+# Note: The command is 'show' not 'list' - each SWA can only have one backend
 get_linked_backend() {
-    az staticwebapp backends list \
+    az staticwebapp backends show \
         --name "${STATIC_WEB_APP_NAME}" \
         --resource-group "${RESOURCE_GROUP}" \
-        --query "[?backendResourceId!=null].backendResourceId" \
+        --query "backendResourceId" \
         -o tsv 2>/dev/null || echo ""
 }
 

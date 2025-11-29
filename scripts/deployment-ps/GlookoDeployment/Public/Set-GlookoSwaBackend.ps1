@@ -123,16 +123,17 @@ function Set-GlookoSwaBackend {
             
             # Check if backend is already linked using Azure CLI
             # Note: Az.Websites doesn't have native cmdlets for SWA backends
+            # Note: The command is 'show' not 'list' - each SWA can only have one backend
             Write-InfoMessage "Checking existing backend..."
             
-            $existingBackendOutput = az staticwebapp backends list `
+            $existingBackendOutput = az staticwebapp backends show `
                 --name $swaName `
                 --resource-group $rg `
-                --query "[?backendResourceId!=null].backendResourceId" `
+                --query "backendResourceId" `
                 --output tsv 2>&1
             
             if ($LASTEXITCODE -ne 0) {
-                Write-WarningMessage "Could not query existing backends: $existingBackendOutput"
+                # No backend linked or command failed - this is normal for new SWAs
                 $existingBackend = $null
             }
             else {
@@ -185,14 +186,14 @@ function Set-GlookoSwaBackend {
             # Verify the backend is linked
             Write-SectionHeader "Verifying Backend Link"
             
-            $verifyBackendOutput = az staticwebapp backends list `
+            $verifyBackendOutput = az staticwebapp backends show `
                 --name $swaName `
                 --resource-group $rg `
-                --query "[?backendResourceId!=null].backendResourceId" `
+                --query "backendResourceId" `
                 --output tsv 2>&1
             
             if ($LASTEXITCODE -ne 0) {
-                throw "Backend verification failed - could not query backends: $verifyBackendOutput"
+                throw "Backend verification failed - could not query backend: $verifyBackendOutput"
             }
             
             $verifyBackend = $verifyBackendOutput

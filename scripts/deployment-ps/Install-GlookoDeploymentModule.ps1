@@ -142,6 +142,7 @@ else {
         @{ Path = "Public/Set-GlookoKeyVault.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoManagedIdentity.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoResourceGroup.ps1"; Dest = "Public" }
+        @{ Path = "Public/Set-GlookoStaticWebApp.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoStorageAccount.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoSwaBackend.ps1"; Dest = "Public" }
         @{ Path = "Public/Set-GlookoTableStorage.ps1"; Dest = "Public" }
