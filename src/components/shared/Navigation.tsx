@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { 
   makeStyles, 
   Button,
@@ -140,6 +140,16 @@ export function Navigation({
     clearError,
   } = useFirstLoginCheck();
 
+  // Track if we've already handled the returning user login to prevent duplicate calls
+  const hasHandledReturningUserLogin = useRef(false);
+
+  // Reset the handled flag when user logs out
+  useEffect(() => {
+    if (!isLoggedIn) {
+      hasHandledReturningUserLogin.current = false;
+    }
+  }, [isLoggedIn]);
+
   // Trigger first login check when user just logged in
   // Use idToken instead of accessToken because:
   // - accessToken is for Microsoft Graph API (audience: https://graph.microsoft.com)
@@ -152,8 +162,9 @@ export function Navigation({
 
   // When a returning user's login check completes, trigger settings load
   useEffect(() => {
-    if (hasChecked && !isFirstLogin && !hasError && justLoggedIn) {
+    if (hasChecked && !isFirstLogin && !hasError && justLoggedIn && !hasHandledReturningUserLogin.current) {
       // Returning user - load their settings
+      hasHandledReturningUserLogin.current = true;
       onReturningUserLogin?.();
       acknowledgeLogin();
     }
