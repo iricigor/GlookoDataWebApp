@@ -1,0 +1,13 @@
+# CodeRabbit configuration file
+# See: https://docs.coderabbit.ai/getting-started/yaml-configuration
+
+language: "en-US"
+
+reviews:
+  # Enable automatic code reviews for all PRs
+  auto_review:
+    enabled: true
+    # Review draft PRs as well
+    drafts: false
+    # Do not ignore PRs from GitHub Copilot - ensure bot PRs are reviewed
+    # Note: By not listing copilot[bot] in ignore_usernames, CodeRabbit will review Copilot PRs

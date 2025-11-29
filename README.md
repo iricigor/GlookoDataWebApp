@@ -2,6 +2,7 @@
 
 [![🧪 Test & Build](https://github.com/iricigor/GlookoDataWebApp/actions/workflows/test.yml/badge.svg)](https://github.com/iricigor/GlookoDataWebApp/actions/workflows/test.yml)
 [![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/iricigor/d15ec8d49e21d87f7b2fd54869d44085/raw/glookodata-webapp-tests.json)](https://github.com/iricigor/GlookoDataWebApp/actions/workflows/test.yml)
+[![CodeRabbit PR Reviews](https://img.shields.io/coderabbit/prs/github/iricigor/GlookoDataWebApp)](https://coderabbit.ai)
 
 A web app for importing, visualizing, and analyzing diabetes data exported from the Glooko platform. It extends the existing Glooko PowerShell module's capabilities by offering an interactive interface for streamlined data analysis and exploration.
 
