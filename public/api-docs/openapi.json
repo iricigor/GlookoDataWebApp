@@ -1,0 +1,449 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "GlookoDataWebApp API",
+    "description": "API for the GlookoDataWebApp application. All endpoints require authentication via Microsoft Personal Account using Bearer token (ID token from MSAL authentication).",
+    "version": "1.0.0",
+    "contact": {
+      "name": "GlookoDataWebApp",
+      "url": "https://github.com/iricigor/GlookoDataWebApp"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "Azure Static Web App API"
+    }
+  ],
+  "tags": [
+    {
+      "name": "User",
+      "description": "User management operations"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/user/check-first-login": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Check if user is logging in for the first time",
+        "description": "Checks if a user is logging in for the first time by querying the UserSettings table in Azure Table Storage. If it's a first login, creates a new user record. If returning user, updates the last login date.",
+        "operationId": "checkFirstLogin",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully checked login status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckFirstLoginResponse"
+                },
+                "examples": {
+                  "firstLogin": {
+                    "summary": "First time user",
+                    "value": {
+                      "isFirstLogin": true,
+                      "userId": "user-abc123"
+                    }
+                  },
+                  "returningUser": {
+                    "summary": "Returning user",
+                    "value": {
+                      "isFirstLogin": false,
+                      "userId": "user-abc123"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized access. Please log in again.",
+                  "errorType": "unauthorized"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Internal server error",
+                  "errorType": "infrastructure"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - Storage not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "storageNotConfigured": {
+                    "summary": "Storage not configured",
+                    "value": {
+                      "error": "Service unavailable - storage not configured",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_NOT_CONFIGURED"
+                    }
+                  },
+                  "storageAccessDenied": {
+                    "summary": "Storage access denied",
+                    "value": {
+                      "error": "Service unavailable - storage access denied",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_ACCESS_DENIED"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/settings": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get user settings",
+        "description": "Retrieves the user's saved settings from Azure Table Storage.",
+        "operationId": "getUserSettings",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSettingsResponse"
+                },
+                "example": {
+                  "settings": {
+                    "themeMode": "dark",
+                    "exportFormat": "csv",
+                    "responseLanguage": "english",
+                    "glucoseUnit": "mmol/L",
+                    "insulinDuration": 4,
+                    "glucoseThresholds": {
+                      "veryHigh": 13.9,
+                      "high": 10.0,
+                      "low": 3.9,
+                      "veryLow": 3.0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized access. Please log in again.",
+                  "errorType": "unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No settings found for user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "No settings found",
+                  "errorType": "not_found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - Storage not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["User"],
+        "summary": "Save user settings",
+        "description": "Saves the user's settings to Azure Table Storage. Creates or updates the user record.",
+        "operationId": "saveUserSettings",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveSettingsRequest"
+              },
+              "example": {
+                "settings": {
+                  "themeMode": "dark",
+                  "exportFormat": "csv",
+                  "responseLanguage": "english",
+                  "glucoseUnit": "mmol/L",
+                  "insulinDuration": 4,
+                  "glucoseThresholds": {
+                    "veryHigh": 13.9,
+                    "high": 10.0,
+                    "low": 3.9,
+                    "veryLow": 3.0
+                  }
+                },
+                "email": "user@example.com"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Settings saved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Missing settings in request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Missing settings in request body",
+                  "errorType": "validation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - Storage not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "ID token from Microsoft Authentication (MSAL). Use the 'Authenticate' button above to sign in with your Microsoft account and automatically set this token."
+      }
+    },
+    "schemas": {
+      "CheckFirstLoginResponse": {
+        "type": "object",
+        "required": ["isFirstLogin", "userId"],
+        "properties": {
+          "isFirstLogin": {
+            "type": "boolean",
+            "description": "True if this is the user's first login"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Unique identifier for the user"
+          }
+        }
+      },
+      "CloudUserSettings": {
+        "type": "object",
+        "required": ["themeMode", "exportFormat", "responseLanguage", "glucoseUnit", "insulinDuration", "glucoseThresholds"],
+        "properties": {
+          "themeMode": {
+            "type": "string",
+            "enum": ["light", "dark", "system"],
+            "description": "UI theme preference"
+          },
+          "exportFormat": {
+            "type": "string",
+            "enum": ["csv", "tsv"],
+            "description": "Data export format preference"
+          },
+          "responseLanguage": {
+            "type": "string",
+            "enum": ["english", "czech", "german", "serbian"],
+            "description": "Language for AI responses"
+          },
+          "glucoseUnit": {
+            "type": "string",
+            "enum": ["mmol/L", "mg/dL"],
+            "description": "Preferred glucose unit"
+          },
+          "insulinDuration": {
+            "type": "number",
+            "description": "Insulin active duration in hours"
+          },
+          "glucoseThresholds": {
+            "$ref": "#/components/schemas/GlucoseThresholds"
+          }
+        }
+      },
+      "GlucoseThresholds": {
+        "type": "object",
+        "required": ["veryHigh", "high", "low", "veryLow"],
+        "properties": {
+          "veryHigh": {
+            "type": "number",
+            "description": "Very high glucose threshold (mmol/L)"
+          },
+          "high": {
+            "type": "number",
+            "description": "High glucose threshold (mmol/L)"
+          },
+          "low": {
+            "type": "number",
+            "description": "Low glucose threshold (mmol/L)"
+          },
+          "veryLow": {
+            "type": "number",
+            "description": "Very low glucose threshold (mmol/L)"
+          }
+        }
+      },
+      "GetSettingsResponse": {
+        "type": "object",
+        "required": ["settings"],
+        "properties": {
+          "settings": {
+            "$ref": "#/components/schemas/CloudUserSettings"
+          }
+        }
+      },
+      "SaveSettingsRequest": {
+        "type": "object",
+        "required": ["settings"],
+        "properties": {
+          "settings": {
+            "$ref": "#/components/schemas/CloudUserSettings"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User's email address"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "required": ["success"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates if the operation was successful"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["error", "errorType"],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Human-readable error message"
+          },
+          "errorType": {
+            "type": "string",
+            "enum": ["unauthorized", "not_found", "validation", "infrastructure"],
+            "description": "Type of error for client handling"
+          },
+          "code": {
+            "type": "string",
+            "description": "Optional error code for specific errors"
+          }
+        }
+      }
+    }
+  }
+}

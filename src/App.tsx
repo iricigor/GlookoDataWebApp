@@ -7,6 +7,7 @@ import { DataUpload } from './pages/DataUpload'
 import { Reports } from './pages/Reports'
 import { AIAnalysis } from './pages/AIAnalysis'
 import { Settings } from './pages/Settings'
+import { APIDocs } from './pages/APIDocs'
 import { useTheme, isDarkTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
 import { useResponseLanguage } from './hooks/useResponseLanguage'
@@ -376,28 +377,35 @@ function App() {
           selectedProvider={selectedProvider}
           onSelectedProviderChange={setSelectedProvider}
         />
+      case 'api-docs':
+        return <APIDocs />
       default:
         return <Home onNavigate={handleNavigate} />
     }
   }
 
+  // Hide navigation and footer on API docs page (standalone developer page)
+  const isApiDocsPage = currentPage === 'api-docs'
+
   return (
     <FluentProvider theme={theme} className="app-container" data-theme={isDark ? 'dark' : 'light'}>
-      <Navigation 
-        currentPage={currentPage} 
-        onNavigate={handleNavigate} 
-        themeMode={themeMode}
-        onThemeToggle={handleThemeToggle}
-        onFirstLoginAccept={handleFirstLoginAccept}
-        onFirstLoginCancel={handleFirstLoginCancel}
-        onBeforeLogout={handleBeforeLogout}
-        onReturningUserLogin={handleReturningUserLogin}
-        syncStatus={syncStatus}
-      />
+      {!isApiDocsPage && (
+        <Navigation 
+          currentPage={currentPage} 
+          onNavigate={handleNavigate} 
+          themeMode={themeMode}
+          onThemeToggle={handleThemeToggle}
+          onFirstLoginAccept={handleFirstLoginAccept}
+          onFirstLoginCancel={handleFirstLoginCancel}
+          onBeforeLogout={handleBeforeLogout}
+          onReturningUserLogin={handleReturningUserLogin}
+          syncStatus={syncStatus}
+        />
+      )}
       <main ref={mainContentRef} className="main-content">
         {renderPage()}
       </main>
-      <Footer />
+      {!isApiDocsPage && <Footer />}
       {!hasConsented && <CookieConsent onAccept={acknowledgeConsent} />}
     </FluentProvider>
   )

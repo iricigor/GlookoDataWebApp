@@ -19,7 +19,7 @@ import {
   AccordionPanel,
 } from '@fluentui/react-components';
 import { useState, useEffect, useRef } from 'react';
-import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular } from '@fluentui/react-icons';
+import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular, DocumentBulletListRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import type { ResponseLanguage } from '../hooks/useResponseLanguage';
@@ -866,6 +866,18 @@ export function Settings({
                     icon={<CodeRegular />}
                   >
                     View on GitHub
+                  </Button>
+                </Link>
+                <Link 
+                  href="#api-docs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button 
+                    appearance="secondary" 
+                    icon={<DocumentBulletListRegular />}
+                  >
+                    API Documentation
                   </Button>
                 </Link>
               </div>
