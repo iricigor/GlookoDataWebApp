@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>568 Implement JWT token validation with JWKS signature verification</summary>
+
+[#568](../../pull/568) Implement JWT token validation with JWKS signature verification
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>567 Split test workflow into parallel jobs with test sharding</summary>
 
 [#567](../../pull/567) Split test workflow into parallel jobs with test sharding
