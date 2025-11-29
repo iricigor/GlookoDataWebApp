@@ -10,6 +10,7 @@ jobs:
     permissions:
       contents: write  # Changed from read to write for creating releases
       pull-requests: write
+      id-token: write  # Required for Azure Login with OIDC
     steps:
       - uses: actions/checkout@v3
         with:
@@ -60,6 +61,36 @@ jobs:
           app-name: glookodatawebapp-func
           package: ./api
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+      # Link Azure Function App to Static Web App as backend
+      # This enables /api/* routes to be proxied to the Function App
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Link Function App to Static Web App
+        run: |
+          # Check if backend is already linked
+          EXISTING_BACKEND=$(az staticwebapp backends list \
+            --name wonderful-stone-071384103 \
+            --resource-group glookodatawebapp-rg \
+            --query "[?backendResourceId!=null].backendResourceId" \
+            -o tsv 2>/dev/null || echo "")
+          
+          FUNCTION_RESOURCE_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/glookodatawebapp-rg/providers/Microsoft.Web/sites/glookodatawebapp-func"
+          
+          if [ -z "$EXISTING_BACKEND" ]; then
+            echo "Linking Function App to Static Web App..."
+            az staticwebapp backends link \
+              --name wonderful-stone-071384103 \
+              --resource-group glookodatawebapp-rg \
+              --backend-resource-id "$FUNCTION_RESOURCE_ID" \
+              --backend-region eastus
+            echo "Backend linked successfully!"
+          else
+            echo "Backend already linked: $EXISTING_BACKEND"
+          fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
