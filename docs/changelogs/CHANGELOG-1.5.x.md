@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>545 Fix PS downloader script missing Set-GlookoSwaBackend.ps1</summary>
+
+[#545](../../pull/545) Fix PS downloader script missing Set-GlookoSwaBackend.ps1
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>543 Fix API 404 by linking Function App backend to Static Web App</summary>
 
 [#543](../../pull/543) Fix API 404 by linking Function App backend to Static Web App
