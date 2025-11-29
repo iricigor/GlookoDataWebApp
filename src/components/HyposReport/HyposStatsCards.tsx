@@ -27,6 +27,9 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
 
   if (!hypoStats) return null;
 
+  // Calculate LBGI interpretation once to avoid redundant function calls
+  const lbgiInterpretation = lbgi !== null ? getLBGIInterpretation(lbgi) : null;
+
   // Helper function to get risk style class based on level
   const getRiskStyleClass = (level: 'low' | 'moderate' | 'high'): string => {
     switch (level) {
@@ -38,9 +41,8 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
 
   // Helper function to get card border style based on LBGI risk level
   const getLBGICardStyle = (): string => {
-    if (lbgi === null) return styles.summaryCardSuccess;
-    const interpretation = getLBGIInterpretation(lbgi);
-    switch (interpretation.level) {
+    if (!lbgiInterpretation) return styles.summaryCardSuccess;
+    switch (lbgiInterpretation.level) {
       case 'low': return styles.summaryCardSuccess;
       case 'moderate': return styles.summaryCardWarning;
       case 'high': return styles.summaryCardDanger;
@@ -49,9 +51,8 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
 
   // Helper function to get icon style based on LBGI risk level
   const getLBGIIconStyle = (): string => {
-    if (lbgi === null) return styles.summaryIconSuccess;
-    const interpretation = getLBGIInterpretation(lbgi);
-    switch (interpretation.level) {
+    if (!lbgiInterpretation) return styles.summaryIconSuccess;
+    switch (lbgiInterpretation.level) {
       case 'low': return styles.summaryIconSuccess;
       case 'moderate': return styles.summaryIconWarning;
       case 'high': return styles.summaryIconDanger;
@@ -73,9 +74,9 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
               {lbgi !== null ? lbgi.toFixed(1) : 'N/A'}
             </Text>
           </div>
-          {lbgi !== null && (
-            <Text className={mergeClasses(styles.riskInterpretation, getRiskStyleClass(getLBGIInterpretation(lbgi).level))}>
-              {getLBGIInterpretation(lbgi).text}
+          {lbgiInterpretation && (
+            <Text className={mergeClasses(styles.riskInterpretation, getRiskStyleClass(lbgiInterpretation.level))}>
+              {lbgiInterpretation.text}
             </Text>
           )}
         </div>

@@ -32,8 +32,8 @@ export const useHyposStyles = makeStyles({
   },
   summarySection: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-    ...shorthands.gap('16px'),
+    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+    ...shorthands.gap('12px'),
   },
   summaryCard: {
     ...shorthands.padding('16px'),
