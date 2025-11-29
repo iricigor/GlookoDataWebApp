@@ -11,7 +11,6 @@ import {
   MenuList,
   MenuItem,
   Tooltip,
-  Spinner,
 } from '@fluentui/react-components';
 import { 
   HomeRegular,
@@ -84,6 +83,16 @@ const useStyles = makeStyles({
     '@media (max-width: 768px)': {
       display: 'flex',
     },
+  },
+  pulsingIcon: {
+    animationName: {
+      '0%': { opacity: 1 },
+      '50%': { opacity: 0.3 },
+      '100%': { opacity: 1 },
+    },
+    animationDuration: '1.5s',
+    animationTimingFunction: 'ease-in-out',
+    animationIterationCount: 'infinite',
   },
 });
 
@@ -282,7 +291,7 @@ export function Navigation({
               <Tooltip content={syncStatus === 'syncing' ? 'Syncing settings...' : 'Settings'} relationship="label">
                 <Button
                   appearance="subtle"
-                  icon={syncStatus === 'syncing' ? <Spinner size="tiny" /> : <SettingsRegular />}
+                  icon={<SettingsRegular className={syncStatus === 'syncing' ? styles.pulsingIcon : undefined} />}
                   onClick={() => onNavigate('settings')}
                   aria-label={syncStatus === 'syncing' ? 'Syncing settings...' : 'Settings'}
                 />
