@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>547 Add Azure Key Vault deployment scripts</summary>
+
+[#547](../../pull/547) Add Azure Key Vault deployment scripts
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>545 Fix PS downloader script missing Set-GlookoSwaBackend.ps1</summary>
 
 [#545](../../pull/545) Fix PS downloader script missing Set-GlookoSwaBackend.ps1
