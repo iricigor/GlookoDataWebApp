@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>578 Replace rotating spinner with pulsating cog icon during settings sync</summary>
+
+[#578](../../pull/578) Replace rotating spinner with pulsating cog icon during settings sync
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>570 Add API Swagger documentation page with Microsoft authentication</summary>
 
 [#570](../../pull/570) Add API Swagger documentation page with Microsoft authentication
