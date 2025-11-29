@@ -42,6 +42,7 @@ cd scripts/deployment-cli
 | `deploy-azure-storage-tables.sh` | Deploys Azure Storage Tables with optional managed identity RBAC |
 | `deploy-azure-managed-identity.sh` | Deploys User-Assigned Managed Identity |
 | `deploy-azure-function.sh` | Deploys Azure Function App with managed identity |
+| `deploy-azure-swa-backend.sh` | Links Azure Function App to Static Web App as backend |
 | `test-azure-resources.sh` | Verifies deployment state of all Azure resources |
 
 ## Configuration
@@ -286,6 +287,48 @@ Creates and configures an Azure Function App that serves as the API backend for 
 - Storage Account must exist (for function app storage)
 - Managed Identity should exist (for RBAC authentication)
 - Key Vault is optional but recommended
+
+### deploy-azure-swa-backend.sh
+
+Links an Azure Function App as the backend for an Azure Static Web App. This enables `/api/*` routes on the Static Web App to be proxied to the Function App.
+
+**Features:**
+- Links Function App to Static Web App as backend
+- Enables API proxy routing for `/api/*` endpoints
+- Handles existing backend (unlinks if different, skips if same)
+- Idempotent - safe to run multiple times
+
+**Options:**
+```
+  -h, --help                  Show help message
+  -n, --swa-name NAME         Static Web App name
+  -f, --function-name NAME    Function App name
+  -g, --resource-group RG     Resource group name
+  -l, --location LOCATION     Azure region for backend
+  -c, --config FILE           Custom configuration file path
+  -s, --save                  Save configuration after deployment
+  -v, --verbose               Enable verbose output
+```
+
+**Examples:**
+```bash
+# Link with defaults from configuration
+./deploy-azure-swa-backend.sh
+
+# Link with explicit names
+./deploy-azure-swa-backend.sh --swa-name my-swa --function-name my-func
+
+# Link with specific region and save config
+./deploy-azure-swa-backend.sh --location westus2 --save
+```
+
+**Prerequisites:**
+- Static Web App must exist
+- Function App must exist (run deploy-azure-function.sh first)
+
+**Why is this needed?**
+When a Function App is deployed separately from a Static Web App, the `/api/*` routes
+won't work until the backend is linked. This script handles that linking.
 
 ### test-azure-resources.sh
 

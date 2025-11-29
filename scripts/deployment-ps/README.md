@@ -101,6 +101,7 @@ Invoke-GlookoDeployment -All
 | `Set-GlookoTableStorage` | `Set-GTS` | Deploy Azure Storage Tables with optional managed identity RBAC |
 | `Set-GlookoManagedIdentity` | `Set-GMI` | Deploy User-Assigned Managed Identity |
 | `Set-GlookoAzureFunction` | `Set-GAF` | Deploy Azure Function App |
+| `Set-GlookoSwaBackend` | `Set-GSB` | Link Azure Function App to Static Web App as backend |
 | `Invoke-GlookoDeployment` | `Invoke-GD` | Orchestrate full deployment |
 | `Test-GlookoDeployment` | `Test-GD` | Verify deployment state of all resources |
 
@@ -269,6 +270,39 @@ Set-GlookoAzureFunction -Runtime "dotnet" -RuntimeVersion "8"
 Set-GlookoAzureFunction -UseManagedIdentity
 ```
 
+### Set-GlookoSwaBackend
+
+Links an Azure Function App as the backend for an Azure Static Web App. This enables `/api/*` routes on the Static Web App to be proxied to the Function App.
+
+**Parameters:**
+- `-StaticWebAppName` - Static Web App name (optional, uses config)
+- `-FunctionAppName` - Function App name (optional, uses config)
+- `-ResourceGroup` - Resource group (optional, uses config)
+- `-Location` - Backend region (optional, uses config)
+
+**Examples:**
+```powershell
+# Link with defaults from configuration
+Set-GlookoSwaBackend
+
+# Link with explicit names
+Set-GlookoSwaBackend -StaticWebAppName "my-swa" -FunctionAppName "my-func"
+
+# Link with specific region
+Set-GlookoSwaBackend -Location "westus2"
+
+# Use alias
+Set-GSB
+```
+
+**Prerequisites:**
+- Static Web App must exist
+- Function App must exist (run Set-GlookoAzureFunction first)
+
+**Why is this needed?**
+When a Function App is deployed separately from a Static Web App, the `/api/*` routes
+won't work until the backend is linked. This function handles that linking.
+
 ### Invoke-GlookoDeployment
 
 Orchestrates complete infrastructure deployment.
@@ -342,6 +376,7 @@ GlookoDeployment/
 │   ├── Set-GlookoTableStorage.ps1
 │   ├── Set-GlookoManagedIdentity.ps1
 │   ├── Set-GlookoAzureFunction.ps1
+│   ├── Set-GlookoSwaBackend.ps1
 │   ├── Invoke-GlookoDeployment.ps1
 │   └── Test-GlookoDeployment.ps1
 └── Private/                      # Internal functions

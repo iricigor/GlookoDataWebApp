@@ -373,6 +373,20 @@ verify_static_web_app() {
         issues+=("SKU is ${sku}, expected ${STATIC_WEB_APP_SKU}")
     fi
     
+    # Check if backend is linked
+    local linked_backend
+    linked_backend=$(az staticwebapp backends list \
+        --name "${name}" \
+        --resource-group "${rg}" \
+        --query "[?backendResourceId!=null].backendResourceId" \
+        -o tsv 2>/dev/null || echo "")
+    
+    if [ -z "${linked_backend}" ]; then
+        issues+=("No backend linked (run deploy-azure-swa-backend.sh)")
+    elif ! echo "${linked_backend}" | grep -q "${FUNCTION_APP_NAME}"; then
+        issues+=("Backend linked to different Function App")
+    fi
+    
     if [ ${#issues[@]} -gt 0 ]; then
         record_result "Static Web App '${name}'" "staticWebApp" "${STATUS_MISCONFIGURED}" "${issues[*]}"
     else
