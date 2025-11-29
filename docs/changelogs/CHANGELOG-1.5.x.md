@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>576 Fix API page cosmetics: unify headers and add dark mode support</summary>
+
+[#576](../../pull/576) Fix API page cosmetics: unify headers and add dark mode support
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>578 Replace rotating spinner with pulsating cog icon during settings sync</summary>
 
 [#578](../../pull/578) Replace rotating spinner with pulsating cog icon during settings sync
