@@ -10,12 +10,6 @@ jobs:
     permissions:
       contents: write  # Changed from read to write for creating releases
       pull-requests: write
-      id-token: write  # Required for Azure Login with OIDC
-    env:
-      AZURE_RESOURCE_GROUP: glookodatawebapp-rg
-      AZURE_STATIC_WEB_APP_NAME: wonderful-stone-071384103
-      AZURE_FUNCTION_APP_NAME: glookodatawebapp-func
-      AZURE_LOCATION: eastus
     steps:
       - uses: actions/checkout@v3
         with:
@@ -63,25 +57,9 @@ jobs:
       - name: Deploy API to Azure Function
         uses: Azure/functions-action@v1
         with:
-          app-name: ${{ env.AZURE_FUNCTION_APP_NAME }}
+          app-name: glookodatawebapp-func
           package: ./api
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-
-      # Link Azure Function App to Static Web App as backend
-      # This enables /api/* routes to be proxied to the Function App
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      
-      - name: Link Function App to Static Web App
-        run: |
-          chmod +x scripts/deployment-cli/deploy-azure-swa-backend.sh
-          scripts/deployment-cli/deploy-azure-swa-backend.sh \
-            --swa-name "$AZURE_STATIC_WEB_APP_NAME" \
-            --function-name "$AZURE_FUNCTION_APP_NAME" \
-            --resource-group "$AZURE_RESOURCE_GROUP" \
-            --location "$AZURE_LOCATION"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

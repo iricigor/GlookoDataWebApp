@@ -57,21 +57,6 @@ The deployment workflow requires the following secrets to be configured in GitHu
 |-------------|-------------|
 | `AZURE_STATIC_WEB_APPS_API_TOKEN_WONDERFUL_STONE_071384103` | SWA deployment token |
 | `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` | Function App publish profile |
-| `AZURE_CREDENTIALS` | Azure service principal credentials (JSON format) |
-
-### Creating Azure Credentials
-
-```bash
-# Create a service principal with Contributor role
-az ad sp create-for-rbac --name "GlookoDataWebApp-Deploy" \
-  --role Contributor \
-  --scopes /subscriptions/<YOUR_SUBSCRIPTION_ID>/resourceGroups/glookodatawebapp-rg \
-  --sdk-auth
-```
-
-Replace `<YOUR_SUBSCRIPTION_ID>` with your actual Azure subscription ID.
-
-Copy the JSON output to the `AZURE_CREDENTIALS` secret.
 
 ## Deployment via GitHub Actions (Recommended)
 
@@ -80,14 +65,15 @@ The repository includes a GitHub Actions workflow that automatically deploys to 
 - **Workflow file**: `.github/workflows/azure-static-web-apps-wonderful-stone-071384103.yml`
 - **Trigger**: Manual (workflow_dispatch)
 - **Build**: Runs `npm run build` automatically
-- **Deploy**: Deploys frontend to Static Web Apps, API to Function App, and links them
+- **Deploy**: Deploys frontend to Static Web Apps and API to Function App
 
 ### What the Workflow Does
 
 1. **Builds and deploys the React frontend** to Azure Static Web Apps
 2. **Builds and deploys the API** to Azure Function App (`glookodatawebapp-func`)
-3. **Links the Function App to the Static Web App** so that `/api/*` routes are proxied to the Function App
-4. **Creates a GitHub release** with the version from package.json
+3. **Creates a GitHub release** with the version from package.json
+
+> **Note**: After deployment, you need to link the Function App backend manually using the deployment scripts. See "Linking the Function App Backend" below.
 
 ## Manual Deployment via Azure Portal
 
@@ -105,7 +91,7 @@ The repository includes a GitHub Actions workflow that automatically deploys to 
 
 If the backend is not linked, `/api/*` requests will return 404.
 
-**Option 1: Use the deployment script (recommended)**
+**Option 1: Use the Bash deployment script**
 
 ```bash
 # From the repository root
@@ -117,7 +103,19 @@ cd scripts/deployment-cli
 
 The script uses configuration from `~/.glookodata/config.json` or defaults.
 
-**Option 2: Link manually with Azure CLI**
+**Option 2: Use the PowerShell deployment module**
+
+```powershell
+# Import the module
+Import-Module GlookoDeployment
+
+# Link the backend
+Set-GlookoSwaBackend
+```
+
+See [PowerShell Module README](../scripts/deployment-ps/README.md) for installation instructions.
+
+**Option 3: Link manually with Azure CLI**
 
 ```bash
 # Login to Azure
