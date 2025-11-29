@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>541 Fix API routes being rewritten to SPA fallback</summary>
+
+[#541](../../pull/541) Fix API routes being rewritten to SPA fallback
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>537 Fix Set-GlookoResourceGroup to add missing tags on existing resource groups</summary>
 
 [#537](../../pull/537) Fix Set-GlookoResourceGroup to add missing tags on existing resource groups
