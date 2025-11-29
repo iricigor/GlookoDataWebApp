@@ -10,6 +10,7 @@
   "functionAppName": "glookodatawebapp-func",
   "webAppUrl": "https://glooko.iric.online",
   "appRegistrationName": "GlookoDataWebApp",
+  "appRegistrationClientId": "",
   "signInAudience": "PersonalMicrosoftAccount",
   "useManagedIdentity": true,
   "tags": {

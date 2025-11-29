@@ -119,6 +119,7 @@ load_config() {
     DEFAULT_FUNCTION_APP_NAME="glookodatawebapp-func"
     DEFAULT_WEB_APP_URL="https://glooko.iric.online"
     DEFAULT_APP_REGISTRATION_NAME="GlookoDataWebApp"
+    DEFAULT_APP_REGISTRATION_CLIENT_ID=""
     DEFAULT_SIGN_IN_AUDIENCE="PersonalMicrosoftAccount"
     DEFAULT_USE_MANAGED_IDENTITY="true"
     
@@ -134,6 +135,7 @@ load_config() {
     FUNCTION_APP_NAME="${FUNCTION_APP_NAME:-$(get_config_value "functionAppName" "${DEFAULT_FUNCTION_APP_NAME}")}"
     WEB_APP_URL="${WEB_APP_URL:-$(get_config_value "webAppUrl" "${DEFAULT_WEB_APP_URL}")}"
     APP_REGISTRATION_NAME="${APP_REGISTRATION_NAME:-$(get_config_value "appRegistrationName" "${DEFAULT_APP_REGISTRATION_NAME}")}"
+    APP_REGISTRATION_CLIENT_ID="${APP_REGISTRATION_CLIENT_ID:-$(get_config_value "appRegistrationClientId" "${DEFAULT_APP_REGISTRATION_CLIENT_ID}")}"
     SIGN_IN_AUDIENCE="${SIGN_IN_AUDIENCE:-$(get_config_value "signInAudience" "${DEFAULT_SIGN_IN_AUDIENCE}")}"
     USE_MANAGED_IDENTITY="${USE_MANAGED_IDENTITY:-$(get_config_value "useManagedIdentity" "${DEFAULT_USE_MANAGED_IDENTITY}")}"
     
@@ -160,6 +162,7 @@ save_configuration() {
   "functionAppName": "${FUNCTION_APP_NAME}",
   "webAppUrl": "${WEB_APP_URL}",
   "appRegistrationName": "${APP_REGISTRATION_NAME}",
+  "appRegistrationClientId": "${APP_REGISTRATION_CLIENT_ID}",
   "signInAudience": "${SIGN_IN_AUDIENCE}",
   "useManagedIdentity": ${USE_MANAGED_IDENTITY},
   "tags": {
@@ -297,19 +300,6 @@ get_managed_identity_resource_id() {
         --name "${MANAGED_IDENTITY_NAME}" \
         --resource-group "${RESOURCE_GROUP}" \
         --query id \
-        -o tsv 2>/dev/null
-}
-
-################################################################################
-# APP REGISTRATION FUNCTIONS
-################################################################################
-
-# Get the client ID (application ID) of an app registration by name
-# This is used for JWT audience validation in the API
-get_app_registration_client_id() {
-    az ad app list \
-        --display-name "${APP_REGISTRATION_NAME}" \
-        --query "[0].appId" \
         -o tsv 2>/dev/null
 }
 
