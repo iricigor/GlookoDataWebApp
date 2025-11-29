@@ -7,7 +7,7 @@
 
     # Version number of this module
     # NOTE: Bump this version when adding/updating scripts (see copilot-instructions.md)
-    ModuleVersion = '1.0.15'
+    ModuleVersion = '1.0.16'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -96,6 +96,7 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
+v1.0.16 - Fixed missing Set-GlookoStaticWebApp function and Set-GSWA alias exports in GlookoDeployment.psm1
 v1.0.15 - Fixed 'az staticwebapp backends list' to use correct 'show' command in Set-GlookoSwaBackend, Test-GlookoDeployment, and deploy-azure-swa-backend.sh; Added Set-GlookoStaticWebApp for creating Azure Static Web Apps; Suppressed app settings redacted warning in Set-GlookoAzureFunction
 v1.0.14 - Added Set-GlookoKeyVault for Azure Key Vault deployment with RBAC and managed identity support
 v1.0.13 - Fixed Install-GlookoDeploymentModule to download Set-GlookoSwaBackend.ps1; fixed module exports for Set-GlookoSwaBackend and Set-GSB alias

@@ -55,6 +55,7 @@ Export-ModuleMember -Function @(
     'Set-GlookoManagedIdentity',
     'Set-GlookoKeyVault',
     'Set-GlookoAzureFunction',
+    'Set-GlookoStaticWebApp',
     'Set-GlookoSwaBackend',
     'Invoke-GlookoDeployment',
     'Test-GlookoDeployment'
@@ -72,6 +73,7 @@ Export-ModuleMember -Alias @(
     'Set-GMI',
     'Set-GKV',
     'Set-GAF',
+    'Set-GSWA',
     'Set-GSB',
     'Invoke-GD',
     'Test-GD'
