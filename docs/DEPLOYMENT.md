@@ -58,7 +58,6 @@ The deployment workflow requires the following secrets to be configured in GitHu
 | `AZURE_STATIC_WEB_APPS_API_TOKEN_WONDERFUL_STONE_071384103` | SWA deployment token |
 | `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` | Function App publish profile |
 | `AZURE_CREDENTIALS` | Azure service principal credentials (JSON format) |
-| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID for resource linking |
 
 ### Creating Azure Credentials
 
@@ -104,7 +103,21 @@ The repository includes a GitHub Actions workflow that automatically deploys to 
 
 ### Linking the Function App Backend
 
-If the backend is not linked, `/api/*` requests will return 404. To link manually:
+If the backend is not linked, `/api/*` requests will return 404.
+
+**Option 1: Use the deployment script (recommended)**
+
+```bash
+# From the repository root
+cd scripts/deployment-cli
+
+# Link the backend using the deployment script
+./deploy-azure-swa-backend.sh
+```
+
+The script uses configuration from `~/.glookodata/config.json` or defaults.
+
+**Option 2: Link manually with Azure CLI**
 
 ```bash
 # Login to Azure

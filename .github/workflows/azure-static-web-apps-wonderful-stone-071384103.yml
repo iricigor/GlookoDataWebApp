@@ -76,26 +76,12 @@ jobs:
       
       - name: Link Function App to Static Web App
         run: |
-          # Check if backend is already linked
-          EXISTING_BACKEND=$(az staticwebapp backends list \
-            --name "$AZURE_STATIC_WEB_APP_NAME" \
+          chmod +x scripts/deployment-cli/deploy-azure-swa-backend.sh
+          scripts/deployment-cli/deploy-azure-swa-backend.sh \
+            --swa-name "$AZURE_STATIC_WEB_APP_NAME" \
+            --function-name "$AZURE_FUNCTION_APP_NAME" \
             --resource-group "$AZURE_RESOURCE_GROUP" \
-            --query "[?backendResourceId!=null].backendResourceId" \
-            -o tsv 2>/dev/null || echo "")
-          
-          FUNCTION_RESOURCE_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/$AZURE_RESOURCE_GROUP/providers/Microsoft.Web/sites/$AZURE_FUNCTION_APP_NAME"
-          
-          if [ -z "$EXISTING_BACKEND" ]; then
-            echo "Linking Function App to Static Web App..."
-            az staticwebapp backends link \
-              --name "$AZURE_STATIC_WEB_APP_NAME" \
-              --resource-group "$AZURE_RESOURCE_GROUP" \
-              --backend-resource-id "$FUNCTION_RESOURCE_ID" \
-              --backend-region "$AZURE_LOCATION"
-            echo "Backend linked successfully!"
-          else
-            echo "Backend already linked: $EXISTING_BACKEND"
-          fi
+            --location "$AZURE_LOCATION"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
