@@ -7,7 +7,7 @@
 
     # Version number of this module
     # NOTE: Bump this version when adding/updating scripts (see copilot-instructions.md)
-    ModuleVersion = '1.0.19'
+    ModuleVersion = '1.0.20'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
