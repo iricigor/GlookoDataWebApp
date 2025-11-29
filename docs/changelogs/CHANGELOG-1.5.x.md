@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>554 Implement cloud sync for user settings</summary>
+
+[#554](../../pull/554) Implement cloud sync for user settings
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>556 Fix missing Set-GlookoStaticWebApp export in PowerShell module</summary>
 
 [#556](../../pull/556) Fix missing Set-GlookoStaticWebApp export in PowerShell module
