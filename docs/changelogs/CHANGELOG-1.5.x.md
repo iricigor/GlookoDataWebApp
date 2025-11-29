@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>550 Fix SWA backend commands and add Set-GlookoStaticWebApp</summary>
+
+[#550](../../pull/550) Fix SWA backend commands and add Set-GlookoStaticWebApp
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>547 Add Azure Key Vault deployment scripts</summary>
 
 [#547](../../pull/547) Add Azure Key Vault deployment scripts
