@@ -55,10 +55,14 @@ jobs:
         run: npm run build
 
   unit-tests:
-    name: 🧪 Unit Tests
+    name: 🧪 Unit Tests (Shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
 
     steps:
       - name: Checkout code
@@ -73,8 +77,8 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Run unit tests with JSON reporter
-        run: npm test -- --run --reporter=json > test-results.json 2>&1 || true
+      - name: Run unit tests with JSON reporter (shard ${{ matrix.shard }}/3)
+        run: npm test -- --run --reporter=json --shard=${{ matrix.shard }}/3 > test-results.json 2>&1 || true
 
       - name: Extract Test Statistics
         if: always()
@@ -88,13 +92,13 @@ jobs:
           echo "TESTS_PASSED=$TEST_PASSED" >> $GITHUB_ENV
           echo "TESTS_FAILED=$TEST_FAILED" >> $GITHUB_ENV
           
-          echo "::notice::Tests: $TEST_PASSED/$TEST_COUNT passed"
+          echo "::notice::Shard ${{ matrix.shard }}: $TEST_PASSED/$TEST_COUNT passed"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: unit-test-results
+          name: unit-test-results-shard-${{ matrix.shard }}
           path: test-results.json
           retention-days: 7
 
@@ -108,24 +112,48 @@ jobs:
       contents: read
 
     steps:
-      - name: Download test results
+      - name: Download all test results
         uses: actions/download-artifact@v4
         with:
-          name: unit-test-results
+          pattern: unit-test-results-shard-*
           path: ./results
+          merge-multiple: false
 
-      - name: Aggregate results
+      - name: Aggregate results from all shards
         run: |
-          # Extract test count from JSON output
-          TEST_COUNT=$(grep -o '"numTotalTests":[0-9]*' ./results/test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
-          TEST_PASSED=$(grep -o '"numPassedTests":[0-9]*' ./results/test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
-          TEST_FAILED=$(grep -o '"numFailedTests":[0-9]*' ./results/test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
+          # Initialize counters
+          TOTAL_TESTS=0
+          TOTAL_PASSED=0
+          TOTAL_FAILED=0
+          SHARDS_FOUND=0
+          EXPECTED_SHARDS=3
           
-          echo "TESTS_TOTAL=$TEST_COUNT" >> $GITHUB_ENV
-          echo "TESTS_PASSED=$TEST_PASSED" >> $GITHUB_ENV
-          echo "TESTS_FAILED=$TEST_FAILED" >> $GITHUB_ENV
+          # Process each shard's results
+          for shard_dir in ./results/unit-test-results-shard-*; do
+            if [ -f "$shard_dir/test-results.json" ]; then
+              SHARDS_FOUND=$((SHARDS_FOUND + 1))
+              SHARD_TOTAL=$(grep -o '"numTotalTests":[0-9]*' "$shard_dir/test-results.json" | head -1 | grep -o '[0-9]*' || echo "0")
+              SHARD_PASSED=$(grep -o '"numPassedTests":[0-9]*' "$shard_dir/test-results.json" | head -1 | grep -o '[0-9]*' || echo "0")
+              SHARD_FAILED=$(grep -o '"numFailedTests":[0-9]*' "$shard_dir/test-results.json" | head -1 | grep -o '[0-9]*' || echo "0")
+              
+              TOTAL_TESTS=$((TOTAL_TESTS + SHARD_TOTAL))
+              TOTAL_PASSED=$((TOTAL_PASSED + SHARD_PASSED))
+              TOTAL_FAILED=$((TOTAL_FAILED + SHARD_FAILED))
+              
+              echo "$(basename $shard_dir): $SHARD_PASSED/$SHARD_TOTAL passed"
+            fi
+          done
           
-          echo "::notice::Tests: $TEST_PASSED/$TEST_COUNT passed"
+          # Warn if not all shards were found
+          if [ "$SHARDS_FOUND" -lt "$EXPECTED_SHARDS" ]; then
+            echo "::warning::Only found $SHARDS_FOUND/$EXPECTED_SHARDS test shard results"
+          fi
+          
+          echo "TESTS_TOTAL=$TOTAL_TESTS" >> $GITHUB_ENV
+          echo "TESTS_PASSED=$TOTAL_PASSED" >> $GITHUB_ENV
+          echo "TESTS_FAILED=$TOTAL_FAILED" >> $GITHUB_ENV
+          
+          echo "::notice::Total Tests: $TOTAL_PASSED/$TOTAL_TESTS passed ($SHARDS_FOUND shards)"
 
       - name: Check job statuses
         run: |
