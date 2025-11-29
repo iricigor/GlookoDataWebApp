@@ -13,9 +13,12 @@
   "dependencies": {
     "@azure/data-tables": "^13.2.2",
     "@azure/functions": "^4.6.0",
-    "@azure/identity": "^4.2.1"
+    "@azure/identity": "^4.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.2.0"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20.11.5",
     "rimraf": "^5.0.5",
     "typescript": "^5.3.3"

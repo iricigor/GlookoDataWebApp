@@ -31,6 +31,11 @@
 .PARAMETER RuntimeVersion
     The runtime version. Default: 20 (for Node.js)
 
+.PARAMETER AppClientId
+    The App Registration Client ID for JWT audience validation. This is required
+    for API security - tokens will be validated against this audience.
+    Find it in Azure Portal: App Registrations > Your App > Application (client) ID
+
 .PARAMETER UseManagedIdentity
     Configure the function app to use a user-assigned managed identity for authentication.
     The identity must be pre-created (see managedIdentityName in configuration).
@@ -54,6 +59,10 @@
     Set-GlookoAzureFunction -UseManagedIdentity
     Creates a function app with user-assigned managed identity configured.
 
+.EXAMPLE
+    Set-GlookoAzureFunction -AppClientId "656dc9c9-bae3-4ed0-a550-0c3e8aa3f26c"
+    Creates a function app with explicit App Registration Client ID for JWT validation.
+
 .NOTES
     Requires Az PowerShell modules to be installed.
     Run in Azure Cloud Shell (PowerShell) for best experience.
@@ -65,6 +74,7 @@
     - Storage Account must exist
     - User-Assigned Managed Identity should exist (for RBAC authentication)
     - Key Vault is optional but recommended
+    - App Registration Client ID for JWT validation
 #>
 function Set-GlookoAzureFunction {
     [CmdletBinding()]
@@ -87,6 +97,9 @@ function Set-GlookoAzureFunction {
         [string]$RuntimeVersion = '20',
 
         [Parameter()]
+        [string]$AppClientId,
+
+        [Parameter()]
         [switch]$UseManagedIdentity,
 
         [Parameter()]
@@ -107,6 +120,8 @@ function Set-GlookoAzureFunction {
         $identityName = $config.managedIdentityName
         $keyVaultName = $config.keyVaultName
         $webAppUrl = $config.webAppUrl
+        $appClientIdValue = if ($AppClientId) { $AppClientId } else { $config.appRegistrationClientId }
+        $appRegistrationName = $config.appRegistrationName
         $useMI = if ($PSBoundParameters.ContainsKey('UseManagedIdentity')) { $UseManagedIdentity.IsPresent } else { $config.useManagedIdentity }
         
         Write-InfoMessage "Function App: $functionName"
@@ -300,6 +315,20 @@ function Set-GlookoAzureFunction {
                 if ($kvExists) {
                     $appSettings["KEY_VAULT_NAME"] = $keyVaultName
                 }
+            }
+            
+            # Add App Registration Client ID for JWT audience validation
+            # This is required for verifying that JWT tokens are issued for this application.
+            # Get the client ID from Azure Portal > App Registrations > Your App > Application (client) ID
+            if ($appClientIdValue) {
+                $appSettings["AZURE_AD_CLIENT_ID"] = $appClientIdValue
+                Write-InfoMessage "App Registration Client ID: $appClientIdValue"
+            }
+            else {
+                Write-WarningMessage "AZURE_AD_CLIENT_ID not configured."
+                Write-WarningMessage "JWT audience validation requires the App Registration Client ID."
+                Write-WarningMessage "Set 'appRegistrationClientId' in config or use -AppClientId parameter."
+                Write-WarningMessage "Find it in Azure Portal: App Registrations > $appRegistrationName > Application (client) ID"
             }
             
             if ($appSettings.Count -gt 0) {

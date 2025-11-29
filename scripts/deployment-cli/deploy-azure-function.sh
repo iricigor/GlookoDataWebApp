@@ -83,11 +83,13 @@ Options:
   --use-managed-identity      Configure with managed identity (default)
   --runtime RUNTIME           Function runtime (node, dotnet, python, java)
   --runtime-version VERSION   Runtime version
+  --app-client-id ID          App Registration Client ID for JWT validation
 
 Examples:
   ./deploy-azure-function.sh
   ./deploy-azure-function.sh --name my-func --location westus2
   ./deploy-azure-function.sh --runtime node --runtime-version 20
+  ./deploy-azure-function.sh --app-client-id 656dc9c9-bae3-4ed0-a550-0c3e8aa3f26c
 
 EOF
 }
@@ -136,6 +138,10 @@ parse_arguments() {
                 ;;
             --runtime-version)
                 FUNCTION_RUNTIME_VERSION="$2"
+                shift 2
+                ;;
+            --app-client-id)
+                APP_REGISTRATION_CLIENT_ID="$2"
                 shift 2
                 ;;
             *)
@@ -358,6 +364,19 @@ configure_app_settings() {
         if [ "${KEY_VAULT_EXISTS}" = true ]; then
             settings_array+=("KEY_VAULT_NAME=${KEY_VAULT_NAME}")
         fi
+    fi
+    
+    # Add App Registration Client ID for JWT audience validation
+    # This is required for verifying that JWT tokens are issued for this application.
+    # Get the client ID from Azure Portal > App Registrations > Your App > Application (client) ID
+    if [ -n "${APP_REGISTRATION_CLIENT_ID}" ]; then
+        settings_array+=("AZURE_AD_CLIENT_ID=${APP_REGISTRATION_CLIENT_ID}")
+        print_info "App Registration Client ID: ${APP_REGISTRATION_CLIENT_ID}"
+    else
+        print_warning "AZURE_AD_CLIENT_ID not configured."
+        print_warning "JWT audience validation requires the App Registration Client ID."
+        print_warning "Set 'appRegistrationClientId' in config or use --app-client-id parameter."
+        print_warning "Find it in Azure Portal: App Registrations > ${APP_REGISTRATION_NAME} > Application (client) ID"
     fi
     
     # Add CORS settings for Static Web App

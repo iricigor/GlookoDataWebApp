@@ -75,8 +75,11 @@ api/
 ├── local.settings.json.template  # Local settings template
 ├── .funcignore               # Files to ignore during deployment
 └── src/
-    └── functions/
-        └── checkFirstLogin.ts  # First login check function
+    ├── functions/
+    │   ├── checkFirstLogin.ts  # First login check function
+    │   └── userSettings.ts     # User settings CRUD operations
+    └── utils/
+        └── azureUtils.ts       # Shared utilities for JWT validation, Table Storage access
 ```
 
 ## Configuration
@@ -87,18 +90,23 @@ api/
 |----------|-------------|----------|
 | `STORAGE_ACCOUNT_NAME` | Azure Storage account name | Yes |
 | `AZURE_CLIENT_ID` | Managed identity client ID | Yes (for managed identity) |
+| `AZURE_AD_CLIENT_ID` | Azure App Registration client ID | Optional (for JWT audience validation, falls back to hardcoded ID) |
 
 ### Azure Resources
 
 The API requires:
 - **Azure Storage Account** with a `UserSettings` table
 - **Managed Identity** with `Storage Table Data Contributor` role
+- **App Registration** for user authentication (client ID used for JWT validation)
 
 Deploy these using the scripts in `scripts/deployment-cli/` or `scripts/deployment-ps/`.
 
 ## Security
 
 - Uses Azure Managed Identity for secure access to Table Storage
+- **Full JWT signature verification** using Microsoft's JWKS endpoint for production security
+- Validates token audience, issuer, and expiration claims
+- Automatic key rotation support via JWKS caching
 - Bearer token authentication for API requests
 - No secrets stored in code or configuration files
 
