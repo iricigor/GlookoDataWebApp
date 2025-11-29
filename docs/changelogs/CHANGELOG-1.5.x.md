@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>539 Display module version when downloading GlookoDeployment module</summary>
+
+[#539](../../pull/539) Display module version when downloading GlookoDeployment module
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>541 Fix API routes being rewritten to SPA fallback</summary>
 
 [#541](../../pull/541) Fix API routes being rewritten to SPA fallback
