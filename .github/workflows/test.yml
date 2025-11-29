@@ -78,9 +78,19 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Run unit tests with JSON reporter (shard ${{ matrix.shard }}/3)
-        run: npm test -- --run --reporter=json --shard=${{ matrix.shard }}/3 > test-results.json 2>&1 || true
+        id: run-tests
+        run: |
+          # Run tests and capture exit code
+          set +e
+          npm test -- --run --reporter=json --shard=${{ matrix.shard }}/3 > test-results.json 2>&1
+          TEST_EXIT_CODE=$?
+          set -e
+          
+          # Save exit code for later steps
+          echo "exit_code=$TEST_EXIT_CODE" >> $GITHUB_OUTPUT
 
       - name: Extract Test Statistics
+        id: extract-stats
         if: always()
         run: |
           # Extract test count from JSON output
@@ -92,7 +102,7 @@ jobs:
           echo "TESTS_PASSED=$TEST_PASSED" >> $GITHUB_ENV
           echo "TESTS_FAILED=$TEST_FAILED" >> $GITHUB_ENV
           
-          echo "::notice::Shard ${{ matrix.shard }}: $TEST_PASSED/$TEST_COUNT passed"
+          echo "::notice::Shard ${{ matrix.shard }}: $TEST_PASSED/$TEST_COUNT passed, $TEST_FAILED failed"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -101,6 +111,12 @@ jobs:
           name: unit-test-results-shard-${{ matrix.shard }}
           path: test-results.json
           retention-days: 7
+      
+      - name: Fail if tests failed
+        if: always() && steps.run-tests.outputs.exit_code != '0'
+        run: |
+          echo "::error::Tests failed with exit code ${{ steps.run-tests.outputs.exit_code }}"
+          exit 1
 
   # Summary job that runs after all parallel jobs complete
   summary:
@@ -174,6 +190,14 @@ jobs:
             echo "::error::One or more jobs failed"
             exit 1
           fi
+
+      - name: Check for test failures
+        run: |
+          if [ "${{ env.TESTS_FAILED }}" != "0" ] && [ -n "${{ env.TESTS_FAILED }}" ]; then
+            echo "::error::${{ env.TESTS_FAILED }} tests failed across all shards"
+            exit 1
+          fi
+          echo "All tests passed!"
 
       - name: Update Test Count Badge
         uses: schneegans/dynamic-badges-action@v1.7.0
