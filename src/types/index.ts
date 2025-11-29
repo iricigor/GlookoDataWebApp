@@ -294,3 +294,40 @@ export interface HourlyTIRStats {
   hourLabel: string;      // Formatted hour label (e.g., "00:00", "06:00")
   stats: GlucoseRangeStats;
 }
+
+/**
+ * User settings that are synced to cloud storage
+ * 
+ * These settings are saved to Azure Table Storage for logged-in users.
+ * Format is compact JSON to minimize storage costs.
+ */
+export interface CloudUserSettings {
+  /** Theme mode preference */
+  themeMode: 'light' | 'dark' | 'system';
+  /** Export format preference */
+  exportFormat: 'csv' | 'tsv';
+  /** AI response language preference */
+  responseLanguage: 'english' | 'czech' | 'german' | 'serbian';
+  /** Glucose unit preference */
+  glucoseUnit: GlucoseUnit;
+  /** Insulin duration for IOB calculations (hours) */
+  insulinDuration: number;
+  /** Glucose thresholds */
+  glucoseThresholds: GlucoseThresholds;
+}
+
+/**
+ * Complete user record stored in Azure Table Storage
+ */
+export interface UserSettingsRecord {
+  /** User ID (object ID from Azure AD) */
+  userId: string;
+  /** User's email address (for reference only) */
+  email: string;
+  /** First login timestamp (ISO 8601) */
+  firstLoginDate: string;
+  /** Last login timestamp (ISO 8601) */
+  lastLoginDate: string;
+  /** Compact JSON settings data */
+  settings: CloudUserSettings;
+}

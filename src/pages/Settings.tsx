@@ -23,8 +23,8 @@ import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular } from '@flue
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import type { ResponseLanguage } from '../hooks/useResponseLanguage';
-import type { GlucoseUnit } from '../types';
-import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
+import type { GlucoseUnit, GlucoseThresholds } from '../types';
+import { validateGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { GlucoseThresholdsSection } from '../components/GlucoseThresholdsSection';
 import { getVersionInfo, formatBuildDate } from '../utils/version';
 import { getProviderDisplayName, getActiveProvider, getAvailableProviders, type AIProvider } from '../utils/api';
@@ -245,6 +245,8 @@ interface SettingsProps {
   onResponseLanguageChange: (language: ResponseLanguage) => void;
   glucoseUnit: GlucoseUnit;
   onGlucoseUnitChange: (unit: GlucoseUnit) => void;
+  glucoseThresholds: GlucoseThresholds;
+  onGlucoseThresholdsChange: (thresholds: GlucoseThresholds) => void;
   insulinDuration: number;
   onInsulinDurationChange: (duration: number) => void;
   perplexityApiKey: string;
@@ -268,6 +270,8 @@ export function Settings({
   onResponseLanguageChange,
   glucoseUnit,
   onGlucoseUnitChange,
+  glucoseThresholds,
+  onGlucoseThresholdsChange,
   insulinDuration,
   onInsulinDurationChange,
   perplexityApiKey, 
@@ -282,10 +286,16 @@ export function Settings({
   onSelectedProviderChange,
 }: SettingsProps) {
   const styles = useStyles();
-  const { thresholds, updateThreshold, validateThresholds, isValid } = useGlucoseThresholds();
-  const validationError = validateThresholds(thresholds);
+  const validationError = validateGlucoseThresholds(glucoseThresholds);
+  const isValid = validationError === null;
   const versionInfo = getVersionInfo();
   const [selectedTab, setSelectedTab] = useState<string>('general');
+
+  // Helper function to update a single threshold
+  const updateThreshold = (key: keyof GlucoseThresholds, value: number) => {
+    const newThresholds = { ...glucoseThresholds, [key]: value };
+    onGlucoseThresholdsChange(newThresholds);
+  };
 
   // Track previous key states for auto-selection logic
   const prevKeysRef = useRef({
@@ -481,7 +491,7 @@ export function Settings({
             </div>
 
             <GlucoseThresholdsSection
-              thresholds={thresholds}
+              thresholds={glucoseThresholds}
               onUpdateThreshold={updateThreshold}
               isValid={isValid}
               validationError={validationError}

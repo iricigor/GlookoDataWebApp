@@ -11,6 +11,7 @@ import { useTheme, isDarkTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
 import { useResponseLanguage } from './hooks/useResponseLanguage'
 import { useGlucoseUnit } from './hooks/useGlucoseUnit'
+import { useGlucoseThresholds } from './hooks/useGlucoseThresholds'
 import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
 import { useGeminiApiKey } from './hooks/useGeminiApiKey'
 import { useGrokApiKey } from './hooks/useGrokApiKey'
@@ -19,7 +20,9 @@ import { useActiveAIProvider } from './hooks/useActiveAIProvider'
 import { useSwipeGesture } from './hooks/useSwipeGesture'
 import { useInsulinDuration } from './hooks/useInsulinDuration'
 import { useCookieConsent } from './hooks/useCookieConsent'
-import type { UploadedFile, AIAnalysisResult } from './types'
+import { useAuth } from './hooks/useAuth'
+import { useUserSettings } from './hooks/useUserSettings'
+import type { UploadedFile, AIAnalysisResult, CloudUserSettings } from './types'
 import { extractZipMetadata } from './features/dataUpload/utils'
 
 // Page navigation order for swipe gestures
@@ -28,6 +31,9 @@ const PAGE_ORDER = ['home', 'upload', 'reports', 'ai', 'settings'] as const
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const [isLoadingDemoData, setIsLoadingDemoData] = useState(true)
+  
+  // Authentication state
+  const { isLoggedIn, idToken, userEmail } = useAuth()
   
   // Settings (stored locally in browser cookies)
   const { theme, themeMode, setThemeMode } = useTheme()
@@ -47,6 +53,7 @@ function App() {
   const { responseLanguage, setResponseLanguage } = useResponseLanguage()
   const { glucoseUnit, setGlucoseUnit } = useGlucoseUnit()
   const { insulinDuration, setInsulinDuration } = useInsulinDuration()
+  const { thresholds: glucoseThresholds, setThresholds: setGlucoseThresholds } = useGlucoseThresholds()
   
   // Cookie consent management
   const { hasConsented, acknowledgeConsent } = useCookieConsent()
@@ -58,10 +65,119 @@ function App() {
   const { apiKey: deepseekApiKey, setApiKey: setDeepSeekApiKey } = useDeepSeekApiKey()
   const { selectedProvider, setSelectedProvider } = useActiveAIProvider()
   
+  // User settings cloud sync
+  const { 
+    syncStatus, 
+    saveSettings, 
+    loadSettings, 
+    saveSettingsSync 
+  } = useUserSettings(idToken, userEmail)
+  
+  // Track if we've loaded settings for the current session
+  const [hasLoadedCloudSettings, setHasLoadedCloudSettings] = useState(false)
+  
   // File management
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
   const [aiAnalysisResults, setAiAnalysisResults] = useState<Record<string, AIAnalysisResult>>({})
+
+  // Get current settings as CloudUserSettings object
+  const getCurrentSettings = useCallback((): CloudUserSettings => {
+    return {
+      themeMode,
+      exportFormat,
+      responseLanguage,
+      glucoseUnit,
+      insulinDuration,
+      glucoseThresholds,
+    }
+  }, [themeMode, exportFormat, responseLanguage, glucoseUnit, insulinDuration, glucoseThresholds])
+
+  // Apply loaded settings to local state
+  const applyCloudSettings = useCallback((settings: CloudUserSettings) => {
+    if (settings.themeMode) setThemeMode(settings.themeMode)
+    if (settings.exportFormat) setExportFormat(settings.exportFormat)
+    if (settings.responseLanguage) setResponseLanguage(settings.responseLanguage)
+    if (settings.glucoseUnit) setGlucoseUnit(settings.glucoseUnit)
+    if (settings.insulinDuration) setInsulinDuration(settings.insulinDuration)
+    if (settings.glucoseThresholds) setGlucoseThresholds(settings.glucoseThresholds)
+  }, [setThemeMode, setExportFormat, setResponseLanguage, setGlucoseUnit, setInsulinDuration, setGlucoseThresholds])
+
+  // Load settings when user logs in (for returning users)
+  useEffect(() => {
+    const loadCloudSettings = async () => {
+      if (isLoggedIn && idToken && !hasLoadedCloudSettings) {
+        const result = await loadSettings()
+        if (result.success && result.settings) {
+          applyCloudSettings(result.settings)
+          // Only mark as loaded when we successfully retrieved settings
+          // This allows retry on next login if loading fails
+          setHasLoadedCloudSettings(true)
+        } else if (result.success && !result.settings) {
+          // 404 - no settings found, which is OK for new users
+          // Mark as loaded so we can start saving changes
+          setHasLoadedCloudSettings(true)
+        }
+        // If loading failed with an error, don't set the flag
+        // so we can retry on next render or login
+      }
+    }
+    
+    loadCloudSettings()
+  }, [isLoggedIn, idToken, hasLoadedCloudSettings, loadSettings, applyCloudSettings])
+
+  // Reset loaded flag when user logs out
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setHasLoadedCloudSettings(false)
+    }
+  }, [isLoggedIn])
+
+  // Track previous settings to detect changes
+  // Using JSON.stringify for comparison is reliable here because:
+  // 1. The settings object has a consistent structure
+  // 2. Property order is determined by getCurrentSettings() which always 
+  //    creates objects with the same property order
+  // 3. All values are primitives or simple nested objects
+  const prevSettingsRef = useRef<string>('')
+  
+  // Save settings when they change (async, fire and forget)
+  useEffect(() => {
+    if (!isLoggedIn || !idToken || !hasLoadedCloudSettings) {
+      return
+    }
+    
+    const currentSettings = getCurrentSettings()
+    const currentSettingsJson = JSON.stringify(currentSettings)
+    
+    // Only save if settings actually changed
+    if (currentSettingsJson !== prevSettingsRef.current) {
+      prevSettingsRef.current = currentSettingsJson
+      // Fire and forget - async save
+      saveSettings(currentSettings)
+    }
+  }, [isLoggedIn, idToken, hasLoadedCloudSettings, getCurrentSettings, saveSettings])
+
+  // Handle first login accept - save initial settings
+  const handleFirstLoginAccept = useCallback(() => {
+    if (isLoggedIn && idToken) {
+      const currentSettings = getCurrentSettings()
+      saveSettings(currentSettings)
+    }
+  }, [isLoggedIn, idToken, getCurrentSettings, saveSettings])
+
+  // Handle first login cancel - user is logged out by Navigation
+  const handleFirstLoginCancel = useCallback(() => {
+    // User will be logged out, nothing to do here
+  }, [])
+
+  // Handle before logout - save settings synchronously
+  const handleBeforeLogout = useCallback(async () => {
+    if (isLoggedIn && idToken) {
+      const currentSettings = getCurrentSettings()
+      await saveSettingsSync(currentSettings)
+    }
+  }, [isLoggedIn, idToken, getCurrentSettings, saveSettingsSync])
 
   // Save AI results when they change
   const handleAIAnalysisComplete = useCallback((fileId: string, response: string, inRangePercentage: number) => {
@@ -252,6 +368,8 @@ function App() {
           onResponseLanguageChange={setResponseLanguage}
           glucoseUnit={glucoseUnit}
           onGlucoseUnitChange={setGlucoseUnit}
+          glucoseThresholds={glucoseThresholds}
+          onGlucoseThresholdsChange={setGlucoseThresholds}
           insulinDuration={insulinDuration}
           onInsulinDurationChange={setInsulinDuration}
           perplexityApiKey={perplexityApiKey}
@@ -277,6 +395,10 @@ function App() {
         onNavigate={handleNavigate} 
         themeMode={themeMode}
         onThemeToggle={handleThemeToggle}
+        onFirstLoginAccept={handleFirstLoginAccept}
+        onFirstLoginCancel={handleFirstLoginCancel}
+        onBeforeLogout={handleBeforeLogout}
+        syncStatus={syncStatus}
       />
       <main ref={mainContentRef} className="main-content">
         {renderPage()}
