@@ -103,29 +103,6 @@ function App() {
     if (settings.glucoseThresholds) setGlucoseThresholds(settings.glucoseThresholds)
   }, [setThemeMode, setExportFormat, setResponseLanguage, setGlucoseUnit, setInsulinDuration, setGlucoseThresholds])
 
-  // Load settings when user logs in (for returning users)
-  useEffect(() => {
-    const loadCloudSettings = async () => {
-      if (isLoggedIn && idToken && !hasLoadedCloudSettings) {
-        const result = await loadSettings()
-        if (result.success && result.settings) {
-          applyCloudSettings(result.settings)
-          // Only mark as loaded when we successfully retrieved settings
-          // This allows retry on next login if loading fails
-          setHasLoadedCloudSettings(true)
-        } else if (result.success && !result.settings) {
-          // 404 - no settings found, which is OK for new users
-          // Mark as loaded so we can start saving changes
-          setHasLoadedCloudSettings(true)
-        }
-        // If loading failed with an error, don't set the flag
-        // so we can retry on next render or login
-      }
-    }
-    
-    loadCloudSettings()
-  }, [isLoggedIn, idToken, hasLoadedCloudSettings, loadSettings, applyCloudSettings])
-
   // Reset loaded flag when user logs out
   useEffect(() => {
     if (!isLoggedIn) {
@@ -170,6 +147,22 @@ function App() {
   const handleFirstLoginCancel = useCallback(() => {
     // User will be logged out, nothing to do here
   }, [])
+
+  // Handle returning user login - load their settings from cloud
+  const handleReturningUserLogin = useCallback(async () => {
+    if (isLoggedIn && idToken && !hasLoadedCloudSettings) {
+      const result = await loadSettings()
+      if (result.success && result.settings) {
+        applyCloudSettings(result.settings)
+        setHasLoadedCloudSettings(true)
+      } else if (result.success && !result.settings) {
+        // 404 - no settings found, which is OK
+        setHasLoadedCloudSettings(true)
+      }
+      // If loading failed with an error, don't set the flag
+      // so we can retry on next login
+    }
+  }, [isLoggedIn, idToken, hasLoadedCloudSettings, loadSettings, applyCloudSettings])
 
   // Handle before logout - save settings synchronously
   const handleBeforeLogout = useCallback(async () => {
@@ -398,6 +391,7 @@ function App() {
         onFirstLoginAccept={handleFirstLoginAccept}
         onFirstLoginCancel={handleFirstLoginCancel}
         onBeforeLogout={handleBeforeLogout}
+        onReturningUserLogin={handleReturningUserLogin}
         syncStatus={syncStatus}
       />
       <main ref={mainContentRef} className="main-content">

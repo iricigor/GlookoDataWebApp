@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { 
   makeStyles, 
   Button,
@@ -22,7 +22,6 @@ import {
   NavigationRegular,
   WeatherSunnyRegular,
   WeatherMoonRegular,
-  CloudSyncRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useFirstLoginCheck } from '../../hooks/useFirstLoginCheck';
@@ -86,20 +85,6 @@ const useStyles = makeStyles({
       display: 'flex',
     },
   },
-  syncIndicator: {
-    display: 'flex',
-    alignItems: 'center',
-    ...shorthands.gap('4px'),
-    color: tokens.colorNeutralForeground3,
-    fontSize: tokens.fontSizeBase200,
-  },
-  syncIcon: {
-    animation: 'spin 1s linear infinite',
-    '@keyframes spin': {
-      from: { transform: 'rotate(0deg)' },
-      to: { transform: 'rotate(360deg)' },
-    },
-  },
 });
 
 interface NavigationProps {
@@ -113,6 +98,8 @@ interface NavigationProps {
   onFirstLoginCancel?: () => void;
   /** Callback before logout to save settings */
   onBeforeLogout?: () => Promise<void>;
+  /** Callback when returning user login check completes (to load settings) */
+  onReturningUserLogin?: () => void;
   /** Current sync status for settings */
   syncStatus?: SyncStatus;
 }
@@ -125,6 +112,7 @@ export function Navigation({
   onFirstLoginAccept,
   onFirstLoginCancel,
   onBeforeLogout,
+  onReturningUserLogin,
   syncStatus = 'idle',
 }: NavigationProps) {
   const styles = useStyles();
@@ -152,6 +140,16 @@ export function Navigation({
     clearError,
   } = useFirstLoginCheck();
 
+  // Track if we've already handled the returning user login to prevent duplicate calls
+  const hasHandledReturningUserLogin = useRef(false);
+
+  // Reset the handled flag when user logs out
+  useEffect(() => {
+    if (!isLoggedIn) {
+      hasHandledReturningUserLogin.current = false;
+    }
+  }, [isLoggedIn]);
+
   // Trigger first login check when user just logged in
   // Use idToken instead of accessToken because:
   // - accessToken is for Microsoft Graph API (audience: https://graph.microsoft.com)
@@ -161,6 +159,16 @@ export function Navigation({
       performCheck(idToken);
     }
   }, [justLoggedIn, idToken, hasChecked, performCheck]);
+
+  // When a returning user's login check completes, trigger settings load
+  useEffect(() => {
+    if (hasChecked && !isFirstLogin && !hasError && justLoggedIn && !hasHandledReturningUserLogin.current) {
+      // Returning user - load their settings
+      hasHandledReturningUserLogin.current = true;
+      onReturningUserLogin?.();
+      acknowledgeLogin();
+    }
+  }, [hasChecked, isFirstLogin, hasError, justLoggedIn, onReturningUserLogin, acknowledgeLogin]);
 
   // Handle welcome dialog accept - user wants to save settings
   const handleWelcomeAccept = () => {
@@ -256,16 +264,6 @@ export function Navigation({
 
         {/* Auth Section */}
         <div className={styles.rightSection}>
-          {/* Sync indicator */}
-          {isLoggedIn && syncStatus === 'syncing' && (
-            <Tooltip content="Syncing settings..." relationship="label">
-              <div className={styles.syncIndicator}>
-                <Spinner size="tiny" />
-                <CloudSyncRegular className={styles.syncIcon} />
-              </div>
-            </Tooltip>
-          )}
-          
           {isLoggedIn && userName ? (
             <>
               {onThemeToggle && (
@@ -281,12 +279,12 @@ export function Navigation({
                   />
                 </Tooltip>
               )}
-              <Tooltip content="Settings" relationship="label">
+              <Tooltip content={syncStatus === 'syncing' ? 'Syncing settings...' : 'Settings'} relationship="label">
                 <Button
                   appearance="subtle"
-                  icon={<SettingsRegular />}
+                  icon={syncStatus === 'syncing' ? <Spinner size="tiny" /> : <SettingsRegular />}
                   onClick={() => onNavigate('settings')}
-                  aria-label="Settings"
+                  aria-label={syncStatus === 'syncing' ? 'Syncing settings...' : 'Settings'}
                 />
               </Tooltip>
               <LogoutDialog 

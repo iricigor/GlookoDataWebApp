@@ -135,6 +135,19 @@ describe('Navigation', () => {
       expect(settingsButtons.length).toBe(2); // Main nav + shortcut
     });
 
+    it('should show "Syncing settings..." on settings button when syncStatus is syncing', () => {
+      render(
+        <Navigation 
+          currentPage="home" 
+          onNavigate={vi.fn()} 
+          syncStatus="syncing"
+        />
+      );
+      
+      // The settings shortcut button should show syncing tooltip
+      expect(screen.getByRole('button', { name: /syncing settings/i })).toBeInTheDocument();
+    });
+
     it('should call onThemeToggle when theme button is clicked', () => {
       const onThemeToggle = vi.fn();
       render(
@@ -313,6 +326,65 @@ describe('Navigation', () => {
       render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
 
       expect(screen.queryByText('Welcome!')).not.toBeInTheDocument();
+    });
+
+    it('should call onReturningUserLogin when returning user login check completes', () => {
+      const onReturningUserLogin = vi.fn();
+      const acknowledgeLogin = vi.fn();
+      
+      mockUseAuth.mockReturnValue({
+        ...defaultAuthState,
+        isLoggedIn: true,
+        userName: 'John Doe',
+        accessToken: 'test-token',
+        idToken: 'test-id-token',
+        justLoggedIn: true,
+        acknowledgeLogin,
+      });
+      mockUseFirstLoginCheck.mockReturnValue({
+        ...defaultFirstLoginCheckState,
+        hasChecked: true,
+        isFirstLogin: false,
+      });
+
+      render(
+        <Navigation 
+          currentPage="home" 
+          onNavigate={vi.fn()} 
+          onReturningUserLogin={onReturningUserLogin}
+        />
+      );
+
+      expect(onReturningUserLogin).toHaveBeenCalledTimes(1);
+      expect(acknowledgeLogin).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call onReturningUserLogin for first-time users', () => {
+      const onReturningUserLogin = vi.fn();
+      
+      mockUseAuth.mockReturnValue({
+        ...defaultAuthState,
+        isLoggedIn: true,
+        userName: 'John Doe',
+        accessToken: 'test-token',
+        idToken: 'test-id-token',
+        justLoggedIn: true,
+      });
+      mockUseFirstLoginCheck.mockReturnValue({
+        ...defaultFirstLoginCheckState,
+        hasChecked: true,
+        isFirstLogin: true,
+      });
+
+      render(
+        <Navigation 
+          currentPage="home" 
+          onNavigate={vi.fn()} 
+          onReturningUserLogin={onReturningUserLogin}
+        />
+      );
+
+      expect(onReturningUserLogin).not.toHaveBeenCalled();
     });
 
     it('should show error dialog when infrastructure error occurs', () => {
