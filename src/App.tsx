@@ -384,23 +384,28 @@ function App() {
     }
   }
 
+  // Hide navigation and footer on API docs page (standalone developer page)
+  const isApiDocsPage = currentPage === 'api-docs'
+
   return (
     <FluentProvider theme={theme} className="app-container" data-theme={isDark ? 'dark' : 'light'}>
-      <Navigation 
-        currentPage={currentPage} 
-        onNavigate={handleNavigate} 
-        themeMode={themeMode}
-        onThemeToggle={handleThemeToggle}
-        onFirstLoginAccept={handleFirstLoginAccept}
-        onFirstLoginCancel={handleFirstLoginCancel}
-        onBeforeLogout={handleBeforeLogout}
-        onReturningUserLogin={handleReturningUserLogin}
-        syncStatus={syncStatus}
-      />
+      {!isApiDocsPage && (
+        <Navigation 
+          currentPage={currentPage} 
+          onNavigate={handleNavigate} 
+          themeMode={themeMode}
+          onThemeToggle={handleThemeToggle}
+          onFirstLoginAccept={handleFirstLoginAccept}
+          onFirstLoginCancel={handleFirstLoginCancel}
+          onBeforeLogout={handleBeforeLogout}
+          onReturningUserLogin={handleReturningUserLogin}
+          syncStatus={syncStatus}
+        />
+      )}
       <main ref={mainContentRef} className="main-content">
         {renderPage()}
       </main>
-      <Footer />
+      {!isApiDocsPage && <Footer />}
       {!hasConsented && <CookieConsent onAccept={acknowledgeConsent} />}
     </FluentProvider>
   )

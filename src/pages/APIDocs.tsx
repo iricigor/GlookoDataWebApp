@@ -161,7 +161,7 @@ export function APIDocs() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <Text className={styles.title}>API Documentation</Text>
+          <Text className={styles.title}>Glooko Insights - API Documentation</Text>
           <Text className={styles.subtitle}>
             Interactive API explorer with Microsoft authentication
           </Text>
