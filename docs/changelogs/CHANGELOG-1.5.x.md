@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>562 Fix login issues: load settings for returning users and show spinner on settings icon</summary>
+
+[#562](../../pull/562) Fix login issues: load settings for returning users and show spinner on settings icon
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>564 Add CodeRabbit badge and configuration</summary>
 
 [#564](../../pull/564) Add CodeRabbit badge and configuration
