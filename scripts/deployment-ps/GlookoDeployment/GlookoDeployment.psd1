@@ -35,7 +35,7 @@
         @{ ModuleName = 'Az.Resources'; ModuleVersion = '6.0.0' }
         @{ ModuleName = 'Az.Storage'; ModuleVersion = '5.0.0' }
         @{ ModuleName = 'Az.Functions'; ModuleVersion = '4.0.0' }
-        @{ ModuleName = 'Az.KeyVault'; ModuleVersion = '4.0.0' }
+        @{ ModuleName = 'Az.KeyVault'; ModuleVersion = '6.0.0' }
         @{ ModuleName = 'Az.ManagedServiceIdentity'; ModuleVersion = '1.0.0' }
         @{ ModuleName = 'Az.Websites'; ModuleVersion = '3.0.0' }
     )
@@ -96,7 +96,8 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
-v1.0.19 - Added appRegistrationClientId verification to Test-GlookoConfig and Test-GlookoDeployment
+v1.0.20 - Added appRegistrationClientId verification to Test-GlookoConfig and Test-GlookoDeployment
+v1.0.19 - Fixed Set-GlookoKeyVault to work with Az.KeyVault 6.0.0+; removed obsolete EnableRbacAuthorization parameter (RBAC is now enabled by default); updated Az.KeyVault minimum version to 6.0.0
 v1.0.18 - Changed AZURE_AD_CLIENT_ID to require explicit configuration instead of dynamic lookup to avoid ambiguity with multiple app registrations
 v1.0.17 - Added AZURE_AD_CLIENT_ID configuration for JWT audience validation with full signature verification
 v1.0.16 - Fixed missing Set-GlookoStaticWebApp function and Set-GSWA alias exports in GlookoDeployment.psm1
