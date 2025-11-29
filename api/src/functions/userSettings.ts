@@ -27,11 +27,13 @@ import { TableClient } from "@azure/data-tables";
 import { DefaultAzureCredential } from "@azure/identity";
 
 /**
- * Expected audiences for ID token validation.
+ * Get expected audiences for ID token validation.
+ * Uses environment variable if set, otherwise falls back to default client ID.
  */
-const EXPECTED_AUDIENCES = [
-  '656dc9c9-bae3-4ed0-a550-0c3e8aa3f26c', // GlookoDataWebApp client ID
-];
+function getExpectedAudiences(): string[] {
+  const clientId = process.env.AZURE_AD_CLIENT_ID || '656dc9c9-bae3-4ed0-a550-0c3e8aa3f26c';
+  return [clientId];
+}
 
 /**
  * Cloud user settings type (should match frontend type)
@@ -78,7 +80,12 @@ interface UserSettingsEntity {
 }
 
 /**
- * Validate and extract user ID from the ID token
+ * Validate and extract user ID from the ID token.
+ * 
+ * SECURITY NOTE: This validates basic JWT claims (audience, expiration, structure)
+ * but does not perform full signature verification. For production environments,
+ * consider using Azure Static Web Apps built-in authentication or Azure AD Easy Auth
+ * which provides full token validation at the infrastructure level.
  */
 function extractUserIdFromToken(authHeader: string | null, context: InvocationContext): string | null {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -103,8 +110,9 @@ function extractUserIdFromToken(authHeader: string | null, context: InvocationCo
       return null;
     }
 
-    if (!EXPECTED_AUDIENCES.includes(claims.aud)) {
-      context.warn(`Token audience mismatch. Expected one of: ${EXPECTED_AUDIENCES.join(', ')}, got: ${claims.aud}`);
+    const expectedAudiences = getExpectedAudiences();
+    if (!expectedAudiences.includes(claims.aud)) {
+      context.warn(`Token audience mismatch. Expected one of: ${expectedAudiences.join(', ')}, got: ${claims.aud}`);
       return null;
     }
 

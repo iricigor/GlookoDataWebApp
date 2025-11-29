@@ -20,6 +20,9 @@ import {
 } from '../utils/api/userSettingsApi';
 import type { CloudUserSettings } from '../types';
 
+/** Time in ms to show success status before returning to idle */
+const SUCCESS_STATUS_DURATION_MS = 2000;
+
 /**
  * Sync status for UI feedback
  */
@@ -91,7 +94,7 @@ export function useUserSettings(
           // Reset to idle after a short delay
           setTimeout(() => {
             setSyncStatus(prev => prev === 'success' ? 'idle' : prev);
-          }, 2000);
+          }, SUCCESS_STATUS_DURATION_MS);
         } else {
           setSyncStatus('error');
           setSyncError(result.error || 'Failed to save settings');

@@ -425,7 +425,6 @@ describe('userSettingsApi', () => {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer valid-token',
-          'Content-Type': 'application/json',
         },
       });
     });

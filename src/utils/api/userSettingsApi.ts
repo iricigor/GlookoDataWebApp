@@ -323,7 +323,6 @@ export async function loadUserSettings(
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${idToken}`,
-        'Content-Type': 'application/json',
       },
     });
 
