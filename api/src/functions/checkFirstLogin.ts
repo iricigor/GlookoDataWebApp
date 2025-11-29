@@ -7,17 +7,31 @@
  * GET /api/user/check-first-login
  * 
  * Headers:
- *   - Authorization: Bearer <access_token> (required)
+ *   - Authorization: Bearer <id_token> (required)
  * 
  * Response:
  *   - 200 OK: { isFirstLogin: boolean, userId: string }
  *   - 401 Unauthorized: Invalid or missing token
  *   - 500 Internal Server Error: Infrastructure error
+ * 
+ * Token Validation:
+ * The function expects an ID token (not an access token) from MSAL authentication.
+ * ID tokens have the application's client ID as the audience, making them suitable
+ * for authenticating with our own API. Access tokens, on the other hand, have
+ * Microsoft Graph API as the audience and are meant for Graph API calls.
  */
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { TableClient } from "@azure/data-tables";
 import { DefaultAzureCredential } from "@azure/identity";
+
+/**
+ * Expected audiences for ID token validation.
+ * The ID token's 'aud' claim should match our application's client ID.
+ */
+const EXPECTED_AUDIENCES = [
+  '656dc9c9-bae3-4ed0-a550-0c3e8aa3f26c', // GlookoDataWebApp client ID
+];
 
 interface UserSettingsEntity {
   partitionKey: string;
@@ -26,22 +40,37 @@ interface UserSettingsEntity {
   lastLoginDate?: string;
 }
 
+interface TokenClaims {
+  aud?: string;      // Audience - should be our app's client ID
+  iss?: string;      // Issuer - Microsoft identity platform
+  oid?: string;      // Object ID (unique user identifier)
+  sub?: string;      // Subject (unique user identifier)
+  exp?: number;      // Expiration time
+  iat?: number;      // Issued at time
+  tid?: string;      // Tenant ID
+}
+
 /**
- * Extract user ID from the access token
+ * Validate and extract user ID from the ID token
  * 
- * SECURITY NOTE: In production, configure Azure Function with Easy Auth
- * (Azure AD authentication) at the infrastructure level, which validates
- * tokens before requests reach the function. This implementation extracts
- * user claims assuming the token has been validated by Azure AD.
+ * SECURITY NOTE: This implementation validates that the token:
+ * 1. Is a valid JWT structure
+ * 2. Has an audience (aud) claim matching our application's client ID
+ * 3. Contains a user identifier (oid or sub claim)
  * 
- * The token is expected to be a Microsoft identity platform (Azure AD) JWT.
- * See: https://learn.microsoft.com/en-us/azure/active-directory/develop/access-tokens
+ * For production environments, consider using Azure AD Easy Auth at the
+ * infrastructure level for additional security.
+ * 
+ * The token is expected to be a Microsoft identity platform (Azure AD) ID token.
+ * See: https://learn.microsoft.com/en-us/azure/active-directory/develop/id-tokens
  * 
  * @param authHeader - The Authorization header value
+ * @param context - The invocation context for logging
  * @returns The user's object ID (oid) or subject (sub) claim, or null if invalid
  */
-function extractUserIdFromToken(authHeader: string | null): string | null {
+function extractUserIdFromToken(authHeader: string | null, context: InvocationContext): string | null {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    context.warn('Missing or invalid Authorization header format');
     return null;
   }
 
@@ -52,16 +81,44 @@ function extractUserIdFromToken(authHeader: string | null): string | null {
     // Requires Node.js 16.14.0+ for base64url encoding support
     const parts = token.split('.');
     if (parts.length !== 3) {
+      context.warn('Invalid JWT structure - expected 3 parts');
       return null;
     }
 
     // Decode the payload (second part)
     const payload = Buffer.from(parts[1], 'base64url').toString('utf-8');
-    const claims = JSON.parse(payload);
+    const claims: TokenClaims = JSON.parse(payload);
+
+    // Validate audience - the token must be intended for our application
+    if (!claims.aud) {
+      context.warn('Token missing audience (aud) claim');
+      return null;
+    }
+
+    if (!EXPECTED_AUDIENCES.includes(claims.aud)) {
+      context.warn(`Token audience mismatch. Expected one of: ${EXPECTED_AUDIENCES.join(', ')}, got: ${claims.aud}`);
+      return null;
+    }
+
+    // Validate token is not expired (basic check - full validation requires signature verification)
+    if (claims.exp) {
+      const now = Math.floor(Date.now() / 1000);
+      if (claims.exp < now) {
+        context.warn('Token has expired');
+        return null;
+      }
+    }
 
     // Return the object ID (oid) or subject (sub) claim
-    return claims.oid || claims.sub || null;
-  } catch {
+    const userId = claims.oid || claims.sub;
+    if (!userId) {
+      context.warn('Token missing user identifier (oid or sub claim)');
+      return null;
+    }
+
+    return userId;
+  } catch (error) {
+    context.warn('Failed to parse token:', error);
     return null;
   }
 }
@@ -135,16 +192,16 @@ async function updateLastLogin(tableClient: TableClient, userId: string): Promis
 async function checkFirstLogin(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   context.log('Processing check-first-login request');
 
-  // Validate authorization header
+  // Validate authorization header and extract user ID from ID token
   const authHeader = request.headers.get('authorization');
-  const userId = extractUserIdFromToken(authHeader);
+  const userId = extractUserIdFromToken(authHeader, context);
 
   if (!userId) {
     context.warn('Unauthorized request - invalid or missing token');
     return {
       status: 401,
       jsonBody: {
-        error: 'Unauthorized - valid Bearer token required',
+        error: 'Unauthorized access. Please log in again.',
         errorType: 'unauthorized',
       },
     };

@@ -19,10 +19,12 @@ vi.mock('@azure/msal-browser', () => {
           localAccountId: '123',
         },
         accessToken: 'test-access-token',
+        idToken: 'test-id-token',
       }),
       logoutPopup: vi.fn().mockResolvedValue(undefined),
       acquireTokenSilent: vi.fn().mockResolvedValue({
         accessToken: 'test-access-token',
+        idToken: 'test-id-token',
       }),
     })),
     LogLevel: {
@@ -116,6 +118,7 @@ describe('useAuth', () => {
     expect(result.current).toHaveProperty('userEmail');
     expect(result.current).toHaveProperty('userPhoto');
     expect(result.current).toHaveProperty('accessToken');
+    expect(result.current).toHaveProperty('idToken');
     expect(result.current).toHaveProperty('isInitialized');
     expect(result.current).toHaveProperty('justLoggedIn');
     expect(result.current).toHaveProperty('login');
@@ -202,6 +205,48 @@ describe('useAuth', () => {
     
     await waitFor(() => {
       expect(result.current.accessToken).toBeNull();
+    });
+  });
+
+  it('should provide idToken after login', async () => {
+    const { result } = renderHook(() => useAuth());
+    
+    await waitFor(() => {
+      expect(result.current.isInitialized).toBe(true);
+    });
+    
+    expect(result.current.idToken).toBeNull();
+    
+    await act(async () => {
+      await result.current.login();
+    });
+    
+    await waitFor(() => {
+      expect(result.current.idToken).toBe('test-id-token');
+    });
+  });
+
+  it('should clear idToken on logout', async () => {
+    const { result } = renderHook(() => useAuth());
+    
+    await waitFor(() => {
+      expect(result.current.isInitialized).toBe(true);
+    });
+    
+    await act(async () => {
+      await result.current.login();
+    });
+    
+    await waitFor(() => {
+      expect(result.current.idToken).toBe('test-id-token');
+    });
+    
+    await act(async () => {
+      await result.current.logout();
+    });
+    
+    await waitFor(() => {
+      expect(result.current.idToken).toBeNull();
     });
   });
 });

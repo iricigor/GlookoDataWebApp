@@ -33,6 +33,7 @@ describe('Navigation', () => {
     userEmail: null,
     userPhoto: null,
     accessToken: null,
+    idToken: null,
     isInitialized: true,
     justLoggedIn: false,
     login: vi.fn(),
@@ -103,6 +104,7 @@ describe('Navigation', () => {
         userName: 'John Doe',
         userEmail: 'john@example.com',
         accessToken: 'test-token',
+        idToken: 'test-id-token',
         logout: vi.fn().mockResolvedValue(undefined),
       });
     });
@@ -239,6 +241,7 @@ describe('Navigation', () => {
         isLoggedIn: true,
         userName: 'John Doe',
         accessToken: 'test-token',
+        idToken: 'test-id-token',
         justLoggedIn: true,
       });
       mockUseFirstLoginCheck.mockReturnValue({
@@ -248,7 +251,7 @@ describe('Navigation', () => {
 
       render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
 
-      expect(performCheck).toHaveBeenCalledWith('test-token');
+      expect(performCheck).toHaveBeenCalledWith('test-id-token');
     });
 
     it('should not trigger performCheck when restoring session', () => {
@@ -258,6 +261,7 @@ describe('Navigation', () => {
         isLoggedIn: true,
         userName: 'John Doe',
         accessToken: 'test-token',
+        idToken: 'test-id-token',
         justLoggedIn: false, // Not a fresh login
       });
       mockUseFirstLoginCheck.mockReturnValue({
@@ -276,6 +280,7 @@ describe('Navigation', () => {
         isLoggedIn: true,
         userName: 'John Doe',
         accessToken: 'test-token',
+        idToken: 'test-id-token',
         justLoggedIn: true,
       });
       mockUseFirstLoginCheck.mockReturnValue({
@@ -296,6 +301,7 @@ describe('Navigation', () => {
         isLoggedIn: true,
         userName: 'John Doe',
         accessToken: 'test-token',
+        idToken: 'test-id-token',
         justLoggedIn: true,
       });
       mockUseFirstLoginCheck.mockReturnValue({
@@ -315,6 +321,7 @@ describe('Navigation', () => {
         isLoggedIn: true,
         userName: 'John Doe',
         accessToken: 'test-token',
+        idToken: 'test-id-token',
         justLoggedIn: true,
       });
       mockUseFirstLoginCheck.mockReturnValue({
@@ -340,6 +347,7 @@ describe('Navigation', () => {
         isLoggedIn: true,
         userName: 'John Doe',
         accessToken: 'test-token',
+        idToken: 'test-id-token',
         justLoggedIn: false,
         logout: logoutMock,
       });
