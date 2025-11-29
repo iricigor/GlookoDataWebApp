@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>559 Fix 401 error by restoring hardcoded client ID fallback</summary>
+
+[#559](../../pull/559) Fix 401 error by restoring hardcoded client ID fallback
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>554 Implement cloud sync for user settings</summary>
 
 [#554](../../pull/554) Implement cloud sync for user settings
