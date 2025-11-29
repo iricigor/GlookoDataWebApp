@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>572 Fix Set-GlookoKeyVault for Az.KeyVault 6.0.0+ compatibility</summary>
+
+[#572](../../pull/572) Fix Set-GlookoKeyVault for Az.KeyVault 6.0.0+ compatibility
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>568 Implement JWT token validation with JWKS signature verification</summary>
 
 [#568](../../pull/568) Implement JWT token validation with JWKS signature verification
