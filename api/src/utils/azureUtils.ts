@@ -8,6 +8,8 @@
 import { InvocationContext } from "@azure/functions";
 import { TableClient } from "@azure/data-tables";
 import { DefaultAzureCredential } from "@azure/identity";
+import jwt from "jsonwebtoken";
+import jwksClient from "jwks-rsa";
 
 /**
  * GlookoDataWebApp client ID - hardcoded fallback for when environment variable is not set.
@@ -34,6 +36,58 @@ export function getExpectedAudiences(): string[] {
   return EXPECTED_AUDIENCES;
 }
 
+/**
+ * Microsoft identity platform JWKS endpoint for key rotation.
+ * This endpoint provides the public keys used to verify JWT signatures.
+ * The "common" endpoint works for both single-tenant and multi-tenant apps.
+ * See: https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc
+ */
+const MS_JWKS_URI = 'https://login.microsoftonline.com/common/discovery/v2.0/keys';
+
+/**
+ * JWKS client for fetching Microsoft identity platform public keys.
+ * Uses caching to minimize requests to the JWKS endpoint.
+ */
+const jwksClientInstance = jwksClient({
+  jwksUri: MS_JWKS_URI,
+  cache: true,
+  cacheMaxAge: 600000, // 10 minutes
+  rateLimit: true,
+  jwksRequestsPerMinute: 10,
+});
+
+/**
+ * Get the signing key from the JWKS endpoint based on the key ID in the JWT header.
+ * 
+ * @param header - The JWT header containing the kid (key ID)
+ * @returns Promise resolving to the public key string
+ */
+async function getSigningKey(header: jwt.JwtHeader): Promise<string> {
+  if (!header.kid) {
+    throw new Error('JWT header missing kid (key ID)');
+  }
+  
+  const key = await jwksClientInstance.getSigningKey(header.kid);
+  return key.getPublicKey();
+}
+
+/**
+ * Valid issuers for Microsoft identity platform tokens.
+ * Supports both v1.0 and v2.0 token formats.
+ * The {tenantid} placeholder is replaced at validation time.
+ * For consumer accounts (MSA), the tenant ID is typically '9188040d-6c67-4c5b-b112-36a304b66dad'.
+ */
+const VALID_ISSUER_PATTERNS = [
+  'https://login.microsoftonline.com/{tenantid}/v2.0',
+  'https://sts.windows.net/{tenantid}/',
+];
+
+/**
+ * Consumer (personal Microsoft account) tenant ID.
+ * Used when users sign in with personal Microsoft accounts.
+ */
+const CONSUMER_TENANT_ID = '9188040d-6c67-4c5b-b112-36a304b66dad';
+
 interface TokenClaims {
   aud?: string;      // Audience - should be our app's client ID
   iss?: string;      // Issuer - Microsoft identity platform
@@ -45,21 +99,50 @@ interface TokenClaims {
 }
 
 /**
- * Validate and extract user ID from the ID token.
+ * Validate the issuer claim against expected Microsoft identity platform issuers.
  * 
- * SECURITY NOTE: This validates basic JWT claims (audience, expiration, structure)
- * but does not perform full signature verification. For production environments,
- * consider using Azure Static Web Apps built-in authentication or Azure AD Easy Auth
- * which provides full token validation at the infrastructure level.
+ * @param issuer - The issuer claim from the token
+ * @param tenantId - The tenant ID from the token (optional, will check consumer tenant if not provided)
+ * @returns True if the issuer is valid
+ */
+function validateIssuer(issuer: string, tenantId?: string): boolean {
+  // If tenant ID is provided, check against patterns with that tenant
+  const tenantsToCheck = tenantId ? [tenantId] : [CONSUMER_TENANT_ID];
+  
+  // Also allow the actual consumer tenant ID if a specific tenant is provided
+  if (tenantId && tenantId !== CONSUMER_TENANT_ID) {
+    tenantsToCheck.push(CONSUMER_TENANT_ID);
+  }
+  
+  for (const tid of tenantsToCheck) {
+    for (const pattern of VALID_ISSUER_PATTERNS) {
+      const expectedIssuer = pattern.replace('{tenantid}', tid);
+      if (issuer === expectedIssuer) {
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}
+
+/**
+ * Validate and extract user ID from the ID token with full signature verification.
  * 
- * The token is expected to be a Microsoft identity platform (Azure AD) ID token.
+ * This implementation provides production-ready JWT validation:
+ * - Cryptographic signature verification using Microsoft's JWKS endpoint
+ * - Audience validation to ensure the token is intended for this application
+ * - Issuer validation to ensure the token comes from Microsoft identity platform
+ * - Expiration validation to reject expired tokens
+ * 
+ * The token is expected to be a Microsoft identity platform (Azure AD/Entra ID) ID token.
  * See: https://learn.microsoft.com/en-us/azure/active-directory/develop/id-tokens
  * 
- * @param authHeader - The Authorization header value
+ * @param authHeader - The Authorization header value (Bearer token)
  * @param context - The invocation context for logging
- * @returns The user's object ID (oid) or subject (sub) claim, or null if invalid
+ * @returns Promise resolving to the user's object ID (oid) or subject (sub) claim, or null if invalid
  */
-export function extractUserIdFromToken(authHeader: string | null, context: InvocationContext): string | null {
+export async function extractUserIdFromToken(authHeader: string | null, context: InvocationContext): Promise<string | null> {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     context.warn('Missing or invalid Authorization header format');
     return null;
@@ -68,41 +151,39 @@ export function extractUserIdFromToken(authHeader: string | null, context: Invoc
   const token = authHeader.substring(7);
   
   try {
-    // JWT tokens are base64url encoded with 3 parts separated by dots
-    // Requires Node.js 16.14.0+ for base64url encoding support
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      context.warn('Invalid JWT structure - expected 3 parts');
+    // Decode the header to get the key ID
+    const decodedToken = jwt.decode(token, { complete: true });
+    if (!decodedToken || typeof decodedToken === 'string') {
+      context.warn('Failed to decode JWT token');
       return null;
     }
 
-    // Decode the payload (second part)
-    const payload = Buffer.from(parts[1], 'base64url').toString('utf-8');
-    const claims: TokenClaims = JSON.parse(payload);
-
-    // Validate audience - the token must be intended for our application
-    if (!claims.aud) {
-      context.warn('Token missing audience (aud) claim');
-      return null;
-    }
-
+    // Get the public key from Microsoft's JWKS endpoint
+    const publicKey = await getSigningKey(decodedToken.header);
+    
+    // Verify the token signature and decode the payload
     const expectedAudiences = getExpectedAudiences();
-    if (!expectedAudiences.includes(claims.aud)) {
-      context.warn(`Token audience mismatch. Expected one of: ${expectedAudiences.join(', ')}, got: ${claims.aud}`);
+    // Use the first audience as the primary, since jsonwebtoken expects a string or non-empty array
+    const audience = expectedAudiences.length === 1 ? expectedAudiences[0] : expectedAudiences as [string, ...string[]];
+    const verifiedPayload = jwt.verify(token, publicKey, {
+      algorithms: ['RS256'], // Microsoft uses RS256 for ID tokens
+      audience: audience,
+      clockTolerance: 60, // Allow 60 seconds of clock skew
+    }) as TokenClaims;
+
+    // Validate issuer
+    if (!verifiedPayload.iss) {
+      context.warn('Token missing issuer (iss) claim');
       return null;
     }
 
-    // Validate token is not expired (basic check - full validation requires signature verification)
-    if (claims.exp) {
-      const now = Math.floor(Date.now() / 1000);
-      if (claims.exp < now) {
-        context.warn('Token has expired');
-        return null;
-      }
+    if (!validateIssuer(verifiedPayload.iss, verifiedPayload.tid)) {
+      context.warn(`Invalid token issuer: ${verifiedPayload.iss}`);
+      return null;
     }
 
     // Return the object ID (oid) or subject (sub) claim
-    const userId = claims.oid || claims.sub;
+    const userId = verifiedPayload.oid || verifiedPayload.sub;
     if (!userId) {
       context.warn('Token missing user identifier (oid or sub claim)');
       return null;
@@ -110,7 +191,15 @@ export function extractUserIdFromToken(authHeader: string | null, context: Invoc
 
     return userId;
   } catch (error) {
-    context.warn('Failed to parse token:', error);
+    if (error instanceof jwt.TokenExpiredError) {
+      context.warn('Token has expired');
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      context.warn(`JWT validation failed: ${error.message}`);
+    } else if (error instanceof jwt.NotBeforeError) {
+      context.warn('Token not yet valid (nbf claim)');
+    } else {
+      context.warn('Failed to validate token:', error);
+    }
     return null;
   }
 }

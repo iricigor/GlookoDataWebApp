@@ -69,7 +69,7 @@ async function getUserSettings(request: HttpRequest, context: InvocationContext)
   context.log('Processing GET user/settings request');
 
   const authHeader = request.headers.get('authorization');
-  const userId = extractUserIdFromToken(authHeader, context);
+  const userId = await extractUserIdFromToken(authHeader, context);
 
   if (!userId) {
     return {
@@ -147,7 +147,7 @@ async function putUserSettings(request: HttpRequest, context: InvocationContext)
   context.log('Processing PUT user/settings request');
 
   const authHeader = request.headers.get('authorization');
-  const userId = extractUserIdFromToken(authHeader, context);
+  const userId = await extractUserIdFromToken(authHeader, context);
 
   if (!userId) {
     return {

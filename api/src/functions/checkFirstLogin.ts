@@ -86,7 +86,7 @@ async function checkFirstLogin(request: HttpRequest, context: InvocationContext)
 
   // Validate authorization header and extract user ID from ID token
   const authHeader = request.headers.get('authorization');
-  const userId = extractUserIdFromToken(authHeader, context);
+  const userId = await extractUserIdFromToken(authHeader, context);
 
   if (!userId) {
     context.warn('Unauthorized request - invalid or missing token');

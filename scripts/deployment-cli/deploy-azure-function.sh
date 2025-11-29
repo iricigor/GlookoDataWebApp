@@ -360,6 +360,17 @@ configure_app_settings() {
         fi
     fi
     
+    # Add App Registration Client ID for JWT audience validation
+    # This is the application (client) ID from Azure App Registration
+    local app_client_id
+    app_client_id=$(get_app_registration_client_id)
+    if [ -n "${app_client_id}" ]; then
+        settings_array+=("AZURE_AD_CLIENT_ID=${app_client_id}")
+        print_info "App Registration Client ID: ${app_client_id}"
+    else
+        print_warning "Could not retrieve App Registration Client ID. JWT validation will use hardcoded fallback."
+    fi
+    
     # Add CORS settings for Static Web App
     settings_array+=("CORS_ALLOWED_ORIGINS=${WEB_APP_URL}")
     

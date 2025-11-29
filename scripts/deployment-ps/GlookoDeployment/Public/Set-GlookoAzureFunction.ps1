@@ -302,6 +302,25 @@ function Set-GlookoAzureFunction {
                 }
             }
             
+            # Add App Registration Client ID for JWT audience validation
+            # This is the application (client) ID from Azure App Registration
+            $appRegistrationName = $config.appRegistrationName
+            if ($appRegistrationName) {
+                try {
+                    $appRegistration = Get-AzADApplication -DisplayName $appRegistrationName -ErrorAction SilentlyContinue
+                    if ($appRegistration) {
+                        $appSettings["AZURE_AD_CLIENT_ID"] = $appRegistration.AppId
+                        Write-InfoMessage "App Registration Client ID: $($appRegistration.AppId)"
+                    }
+                    else {
+                        Write-WarningMessage "App Registration '$appRegistrationName' not found. JWT validation will use hardcoded fallback."
+                    }
+                }
+                catch {
+                    Write-WarningMessage "Could not retrieve App Registration Client ID: $_"
+                }
+            }
+            
             if ($appSettings.Count -gt 0) {
                 Write-InfoMessage "Setting application configuration..."
                 # Suppress the warning about redacted app settings by using -WarningAction SilentlyContinue

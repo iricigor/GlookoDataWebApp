@@ -301,6 +301,19 @@ get_managed_identity_resource_id() {
 }
 
 ################################################################################
+# APP REGISTRATION FUNCTIONS
+################################################################################
+
+# Get the client ID (application ID) of an app registration by name
+# This is used for JWT audience validation in the API
+get_app_registration_client_id() {
+    az ad app list \
+        --display-name "${APP_REGISTRATION_NAME}" \
+        --query "[0].appId" \
+        -o tsv 2>/dev/null
+}
+
+################################################################################
 # INITIALIZATION
 ################################################################################
 
