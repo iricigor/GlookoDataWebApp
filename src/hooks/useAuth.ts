@@ -14,6 +14,8 @@ export interface AuthState {
   userPhoto: string | null;
   account: AccountInfo | null;
   accessToken: string | null;
+  /** ID token for authenticating with our backend API (audience is our app's client ID) */
+  idToken: string | null;
 }
 
 /**
@@ -30,6 +32,7 @@ export function useAuth() {
     userPhoto: null,
     account: null,
     accessToken: null,
+    idToken: null,
   });
   const [isInitialized, setIsInitialized] = useState(false);
   const [justLoggedIn, setJustLoggedIn] = useState(false);
@@ -47,7 +50,7 @@ export function useAuth() {
           // User just logged in via redirect - this is a fresh login
           const account = response.account;
           if (account) {
-            await updateAuthState(account, response.accessToken);
+            await updateAuthState(account, response.accessToken, response.idToken);
             setJustLoggedIn(true);
           }
         } else {
@@ -63,7 +66,7 @@ export function useAuth() {
                 account: account,
               });
               // This is restoring a session, not a fresh login - don't set justLoggedIn
-              await updateAuthState(account, tokenResponse.accessToken);
+              await updateAuthState(account, tokenResponse.accessToken, tokenResponse.idToken);
             } catch (error) {
               // If silent token acquisition fails, user needs to login again
               console.warn('Silent token acquisition failed:', error);
@@ -74,6 +77,7 @@ export function useAuth() {
                 userPhoto: null,
                 account: null,
                 accessToken: null,
+                idToken: null,
               });
             }
           }
@@ -89,7 +93,7 @@ export function useAuth() {
   }, []);
 
   // Update auth state with user information
-  const updateAuthState = async (account: AccountInfo, accessToken: string) => {
+  const updateAuthState = async (account: AccountInfo, accessToken: string, idToken: string) => {
     try {
       const displayName = getUserDisplayName(account);
       const email = getUserEmail(account);
@@ -109,6 +113,7 @@ export function useAuth() {
         userPhoto: photoUrl,
         account: account,
         accessToken: accessToken,
+        idToken: idToken,
       });
     } catch (error) {
       console.error('Failed to update auth state:', error);
@@ -120,6 +125,7 @@ export function useAuth() {
         userPhoto: null,
         account: account,
         accessToken: accessToken,
+        idToken: idToken,
       });
     }
   };
@@ -131,7 +137,7 @@ export function useAuth() {
       
       if (response && response.account) {
         // This is a fresh login via popup
-        await updateAuthState(response.account, response.accessToken);
+        await updateAuthState(response.account, response.accessToken, response.idToken);
         setJustLoggedIn(true);
       }
     } catch (error) {
@@ -158,6 +164,7 @@ export function useAuth() {
         userPhoto: null,
         account: null,
         accessToken: null,
+        idToken: null,
       });
       setJustLoggedIn(false);
 
@@ -181,6 +188,7 @@ export function useAuth() {
     userEmail: authState.userEmail,
     userPhoto: authState.userPhoto,
     accessToken: authState.accessToken,
+    idToken: authState.idToken,
     isInitialized,
     justLoggedIn,
     login,

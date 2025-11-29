@@ -46,16 +46,16 @@ const defaultConfig: UserSettingsApiConfig = {
  * 
  * This function calls the Azure Function to check the UserSettings table.
  * 
- * @param accessToken - The access token from MSAL authentication
+ * @param idToken - The ID token from MSAL authentication (has app's client ID as audience)
  * @param config - Optional API configuration (defaults to /api)
  * @returns Promise with the result containing success status and isFirstLogin flag or error
  */
 export async function checkFirstLogin(
-  accessToken: string,
+  idToken: string,
   config: UserSettingsApiConfig = defaultConfig
 ): Promise<FirstLoginCheckResult> {
-  // Validate access token
-  if (!accessToken || accessToken.trim() === '') {
+  // Validate ID token
+  if (!idToken || idToken.trim() === '') {
     return {
       success: false,
       error: 'Authentication required',
@@ -67,7 +67,7 @@ export async function checkFirstLogin(
     const response = await fetch(`${config.baseUrl}/user/check-first-login`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        'Authorization': `Bearer ${idToken}`,
         'Content-Type': 'application/json',
       },
     });

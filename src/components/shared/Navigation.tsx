@@ -99,7 +99,7 @@ export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }
     userName, 
     userEmail, 
     userPhoto, 
-    accessToken, 
+    idToken, 
     justLoggedIn, 
     login, 
     logout, 
@@ -119,11 +119,14 @@ export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }
   } = useFirstLoginCheck();
 
   // Trigger first login check when user just logged in
+  // Use idToken instead of accessToken because:
+  // - accessToken is for Microsoft Graph API (audience: https://graph.microsoft.com)
+  // - idToken is for our own API (audience: our app's client ID)
   useEffect(() => {
-    if (justLoggedIn && accessToken && !hasChecked) {
-      performCheck(accessToken);
+    if (justLoggedIn && idToken && !hasChecked) {
+      performCheck(idToken);
     }
-  }, [justLoggedIn, accessToken, hasChecked, performCheck]);
+  }, [justLoggedIn, idToken, hasChecked, performCheck]);
 
   // Handle welcome dialog close
   const handleWelcomeClose = () => {
