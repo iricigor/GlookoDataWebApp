@@ -10,7 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  lint:
+    name: 🔍 Lint
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -31,8 +32,46 @@ jobs:
       - name: Run linter
         run: npm run lint
 
+  build:
+    name: 🏗️ Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
       - name: Build project
         run: npm run build
+
+  unit-tests:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
 
       - name: Run unit tests with JSON reporter
         run: npm test -- --run --reporter=json > test-results.json 2>&1 || true
@@ -50,6 +89,56 @@ jobs:
           echo "TESTS_FAILED=$TEST_FAILED" >> $GITHUB_ENV
           
           echo "::notice::Tests: $TEST_PASSED/$TEST_COUNT passed"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results
+          path: test-results.json
+          retention-days: 7
+
+  # Summary job that runs after all parallel jobs complete
+  summary:
+    name: 📊 Summary
+    runs-on: ubuntu-latest
+    needs: [lint, build, unit-tests]
+    if: always()
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download test results
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-test-results
+          path: ./results
+
+      - name: Aggregate results
+        id: aggregate
+        run: |
+          # Extract test count from JSON output
+          TEST_COUNT=$(grep -o '"numTotalTests":[0-9]*' ./results/test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
+          TEST_PASSED=$(grep -o '"numPassedTests":[0-9]*' ./results/test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
+          TEST_FAILED=$(grep -o '"numFailedTests":[0-9]*' ./results/test-results.json | head -1 | grep -o '[0-9]*' || echo "0")
+          
+          echo "TESTS_TOTAL=$TEST_COUNT" >> $GITHUB_ENV
+          echo "TESTS_PASSED=$TEST_PASSED" >> $GITHUB_ENV
+          echo "TESTS_FAILED=$TEST_FAILED" >> $GITHUB_ENV
+          
+          echo "::notice::Tests: $TEST_PASSED/$TEST_COUNT passed"
+
+      - name: Check job statuses
+        run: |
+          echo "Lint: ${{ needs.lint.result }}"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Unit Tests: ${{ needs.unit-tests.result }}"
+          
+          # Fail if any job failed
+          if [[ "${{ needs.lint.result }}" == "failure" || "${{ needs.build.result }}" == "failure" || "${{ needs.unit-tests.result }}" == "failure" ]]; then
+            echo "::error::One or more jobs failed"
+            exit 1
+          fi
 
       - name: Update Test Count Badge
         uses: schneegans/dynamic-badges-action@v1.7.0
