@@ -330,17 +330,25 @@ function Test-GlookoDeployment {
                 # Note: Azure PowerShell doesn't have native cmdlets for SWA backends.
                 # We use Azure CLI 'az staticwebapp backends list' to check backend linking.
                 try {
+                    $backendOutput = $null
+                    $backendError = $null
+                    
+                    # Run Azure CLI and capture stdout/stderr separately
                     $backendOutput = az staticwebapp backends list `
                         --name $staticWebAppName `
                         --resource-group $rg `
                         --query "[?backendResourceId!=null].backendResourceId" `
-                        --output tsv 2>&1
+                        --output tsv 2>$null
                     
                     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($backendOutput)) {
                         $issues += "No backend linked (run Set-GlookoSwaBackend)"
                     }
-                    elseif (-not ($backendOutput -like "*$functionAppName*")) {
-                        $issues += "Backend linked to different Function App"
+                    else {
+                        # Use more precise pattern matching: resource ID ends with /sites/{functionAppName}
+                        # This avoids false positives from substring matches
+                        if (-not ($backendOutput -like "*/sites/$functionAppName")) {
+                            $issues += "Backend linked to different Function App"
+                        }
                     }
                 }
                 catch {
