@@ -124,11 +124,13 @@ function Set-GlookoKeyVault {
             else {
                 Write-InfoMessage "Creating Key Vault '$keyVaultName'..."
                 
+                # Note: Starting with Az.KeyVault 6.0.0, RBAC is enabled by default
+                # and EnableRbacAuthorization was replaced with DisableRbacAuthorization.
+                # We don't need to specify anything since RBAC is the default behavior.
                 $keyVaultParams = @{
                     ResourceGroupName      = $rg
                     VaultName              = $keyVaultName
                     Location               = $loc
-                    EnableRbacAuthorization = $true
                     SoftDeleteRetentionInDays = 90
                     Sku                    = 'Standard'
                     Tag                    = @{
