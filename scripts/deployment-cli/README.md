@@ -41,6 +41,7 @@ cd scripts/deployment-cli
 | `deploy-azure-storage-account.sh` | Deploys Azure Storage Account |
 | `deploy-azure-storage-tables.sh` | Deploys Azure Storage Tables with optional managed identity RBAC |
 | `deploy-azure-managed-identity.sh` | Deploys User-Assigned Managed Identity |
+| `deploy-azure-key-vault.sh` | Deploys Azure Key Vault with RBAC authorization |
 | `deploy-azure-function.sh` | Deploys Azure Function App with managed identity |
 | `deploy-azure-swa-backend.sh` | Links Azure Function App to Static Web App as backend |
 | `test-azure-resources.sh` | Verifies deployment state of all Azure resources |
@@ -241,6 +242,57 @@ Creates and configures a user-assigned managed identity for passwordless authent
 - Deploy Storage Account (for function app storage)
 - Deploy Key Vault (for secrets management)
 - Deploy Function App (which will use this identity)
+
+### deploy-azure-key-vault.sh
+
+Creates and configures an Azure Key Vault for secure secrets management.
+
+**Features:**
+- Creates Key Vault with RBAC authorization (not access policies)
+- Enables soft delete and purge protection (90 days retention)
+- Assigns Key Vault Secrets User role to managed identity (optional)
+- Idempotent - safe to run multiple times
+
+**Options:**
+```
+  -h, --help              Show help message
+  -n, --name NAME         Key Vault name
+  -g, --resource-group RG Resource group name
+  -l, --location LOCATION Azure region
+  -c, --config FILE       Custom configuration file path
+  -s, --save              Save configuration after deployment
+  -v, --verbose           Enable verbose output
+  --assign-identity       Assign RBAC to managed identity if it exists
+```
+
+**Examples:**
+```bash
+# Deploy with defaults
+./deploy-azure-key-vault.sh
+
+# Deploy with custom name and location
+./deploy-azure-key-vault.sh --name my-keyvault --location westus2
+
+# Deploy and assign RBAC to managed identity
+./deploy-azure-key-vault.sh --assign-identity
+
+# Deploy and save configuration
+./deploy-azure-key-vault.sh --save
+```
+
+**Prerequisites:**
+- Resource Group must exist (created automatically if not present)
+- For RBAC assignment: Managed Identity should exist (run deploy-azure-managed-identity.sh)
+
+**Expected Secrets:**
+After deploying the Key Vault, add secrets manually:
+```bash
+# Add Perplexity API key
+az keyvault secret set --vault-name <name> --name "PerplexityApiKey" --value "<your-api-key>"
+
+# Add Google Gemini API key
+az keyvault secret set --vault-name <name> --name "GeminiApiKey" --value "<your-api-key>"
+```
 
 ### deploy-azure-function.sh
 

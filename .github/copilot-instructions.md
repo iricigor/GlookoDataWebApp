@@ -1054,6 +1054,9 @@ When adding or updating deployment scripts:
    - PATCH: Bug fixes, documentation updates, **new scripts/functions added**
    - MINOR: Reserved for future use (coordinate with maintainer)
    - MAJOR: Breaking changes to existing scripts (coordinate with maintainer)
+3. **Add new scripts to the download list** in `Install-GlookoDeploymentModule.ps1`
+   - The `$Files` array in the installer defines which files are downloaded from GitHub
+   - Any new Public function must be added to this array, otherwise it won't be available when users install the module remotely
 
 ### Script Language Alignment
 

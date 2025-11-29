@@ -100,6 +100,7 @@ Invoke-GlookoDeployment -All
 | `Set-GlookoStorageAccount` | `Set-GSA` | Deploy Azure Storage Account |
 | `Set-GlookoTableStorage` | `Set-GTS` | Deploy Azure Storage Tables with optional managed identity RBAC |
 | `Set-GlookoManagedIdentity` | `Set-GMI` | Deploy User-Assigned Managed Identity |
+| `Set-GlookoKeyVault` | `Set-GKV` | Deploy Azure Key Vault with RBAC authorization |
 | `Set-GlookoAzureFunction` | `Set-GAF` | Deploy Azure Function App |
 | `Set-GlookoSwaBackend` | `Set-GSB` | Link Azure Function App to Static Web App as backend |
 | `Invoke-GlookoDeployment` | `Invoke-GD` | Orchestrate full deployment |
@@ -242,6 +243,47 @@ Set-GlookoManagedIdentity -Name "my-identity" -Location "westus2"
 Set-GlookoManagedIdentity -ResourceGroup "my-rg"
 ```
 
+### Set-GlookoKeyVault
+
+Creates and configures an Azure Key Vault for secure secrets management.
+
+**Parameters:**
+- `-Name` - Key Vault name (optional, uses config)
+- `-ResourceGroup` - Resource group (optional, uses config)
+- `-Location` - Azure region (optional, uses config)
+- `-AssignIdentity` - Assign Key Vault Secrets User role to managed identity
+
+**Examples:**
+```powershell
+# Deploy with defaults
+Set-GlookoKeyVault
+
+# Deploy with custom name and location
+Set-GlookoKeyVault -Name "my-keyvault" -Location "westus2"
+
+# Deploy and assign RBAC to managed identity
+Set-GlookoKeyVault -AssignIdentity
+
+# Use alias
+Set-GKV -AssignIdentity
+```
+
+**Prerequisites:**
+- Resource Group must exist (created automatically if not present)
+- For RBAC assignment: Managed Identity should exist (run Set-GlookoManagedIdentity)
+
+**Expected Secrets:**
+After deploying the Key Vault, add secrets manually:
+```powershell
+# Add Perplexity API key
+$secret = ConvertTo-SecureString 'your-api-key' -AsPlainText -Force
+Set-AzKeyVaultSecret -VaultName '<name>' -Name 'PerplexityApiKey' -SecretValue $secret
+
+# Add Google Gemini API key
+$secret = ConvertTo-SecureString 'your-api-key' -AsPlainText -Force
+Set-AzKeyVaultSecret -VaultName '<name>' -Name 'GeminiApiKey' -SecretValue $secret
+```
+
 ### Set-GlookoAzureFunction
 
 Creates and configures an Azure Function App.
@@ -375,6 +417,7 @@ GlookoDeployment/
 │   ├── Set-GlookoStorageAccount.ps1
 │   ├── Set-GlookoTableStorage.ps1
 │   ├── Set-GlookoManagedIdentity.ps1
+│   ├── Set-GlookoKeyVault.ps1
 │   ├── Set-GlookoAzureFunction.ps1
 │   ├── Set-GlookoSwaBackend.ps1
 │   ├── Invoke-GlookoDeployment.ps1
