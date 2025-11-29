@@ -12,6 +12,10 @@ import { DefaultAzureCredential } from "@azure/identity";
 /**
  * GlookoDataWebApp client ID - hardcoded fallback for when environment variable is not set.
  * This is the Application (client) ID from Azure App Registration.
+ * 
+ * Note: Client IDs are not secrets and are safe to include in source code.
+ * This is standard practice for SPAs using MSAL authentication.
+ * See: https://learn.microsoft.com/en-us/azure/active-directory/develop/msal-client-application-configuration
  */
 const GLOOKO_CLIENT_ID = '656dc9c9-bae3-4ed0-a550-0c3e8aa3f26c';
 
@@ -20,9 +24,7 @@ const GLOOKO_CLIENT_ID = '656dc9c9-bae3-4ed0-a550-0c3e8aa3f26c';
  * Uses environment variable if set, otherwise falls back to hardcoded client ID.
  * This ensures the application works even if the environment variable is not configured.
  */
-const EXPECTED_AUDIENCES: string[] = process.env.AZURE_AD_CLIENT_ID 
-  ? [process.env.AZURE_AD_CLIENT_ID] 
-  : [GLOOKO_CLIENT_ID];
+const EXPECTED_AUDIENCES: string[] = [process.env.AZURE_AD_CLIENT_ID || GLOOKO_CLIENT_ID];
 
 /**
  * Get expected audiences for ID token validation.
