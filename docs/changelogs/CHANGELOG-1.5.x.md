@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>556 Fix missing Set-GlookoStaticWebApp export in PowerShell module</summary>
+
+[#556](../../pull/556) Fix missing Set-GlookoStaticWebApp export in PowerShell module
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>552 Fix API 401 by using ID token instead of access token for authentication</summary>
 
 [#552](../../pull/552) Fix API 401 by using ID token instead of access token for authentication
