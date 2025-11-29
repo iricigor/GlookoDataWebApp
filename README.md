@@ -11,11 +11,11 @@ A web app for importing, visualizing, and analyzing diabetes data exported from 
 ![GlookoDataWebApp Home Page](https://github.com/user-attachments/assets/9630fcd4-4eca-4fb6-80c5-b4d53215b1c9)
 
 The application features a modern, Microsoft Fluent UI-based interface with intuitive navigation:
-- **Data Upload** - Upload and manage your Glooko export files
-- **Comprehensive Reports** - View detailed analytics and trends
-- **AI Analysis** - Get intelligent insights using AI algorithms
-- **Settings** - Configure theme preferences and glucose thresholds
-- **User Authentication** - Sign in with Microsoft for a personalized experience
+- **Data Upload** - Upload and manage your Glooko export files (ZIP format)
+- **Comprehensive Reports** - BG Overview, Time in Range, AGP, Rate of Change, and more
+- **AI Analysis** - Get intelligent insights from Perplexity, Gemini, Grok, or DeepSeek
+- **Settings** - Configure theme preferences, glucose thresholds, and AI providers
+- **User Authentication** - Optional Microsoft sign-in for personalized experience
 
 📸 **[View all screenshots and interface examples →](docs/SCREENSHOTS.md)**
 
@@ -25,18 +25,39 @@ All data processing happens locally in your browser. No files or data are transm
 
 You can optionally sign in with your Microsoft account for a personalized experience. All settings remain stored locally in your browser.
 
-## ✨ New Features
+## ✨ Key Features
+
+### 📊 Comprehensive Glucose Analytics
+
+The application provides professional-grade diabetes analytics:
+
+- **BG Overview** - Consolidated Time in Range and AGP visualization with period breakdowns
+- **Rate of Change (RoC)** - Gradient-colored glucose velocity analysis with interval controls
+- **Hypoglycemia Detection** - Statistics, nadir markers, and pattern recognition
+- **HbA1c Estimation** - Calculated from CGM data in both NGSP (%) and IFCC (mmol/mol) units
+- **Time in Range** - Detailed statistics by day, week, and custom date ranges
+- **AGP (Ambulatory Glucose Profile)** - Industry-standard 24-hour pattern visualization
+
+### 🤖 AI-Powered Insights
+
+Get intelligent recommendations from multiple AI providers:
+
+- **Perplexity AI** - Advanced analysis with real-time insights
+- **Google Gemini** - Comprehensive pattern recognition
+- **Grok** - xAI's powerful analysis engine
+- **DeepSeek** - Deep learning-based recommendations
+
+AI analysis covers time in range, glucose & insulin correlation, meal timing, and pump settings.
 
 ### 🌐 Multi-Language Support
 
-The application now **automatically supports German-language Glooko exports** in addition to English:
+Automatic detection for Glooko export files:
 
-- 🇬🇧 **English** - Standard Glooko export files
-- 🇩🇪 **German** - Automatically detected and processed
-- ⚡ **Zero configuration** - Language is detected from column headers
-- 🔄 **Full compatibility** - All features work with both languages
+- 🇬🇧 **English** - Standard Glooko exports
+- 🇩🇪 **German** - Auto-detected from column headers
+- 🔄 **Zero configuration** - Just upload and go
 
-Simply upload your German or English Glooko export files - the application handles the rest automatically. See the [Data Upload Guide](docs/DATA_UPLOAD.md) for details.
+See the [Data Upload Guide](docs/DATA_UPLOAD.md) for details.
 
 
 ## 🚀 Quick Start
@@ -69,17 +90,20 @@ The app will open at `http://localhost:5173/`
 
 ## 📚 Documentation
 
-Comprehensive documentation is available to help you get started:
+Comprehensive documentation is available:
 
+### User Guides
 - **[Quick Start Guide](QUICKSTART.md)** - Get up and running in minutes
-- **[Data Upload Guide](docs/DATA_UPLOAD.md)** - Learn how to import and manage your data
-- **[Reports Documentation](docs/REPORTS.md)** - Understand the analytics and reports
+- **[Data Upload Guide](docs/DATA_UPLOAD.md)** - Import and manage your data
+- **[Reports Documentation](docs/REPORTS.md)** - Understand analytics and reports
 - **[Settings Guide](docs/SETTINGS.md)** - Configure themes and glucose thresholds
-- **[Deployment Guide](docs/DEPLOYMENT.md)** - Deploy to Azure Static Web Apps
 - **[Screenshots](docs/SCREENSHOTS.md)** - View all application screenshots
-- **[Contributing Guide](CONTRIBUTING.md)** - Learn how to contribute to the project
-- **[E2E Testing Guide](docs/E2E_TESTING.md)** - End-to-end testing with Playwright
-- **[Changelog](CHANGELOG.md)** - See what's new in each version
+
+### Developer Guides
+- **[Contributing Guide](CONTRIBUTING.md)** - Learn how to contribute
+- **[E2E Testing Guide](docs/E2E_TESTING.md)** - Playwright end-to-end testing
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Deploy to Azure Static Web Apps
+- **[Changelog](CHANGELOG.md)** - Version history and release notes
 
 ## 🛠️ Tech Stack
 
@@ -89,6 +113,7 @@ This project is built with modern web technologies:
 - 📘 **TypeScript** - Type-safe JavaScript
 - ⚡ **Vite** - Next-generation frontend build tool
 - 🎨 **Fluent UI React** - Microsoft's official React component library
+- 📈 **Recharts** - Composable charting library for data visualization
 - 🧪 **Vitest** - Fast unit testing framework
 - 🎭 **Playwright** - End-to-end testing framework
 
