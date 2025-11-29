@@ -3,11 +3,27 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { checkFirstLogin } from './userSettingsApi';
+import { checkFirstLogin, saveUserSettings, loadUserSettings } from './userSettingsApi';
+import type { CloudUserSettings } from '../../types';
 
 // Mock global fetch
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
+
+// Sample settings for testing
+const sampleSettings: CloudUserSettings = {
+  themeMode: 'dark',
+  exportFormat: 'csv',
+  responseLanguage: 'english',
+  glucoseUnit: 'mmol/L',
+  insulinDuration: 5,
+  glucoseThresholds: {
+    veryHigh: 13.9,
+    high: 10.0,
+    low: 3.9,
+    veryLow: 3.0,
+  },
+};
 
 describe('userSettingsApi', () => {
   beforeEach(() => {
@@ -300,6 +316,176 @@ describe('userSettingsApi', () => {
         error: 'Some error message',
         errorType: 'infrastructure',
         statusCode: 400,
+      });
+    });
+  });
+
+  describe('saveUserSettings', () => {
+    it('should return unauthorized error when token is empty', async () => {
+      const result = await saveUserSettings('', sampleSettings, 'test@example.com');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Authentication required',
+        errorType: 'unauthorized',
+      });
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should save settings successfully', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ success: true }),
+      });
+
+      const result = await saveUserSettings('valid-token', sampleSettings, 'test@example.com');
+      
+      expect(result).toEqual({ success: true });
+      expect(mockFetch).toHaveBeenCalledWith('/api/user/settings', {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'Bearer valid-token',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ settings: sampleSettings, email: 'test@example.com' }),
+      });
+    });
+
+    it('should return unauthorized error for 401 response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+      });
+
+      const result = await saveUserSettings('invalid-token', sampleSettings, 'test@example.com');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Unauthorized access. Please log in again.',
+        errorType: 'unauthorized',
+        statusCode: 401,
+      });
+    });
+
+    it('should return infrastructure error for 500 response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+      });
+
+      const result = await saveUserSettings('valid-token', sampleSettings, 'test@example.com');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Internal server error. Settings could not be saved.',
+        errorType: 'infrastructure',
+        statusCode: 500,
+      });
+    });
+
+    it('should return network error for fetch failures', async () => {
+      const fetchError = new TypeError('fetch failed');
+      mockFetch.mockRejectedValueOnce(fetchError);
+
+      const result = await saveUserSettings('valid-token', sampleSettings, 'test@example.com');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Network error. Please check your internet connection.',
+        errorType: 'network',
+      });
+    });
+  });
+
+  describe('loadUserSettings', () => {
+    it('should return unauthorized error when token is empty', async () => {
+      const result = await loadUserSettings('');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Authentication required',
+        errorType: 'unauthorized',
+      });
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should load settings successfully', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ settings: sampleSettings }),
+      });
+
+      const result = await loadUserSettings('valid-token');
+      
+      expect(result).toEqual({
+        success: true,
+        settings: sampleSettings,
+      });
+      expect(mockFetch).toHaveBeenCalledWith('/api/user/settings', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer valid-token',
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+
+    it('should return success with undefined settings for 404 response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+      });
+
+      const result = await loadUserSettings('valid-token');
+      
+      expect(result).toEqual({
+        success: true,
+        settings: undefined,
+      });
+    });
+
+    it('should return unauthorized error for 401 response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+      });
+
+      const result = await loadUserSettings('invalid-token');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Unauthorized access. Please log in again.',
+        errorType: 'unauthorized',
+        statusCode: 401,
+      });
+    });
+
+    it('should return infrastructure error for 500 response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+      });
+
+      const result = await loadUserSettings('valid-token');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Internal server error. Settings could not be loaded.',
+        errorType: 'infrastructure',
+        statusCode: 500,
+      });
+    });
+
+    it('should return network error for fetch failures', async () => {
+      const fetchError = new TypeError('fetch failed');
+      mockFetch.mockRejectedValueOnce(fetchError);
+
+      const result = await loadUserSettings('valid-token');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Network error. Please check your internet connection.',
+        errorType: 'network',
       });
     });
   });

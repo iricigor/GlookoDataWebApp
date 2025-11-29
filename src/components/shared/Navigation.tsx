@@ -11,6 +11,7 @@ import {
   MenuList,
   MenuItem,
   Tooltip,
+  Spinner,
 } from '@fluentui/react-components';
 import { 
   HomeRegular,
@@ -21,6 +22,7 @@ import {
   NavigationRegular,
   WeatherSunnyRegular,
   WeatherMoonRegular,
+  CloudSyncRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useFirstLoginCheck } from '../../hooks/useFirstLoginCheck';
@@ -29,6 +31,7 @@ import { LogoutDialog } from './LogoutDialog';
 import { WelcomeDialog } from './WelcomeDialog';
 import { InfrastructureErrorDialog } from './InfrastructureErrorDialog';
 import { type ThemeMode, isDarkTheme } from '../../hooks/useTheme';
+import type { SyncStatus } from '../../hooks/useUserSettings';
 
 const useStyles = makeStyles({
   nav: {
@@ -83,6 +86,20 @@ const useStyles = makeStyles({
       display: 'flex',
     },
   },
+  syncIndicator: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('4px'),
+    color: tokens.colorNeutralForeground3,
+    fontSize: tokens.fontSizeBase200,
+  },
+  syncIcon: {
+    animation: 'spin 1s linear infinite',
+    '@keyframes spin': {
+      from: { transform: 'rotate(0deg)' },
+      to: { transform: 'rotate(360deg)' },
+    },
+  },
 });
 
 interface NavigationProps {
@@ -90,9 +107,26 @@ interface NavigationProps {
   onNavigate: (page: string) => void;
   themeMode?: ThemeMode;
   onThemeToggle?: () => void;
+  /** Callback when first-time user accepts cloud settings */
+  onFirstLoginAccept?: () => void;
+  /** Callback when first-time user cancels (doesn't want cloud settings) */
+  onFirstLoginCancel?: () => void;
+  /** Callback before logout to save settings */
+  onBeforeLogout?: () => Promise<void>;
+  /** Current sync status for settings */
+  syncStatus?: SyncStatus;
 }
 
-export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }: NavigationProps) {
+export function Navigation({ 
+  currentPage, 
+  onNavigate, 
+  themeMode, 
+  onThemeToggle,
+  onFirstLoginAccept,
+  onFirstLoginCancel,
+  onBeforeLogout,
+  syncStatus = 'idle',
+}: NavigationProps) {
   const styles = useStyles();
   const { 
     isLoggedIn, 
@@ -128,10 +162,20 @@ export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }
     }
   }, [justLoggedIn, idToken, hasChecked, performCheck]);
 
-  // Handle welcome dialog close
-  const handleWelcomeClose = () => {
+  // Handle welcome dialog accept - user wants to save settings
+  const handleWelcomeAccept = () => {
     resetState();
     acknowledgeLogin();
+    onFirstLoginAccept?.();
+  };
+
+  // Handle welcome dialog cancel - user doesn't want cloud settings
+  const handleWelcomeCancel = async () => {
+    resetState();
+    acknowledgeLogin();
+    onFirstLoginCancel?.();
+    // Log out the user since they don't want to use cloud settings
+    await logout();
   };
 
   // Handle error dialog close
@@ -140,8 +184,12 @@ export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }
     acknowledgeLogin();
   };
 
-  // Handle logout: reset first login check state, then logout
+  // Handle logout: save settings first, then logout
   const handleLogout = async () => {
+    // Wait for settings to be saved before logging out
+    if (onBeforeLogout) {
+      await onBeforeLogout();
+    }
     resetState();
     await logout();
   };
@@ -208,6 +256,16 @@ export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }
 
         {/* Auth Section */}
         <div className={styles.rightSection}>
+          {/* Sync indicator */}
+          {isLoggedIn && syncStatus === 'syncing' && (
+            <Tooltip content="Syncing settings..." relationship="label">
+              <div className={styles.syncIndicator}>
+                <Spinner size="tiny" />
+                <CloudSyncRegular className={styles.syncIcon} />
+              </div>
+            </Tooltip>
+          )}
+          
           {isLoggedIn && userName ? (
             <>
               {onThemeToggle && (
@@ -247,7 +305,8 @@ export function Navigation({ currentPage, onNavigate, themeMode, onThemeToggle }
       {/* Welcome dialog for first-time users */}
       <WelcomeDialog
         open={hasChecked && isFirstLogin && !hasError}
-        onClose={handleWelcomeClose}
+        onAccept={handleWelcomeAccept}
+        onCancel={handleWelcomeCancel}
         userName={userName}
       />
 
