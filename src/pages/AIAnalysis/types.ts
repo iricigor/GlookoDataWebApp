@@ -13,6 +13,7 @@ import type {
 } from '../../types';
 import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
 import type { AIProvider } from '../../utils/api';
+import type { HypoAnalysisDatasets } from '../../utils/data';
 
 /** Props for the main AIAnalysis component */
 export interface AIAnalysisProps {
@@ -101,6 +102,17 @@ export interface MealTimingTabProps extends TabContentProps {
 /** Props for Pump Settings tab */
 export interface PumpSettingsTabProps extends TabContentProps {
   mealTimingDatasets: MealTimingDatasets;
+  responseLanguage: ResponseLanguage;
+  glucoseUnit: GlucoseUnit;
+  perplexityApiKey: string;
+  geminiApiKey: string;
+  grokApiKey: string;
+  deepseekApiKey: string;
+}
+
+/** Props for Hypos tab */
+export interface HyposTabProps extends TabContentProps {
+  hypoDatasets: HypoAnalysisDatasets | null;
   responseLanguage: ResponseLanguage;
   glucoseUnit: GlucoseUnit;
   perplexityApiKey: string;
