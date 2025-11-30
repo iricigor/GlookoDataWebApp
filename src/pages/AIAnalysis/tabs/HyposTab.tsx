@@ -279,7 +279,7 @@ export function HyposTab({
           of hypoglycemia. Unlike simple glucose averages, LBGI weighs low readings more heavily, providing 
           better insight into hypo risk.{' '}
           <Tooltip 
-            content="LBGI &lt;2.5 = Low risk, 2.5-5.0 = Moderate risk, &gt;5.0 = High risk" 
+            content="LBGI <2.5 = Low risk, 2.5-5.0 = Moderate risk, >5.0 = High risk" 
             relationship="description"
           >
             <Text style={{ textDecoration: 'underline', cursor: 'help' }}>Risk thresholds</Text>

@@ -122,7 +122,7 @@ export function findLastBolusBeforeHypo(
   hypoStartTime: Date,
   bolusReadings: InsulinReading[]
 ): LastBolusInfo | null {
-  if (!bolusReadings || bolusReadings.length === 0) {
+  if (bolusReadings.length === 0) {
     return null;
   }
 
