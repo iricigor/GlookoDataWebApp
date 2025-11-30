@@ -71,8 +71,8 @@ async function checkProStatus(request: HttpRequest, context: InvocationContext):
     return requestLogger.logSuccess({
       status: 200,
       jsonBody: {
-        isProUser: isProUser,
-        userId: userId,
+        isProUser,
+        userId,
       },
     });
   } catch (error: unknown) {

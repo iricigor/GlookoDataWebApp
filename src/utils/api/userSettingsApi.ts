@@ -515,7 +515,7 @@ export async function checkProUserStatus(
     if (!response.ok) {
       const statusCode = response.status;
       
-      if (response.status === 401 || response.status === 403) {
+      if (statusCode === 401 || statusCode === 403) {
         apiLogger.logError('Unauthorized access', 'unauthorized', statusCode);
         return {
           success: false,
@@ -526,7 +526,7 @@ export async function checkProUserStatus(
       }
 
       // Handle infrastructure errors (e.g., can't reach table storage)
-      if (response.status >= 500) {
+      if (statusCode >= 500) {
         apiLogger.logError('Internal server error', 'infrastructure', statusCode);
         return {
           success: false,
@@ -539,7 +539,7 @@ export async function checkProUserStatus(
       // Try to parse error message from response
       try {
         const errorData = await response.json();
-        const errorMessage = errorData.error || errorData.message || `API error: ${response.status}`;
+        const errorMessage = errorData.error || errorData.message || `API error: ${statusCode}`;
         
         // Prefer structured error type/code from API response if available
         const apiErrorType = errorData.errorType || errorData.code || errorData.type;
