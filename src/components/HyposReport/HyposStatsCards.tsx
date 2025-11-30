@@ -68,7 +68,7 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
       <Card className={mergeClasses(styles.summaryCard, getLBGICardStyle())}>
         <ShieldRegular className={mergeClasses(styles.summaryIcon, getLBGIIconStyle())} />
         <div className={styles.summaryContent}>
-          <Text className={styles.summaryLabel}>LBGI (Hypo Risk)</Text>
+          <Text className={styles.summaryLabel}>LBGI</Text>
           <div className={styles.summaryValueRow}>
             <Text className={styles.summaryValue}>
               {lbgi !== null ? lbgi.toFixed(1) : 'N/A'}
@@ -88,11 +88,11 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
   if (hypoStats.totalCount === 0) {
     return (
       <div className={styles.summarySection}>
-        <Tooltip content="No hypoglycemic events detected today" relationship="description">
+        <Tooltip content="Severe hypoglycemic events (below very low threshold)" relationship="description">
           <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
             <HeartPulseWarningRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)} />
             <div className={styles.summaryContent}>
-              <Text className={styles.summaryLabel}>Severe Hypos</Text>
+              <Text className={styles.summaryLabel}>Severe</Text>
               <div className={styles.summaryValueRow}>
                 <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSuccess)}>0</Text>
               </div>
@@ -100,11 +100,11 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
           </Card>
         </Tooltip>
         
-        <Tooltip content="No hypoglycemic events detected today" relationship="description">
+        <Tooltip content="Non-severe hypoglycemic events (below low threshold)" relationship="description">
           <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
             <WarningRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)} />
             <div className={styles.summaryContent}>
-              <Text className={styles.summaryLabel}>Non-Severe Hypos</Text>
+              <Text className={styles.summaryLabel}>Non-Severe</Text>
               <div className={styles.summaryValueRow}>
                 <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSuccess)}>0</Text>
               </div>
@@ -112,11 +112,11 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
           </Card>
         </Tooltip>
         
-        <Tooltip content="No hypoglycemic events - great control!" relationship="description">
+        <Tooltip content="Lowest glucose value during hypoglycemia" relationship="description">
           <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
             <ArrowTrendingDownRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)} />
             <div className={styles.summaryContent}>
-              <Text className={styles.summaryLabel}>Lowest Hypo Value</Text>
+              <Text className={styles.summaryLabel}>Lowest</Text>
               <div className={styles.summaryValueRow}>
                 <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSuccess)}>N/A</Text>
               </div>
@@ -125,11 +125,11 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
         </Tooltip>
         
         {/* Longest Hypo Duration */}
-        <Tooltip content="No hypoglycemic events - great control!" relationship="description">
+        <Tooltip content="Duration of longest hypoglycemic event" relationship="description">
           <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
             <TimerRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)} />
             <div className={styles.summaryContent}>
-              <Text className={styles.summaryLabel}>Longest Hypo</Text>
+              <Text className={styles.summaryLabel}>Longest</Text>
               <div className={styles.summaryValueRow}>
                 <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSuccess)}>0m</Text>
               </div>
@@ -138,11 +138,11 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
         </Tooltip>
         
         {/* Total Hypo Time - use smiley as the value */}
-        <Tooltip content="No time spent in hypoglycemia" relationship="description">
+        <Tooltip content="Total time spent in hypoglycemia" relationship="description">
           <Card className={mergeClasses(styles.summaryCard, styles.summaryCardSuccess)}>
             <ClockRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconSuccess)} />
             <div className={styles.summaryContent}>
-              <Text className={styles.summaryLabel}>Total Hypo Time</Text>
+              <Text className={styles.summaryLabel}>Total Time</Text>
               <div className={styles.summaryValueRow}>
                 <Text className={mergeClasses(styles.summaryValue, styles.summaryValueSmiley)}>😊</Text>
               </div>
@@ -160,7 +160,7 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
   return (
     <div className={styles.summarySection}>
       {/* Severe Hypos Count */}
-      <Tooltip content="Number of hypoglycemic events below very low threshold" relationship="description">
+      <Tooltip content="Severe hypoglycemic events (below very low threshold)" relationship="description">
         <Card className={mergeClasses(
           styles.summaryCard, 
           hypoStats.severeCount > 0 ? styles.summaryCardDanger : styles.summaryCardSuccess
@@ -170,7 +170,7 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
             hypoStats.severeCount > 0 ? styles.summaryIconDanger : styles.summaryIconSuccess
           )} />
           <div className={styles.summaryContent}>
-            <Text className={styles.summaryLabel}>Severe Hypos</Text>
+            <Text className={styles.summaryLabel}>Severe</Text>
             <div className={styles.summaryValueRow}>
               <Text className={styles.summaryValue}>{hypoStats.severeCount}</Text>
             </div>
@@ -179,7 +179,7 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
       </Tooltip>
       
       {/* Non-Severe Hypos Count */}
-      <Tooltip content="Number of hypoglycemic events below low threshold but above very low" relationship="description">
+      <Tooltip content="Non-severe hypoglycemic events (below low threshold)" relationship="description">
         <Card className={mergeClasses(
           styles.summaryCard,
           hypoStats.nonSevereCount > 0 ? styles.summaryCardWarning : styles.summaryCardSuccess
@@ -189,7 +189,7 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
             hypoStats.nonSevereCount > 0 ? styles.summaryIconWarning : styles.summaryIconSuccess
           )} />
           <div className={styles.summaryContent}>
-            <Text className={styles.summaryLabel}>Non-Severe Hypos</Text>
+            <Text className={styles.summaryLabel}>Non-Severe</Text>
             <div className={styles.summaryValueRow}>
               <Text className={styles.summaryValue}>{hypoStats.nonSevereCount}</Text>
             </div>
@@ -198,7 +198,7 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
       </Tooltip>
       
       {/* Lowest Hypo Value */}
-      <Tooltip content="Lowest glucose reading during a hypoglycemic event" relationship="description">
+      <Tooltip content="Lowest glucose value during hypoglycemia" relationship="description">
         <Card className={mergeClasses(
           styles.summaryCard,
           hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
@@ -212,7 +212,7 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
               : styles.summaryIconWarning
           )} />
           <div className={styles.summaryContent}>
-            <Text className={styles.summaryLabel}>Lowest Hypo Value</Text>
+            <Text className={styles.summaryLabel}>Lowest</Text>
             <div className={styles.summaryValueRow}>
               <Text className={styles.summaryValue}>
                 {hypoStats.lowestValue !== null 
@@ -228,11 +228,11 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
       </Tooltip>
       
       {/* Longest Hypo Duration */}
-      <Tooltip content="Duration of the longest hypoglycemic event" relationship="description">
+      <Tooltip content="Duration of longest hypoglycemic event" relationship="description">
         <Card className={mergeClasses(styles.summaryCard, styles.summaryCardWarning)}>
           <TimerRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconWarning)} />
           <div className={styles.summaryContent}>
-            <Text className={styles.summaryLabel}>Longest Hypo</Text>
+            <Text className={styles.summaryLabel}>Longest</Text>
             <div className={styles.summaryValueRow}>
               <Text className={styles.summaryValue}>
                 {formatHypoDuration(hypoStats.longestDurationMinutes)}
@@ -243,11 +243,11 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
       </Tooltip>
       
       {/* Total Hypo Duration */}
-      <Tooltip content="Total time spent in hypoglycemia during the day" relationship="description">
+      <Tooltip content="Total time spent in hypoglycemia" relationship="description">
         <Card className={mergeClasses(styles.summaryCard, styles.summaryCardWarning)}>
           <ClockRegular className={mergeClasses(styles.summaryIcon, styles.summaryIconWarning)} />
           <div className={styles.summaryContent}>
-            <Text className={styles.summaryLabel}>Total Hypo Time</Text>
+            <Text className={styles.summaryLabel}>Total Time</Text>
             <div className={styles.summaryValueRow}>
               <Text className={styles.summaryValue}>
                 {formatHypoDuration(hypoStats.totalDurationMinutes)}
