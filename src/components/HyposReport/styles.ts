@@ -32,8 +32,12 @@ export const useHyposStyles = makeStyles({
   },
   summarySection: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
     ...shorthands.gap('12px'),
+    // Force 6 columns on wide screens to keep all cards in one row
+    '@media (min-width: 1024px)': {
+      gridTemplateColumns: 'repeat(6, 1fr)',
+    },
   },
   summaryCard: {
     ...shorthands.padding('16px'),
