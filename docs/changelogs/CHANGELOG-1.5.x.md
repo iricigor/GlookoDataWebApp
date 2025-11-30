@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>584 Add AI Hypos analysis feature with hypoglycemia pattern detection and risk assessment</summary>
+
+[#584](../../pull/584) Add AI Hypos analysis feature with hypoglycemia pattern detection and risk assessment
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>582 Add LBGI to the hypos report summary cards</summary>
 
 [#582](../../pull/582) Add LBGI to the hypos report summary cards
