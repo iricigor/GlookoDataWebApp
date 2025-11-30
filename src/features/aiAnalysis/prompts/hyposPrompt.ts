@@ -17,7 +17,7 @@ import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils'
  * @param base64HypoEventsData - Base64 encoded CSV data with CGM readings around hypo events (+/-1 hour)
  * @param base64HypoSummaryData - Base64 encoded CSV data with daily hypo summaries
  * @param language - Response language (english, czech, german, or serbian)
- * @param unit - Glucose unit (mmol/L or mg/dL)
+ * @param unit - Glucose unit for response (mmol/L or mg/dL) - note: CSV data is always in mmol/L
  * @param provider - AI provider being used (optional)
  * @returns Formatted prompt for AI analysis
  */
@@ -33,13 +33,23 @@ export function generateHyposPrompt(
   const languageInstruction = getLanguageInstruction(language);
   const disclaimerInstruction = getDisclaimerInstruction(provider, language);
   
-  // Unit-specific values
-  const lowThreshold = unit === 'mg/dL' ? '70' : '3.9';
-  const veryLowThreshold = unit === 'mg/dL' ? '54' : '3.0';
+  // CSV data is always in mmol/L, but we show thresholds in both units for clarity
+  // User's preferred display unit determines which unit to emphasize in the response
+  const lowThresholdMmol = '3.9';
+  const lowThresholdMgdl = '70';
+  const veryLowThresholdMmol = '3.0';
+  const veryLowThresholdMgdl = '54';
   const targetLowTime = '<4%';
   const targetVeryLowTime = '<1%';
   const lbgiLowRisk = '2.5';
   const lbgiModerateRisk = '5.0';
+  
+  // Format thresholds showing both units
+  const lowThresholdDisplay = `${lowThresholdMmol} mmol/L (${lowThresholdMgdl} mg/dL)`;
+  const veryLowThresholdDisplay = `${veryLowThresholdMmol} mmol/L (${veryLowThresholdMgdl} mg/dL)`;
+  
+  // User's preferred response unit
+  const responseUnit = unit;
   
   return `**Data Context**
 This analysis examines your hypoglycemia events and patterns to identify root causes, assess risk levels, and provide actionable recommendations for preventing low blood glucose episodes while maintaining good overall glycemic control.
@@ -55,11 +65,12 @@ Analyze hypoglycemia risk with focus on patterns, root causes and actionable rec
 - Do NOT include procedural statements like "I am analyzing", "Let me extract", "I will now look at", etc.
 - Start directly with the analysis findings
 - **Use tables wherever possible** to present data comparisons, statistics, and findings in a clear and structured format
+- When presenting glucose values in your response, use ${responseUnit} as the preferred unit
 
 **Reference Thresholds**
-- Low glucose: <${lowThreshold} ${unit}
-- Very low glucose (severe): <${veryLowThreshold} ${unit}
-- Consensus targets: ${targetLowTime} time <${lowThreshold} ${unit}, ${targetVeryLowTime} time <${veryLowThreshold} ${unit}
+- Low glucose: <${lowThresholdDisplay}
+- Very low glucose (severe): <${veryLowThresholdDisplay}
+- Consensus targets: ${targetLowTime} time below low threshold, ${targetVeryLowTime} time below very low threshold
 - LBGI risk levels: <${lbgiLowRisk} low risk, ${lbgiLowRisk}-${lbgiModerateRisk} moderate risk, >${lbgiModerateRisk} high risk
 
 **Required Analysis and Findings**
@@ -68,9 +79,9 @@ Analyze hypoglycemia risk with focus on patterns, root causes and actionable rec
 Analyze the provided data and report:
 - Overall LBGI (Low Blood Glucose Index) and interpretation
 - Percentage of days with LBGI >${lbgiLowRisk} or >${lbgiModerateRisk}
-- Frequency of severe hypos (nadir <${veryLowThreshold} ${unit})
-- Estimated % time <${veryLowThreshold} ${unit} based on the hypo event data
-- Compare with consensus targets (${targetLowTime} <${lowThreshold}, ${targetVeryLowTime} <${veryLowThreshold}, LBGI <${lbgiLowRisk})
+- Frequency of severe hypos (nadir <${veryLowThresholdDisplay})
+- Estimated % time below very low threshold based on the hypo event data
+- Compare with consensus targets (${targetLowTime} <${lowThresholdDisplay}, ${targetVeryLowTime} <${veryLowThresholdDisplay}, LBGI <${lbgiLowRisk})
 - Present summary in a table format
 
 **B. Pattern Analysis**
@@ -82,7 +93,7 @@ Answer these exact questions with evidence from the data:
    - Calculate if nocturnal hypos are overrepresented compared to daytime
 
 2. **Most common preceding factors** (from CGM trajectory before hypo):
-   - Rapid glucose drop (>1 ${unit}/5min) before hypo
+   - Rapid glucose drop (>1 mmol/L per 5min, or >18 mg/dL per 5min) before hypo
    - Gradual decline over extended period
    - Post-meal pattern (bolus within 2-4h before hypo)
    - Identify any patterns from the glucose data before each hypo event
@@ -96,7 +107,7 @@ Answer these exact questions with evidence from the data:
    - Analyze what happened on those specific days
 
 5. **Recovery patterns**
-   - Typical time to recover from hypo (return to >${lowThreshold} ${unit})
+   - Typical time to recover from hypo (return to >${lowThresholdDisplay})
    - Presence of rebound hyperglycemia after hypo treatment
 
 **C. Risk Stratification**
@@ -135,16 +146,18 @@ Provide 3-5 specific, actionable recommendations ranked by expected impact. Exam
 Base every statement on the provided data only. If something cannot be determined from the data, explicitly state "cannot be determined from provided data".
 
 **Dataset 1: Hypo Events with Surrounding CGM Data (hypo_events.csv)**
-Each hypo event includes CGM readings from 1 hour before to 1 hour after the hypo period:
+Each hypo event includes CGM readings from 1 hour before to 1 hour after the hypo period.
+**Important: All glucose values in the CSV are in mmol/L.**
 \`\`\`csv
 ${hypoEventsData}
 \`\`\`
 
 **Dataset 2: Daily Hypo Summaries (hypo_summaries.csv)**
-Aggregated daily statistics including hypo counts, durations, nadirs, and LBGI:
+Aggregated daily statistics including hypo counts, durations, nadirs, and LBGI.
+**Important: All glucose values in the CSV are in mmol/L.**
 \`\`\`csv
 ${hypoSummaryData}
 \`\`\`
 
-Remember that all glucose values are in ${unit} (not ${unit === 'mg/dL' ? 'mmol/L' : 'mg/dL'}). Address me directly using "you/your" language. Keep your response clear, detailed, and actionable. ${languageInstruction}${disclaimerInstruction}`;
+All glucose values in the provided CSV data are in mmol/L. When presenting values in your response, please use ${responseUnit} as the preferred unit (convert if needed: 1 mmol/L = 18 mg/dL). Address me directly using "you/your" language. Keep your response clear, detailed, and actionable. ${languageInstruction}${disclaimerInstruction}`;
 }

@@ -118,4 +118,5 @@ export interface HyposTabProps extends TabContentProps {
   perplexityApiKey: string;
   geminiApiKey: string;
   grokApiKey: string;
+  deepseekApiKey: string;
 }

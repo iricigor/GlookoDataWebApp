@@ -41,7 +41,7 @@ function convertHypoEventsToArray(events: HypoEventData[]): (string | number)[][
     'Event ID',
     'Start Time',
     'Duration (min)',
-    'Nadir Value (mmol/L)',
+    'Nadir (mmol/L)',
     'Nadir Time',
     'Is Severe',
   ];
@@ -97,6 +97,7 @@ export function HyposTab({
   perplexityApiKey,
   geminiApiKey,
   grokApiKey,
+  deepseekApiKey,
 }: HyposTabProps) {
   const styles = useAIAnalysisStyles();
   const hasData = hypoDatasets !== null && hypoDatasets.dailySummaries.length > 0;
@@ -143,8 +144,11 @@ export function HyposTab({
     );
 
     // Get the appropriate API key for the active provider
-    const apiKey = activeProvider === 'perplexity' ? perplexityApiKey :
-                    activeProvider === 'grok' ? grokApiKey : geminiApiKey;
+    const apiKey = 
+      activeProvider === 'perplexity' ? perplexityApiKey :
+      activeProvider === 'grok' ? grokApiKey :
+      activeProvider === 'deepseek' ? deepseekApiKey :
+      geminiApiKey;
 
     // Call the AI API using the selected provider
     return await callAIApi(activeProvider!, apiKey, prompt);
@@ -329,7 +333,7 @@ export function HyposTab({
                     <TableHeaderCell>Severe</TableHeaderCell>
                     <TableHeaderCell>Non-Severe</TableHeaderCell>
                     <TableHeaderCell className={styles.emphasizedHeaderCell}>Total</TableHeaderCell>
-                    <TableHeaderCell className={styles.emphasizedHeaderCell}>Lowest</TableHeaderCell>
+                    <TableHeaderCell className={styles.emphasizedHeaderCell}>Lowest (mmol/L)</TableHeaderCell>
                     <TableHeaderCell>Longest</TableHeaderCell>
                     <TableHeaderCell>Total Time</TableHeaderCell>
                     <TableHeaderCell className={styles.emphasizedHeaderCell}>LBGI</TableHeaderCell>
@@ -378,7 +382,7 @@ export function HyposTab({
                       <TableHeaderCell>Event ID</TableHeaderCell>
                       <TableHeaderCell className={styles.emphasizedHeaderCell}>Start Time</TableHeaderCell>
                       <TableHeaderCell>Duration (min)</TableHeaderCell>
-                      <TableHeaderCell className={styles.emphasizedHeaderCell}>Nadir Value</TableHeaderCell>
+                      <TableHeaderCell className={styles.emphasizedHeaderCell}>Nadir (mmol/L)</TableHeaderCell>
                       <TableHeaderCell>Nadir Time</TableHeaderCell>
                       <TableHeaderCell className={styles.emphasizedHeaderCell}>Severe</TableHeaderCell>
                     </TableRow>

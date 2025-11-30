@@ -246,6 +246,7 @@ export function AIAnalysis({
             perplexityApiKey={perplexityApiKey}
             geminiApiKey={geminiApiKey}
             grokApiKey={grokApiKey}
+            deepseekApiKey={deepseekApiKey}
           />
         );
       
