@@ -12,7 +12,8 @@ import {
 } from '@fluentui/react-components';
 import { BrainCircuitRegular } from '@fluentui/react-icons';
 import type { DailyReport, GlucoseRangeStats } from '../../types';
-import { extractGlucoseReadings, extractDailyInsulinSummaries, extractInsulinReadings } from '../../utils/data';
+import { extractGlucoseReadings, extractDailyInsulinSummaries, extractInsulinReadings, extractHypoAnalysisDatasets } from '../../utils/data';
+import type { HypoAnalysisDatasets } from '../../utils/data';
 import { calculateGlucoseRangeStats, calculatePercentage, groupByDate } from '../../utils/data';
 import { useGlucoseThresholds } from '../../hooks/useGlucoseThresholds';
 import { getActiveProvider } from '../../utils/api';
@@ -52,6 +53,7 @@ export function AIAnalysis({
     bolusReadings: [],
     basalReadings: [],
   });
+  const [hypoDatasets, setHypoDatasets] = useState<HypoAnalysisDatasets | null>(null);
 
   // Determine which AI provider to use (respecting manual selection)
   const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
@@ -71,6 +73,7 @@ export function AIAnalysis({
       setGlucoseStats(null);
       setCombinedDataset([]);
       setMealTimingDatasets({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
+      setHypoDatasets(null);
       return;
     }
 
@@ -130,11 +133,21 @@ export function AIAnalysis({
             console.warn('Failed to extract meal timing data:', mealTimingErr);
             setMealTimingDatasets({ cgmReadings: readings, bolusReadings: [], basalReadings: [] });
           }
+
+          // Extract hypo analysis datasets
+          try {
+            const hypoData = extractHypoAnalysisDatasets(readings, thresholds);
+            setHypoDatasets(hypoData);
+          } catch (hypoErr) {
+            console.warn('Failed to extract hypo data:', hypoErr);
+            setHypoDatasets(null);
+          }
         } else {
           setInRangePercentage(null);
           setGlucoseStats(null);
           setCombinedDataset([]);
           setMealTimingDatasets({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
+          setHypoDatasets(null);
         }
       } catch (error) {
         console.error('Failed to calculate in-range percentage:', error);
@@ -142,6 +155,7 @@ export function AIAnalysis({
         setGlucoseStats(null);
         setCombinedDataset([]);
         setMealTimingDatasets({ cgmReadings: [], bolusReadings: [], basalReadings: [] });
+        setHypoDatasets(null);
       } finally {
         setLoading(false);
       }
@@ -221,7 +235,19 @@ export function AIAnalysis({
         );
       
       case 'hypos':
-        return <HyposTab />;
+        return (
+          <HyposTab
+            loading={loading}
+            hasApiKey={hasApiKey}
+            activeProvider={activeProvider}
+            hypoDatasets={hypoDatasets}
+            responseLanguage={responseLanguage}
+            glucoseUnit={glucoseUnit}
+            perplexityApiKey={perplexityApiKey}
+            geminiApiKey={geminiApiKey}
+            grokApiKey={grokApiKey}
+          />
+        );
       
       default:
         return null;
