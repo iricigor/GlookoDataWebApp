@@ -46,6 +46,31 @@ export interface HyposStatsCardsProps {
   hypoStats: HypoStats | null;
   thresholds: GlucoseThresholds;
   glucoseUnit: GlucoseUnit;
+  lbgi: number | null;
+}
+
+/**
+ * LBGI risk thresholds for hypoglycemia risk assessment
+ */
+export const LBGI_THRESHOLDS = { low: 2.5, moderate: 5 };
+
+/**
+ * LBGI risk interpretation result
+ */
+export interface LBGIInterpretation {
+  text: string;
+  level: 'low' | 'moderate' | 'high';
+}
+
+/**
+ * Get LBGI risk interpretation based on value
+ * @param lbgi - Low Blood Glucose Index value
+ * @returns Risk interpretation with text and level
+ */
+export function getLBGIInterpretation(lbgi: number): LBGIInterpretation {
+  if (lbgi < LBGI_THRESHOLDS.low) return { text: 'Low Risk', level: 'low' };
+  if (lbgi <= LBGI_THRESHOLDS.moderate) return { text: 'Moderate Risk', level: 'moderate' };
+  return { text: 'High Risk', level: 'high' };
 }
 
 /**

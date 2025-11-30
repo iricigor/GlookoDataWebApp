@@ -32,8 +32,12 @@ export const useHyposStyles = makeStyles({
   },
   summarySection: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-    ...shorthands.gap('16px'),
+    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+    ...shorthands.gap('12px'),
+    // Force 6 columns on wide screens to keep all cards in one row
+    '@media (min-width: 1024px)': {
+      gridTemplateColumns: 'repeat(6, 1fr)',
+    },
   },
   summaryCard: {
     ...shorthands.padding('16px'),
@@ -162,5 +166,25 @@ export const useHyposStyles = makeStyles({
     width: '20px',
     height: '0',
     borderTop: `2px dashed ${tokens.colorNeutralStroke1}`,
+  },
+  riskInterpretation: {
+    fontSize: tokens.fontSizeBase100,
+    marginTop: '4px',
+    ...shorthands.padding('2px', '6px'),
+    ...shorthands.borderRadius(tokens.borderRadiusSmall),
+    display: 'inline-block',
+    width: 'fit-content',
+  },
+  riskLow: {
+    color: tokens.colorStatusSuccessForeground1,
+    backgroundColor: tokens.colorStatusSuccessBackground1,
+  },
+  riskModerate: {
+    color: tokens.colorStatusWarningForeground1,
+    backgroundColor: tokens.colorStatusWarningBackground1,
+  },
+  riskHigh: {
+    color: tokens.colorStatusDangerForeground1,
+    backgroundColor: tokens.colorStatusDangerBackground1,
   },
 });
