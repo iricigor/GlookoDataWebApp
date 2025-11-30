@@ -7,7 +7,7 @@
 
     # Version number of this module
     # NOTE: Bump this version when adding/updating scripts (see copilot-instructions.md)
-    ModuleVersion = '1.0.20'
+    ModuleVersion = '1.0.21'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -55,6 +55,7 @@
         'Set-GlookoStaticWebApp',
         'Set-GlookoSwaBackend',
         'Invoke-GlookoDeployment',
+        'Invoke-GlookoProUsers',
         'Test-GlookoDeployment'
     )
 
@@ -73,6 +74,7 @@
         'Set-GSWA',
         'Set-GSB',
         'Invoke-GD',
+        'Invoke-GPU',
         'Test-GD'
     )
 
@@ -96,6 +98,7 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
+v1.0.21 - Added Invoke-GlookoProUsers function for managing Pro users (list, add, remove, check) in ProUsers table
 v1.0.20 - Added appRegistrationClientId verification to Test-GlookoConfig and Test-GlookoDeployment
 v1.0.19 - Fixed Set-GlookoKeyVault to work with Az.KeyVault 6.0.0+; removed obsolete EnableRbacAuthorization parameter (RBAC is now enabled by default); updated Az.KeyVault minimum version to 6.0.0
 v1.0.18 - Changed AZURE_AD_CLIENT_ID to require explicit configuration instead of dynamic lookup to avoid ambiguity with multiple app registrations

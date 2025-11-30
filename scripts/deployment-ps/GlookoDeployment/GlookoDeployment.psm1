@@ -58,6 +58,7 @@ Export-ModuleMember -Function @(
     'Set-GlookoStaticWebApp',
     'Set-GlookoSwaBackend',
     'Invoke-GlookoDeployment',
+    'Invoke-GlookoProUsers',
     'Test-GlookoDeployment'
 )
 
@@ -76,5 +77,6 @@ Export-ModuleMember -Alias @(
     'Set-GSWA',
     'Set-GSB',
     'Invoke-GD',
+    'Invoke-GPU',
     'Test-GD'
 )

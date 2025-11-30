@@ -104,6 +104,7 @@ Invoke-GlookoDeployment -All
 | `Set-GlookoAzureFunction` | `Set-GAF` | Deploy Azure Function App |
 | `Set-GlookoSwaBackend` | `Set-GSB` | Link Azure Function App to Static Web App as backend |
 | `Invoke-GlookoDeployment` | `Invoke-GD` | Orchestrate full deployment |
+| `Invoke-GlookoProUsers` | `Invoke-GPU` | Manage Pro users (list, add, remove, check) |
 | `Test-GlookoDeployment` | `Test-GD` | Verify deployment state of all resources |
 
 ## Configuration
@@ -371,6 +372,54 @@ Invoke-GlookoDeployment -ManagedIdentity
 Invoke-GlookoDeployment -FunctionApp
 ```
 
+### Invoke-GlookoProUsers
+
+Manages Pro users in the ProUsers Azure Storage Table. Users are identified by their email address.
+
+**Parameters:**
+- `-Action` - The action to perform: List, Add, Remove, Check (required)
+- `-Email` - The email address of the user (required for Add, Remove, Check)
+- `-StorageAccountName` - Storage account name (optional, uses config)
+- `-ResourceGroup` - Resource group (optional, uses config)
+
+**Examples:**
+```powershell
+# List all Pro users
+Invoke-GlookoProUsers -Action List
+
+# Add a new Pro user
+Invoke-GlookoProUsers -Action Add -Email "user@example.com"
+
+# Remove a Pro user
+Invoke-GlookoProUsers -Action Remove -Email "user@example.com"
+
+# Check if an email is a Pro user
+Invoke-GlookoProUsers -Action Check -Email "user@example.com"
+
+# Use alias with positional parameters
+Invoke-GPU Add user@example.com
+
+# List from a specific storage account
+Invoke-GlookoProUsers -Action List -StorageAccountName "mystorageacct"
+```
+
+**Return Values:**
+Returns a hashtable with action-specific properties:
+- List: `@{ Action; Count; Users }`
+- Add: `@{ Action; Email; Success; AlreadyExists }`
+- Remove: `@{ Action; Email; Success; NotFound }`
+- Check: `@{ Action; Email; IsProUser; CreatedAt }`
+
+**Table Structure:**
+- PartitionKey: "ProUser" (constant for all entries)
+- RowKey: Email address (URL-encoded)
+- Email: Email address (original format)
+- CreatedAt: ISO 8601 timestamp when the user was added
+
+**Prerequisites:**
+- Storage Account must exist (run Set-GlookoStorageAccount first)
+- ProUsers table must exist (run Set-GlookoTableStorage first)
+
 ### Test-GlookoDeployment
 
 Verifies the deployment state of all Azure resources for GlookoDataWebApp. For each resource, it reports one of three states:
@@ -421,6 +470,7 @@ GlookoDeployment/
 │   ├── Set-GlookoAzureFunction.ps1
 │   ├── Set-GlookoSwaBackend.ps1
 │   ├── Invoke-GlookoDeployment.ps1
+│   ├── Invoke-GlookoProUsers.ps1
 │   └── Test-GlookoDeployment.ps1
 └── Private/                      # Internal functions
     ├── Output-Functions.ps1     # Output formatting
