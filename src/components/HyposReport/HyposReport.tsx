@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Text } from '@fluentui/react-components';
+import { Text, Link } from '@fluentui/react-components';
 import type { GlucoseReading, GlucoseDataSource } from '../../types';
 import { 
   extractGlucoseReadings, 
@@ -337,6 +337,8 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
         <Text className={styles.reportSubtitle}>
           Hypoglycemia (low blood sugar) occurs when glucose levels fall below target range, 
           typically below 3.9 mmol/L (70 mg/dL). This report helps identify patterns and timing of low glucose events.
+          {' '}
+          <Link href="#ai/hypos">Get AI-powered insights →</Link>
         </Text>
       </div>
 

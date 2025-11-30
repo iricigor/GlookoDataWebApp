@@ -5,6 +5,7 @@
 import { useEffect } from 'react';
 import {
   Text,
+  Link,
   Accordion,
   AccordionItem,
   AccordionHeader,
@@ -15,11 +16,13 @@ import {
   TableHeaderCell,
   TableBody,
   TableCell,
+  Tooltip,
 } from '@fluentui/react-components';
+import { InfoRegular } from '@fluentui/react-icons';
 import { TableContainer } from '../../../components/TableContainer';
 import { generateHyposPrompt } from '../../../features/aiAnalysis/prompts';
 import { callAIApi, isRequestTooLargeError } from '../../../utils/api';
-import { convertHypoEventsToCSV, convertHypoSummariesToCSV } from '../../../utils/data';
+import { convertHypoEventsToCSV, convertHypoSummariesToCSV, convertHypoEventSummaryToCSV } from '../../../utils/data';
 import { base64Encode } from '../../../utils/formatting';
 import { useAIAnalysisStyles } from '../styles';
 import { useAnalysisState } from '../useAnalysisState';
@@ -44,16 +47,23 @@ function convertHypoEventsToArray(events: HypoEventData[]): (string | number)[][
     'Nadir (mmol/L)',
     'Nadir Time',
     'Is Severe',
+    'Last Bolus (2-4h)',
+    'Bolus Dose (U)',
   ];
 
-  const rows = events.map(event => [
-    event.eventId,
-    event.hypoPeriod.startTime.toLocaleString(),
-    Math.round(event.hypoPeriod.durationMinutes),
-    event.hypoPeriod.nadir.toFixed(1),
-    event.hypoPeriod.nadirTime.toLocaleTimeString(),
-    event.hypoPeriod.isSevere ? 'Yes' : 'No',
-  ]);
+  const rows = events.map(event => {
+    const lastBolus = event.lastBolusBeforeHypo;
+    return [
+      event.eventId,
+      event.hypoPeriod.startTime.toLocaleString(),
+      Math.round(event.hypoPeriod.durationMinutes),
+      event.hypoPeriod.nadir.toFixed(1),
+      event.hypoPeriod.nadirTime.toLocaleTimeString(),
+      event.hypoPeriod.isSevere ? 'Yes' : 'No',
+      lastBolus ? lastBolus.timestamp.toLocaleTimeString() : '-',
+      lastBolus ? lastBolus.dose.toFixed(1) : '-',
+    ];
+  });
 
   return [headers, ...rows];
 }
@@ -128,11 +138,13 @@ export function HyposTab({
   // Helper function to try analysis with given datasets
   const tryAnalysis = async (
     hypoEventsCSV: string,
-    hypoSummariesCSV: string
+    hypoSummariesCSV: string,
+    hypoEventSummaryCSV: string = ''
   ) => {
     // Base64 encode the CSV data
     const base64EventsData = base64Encode(hypoEventsCSV);
     const base64SummariesData = base64Encode(hypoSummariesCSV);
+    const base64EventSummaryData = hypoEventSummaryCSV ? base64Encode(hypoEventSummaryCSV) : undefined;
 
     // Generate the prompt with the base64 CSV data
     const prompt = generateHyposPrompt(
@@ -140,7 +152,8 @@ export function HyposTab({
       base64SummariesData,
       responseLanguage,
       glucoseUnit,
-      activeProvider!
+      activeProvider!,
+      base64EventSummaryData
     );
 
     // Get the appropriate API key for the active provider
@@ -177,9 +190,10 @@ export function HyposTab({
       // Convert datasets to CSV format
       const hypoEventsCSV = convertHypoEventsToCSV(hypoDatasets.hypoEvents);
       const hypoSummariesCSV = convertHypoSummariesToCSV(hypoDatasets.dailySummaries);
+      const hypoEventSummaryCSV = convertHypoEventSummaryToCSV(hypoDatasets.hypoEvents);
 
       // First attempt: try with full dataset
-      let result = await tryAnalysis(hypoEventsCSV, hypoSummariesCSV);
+      let result = await tryAnalysis(hypoEventsCSV, hypoSummariesCSV, hypoEventSummaryCSV);
       let datasetInfo = '';
 
       // If request was too large, try with limited data
@@ -234,6 +248,9 @@ export function HyposTab({
   // Get stats for display
   const stats = hypoDatasets!.overallStats;
   const hasHypoEvents = hypoDatasets!.hypoEvents.length > 0;
+  
+  // Count hypos with preceding bolus (2-4h before)
+  const hyposWithPrecedingBolus = hypoDatasets!.hypoEvents.filter(e => e.lastBolusBeforeHypo !== null).length;
 
   return (
     <div className={styles.promptContent}>
@@ -246,6 +263,27 @@ export function HyposTab({
           Hypoglycemia (low blood sugar) occurs when glucose levels fall below target range, 
           typically below 3.9 mmol/L (70 mg/dL). This AI analysis helps identify patterns, 
           timing, and potential causes of low glucose events.
+          {' '}
+          <Link href="#reports/hypos">View detailed Hypos Report →</Link>
+        </Text>
+      </div>
+
+      {/* LBGI Explanation */}
+      <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: 'var(--colorNeutralBackground3)', borderRadius: '4px', borderLeft: '3px solid var(--colorBrandBackground)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+          <InfoRegular style={{ fontSize: '16px' }} />
+          <Text style={{ fontWeight: 600 }}>What is LBGI?</Text>
+        </div>
+        <Text className={styles.helperText} style={{ display: 'block' }}>
+          <strong>LBGI (Low Blood Glucose Index)</strong> is a validated risk metric that predicts the likelihood 
+          of hypoglycemia. Unlike simple glucose averages, LBGI weighs low readings more heavily, providing 
+          better insight into hypo risk.{' '}
+          <Tooltip 
+            content="LBGI &lt;2.5 = Low risk, 2.5-5.0 = Moderate risk, &gt;5.0 = High risk" 
+            relationship="description"
+          >
+            <Text style={{ textDecoration: 'underline', cursor: 'help' }}>Risk thresholds</Text>
+          </Tooltip>
         </Text>
       </div>
 
@@ -260,6 +298,9 @@ export function HyposTab({
         </Text>
         <Text className={styles.helperText} style={{ display: 'block' }}>
           • Total hypo events: {stats.totalHypoEvents} (severe: {stats.totalSevereEvents})
+        </Text>
+        <Text className={styles.helperText} style={{ display: 'block' }}>
+          • Hypos with bolus 2-4h before: {hyposWithPrecedingBolus} ({stats.totalHypoEvents > 0 ? Math.round(hyposWithPrecedingBolus / stats.totalHypoEvents * 100) : 0}%)
         </Text>
         <Text className={styles.helperText} style={{ display: 'block' }}>
           • Average LBGI: {stats.averageLBGI.toFixed(2)}
@@ -385,6 +426,8 @@ export function HyposTab({
                       <TableHeaderCell className={styles.emphasizedHeaderCell}>Nadir (mmol/L)</TableHeaderCell>
                       <TableHeaderCell>Nadir Time</TableHeaderCell>
                       <TableHeaderCell className={styles.emphasizedHeaderCell}>Severe</TableHeaderCell>
+                      <TableHeaderCell>Last Bolus (2-4h)</TableHeaderCell>
+                      <TableHeaderCell>Bolus Dose</TableHeaderCell>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -401,6 +444,12 @@ export function HyposTab({
                         <TableCell>{event.hypoPeriod.nadirTime.toLocaleTimeString()}</TableCell>
                         <TableCell className={styles.emphasizedCell}>
                           {event.hypoPeriod.isSevere ? 'Yes' : 'No'}
+                        </TableCell>
+                        <TableCell>
+                          {event.lastBolusBeforeHypo ? event.lastBolusBeforeHypo.timestamp.toLocaleTimeString() : '-'}
+                        </TableCell>
+                        <TableCell>
+                          {event.lastBolusBeforeHypo ? `${event.lastBolusBeforeHypo.dose.toFixed(1)}U` : '-'}
                         </TableCell>
                       </TableRow>
                     ))}
