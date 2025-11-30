@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { checkFirstLogin, saveUserSettings, loadUserSettings } from './userSettingsApi';
+import { checkFirstLogin, saveUserSettings, loadUserSettings, checkProUserStatus } from './userSettingsApi';
 import type { CloudUserSettings } from '../../types';
 
 // Mock global fetch
@@ -485,6 +485,184 @@ describe('userSettingsApi', () => {
         success: false,
         error: 'Network error. Please check your internet connection.',
         errorType: 'network',
+      });
+    });
+  });
+
+  describe('checkProUserStatus', () => {
+    it('should return unauthorized error when access token is empty', async () => {
+      const result = await checkProUserStatus('');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Authentication required',
+        errorType: 'unauthorized',
+      });
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should return unauthorized error when access token is whitespace only', async () => {
+      const result = await checkProUserStatus('   ');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Authentication required',
+        errorType: 'unauthorized',
+      });
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should return success with isProUser=true for pro user', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ isProUser: true, userId: 'user-123' }),
+      });
+
+      const result = await checkProUserStatus('valid-token');
+      
+      expect(result).toEqual({
+        success: true,
+        isProUser: true,
+      });
+      expect(mockFetch).toHaveBeenCalledWith('/api/user/check-pro-status', expect.objectContaining({
+        method: 'GET',
+        headers: expect.objectContaining({
+          'Authorization': 'Bearer valid-token',
+          'Content-Type': 'application/json',
+        }),
+      }));
+    });
+
+    it('should return success with isProUser=false for regular user', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ isProUser: false, userId: 'user-123' }),
+      });
+
+      const result = await checkProUserStatus('valid-token');
+      
+      expect(result).toEqual({
+        success: true,
+        isProUser: false,
+      });
+    });
+
+    it('should return unauthorized error for 401 response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+      });
+
+      const result = await checkProUserStatus('invalid-token');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Unauthorized access. Please log in again.',
+        errorType: 'unauthorized',
+        statusCode: 401,
+      });
+    });
+
+    it('should return unauthorized error for 403 response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+      });
+
+      const result = await checkProUserStatus('valid-token');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Unauthorized access. Please log in again.',
+        errorType: 'unauthorized',
+        statusCode: 403,
+      });
+    });
+
+    it('should return infrastructure error for 500 response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+      });
+
+      const result = await checkProUserStatus('valid-token');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Internal server error. The infrastructure may not be ready or there are access issues.',
+        errorType: 'infrastructure',
+        statusCode: 500,
+      });
+    });
+
+    it('should return infrastructure error for response with infrastructure error type', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 422,
+        json: () => Promise.resolve({
+          error: 'ProUsers table not accessible',
+          errorType: 'infrastructure',
+        }),
+      });
+
+      const result = await checkProUserStatus('valid-token');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'ProUsers table not accessible',
+        errorType: 'infrastructure',
+        statusCode: 422,
+      });
+    });
+
+    it('should return network error for fetch failures', async () => {
+      const fetchError = new TypeError('fetch failed');
+      mockFetch.mockRejectedValueOnce(fetchError);
+
+      const result = await checkProUserStatus('valid-token');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Network error. Please check your internet connection.',
+        errorType: 'network',
+      });
+    });
+
+    it('should handle error response with error details', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: () => Promise.resolve({
+          error: 'Bad request',
+          errorType: 'validation',
+        }),
+      });
+
+      const result = await checkProUserStatus('valid-token');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'Bad request',
+        errorType: 'validation',
+        statusCode: 400,
+      });
+    });
+
+    it('should handle error response without JSON body', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        statusText: 'Bad Request',
+        json: () => Promise.reject(new Error('Not JSON')),
+      });
+
+      const result = await checkProUserStatus('valid-token');
+      
+      expect(result).toEqual({
+        success: false,
+        error: 'API error: 400 Bad Request',
+        errorType: 'unknown',
+        statusCode: 400,
       });
     });
   });

@@ -82,4 +82,41 @@ describe('LogoutDialog', () => {
     expect(button).toBeInTheDocument();
     // Avatar with image prop should be rendered
   });
+
+  it('should display pro user badge when isProUser is true', () => {
+    const onLogout = vi.fn().mockResolvedValue(undefined);
+    render(<LogoutDialog userName="John Doe" isProUser={true} onLogout={onLogout} />);
+    
+    // Pro user badge should be visible in the button
+    expect(screen.getByLabelText('Pro user')).toBeInTheDocument();
+  });
+
+  it('should not display pro user badge when isProUser is false', () => {
+    const onLogout = vi.fn().mockResolvedValue(undefined);
+    render(<LogoutDialog userName="John Doe" isProUser={false} onLogout={onLogout} />);
+    
+    // Pro user badge should not be visible
+    expect(screen.queryByLabelText('Pro user')).not.toBeInTheDocument();
+  });
+
+  it('should not display pro user badge when isProUser is undefined', () => {
+    const onLogout = vi.fn().mockResolvedValue(undefined);
+    render(<LogoutDialog userName="John Doe" onLogout={onLogout} />);
+    
+    // Pro user badge should not be visible
+    expect(screen.queryByLabelText('Pro user')).not.toBeInTheDocument();
+  });
+
+  it('should display pro user badge in dialog when isProUser is true', () => {
+    const onLogout = vi.fn().mockResolvedValue(undefined);
+    render(<LogoutDialog userName="John Doe" isProUser={true} onLogout={onLogout} />);
+    
+    // Open dialog
+    const openButton = screen.getByRole('button', { name: /john doe/i });
+    fireEvent.click(openButton);
+    
+    // Pro user badge should appear twice (in button and in dialog)
+    const proBadges = screen.getAllByLabelText('Pro user');
+    expect(proBadges.length).toBe(2);
+  });
 });

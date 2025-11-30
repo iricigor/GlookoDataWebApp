@@ -12,6 +12,7 @@ import {
   shorthands,
   Text,
   tokens,
+  Tooltip,
 } from '@fluentui/react-components';
 import { useState } from 'react';
 
@@ -46,16 +47,25 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground2,
   },
+  proUserBadge: {
+    marginLeft: '4px',
+    cursor: 'default',
+  },
+  userNameContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  },
 });
 
 interface LogoutDialogProps {
   userName: string;
   userEmail?: string | null;
   userPhoto?: string | null;
+  isProUser?: boolean;
   onLogout: () => Promise<void>;
 }
 
-export function LogoutDialog({ userName, userEmail, userPhoto, onLogout }: LogoutDialogProps) {
+export function LogoutDialog({ userName, userEmail, userPhoto, isProUser, onLogout }: LogoutDialogProps) {
   const styles = useStyles();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -82,6 +92,11 @@ export function LogoutDialog({ userName, userEmail, userPhoto, onLogout }: Logou
             image={userPhoto ? { src: userPhoto } : undefined}
           />
           {userName}
+          {isProUser && (
+            <Tooltip content="Pro user" relationship="label">
+              <span className={styles.proUserBadge} aria-label="Pro user">✨</span>
+            </Tooltip>
+          )}
         </Button>
       </DialogTrigger>
       <DialogSurface>
@@ -95,7 +110,14 @@ export function LogoutDialog({ userName, userEmail, userPhoto, onLogout }: Logou
                 image={userPhoto ? { src: userPhoto } : undefined}
               />
               <div className={styles.userDetails}>
-                <Text className={styles.userName}>{userName}</Text>
+                <div className={styles.userNameContainer}>
+                  <Text className={styles.userName}>{userName}</Text>
+                  {isProUser && (
+                    <Tooltip content="Pro user" relationship="label">
+                      <span className={styles.proUserBadge} aria-label="Pro user">✨</span>
+                    </Tooltip>
+                  )}
+                </div>
                 {userEmail && (
                   <Text className={styles.userEmail}>{userEmail}</Text>
                 )}
