@@ -192,8 +192,8 @@ function Invoke-GlookoProUsers {
                 'Add' {
                     Write-SectionHeader "Adding Pro User"
                     
-                    # URL encode email for RowKey
-                    $rowKey = [System.Web.HttpUtility]::UrlEncode($Email)
+                    # URL encode email for RowKey (using .NET Uri class which is always available)
+                    $rowKey = [System.Uri]::EscapeDataString($Email)
                     
                     # Check if user already exists
                     $retrieveOp = [Microsoft.Azure.Cosmos.Table.TableOperation]::Retrieve($PartitionKey, $rowKey)
@@ -231,8 +231,8 @@ function Invoke-GlookoProUsers {
                 'Remove' {
                     Write-SectionHeader "Removing Pro User"
                     
-                    # URL encode email for RowKey
-                    $rowKey = [System.Web.HttpUtility]::UrlEncode($Email)
+                    # URL encode email for RowKey (using .NET Uri class which is always available)
+                    $rowKey = [System.Uri]::EscapeDataString($Email)
                     
                     # Check if user exists
                     $retrieveOp = [Microsoft.Azure.Cosmos.Table.TableOperation]::Retrieve($PartitionKey, $rowKey)
@@ -266,8 +266,8 @@ function Invoke-GlookoProUsers {
                 'Check' {
                     Write-SectionHeader "Checking Pro User Status"
                     
-                    # URL encode email for RowKey
-                    $rowKey = [System.Web.HttpUtility]::UrlEncode($Email)
+                    # URL encode email for RowKey (using .NET Uri class which is always available)
+                    $rowKey = [System.Uri]::EscapeDataString($Email)
                     
                     # Check if user exists
                     $retrieveOp = [Microsoft.Azure.Cosmos.Table.TableOperation]::Retrieve($PartitionKey, $rowKey)

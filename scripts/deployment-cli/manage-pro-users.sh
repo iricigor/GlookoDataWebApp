@@ -10,6 +10,7 @@
 #   - Run this script in Azure Cloud Shell (bash) or with Azure CLI installed
 #   - Must have appropriate permissions to access the storage table
 #   - Storage Account and ProUsers table must already exist
+#   - Python 3 for URL encoding (pre-installed in Azure Cloud Shell)
 #
 # Usage:
 #   ./manage-pro-users.sh [COMMAND] [OPTIONS]
@@ -185,10 +186,20 @@ parse_arguments() {
 # HELPER FUNCTIONS
 ################################################################################
 
+# Check if Python 3 is available (required for URL encoding)
+check_python3() {
+    if ! command -v python3 &> /dev/null; then
+        print_error "Python 3 is not installed or not in PATH"
+        print_info "Python 3 is required for URL encoding"
+        print_info "Install Python 3 or use Azure Cloud Shell which has it pre-installed"
+        exit 1
+    fi
+}
+
 # URL encode a string (for use as RowKey)
+# Uses Python 3 for reliable URL encoding
 url_encode() {
     local string="$1"
-    # Use Python for reliable URL encoding
     python3 -c "import urllib.parse; print(urllib.parse.quote('$string', safe=''))"
 }
 
@@ -375,6 +386,7 @@ main() {
     fi
     
     check_prerequisites
+    check_python3
     check_storage_account
     check_table_exists
     
