@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>597 Add Sugarmate-style statistics with visual representations to BG Overview</summary>
+
+[#597](../../pull/597) Add Sugarmate-style statistics with visual representations to BG Overview
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>603 Update docs/LARGE_FILES.md with current statistics and improved structure</summary>
 
 [#603](../../pull/603) Update docs/LARGE_FILES.md with current statistics and improved structure
