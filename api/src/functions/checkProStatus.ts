@@ -41,17 +41,35 @@ function urlEncode(str: string): string {
 }
 
 /**
+ * Mask an email address for logging purposes to reduce PII exposure.
+ * Shows first character of local part and domain only.
+ * Example: "john.doe@example.com" -> "j***@example.com"
+ */
+function maskEmail(email: string): string {
+  const parts = email.split('@');
+  if (parts.length !== 2) {
+    return '***';
+  }
+  const [localPart, domain] = parts;
+  const maskedLocal = localPart.length > 0 ? localPart[0] + '***' : '***';
+  return `${maskedLocal}@${domain}`;
+}
+
+/**
  * Check if user exists in ProUsers table by email
  * 
  * The ProUsers table structure:
  * - PartitionKey: "ProUser" (constant)
- * - RowKey: URL-encoded email address
+ * - RowKey: URL-encoded email address (normalized to lowercase)
+ * 
+ * Note: Email is normalized to lowercase here to ensure consistent lookup
+ * regardless of the case used by callers, matching how deployment scripts store entries.
  */
 async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>, email: string): Promise<boolean> {
   try {
     // Query for the user in the ProUsers table
-    // PartitionKey is 'ProUser', RowKey is the URL-encoded email
-    const rowKey = urlEncode(email);
+    // PartitionKey is 'ProUser', RowKey is the URL-encoded email (normalized to lowercase)
+    const rowKey = urlEncode(email.toLowerCase());
     await tableClient.getEntity('ProUser', rowKey);
     return true;
   } catch (error: unknown) {
@@ -93,8 +111,10 @@ async function checkProStatus(request: HttpRequest, context: InvocationContext):
     const tableClient = getTableClient('ProUsers');
     const isProUser = await checkProUserExists(tableClient, email);
 
-    requestLogger.logStorage('checkProUser', true, { userId, email, isProUser });
-    requestLogger.logInfo('Pro status check completed', { userId, email, isProUser });
+    // Use masked email in logs to reduce PII exposure (userId already uniquely identifies the user)
+    const maskedEmailForLog = maskEmail(email);
+    requestLogger.logStorage('checkProUser', true, { userId, email: maskedEmailForLog, isProUser });
+    requestLogger.logInfo('Pro status check completed', { userId, email: maskedEmailForLog, isProUser });
     
     return requestLogger.logSuccess({
       status: 200,

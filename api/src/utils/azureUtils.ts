@@ -98,6 +98,7 @@ interface TokenClaims {
   tid?: string;      // Tenant ID
   email?: string;    // User's email address (when email scope is requested)
   preferred_username?: string; // User's preferred username (usually email)
+  upn?: string;      // User Principal Name (common in enterprise AAD setups)
 }
 
 /**
@@ -201,6 +202,41 @@ async function validateAndDecodeToken(authHeader: string | null, context: Invoca
 }
 
 /**
+ * Extract user ID from verified token claims.
+ * 
+ * This helper extracts the user's unique identifier (oid or sub claim) from
+ * verified token claims and logs a warning if neither claim is present.
+ * 
+ * @param claims - The verified token claims
+ * @param context - The invocation context for logging
+ * @returns The user ID or null if not found
+ */
+function getUserIdFromClaims(claims: TokenClaims, context: InvocationContext): string | null {
+  const userId = claims.oid || claims.sub;
+  if (!userId) {
+    context.warn('Token missing user identifier (oid or sub claim)');
+    return null;
+  }
+  return userId;
+}
+
+/**
+ * Extract email from verified token claims.
+ * 
+ * This helper extracts the user's email from verified token claims,
+ * checking email, preferred_username, and upn claims in order.
+ * The email is normalized to lowercase for consistent lookup.
+ * 
+ * @param claims - The verified token claims
+ * @returns The normalized email or null if not found
+ */
+function getEmailFromClaims(claims: TokenClaims): string | null {
+  // Check email, preferred_username, and upn claims in order of preference
+  const rawEmail = claims.email || claims.preferred_username || claims.upn;
+  return rawEmail ? rawEmail.toLowerCase() : null;
+}
+
+/**
  * Validate and extract user ID from the ID token with full signature verification.
  * 
  * This implementation uses the shared validateAndDecodeToken helper and extracts
@@ -219,14 +255,7 @@ export async function extractUserIdFromToken(authHeader: string | null, context:
     return null;
   }
 
-  // Return the object ID (oid) or subject (sub) claim
-  const userId = verifiedPayload.oid || verifiedPayload.sub;
-  if (!userId) {
-    context.warn('Token missing user identifier (oid or sub claim)');
-    return null;
-  }
-
-  return userId;
+  return getUserIdFromClaims(verifiedPayload, context);
 }
 
 /**
@@ -256,16 +285,12 @@ export async function extractUserInfoFromToken(authHeader: string | null, contex
     return null;
   }
 
-  // Get the user ID (oid or sub claim)
-  const userId = verifiedPayload.oid || verifiedPayload.sub;
+  const userId = getUserIdFromClaims(verifiedPayload, context);
   if (!userId) {
-    context.warn('Token missing user identifier (oid or sub claim)');
     return null;
   }
 
-  // Get the email (email or preferred_username claim, normalized to lowercase)
-  const rawEmail = verifiedPayload.email || verifiedPayload.preferred_username;
-  const email = rawEmail ? rawEmail.toLowerCase() : null;
+  const email = getEmailFromClaims(verifiedPayload);
 
   return { userId, email };
 }
