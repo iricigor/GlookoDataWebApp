@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>603 Update docs/LARGE_FILES.md with current statistics and improved structure</summary>
+
+[#603](../../pull/603) Update docs/LARGE_FILES.md with current statistics and improved structure
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>601 Fix filter layout in mobile view to reduce vertical space</summary>
 
 [#601](../../pull/601) Fix filter layout in mobile view to reduce vertical space
