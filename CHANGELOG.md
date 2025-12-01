@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of Contents
 
 - [Unreleased](#unreleased---partial-rollback-of-cloud-features)
-- [Current Development - 1.5.x](#15x---current-development)
+- [Current Development - 1.6.x](#16x---current-development)
+- [Version 1.5.x](#15x---released)
 - [Version 1.4.x](#14x---released)
 - [Version 1.3.x](#13x---released)
 - [Version 1.2.x](#12x---released)
@@ -50,19 +51,40 @@ All data processing continues to happen client-side in the browser. Settings are
 
 ---
 
-## [1.5.x] - Current Development
+## [1.6.x] - Current Development
+
+> **📖 Full Details:** [View complete 1.6.x changelog](docs/changelogs/CHANGELOG-1.6.x.md)
+
+### Summary
+
+Version 1.6 focuses on branding updates and UI improvements.
+
+### Planned Features
+
+- **New Favicon Design** - Modern favicon with blood drop and ECG pulse line on dark circular background
+- **UI Refinements** - Continued improvements to user experience
+
+---
+
+## [1.5.x] - Released
 
 > **📖 Full Details:** [View complete 1.5.x changelog](docs/changelogs/CHANGELOG-1.5.x.md)
 
 ### Summary
 
-Version 1.5 will introduce new functionality for logged-in users. Users will be able to save their settings in the cloud, enabling cross-device synchronization and persistent preferences.
+Version 1.5 brought significant enhancements to reporting capabilities, AI analysis features, cloud infrastructure, and deployment automation. This release introduced the Daily BG report combining glucose, insulin, and IOB data, expanded the BG Overview page with sticky filters and period sections, and added AI-powered hypoglycemia pattern detection. Major infrastructure work included Azure Functions API deployment, cloud sync for user settings, centralized logging with correlation IDs, and comprehensive deployment scripts for Azure resources including Key Vault, Storage Tables, and Managed Identities.
 
-### Planned Features
+### Major Features
 
-- **Cloud-Based Settings Storage** - Save user preferences to the cloud for persistent storage
-- **Cross-Device Synchronization** - Access settings from any device when logged in
-- **User Profile Settings** - Enhanced settings management for authenticated users
+- **Daily BG Report** - New comprehensive report combining glucose, insulin, and IOB data visualization
+- **BG Overview Enhancements** - Extended with sticky filters, period section, and time-of-day analysis
+- **AI Hypos Analysis** - Hypoglycemia pattern detection with risk assessment and bolus context analysis
+- **Cloud Settings Sync** - User settings synchronization via Azure Table Storage for logged-in users
+- **API Documentation** - Swagger UI page with Microsoft authentication support
+- **Centralized Logging** - Correlation IDs for UI and API request tracking
+- **Azure Infrastructure** - Complete deployment scripts for Function Apps, Key Vault, Storage, and Managed Identities
+- **JWT Validation** - Token validation with JWKS signature verification for API security
+- **LBGI/HBGI Metrics** - Low/High Blood Glucose Index and BGRI statistics in reports
 
 ---
 

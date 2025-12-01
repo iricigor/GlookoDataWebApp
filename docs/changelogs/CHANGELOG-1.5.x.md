@@ -1,20 +1,26 @@
-# Changelog - Version 1.5.x (Current Development)
+# Changelog - Version 1.5.x (Released)
 
 [← Back to Main Changelog](../../CHANGELOG.md)
 
 ---
 
-## [1.5.x] - Current Development
+## [1.5.x] - Released
 
 ### Overview
 
-Version 1.5 will introduce new functionality for logged-in users. Users will be able to save their settings in the cloud, enabling cross-device synchronization and persistent preferences. This release builds upon the Microsoft authentication foundation from version 1.3 to provide a seamless cloud-connected experience.
+Version 1.5 brought significant enhancements to reporting capabilities, AI analysis features, cloud infrastructure, and deployment automation. This release introduced the Daily BG report combining glucose, insulin, and IOB data, expanded the BG Overview page with sticky filters and period sections, and added AI-powered hypoglycemia pattern detection. Major infrastructure work included Azure Functions API deployment, cloud sync for user settings, centralized logging with correlation IDs, and comprehensive deployment scripts for Azure resources including Key Vault, Storage Tables, and Managed Identities.
 
-### Planned Features
+### Major Features
 
-- **Cloud-Based Settings Storage** - Save user preferences to the cloud for persistent storage
-- **Cross-Device Synchronization** - Access settings from any device when logged in
-- **User Profile Settings** - Enhanced settings management for authenticated users
+- **Daily BG Report** - New comprehensive report combining glucose, insulin, and IOB data visualization
+- **BG Overview Enhancements** - Extended with sticky filters, period section, and time-of-day analysis
+- **AI Hypos Analysis** - Hypoglycemia pattern detection with risk assessment and bolus context analysis
+- **Cloud Settings Sync** - User settings synchronization via Azure Table Storage for logged-in users
+- **API Documentation** - Swagger UI page with Microsoft authentication support
+- **Centralized Logging** - Correlation IDs for UI and API request tracking
+- **Azure Infrastructure** - Complete deployment scripts for Function Apps, Key Vault, Storage, and Managed Identities
+- **JWT Validation** - Token validation with JWKS signature verification for API security
+- **LBGI/HBGI Metrics** - Low/High Blood Glucose Index and BGRI statistics in reports
 
 ### New Features
 

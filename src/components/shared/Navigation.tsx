@@ -50,7 +50,15 @@ const useStyles = makeStyles({
   brand: {
     display: 'flex',
     alignItems: 'center',
-    ...shorthands.gap('16px'),
+    ...shorthands.gap('8px'),
+  },
+  brandIcon: {
+    width: '28px',
+    height: '28px',
+    '@media (max-width: 768px)': {
+      width: '24px',
+      height: '24px',
+    },
   },
   brandText: {
     fontSize: tokens.fontSizeBase500,
@@ -231,6 +239,11 @@ export function Navigation({
     <>
       <nav className={styles.nav}>
         <div className={styles.brand}>
+          <img 
+            src="/favicon/favicon.svg" 
+            alt="Glooko Insights Logo" 
+            className={styles.brandIcon}
+          />
           <Text className={styles.brandText}>Glooko Insights</Text>
         </div>
         
