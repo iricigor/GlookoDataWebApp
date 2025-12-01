@@ -56,12 +56,22 @@ export const useBGOverviewStyles = makeStyles({
     alignItems: 'center',
     ...shorthands.gap('16px'),
     flexWrap: 'wrap',
+    // On mobile, keep label and controls on same row (no wrapping)
+    '@media (max-width: 767px)': {
+      flexWrap: 'nowrap',
+      ...shorthands.gap('8px'),
+    },
   },
   controlLabel: {
     fontSize: tokens.fontSizeBase300,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
     minWidth: '120px',
+    // Reduce label width on mobile to allow more space for controls
+    '@media (max-width: 767px)': {
+      minWidth: '90px',
+      flexShrink: 0,
+    },
   },
   pillGroup: {
     display: 'flex',
