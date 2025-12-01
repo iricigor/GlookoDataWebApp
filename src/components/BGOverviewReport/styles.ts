@@ -296,6 +296,13 @@ export const useBGOverviewStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground2,
   },
+  baseCard: {
+    ...shorthands.padding('20px'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    boxShadow: tokens.shadow16,
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+  },
   sectionCard: {
     ...shorthands.padding('20px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),

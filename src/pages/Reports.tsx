@@ -79,18 +79,20 @@ interface ReportsProps {
   insulinDuration?: number;
 }
 
+const VALID_TABS = ['fileInfo', 'bgOverview', 'detailedCgm', 'detailedInsulin', 'unifiedView', 'iob', 'roc', 'hypos'];
+
 export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDuration }: ReportsProps) {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState<string>(() => {
     // Check URL hash for deep linking first (e.g., #reports/bgOverview)
     const hash = window.location.hash.slice(1);
     const parts = hash.split('/');
-    if (parts.length > 1 && parts[0] === 'reports') {
+    if (parts.length > 1 && parts[0] === 'reports' && VALID_TABS.includes(parts[1])) {
       return parts[1];
     }
     // Otherwise, load the last selected tab from localStorage
     const savedTab = localStorage.getItem('reports-selected-tab');
-    return savedTab || 'bgOverview';
+    return (savedTab && VALID_TABS.includes(savedTab)) ? savedTab : 'bgOverview';
   });
 
   // Save the selected tab to localStorage and update URL hash whenever it changes
@@ -102,6 +104,23 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
     if (currentHash !== expectedHash) {
       window.history.replaceState(null, '', `#${expectedHash}`);
     }
+  }, [selectedTab]);
+
+  // Listen for hash changes to sync URL → tab state
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      const parts = hash.split('/');
+      if (parts.length > 1 && parts[0] === 'reports' && VALID_TABS.includes(parts[1])) {
+        const newTab = parts[1];
+        if (newTab !== selectedTab) {
+          setSelectedTab(newTab);
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, [selectedTab]);
 
   const renderTabContent = () => {

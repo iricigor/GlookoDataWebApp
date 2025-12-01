@@ -17,27 +17,15 @@ import type {
 } from '../../types';
 import { 
   calculatePercentage, 
-  GLUCOSE_RANGE_COLORS, 
 } from '../../utils/data';
 import { useBGOverviewStyles } from './styles';
+import { getColorForCategory } from './types';
 import type { TIRStats } from './types';
 
 interface TimeInRangeByTimeOfDaySectionProps {
   categoryMode: RangeCategoryMode;
   dayFilter: AGPDayOfWeekFilter;
   hourlyStats: HourlyTIRStats[];
-}
-
-/** Get color for a glucose range category */
-function getColorForCategory(category: string): string {
-  switch (category) {
-    case 'veryLow': return GLUCOSE_RANGE_COLORS.veryLow;
-    case 'low': return GLUCOSE_RANGE_COLORS.low;
-    case 'inRange': return GLUCOSE_RANGE_COLORS.inRange;
-    case 'high': return GLUCOSE_RANGE_COLORS.high;
-    case 'veryHigh': return GLUCOSE_RANGE_COLORS.veryHigh;
-    default: return '#000';
-  }
 }
 
 export function TimeInRangeByTimeOfDaySection({
@@ -108,7 +96,7 @@ export function TimeInRangeByTimeOfDaySection({
             return (
               <Tooltip key={hourData.hour} content={tooltipContent} relationship="description">
                 <div className={styles.hourlyBar}>
-                  {/* Stack from bottom: veryHigh, high, inRange, low, veryLow */}
+                  {/* Render order: veryHigh (top) → high → inRange → low → veryLow (bottom) */}
                   {categoryMode === 5 && veryHighPct > 0 && (
                     <div
                       className={styles.hourlySegment}

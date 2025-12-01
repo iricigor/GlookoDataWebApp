@@ -1,6 +1,6 @@
 /**
  * Time in Range by Period Section Component
- * Displays TIR breakdown by time periods (14 days, 7 days, 3 days)
+ * Displays TIR breakdown by time periods (28, 14, 7, 3 days)
  */
 
 import { 
@@ -16,27 +16,15 @@ import type {
 } from '../../types';
 import { 
   calculatePercentage, 
-  GLUCOSE_RANGE_COLORS, 
   MIN_PERCENTAGE_FOR_PERIOD_BAR,
 } from '../../utils/data';
 import { useBGOverviewStyles } from './styles';
+import { getColorForCategory } from './types';
 
 interface TimeInRangeByPeriodSectionProps {
   categoryMode: RangeCategoryMode;
   dayFilter: AGPDayOfWeekFilter;
   periodStats: TimePeriodTIRStats[];
-}
-
-/** Get color for a glucose range category */
-function getColorForCategory(category: string): string {
-  switch (category) {
-    case 'veryLow': return GLUCOSE_RANGE_COLORS.veryLow;
-    case 'low': return GLUCOSE_RANGE_COLORS.low;
-    case 'inRange': return GLUCOSE_RANGE_COLORS.inRange;
-    case 'high': return GLUCOSE_RANGE_COLORS.high;
-    case 'veryHigh': return GLUCOSE_RANGE_COLORS.veryHigh;
-    default: return '#000';
-  }
 }
 
 export function TimeInRangeByPeriodSection({
@@ -62,85 +50,89 @@ export function TimeInRangeByPeriodSection({
         )}
       </Text>
       <div className={styles.periodBarsContainer}>
-        {periodStats.map((period) => (
-          <div key={period.period} className={styles.periodBarRow}>
-            <Text className={styles.periodLabel}>{period.period}</Text>
-            <div className={styles.periodBarWrapper}>
-              <div className={styles.periodBar}>
-                {categoryMode === 5 && (period.stats.veryLow ?? 0) > 0 && (
-                  <Tooltip content={`Very Low: ${calculatePercentage(period.stats.veryLow ?? 0, period.stats.total)}% (${period.stats.veryLow ?? 0})`} relationship="description">
-                    <div
-                      className={styles.periodSegment}
-                      style={{
-                        width: `${calculatePercentage(period.stats.veryLow ?? 0, period.stats.total)}%`,
-                        backgroundColor: getColorForCategory('veryLow'),
-                      }}
-                    >
-                      {calculatePercentage(period.stats.veryLow ?? 0, period.stats.total) >= MIN_PERCENTAGE_FOR_PERIOD_BAR && 
-                        `${calculatePercentage(period.stats.veryLow ?? 0, period.stats.total)}%`}
-                    </div>
-                  </Tooltip>
-                )}
-                {period.stats.low > 0 && (
-                  <Tooltip content={`Low: ${calculatePercentage(period.stats.low, period.stats.total)}% (${period.stats.low})`} relationship="description">
-                    <div
-                      className={styles.periodSegment}
-                      style={{
-                        width: `${calculatePercentage(period.stats.low, period.stats.total)}%`,
-                        backgroundColor: getColorForCategory('low'),
-                      }}
-                    >
-                      {calculatePercentage(period.stats.low, period.stats.total) >= MIN_PERCENTAGE_FOR_PERIOD_BAR && 
-                        `${calculatePercentage(period.stats.low, period.stats.total)}%`}
-                    </div>
-                  </Tooltip>
-                )}
-                {period.stats.inRange > 0 && (
-                  <Tooltip content={`In Range: ${calculatePercentage(period.stats.inRange, period.stats.total)}% (${period.stats.inRange})`} relationship="description">
-                    <div
-                      className={styles.periodSegment}
-                      style={{
-                        width: `${calculatePercentage(period.stats.inRange, period.stats.total)}%`,
-                        backgroundColor: getColorForCategory('inRange'),
-                      }}
-                    >
-                      {calculatePercentage(period.stats.inRange, period.stats.total) >= MIN_PERCENTAGE_FOR_PERIOD_BAR && 
-                        `${calculatePercentage(period.stats.inRange, period.stats.total)}%`}
-                    </div>
-                  </Tooltip>
-                )}
-                {period.stats.high > 0 && (
-                  <Tooltip content={`High: ${calculatePercentage(period.stats.high, period.stats.total)}% (${period.stats.high})`} relationship="description">
-                    <div
-                      className={styles.periodSegment}
-                      style={{
-                        width: `${calculatePercentage(period.stats.high, period.stats.total)}%`,
-                        backgroundColor: getColorForCategory('high'),
-                      }}
-                    >
-                      {calculatePercentage(period.stats.high, period.stats.total) >= MIN_PERCENTAGE_FOR_PERIOD_BAR && 
-                        `${calculatePercentage(period.stats.high, period.stats.total)}%`}
-                    </div>
-                  </Tooltip>
-                )}
-                {categoryMode === 5 && (period.stats.veryHigh ?? 0) > 0 && (
-                  <Tooltip content={`Very High: ${calculatePercentage(period.stats.veryHigh ?? 0, period.stats.total)}% (${period.stats.veryHigh ?? 0})`} relationship="description">
-                    <div
-                      className={styles.periodSegment}
-                      style={{
-                        width: `${calculatePercentage(period.stats.veryHigh ?? 0, period.stats.total)}%`,
-                        backgroundColor: getColorForCategory('veryHigh'),
-                      }}
-                    >
-                      {calculatePercentage(period.stats.veryHigh ?? 0, period.stats.total) >= MIN_PERCENTAGE_FOR_PERIOD_BAR && 
-                        `${calculatePercentage(period.stats.veryHigh ?? 0, period.stats.total)}%`}
-                    </div>
-                  </Tooltip>
-                )}
+        {periodStats.map((period) => {
+          const total = period.stats.total;
+          const veryLowPct = categoryMode === 5 ? calculatePercentage(period.stats.veryLow ?? 0, total) : 0;
+          const lowPct = calculatePercentage(period.stats.low, total);
+          const inRangePct = calculatePercentage(period.stats.inRange, total);
+          const highPct = calculatePercentage(period.stats.high, total);
+          const veryHighPct = categoryMode === 5 ? calculatePercentage(period.stats.veryHigh ?? 0, total) : 0;
+
+          return (
+            <div key={period.period} className={styles.periodBarRow}>
+              <Text className={styles.periodLabel}>{period.period}</Text>
+              <div className={styles.periodBarWrapper}>
+                <div className={styles.periodBar}>
+                  {categoryMode === 5 && (period.stats.veryLow ?? 0) > 0 && (
+                    <Tooltip content={`Very Low: ${veryLowPct}% (${period.stats.veryLow ?? 0})`} relationship="description">
+                      <div
+                        className={styles.periodSegment}
+                        style={{
+                          width: `${veryLowPct}%`,
+                          backgroundColor: getColorForCategory('veryLow'),
+                        }}
+                      >
+                        {veryLowPct >= MIN_PERCENTAGE_FOR_PERIOD_BAR && `${veryLowPct}%`}
+                      </div>
+                    </Tooltip>
+                  )}
+                  {period.stats.low > 0 && (
+                    <Tooltip content={`Low: ${lowPct}% (${period.stats.low})`} relationship="description">
+                      <div
+                        className={styles.periodSegment}
+                        style={{
+                          width: `${lowPct}%`,
+                          backgroundColor: getColorForCategory('low'),
+                        }}
+                      >
+                        {lowPct >= MIN_PERCENTAGE_FOR_PERIOD_BAR && `${lowPct}%`}
+                      </div>
+                    </Tooltip>
+                  )}
+                  {period.stats.inRange > 0 && (
+                    <Tooltip content={`In Range: ${inRangePct}% (${period.stats.inRange})`} relationship="description">
+                      <div
+                        className={styles.periodSegment}
+                        style={{
+                          width: `${inRangePct}%`,
+                          backgroundColor: getColorForCategory('inRange'),
+                        }}
+                      >
+                        {inRangePct >= MIN_PERCENTAGE_FOR_PERIOD_BAR && `${inRangePct}%`}
+                      </div>
+                    </Tooltip>
+                  )}
+                  {period.stats.high > 0 && (
+                    <Tooltip content={`High: ${highPct}% (${period.stats.high})`} relationship="description">
+                      <div
+                        className={styles.periodSegment}
+                        style={{
+                          width: `${highPct}%`,
+                          backgroundColor: getColorForCategory('high'),
+                        }}
+                      >
+                        {highPct >= MIN_PERCENTAGE_FOR_PERIOD_BAR && `${highPct}%`}
+                      </div>
+                    </Tooltip>
+                  )}
+                  {categoryMode === 5 && (period.stats.veryHigh ?? 0) > 0 && (
+                    <Tooltip content={`Very High: ${veryHighPct}% (${period.stats.veryHigh ?? 0})`} relationship="description">
+                      <div
+                        className={styles.periodSegment}
+                        style={{
+                          width: `${veryHighPct}%`,
+                          backgroundColor: getColorForCategory('veryHigh'),
+                        }}
+                      >
+                        {veryHighPct >= MIN_PERCENTAGE_FOR_PERIOD_BAR && `${veryHighPct}%`}
+                      </div>
+                    </Tooltip>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </Card>
   );

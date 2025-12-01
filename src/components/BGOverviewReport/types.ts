@@ -65,8 +65,11 @@ export function getJIndexInterpretation(jIndex: number): RiskInterpretation {
   return { text: 'Poor', level: 'high' };
 }
 
+/** Glucose category type for type-safe color lookups */
+export type GlucoseCategory = 'veryLow' | 'low' | 'inRange' | 'high' | 'veryHigh';
+
 /** Get color for a glucose range category */
-export function getColorForCategory(category: string): string {
+export function getColorForCategory(category: GlucoseCategory | string): string {
   switch (category) {
     case 'veryLow': return GLUCOSE_RANGE_COLORS.veryLow;
     case 'low': return GLUCOSE_RANGE_COLORS.low;
