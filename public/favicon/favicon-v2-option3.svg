@@ -35,8 +35,13 @@
   <path d="M 42 108 Q 64 118, 86 108" 
         stroke="#ff8888" stroke-width="2" fill="none" opacity="0.4"/>
   
-  <!-- ECG/Pulse line with heart-like pattern -->
-  <polyline points="6,70 22,70 34,70 42,60 50,80 58,46 66,84 74,46 82,80 90,60 98,70 112,70 122,70" 
-            stroke="#ffffff" stroke-width="3" fill="none" 
-            stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+  <!-- ECG/Pulse line - dark outline for contrast -->
+  <polyline points="6,70 26,70 38,70 46,56 54,84 62,44 70,84 78,44 86,84 94,56 102,70 122,70" 
+            stroke="#400000" stroke-width="7" fill="none" 
+            stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  
+  <!-- ECG/Pulse line - white main line (thicker for visibility) -->
+  <polyline points="6,70 26,70 38,70 46,56 54,84 62,44 70,84 78,44 86,84 94,56 102,70 122,70" 
+            stroke="#ffffff" stroke-width="5" fill="none" 
+            stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

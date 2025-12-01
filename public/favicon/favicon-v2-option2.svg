@@ -28,8 +28,13 @@
   <path d="M 46 106 Q 64 116, 82 106" 
         stroke="#ffaaaa" stroke-width="2.5" fill="none" opacity="0.5"/>
   
-  <!-- ECG/Pulse line - wider amplitude -->
-  <polyline points="8,70 24,70 36,70 44,56 52,84 60,44 68,88 76,56 84,70 104,70 120,70" 
-            stroke="#ffffff" stroke-width="3" fill="none" 
+  <!-- ECG/Pulse line - dark outline for contrast -->
+  <polyline points="8,70 28,70 40,70 48,52 56,88 64,40 72,88 80,52 88,70 120,70" 
+            stroke="#400000" stroke-width="7" fill="none" 
+            stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  
+  <!-- ECG/Pulse line - white main line (thicker for visibility) -->
+  <polyline points="8,70 28,70 40,70 48,52 56,88 64,40 72,88 80,52 88,70 120,70" 
+            stroke="#ffffff" stroke-width="5" fill="none" 
             stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
