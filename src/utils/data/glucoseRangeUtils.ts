@@ -44,10 +44,21 @@ export const FLUX_GRADE_COLORS = {
 
 /**
  * Tolerance for unicorn detection (floating point comparison)
- * CGM readings have limited precision, so we use a small tolerance
- * to account for minor variations in the recorded values
+ * For 5 mmol/L unicorn: tolerance is 0.05 mmol/L
+ * For 100 mg/dL unicorn: tolerance is 0.5 mg/dL (≈ 0.028 mmol/L)
  */
-export const UNICORN_TOLERANCE = 0.05;
+export const UNICORN_TOLERANCE_MMOL = 0.05;
+
+/**
+ * Tolerance for unicorn detection for 100 mg/dL readings
+ * 0.5 mg/dL converted to mmol/L (0.5 / 18.0182 ≈ 0.028)
+ */
+export const UNICORN_TOLERANCE_100_MGDL = 0.5 / MMOL_TO_MGDL;
+
+/**
+ * Unicorn target value: 100 mg/dL in mmol/L (100 / 18.0182 ≈ 5.5506)
+ */
+export const UNICORN_100_MGDL_IN_MMOL = 100 / MMOL_TO_MGDL;
 
 /**
  * Minimum percentage threshold to display percentage text in summary bars
@@ -957,8 +968,8 @@ export function countHighLowIncidents(
 }
 
 /**
- * Count "unicorns" - glucose values that are exactly 100 mg/dL (5.6 mmol/L)
- * or exactly 5.0 mmol/L (90 mg/dL) depending on measurement precision
+ * Count "unicorns" - glucose values that are exactly 100 mg/dL (+/- 0.5)
+ * or exactly 5 mmol/L (+/- 0.05)
  * 
  * @param readings - Array of glucose readings (values in mmol/L)
  * @returns Number of unicorn readings
@@ -966,9 +977,10 @@ export function countHighLowIncidents(
 export function countUnicorns(readings: GlucoseReading[]): number {
   return readings.filter(r => {
     const value = r.value;
-    // 5.0 mmol/L is considered a "perfect" reading in mmol/L systems
-    // 5.6 mmol/L ≈ 100 mg/dL is considered a "perfect" reading in mg/dL systems
-    return Math.abs(value - 5.0) < UNICORN_TOLERANCE || Math.abs(value - 5.6) < UNICORN_TOLERANCE;
+    // 5.0 mmol/L is considered a "perfect" reading in mmol/L systems (tolerance: +/- 0.05)
+    // 100 mg/dL (≈ 5.5506 mmol/L) is considered a "perfect" reading in mg/dL systems (tolerance: +/- 0.5 mg/dL)
+    return Math.abs(value - 5.0) < UNICORN_TOLERANCE_MMOL || 
+           Math.abs(value - UNICORN_100_MGDL_IN_MMOL) < UNICORN_TOLERANCE_100_MGDL;
   }).length;
 }
 
