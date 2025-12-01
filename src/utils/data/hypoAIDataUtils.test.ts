@@ -10,8 +10,10 @@ import {
   extractHypoAnalysisDatasets,
   convertHypoEventsToCSV,
   convertHypoSummariesToCSV,
+  findLastBolusBeforeHypo,
+  convertHypoEventSummaryToCSV,
 } from './hypoAIDataUtils';
-import type { GlucoseReading, GlucoseThresholds } from '../../types';
+import type { GlucoseReading, GlucoseThresholds, InsulinReading } from '../../types';
 import type { HypoPeriod } from './hypoDataUtils';
 
 // Helper to create glucose readings
@@ -328,6 +330,7 @@ describe('hypoAIDataUtils', () => {
           minutesFromNadir: 0,
           eventId: 1,
         }],
+        lastBolusBeforeHypo: null,
       }];
       
       const result = convertHypoEventsToCSV(events);
@@ -350,6 +353,7 @@ describe('hypoAIDataUtils', () => {
           minutesFromNadir: 0,
           eventId: 1,
         }],
+        lastBolusBeforeHypo: null,
       }];
       
       const result = convertHypoEventsToCSV(events);
@@ -424,6 +428,147 @@ describe('hypoAIDataUtils', () => {
       }];
       
       const result = convertHypoSummariesToCSV(summaries);
+      
+      expect(result).toContain('N/A');
+    });
+  });
+
+  describe('findLastBolusBeforeHypo', () => {
+    // Helper to create bolus reading
+    function createBolusReading(dose: number, timestamp: Date): InsulinReading {
+      return { dose, timestamp, insulinType: 'bolus' };
+    }
+
+    it('should return null for empty bolus readings', () => {
+      const hypoStartTime = new Date('2024-01-15T10:00:00');
+      const result = findLastBolusBeforeHypo(hypoStartTime, []);
+      expect(result).toBeNull();
+    });
+
+    it('should return null when no bolus in 2-4 hour window', () => {
+      const hypoStartTime = new Date('2024-01-15T10:00:00');
+      // Bolus at 05:00 (5 hours before) - outside window
+      const bolusReadings = [createBolusReading(5.0, new Date('2024-01-15T05:00:00'))];
+      
+      const result = findLastBolusBeforeHypo(hypoStartTime, bolusReadings);
+      expect(result).toBeNull();
+    });
+
+    it('should return null when bolus is too recent (less than 2 hours)', () => {
+      const hypoStartTime = new Date('2024-01-15T10:00:00');
+      // Bolus at 08:30 (1.5 hours before) - too recent
+      const bolusReadings = [createBolusReading(5.0, new Date('2024-01-15T08:30:00'))];
+      
+      const result = findLastBolusBeforeHypo(hypoStartTime, bolusReadings);
+      expect(result).toBeNull();
+    });
+
+    it('should find bolus in 2-4 hour window', () => {
+      const hypoStartTime = new Date('2024-01-15T10:00:00');
+      // Bolus at 07:00 (3 hours before) - in window
+      const bolusReadings = [createBolusReading(5.0, new Date('2024-01-15T07:00:00'))];
+      
+      const result = findLastBolusBeforeHypo(hypoStartTime, bolusReadings);
+      
+      expect(result).not.toBeNull();
+      expect(result!.dose).toBe(5.0);
+      expect(result!.hoursBeforeHypo).toBe(3.0);
+    });
+
+    it('should return the most recent bolus in window', () => {
+      const hypoStartTime = new Date('2024-01-15T10:00:00');
+      // Multiple boluses in window
+      const bolusReadings = [
+        createBolusReading(3.0, new Date('2024-01-15T06:00:00')), // 4 hours before
+        createBolusReading(5.0, new Date('2024-01-15T07:00:00')), // 3 hours before - most recent
+      ];
+      
+      const result = findLastBolusBeforeHypo(hypoStartTime, bolusReadings);
+      
+      expect(result).not.toBeNull();
+      expect(result!.dose).toBe(5.0); // Should get the 7:00 bolus
+      expect(result!.hoursBeforeHypo).toBe(3.0);
+    });
+  });
+
+  describe('convertHypoEventSummaryToCSV', () => {
+    it('should return empty string for empty events', () => {
+      const result = convertHypoEventSummaryToCSV([]);
+      expect(result).toBe('');
+    });
+
+    it('should include correct headers', () => {
+      const events = [{
+        eventId: 1,
+        hypoPeriod: {
+          startTime: new Date('2024-01-15T08:00:00'),
+          endTime: new Date('2024-01-15T08:30:00'),
+          durationMinutes: 30,
+          nadir: 3.2,
+          nadirTime: new Date('2024-01-15T08:15:00'),
+          isSevere: false,
+          nadirIndex: 0,
+          nadirTimeDecimal: 8.25,
+        } as HypoPeriod,
+        readings: [],
+        lastBolusBeforeHypo: null,
+      }];
+      
+      const result = convertHypoEventSummaryToCSV(events);
+      
+      expect(result).toContain('Event ID');
+      expect(result).toContain('Hypo Start Time');
+      expect(result).toContain('Nadir');
+      expect(result).toContain('Is Severe');
+      expect(result).toContain('Last Bolus Time');
+      expect(result).toContain('Hours Before Hypo');
+    });
+
+    it('should include bolus info when present', () => {
+      const events = [{
+        eventId: 1,
+        hypoPeriod: {
+          startTime: new Date('2024-01-15T10:00:00'),
+          endTime: new Date('2024-01-15T10:30:00'),
+          durationMinutes: 30,
+          nadir: 3.2,
+          nadirTime: new Date('2024-01-15T10:15:00'),
+          isSevere: false,
+          nadirIndex: 0,
+          nadirTimeDecimal: 10.25,
+        } as HypoPeriod,
+        readings: [],
+        lastBolusBeforeHypo: {
+          timestamp: new Date('2024-01-15T07:00:00'),
+          dose: 5.5,
+          hoursBeforeHypo: 3.0,
+        },
+      }];
+      
+      const result = convertHypoEventSummaryToCSV(events);
+      
+      expect(result).toContain('5.5'); // Dose
+      expect(result).toContain('3.0'); // Hours before
+    });
+
+    it('should show N/A when no bolus before hypo', () => {
+      const events = [{
+        eventId: 1,
+        hypoPeriod: {
+          startTime: new Date('2024-01-15T08:00:00'),
+          endTime: new Date('2024-01-15T08:30:00'),
+          durationMinutes: 30,
+          nadir: 3.2,
+          nadirTime: new Date('2024-01-15T08:15:00'),
+          isSevere: false,
+          nadirIndex: 0,
+          nadirTimeDecimal: 8.25,
+        } as HypoPeriod,
+        readings: [],
+        lastBolusBeforeHypo: null,
+      }];
+      
+      const result = convertHypoEventSummaryToCSV(events);
       
       expect(result).toContain('N/A');
     });

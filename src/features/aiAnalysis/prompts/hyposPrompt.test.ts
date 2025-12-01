@@ -62,8 +62,9 @@ describe('hyposPrompt', () => {
       
       expect(result).toContain('Pattern Analysis');
       expect(result).toContain('Time-of-day distribution');
-      expect(result).toContain('Nocturnal');
+      expect(result).toContain('nocturnal'); // lowercase in "nocturnal hypos"
       expect(result).toContain('00:00–06:00');
+      expect(result).toContain('Identify specific high-risk time windows');
     });
 
     it('should include preceding factors analysis', () => {
@@ -72,9 +73,9 @@ describe('hyposPrompt', () => {
       
       const result = generateHyposPrompt(base64Events, base64Summary);
       
-      expect(result).toContain('preceding factors');
-      expect(result).toContain('Rapid glucose drop');
-      expect(result).toContain('Gradual decline');
+      expect(result).toContain('trajectory analysis');
+      expect(result).toContain('Rapid drop percentage');
+      expect(result).toContain('Gradual decline percentage');
     });
 
     it('should include insulin stacking analysis', () => {
@@ -121,7 +122,7 @@ describe('hyposPrompt', () => {
       expect(result).toContain('actionable');
     });
 
-    it('should include output structure', () => {
+    it('should include output structure with trajectory analysis', () => {
       const base64Events = base64Encode(sampleHypoEventsData);
       const base64Summary = base64Encode(sampleHypoSummaryData);
       
@@ -130,6 +131,7 @@ describe('hyposPrompt', () => {
       expect(result).toContain('Output Structure');
       expect(result).toContain('Risk Summary Table');
       expect(result).toContain('Time Distribution Analysis');
+      expect(result).toContain('Trajectory Analysis');
       expect(result).toContain('Pattern Findings');
       expect(result).toContain('Risk Classification');
       expect(result).toContain('Prioritized Recommendations');
@@ -143,6 +145,28 @@ describe('hyposPrompt', () => {
       
       expect(result).toContain('Dataset 1: Hypo Events');
       expect(result).toContain('Dataset 2: Daily Hypo Summaries');
+    });
+
+    it('should include Dataset 3 when hypo event summary is provided', () => {
+      const base64Events = base64Encode(sampleHypoEventsData);
+      const base64Summary = base64Encode(sampleHypoSummaryData);
+      const sampleEventSummary = `Event ID,Start Time,Nadir,Last Bolus Time,Bolus Dose
+1,2024-01-01 09:00:00,3.2,2024-01-01 06:00:00,5.0`;
+      const base64EventSummary = base64Encode(sampleEventSummary);
+      
+      const result = generateHyposPrompt(base64Events, base64Summary, 'english', 'mmol/L', undefined, base64EventSummary);
+      
+      expect(result).toContain('Dataset 3: Hypo Event Summary with Bolus Context');
+      expect(result).toContain('2-4 hours before each hypo');
+    });
+
+    it('should not include Dataset 3 when hypo event summary is not provided', () => {
+      const base64Events = base64Encode(sampleHypoEventsData);
+      const base64Summary = base64Encode(sampleHypoSummaryData);
+      
+      const result = generateHyposPrompt(base64Events, base64Summary);
+      
+      expect(result).not.toContain('Dataset 3');
     });
 
     it('should include mmol/L reminder by default', () => {

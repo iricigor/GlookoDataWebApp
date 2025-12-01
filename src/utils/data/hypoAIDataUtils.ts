@@ -7,16 +7,35 @@
  * 3. Convert data to CSV format for AI prompts
  */
 
-import type { GlucoseReading, GlucoseThresholds } from '../../types';
+import type { GlucoseReading, GlucoseThresholds, InsulinReading } from '../../types';
 import { calculateHypoStats, type HypoPeriod } from './hypoDataUtils';
 import { getUniqueDates, filterReadingsByDate, calculateLBGI } from './glucoseRangeUtils';
 import { convertToDelimitedFormat } from './csvUtils';
+
+/**
+ * Time window in hours for finding last bolus before hypo
+ * Looking for boluses 2-4 hours before hypo start
+ */
+const BOLUS_WINDOW_MIN_HOURS = 2;
+const BOLUS_WINDOW_MAX_HOURS = 4;
 
 /**
  * Time window in milliseconds for extracting CGM data around hypo events
  * Default: 1 hour before and 1 hour after
  */
 const HYPO_WINDOW_MS = 60 * 60 * 1000; // 1 hour in milliseconds
+
+/**
+ * Information about the last bolus before a hypo event
+ */
+export interface LastBolusInfo {
+  /** Timestamp of the bolus */
+  timestamp: Date;
+  /** Bolus dose in units */
+  dose: number;
+  /** Hours before the hypo start */
+  hoursBeforeHypo: number;
+}
 
 /**
  * Represents CGM data surrounding a hypo event
@@ -28,6 +47,8 @@ export interface HypoEventData {
   hypoPeriod: HypoPeriod;
   /** CGM readings from 1 hour before to 1 hour after the hypo period */
   readings: HypoEventReading[];
+  /** Last bolus that occurred 2-4 hours before this hypo (if any) */
+  lastBolusBeforeHypo: LastBolusInfo | null;
 }
 
 /**
@@ -91,16 +112,61 @@ export interface HypoAnalysisDatasets {
 }
 
 /**
+ * Find the last bolus that occurred 2-4 hours before a hypo event
+ * 
+ * @param hypoStartTime - Start time of the hypo period
+ * @param bolusReadings - Array of bolus insulin readings
+ * @returns Last bolus info or null if none found in the window
+ */
+export function findLastBolusBeforeHypo(
+  hypoStartTime: Date,
+  bolusReadings: InsulinReading[]
+): LastBolusInfo | null {
+  if (bolusReadings.length === 0) {
+    return null;
+  }
+
+  // Calculate the time window (2-4 hours before hypo start)
+  const windowStart = new Date(hypoStartTime.getTime() - BOLUS_WINDOW_MAX_HOURS * 60 * 60 * 1000);
+  const windowEnd = new Date(hypoStartTime.getTime() - BOLUS_WINDOW_MIN_HOURS * 60 * 60 * 1000);
+
+  // Find boluses in the 2-4 hour window before hypo
+  const bolusesInWindow = bolusReadings.filter(
+    bolus => bolus.timestamp >= windowStart && bolus.timestamp <= windowEnd
+  );
+
+  if (bolusesInWindow.length === 0) {
+    return null;
+  }
+
+  // Get the last (most recent) bolus in the window
+  const lastBolus = bolusesInWindow.reduce((latest, current) =>
+    current.timestamp > latest.timestamp ? current : latest
+  );
+
+  // Calculate hours before hypo
+  const hoursBeforeHypo = (hypoStartTime.getTime() - lastBolus.timestamp.getTime()) / (1000 * 60 * 60);
+
+  return {
+    timestamp: lastBolus.timestamp,
+    dose: lastBolus.dose,
+    hoursBeforeHypo: Math.round(hoursBeforeHypo * 10) / 10, // Round to 1 decimal
+  };
+}
+
+/**
  * Extract CGM data surrounding hypo events
  * Returns readings from 1 hour before to 1 hour after each hypo period
  * 
  * @param allReadings - All glucose readings, sorted by timestamp
  * @param hypoPeriods - Detected hypo periods
+ * @param bolusReadings - Optional array of bolus insulin readings
  * @returns Array of hypo event data with surrounding CGM readings
  */
 export function extractHypoEventData(
   allReadings: GlucoseReading[],
-  hypoPeriods: HypoPeriod[]
+  hypoPeriods: HypoPeriod[],
+  bolusReadings: InsulinReading[] = []
 ): HypoEventData[] {
   if (allReadings.length === 0 || hypoPeriods.length === 0) {
     return [];
@@ -134,10 +200,14 @@ export function extractHypoEventData(
       };
     });
     
+    // Find last bolus 2-4 hours before this hypo
+    const lastBolusBeforeHypo = findLastBolusBeforeHypo(period.startTime, bolusReadings);
+    
     events.push({
       eventId,
       hypoPeriod: period,
       readings,
+      lastBolusBeforeHypo,
     });
   });
 
@@ -238,11 +308,13 @@ export function calculateOverallHypoStats(
  * 
  * @param allReadings - All glucose readings, sorted by timestamp
  * @param thresholds - Glucose thresholds for hypo detection
+ * @param bolusReadings - Optional array of bolus insulin readings
  * @returns Complete hypo analysis datasets
  */
 export function extractHypoAnalysisDatasets(
   allReadings: GlucoseReading[],
-  thresholds: GlucoseThresholds
+  thresholds: GlucoseThresholds,
+  bolusReadings: InsulinReading[] = []
 ): HypoAnalysisDatasets {
   // Sort readings by timestamp
   const sortedReadings = [...allReadings].sort(
@@ -252,8 +324,8 @@ export function extractHypoAnalysisDatasets(
   // Calculate stats for all readings to get all hypo periods
   const overallHypoStats = calculateHypoStats(sortedReadings, thresholds);
   
-  // Extract hypo event data with surrounding CGM readings
-  const hypoEvents = extractHypoEventData(sortedReadings, overallHypoStats.hypoPeriods);
+  // Extract hypo event data with surrounding CGM readings and bolus info
+  const hypoEvents = extractHypoEventData(sortedReadings, overallHypoStats.hypoPeriods, bolusReadings);
   
   // Calculate daily summaries
   const dailySummaries = calculateDailyHypoSummaries(sortedReadings, thresholds);
@@ -299,6 +371,52 @@ export function convertHypoEventsToCSV(hypoEvents: HypoEventData[]): string {
         reading.minutesFromNadir,
       ]);
     });
+  });
+
+  return convertToDelimitedFormat(rows, 'csv');
+}
+
+/**
+ * Convert hypo event summary (with bolus info) to CSV format for AI prompts
+ * This provides a per-event summary including last bolus before hypo
+ * 
+ * @param hypoEvents - Array of hypo events with surrounding CGM data and bolus info
+ * @returns CSV formatted string
+ */
+export function convertHypoEventSummaryToCSV(hypoEvents: HypoEventData[]): string {
+  if (!hypoEvents || hypoEvents.length === 0) {
+    return '';
+  }
+
+  const headers = [
+    'Event ID',
+    'Hypo Start Time',
+    'Hypo End Time',
+    'Duration (min)',
+    'Nadir (mmol/L)',
+    'Nadir Time',
+    'Is Severe',
+    'Last Bolus Time',
+    'Last Bolus Dose (U)',
+    'Hours Before Hypo',
+  ];
+
+  const rows: (string | number)[][] = [headers];
+
+  hypoEvents.forEach(event => {
+    const lastBolus = event.lastBolusBeforeHypo;
+    rows.push([
+      event.eventId,
+      event.hypoPeriod.startTime.toISOString(),
+      event.hypoPeriod.endTime.toISOString(),
+      Math.round(event.hypoPeriod.durationMinutes),
+      event.hypoPeriod.nadir.toFixed(1),
+      event.hypoPeriod.nadirTime.toISOString(),
+      event.hypoPeriod.isSevere ? 'true' : 'false',
+      lastBolus ? lastBolus.timestamp.toISOString() : 'N/A',
+      lastBolus ? lastBolus.dose.toFixed(1) : 'N/A',
+      lastBolus ? lastBolus.hoursBeforeHypo.toFixed(1) : 'N/A',
+    ]);
   });
 
   return convertToDelimitedFormat(rows, 'csv');

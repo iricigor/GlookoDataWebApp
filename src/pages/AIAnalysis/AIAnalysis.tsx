@@ -11,7 +11,7 @@ import {
   Tab,
 } from '@fluentui/react-components';
 import { BrainCircuitRegular } from '@fluentui/react-icons';
-import type { DailyReport, GlucoseRangeStats } from '../../types';
+import type { DailyReport, GlucoseRangeStats, InsulinReading } from '../../types';
 import { extractGlucoseReadings, extractDailyInsulinSummaries, extractInsulinReadings, extractHypoAnalysisDatasets } from '../../utils/data';
 import type { HypoAnalysisDatasets } from '../../utils/data';
 import { calculateGlucoseRangeStats, calculatePercentage, groupByDate } from '../../utils/data';
@@ -120,6 +120,8 @@ export function AIAnalysis({
           }
 
           // Extract detailed insulin readings for meal timing analysis
+          // These are also used for hypo analysis
+          let bolusReadingsForHypos: InsulinReading[] = [];
           try {
             const insulinReadings = await extractInsulinReadings(selectedFile);
             const bolusReadings = insulinReadings.filter(r => r.insulinType === 'bolus');
@@ -129,14 +131,15 @@ export function AIAnalysis({
               bolusReadings,
               basalReadings,
             });
+            bolusReadingsForHypos = bolusReadings;
           } catch (mealTimingErr) {
             console.warn('Failed to extract meal timing data:', mealTimingErr);
             setMealTimingDatasets({ cgmReadings: readings, bolusReadings: [], basalReadings: [] });
           }
 
-          // Extract hypo analysis datasets
+          // Extract hypo analysis datasets with bolus info
           try {
-            const hypoData = extractHypoAnalysisDatasets(readings, thresholds);
+            const hypoData = extractHypoAnalysisDatasets(readings, thresholds, bolusReadingsForHypos);
             setHypoDatasets(hypoData);
           } catch (hypoErr) {
             console.warn('Failed to extract hypo data:', hypoErr);
