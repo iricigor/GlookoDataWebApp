@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>601 Fix filter layout in mobile view to reduce vertical space</summary>
+
+[#601](../../pull/601) Fix filter layout in mobile view to reduce vertical space
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>599 Add Daily BG report combining glucose, insulin, and IOB data</summary>
 
 [#599](../../pull/599) Add Daily BG report combining glucose, insulin, and IOB data
