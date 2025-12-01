@@ -126,22 +126,19 @@ function validateIssuer(issuer: string, tenantId?: string): boolean {
 }
 
 /**
- * Validate and extract user ID from the ID token with full signature verification.
+ * Validate and decode a JWT token from the Authorization header.
  * 
- * This implementation provides production-ready JWT validation:
+ * This is a shared helper function that provides production-ready JWT validation:
  * - Cryptographic signature verification using Microsoft's JWKS endpoint
  * - Audience validation to ensure the token is intended for this application
  * - Issuer validation to ensure the token comes from Microsoft identity platform
  * - Expiration validation to reject expired tokens
  * 
- * The token is expected to be a Microsoft identity platform (Azure AD/Entra ID) ID token.
- * See: https://learn.microsoft.com/en-us/azure/active-directory/develop/id-tokens
- * 
  * @param authHeader - The Authorization header value (Bearer token)
  * @param context - The invocation context for logging
- * @returns Promise resolving to the user's object ID (oid) or subject (sub) claim, or null if invalid
+ * @returns Promise resolving to the verified token claims or null if invalid
  */
-export async function extractUserIdFromToken(authHeader: string | null, context: InvocationContext): Promise<string | null> {
+async function validateAndDecodeToken(authHeader: string | null, context: InvocationContext): Promise<TokenClaims | null> {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     context.warn('Missing or invalid Authorization header format');
     return null;
@@ -188,14 +185,7 @@ export async function extractUserIdFromToken(authHeader: string | null, context:
       return null;
     }
 
-    // Return the object ID (oid) or subject (sub) claim
-    const userId = verifiedPayload.oid || verifiedPayload.sub;
-    if (!userId) {
-      context.warn('Token missing user identifier (oid or sub claim)');
-      return null;
-    }
-
-    return userId;
+    return verifiedPayload;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       context.warn('Token has expired');
@@ -208,6 +198,35 @@ export async function extractUserIdFromToken(authHeader: string | null, context:
     }
     return null;
   }
+}
+
+/**
+ * Validate and extract user ID from the ID token with full signature verification.
+ * 
+ * This implementation uses the shared validateAndDecodeToken helper and extracts
+ * the user's unique identifier (oid or sub claim).
+ * 
+ * The token is expected to be a Microsoft identity platform (Azure AD/Entra ID) ID token.
+ * See: https://learn.microsoft.com/en-us/azure/active-directory/develop/id-tokens
+ * 
+ * @param authHeader - The Authorization header value (Bearer token)
+ * @param context - The invocation context for logging
+ * @returns Promise resolving to the user's object ID (oid) or subject (sub) claim, or null if invalid
+ */
+export async function extractUserIdFromToken(authHeader: string | null, context: InvocationContext): Promise<string | null> {
+  const verifiedPayload = await validateAndDecodeToken(authHeader, context);
+  if (!verifiedPayload) {
+    return null;
+  }
+
+  // Return the object ID (oid) or subject (sub) claim
+  const userId = verifiedPayload.oid || verifiedPayload.sub;
+  if (!userId) {
+    context.warn('Token missing user identifier (oid or sub claim)');
+    return null;
+  }
+
+  return userId;
 }
 
 /**
@@ -223,7 +242,7 @@ export interface UserInfo {
 /**
  * Validate and extract user info from the ID token with full signature verification.
  * 
- * This function provides production-ready JWT validation and extracts:
+ * This implementation uses the shared validateAndDecodeToken helper and extracts:
  * - userId: Object ID (oid) or Subject (sub) claim
  * - email: Email or preferred_username claim (normalized to lowercase)
  * 
@@ -232,76 +251,23 @@ export interface UserInfo {
  * @returns Promise resolving to UserInfo or null if invalid
  */
 export async function extractUserInfoFromToken(authHeader: string | null, context: InvocationContext): Promise<UserInfo | null> {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    context.warn('Missing or invalid Authorization header format');
+  const verifiedPayload = await validateAndDecodeToken(authHeader, context);
+  if (!verifiedPayload) {
     return null;
   }
 
-  const token = authHeader.substring(7);
-  
-  try {
-    // Decode the header to get the key ID
-    const decodedToken = jwt.decode(token, { complete: true });
-    if (!decodedToken || typeof decodedToken === 'string') {
-      context.warn('Failed to decode JWT token');
-      return null;
-    }
-
-    // Get the public key from Microsoft's JWKS endpoint
-    const publicKey = await getSigningKey(decodedToken.header);
-    
-    // Verify the token signature and decode the payload
-    const expectedAudiences = getExpectedAudiences();
-    // Ensure audience is never empty - jsonwebtoken requires string or non-empty array
-    if (expectedAudiences.length === 0) {
-      context.warn('No expected audiences configured');
-      return null;
-    }
-    // Use single string for one audience, or cast to tuple for multiple
-    const audience: string | [string, ...string[]] = expectedAudiences.length === 1 
-      ? expectedAudiences[0] 
-      : [expectedAudiences[0], ...expectedAudiences.slice(1)];
-    const verifiedPayload = jwt.verify(token, publicKey, {
-      algorithms: ['RS256'], // Microsoft uses RS256 for ID tokens
-      audience: audience,
-      clockTolerance: 60, // Allow 60 seconds of clock skew
-    }) as TokenClaims;
-
-    // Validate issuer
-    if (!verifiedPayload.iss) {
-      context.warn('Token missing issuer (iss) claim');
-      return null;
-    }
-
-    if (!validateIssuer(verifiedPayload.iss, verifiedPayload.tid)) {
-      context.warn(`Invalid token issuer: ${verifiedPayload.iss}`);
-      return null;
-    }
-
-    // Get the user ID (oid or sub claim)
-    const userId = verifiedPayload.oid || verifiedPayload.sub;
-    if (!userId) {
-      context.warn('Token missing user identifier (oid or sub claim)');
-      return null;
-    }
-
-    // Get the email (email or preferred_username claim, normalized to lowercase)
-    const rawEmail = verifiedPayload.email || verifiedPayload.preferred_username;
-    const email = rawEmail ? rawEmail.toLowerCase() : null;
-
-    return { userId, email };
-  } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-      context.warn('Token has expired');
-    } else if (error instanceof jwt.JsonWebTokenError) {
-      context.warn(`JWT validation failed: ${error.message}`);
-    } else if (error instanceof jwt.NotBeforeError) {
-      context.warn('Token not yet valid (nbf claim)');
-    } else {
-      context.warn('Failed to validate token:', error);
-    }
+  // Get the user ID (oid or sub claim)
+  const userId = verifiedPayload.oid || verifiedPayload.sub;
+  if (!userId) {
+    context.warn('Token missing user identifier (oid or sub claim)');
     return null;
   }
+
+  // Get the email (email or preferred_username claim, normalized to lowercase)
+  const rawEmail = verifiedPayload.email || verifiedPayload.preferred_username;
+  const email = rawEmail ? rawEmail.toLowerCase() : null;
+
+  return { userId, email };
 }
 
 /**
