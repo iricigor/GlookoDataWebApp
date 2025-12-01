@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <!-- Blood drop gradient - more vibrant red -->
+    <radialGradient id="bloodGradientV2B" cx="40%" cy="30%" r="60%">
+      <stop offset="0%" style="stop-color:#ff3344;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#cc0022;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#770011;stop-opacity:1" />
+    </radialGradient>
+    <!-- Circle border gradient -->
+    <linearGradient id="borderGradientB" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a4a4a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer circle with border -->
+  <circle cx="64" cy="64" r="60" fill="url(#borderGradientB)"/>
+  
+  <!-- Inner black circle -->
+  <circle cx="64" cy="64" r="54" fill="#080808"/>
+  
+  <!-- Blood drop shape -->
+  <path d="M 64 22 C 64 22 38 54 38 76 C 38 94 49.5 106 64 106 C 78.5 106 90 94 90 76 C 90 54 64 22 64 22 Z" 
+        fill="url(#bloodGradientV2B)" />
+  
+  <!-- Blood drop glossy highlight -->
+  <path d="M 64 28 C 64 28 50 50 50 68 Q 55 52 64 52 L 64 28 Z" 
+        fill="#ffffff" opacity="0.35"/>
+  
+  <!-- Shine spot -->
+  <ellipse cx="54" cy="46" rx="5" ry="9" fill="#ffffff" opacity="0.3"/>
+  
+  <!-- Bottom curve reflection -->
+  <path d="M 52 95 Q 64 102, 76 95" 
+        stroke="#ff6666" stroke-width="1.5" fill="none" opacity="0.5"/>
+  
+  <!-- ECG/Pulse line - wider amplitude -->
+  <polyline points="15,64 30,64 40,64 46,52 52,76 58,42 64,80 70,52 76,64 98,64 113,64" 
+            stroke="#ffffff" stroke-width="2.5" fill="none" 
+            stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

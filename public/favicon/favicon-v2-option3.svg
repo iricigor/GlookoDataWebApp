@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <!-- Blood drop gradient - deep crimson -->
+    <linearGradient id="bloodGradientV2C" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" style="stop-color:#dc143c;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#b91c3c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6b0f1a;stop-opacity:1" />
+    </linearGradient>
+    <!-- Metallic border gradient -->
+    <linearGradient id="borderGradientC" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#606060;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#383838;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#202020;stop-opacity:1" />
+    </linearGradient>
+    <!-- Inner glow effect -->
+    <radialGradient id="innerGlowC" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Outer circle with metallic border -->
+  <circle cx="64" cy="64" r="62" fill="url(#borderGradientC)"/>
+  
+  <!-- Inner dark circle with subtle glow -->
+  <circle cx="64" cy="64" r="56" fill="url(#innerGlowC)"/>
+  
+  <!-- Blood drop shape - slightly larger -->
+  <path d="M 64 20 C 64 20 36 52 36 76 C 36 96 48 108 64 108 C 80 108 92 96 92 76 C 92 52 64 20 64 20 Z" 
+        fill="url(#bloodGradientV2C)" />
+  
+  <!-- Blood drop main highlight -->
+  <path d="M 64 26 C 64 26 46 50 46 70 C 46 70 56 50 64 50 L 64 26 Z" 
+        fill="#ffffff" opacity="0.3"/>
+  
+  <!-- Top shine -->
+  <ellipse cx="52" cy="44" rx="7" ry="11" fill="#ffffff" opacity="0.2"/>
+  
+  <!-- Bottom reflection arc -->
+  <path d="M 48 96 Q 64 105, 80 96" 
+        stroke="#ff5555" stroke-width="2" fill="none" opacity="0.35"/>
+  
+  <!-- ECG/Pulse line with heart-like pattern -->
+  <polyline points="12,64 28,64 38,64 44,56 50,72 56,48 62,76 68,48 74,72 80,56 86,64 100,64 116,64" 
+            stroke="#ffffff" stroke-width="2.5" fill="none" 
+            stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+</svg>
