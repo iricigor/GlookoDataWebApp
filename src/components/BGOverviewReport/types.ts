@@ -89,10 +89,10 @@ export interface TIRComponentProps {
 
 /** Sugarmate-style statistics */
 export interface SugarmateStats {
-  percentAbove: number;
-  percentBelow: number;
-  percentInRange: number;
+  averageGlucose: number | null;
   medianGlucose: number | null;
   standardDeviation: number | null;
   unicornCount: number;
+  wakeupAverage: number | null;
+  bedtimeAverage: number | null;
 }

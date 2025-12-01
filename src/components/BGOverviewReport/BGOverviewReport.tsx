@@ -40,7 +40,8 @@ import {
   countHighLowIncidents,
   countUnicorns,
   calculateFlux,
-  calculatePercentage,
+  calculateWakeupAverage,
+  calculateBedtimeAverage,
 } from '../../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../../utils/visualization';
 import { useGlucoseThresholds } from '../../hooks/useGlucoseThresholds';
@@ -306,15 +307,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
       return null;
     }
 
-    // Calculate percentages from TIR stats
-    const percentBelow = calculatePercentage(tirStats.low + (tirStats.veryLow ?? 0), tirStats.total);
-    const percentInRange = calculatePercentage(tirStats.inRange, tirStats.total);
-    const percentAbove = calculatePercentage(tirStats.high + (tirStats.veryHigh ?? 0), tirStats.total);
-
     return {
-      percentAbove,
-      percentBelow,
-      percentInRange,
       averageGlucose: calculateAverageGlucose(filteredReadings),
       medianGlucose: calculateMedianGlucose(filteredReadings),
       standardDeviation: calculateStandardDeviation(filteredReadings),
@@ -322,6 +315,8 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
       incidents: countHighLowIncidents(filteredReadings, thresholds),
       flux: calculateFlux(filteredReadings),
       unicornCount: countUnicorns(filteredReadings),
+      wakeupAverage: calculateWakeupAverage(filteredReadings),
+      bedtimeAverage: calculateBedtimeAverage(filteredReadings),
     };
   };
 
@@ -394,10 +389,6 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
       {!loading && !error && sugarmateStats && (
         <SugarmateStatsCard
           glucoseUnit={glucoseUnit}
-          thresholds={thresholds}
-          percentAbove={sugarmateStats.percentAbove}
-          percentBelow={sugarmateStats.percentBelow}
-          percentInRange={sugarmateStats.percentInRange}
           averageGlucose={sugarmateStats.averageGlucose}
           medianGlucose={sugarmateStats.medianGlucose}
           standardDeviation={sugarmateStats.standardDeviation}
@@ -405,6 +396,8 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
           incidents={sugarmateStats.incidents}
           flux={sugarmateStats.flux}
           unicornCount={sugarmateStats.unicornCount}
+          wakeupAverage={sugarmateStats.wakeupAverage}
+          bedtimeAverage={sugarmateStats.bedtimeAverage}
         />
       )}
 

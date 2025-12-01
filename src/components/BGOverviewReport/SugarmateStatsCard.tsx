@@ -14,21 +14,14 @@ import {
 } from '@fluentui/react-components';
 import { 
   DataTrendingRegular,
-  ArrowUpRegular,
-  ArrowDownRegular,
   SparkleRegular,
+  WeatherSunnyRegular,
+  WeatherMoonRegular,
 } from '@fluentui/react-icons';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-} from 'recharts';
-import type { GlucoseUnit, GlucoseThresholds } from '../../types';
+import type { GlucoseUnit } from '../../types';
 import { 
   displayGlucoseValue, 
   getUnitLabel,
-  GLUCOSE_RANGE_COLORS,
   FLUX_GRADE_COLORS,
 } from '../../utils/data';
 import type { 
@@ -36,6 +29,9 @@ import type {
   HighLowIncidents, 
   FluxResult 
 } from '../../utils/data/glucoseRangeUtils';
+
+/** Fixed box height for consistent sizing */
+const BOX_HEIGHT = '120px';
 
 const useStyles = makeStyles({
   card: {
@@ -60,157 +56,122 @@ const useStyles = makeStyles({
   },
   statsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    ...shorthands.gap('20px'),
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    ...shorthands.gap('16px'),
+    '@media (max-width: 900px)': {
+      gridTemplateColumns: 'repeat(2, 1fr)',
+    },
+    '@media (max-width: 600px)': {
+      gridTemplateColumns: '1fr',
+    },
   },
   statSection: {
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.padding('16px'),
+    ...shorthands.padding('12px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorNeutralBackground2,
+    height: BOX_HEIGHT,
+    boxSizing: 'border-box',
   },
   sectionTitle: {
-    fontSize: tokens.fontSizeBase300,
-    fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground2,
-    marginBottom: '12px',
-  },
-  // Donut chart styles
-  donutContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    ...shorthands.gap('16px'),
-  },
-  donutChart: {
-    width: '120px',
-    height: '120px',
-    flexShrink: 0,
-  },
-  donutLegend: {
-    display: 'flex',
-    flexDirection: 'column',
-    ...shorthands.gap('8px'),
-  },
-  legendItem: {
-    display: 'flex',
-    alignItems: 'center',
-    ...shorthands.gap('8px'),
-  },
-  legendColor: {
-    width: '12px',
-    height: '12px',
-    ...shorthands.borderRadius('2px'),
-  },
-  legendText: {
     fontSize: tokens.fontSizeBase200,
-    color: tokens.colorNeutralForeground2,
-  },
-  legendValue: {
-    fontSize: tokens.fontSizeBase300,
     fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground1,
-    marginLeft: 'auto',
+    color: tokens.colorNeutralForeground2,
+    marginBottom: '8px',
   },
-  // Quartile visualization styles
-  quartileContainer: {
+  sectionContent: {
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.gap('12px'),
-  },
-  quartileLine: {
-    position: 'relative',
-    height: '40px',
-    backgroundColor: tokens.colorNeutralBackground3,
-    ...shorthands.borderRadius(tokens.borderRadiusSmall),
-    display: 'flex',
-    alignItems: 'center',
-  },
-  quartileRange: {
-    position: 'absolute',
-    height: '20px',
-    backgroundColor: tokens.colorBrandBackground2,
-    ...shorthands.borderRadius(tokens.borderRadiusSmall),
-    display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    flexGrow: 1,
   },
-  quartileMedian: {
-    position: 'absolute',
-    width: '4px',
-    height: '30px',
-    backgroundColor: tokens.colorBrandForeground1,
-    ...shorthands.borderRadius('2px'),
-    zIndex: 1,
+  // Quartile Gaussian curve styles
+  gaussianContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexGrow: 1,
+    width: '100%',
+  },
+  gaussianSvg: {
+    width: '100%',
+    height: '50px',
   },
   quartileLabels: {
     display: 'flex',
     justifyContent: 'space-between',
-    fontSize: tokens.fontSizeBase100,
-    color: tokens.colorNeutralForeground3,
-  },
-  quartileValues: {
-    display: 'flex',
-    justifyContent: 'space-around',
-    marginTop: '8px',
+    width: '100%',
+    marginTop: '4px',
+    paddingLeft: '8px',
+    paddingRight: '8px',
   },
   quartileValue: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  quartileLabel: {
-    fontSize: tokens.fontSizeBase100,
-    color: tokens.colorNeutralForeground2,
-  },
-  quartileNumber: {
     fontSize: tokens.fontSizeBase300,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
+    textAlign: 'center',
   },
-  // High/Low incidents styles
-  incidentsContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    ...shorthands.gap('24px'),
-    marginTop: '8px',
+  quartileMedianValue: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightBold,
+    color: tokens.colorBrandForeground1,
   },
-  incidentItem: {
+  // High/Low circular indicator styles
+  circularIndicator: {
+    position: 'relative',
+    width: '70px',
+    height: '70px',
+  },
+  circularRing: {
+    width: '100%',
+    height: '100%',
+  },
+  circularValues: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    ...shorthands.padding('12px'),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    minWidth: '80px',
+    lineHeight: '1.1',
   },
-  incidentIcon: {
-    fontSize: '24px',
-    marginBottom: '4px',
-  },
-  incidentCount: {
-    fontSize: tokens.fontSizeHero700,
+  highValue: {
+    fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightBold,
-    lineHeight: '1',
+    color: tokens.colorNeutralForeground1,
   },
-  incidentLabel: {
-    fontSize: tokens.fontSizeBase200,
-    color: tokens.colorNeutralForeground2,
-    marginTop: '4px',
+  dividerLine: {
+    width: '20px',
+    height: '1px',
+    backgroundColor: tokens.colorNeutralForeground3,
+    marginTop: '2px',
+    marginBottom: '2px',
+  },
+  lowValue: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightBold,
+    color: tokens.colorNeutralForeground1,
   },
   // Flux grade styles
   fluxContainer: {
     display: 'flex',
     alignItems: 'center',
-    ...shorthands.gap('16px'),
+    justifyContent: 'center',
+    ...shorthands.gap('12px'),
+    flexGrow: 1,
   },
   fluxGrade: {
-    width: '64px',
-    height: '64px',
+    width: '50px',
+    height: '50px',
     ...shorthands.borderRadius('50%'),
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: tokens.fontSizeHero800,
+    fontSize: tokens.fontSizeHero700,
     fontWeight: tokens.fontWeightBold,
     color: 'white',
     flexShrink: 0,
@@ -220,22 +181,20 @@ const useStyles = makeStyles({
     flexDirection: 'column',
   },
   fluxDescription: {
-    fontSize: tokens.fontSizeBase300,
+    fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground1,
   },
   fluxScore: {
-    fontSize: tokens.fontSizeBase200,
+    fontSize: tokens.fontSizeBase100,
     color: tokens.colorNeutralForeground2,
   },
   // Unicorn styles
   unicornContainer: {
     display: 'flex',
     alignItems: 'center',
-    ...shorthands.gap('12px'),
-    marginTop: '8px',
-  },
-  unicornEmoji: {
-    fontSize: '32px',
+    justifyContent: 'center',
+    ...shorthands.gap('8px'),
+    flexGrow: 1,
   },
   unicornCount: {
     fontSize: tokens.fontSizeHero700,
@@ -243,7 +202,27 @@ const useStyles = makeStyles({
     color: tokens.colorBrandForeground1,
   },
   unicornLabel: {
-    fontSize: tokens.fontSizeBase200,
+    fontSize: tokens.fontSizeBase100,
+    color: tokens.colorNeutralForeground2,
+  },
+  // Time average styles (bedtime/wakeup)
+  timeAverageContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shorthands.gap('10px'),
+    flexGrow: 1,
+  },
+  timeAverageIcon: {
+    fontSize: '28px',
+  },
+  timeAverageValue: {
+    fontSize: tokens.fontSizeHero700,
+    fontWeight: tokens.fontWeightBold,
+    color: tokens.colorNeutralForeground1,
+  },
+  timeAverageUnit: {
+    fontSize: tokens.fontSizeBase100,
     color: tokens.colorNeutralForeground2,
   },
   // Summary stats row
@@ -251,7 +230,7 @@ const useStyles = makeStyles({
     display: 'flex',
     justifyContent: 'space-around',
     ...shorthands.padding('12px'),
-    marginTop: '8px',
+    marginTop: '16px',
     backgroundColor: tokens.colorNeutralBackground3,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
   },
@@ -273,11 +252,7 @@ const useStyles = makeStyles({
 
 interface SugarmateStatsCardProps {
   glucoseUnit: GlucoseUnit;
-  thresholds: GlucoseThresholds;
   // Stats data
-  percentAbove: number;
-  percentBelow: number;
-  percentInRange: number;
   averageGlucose: number | null;
   medianGlucose: number | null;
   standardDeviation: number | null;
@@ -285,6 +260,9 @@ interface SugarmateStatsCardProps {
   incidents: HighLowIncidents;
   flux: FluxResult | null;
   unicornCount: number;
+  // Time-based averages
+  wakeupAverage: number | null;
+  bedtimeAverage: number | null;
 }
 
 /** Get color for flux grade */
@@ -295,11 +273,108 @@ function getFluxGradeColor(grade: string): string {
   return tokens.colorNeutralForeground1;
 }
 
+/** SVG Gaussian curve component for quartiles */
+function GaussianCurve({ q25, q50, q75, glucoseUnit }: { q25: number; q50: number; q75: number; glucoseUnit: GlucoseUnit }) {
+  // Simple bell curve path - static shape, values are positioned at 25%, 50%, 75%
+  const curveColor = tokens.colorNeutralForeground3;
+  const markerColor = tokens.colorBrandForeground1;
+  
+  return (
+    <svg viewBox="0 0 100 40" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '50px' }}>
+      {/* Gaussian curve shape */}
+      <path
+        d="M 0,40 Q 15,38 25,25 Q 35,12 50,8 Q 65,12 75,25 Q 85,38 100,40"
+        fill="none"
+        stroke={curveColor}
+        strokeWidth="2"
+      />
+      {/* Shaded area under curve */}
+      <path
+        d="M 0,40 Q 15,38 25,25 Q 35,12 50,8 Q 65,12 75,25 Q 85,38 100,40 L 100,40 L 0,40 Z"
+        fill={curveColor}
+        fillOpacity="0.15"
+      />
+      {/* Q25 marker line */}
+      <line x1="25" y1="25" x2="25" y2="40" stroke={markerColor} strokeWidth="1.5" strokeDasharray="2,2" />
+      {/* Q50 (median) marker line - thicker */}
+      <line x1="50" y1="8" x2="50" y2="40" stroke={markerColor} strokeWidth="2" />
+      {/* Q75 marker line */}
+      <line x1="75" y1="25" x2="75" y2="40" stroke={markerColor} strokeWidth="1.5" strokeDasharray="2,2" />
+      {/* Q25 value */}
+      <text x="25" y="38" textAnchor="middle" fontSize="8" fill={curveColor}>
+        {displayGlucoseValue(q25, glucoseUnit)}
+      </text>
+      {/* Q50 value - emphasized */}
+      <text x="50" y="6" textAnchor="middle" fontSize="10" fontWeight="bold" fill={markerColor}>
+        {displayGlucoseValue(q50, glucoseUnit)}
+      </text>
+      {/* Q75 value */}
+      <text x="75" y="38" textAnchor="middle" fontSize="8" fill={curveColor}>
+        {displayGlucoseValue(q75, glucoseUnit)}
+      </text>
+    </svg>
+  );
+}
+
+/** Circular progress ring for high/low incidents */
+function HighLowRing({ highs, lows }: { highs: number; lows: number }) {
+  const total = highs + lows;
+  const highRatio = total > 0 ? highs / total : 0.5;
+  
+  // SVG circle parameters
+  const size = 70;
+  const strokeWidth = 5;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  
+  // Calculate stroke dash for the high portion
+  const highDash = circumference * highRatio;
+  const lowDash = circumference * (1 - highRatio);
+  
+  const highColor = '#FFB300'; // Amber
+  const lowColor = '#D32F2F'; // Red
+  
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {/* Background circle */}
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke={tokens.colorNeutralBackground3}
+        strokeWidth={strokeWidth}
+      />
+      {/* Low portion (bottom) */}
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke={lowColor}
+        strokeWidth={strokeWidth}
+        strokeDasharray={`${lowDash} ${circumference}`}
+        strokeDashoffset={0}
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+      />
+      {/* High portion (top) */}
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        stroke={highColor}
+        strokeWidth={strokeWidth}
+        strokeDasharray={`${highDash} ${circumference}`}
+        strokeDashoffset={-lowDash}
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+      />
+    </svg>
+  );
+}
+
 export function SugarmateStatsCard({
   glucoseUnit,
-  percentAbove,
-  percentBelow,
-  percentInRange,
   averageGlucose,
   medianGlucose,
   standardDeviation,
@@ -307,24 +382,14 @@ export function SugarmateStatsCard({
   incidents,
   flux,
   unicornCount,
+  wakeupAverage,
+  bedtimeAverage,
 }: SugarmateStatsCardProps) {
   const styles = useStyles();
   const unitLabel = getUnitLabel(glucoseUnit);
 
-  // Donut chart data
-  const donutData = [
-    { name: 'Below', value: percentBelow, color: GLUCOSE_RANGE_COLORS.low },
-    { name: 'In Range', value: percentInRange, color: GLUCOSE_RANGE_COLORS.inRange },
-    { name: 'Above', value: percentAbove, color: GLUCOSE_RANGE_COLORS.high },
-  ].filter(d => d.value > 0);
-
-  // Calculate quartile positions for visualization
-  const getQuartilePosition = (value: number): number => {
-    if (!quartiles) return 50;
-    const range = quartiles.max - quartiles.min;
-    if (range === 0) return 50;
-    return ((value - quartiles.min) / range) * 100;
-  };
+  const totalHighs = incidents.highCount + incidents.veryHighCount;
+  const totalLows = incidents.lowCount + incidents.veryLowCount;
 
   return (
     <Card className={styles.card}>
@@ -334,138 +399,44 @@ export function SugarmateStatsCard({
       </Text>
 
       <div className={styles.statsGrid}>
-        {/* Range Distribution Donut Chart */}
-        <div className={styles.statSection}>
-          <Text className={styles.sectionTitle}>Range Distribution</Text>
-          <div className={styles.donutContainer}>
-            <div className={styles.donutChart}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={donutData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={30}
-                    outerRadius={50}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {donutData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className={styles.donutLegend}>
-              <Tooltip content={`Below target range`} relationship="description">
-                <div className={styles.legendItem}>
-                  <div className={styles.legendColor} style={{ backgroundColor: GLUCOSE_RANGE_COLORS.low }} />
-                  <Text className={styles.legendText}>Below</Text>
-                  <Text className={styles.legendValue}>{percentBelow.toFixed(1)}%</Text>
-                </div>
-              </Tooltip>
-              <Tooltip content={`Within target range`} relationship="description">
-                <div className={styles.legendItem}>
-                  <div className={styles.legendColor} style={{ backgroundColor: GLUCOSE_RANGE_COLORS.inRange }} />
-                  <Text className={styles.legendText}>In Range</Text>
-                  <Text className={styles.legendValue}>{percentInRange.toFixed(1)}%</Text>
-                </div>
-              </Tooltip>
-              <Tooltip content={`Above target range`} relationship="description">
-                <div className={styles.legendItem}>
-                  <div className={styles.legendColor} style={{ backgroundColor: GLUCOSE_RANGE_COLORS.high }} />
-                  <Text className={styles.legendText}>Above</Text>
-                  <Text className={styles.legendValue}>{percentAbove.toFixed(1)}%</Text>
-                </div>
-              </Tooltip>
-            </div>
-          </div>
-        </div>
-
-        {/* Quartiles Visualization */}
+        {/* Quartiles on Gaussian Curve */}
         {quartiles && (
           <div className={styles.statSection}>
             <Text className={styles.sectionTitle}>Quartiles</Text>
-            <div className={styles.quartileContainer}>
-              <div className={styles.quartileLine}>
-                {/* 25-75% range */}
-                <div 
-                  className={styles.quartileRange}
-                  style={{
-                    left: `${getQuartilePosition(quartiles.q25)}%`,
-                    width: `${getQuartilePosition(quartiles.q75) - getQuartilePosition(quartiles.q25)}%`,
-                  }}
-                />
-                {/* Median marker */}
-                <Tooltip content={`Median: ${displayGlucoseValue(quartiles.q50, glucoseUnit)} ${unitLabel}`} relationship="description">
-                  <div 
-                    className={styles.quartileMedian}
-                    style={{ left: `calc(${getQuartilePosition(quartiles.q50)}% - 2px)` }}
-                  />
-                </Tooltip>
-              </div>
-              <div className={styles.quartileLabels}>
-                <Text>Min: {displayGlucoseValue(quartiles.min, glucoseUnit)}</Text>
-                <Text>Max: {displayGlucoseValue(quartiles.max, glucoseUnit)}</Text>
-              </div>
-              <div className={styles.quartileValues}>
-                <Tooltip content="25th percentile" relationship="description">
-                  <div className={styles.quartileValue}>
-                    <Text className={styles.quartileLabel}>Q1 (25%)</Text>
-                    <Text className={styles.quartileNumber}>{displayGlucoseValue(quartiles.q25, glucoseUnit)}</Text>
-                  </div>
-                </Tooltip>
-                <Tooltip content="50th percentile (Median)" relationship="description">
-                  <div className={styles.quartileValue}>
-                    <Text className={styles.quartileLabel}>Median</Text>
-                    <Text className={styles.quartileNumber} style={{ color: tokens.colorBrandForeground1 }}>
-                      {displayGlucoseValue(quartiles.q50, glucoseUnit)}
-                    </Text>
-                  </div>
-                </Tooltip>
-                <Tooltip content="75th percentile" relationship="description">
-                  <div className={styles.quartileValue}>
-                    <Text className={styles.quartileLabel}>Q3 (75%)</Text>
-                    <Text className={styles.quartileNumber}>{displayGlucoseValue(quartiles.q75, glucoseUnit)}</Text>
-                  </div>
-                </Tooltip>
-              </div>
+            <div className={styles.gaussianContainer}>
+              <GaussianCurve
+                q25={quartiles.q25}
+                q50={quartiles.q50}
+                q75={quartiles.q75}
+                glucoseUnit={glucoseUnit}
+              />
             </div>
           </div>
         )}
 
-        {/* High/Low Incidents */}
+        {/* High/Low Incidents - Circular */}
         <div className={styles.statSection}>
-          <Text className={styles.sectionTitle}>High/Low Incidents</Text>
-          <div className={styles.incidentsContainer}>
-            <Tooltip content="Number of transitions into high glucose zone" relationship="description">
-              <div className={styles.incidentItem} style={{ backgroundColor: `${GLUCOSE_RANGE_COLORS.high}20` }}>
-                <ArrowUpRegular className={styles.incidentIcon} style={{ color: GLUCOSE_RANGE_COLORS.high }} />
-                <Text className={styles.incidentCount} style={{ color: GLUCOSE_RANGE_COLORS.high }}>
-                  {incidents.highCount + incidents.veryHighCount}
-                </Text>
-                <Text className={styles.incidentLabel}>Highs</Text>
+          <Text className={styles.sectionTitle}>Highs/Lows</Text>
+          <Tooltip content={`${totalHighs} high incidents, ${totalLows} low incidents`} relationship="description">
+            <div className={styles.sectionContent}>
+              <div className={styles.circularIndicator}>
+                <HighLowRing highs={totalHighs} lows={totalLows} />
+                <div className={styles.circularValues}>
+                  <Text className={styles.highValue}>{totalHighs}</Text>
+                  <div className={styles.dividerLine} />
+                  <Text className={styles.lowValue}>{totalLows}</Text>
+                </div>
               </div>
-            </Tooltip>
-            <Tooltip content="Number of transitions into low glucose zone" relationship="description">
-              <div className={styles.incidentItem} style={{ backgroundColor: `${GLUCOSE_RANGE_COLORS.low}20` }}>
-                <ArrowDownRegular className={styles.incidentIcon} style={{ color: GLUCOSE_RANGE_COLORS.low }} />
-                <Text className={styles.incidentCount} style={{ color: GLUCOSE_RANGE_COLORS.low }}>
-                  {incidents.lowCount + incidents.veryLowCount}
-                </Text>
-                <Text className={styles.incidentLabel}>Lows</Text>
-              </div>
-            </Tooltip>
-          </div>
+            </div>
+          </Tooltip>
         </div>
 
         {/* Flux Grade */}
         {flux && (
           <div className={styles.statSection}>
-            <Text className={styles.sectionTitle}>Flux (Stability Grade)</Text>
+            <Text className={styles.sectionTitle}>Flux (Stability)</Text>
             <div className={styles.fluxContainer}>
-              <Tooltip content={`Grade based on coefficient of variation: ${flux.score.toFixed(1)}%`} relationship="description">
+              <Tooltip content={`Grade based on CV: ${flux.score.toFixed(1)}%`} relationship="description">
                 <div 
                   className={styles.fluxGrade}
                   style={{ backgroundColor: getFluxGradeColor(flux.grade) }}
@@ -484,20 +455,51 @@ export function SugarmateStatsCard({
         {/* Unicorns */}
         <div className={styles.statSection}>
           <Text className={styles.sectionTitle}>🦄 Unicorns</Text>
-          <div className={styles.unicornContainer}>
-            <SparkleRegular style={{ fontSize: '32px', color: tokens.colorBrandForeground1 }} />
-            <div>
-              <Text className={styles.unicornCount}>{unicornCount}</Text>
-              <Text className={styles.unicornLabel}> perfect readings</Text>
+          <Tooltip content={`Perfect readings at 5.0 or 5.6 ${unitLabel}`} relationship="description">
+            <div className={styles.unicornContainer}>
+              <SparkleRegular style={{ fontSize: '24px', color: tokens.colorBrandForeground1 }} />
+              <div style={{ textAlign: 'center' }}>
+                <Text className={styles.unicornCount}>{unicornCount}</Text>
+                <Text className={styles.unicornLabel}> perfect</Text>
+              </div>
             </div>
-          </div>
-          <Text style={{ fontSize: tokens.fontSizeBase200, color: tokens.colorNeutralForeground3, marginTop: '8px' }}>
-            Readings at exactly 5.0 or 5.6 {unitLabel}
-          </Text>
+          </Tooltip>
+        </div>
+
+        {/* Wake Up Average */}
+        <div className={styles.statSection}>
+          <Text className={styles.sectionTitle}>☀ Wake Up Avg</Text>
+          <Tooltip content="Average glucose value at wake up time (6-9 AM)" relationship="description">
+            <div className={styles.timeAverageContainer}>
+              <WeatherSunnyRegular className={styles.timeAverageIcon} style={{ color: '#FFB300' }} />
+              <div style={{ textAlign: 'center' }}>
+                <Text className={styles.timeAverageValue}>
+                  {wakeupAverage !== null ? displayGlucoseValue(wakeupAverage, glucoseUnit) : '-'}
+                </Text>
+                <Text className={styles.timeAverageUnit}>{unitLabel}</Text>
+              </div>
+            </div>
+          </Tooltip>
+        </div>
+
+        {/* Bedtime Average */}
+        <div className={styles.statSection}>
+          <Text className={styles.sectionTitle}>☾ Bedtime Avg</Text>
+          <Tooltip content="Average glucose value at bedtime (9 PM - 12 AM)" relationship="description">
+            <div className={styles.timeAverageContainer}>
+              <WeatherMoonRegular className={styles.timeAverageIcon} style={{ color: '#5C6BC0' }} />
+              <div style={{ textAlign: 'center' }}>
+                <Text className={styles.timeAverageValue}>
+                  {bedtimeAverage !== null ? displayGlucoseValue(bedtimeAverage, glucoseUnit) : '-'}
+                </Text>
+                <Text className={styles.timeAverageUnit}>{unitLabel}</Text>
+              </div>
+            </div>
+          </Tooltip>
         </div>
       </div>
 
-      {/* Summary Row with Average, Median, SD */}
+      {/* Summary Row with Average, Median, StDev */}
       <div className={styles.summaryRow}>
         <Tooltip content="Average of all glucose values" relationship="description">
           <div className={styles.summaryItem}>
@@ -520,7 +522,7 @@ export function SugarmateStatsCard({
             <Text className={styles.summaryValue}>
               {standardDeviation !== null ? displayGlucoseValue(standardDeviation, glucoseUnit) : '-'}
             </Text>
-            <Text className={styles.summaryLabel}>SD {unitLabel}</Text>
+            <Text className={styles.summaryLabel}>StDev {unitLabel}</Text>
           </div>
         </Tooltip>
       </div>

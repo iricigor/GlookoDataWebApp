@@ -40,6 +40,8 @@ import {
   countHighLowIncidents,
   countUnicorns,
   calculateFlux,
+  calculateWakeupAverage,
+  calculateBedtimeAverage,
 } from './glucoseRangeUtils';
 import { MMOL_TO_MGDL } from './glucoseUnitUtils';
 import type { GlucoseReading, GlucoseThresholds } from '../../types';
@@ -1304,6 +1306,72 @@ describe('glucoseRangeUtils', () => {
       
       expect(result).not.toBeNull();
       expect(typeof result!.score).toBe('number');
+    });
+  });
+
+  describe('calculateWakeupAverage', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateWakeupAverage([])).toBeNull();
+    });
+
+    it('should return null when no readings are in wakeup time range', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 7.0 }, // 10 AM - outside range
+        { timestamp: new Date('2024-01-15T14:00:00'), value: 8.0 }, // 2 PM - outside range
+      ];
+      expect(calculateWakeupAverage(readings)).toBeNull();
+    });
+
+    it('should calculate average for readings between 6-9 AM', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T06:00:00'), value: 6.0 }, // 6 AM
+        { timestamp: new Date('2024-01-15T07:30:00'), value: 7.0 }, // 7:30 AM
+        { timestamp: new Date('2024-01-15T08:45:00'), value: 8.0 }, // 8:45 AM
+        { timestamp: new Date('2024-01-15T09:00:00'), value: 9.0 }, // 9 AM - outside range (9 AM is >= 9)
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 10.0 }, // 10 AM - outside range
+      ];
+      const result = calculateWakeupAverage(readings);
+      expect(result).toBe(7.0); // (6 + 7 + 8) / 3
+    });
+
+    it('should handle single reading in wakeup range', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T07:00:00'), value: 5.5 },
+      ];
+      expect(calculateWakeupAverage(readings)).toBe(5.5);
+    });
+  });
+
+  describe('calculateBedtimeAverage', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateBedtimeAverage([])).toBeNull();
+    });
+
+    it('should return null when no readings are in bedtime range', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 7.0 }, // 10 AM - outside range
+        { timestamp: new Date('2024-01-15T14:00:00'), value: 8.0 }, // 2 PM - outside range
+        { timestamp: new Date('2024-01-15T20:00:00'), value: 9.0 }, // 8 PM - outside range
+      ];
+      expect(calculateBedtimeAverage(readings)).toBeNull();
+    });
+
+    it('should calculate average for readings between 9 PM - midnight', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T20:00:00'), value: 6.0 }, // 8 PM - outside range
+        { timestamp: new Date('2024-01-15T21:00:00'), value: 7.0 }, // 9 PM
+        { timestamp: new Date('2024-01-15T22:30:00'), value: 8.0 }, // 10:30 PM
+        { timestamp: new Date('2024-01-15T23:45:00'), value: 9.0 }, // 11:45 PM
+      ];
+      const result = calculateBedtimeAverage(readings);
+      expect(result).toBe(8.0); // (7 + 8 + 9) / 3
+    });
+
+    it('should handle single reading in bedtime range', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T22:00:00'), value: 6.5 },
+      ];
+      expect(calculateBedtimeAverage(readings)).toBe(6.5);
     });
   });
 });

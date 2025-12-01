@@ -1027,3 +1027,45 @@ export function calculateFlux(readings: GlucoseReading[]): FluxResult | null {
   
   return { grade, score: cv, description };
 }
+
+/**
+ * Calculate average glucose at wake up time (6-9 AM)
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns Average glucose at wake up time, or null if no readings
+ */
+export function calculateWakeupAverage(readings: GlucoseReading[]): number | null {
+  if (readings.length === 0) return null;
+  
+  // Filter readings between 6 AM and 9 AM
+  const wakeupReadings = readings.filter(r => {
+    const hour = r.timestamp.getHours();
+    return hour >= 6 && hour < 9;
+  });
+  
+  if (wakeupReadings.length === 0) return null;
+  
+  const sum = wakeupReadings.reduce((acc, r) => acc + r.value, 0);
+  return sum / wakeupReadings.length;
+}
+
+/**
+ * Calculate average glucose at bedtime (9 PM - 12 AM)
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns Average glucose at bedtime, or null if no readings
+ */
+export function calculateBedtimeAverage(readings: GlucoseReading[]): number | null {
+  if (readings.length === 0) return null;
+  
+  // Filter readings between 9 PM (21:00) and midnight (24:00)
+  const bedtimeReadings = readings.filter(r => {
+    const hour = r.timestamp.getHours();
+    return hour >= 21 && hour <= 23;
+  });
+  
+  if (bedtimeReadings.length === 0) return null;
+  
+  const sum = bedtimeReadings.reduce((acc, r) => acc + r.value, 0);
+  return sum / bedtimeReadings.length;
+}
