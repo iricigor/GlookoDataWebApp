@@ -34,6 +34,14 @@ import {
   calculateLBGI,
   calculateHBGI,
   calculateJIndex,
+  calculateMedianGlucose,
+  calculateStandardDeviation,
+  calculateQuartiles,
+  countHighLowIncidents,
+  countUnicorns,
+  calculateFlux,
+  calculateWakeupAverage,
+  calculateBedtimeAverage,
 } from './glucoseRangeUtils';
 import { MMOL_TO_MGDL } from './glucoseUnitUtils';
 import type { GlucoseReading, GlucoseThresholds } from '../../types';
@@ -1045,6 +1053,325 @@ describe('glucoseRangeUtils', () => {
       // Mean = 5.5 mmol/L = ~99 mg/dL, SD = 0
       // J-Index = 0.001 × 99² = ~9.8
       expect(jIndex!).toBeCloseTo(9.8, 0);
+    });
+  });
+
+  describe('calculateMedianGlucose', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateMedianGlucose([])).toBeNull();
+    });
+
+    it('should return the single value for one reading', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+      ];
+      expect(calculateMedianGlucose(readings)).toBe(5.5);
+    });
+
+    it('should calculate median for odd number of readings', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 3.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 8.0 },
+      ];
+      expect(calculateMedianGlucose(readings)).toBe(5.0);
+    });
+
+    it('should calculate median for even number of readings', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 4.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 8.0 },
+        { timestamp: new Date('2024-01-15T13:00:00'), value: 10.0 },
+      ];
+      expect(calculateMedianGlucose(readings)).toBe(7.0); // (6 + 8) / 2
+    });
+
+    it('should sort values before calculating median', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 8.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 3.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.0 },
+      ];
+      expect(calculateMedianGlucose(readings)).toBe(5.0);
+    });
+  });
+
+  describe('calculateStandardDeviation', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateStandardDeviation([])).toBeNull();
+    });
+
+    it('should return null for single reading', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+      ];
+      expect(calculateStandardDeviation(readings)).toBeNull();
+    });
+
+    it('should return 0 for identical readings', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.5 },
+      ];
+      expect(calculateStandardDeviation(readings)).toBe(0);
+    });
+
+    it('should calculate standard deviation correctly', () => {
+      // Values: 5, 6, 7 => Mean = 6, Variance = (1+0+1)/2 = 1, SD = 1
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 7.0 },
+      ];
+      expect(calculateStandardDeviation(readings)).toBe(1.0);
+    });
+  });
+
+  describe('calculateQuartiles', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateQuartiles([])).toBeNull();
+    });
+
+    it('should calculate quartiles for multiple readings', () => {
+      // Values sorted: 2, 4, 6, 8, 10
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 2.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 10.0 },
+        { timestamp: new Date('2024-01-15T13:00:00'), value: 8.0 },
+        { timestamp: new Date('2024-01-15T14:00:00'), value: 4.0 },
+      ];
+      const result = calculateQuartiles(readings);
+      
+      expect(result).not.toBeNull();
+      expect(result!.min).toBe(2.0);
+      expect(result!.max).toBe(10.0);
+      expect(result!.q50).toBe(6.0); // Median
+    });
+
+    it('should include min and max values', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 3.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 7.0 },
+      ];
+      const result = calculateQuartiles(readings);
+      
+      expect(result).not.toBeNull();
+      expect(result!.min).toBe(3.0);
+      expect(result!.max).toBe(7.0);
+    });
+  });
+
+  describe('countHighLowIncidents', () => {
+    it('should return zeros for empty readings', () => {
+      const result = countHighLowIncidents([], standardThresholds);
+      expect(result.highCount).toBe(0);
+      expect(result.lowCount).toBe(0);
+      expect(result.veryHighCount).toBe(0);
+      expect(result.veryLowCount).toBe(0);
+    });
+
+    it('should count transitions to high zone', () => {
+      // Starts in range, goes high
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },  // inRange
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 11.0 }, // high
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.5 },  // inRange
+        { timestamp: new Date('2024-01-15T13:00:00'), value: 12.0 }, // high
+      ];
+      const result = countHighLowIncidents(readings, standardThresholds);
+      expect(result.highCount).toBe(2); // Two transitions to high
+    });
+
+    it('should count transitions to low zone', () => {
+      // Starts in range, goes low
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },  // inRange
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 3.5 },  // low
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.5 },  // inRange
+        { timestamp: new Date('2024-01-15T13:00:00'), value: 3.2 },  // low
+      ];
+      const result = countHighLowIncidents(readings, standardThresholds);
+      expect(result.lowCount).toBe(2); // Two transitions to low
+    });
+
+    it('should count very high and very low incidents', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },  // inRange
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 15.0 }, // veryHigh
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.5 },  // inRange
+        { timestamp: new Date('2024-01-15T13:00:00'), value: 2.5 },  // veryLow
+      ];
+      const result = countHighLowIncidents(readings, standardThresholds);
+      expect(result.veryHighCount).toBe(1);
+      expect(result.veryLowCount).toBe(1);
+    });
+  });
+
+  describe('countUnicorns', () => {
+    it('should return 0 for empty readings', () => {
+      expect(countUnicorns([])).toBe(0);
+    });
+
+    it('should count readings at 5.0 mmol/L', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.0 },
+      ];
+      expect(countUnicorns(readings)).toBe(2);
+    });
+
+    it('should count readings at 5.6 mmol/L (100 mg/dL)', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.6 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.6 },
+      ];
+      expect(countUnicorns(readings)).toBe(2);
+    });
+
+    it('should return 0 when no unicorns present', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 4.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 8.0 },
+      ];
+      expect(countUnicorns(readings)).toBe(0);
+    });
+  });
+
+  describe('calculateFlux', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateFlux([])).toBeNull();
+    });
+
+    it('should return null for single reading', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+      ];
+      expect(calculateFlux(readings)).toBeNull();
+    });
+
+    it('should return A+ grade for very stable readings (CV ≤ 20%)', () => {
+      // Very stable readings with minimal variation
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T13:00:00'), value: 5.5 },
+        { timestamp: new Date('2024-01-15T14:00:00'), value: 5.6 },
+      ];
+      const result = calculateFlux(readings);
+      
+      expect(result).not.toBeNull();
+      expect(result!.grade).toBe('A+');
+    });
+
+    it('should return F grade for very variable readings (CV > 50%)', () => {
+      // Highly variable readings
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 2.5 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 10.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 3.0 },
+        { timestamp: new Date('2024-01-15T13:00:00'), value: 15.0 },
+        { timestamp: new Date('2024-01-15T14:00:00'), value: 4.0 },
+      ];
+      const result = calculateFlux(readings);
+      
+      expect(result).not.toBeNull();
+      expect(result!.grade).toBe('F');
+    });
+
+    it('should include description in result', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+      ];
+      const result = calculateFlux(readings);
+      
+      expect(result).not.toBeNull();
+      expect(result!.description).toBeTruthy();
+    });
+
+    it('should include CV score in result', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.0 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+      ];
+      const result = calculateFlux(readings);
+      
+      expect(result).not.toBeNull();
+      expect(typeof result!.score).toBe('number');
+    });
+  });
+
+  describe('calculateWakeupAverage', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateWakeupAverage([])).toBeNull();
+    });
+
+    it('should return null when no readings are in wakeup time range', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 7.0 }, // 10 AM - outside range
+        { timestamp: new Date('2024-01-15T14:00:00'), value: 8.0 }, // 2 PM - outside range
+      ];
+      expect(calculateWakeupAverage(readings)).toBeNull();
+    });
+
+    it('should calculate average for readings between 6-9 AM', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T06:00:00'), value: 6.0 }, // 6 AM
+        { timestamp: new Date('2024-01-15T07:30:00'), value: 7.0 }, // 7:30 AM
+        { timestamp: new Date('2024-01-15T08:45:00'), value: 8.0 }, // 8:45 AM
+        { timestamp: new Date('2024-01-15T09:00:00'), value: 9.0 }, // 9 AM - outside range (9 AM is >= 9)
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 10.0 }, // 10 AM - outside range
+      ];
+      const result = calculateWakeupAverage(readings);
+      expect(result).toBe(7.0); // (6 + 7 + 8) / 3
+    });
+
+    it('should handle single reading in wakeup range', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T07:00:00'), value: 5.5 },
+      ];
+      expect(calculateWakeupAverage(readings)).toBe(5.5);
+    });
+  });
+
+  describe('calculateBedtimeAverage', () => {
+    it('should return null for empty readings', () => {
+      expect(calculateBedtimeAverage([])).toBeNull();
+    });
+
+    it('should return null when no readings are in bedtime range', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 7.0 }, // 10 AM - outside range
+        { timestamp: new Date('2024-01-15T14:00:00'), value: 8.0 }, // 2 PM - outside range
+        { timestamp: new Date('2024-01-15T20:00:00'), value: 9.0 }, // 8 PM - outside range
+      ];
+      expect(calculateBedtimeAverage(readings)).toBeNull();
+    });
+
+    it('should calculate average for readings between 9 PM - midnight', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T20:00:00'), value: 6.0 }, // 8 PM - outside range
+        { timestamp: new Date('2024-01-15T21:00:00'), value: 7.0 }, // 9 PM
+        { timestamp: new Date('2024-01-15T22:30:00'), value: 8.0 }, // 10:30 PM
+        { timestamp: new Date('2024-01-15T23:45:00'), value: 9.0 }, // 11:45 PM
+      ];
+      const result = calculateBedtimeAverage(readings);
+      expect(result).toBe(8.0); // (7 + 8 + 9) / 3
+    });
+
+    it('should handle single reading in bedtime range', () => {
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T22:00:00'), value: 6.5 },
+      ];
+      expect(calculateBedtimeAverage(readings)).toBe(6.5);
     });
   });
 });
