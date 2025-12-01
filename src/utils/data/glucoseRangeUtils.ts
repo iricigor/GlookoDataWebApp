@@ -56,7 +56,7 @@ export const UNICORN_TOLERANCE_MMOL = 0.05;
 export const UNICORN_TOLERANCE_100_MGDL = 0.5 / MMOL_TO_MGDL;
 
 /**
- * Unicorn target value: 100 mg/dL in mmol/L (100 / 18.0182 ≈ 5.5506)
+ * Unicorn target value: 100 mg/dL in mmol/L (100 / 18.018 ≈ 5.55)
  */
 export const UNICORN_100_MGDL_IN_MMOL = 100 / MMOL_TO_MGDL;
 
