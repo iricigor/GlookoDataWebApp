@@ -41,6 +41,11 @@ export const useBGOverviewStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground2,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     boxShadow: tokens.shadow4,
+    // Reduce padding and gap on mobile to save vertical space
+    '@media (max-width: 767px)': {
+      ...shorthands.padding('12px'),
+      ...shorthands.gap('8px'),
+    },
   },
   controlGrid: {
     display: 'grid',
@@ -49,6 +54,10 @@ export const useBGOverviewStyles = makeStyles({
     // On wider screens, show first two filters in first row, last two in second row
     '@media (min-width: 768px)': {
       gridTemplateColumns: '1fr 1fr',
+    },
+    // Reduce gap between filter rows on mobile
+    '@media (max-width: 767px)': {
+      ...shorthands.gap('6px'),
     },
   },
   controlRow: {
