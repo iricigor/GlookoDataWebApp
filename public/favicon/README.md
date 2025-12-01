@@ -6,34 +6,34 @@ This directory contains the website favicon (browser tab icon) for GlookoDataWeb
 
 **`favicon.svg`** - The active favicon used by the application
 
-- **Design**: Blood Drop with Pulse on Dark Circle (v2 Option 1)
+- **Design**: Full-size Blood Drop with Shadow (v2 Option 1)
 - **Theme**: Blood glucose monitoring with modern aesthetics
-- **Description**: Red blood drop with ECG pulse line on a black circular background with gray border
-- **Rationale**: Modern, professional design with clear diabetes association. The dark circular background provides excellent contrast and visibility at small sizes. The 3D blood drop with glossy highlights gives a polished app-like appearance, while the ECG line represents health monitoring.
+- **Description**: Full-size red blood drop with subtle shadow and white ECG pulse line overlay
+- **Rationale**: Clean, modern design with clear diabetes association. The full-size blood drop maximizes visibility at small sizes, while the drop shadow adds depth without a heavy background. The ECG line represents health monitoring.
 
 ## Version 2 Options (Current)
 
-Three new icon designs based on the modern circular dark background style:
+Three icon designs featuring full-size blood drop with shadow (no background):
 
-### v2 Option 1: Classic Dark Circle (SELECTED)
+### v2 Option 1: Classic with Shadow (SELECTED)
 **File**: `favicon-v2-option1.svg` → `favicon.svg`
-- **Theme**: Modern blood glucose monitoring
-- **Design**: 3D red blood drop with ECG pulse line on black circular background
-- **Pros**: Professional appearance, excellent contrast, clear at small sizes, modern app-like aesthetic
-- **Cons**: Darker overall appearance
+- **Theme**: Clean blood glucose monitoring
+- **Design**: Full-size 3D red blood drop with dark shadow and ECG pulse line
+- **Pros**: Clean appearance, works on any background, excellent visibility
+- **Cons**: Shadow may blend on very dark backgrounds
 
 ### v2 Option 2: Vibrant Red
 **File**: `favicon-v2-option2.svg`
 - **Theme**: Bold blood glucose monitoring  
-- **Design**: Brighter red blood drop with wider ECG amplitude on dark circle
+- **Design**: Brighter red blood drop with red-tinted shadow and wider ECG amplitude
 - **Pros**: More vibrant colors, eye-catching, wider pulse pattern more visible
 - **Cons**: Brighter red may be less professional for some contexts
 
 ### v2 Option 3: Deep Crimson
 **File**: `favicon-v2-option3.svg`
 - **Theme**: Elegant blood glucose monitoring
-- **Design**: Deep crimson blood drop with heart-like ECG pattern on metallic-bordered dark circle
-- **Pros**: Most elegant/refined appearance, subtle metallic border effect
+- **Design**: Deep crimson blood drop with soft diffused shadow and heart-like ECG pattern
+- **Pros**: Most elegant/refined appearance, softer shadow effect
 - **Cons**: Heart-like ECG pattern may suggest cardiac rather than glucose monitoring
 
 ## Legacy Options (Version 1)
@@ -45,7 +45,7 @@ The original favicon designs are preserved for reference:
 - **Theme**: Blood glucose monitoring (simple style)
 - **Design**: Red blood drop with white heartbeat/pulse line on transparent background
 - **Pros**: Simple, recognizable, clear diabetes association
-- **Cons**: Less modern appearance, no circular container
+- **Cons**: Less modern appearance, no shadow effect
 
 ### Option 2: Glucose Meter with AI
 **File**: `favicon-option2.svg`
@@ -65,7 +65,7 @@ The original favicon designs are preserved for reference:
 
 - **Format**: SVG (Scalable Vector Graphics)
 - **Size**: Optimized for display at 16×16, 32×32, and 64×64 pixels
-- **Color Scheme**: Red blood drop with white ECG line on black circular background
+- **Color Scheme**: Red blood drop with white ECG line and subtle drop shadow
 - **Browser Support**: All modern browsers support SVG favicons
 
 ## Changing the Icon

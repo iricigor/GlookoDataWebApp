@@ -1,47 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
   <defs>
-    <!-- Blood drop gradient - deep crimson -->
-    <linearGradient id="bloodGradientV2C" x1="30%" y1="0%" x2="70%" y2="100%">
-      <stop offset="0%" style="stop-color:#dc143c;stop-opacity:1" />
-      <stop offset="40%" style="stop-color:#b91c3c;stop-opacity:1" />
+    <!-- Blood drop gradient - deep crimson with rich tones -->
+    <linearGradient id="bloodGradientV3C" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" style="stop-color:#ef476f;stop-opacity:1" />
+      <stop offset="40%" style="stop-color:#c41e3a;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#6b0f1a;stop-opacity:1" />
     </linearGradient>
-    <!-- Metallic border gradient -->
-    <linearGradient id="borderGradientC" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#606060;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#383838;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#202020;stop-opacity:1" />
-    </linearGradient>
-    <!-- Inner glow effect -->
-    <radialGradient id="innerGlowC" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
-    </radialGradient>
+    <!-- Drop shadow filter - soft diffused shadow -->
+    <filter id="shadowC" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+      <feOffset dx="4" dy="6" result="offsetBlur"/>
+      <feFlood flood-color="#4a0010" flood-opacity="0.35"/>
+      <feComposite in2="offsetBlur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   
-  <!-- Outer circle with metallic border -->
-  <circle cx="64" cy="64" r="62" fill="url(#borderGradientC)"/>
-  
-  <!-- Inner dark circle with subtle glow -->
-  <circle cx="64" cy="64" r="56" fill="url(#innerGlowC)"/>
-  
-  <!-- Blood drop shape - slightly larger -->
-  <path d="M 64 20 C 64 20 36 52 36 76 C 36 96 48 108 64 108 C 80 108 92 96 92 76 C 92 52 64 20 64 20 Z" 
-        fill="url(#bloodGradientV2C)" />
+  <!-- Blood drop shape - full size with soft shadow -->
+  <path d="M 64 8 C 64 8 24 52 24 82 C 24 104 42 120 64 120 C 86 120 104 104 104 82 C 104 52 64 8 64 8 Z" 
+        fill="url(#bloodGradientV3C)" 
+        filter="url(#shadowC)"/>
   
   <!-- Blood drop main highlight -->
-  <path d="M 64 26 C 64 26 46 50 46 70 C 46 70 56 50 64 50 L 64 26 Z" 
-        fill="#ffffff" opacity="0.3"/>
+  <path d="M 64 16 C 64 16 36 52 36 78 Q 50 46 64 46 L 64 16 Z" 
+        fill="#ffffff" opacity="0.35"/>
   
   <!-- Top shine -->
-  <ellipse cx="52" cy="44" rx="7" ry="11" fill="#ffffff" opacity="0.2"/>
+  <ellipse cx="46" cy="38" rx="9" ry="15" fill="#ffffff" opacity="0.3"/>
   
   <!-- Bottom reflection arc -->
-  <path d="M 48 96 Q 64 105, 80 96" 
-        stroke="#ff5555" stroke-width="2" fill="none" opacity="0.35"/>
+  <path d="M 42 108 Q 64 118, 86 108" 
+        stroke="#ff8888" stroke-width="2" fill="none" opacity="0.4"/>
   
   <!-- ECG/Pulse line with heart-like pattern -->
-  <polyline points="12,64 28,64 38,64 44,56 50,72 56,48 62,76 68,48 74,72 80,56 86,64 100,64 116,64" 
-            stroke="#ffffff" stroke-width="2.5" fill="none" 
+  <polyline points="6,70 22,70 34,70 42,60 50,80 58,46 66,84 74,46 82,80 90,60 98,70 112,70 122,70" 
+            stroke="#ffffff" stroke-width="3" fill="none" 
             stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
 </svg>
