@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>592 Extend BG Overview page with sticky filters, period section, and time-of-day section</summary>
+
+[#592](../../pull/592) Extend BG Overview page with sticky filters, period section, and time-of-day section
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>590 Fix ProUsers backend to align with deployment scripts</summary>
 
 [#590](../../pull/590) Fix ProUsers backend to align with deployment scripts
