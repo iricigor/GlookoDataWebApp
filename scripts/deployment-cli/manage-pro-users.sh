@@ -198,9 +198,16 @@ check_python3() {
 
 # URL encode a string (for use as RowKey)
 # Uses Python 3 for reliable URL encoding
+# Passes value as argument to prevent code injection
 url_encode() {
     local string="$1"
-    python3 -c "import urllib.parse; print(urllib.parse.quote('$string', safe=''))"
+    python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=''))" "$string"
+}
+
+# Normalize email to lowercase for case-insensitive matching
+normalize_email() {
+    local email="$1"
+    echo "$email" | tr '[:upper:]' '[:lower:]'
 }
 
 # Get current timestamp in ISO 8601 format
@@ -269,13 +276,16 @@ list_pro_users() {
 # Add a new Pro user
 add_pro_user() {
     local email="$1"
+    # Normalize email to lowercase for case-insensitive matching
+    local normalized_email
+    normalized_email=$(normalize_email "$email")
     local row_key
-    row_key=$(url_encode "$email")
+    row_key=$(url_encode "$normalized_email")
     local timestamp
     timestamp=$(get_timestamp)
     
     print_section "Adding Pro User"
-    print_info "Email: ${email}"
+    print_info "Email: ${normalized_email}"
     
     # Check if user already exists
     local existing
@@ -288,7 +298,7 @@ add_pro_user() {
         -o json 2>/dev/null || echo "")
     
     if [ -n "$existing" ]; then
-        print_warning "Pro user '${email}' already exists"
+        print_warning "Pro user '${normalized_email}' already exists"
         return 0
     fi
     
@@ -297,20 +307,23 @@ add_pro_user() {
         --table-name "${TABLE_NAME}" \
         --account-name "${STORAGE_ACCOUNT_NAME}" \
         --auth-mode login \
-        --entity "PartitionKey=${PARTITION_KEY}" "RowKey=${row_key}" "Email=${email}" "CreatedAt=${timestamp}" \
+        --entity "PartitionKey=${PARTITION_KEY}" "RowKey=${row_key}" "Email=${normalized_email}" "CreatedAt=${timestamp}" \
         --output none
     
-    print_success "Pro user '${email}' added successfully"
+    print_success "Pro user '${normalized_email}' added successfully"
 }
 
 # Remove a Pro user
 remove_pro_user() {
     local email="$1"
+    # Normalize email to lowercase for case-insensitive matching
+    local normalized_email
+    normalized_email=$(normalize_email "$email")
     local row_key
-    row_key=$(url_encode "$email")
+    row_key=$(url_encode "$normalized_email")
     
     print_section "Removing Pro User"
-    print_info "Email: ${email}"
+    print_info "Email: ${normalized_email}"
     
     # Check if user exists
     local existing
@@ -323,7 +336,7 @@ remove_pro_user() {
         -o json 2>/dev/null || echo "")
     
     if [ -z "$existing" ]; then
-        print_warning "Pro user '${email}' does not exist"
+        print_warning "Pro user '${normalized_email}' does not exist"
         return 0
     fi
     
@@ -336,17 +349,20 @@ remove_pro_user() {
         --row-key "${row_key}" \
         --output none
     
-    print_success "Pro user '${email}' removed successfully"
+    print_success "Pro user '${normalized_email}' removed successfully"
 }
 
 # Check if an email is a Pro user
 check_pro_user() {
     local email="$1"
+    # Normalize email to lowercase for case-insensitive matching
+    local normalized_email
+    normalized_email=$(normalize_email "$email")
     local row_key
-    row_key=$(url_encode "$email")
+    row_key=$(url_encode "$normalized_email")
     
     print_section "Checking Pro User Status"
-    print_info "Email: ${email}"
+    print_info "Email: ${normalized_email}"
     
     # Check if user exists
     local existing
@@ -361,10 +377,10 @@ check_pro_user() {
     if [ -n "$existing" ]; then
         local created_at
         created_at=$(echo "$existing" | jq -r '.CreatedAt // "unknown"')
-        print_success "'${email}' is a Pro user (added: ${created_at})"
+        print_success "'${normalized_email}' is a Pro user (added: ${created_at})"
         return 0
     else
-        print_info "'${email}' is NOT a Pro user"
+        print_info "'${normalized_email}' is NOT a Pro user"
         return 1
     fi
 }

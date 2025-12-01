@@ -436,7 +436,7 @@ Manages Pro users in the ProUsers Azure Storage Table. Users are identified by t
 - Idempotent - safe to run multiple times
 
 **Commands:**
-```
+```text
   list                    List all Pro users
   add EMAIL               Add a new Pro user by email
   remove EMAIL            Remove a Pro user by email
@@ -444,7 +444,7 @@ Manages Pro users in the ProUsers Azure Storage Table. Users are identified by t
 ```
 
 **Options:**
-```
+```text
   -h, --help              Show help message
   -a, --storage-account   Storage account name
   -g, --resource-group    Resource group name

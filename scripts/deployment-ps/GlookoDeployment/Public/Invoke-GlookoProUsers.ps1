@@ -140,6 +140,9 @@ function Invoke-GlookoProUsers {
                 if ($Email -notmatch '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$') {
                     throw "Invalid email format: $Email"
                 }
+                
+                # Normalize email to lowercase for case-insensitive matching
+                $Email = $Email.ToLowerInvariant()
             }
 
             # Get cloud table reference for entity operations
@@ -212,7 +215,8 @@ function Invoke-GlookoProUsers {
                     # Create new entity
                     $entity = [Microsoft.Azure.Cosmos.Table.DynamicTableEntity]::new($PartitionKey, $rowKey)
                     $entity.Properties.Add("Email", [Microsoft.Azure.Cosmos.Table.EntityProperty]::GeneratePropertyForString($Email))
-                    $entity.Properties.Add("CreatedAt", [Microsoft.Azure.Cosmos.Table.EntityProperty]::GeneratePropertyForString((Get-Date -Format "o")))
+                    # Use UTC timestamp for consistency with bash script
+                    $entity.Properties.Add("CreatedAt", [Microsoft.Azure.Cosmos.Table.EntityProperty]::GeneratePropertyForString((Get-Date -AsUTC -Format "o")))
                     
                     # Insert entity
                     $insertOp = [Microsoft.Azure.Cosmos.Table.TableOperation]::Insert($entity)
