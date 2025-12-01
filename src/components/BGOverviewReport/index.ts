@@ -8,6 +8,8 @@ export { TimeInRangeCard } from './TimeInRangeCard';
 export { HbA1cEstimateCard } from './HbA1cEstimateCard';
 export { RiskAssessmentCard } from './RiskAssessmentCard';
 export { ControlBar } from './ControlBar';
+export { TimeInRangeByPeriodSection } from './TimeInRangeByPeriodSection';
+export { TimeInRangeByTimeOfDaySection } from './TimeInRangeByTimeOfDaySection';
 export { DetailedBreakdownAccordion } from './DetailedBreakdownAccordion';
 export { useBGOverviewStyles } from './styles';
 export * from './types';

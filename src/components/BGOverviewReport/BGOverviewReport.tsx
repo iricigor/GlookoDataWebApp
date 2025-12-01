@@ -44,6 +44,8 @@ import { ControlBar } from './ControlBar';
 import { TimeInRangeCard } from './TimeInRangeCard';
 import { HbA1cEstimateCard } from './HbA1cEstimateCard';
 import { RiskAssessmentCard } from './RiskAssessmentCard';
+import { TimeInRangeByPeriodSection } from './TimeInRangeByPeriodSection';
+import { TimeInRangeByTimeOfDaySection } from './TimeInRangeByTimeOfDaySection';
 import { DetailedBreakdownAccordion } from './DetailedBreakdownAccordion';
 import type { TIRStats, HbA1cStats, RiskStats } from './types';
 
@@ -346,21 +348,23 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
 
   return (
     <div className={styles.container}>
-      {/* Control Bar */}
-      <ControlBar
-        dataSource={dataSource}
-        setDataSource={setDataSource}
-        categoryMode={categoryMode}
-        setCategoryMode={setCategoryMode}
-        dayFilter={dayFilter}
-        setDayFilter={setDayFilter}
-        startDate={startDate}
-        endDate={endDate}
-        minDate={minDate}
-        maxDate={maxDate}
-        onStartDateChange={setStartDate}
-        onEndDateChange={setEndDate}
-      />
+      {/* Sticky Control Bar Wrapper */}
+      <div className={styles.stickyControlBarWrapper}>
+        <ControlBar
+          dataSource={dataSource}
+          setDataSource={setDataSource}
+          categoryMode={categoryMode}
+          setCategoryMode={setCategoryMode}
+          dayFilter={dayFilter}
+          setDayFilter={setDayFilter}
+          startDate={startDate}
+          endDate={endDate}
+          minDate={minDate}
+          maxDate={maxDate}
+          onStartDateChange={setStartDate}
+          onEndDateChange={setEndDate}
+        />
+      </div>
 
       {/* Loading/Error states */}
       {loading && <Text className={styles.loading}>Loading glucose data...</Text>}
@@ -369,6 +373,15 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
       {/* Time In Range Card */}
       {!loading && !error && tirStats.total > 0 && (
         <TimeInRangeCard tirStats={tirStats} categoryMode={categoryMode} />
+      )}
+
+      {/* Time in Range by Period Section */}
+      {!loading && !error && periodStats.length > 0 && (
+        <TimeInRangeByPeriodSection
+          categoryMode={categoryMode}
+          dayFilter={dayFilter}
+          periodStats={periodStats}
+        />
       )}
 
       {/* HbA1c Estimate Card */}
@@ -392,13 +405,21 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
         </Card>
       )}
 
+      {/* Time in Range by Time of Day Section */}
+      {!loading && !error && hourlyStats.length > 0 && (
+        <TimeInRangeByTimeOfDaySection
+          categoryMode={categoryMode}
+          dayFilter={dayFilter}
+          hourlyStats={hourlyStats}
+        />
+      )}
+
       {/* Detailed Breakdown Accordion */}
       {!loading && !error && tirStats.total > 0 && (
         <DetailedBreakdownAccordion
           categoryMode={categoryMode}
           glucoseUnit={glucoseUnit}
           dayFilter={dayFilter}
-          periodStats={periodStats}
           hourlyStats={hourlyStats}
           dayOfWeekReports={dayOfWeekReports}
           weeklyReports={weeklyReports}

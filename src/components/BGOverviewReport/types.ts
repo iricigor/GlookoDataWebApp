@@ -6,6 +6,7 @@ import type {
   RangeCategoryMode,
   GlucoseUnit,
 } from '../../types';
+import { GLUCOSE_RANGE_COLORS } from '../../utils/data';
 
 /** Statistics for TIR (Time in Range) data */
 export interface TIRStats {
@@ -62,6 +63,21 @@ export function getJIndexInterpretation(jIndex: number): RiskInterpretation {
   if (jIndex <= JINDEX_THRESHOLDS.good) return { text: 'Good', level: 'low' };
   if (jIndex <= JINDEX_THRESHOLDS.fair) return { text: 'Fair', level: 'moderate' };
   return { text: 'Poor', level: 'high' };
+}
+
+/** Glucose category type for type-safe color lookups */
+export type GlucoseCategory = 'veryLow' | 'low' | 'inRange' | 'high' | 'veryHigh';
+
+/** Get color for a glucose range category */
+export function getColorForCategory(category: GlucoseCategory | string): string {
+  switch (category) {
+    case 'veryLow': return GLUCOSE_RANGE_COLORS.veryLow;
+    case 'low': return GLUCOSE_RANGE_COLORS.low;
+    case 'inRange': return GLUCOSE_RANGE_COLORS.inRange;
+    case 'high': return GLUCOSE_RANGE_COLORS.high;
+    case 'veryHigh': return GLUCOSE_RANGE_COLORS.veryHigh;
+    default: return '#000';
+  }
 }
 
 /** Common props for TIR-related components */
