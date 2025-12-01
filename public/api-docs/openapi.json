@@ -128,6 +128,103 @@
         }
       }
     },
+    "/user/check-pro-status": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Check if user is a pro user",
+        "description": "Checks if a user is a pro user by querying the ProUsers table in Azure Table Storage. Pro users receive special features and are indicated with a ✨ symbol.",
+        "operationId": "checkProStatus",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully checked pro status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckProStatusResponse"
+                },
+                "examples": {
+                  "proUser": {
+                    "summary": "Pro user",
+                    "value": {
+                      "isProUser": true,
+                      "userId": "user-abc123"
+                    }
+                  },
+                  "regularUser": {
+                    "summary": "Regular user",
+                    "value": {
+                      "isProUser": false,
+                      "userId": "user-abc123"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized access. Please log in again.",
+                  "errorType": "unauthorized"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Internal server error",
+                  "errorType": "infrastructure"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - Storage not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "storageNotConfigured": {
+                    "summary": "Storage not configured",
+                    "value": {
+                      "error": "Service unavailable - storage not configured",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_NOT_CONFIGURED"
+                    }
+                  },
+                  "storageAccessDenied": {
+                    "summary": "Storage access denied",
+                    "value": {
+                      "error": "Service unavailable - storage access denied",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_ACCESS_DENIED"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/user/settings": {
       "get": {
         "tags": ["User"],
@@ -330,6 +427,20 @@
           "isFirstLogin": {
             "type": "boolean",
             "description": "True if this is the user's first login"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Unique identifier for the user"
+          }
+        }
+      },
+      "CheckProStatusResponse": {
+        "type": "object",
+        "required": ["isProUser", "userId"],
+        "properties": {
+          "isProUser": {
+            "type": "boolean",
+            "description": "True if the user is a pro user"
           },
           "userId": {
             "type": "string",

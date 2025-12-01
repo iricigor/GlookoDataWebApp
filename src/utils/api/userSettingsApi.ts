@@ -452,3 +452,153 @@ export async function loadUserSettings(
     };
   }
 }
+
+/**
+ * Result of checking if a user is a pro user
+ */
+export interface ProUserCheckResult {
+  success: boolean;
+  isProUser?: boolean;
+  error?: string;
+  errorType?: 'unauthorized' | 'infrastructure' | 'network' | 'unknown';
+  /** HTTP status code when available */
+  statusCode?: number;
+}
+
+/**
+ * API response for pro user check
+ */
+interface ProUserCheckApiResponse {
+  isProUser: boolean;
+  userId?: string;
+}
+
+/**
+ * Check if the current user is a pro user
+ * 
+ * This function calls the Azure Function to check the ProUsers table.
+ * 
+ * @param idToken - The ID token from MSAL authentication (has app's client ID as audience)
+ * @param config - Optional API configuration (defaults to /api)
+ * @returns Promise with the result containing success status and isProUser flag or error
+ */
+export async function checkProUserStatus(
+  idToken: string,
+  config: UserSettingsApiConfig = defaultConfig
+): Promise<ProUserCheckResult> {
+  const endpoint = `${config.baseUrl}/user/check-pro-status`;
+  const apiLogger = createApiLogger(endpoint);
+  
+  // Validate ID token
+  if (!idToken || idToken.trim() === '') {
+    apiLogger.logError('Authentication required - missing token', 'unauthorized');
+    return {
+      success: false,
+      error: 'Authentication required',
+      errorType: 'unauthorized',
+    };
+  }
+
+  apiLogger.logStart('GET');
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${idToken}`,
+        'Content-Type': 'application/json',
+        'x-correlation-id': apiLogger.correlationId,
+      },
+    });
+
+    // Handle HTTP errors
+    if (!response.ok) {
+      const statusCode = response.status;
+      
+      if (statusCode === 401 || statusCode === 403) {
+        apiLogger.logError('Unauthorized access', 'unauthorized', statusCode);
+        return {
+          success: false,
+          error: 'Unauthorized access. Please log in again.',
+          errorType: 'unauthorized',
+          statusCode,
+        };
+      }
+
+      // Handle infrastructure errors (e.g., can't reach table storage)
+      if (statusCode >= 500) {
+        apiLogger.logError('Internal server error', 'infrastructure', statusCode);
+        return {
+          success: false,
+          error: 'Internal server error. The infrastructure may not be ready or there are access issues.',
+          errorType: 'infrastructure',
+          statusCode,
+        };
+      }
+
+      // Try to parse error message from response
+      try {
+        const errorData = await response.json();
+        const errorMessage = errorData.error || errorData.message || `API error: ${statusCode}`;
+        
+        // Prefer structured error type/code from API response if available
+        const apiErrorType = errorData.errorType || errorData.code || errorData.type;
+        
+        if (apiErrorType === 'infrastructure') {
+          apiLogger.logError(errorMessage, 'infrastructure', statusCode);
+          return {
+            success: false,
+            error: errorMessage,
+            errorType: 'infrastructure',
+            statusCode,
+          };
+        }
+        
+        apiLogger.logError(errorMessage, apiErrorType || 'unknown', statusCode);
+        return {
+          success: false,
+          error: errorMessage,
+          errorType: apiErrorType || 'unknown',
+          statusCode,
+        };
+      } catch {
+        const errorMessage = `API error: ${response.status} ${response.statusText}`;
+        apiLogger.logError(errorMessage, 'unknown', response.status);
+        return {
+          success: false,
+          error: errorMessage,
+          errorType: 'unknown',
+          statusCode: response.status,
+        };
+      }
+    }
+
+    // Parse successful response
+    const data: ProUserCheckApiResponse = await response.json();
+    
+    apiLogger.logSuccess(200, { isProUser: data.isProUser });
+    return {
+      success: true,
+      isProUser: data.isProUser,
+    };
+
+  } catch (error) {
+    // Handle network errors
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      apiLogger.logError('Network error. Please check your internet connection.', 'network');
+      return {
+        success: false,
+        error: 'Network error. Please check your internet connection.',
+        errorType: 'network',
+      };
+    }
+
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    apiLogger.logError(errorMessage, 'unknown');
+    return {
+      success: false,
+      error: errorMessage,
+      errorType: 'unknown',
+    };
+  }
+}

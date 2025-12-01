@@ -24,6 +24,7 @@ import {
 } from '@fluentui/react-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useFirstLoginCheck } from '../../hooks/useFirstLoginCheck';
+import { useProUserCheck } from '../../hooks/useProUserCheck';
 import { LoginDialog } from './LoginDialog';
 import { LogoutDialog } from './LogoutDialog';
 import { WelcomeDialog } from './WelcomeDialog';
@@ -149,6 +150,9 @@ export function Navigation({
     clearError,
   } = useFirstLoginCheck();
 
+  // Check if user is a pro user after login
+  const { isProUser, resetState: resetProUserState } = useProUserCheck(isLoggedIn ? idToken : null);
+
   // Track if we've already handled the returning user login to prevent duplicate calls
   const hasHandledReturningUserLogin = useRef(false);
 
@@ -208,6 +212,7 @@ export function Navigation({
       await onBeforeLogout();
     }
     resetState();
+    resetProUserState();
     await logout();
   };
 
@@ -300,6 +305,7 @@ export function Navigation({
                 userName={userName} 
                 userEmail={userEmail}
                 userPhoto={userPhoto}
+                isProUser={isProUser}
                 onLogout={handleLogout} 
               />
             </>

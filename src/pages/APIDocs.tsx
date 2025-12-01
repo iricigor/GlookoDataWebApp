@@ -9,6 +9,7 @@ import {
   MessageBar,
   MessageBarBody,
   Spinner,
+  Tooltip,
 } from '@fluentui/react-components'
 import {
   PersonRegular,
@@ -19,6 +20,8 @@ import SwaggerUI from 'swagger-ui-react'
 import 'swagger-ui-react/swagger-ui.css'
 import './APIDocs.css'
 import { useAuth } from '../hooks/useAuth'
+import { useProUserCheck } from '../hooks/useProUserCheck'
+import { useProUserBadgeStyles } from '../styles/proUserBadge'
 
 const useStyles = makeStyles({
   container: {
@@ -109,7 +112,9 @@ const useStyles = makeStyles({
 
 export function APIDocs() {
   const styles = useStyles()
+  const proBadgeStyles = useProUserBadgeStyles()
   const { isLoggedIn, userName, userEmail, idToken, isInitialized, login, logout } = useAuth()
+  const { isProUser } = useProUserCheck(isLoggedIn ? idToken : null)
   const [swaggerSpec, setSwaggerSpec] = useState<object | null>(null)
   const [specError, setSpecError] = useState<string | null>(null)
 
@@ -172,7 +177,14 @@ export function APIDocs() {
           {isLoggedIn && userName ? (
             <>
               <div className={styles.userInfo}>
-                <Text className={styles.userName}>{userName}</Text>
+                <div className={proBadgeStyles.userNameContainer}>
+                  <Text className={styles.userName}>{userName}</Text>
+                  {isProUser && (
+                    <Tooltip content="Pro user" relationship="label">
+                      <span className={proBadgeStyles.proUserBadge} aria-label="Pro user">✨</span>
+                    </Tooltip>
+                  )}
+                </div>
                 {userEmail && <Text className={styles.userEmail}>{userEmail}</Text>}
                 <div className={styles.tokenStatus}>
                   <CheckmarkCircleRegular className={styles.tokenStatusIcon} fontSize={14} />
