@@ -215,16 +215,9 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     }
   }, [startDate, endDate, readings, dayFilter, thresholds, categoryMode]);
 
-  // Calculate TIR statistics
-  const calculateTIRStats = (): TIRStats => {
-    if (readings.length === 0) {
-      return categoryMode === 5
-        ? { veryLow: 0, low: 0, inRange: 0, high: 0, veryHigh: 0, total: 0 }
-        : { low: 0, inRange: 0, high: 0, total: 0 };
-    }
-
-    // Filter by date range and day of week
-    let filteredReadings = readings;
+  // Shared helper to filter readings by date range and day of week
+  const getFilteredReadings = (): GlucoseReading[] => {
+    let filtered = readings;
     
     if (startDate && endDate) {
       const start = new Date(startDate);
@@ -232,13 +225,22 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
       const end = new Date(endDate);
       end.setHours(23, 59, 59, 999);
       
-      filteredReadings = readings.filter(r => {
+      filtered = readings.filter(r => {
         const timestamp = r.timestamp.getTime();
         return timestamp >= start.getTime() && timestamp <= end.getTime();
       });
     }
+    
+    return filterReadingsByDayOfWeek(filtered, dayFilter);
+  };
 
-    filteredReadings = filterReadingsByDayOfWeek(filteredReadings, dayFilter);
+  // Calculate TIR statistics from filtered readings
+  const calculateTIRStats = (filteredReadings: GlucoseReading[]): TIRStats => {
+    if (filteredReadings.length === 0) {
+      return categoryMode === 5
+        ? { veryLow: 0, low: 0, inRange: 0, high: 0, veryHigh: 0, total: 0 }
+        : { low: 0, inRange: 0, high: 0, total: 0 };
+    }
 
     const reports = groupByDayOfWeek(filteredReadings, thresholds, categoryMode);
 
@@ -267,29 +269,8 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     return totals;
   };
 
-  // Calculate HbA1c estimate with current filters applied
-  const calculateHbA1cStats = (): HbA1cStats => {
-    if (readings.length === 0) {
-      return { hba1c: null, averageGlucose: null, daysWithData: 0, cv: null };
-    }
-
-    // Filter by date range and day of week (same as TIR)
-    let filteredReadings = readings;
-    
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(endDate);
-      end.setHours(23, 59, 59, 999);
-      
-      filteredReadings = readings.filter(r => {
-        const timestamp = r.timestamp.getTime();
-        return timestamp >= start.getTime() && timestamp <= end.getTime();
-      });
-    }
-
-    filteredReadings = filterReadingsByDayOfWeek(filteredReadings, dayFilter);
-
+  // Calculate HbA1c estimate from filtered readings
+  const calculateHbA1cStats = (filteredReadings: GlucoseReading[]): HbA1cStats => {
     if (filteredReadings.length === 0) {
       return { hba1c: null, averageGlucose: null, daysWithData: 0, cv: null };
     }
@@ -302,29 +283,8 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     return { hba1c, averageGlucose, daysWithData, cv };
   };
 
-  // Calculate Risk Assessment stats (LBGI, HBGI, BGRI, J-Index) with current filters applied
-  const calculateRiskStats = (): RiskStats => {
-    if (readings.length === 0) {
-      return { lbgi: null, hbgi: null, bgri: null, jIndex: null };
-    }
-
-    // Filter by date range and day of week (same as TIR)
-    let filteredReadings = readings;
-    
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(endDate);
-      end.setHours(23, 59, 59, 999);
-      
-      filteredReadings = readings.filter(r => {
-        const timestamp = r.timestamp.getTime();
-        return timestamp >= start.getTime() && timestamp <= end.getTime();
-      });
-    }
-
-    filteredReadings = filterReadingsByDayOfWeek(filteredReadings, dayFilter);
-
+  // Calculate Risk Assessment stats from filtered readings
+  const calculateRiskStats = (filteredReadings: GlucoseReading[]): RiskStats => {
     if (filteredReadings.length === 0) {
       return { lbgi: null, hbgi: null, bgri: null, jIndex: null };
     }
@@ -340,30 +300,9 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     };
   };
 
-  // Calculate Sugarmate-style stats with current filters applied
-  const calculateSugarmateStats = () => {
-    if (readings.length === 0 || tirStats.total === 0) {
-      return null;
-    }
-
-    // Filter by date range and day of week (same as TIR)
-    let filteredReadings = readings;
-    
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(endDate);
-      end.setHours(23, 59, 59, 999);
-      
-      filteredReadings = readings.filter(r => {
-        const timestamp = r.timestamp.getTime();
-        return timestamp >= start.getTime() && timestamp <= end.getTime();
-      });
-    }
-
-    filteredReadings = filterReadingsByDayOfWeek(filteredReadings, dayFilter);
-
-    if (filteredReadings.length === 0) {
+  // Calculate Sugarmate-style stats from filtered readings and TIR stats
+  const calculateSugarmateStats = (filteredReadings: GlucoseReading[], tirStats: TIRStats) => {
+    if (filteredReadings.length === 0 || tirStats.total === 0) {
       return null;
     }
 
@@ -386,10 +325,12 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     };
   };
 
-  const tirStats = calculateTIRStats();
-  const hba1cStats = calculateHbA1cStats();
-  const riskStats = calculateRiskStats();
-  const sugarmateStats = calculateSugarmateStats();
+  // Get filtered readings once and use for all calculations
+  const filteredReadings = getFilteredReadings();
+  const tirStats = calculateTIRStats(filteredReadings);
+  const hba1cStats = calculateHbA1cStats(filteredReadings);
+  const riskStats = calculateRiskStats(filteredReadings);
+  const sugarmateStats = calculateSugarmateStats(filteredReadings, tirStats);
 
   if (!selectedFile) {
     return (
