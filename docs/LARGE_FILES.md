@@ -1,6 +1,7 @@
 # Large Files Documentation
 
 This document identifies large files in the GlookoDataWebApp repository and provides recommendations for potential splitting or optimization.
+Last update on December 1, 2025.
 
 ## Table of Contents
 
