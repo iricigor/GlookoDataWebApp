@@ -83,6 +83,7 @@ GlookoDataWebApp is a modern web application for importing, visualizing, and ana
    - Extract reusable logic into custom hooks in `src/hooks/`
    - Split large components into smaller, composable ones
    - **Component size guideline:** Keep component files under 200 lines when possible to minimize merge conflicts
+   - **Large file splitting rule:** When modifying any source file over 500 lines, split it into smaller files as part of your changes
    - Extract UI sections (navigation bars, summary cards, etc.) into separate components for better maintainability
 
 3. **Use Fluent UI components** - Never recreate existing UI components
