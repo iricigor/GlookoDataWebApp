@@ -15,6 +15,7 @@ import { IOBReport } from '../components/IOBReport';
 import { BGOverviewReport } from '../components/BGOverviewReport';
 import { RoCReport } from '../components/RoCReport';
 import { HyposReport } from '../components/HyposReport';
+import { DailyBGReport } from '../components/DailyBGReport';
 import type { UploadedFile, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 
@@ -79,7 +80,7 @@ interface ReportsProps {
   insulinDuration?: number;
 }
 
-const VALID_TABS = ['fileInfo', 'bgOverview', 'detailedCgm', 'detailedInsulin', 'unifiedView', 'iob', 'roc', 'hypos'];
+const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'detailedCgm', 'detailedInsulin', 'unifiedView', 'iob', 'roc', 'hypos'];
 
 export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDuration }: ReportsProps) {
   const styles = useStyles();
@@ -133,6 +134,8 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
         );
       case 'bgOverview':
         return <BGOverviewReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
+      case 'dailyBG':
+        return <DailyBGReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} />;
       case 'detailedCgm':
         return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
       case 'detailedInsulin':
@@ -169,6 +172,7 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
       >
         <Tab value="fileInfo">File Info</Tab>
         <Tab value="bgOverview">BG Overview</Tab>
+        <Tab value="dailyBG">Daily BG</Tab>
         <Tab value="detailedCgm">Detailed CGM</Tab>
         <Tab value="detailedInsulin">Detailed Insulin</Tab>
         <Tab value="unifiedView">Unified View</Tab>
@@ -188,6 +192,7 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
         >
           <Tab value="fileInfo">File Info</Tab>
           <Tab value="bgOverview">BG Overview</Tab>
+          <Tab value="dailyBG">Daily BG</Tab>
           <Tab value="detailedCgm">Detailed CGM</Tab>
           <Tab value="detailedInsulin">Detailed Insulin</Tab>
           <Tab value="unifiedView">Unified View</Tab>
