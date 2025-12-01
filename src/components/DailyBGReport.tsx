@@ -44,8 +44,6 @@ import {
   extractInsulinReadings,
   prepareInsulinTimelineData,
   prepareHourlyIOBData,
-} from '../utils/data';
-import { 
   getUniqueDates, 
   filterReadingsByDate, 
   calculateGlucoseRangeStats,
@@ -522,7 +520,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5 }
 
   // Custom dot renderer for colored glucose values
   const renderColoredDot = (props: { cx?: number; cy?: number; payload?: { color: string } }): React.ReactElement | null => {
-    if (props.cx === undefined || props.cy === undefined || !props.payload) return <></>;
+    if (props.cx === undefined || props.cy === undefined || !props.payload) return null;
     return (
       <circle
         cx={props.cx}
