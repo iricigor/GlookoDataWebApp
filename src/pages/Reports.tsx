@@ -99,7 +99,7 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
     // Update URL hash to enable deep linking (e.g., #reports/bgOverview)
     const currentHash = window.location.hash.slice(1);
     const expectedHash = `reports/${selectedTab}`;
-    if (currentHash !== expectedHash && currentHash.startsWith('reports')) {
+    if (currentHash !== expectedHash) {
       window.history.replaceState(null, '', `#${expectedHash}`);
     }
   }, [selectedTab]);
