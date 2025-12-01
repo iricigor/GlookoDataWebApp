@@ -31,6 +31,13 @@ Version 1.5 will introduce new functionality for logged-in users. Users will be 
 ### Other
 
 <details>
+<summary>586 Add bolus context and trajectory analysis to Hypos AI</summary>
+
+[#586](../../pull/586) Add bolus context and trajectory analysis to Hypos AI
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>587 Add Pro users maintenance deployment scripts</summary>
 
 [#587](../../pull/587) Add Pro users maintenance deployment scripts
