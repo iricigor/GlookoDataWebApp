@@ -96,6 +96,8 @@ interface TokenClaims {
   exp?: number;      // Expiration time
   iat?: number;      // Issued at time
   tid?: string;      // Tenant ID
+  email?: string;    // User's email address (when email scope is requested)
+  preferred_username?: string; // User's preferred username (usually email)
 }
 
 /**
@@ -194,6 +196,100 @@ export async function extractUserIdFromToken(authHeader: string | null, context:
     }
 
     return userId;
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      context.warn('Token has expired');
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      context.warn(`JWT validation failed: ${error.message}`);
+    } else if (error instanceof jwt.NotBeforeError) {
+      context.warn('Token not yet valid (nbf claim)');
+    } else {
+      context.warn('Failed to validate token:', error);
+    }
+    return null;
+  }
+}
+
+/**
+ * User info extracted from the ID token
+ */
+export interface UserInfo {
+  /** User's object ID (oid) or subject (sub) - unique identifier */
+  userId: string;
+  /** User's email address (normalized to lowercase) */
+  email: string | null;
+}
+
+/**
+ * Validate and extract user info from the ID token with full signature verification.
+ * 
+ * This function provides production-ready JWT validation and extracts:
+ * - userId: Object ID (oid) or Subject (sub) claim
+ * - email: Email or preferred_username claim (normalized to lowercase)
+ * 
+ * @param authHeader - The Authorization header value (Bearer token)
+ * @param context - The invocation context for logging
+ * @returns Promise resolving to UserInfo or null if invalid
+ */
+export async function extractUserInfoFromToken(authHeader: string | null, context: InvocationContext): Promise<UserInfo | null> {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    context.warn('Missing or invalid Authorization header format');
+    return null;
+  }
+
+  const token = authHeader.substring(7);
+  
+  try {
+    // Decode the header to get the key ID
+    const decodedToken = jwt.decode(token, { complete: true });
+    if (!decodedToken || typeof decodedToken === 'string') {
+      context.warn('Failed to decode JWT token');
+      return null;
+    }
+
+    // Get the public key from Microsoft's JWKS endpoint
+    const publicKey = await getSigningKey(decodedToken.header);
+    
+    // Verify the token signature and decode the payload
+    const expectedAudiences = getExpectedAudiences();
+    // Ensure audience is never empty - jsonwebtoken requires string or non-empty array
+    if (expectedAudiences.length === 0) {
+      context.warn('No expected audiences configured');
+      return null;
+    }
+    // Use single string for one audience, or cast to tuple for multiple
+    const audience: string | [string, ...string[]] = expectedAudiences.length === 1 
+      ? expectedAudiences[0] 
+      : [expectedAudiences[0], ...expectedAudiences.slice(1)];
+    const verifiedPayload = jwt.verify(token, publicKey, {
+      algorithms: ['RS256'], // Microsoft uses RS256 for ID tokens
+      audience: audience,
+      clockTolerance: 60, // Allow 60 seconds of clock skew
+    }) as TokenClaims;
+
+    // Validate issuer
+    if (!verifiedPayload.iss) {
+      context.warn('Token missing issuer (iss) claim');
+      return null;
+    }
+
+    if (!validateIssuer(verifiedPayload.iss, verifiedPayload.tid)) {
+      context.warn(`Invalid token issuer: ${verifiedPayload.iss}`);
+      return null;
+    }
+
+    // Get the user ID (oid or sub claim)
+    const userId = verifiedPayload.oid || verifiedPayload.sub;
+    if (!userId) {
+      context.warn('Token missing user identifier (oid or sub claim)');
+      return null;
+    }
+
+    // Get the email (email or preferred_username claim, normalized to lowercase)
+    const rawEmail = verifiedPayload.email || verifiedPayload.preferred_username;
+    const email = rawEmail ? rawEmail.toLowerCase() : null;
+
+    return { userId, email };
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       context.warn('Token has expired');

@@ -19,20 +19,40 @@
  * The function expects an ID token (not an access token) from MSAL authentication.
  * ID tokens have the application's client ID as the audience, making them suitable
  * for authenticating with our own API.
+ * 
+ * ProUsers Table Structure:
+ * The ProUsers table uses the following structure (aligned with deployment scripts):
+ * - PartitionKey: "ProUser" (constant for all entries)
+ * - RowKey: URL-encoded email address (normalized to lowercase)
+ * - Email: User's email address (original format)
+ * - CreatedAt: ISO 8601 timestamp when the user was added
  */
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import { extractUserIdFromToken, getTableClient, isNotFoundError } from "../utils/azureUtils";
+import { extractUserInfoFromToken, getTableClient, isNotFoundError } from "../utils/azureUtils";
 import { createRequestLogger } from "../utils/logger";
 
 /**
- * Check if user exists in ProUsers table
+ * URL-encode a string for use as RowKey
+ * This mirrors the Python/PowerShell URL encoding used in deployment scripts
  */
-async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>, userId: string): Promise<boolean> {
+function urlEncode(str: string): string {
+  return encodeURIComponent(str);
+}
+
+/**
+ * Check if user exists in ProUsers table by email
+ * 
+ * The ProUsers table structure:
+ * - PartitionKey: "ProUser" (constant)
+ * - RowKey: URL-encoded email address
+ */
+async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>, email: string): Promise<boolean> {
   try {
     // Query for the user in the ProUsers table
-    // PartitionKey is 'prousers', RowKey is the userId
-    await tableClient.getEntity('prousers', userId);
+    // PartitionKey is 'ProUser', RowKey is the URL-encoded email
+    const rowKey = urlEncode(email);
+    await tableClient.getEntity('ProUser', rowKey);
     return true;
   } catch (error: unknown) {
     // 404 means user is not a pro user - this is expected
@@ -51,23 +71,30 @@ async function checkProStatus(request: HttpRequest, context: InvocationContext):
   const requestLogger = createRequestLogger(request, context);
   requestLogger.logStart();
 
-  // Validate authorization header and extract user ID from ID token
+  // Validate authorization header and extract user info from ID token
   const authHeader = request.headers.get('authorization');
-  const userId = await extractUserIdFromToken(authHeader, context);
+  const userInfo = await extractUserInfoFromToken(authHeader, context);
 
-  if (!userId) {
+  if (!userInfo) {
     requestLogger.logAuth(false, undefined, 'Invalid or missing token');
     return requestLogger.logError('Unauthorized access. Please log in again.', 401, 'unauthorized');
+  }
+
+  const { userId, email } = userInfo;
+
+  if (!email) {
+    requestLogger.logAuth(true, userId, 'Token missing email claim');
+    return requestLogger.logError('Token missing email claim. Please ensure the app has email scope.', 401, 'unauthorized');
   }
 
   requestLogger.logAuth(true, userId);
 
   try {
     const tableClient = getTableClient('ProUsers');
-    const isProUser = await checkProUserExists(tableClient, userId);
+    const isProUser = await checkProUserExists(tableClient, email);
 
-    requestLogger.logStorage('checkProUser', true, { userId, isProUser });
-    requestLogger.logInfo('Pro status check completed', { userId, isProUser });
+    requestLogger.logStorage('checkProUser', true, { userId, email, isProUser });
+    requestLogger.logInfo('Pro status check completed', { userId, email, isProUser });
     
     return requestLogger.logSuccess({
       status: 200,
