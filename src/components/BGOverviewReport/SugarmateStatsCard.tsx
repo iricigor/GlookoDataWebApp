@@ -32,9 +32,9 @@ import type {
 /** Fixed box height for consistent sizing */
 const BOX_HEIGHT = '90px';
 
-/** Neutral colors for highs/lows donut - softer gray tones */
-const HIGH_COLOR = '#6B7280'; // Neutral gray
-const LOW_COLOR = '#9CA3AF';  // Lighter gray
+/** Neutral colors for highs/lows donut - more distinct tones */
+const HIGH_COLOR = '#4B5563'; // Darker neutral gray
+const LOW_COLOR = '#D1D5DB';  // Much lighter gray for better contrast
 
 /** Donut size - shared between Highs/Lows and Flux */
 const DONUT_SIZE = 52;
@@ -125,10 +125,10 @@ const useStyles = makeStyles({
     right: '0',
     transform: 'translateY(-50%)',
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     alignItems: 'center',
-    paddingLeft: '12%',
-    paddingRight: '12%',
+    paddingLeft: '8%',
+    paddingRight: '8%',
     zIndex: 2,
   },
   quartileValue: {
@@ -213,8 +213,10 @@ const useStyles = makeStyles({
     lineHeight: 1.2,
   },
   fluxScore: {
-    fontSize: tokens.fontSizeBase100,
-    color: tokens.colorNeutralForeground3,
+    fontSize: tokens.fontSizeBase500,
+    fontWeight: tokens.fontWeightBold,
+    color: tokens.colorNeutralForeground1,
+    lineHeight: 1,
   },
   // Unicorn styles - larger, bolder
   unicornContainer: {
@@ -335,21 +337,22 @@ function getFluxGradeColor(grade: string): string {
   return tokens.colorNeutralForeground1;
 }
 
-/** SVG Gaussian curve component for quartiles - wider, more curvy */
+/** SVG Gaussian curve component for quartiles - wider to ensure numbers are in front */
 function GaussianCurve() {
   // Soft blue color for the curve
   const curveColor = '#A8C5E8';
   const lineColor = '#7AA7D6';
   
   // More points for a smoother, more curvy Gaussian curve
-  // Using a proper Gaussian formula approximation: y = 50 - 45 * exp(-((x-50)^2)/(2*20^2))
+  // Using a proper Gaussian formula: wider sigma for a wider curve
+  // Curve spans from 5% to 95% of the viewBox width
   const curvePoints = [];
-  for (let x = 0; x <= 100; x += 2) {
-    const sigma = 22;
+  for (let x = 5; x <= 95; x += 2) {
+    const sigma = 20;
     const y = 50 - 42 * Math.exp(-Math.pow(x - 50, 2) / (2 * Math.pow(sigma, 2)));
     curvePoints.push(`${x},${y}`);
   }
-  const curvePath = `M 0,50 L ${curvePoints.join(' L ')} L 100,50`;
+  const curvePath = `M 5,50 L ${curvePoints.join(' L ')} L 95,50`;
   const curveOutline = `M ${curvePoints.join(' L ')}`;
   
   return (
@@ -358,7 +361,7 @@ function GaussianCurve() {
       <path
         d={curvePath}
         fill={curveColor}
-        fillOpacity="0.3"
+        fillOpacity="0.4"
       />
       {/* Gaussian curve outline */}
       <path
@@ -366,26 +369,26 @@ function GaussianCurve() {
         fill="none"
         stroke={lineColor}
         strokeWidth="1.5"
-        strokeOpacity="0.5"
+        strokeOpacity="0.6"
       />
-      {/* Q25 marker line at 25% position */}
-      <line x1="25" y1="8" x2="25" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.4" strokeDasharray="2,2" />
+      {/* Q25 marker line at 30% position (shifted for wider curve) */}
+      <line x1="30" y1="8" x2="30" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
       {/* Q50 (median) marker line at 50% position */}
-      <line x1="50" y1="8" x2="50" y2="50" stroke={lineColor} strokeWidth="1.5" strokeOpacity="0.5" strokeDasharray="2,2" />
-      {/* Q75 marker line at 75% position */}
-      <line x1="75" y1="8" x2="75" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.4" strokeDasharray="2,2" />
+      <line x1="50" y1="8" x2="50" y2="50" stroke={lineColor} strokeWidth="1.5" strokeOpacity="0.6" strokeDasharray="2,2" />
+      {/* Q75 marker line at 70% position (shifted for wider curve) */}
+      <line x1="70" y1="8" x2="70" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
     </svg>
   );
 }
 
-/** Circular progress ring for high/low incidents - neutral colors */
+/** Circular progress ring for high/low incidents - neutral colors with thicker stroke */
 function HighLowRing({ highs, lows }: { highs: number; lows: number }) {
   const total = highs + lows;
   const highRatio = total > 0 ? highs / total : 0.5;
   
-  // SVG circle parameters - use shared donut size
+  // SVG circle parameters - use shared donut size with thicker stroke
   const size = DONUT_SIZE;
-  const strokeWidth = 5;
+  const strokeWidth = 7;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   
@@ -451,7 +454,7 @@ export function SugarmateStatsCard({
       <div className={styles.statsGrid}>
         {/* Quartiles on Gaussian Curve */}
         {quartiles && (
-          <Tooltip content="25th, 50th (median), and 75th percentile glucose values" relationship="description">
+          <Tooltip content="25th, 50th (median), and 75th percentile glucose values showing the distribution spread of your readings over the selected period" relationship="description">
             <div className={styles.statSection}>
               <div className={styles.labelColumn}>
                 <Text className={styles.sectionTitle}>Quartiles</Text>
@@ -478,7 +481,7 @@ export function SugarmateStatsCard({
         )}
 
         {/* High/Low Incidents - neutral colors, text outside */}
-        <Tooltip content="Number of transitions into high and low glucose zones" relationship="description">
+        <Tooltip content="Number of transitions into high and low glucose zones. Each incident represents a period when glucose moved outside your target range" relationship="description">
           <div className={styles.statSection}>
             <div className={styles.labelColumn}>
               <Text className={styles.sectionTitle}>Highs / Lows</Text>
@@ -506,7 +509,7 @@ export function SugarmateStatsCard({
 
         {/* Flux Grade */}
         {flux && (
-          <Tooltip content={`Glucose stability grade based on coefficient of variation (CV: ${flux.score.toFixed(1)}%)`} relationship="description">
+          <Tooltip content={`Glucose stability grade based on coefficient of variation. A+ means very steady glucose, F means high variability (CV: ${flux.score.toFixed(1)}%)`} relationship="description">
             <div className={styles.statSection}>
               <div className={styles.labelColumn}>
                 <Text className={styles.sectionTitle}>Flux (Stability)</Text>
@@ -530,7 +533,7 @@ export function SugarmateStatsCard({
         )}
 
         {/* Unicorns */}
-        <Tooltip content={`"Perfect" glucose readings at exactly 5.0 or 5.6 ${unitLabel}`} relationship="description">
+        <Tooltip content={`"Perfect" glucose readings at exactly 5.0 or 5.6 ${unitLabel}. These are considered ideal glucose levels for many people with diabetes`} relationship="description">
           <div className={styles.statSection}>
             <div className={styles.labelColumn}>
               <Text className={styles.sectionTitle}>Unicorns</Text>
@@ -548,7 +551,7 @@ export function SugarmateStatsCard({
         </Tooltip>
 
         {/* Wake Up Average */}
-        <Tooltip content="Average glucose value at wake up time (6-9 AM)" relationship="description">
+        <Tooltip content="Average glucose value at wake up time (6-9 AM). Morning glucose levels can indicate overnight glycemic control and dawn phenomenon" relationship="description">
           <div className={styles.statSection}>
             <div className={styles.labelColumn}>
               <Text className={styles.sectionTitle}>Wake Up Avg</Text>
@@ -568,7 +571,7 @@ export function SugarmateStatsCard({
         </Tooltip>
 
         {/* Bedtime Average */}
-        <Tooltip content="Average glucose value at bedtime (9 PM - 12 AM)" relationship="description">
+        <Tooltip content="Average glucose value at bedtime (9 PM - 12 AM). Pre-sleep glucose levels help assess evening meal impact and overnight risk" relationship="description">
           <div className={styles.statSection}>
             <div className={styles.labelColumn}>
               <Text className={styles.sectionTitle}>Bedtime Avg</Text>
@@ -590,7 +593,7 @@ export function SugarmateStatsCard({
 
       {/* Summary Row with Average, Median, StDev - inline format */}
       <div className={styles.summaryRow}>
-        <Tooltip content="Average of all glucose values" relationship="description">
+        <Tooltip content="Average of all glucose values in the selected period. A key metric for overall glucose control assessment" relationship="description">
           <div className={styles.summaryItem}>
             <Text className={styles.summaryLabel}>Avg</Text>
             <Text className={styles.summaryValue}>
@@ -599,7 +602,7 @@ export function SugarmateStatsCard({
             <Text className={styles.summaryUnit}>{unitLabel}</Text>
           </div>
         </Tooltip>
-        <Tooltip content="Median (middle) glucose value" relationship="description">
+        <Tooltip content="Median (middle) glucose value. Less affected by extreme highs or lows than the average, representing a typical reading" relationship="description">
           <div className={styles.summaryItem}>
             <Text className={styles.summaryLabel}>Median</Text>
             <Text className={styles.summaryValue}>
@@ -608,7 +611,7 @@ export function SugarmateStatsCard({
             <Text className={styles.summaryUnit}>{unitLabel}</Text>
           </div>
         </Tooltip>
-        <Tooltip content="Standard deviation - measures glucose variability" relationship="description">
+        <Tooltip content="Standard deviation - measures glucose variability. Lower values indicate more stable glucose levels with less fluctuation" relationship="description">
           <div className={styles.summaryItem}>
             <Text className={styles.summaryLabel}>StDev</Text>
             <Text className={styles.summaryValue}>
