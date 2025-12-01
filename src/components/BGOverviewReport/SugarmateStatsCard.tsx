@@ -30,11 +30,14 @@ import type {
 } from '../../utils/data/glucoseRangeUtils';
 
 /** Fixed box height for consistent sizing */
-const BOX_HEIGHT = '80px';
+const BOX_HEIGHT = '90px';
 
-/** Neutral colors for highs/lows donut - Fluent UI DonutChart style */
-const HIGH_COLOR = '#0078D4'; // Fluent blue
-const LOW_COLOR = '#8764B8';  // Fluent purple
+/** Neutral colors for highs/lows donut - softer gray tones */
+const HIGH_COLOR = '#6B7280'; // Neutral gray
+const LOW_COLOR = '#9CA3AF';  // Lighter gray
+
+/** Donut size - shared between Highs/Lows and Flux */
+const DONUT_SIZE = 52;
 
 /** Sun/Moon icon colors */
 const SUN_COLOR = '#F5A623';
@@ -64,7 +67,7 @@ const useStyles = makeStyles({
   statsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
-    ...shorthands.gap('16px'),
+    ...shorthands.gap('12px'),
     '@media (max-width: 900px)': {
       gridTemplateColumns: 'repeat(2, 1fr)',
     },
@@ -76,7 +79,7 @@ const useStyles = makeStyles({
   statSection: {
     display: 'flex',
     flexDirection: 'row',
-    ...shorthands.padding('12px'),
+    ...shorthands.padding('10px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorNeutralBackground2,
     height: BOX_HEIGHT,
@@ -87,9 +90,9 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    width: '80px',
+    width: '70px',
     flexShrink: 0,
-    paddingRight: '8px',
+    paddingRight: '6px',
   },
   graphicsColumn: {
     display: 'flex',
@@ -105,7 +108,7 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     lineHeight: 1.2,
   },
-  // Quartile Gaussian curve styles - taller, soft blue
+  // Quartile Gaussian curve styles - wider, more curvy
   gaussianContainer: {
     display: 'flex',
     flexDirection: 'column',
@@ -117,72 +120,69 @@ const useStyles = makeStyles({
   },
   quartileValuesOverlay: {
     position: 'absolute',
-    bottom: '4px',
+    top: '50%',
     left: '0',
     right: '0',
+    transform: 'translateY(-50%)',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    paddingLeft: '4px',
-    paddingRight: '4px',
+    alignItems: 'center',
+    paddingLeft: '12%',
+    paddingRight: '12%',
     zIndex: 2,
   },
   quartileValue: {
-    fontSize: tokens.fontSizeBase300,
-    fontWeight: tokens.fontWeightBold,
-    color: tokens.colorNeutralForeground1,
-    textAlign: 'center',
-  },
-  quartileMedianValue: {
     fontSize: tokens.fontSizeBase500,
     fontWeight: tokens.fontWeightBold,
     color: tokens.colorNeutralForeground1,
+    textAlign: 'center',
+    lineHeight: 1,
   },
-  // High/Low circular indicator styles - Fluent colors
+  // High/Low container - text outside donut
   highLowContainer: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    ...shorthands.gap('8px'),
+    ...shorthands.gap('10px'),
     height: '100%',
   },
   circularIndicator: {
     position: 'relative',
-    width: '56px',
-    height: '56px',
+    width: `${DONUT_SIZE}px`,
+    height: `${DONUT_SIZE}px`,
+    flexShrink: 0,
   },
-  circularValues: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    lineHeight: '1.0',
-  },
-  highValue: {
-    fontSize: tokens.fontSizeBase400,
-    fontWeight: tokens.fontWeightBold,
-    color: HIGH_COLOR,
-  },
-  lowValue: {
-    fontSize: tokens.fontSizeBase200,
-    fontWeight: tokens.fontWeightSemibold,
-    color: LOW_COLOR,
-  },
-  highLowLabels: {
+  highLowTextContainer: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    ...shorthands.gap('0px'),
+    justifyContent: 'center',
+    ...shorthands.gap('2px'),
+  },
+  highLowRow: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('4px'),
+  },
+  highLowValue: {
+    fontSize: tokens.fontSizeBase500,
+    fontWeight: tokens.fontWeightBold,
+    color: tokens.colorNeutralForeground1,
+    lineHeight: 1,
   },
   highLowLabel: {
     fontSize: tokens.fontSizeBase100,
     fontWeight: tokens.fontWeightSemibold,
-    letterSpacing: '0.3px',
+    color: tokens.colorNeutralForeground3,
   },
-  // Flux grade styles - softer shadow
+  highLowDivider: {
+    width: '100%',
+    height: '1px',
+    backgroundColor: tokens.colorNeutralStroke2,
+    marginTop: '2px',
+    marginBottom: '2px',
+  },
+  // Flux grade styles - same size as donut
   fluxContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -191,13 +191,13 @@ const useStyles = makeStyles({
     height: '100%',
   },
   fluxGrade: {
-    width: '40px',
-    height: '40px',
+    width: `${DONUT_SIZE}px`,
+    height: `${DONUT_SIZE}px`,
     ...shorthands.borderRadius('50%'),
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: tokens.fontSizeBase500,
+    fontSize: tokens.fontSizeBase600,
     fontWeight: tokens.fontWeightBold,
     color: 'white',
     flexShrink: 0,
@@ -235,7 +235,7 @@ const useStyles = makeStyles({
     alignItems: 'flex-start',
   },
   unicornCount: {
-    fontSize: tokens.fontSizeBase600,
+    fontSize: tokens.fontSizeBase500,
     fontWeight: tokens.fontWeightBold,
     color: tokens.colorNeutralForeground1,
     lineHeight: 1,
@@ -261,7 +261,7 @@ const useStyles = makeStyles({
     alignItems: 'flex-start',
   },
   timeAverageValue: {
-    fontSize: tokens.fontSizeBase600,
+    fontSize: tokens.fontSizeBase500,
     fontWeight: tokens.fontWeightBold,
     color: tokens.colorNeutralForeground1,
     lineHeight: 1,
@@ -270,30 +270,43 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase100,
     color: tokens.colorNeutralForeground3,
   },
-  // Summary stats row - smaller, darker background
+  // Summary stats row - inline format, darker background
   summaryRow: {
     display: 'flex',
     justifyContent: 'space-around',
     alignItems: 'center',
-    ...shorthands.padding('10px'),
-    marginTop: '16px',
+    flexWrap: 'wrap',
+    ...shorthands.padding('8px', '12px'),
+    marginTop: '12px',
     backgroundColor: tokens.colorNeutralBackground3,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.gap('12px'),
+    '@media (max-width: 600px)': {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      ...shorthands.gap('6px'),
+    },
   },
   summaryItem: {
     display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    minWidth: '70px',
-  },
-  summaryValue: {
-    fontSize: tokens.fontSizeBase500,
-    fontWeight: tokens.fontWeightBold,
-    color: tokens.colorNeutralForeground1,
-    lineHeight: 1,
-    marginBottom: '2px',
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    ...shorthands.gap('4px'),
+    '@media (max-width: 600px)': {
+      justifyContent: 'center',
+    },
   },
   summaryLabel: {
+    fontSize: tokens.fontSizeBase300,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground2,
+  },
+  summaryValue: {
+    fontSize: tokens.fontSizeBase300,
+    fontWeight: tokens.fontWeightBold,
+    color: tokens.colorNeutralForeground1,
+  },
+  summaryUnit: {
     fontSize: tokens.fontSizeBase100,
     color: tokens.colorNeutralForeground3,
   },
@@ -322,46 +335,57 @@ function getFluxGradeColor(grade: string): string {
   return tokens.colorNeutralForeground1;
 }
 
-/** SVG Gaussian curve component for quartiles - taller with soft blue fill */
+/** SVG Gaussian curve component for quartiles - wider, more curvy */
 function GaussianCurve() {
   // Soft blue color for the curve
   const curveColor = '#A8C5E8';
   const lineColor = '#7AA7D6';
   
+  // More points for a smoother, more curvy Gaussian curve
+  // Using a proper Gaussian formula approximation: y = 50 - 45 * exp(-((x-50)^2)/(2*20^2))
+  const curvePoints = [];
+  for (let x = 0; x <= 100; x += 2) {
+    const sigma = 22;
+    const y = 50 - 42 * Math.exp(-Math.pow(x - 50, 2) / (2 * Math.pow(sigma, 2)));
+    curvePoints.push(`${x},${y}`);
+  }
+  const curvePath = `M 0,50 L ${curvePoints.join(' L ')} L 100,50`;
+  const curveOutline = `M ${curvePoints.join(' L ')}`;
+  
   return (
-    <svg viewBox="0 0 100 50" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
+    <svg viewBox="0 0 100 55" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
       {/* Shaded area under curve - soft blue fill */}
       <path
-        d="M 0,50 Q 10,48 25,32 Q 40,12 50,6 Q 60,12 75,32 Q 90,48 100,50 L 100,50 L 0,50 Z"
+        d={curvePath}
         fill={curveColor}
-        fillOpacity="0.4"
+        fillOpacity="0.3"
       />
       {/* Gaussian curve outline */}
       <path
-        d="M 0,50 Q 10,48 25,32 Q 40,12 50,6 Q 60,12 75,32 Q 90,48 100,50"
+        d={curveOutline}
         fill="none"
         stroke={lineColor}
         strokeWidth="1.5"
-        strokeOpacity="0.6"
+        strokeOpacity="0.5"
       />
       {/* Q25 marker line at 25% position */}
-      <line x1="25" y1="32" x2="25" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" />
+      <line x1="25" y1="8" x2="25" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.4" strokeDasharray="2,2" />
       {/* Q50 (median) marker line at 50% position */}
-      <line x1="50" y1="6" x2="50" y2="50" stroke={lineColor} strokeWidth="1.5" strokeOpacity="0.6" />
+      <line x1="50" y1="8" x2="50" y2="50" stroke={lineColor} strokeWidth="1.5" strokeOpacity="0.5" strokeDasharray="2,2" />
       {/* Q75 marker line at 75% position */}
-      <line x1="75" y1="32" x2="75" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" />
+      <line x1="75" y1="8" x2="75" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.4" strokeDasharray="2,2" />
     </svg>
   );
 }
 
-/** Circular progress ring for high/low incidents - Fluent UI DonutChart style */
+/** Circular progress ring for high/low incidents - neutral colors */
 function HighLowRing({ highs, lows }: { highs: number; lows: number }) {
   const total = highs + lows;
   const highRatio = total > 0 ? highs / total : 0.5;
   
-  // SVG circle parameters - Fluent UI style
-  const size = 56;
-  const strokeWidth = 6;
+  // SVG circle parameters - use shared donut size
+  const size = DONUT_SIZE;
+  const strokeWidth = 5;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   
@@ -371,7 +395,7 @@ function HighLowRing({ highs, lows }: { highs: number; lows: number }) {
   
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      {/* Low portion (purple) - starts first */}
+      {/* Low portion (lighter gray) - starts first */}
       <circle
         cx={size / 2}
         cy={size / 2}
@@ -383,7 +407,7 @@ function HighLowRing({ highs, lows }: { highs: number; lows: number }) {
         strokeDashoffset={0}
         transform={`rotate(-90 ${size / 2} ${size / 2})`}
       />
-      {/* High portion (blue) */}
+      {/* High portion (darker gray) */}
       <circle
         cx={size / 2}
         cy={size / 2}
@@ -435,12 +459,12 @@ export function SugarmateStatsCard({
               <div className={styles.graphicsColumn}>
                 <div className={styles.gaussianContainer}>
                   <GaussianCurve />
-                  {/* Quartile values overlaid on curve */}
+                  {/* Quartile values overlaid on curve - positioned at 25%, 50%, 75% */}
                   <div className={styles.quartileValuesOverlay}>
                     <Text className={styles.quartileValue}>
                       {displayGlucoseValue(quartiles.q25, glucoseUnit)}
                     </Text>
-                    <Text className={styles.quartileMedianValue}>
+                    <Text className={styles.quartileValue}>
                       {displayGlucoseValue(quartiles.q50, glucoseUnit)}
                     </Text>
                     <Text className={styles.quartileValue}>
@@ -453,7 +477,7 @@ export function SugarmateStatsCard({
           </Tooltip>
         )}
 
-        {/* High/Low Incidents - Fluent UI DonutChart style */}
+        {/* High/Low Incidents - neutral colors, text outside */}
         <Tooltip content="Number of transitions into high and low glucose zones" relationship="description">
           <div className={styles.statSection}>
             <div className={styles.labelColumn}>
@@ -463,14 +487,17 @@ export function SugarmateStatsCard({
               <div className={styles.highLowContainer}>
                 <div className={styles.circularIndicator}>
                   <HighLowRing highs={totalHighs} lows={totalLows} />
-                  <div className={styles.circularValues}>
-                    <Text className={styles.highValue}>{totalHighs}</Text>
-                    <Text className={styles.lowValue}>{totalLows}</Text>
-                  </div>
                 </div>
-                <div className={styles.highLowLabels}>
-                  <Text className={styles.highLowLabel} style={{ color: HIGH_COLOR }}>High</Text>
-                  <Text className={styles.highLowLabel} style={{ color: LOW_COLOR }}>Low</Text>
+                <div className={styles.highLowTextContainer}>
+                  <div className={styles.highLowRow}>
+                    <Text className={styles.highLowValue}>{totalHighs}</Text>
+                    <Text className={styles.highLowLabel}>High</Text>
+                  </div>
+                  <div className={styles.highLowDivider} />
+                  <div className={styles.highLowRow}>
+                    <Text className={styles.highLowValue}>{totalLows}</Text>
+                    <Text className={styles.highLowLabel}>Low</Text>
+                  </div>
                 </div>
               </div>
             </div>
@@ -561,30 +588,33 @@ export function SugarmateStatsCard({
         </Tooltip>
       </div>
 
-      {/* Summary Row with Average, Median, StDev */}
+      {/* Summary Row with Average, Median, StDev - inline format */}
       <div className={styles.summaryRow}>
         <Tooltip content="Average of all glucose values" relationship="description">
           <div className={styles.summaryItem}>
+            <Text className={styles.summaryLabel}>Avg</Text>
             <Text className={styles.summaryValue}>
               {averageGlucose !== null ? displayGlucoseValue(averageGlucose, glucoseUnit) : '-'}
             </Text>
-            <Text className={styles.summaryLabel}>Avg {unitLabel}</Text>
+            <Text className={styles.summaryUnit}>{unitLabel}</Text>
           </div>
         </Tooltip>
         <Tooltip content="Median (middle) glucose value" relationship="description">
           <div className={styles.summaryItem}>
+            <Text className={styles.summaryLabel}>Median</Text>
             <Text className={styles.summaryValue}>
               {medianGlucose !== null ? displayGlucoseValue(medianGlucose, glucoseUnit) : '-'}
             </Text>
-            <Text className={styles.summaryLabel}>Median {unitLabel}</Text>
+            <Text className={styles.summaryUnit}>{unitLabel}</Text>
           </div>
         </Tooltip>
         <Tooltip content="Standard deviation - measures glucose variability" relationship="description">
           <div className={styles.summaryItem}>
+            <Text className={styles.summaryLabel}>StDev</Text>
             <Text className={styles.summaryValue}>
               {standardDeviation !== null ? displayGlucoseValue(standardDeviation, glucoseUnit) : '-'}
             </Text>
-            <Text className={styles.summaryLabel}>StDev {unitLabel}</Text>
+            <Text className={styles.summaryUnit}>{unitLabel}</Text>
           </div>
         </Tooltip>
       </div>

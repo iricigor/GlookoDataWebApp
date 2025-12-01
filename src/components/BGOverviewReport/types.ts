@@ -7,6 +7,11 @@ import type {
   GlucoseUnit,
 } from '../../types';
 import { GLUCOSE_RANGE_COLORS } from '../../utils/data';
+import type {
+  QuartileStats,
+  HighLowIncidents,
+  FluxResult,
+} from '../../utils/data/glucoseRangeUtils';
 
 /** Statistics for TIR (Time in Range) data */
 export interface TIRStats {
@@ -92,6 +97,9 @@ export interface SugarmateStats {
   averageGlucose: number | null;
   medianGlucose: number | null;
   standardDeviation: number | null;
+  quartiles: QuartileStats | null;
+  incidents: HighLowIncidents;
+  flux: FluxResult | null;
   unicornCount: number;
   wakeupAverage: number | null;
   bedtimeAverage: number | null;
