@@ -34,6 +34,13 @@ import {
   calculateCV,
   calculateBGRI,
   calculateJIndex,
+  calculateMedianGlucose,
+  calculateStandardDeviation,
+  calculateQuartiles,
+  countHighLowIncidents,
+  countUnicorns,
+  calculateFlux,
+  calculatePercentage,
 } from '../../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../../utils/visualization';
 import { useGlucoseThresholds } from '../../hooks/useGlucoseThresholds';
@@ -44,6 +51,7 @@ import { ControlBar } from './ControlBar';
 import { TimeInRangeCard } from './TimeInRangeCard';
 import { HbA1cEstimateCard } from './HbA1cEstimateCard';
 import { RiskAssessmentCard } from './RiskAssessmentCard';
+import { SugarmateStatsCard } from './SugarmateStatsCard';
 import { TimeInRangeByPeriodSection } from './TimeInRangeByPeriodSection';
 import { TimeInRangeByTimeOfDaySection } from './TimeInRangeByTimeOfDaySection';
 import { DetailedBreakdownAccordion } from './DetailedBreakdownAccordion';
@@ -332,9 +340,56 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
     };
   };
 
+  // Calculate Sugarmate-style stats with current filters applied
+  const calculateSugarmateStats = () => {
+    if (readings.length === 0 || tirStats.total === 0) {
+      return null;
+    }
+
+    // Filter by date range and day of week (same as TIR)
+    let filteredReadings = readings;
+    
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      
+      filteredReadings = readings.filter(r => {
+        const timestamp = r.timestamp.getTime();
+        return timestamp >= start.getTime() && timestamp <= end.getTime();
+      });
+    }
+
+    filteredReadings = filterReadingsByDayOfWeek(filteredReadings, dayFilter);
+
+    if (filteredReadings.length === 0) {
+      return null;
+    }
+
+    // Calculate percentages from TIR stats
+    const percentBelow = calculatePercentage(tirStats.low + (tirStats.veryLow ?? 0), tirStats.total);
+    const percentInRange = calculatePercentage(tirStats.inRange, tirStats.total);
+    const percentAbove = calculatePercentage(tirStats.high + (tirStats.veryHigh ?? 0), tirStats.total);
+
+    return {
+      percentAbove,
+      percentBelow,
+      percentInRange,
+      averageGlucose: calculateAverageGlucose(filteredReadings),
+      medianGlucose: calculateMedianGlucose(filteredReadings),
+      standardDeviation: calculateStandardDeviation(filteredReadings),
+      quartiles: calculateQuartiles(filteredReadings),
+      incidents: countHighLowIncidents(filteredReadings, thresholds),
+      flux: calculateFlux(filteredReadings),
+      unicornCount: countUnicorns(filteredReadings),
+    };
+  };
+
   const tirStats = calculateTIRStats();
   const hba1cStats = calculateHbA1cStats();
   const riskStats = calculateRiskStats();
+  const sugarmateStats = calculateSugarmateStats();
 
   if (!selectedFile) {
     return (
@@ -392,6 +447,24 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
       {/* Risk Assessment Card */}
       {!loading && !error && (
         <RiskAssessmentCard riskStats={riskStats} />
+      )}
+
+      {/* Sugarmate Stats Card */}
+      {!loading && !error && sugarmateStats && (
+        <SugarmateStatsCard
+          glucoseUnit={glucoseUnit}
+          thresholds={thresholds}
+          percentAbove={sugarmateStats.percentAbove}
+          percentBelow={sugarmateStats.percentBelow}
+          percentInRange={sugarmateStats.percentInRange}
+          averageGlucose={sugarmateStats.averageGlucose}
+          medianGlucose={sugarmateStats.medianGlucose}
+          standardDeviation={sugarmateStats.standardDeviation}
+          quartiles={sugarmateStats.quartiles}
+          incidents={sugarmateStats.incidents}
+          flux={sugarmateStats.flux}
+          unicornCount={sugarmateStats.unicornCount}
+        />
       )}
 
       {/* AGP Card */}

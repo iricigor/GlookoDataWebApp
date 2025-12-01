@@ -86,3 +86,13 @@ export interface TIRComponentProps {
   categoryMode: RangeCategoryMode;
   glucoseUnit: GlucoseUnit;
 }
+
+/** Sugarmate-style statistics */
+export interface SugarmateStats {
+  percentAbove: number;
+  percentBelow: number;
+  percentInRange: number;
+  medianGlucose: number | null;
+  standardDeviation: number | null;
+  unicornCount: number;
+}

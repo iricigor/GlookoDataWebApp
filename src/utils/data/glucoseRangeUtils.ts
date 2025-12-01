@@ -799,3 +799,215 @@ export function calculateJIndex(readings: GlucoseReading[]): number | null {
   
   return 0.001 * Math.pow(meanMgdl + sdMgdl, 2);
 }
+
+/**
+ * Calculate median glucose value from readings
+ * The median is the 'middle' value when all values are sorted
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns Median glucose value in mmol/L, or null if no readings
+ */
+export function calculateMedianGlucose(readings: GlucoseReading[]): number | null {
+  if (readings.length === 0) return null;
+  
+  const sortedValues = readings.map(r => r.value).sort((a, b) => a - b);
+  const mid = Math.floor(sortedValues.length / 2);
+  
+  if (sortedValues.length % 2 === 0) {
+    return (sortedValues[mid - 1] + sortedValues[mid]) / 2;
+  }
+  return sortedValues[mid];
+}
+
+/**
+ * Calculate standard deviation of glucose values
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns Standard deviation in mmol/L, or null if insufficient readings
+ */
+export function calculateStandardDeviation(readings: GlucoseReading[]): number | null {
+  if (readings.length < 2) return null;
+  
+  const mean = calculateAverageGlucose(readings);
+  if (!mean) return null;
+  
+  const sumSquaredDiffs = readings.reduce((sum, r) => sum + Math.pow(r.value - mean, 2), 0);
+  return Math.sqrt(sumSquaredDiffs / (readings.length - 1));
+}
+
+/**
+ * Quartile statistics for glucose readings
+ */
+export interface QuartileStats {
+  q25: number;  // 25th percentile
+  q50: number;  // 50th percentile (median)
+  q75: number;  // 75th percentile
+  min: number;  // Minimum value
+  max: number;  // Maximum value
+}
+
+/**
+ * Calculate quartiles (25%, 50%, 75%) from glucose readings
+ * Quartiles help indicate the variability in glucose values
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns Quartile statistics, or null if no readings
+ */
+export function calculateQuartiles(readings: GlucoseReading[]): QuartileStats | null {
+  if (readings.length === 0) return null;
+  
+  const sortedValues = readings.map(r => r.value).sort((a, b) => a - b);
+  const n = sortedValues.length;
+  
+  // Helper function to calculate percentile
+  const percentile = (arr: number[], p: number): number => {
+    const index = (p / 100) * (arr.length - 1);
+    const lower = Math.floor(index);
+    const upper = Math.ceil(index);
+    if (lower === upper) return arr[lower];
+    return arr[lower] + (arr[upper] - arr[lower]) * (index - lower);
+  };
+  
+  return {
+    q25: percentile(sortedValues, 25),
+    q50: percentile(sortedValues, 50),
+    q75: percentile(sortedValues, 75),
+    min: sortedValues[0],
+    max: sortedValues[n - 1],
+  };
+}
+
+/**
+ * High/Low incident statistics
+ */
+export interface HighLowIncidents {
+  highCount: number;   // Number of high incidents (going above range)
+  lowCount: number;    // Number of low incidents (going below range)
+  veryHighCount: number;
+  veryLowCount: number;
+}
+
+/**
+ * Count high and low incidents
+ * An incident is when the glucose value goes outside the configured normal range
+ * This counts the number of times glucose transitions into each zone
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L), should be sorted by time
+ * @param thresholds - Glucose thresholds in mmol/L
+ * @returns High/Low incident counts
+ */
+export function countHighLowIncidents(
+  readings: GlucoseReading[],
+  thresholds: GlucoseThresholds
+): HighLowIncidents {
+  if (readings.length === 0) {
+    return { highCount: 0, lowCount: 0, veryHighCount: 0, veryLowCount: 0 };
+  }
+  
+  // Sort readings by timestamp
+  const sortedReadings = [...readings].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  
+  let highCount = 0;
+  let lowCount = 0;
+  let veryHighCount = 0;
+  let veryLowCount = 0;
+  
+  let previousCategory: string | null = null;
+  
+  for (const reading of sortedReadings) {
+    const currentCategory = categorizeGlucose(reading.value, thresholds, 5);
+    
+    if (previousCategory !== null && currentCategory !== previousCategory) {
+      // Transition detected
+      if (currentCategory === 'high' && previousCategory !== 'veryHigh') {
+        highCount++;
+      } else if (currentCategory === 'veryHigh') {
+        veryHighCount++;
+      } else if (currentCategory === 'low' && previousCategory !== 'veryLow') {
+        lowCount++;
+      } else if (currentCategory === 'veryLow') {
+        veryLowCount++;
+      }
+    }
+    
+    previousCategory = currentCategory;
+  }
+  
+  return { highCount, lowCount, veryHighCount, veryLowCount };
+}
+
+/**
+ * Count "unicorns" - glucose values that are exactly 100 mg/dL (5.6 mmol/L)
+ * or exactly 5.0 mmol/L (90 mg/dL) depending on measurement precision
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns Number of unicorn readings
+ */
+export function countUnicorns(readings: GlucoseReading[]): number {
+  // Check for values close to 5.0 mmol/L (90 mg/dL) or 5.6 mmol/L (100 mg/dL)
+  // Using a small tolerance for floating point comparison
+  const tolerance = 0.05;
+  
+  return readings.filter(r => {
+    const value = r.value;
+    // 5.0 mmol/L is considered a "perfect" reading in mmol/L systems
+    // 5.6 mmol/L ≈ 100 mg/dL is considered a "perfect" reading in mg/dL systems
+    return Math.abs(value - 5.0) < tolerance || Math.abs(value - 5.6) < tolerance;
+  }).length;
+}
+
+/**
+ * Flux grade type (A+ to F)
+ */
+export type FluxGrade = 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';
+
+/**
+ * Flux grade result with interpretation
+ */
+export interface FluxResult {
+  grade: FluxGrade;
+  score: number;  // Underlying numeric score
+  description: string;
+}
+
+/**
+ * Calculate Flux grade - measures how steady glucose values are
+ * Based on the coefficient of variation (CV) and rate of change
+ * A+ indicates very steady values, F indicates frequently changing values
+ * 
+ * @param readings - Array of glucose readings (values in mmol/L)
+ * @returns Flux grade result
+ */
+export function calculateFlux(readings: GlucoseReading[]): FluxResult | null {
+  if (readings.length < 2) return null;
+  
+  const cv = calculateCV(readings);
+  if (cv === null) return null;
+  
+  // Grade based on CV% thresholds
+  // Lower CV = more stable glucose = better grade
+  let grade: FluxGrade;
+  let description: string;
+  
+  if (cv <= 20) {
+    grade = 'A+';
+    description = 'Extremely steady glucose values';
+  } else if (cv <= 26) {
+    grade = 'A';
+    description = 'Very steady glucose values';
+  } else if (cv <= 33) {
+    grade = 'B';
+    description = 'Reasonably steady glucose values';
+  } else if (cv <= 40) {
+    grade = 'C';
+    description = 'Moderate glucose variability';
+  } else if (cv <= 50) {
+    grade = 'D';
+    description = 'High glucose variability';
+  } else {
+    grade = 'F';
+    description = 'Very high glucose variability';
+  }
+  
+  return { grade, score: cv, description };
+}
