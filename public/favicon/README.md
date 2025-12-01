@@ -6,24 +6,24 @@ This directory contains the website favicon (browser tab icon) for GlookoDataWeb
 
 **`favicon.svg`** - The active favicon used by the application
 
-- **Design**: Full-size Blood Drop with Shadow (v2 Option 1)
-- **Theme**: Blood glucose monitoring with modern aesthetics
-- **Description**: Full-size red blood drop with subtle shadow and white ECG pulse line overlay
-- **Rationale**: Clean, modern design with clear diabetes association. The full-size blood drop maximizes visibility at small sizes, while the drop shadow adds depth without a heavy background. The ECG line represents health monitoring.
+- **Design**: Full-size Blood Drop with Shadow (v2 Option 2 - Vibrant Red)
+- **Theme**: Bold blood glucose monitoring with modern aesthetics
+- **Description**: Full-size vibrant red blood drop with red-tinted shadow and white ECG pulse line overlay
+- **Rationale**: Eye-catching, modern design with clear diabetes association. The vibrant red color and wider ECG amplitude ensure excellent visibility at all sizes, including 16px icons.
 
 ## Version 2 Options (Current)
 
 Three icon designs featuring full-size blood drop with shadow (no background):
 
-### v2 Option 1: Classic with Shadow (SELECTED)
-**File**: `favicon-v2-option1.svg` → `favicon.svg`
+### v2 Option 1: Classic with Shadow
+**File**: `favicon-v2-option1.svg`
 - **Theme**: Clean blood glucose monitoring
 - **Design**: Full-size 3D red blood drop with dark shadow and ECG pulse line
 - **Pros**: Clean appearance, works on any background, excellent visibility
 - **Cons**: Shadow may blend on very dark backgrounds
 
-### v2 Option 2: Vibrant Red
-**File**: `favicon-v2-option2.svg`
+### v2 Option 2: Vibrant Red (SELECTED)
+**File**: `favicon-v2-option2.svg` → `favicon.svg`
 - **Theme**: Bold blood glucose monitoring  
 - **Design**: Brighter red blood drop with red-tinted shadow and wider ECG amplitude
 - **Pros**: More vibrant colors, eye-catching, wider pulse pattern more visible
@@ -74,10 +74,10 @@ To use a different icon option:
 
 1. Copy the desired option file to `favicon.svg`:
    ```bash
-   # Use v2 Option 1 (current default)
+   # Use v2 Option 1 (classic with shadow)
    cp public/favicon/favicon-v2-option1.svg public/favicon/favicon.svg
    
-   # Or use v2 Option 2 (vibrant red)
+   # Or use v2 Option 2 (vibrant red - current default)
    cp public/favicon/favicon-v2-option2.svg public/favicon/favicon.svg
    
    # Or use v2 Option 3 (deep crimson)
