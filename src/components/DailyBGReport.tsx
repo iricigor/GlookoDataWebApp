@@ -234,6 +234,11 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5 }
   const loadedFileIdRef = useRef<string | undefined>(undefined);
   const hasAppliedSavedDateRef = useRef<boolean>(false);
 
+  // Reset maxGlucose when glucoseUnit changes to avoid mismatched clamping
+  useEffect(() => {
+    setMaxGlucose(glucoseUnit === 'mg/dL' ? 396 : 22.0);
+  }, [glucoseUnit]);
+
   // Load all data when file is selected
   useEffect(() => {
     if (!selectedFile) {
