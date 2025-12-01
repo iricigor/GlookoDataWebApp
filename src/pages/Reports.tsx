@@ -93,9 +93,15 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
     return savedTab || 'bgOverview';
   });
 
-  // Save the selected tab to localStorage whenever it changes
+  // Save the selected tab to localStorage and update URL hash whenever it changes
   useEffect(() => {
     localStorage.setItem('reports-selected-tab', selectedTab);
+    // Update URL hash to enable deep linking (e.g., #reports/bgOverview)
+    const currentHash = window.location.hash.slice(1);
+    const expectedHash = `reports/${selectedTab}`;
+    if (currentHash !== expectedHash && currentHash.startsWith('reports')) {
+      window.history.replaceState(null, '', `#${expectedHash}`);
+    }
   }, [selectedTab]);
 
   const renderTabContent = () => {
