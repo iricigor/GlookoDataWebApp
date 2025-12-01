@@ -197,9 +197,10 @@ interface DailyBGReportProps {
   selectedFile?: UploadedFile;
   glucoseUnit: GlucoseUnit;
   insulinDuration?: number;
+  showDayNightShading: boolean;
 }
 
-export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5 }: DailyBGReportProps) {
+export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, showDayNightShading: _showDayNightShading }: DailyBGReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
   const { colorScheme, setColorScheme } = useBGColorScheme();

@@ -8,13 +8,7 @@ import {
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
-import { BGValuesReport } from '../components/BGValuesReport';
-import { InsulinDailyReport } from '../components/InsulinDailyReport';
-import { UnifiedDailyReport } from '../components/UnifiedDailyReport';
-import { IOBReport } from '../components/IOBReport';
 import { BGOverviewReport } from '../components/BGOverviewReport';
-import { RoCReport } from '../components/RoCReport';
-import { HyposReport } from '../components/HyposReport';
 import { DailyBGReport } from '../components/DailyBGReport';
 import type { UploadedFile, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
@@ -78,11 +72,12 @@ interface ReportsProps {
   exportFormat: ExportFormat;
   glucoseUnit: GlucoseUnit;
   insulinDuration?: number;
+  showDayNightShading: boolean;
 }
 
-const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'detailedCgm', 'detailedInsulin', 'unifiedView', 'iob', 'roc', 'hypos'];
+const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG'];
 
-export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDuration }: ReportsProps) {
+export function Reports({ selectedFile, glucoseUnit, insulinDuration, showDayNightShading }: ReportsProps) {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState<string>(() => {
     // Check URL hash for deep linking first (e.g., #reports/bgOverview)
@@ -135,19 +130,7 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
       case 'bgOverview':
         return <BGOverviewReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
       case 'dailyBG':
-        return <DailyBGReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} />;
-      case 'detailedCgm':
-        return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
-      case 'detailedInsulin':
-        return <InsulinDailyReport selectedFile={selectedFile} />;
-      case 'unifiedView':
-        return <UnifiedDailyReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
-      case 'iob':
-        return <IOBReport selectedFile={selectedFile} insulinDuration={insulinDuration} />;
-      case 'roc':
-        return <RoCReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
-      case 'hypos':
-        return <HyposReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
+        return <DailyBGReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} showDayNightShading={showDayNightShading} />;
       default:
         return null;
     }
@@ -173,12 +156,6 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
         <Tab value="fileInfo">File Info</Tab>
         <Tab value="bgOverview">BG Overview</Tab>
         <Tab value="dailyBG">Daily BG</Tab>
-        <Tab value="detailedCgm">Detailed CGM</Tab>
-        <Tab value="detailedInsulin">Detailed Insulin</Tab>
-        <Tab value="unifiedView">Unified View</Tab>
-        <Tab value="iob">IOB</Tab>
-        <Tab value="roc">RoC</Tab>
-        <Tab value="hypos">Hypos</Tab>
       </TabList>
 
       <div className={styles.contentWrapper}>
@@ -193,12 +170,6 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
           <Tab value="fileInfo">File Info</Tab>
           <Tab value="bgOverview">BG Overview</Tab>
           <Tab value="dailyBG">Daily BG</Tab>
-          <Tab value="detailedCgm">Detailed CGM</Tab>
-          <Tab value="detailedInsulin">Detailed Insulin</Tab>
-          <Tab value="unifiedView">Unified View</Tab>
-          <Tab value="iob">IOB</Tab>
-          <Tab value="roc">RoC</Tab>
-          <Tab value="hypos">Hypos</Tab>
         </TabList>
 
         <div className={styles.contentArea}>

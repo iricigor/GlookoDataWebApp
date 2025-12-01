@@ -72,7 +72,7 @@ describe('DailyBGReport', () => {
   });
 
   it('should show "please select a file" message when no file is selected', () => {
-    render(<DailyBGReport glucoseUnit="mmol/L" />);
+    render(<DailyBGReport glucoseUnit="mmol/L" showDayNightShading={true} />);
     
     expect(screen.getByText(/please select a file to view the daily bg report/i)).toBeInTheDocument();
   });
@@ -93,14 +93,14 @@ describe('DailyBGReport', () => {
       () => new Promise(() => {}) // Never resolves to keep loading state
     );
 
-    render(<DailyBGReport selectedFile={mockFile} glucoseUnit="mmol/L" />);
+    render(<DailyBGReport selectedFile={mockFile} glucoseUnit="mmol/L" showDayNightShading={true} />);
     
     // Should show loading state
     expect(screen.getByText(/loading data/i)).toBeInTheDocument();
   });
 
   it('should render with correct props', () => {
-    const { container } = render(<DailyBGReport glucoseUnit="mmol/L" insulinDuration={5} />);
+    const { container } = render(<DailyBGReport glucoseUnit="mmol/L" insulinDuration={5} showDayNightShading={true} />);
     
     expect(container).toBeInTheDocument();
   });

@@ -17,6 +17,7 @@ import {
   AccordionItem,
   AccordionHeader,
   AccordionPanel,
+  Switch,
 } from '@fluentui/react-components';
 import { useState, useEffect, useRef } from 'react';
 import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular, DocumentBulletListRegular } from '@fluentui/react-icons';
@@ -239,6 +240,8 @@ const useStyles = makeStyles({
 interface SettingsProps {
   themeMode: ThemeMode;
   onThemeChange: (mode: ThemeMode) => void;
+  showDayNightShading: boolean;
+  onShowDayNightShadingChange: (show: boolean) => void;
   exportFormat: ExportFormat;
   onExportFormatChange: (format: ExportFormat) => void;
   responseLanguage: ResponseLanguage;
@@ -264,6 +267,8 @@ interface SettingsProps {
 export function Settings({ 
   themeMode, 
   onThemeChange, 
+  showDayNightShading,
+  onShowDayNightShadingChange,
   exportFormat, 
   onExportFormatChange,
   responseLanguage,
@@ -436,6 +441,19 @@ export function Settings({
                 <Radio value="dark" label="Dark" />
                 <Radio value="system" label="System (recommended)" />
               </RadioGroup>
+            </div>
+
+            <div className={styles.settingSection}>
+              <Title3 className={styles.sectionTitle}>Day/Night Shading</Title3>
+              <Divider className={styles.divider} />
+              <Text className={styles.settingDescription}>
+                Show day/night background shading on 24-hour glucose graphs. Night hours (midnight to 8AM and 8PM to midnight) are shaded to help visualize glucose patterns during sleep.
+              </Text>
+              <Switch
+                checked={showDayNightShading}
+                onChange={(_, data) => onShowDayNightShadingChange(data.checked)}
+                label={showDayNightShading ? 'Day/night shading enabled' : 'Day/night shading disabled'}
+              />
             </div>
 
             <div className={styles.settingSection}>
