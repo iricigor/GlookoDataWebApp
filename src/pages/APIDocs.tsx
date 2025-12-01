@@ -21,6 +21,7 @@ import 'swagger-ui-react/swagger-ui.css'
 import './APIDocs.css'
 import { useAuth } from '../hooks/useAuth'
 import { useProUserCheck } from '../hooks/useProUserCheck'
+import { useProUserBadgeStyles } from '../styles/proUserBadge'
 
 const useStyles = makeStyles({
   container: {
@@ -92,14 +93,6 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorStatusSuccessForeground1,
   },
-  userNameContainer: {
-    display: 'flex',
-    alignItems: 'center',
-  },
-  proUserBadge: {
-    marginLeft: '4px',
-    cursor: 'default',
-  },
   content: {
     flex: 1,
     overflow: 'auto',
@@ -119,6 +112,7 @@ const useStyles = makeStyles({
 
 export function APIDocs() {
   const styles = useStyles()
+  const proBadgeStyles = useProUserBadgeStyles()
   const { isLoggedIn, userName, userEmail, idToken, isInitialized, login, logout } = useAuth()
   const { isProUser } = useProUserCheck(isLoggedIn ? idToken : null)
   const [swaggerSpec, setSwaggerSpec] = useState<object | null>(null)
@@ -183,11 +177,11 @@ export function APIDocs() {
           {isLoggedIn && userName ? (
             <>
               <div className={styles.userInfo}>
-                <div className={styles.userNameContainer}>
+                <div className={proBadgeStyles.userNameContainer}>
                   <Text className={styles.userName}>{userName}</Text>
                   {isProUser && (
                     <Tooltip content="Pro user" relationship="label">
-                      <span className={styles.proUserBadge} aria-label="Pro user">✨</span>
+                      <span className={proBadgeStyles.proUserBadge} aria-label="Pro user">✨</span>
                     </Tooltip>
                   )}
                 </div>

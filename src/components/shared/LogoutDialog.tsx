@@ -15,6 +15,7 @@ import {
   Tooltip,
 } from '@fluentui/react-components';
 import { useState } from 'react';
+import { useProUserBadgeStyles } from '../../styles/proUserBadge';
 
 const useStyles = makeStyles({
   userButton: {
@@ -47,14 +48,6 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground2,
   },
-  proUserBadge: {
-    marginLeft: '4px',
-    cursor: 'default',
-  },
-  userNameContainer: {
-    display: 'flex',
-    alignItems: 'center',
-  },
 });
 
 interface LogoutDialogProps {
@@ -67,6 +60,7 @@ interface LogoutDialogProps {
 
 export function LogoutDialog({ userName, userEmail, userPhoto, isProUser, onLogout }: LogoutDialogProps) {
   const styles = useStyles();
+  const proBadgeStyles = useProUserBadgeStyles();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -94,7 +88,7 @@ export function LogoutDialog({ userName, userEmail, userPhoto, isProUser, onLogo
           {userName}
           {isProUser && (
             <Tooltip content="Pro user" relationship="label">
-              <span className={styles.proUserBadge} aria-label="Pro user">✨</span>
+              <span className={proBadgeStyles.proUserBadge} aria-label="Pro user">✨</span>
             </Tooltip>
           )}
         </Button>
@@ -110,11 +104,11 @@ export function LogoutDialog({ userName, userEmail, userPhoto, isProUser, onLogo
                 image={userPhoto ? { src: userPhoto } : undefined}
               />
               <div className={styles.userDetails}>
-                <div className={styles.userNameContainer}>
+                <div className={proBadgeStyles.userNameContainer}>
                   <Text className={styles.userName}>{userName}</Text>
                   {isProUser && (
                     <Tooltip content="Pro user" relationship="label">
-                      <span className={styles.proUserBadge} aria-label="Pro user">✨</span>
+                      <span className={proBadgeStyles.proUserBadge} aria-label="Pro user">✨</span>
                     </Tooltip>
                   )}
                 </div>

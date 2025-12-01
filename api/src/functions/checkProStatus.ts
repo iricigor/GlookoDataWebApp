@@ -13,6 +13,7 @@
  *   - 200 OK: { isProUser: boolean, userId: string }
  *   - 401 Unauthorized: Invalid or missing token
  *   - 500 Internal Server Error: Infrastructure error
+ *   - 503 Service Unavailable: Storage not configured or access denied
  * 
  * Token Validation:
  * The function expects an ID token (not an access token) from MSAL authentication.

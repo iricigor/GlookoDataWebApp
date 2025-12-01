@@ -139,7 +139,7 @@ export function useProUserCheck(idToken?: string | null): UseProUserCheckReturn 
     isCheckingRef.current = false;
     hasCheckedRef.current = false;
     currentTokenRef.current = null;
-    setState(initialState);
+    setState(() => ({ ...initialState }));
   }, []);
 
   // Auto-check when idToken is provided
