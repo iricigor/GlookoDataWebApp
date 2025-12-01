@@ -96,6 +96,9 @@ interface TokenClaims {
   exp?: number;      // Expiration time
   iat?: number;      // Issued at time
   tid?: string;      // Tenant ID
+  email?: string;    // User's email address (when email scope is requested)
+  preferred_username?: string; // User's preferred username (usually email)
+  upn?: string;      // User Principal Name (common in enterprise AAD setups)
 }
 
 /**
@@ -124,22 +127,19 @@ function validateIssuer(issuer: string, tenantId?: string): boolean {
 }
 
 /**
- * Validate and extract user ID from the ID token with full signature verification.
+ * Validate and decode a JWT token from the Authorization header.
  * 
- * This implementation provides production-ready JWT validation:
+ * This is a shared helper function that provides production-ready JWT validation:
  * - Cryptographic signature verification using Microsoft's JWKS endpoint
  * - Audience validation to ensure the token is intended for this application
  * - Issuer validation to ensure the token comes from Microsoft identity platform
  * - Expiration validation to reject expired tokens
  * 
- * The token is expected to be a Microsoft identity platform (Azure AD/Entra ID) ID token.
- * See: https://learn.microsoft.com/en-us/azure/active-directory/develop/id-tokens
- * 
  * @param authHeader - The Authorization header value (Bearer token)
  * @param context - The invocation context for logging
- * @returns Promise resolving to the user's object ID (oid) or subject (sub) claim, or null if invalid
+ * @returns Promise resolving to the verified token claims or null if invalid
  */
-export async function extractUserIdFromToken(authHeader: string | null, context: InvocationContext): Promise<string | null> {
+async function validateAndDecodeToken(authHeader: string | null, context: InvocationContext): Promise<TokenClaims | null> {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     context.warn('Missing or invalid Authorization header format');
     return null;
@@ -186,14 +186,7 @@ export async function extractUserIdFromToken(authHeader: string | null, context:
       return null;
     }
 
-    // Return the object ID (oid) or subject (sub) claim
-    const userId = verifiedPayload.oid || verifiedPayload.sub;
-    if (!userId) {
-      context.warn('Token missing user identifier (oid or sub claim)');
-      return null;
-    }
-
-    return userId;
+    return verifiedPayload;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       context.warn('Token has expired');
@@ -206,6 +199,100 @@ export async function extractUserIdFromToken(authHeader: string | null, context:
     }
     return null;
   }
+}
+
+/**
+ * Extract user ID from verified token claims.
+ * 
+ * This helper extracts the user's unique identifier (oid or sub claim) from
+ * verified token claims and logs a warning if neither claim is present.
+ * 
+ * @param claims - The verified token claims
+ * @param context - The invocation context for logging
+ * @returns The user ID or null if not found
+ */
+function getUserIdFromClaims(claims: TokenClaims, context: InvocationContext): string | null {
+  const userId = claims.oid || claims.sub;
+  if (!userId) {
+    context.warn('Token missing user identifier (oid or sub claim)');
+    return null;
+  }
+  return userId;
+}
+
+/**
+ * Extract email from verified token claims.
+ * 
+ * This helper extracts the user's email from verified token claims,
+ * checking email, preferred_username, and upn claims in order.
+ * The email is normalized to lowercase for consistent lookup.
+ * 
+ * @param claims - The verified token claims
+ * @returns The normalized email or null if not found
+ */
+function getEmailFromClaims(claims: TokenClaims): string | null {
+  // Check email, preferred_username, and upn claims in order of preference
+  const rawEmail = claims.email || claims.preferred_username || claims.upn;
+  return rawEmail ? rawEmail.toLowerCase() : null;
+}
+
+/**
+ * Validate and extract user ID from the ID token with full signature verification.
+ * 
+ * This implementation uses the shared validateAndDecodeToken helper and extracts
+ * the user's unique identifier (oid or sub claim).
+ * 
+ * The token is expected to be a Microsoft identity platform (Azure AD/Entra ID) ID token.
+ * See: https://learn.microsoft.com/en-us/azure/active-directory/develop/id-tokens
+ * 
+ * @param authHeader - The Authorization header value (Bearer token)
+ * @param context - The invocation context for logging
+ * @returns Promise resolving to the user's object ID (oid) or subject (sub) claim, or null if invalid
+ */
+export async function extractUserIdFromToken(authHeader: string | null, context: InvocationContext): Promise<string | null> {
+  const verifiedPayload = await validateAndDecodeToken(authHeader, context);
+  if (!verifiedPayload) {
+    return null;
+  }
+
+  return getUserIdFromClaims(verifiedPayload, context);
+}
+
+/**
+ * User info extracted from the ID token
+ */
+export interface UserInfo {
+  /** User's object ID (oid) or subject (sub) - unique identifier */
+  userId: string;
+  /** User's email address (normalized to lowercase) */
+  email: string | null;
+}
+
+/**
+ * Validate and extract user info from the ID token with full signature verification.
+ * 
+ * This implementation uses the shared validateAndDecodeToken helper and extracts:
+ * - userId: Object ID (oid) or Subject (sub) claim
+ * - email: Email or preferred_username claim (normalized to lowercase)
+ * 
+ * @param authHeader - The Authorization header value (Bearer token)
+ * @param context - The invocation context for logging
+ * @returns Promise resolving to UserInfo or null if invalid
+ */
+export async function extractUserInfoFromToken(authHeader: string | null, context: InvocationContext): Promise<UserInfo | null> {
+  const verifiedPayload = await validateAndDecodeToken(authHeader, context);
+  if (!verifiedPayload) {
+    return null;
+  }
+
+  const userId = getUserIdFromClaims(verifiedPayload, context);
+  if (!userId) {
+    return null;
+  }
+
+  const email = getEmailFromClaims(verifiedPayload);
+
+  return { userId, email };
 }
 
 /**
