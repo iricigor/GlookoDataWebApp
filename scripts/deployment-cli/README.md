@@ -44,6 +44,7 @@ cd scripts/deployment-cli
 | `deploy-azure-key-vault.sh` | Deploys Azure Key Vault with RBAC authorization |
 | `deploy-azure-function.sh` | Deploys Azure Function App with managed identity |
 | `deploy-azure-swa-backend.sh` | Links Azure Function App to Static Web App as backend |
+| `manage-pro-users.sh` | Manages Pro users (list, add, remove, check) in ProUsers table |
 | `test-azure-resources.sh` | Verifies deployment state of all Azure resources |
 
 ## Configuration
@@ -422,6 +423,62 @@ Verifies the deployment state of all Azure resources for GlookoDataWebApp. For e
 **Exit Codes:**
 - `0` - All resources are properly configured
 - `1` - Some resources are missing or misconfigured
+
+### manage-pro-users.sh
+
+Manages Pro users in the ProUsers Azure Storage Table. Users are identified by their email address.
+
+**Features:**
+- List all Pro users
+- Add new Pro users by email
+- Remove Pro users by email
+- Check if an email is a Pro user
+- Idempotent - safe to run multiple times
+
+**Commands:**
+```text
+  list                    List all Pro users
+  add EMAIL               Add a new Pro user by email
+  remove EMAIL            Remove a Pro user by email
+  check EMAIL             Check if an email is a Pro user
+```
+
+**Options:**
+```text
+  -h, --help              Show help message
+  -a, --storage-account   Storage account name
+  -g, --resource-group    Resource group name
+  -c, --config FILE       Custom configuration file path
+  -v, --verbose           Enable verbose output
+```
+
+**Examples:**
+```bash
+# List all Pro users
+./manage-pro-users.sh list
+
+# Add a new Pro user
+./manage-pro-users.sh add user@example.com
+
+# Remove a Pro user
+./manage-pro-users.sh remove user@example.com
+
+# Check if an email is a Pro user
+./manage-pro-users.sh check user@example.com
+
+# List Pro users from a specific storage account
+./manage-pro-users.sh list --storage-account mystorageacct
+```
+
+**Table Structure:**
+- PartitionKey: "ProUser" (constant for all entries)
+- RowKey: Email address (URL-encoded)
+- Email: Email address (original format)
+- CreatedAt: ISO 8601 timestamp when the user was added
+
+**Prerequisites:**
+- Storage Account must exist (run deploy-azure-storage-account.sh first)
+- ProUsers table must exist (run deploy-azure-storage-tables.sh first)
 
 ## Configuration Library (config-lib.sh)
 
