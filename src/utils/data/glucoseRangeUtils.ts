@@ -30,6 +30,26 @@ export const GLUCOSE_RANGE_COLORS = {
 } as const;
 
 /**
+ * Flux stability grade colors
+ * Used to visually represent glucose stability based on CV%
+ */
+export const FLUX_GRADE_COLORS = {
+  'A+': '#4CAF50', // Green - Extremely steady
+  'A': '#4CAF50',  // Green - Very steady
+  'B': '#8BC34A',  // Light green - Reasonably steady
+  'C': '#FFB300',  // Amber - Moderate variability
+  'D': '#FF9800',  // Orange - High variability
+  'F': '#D32F2F',  // Red - Very high variability
+} as const;
+
+/**
+ * Tolerance for unicorn detection (floating point comparison)
+ * CGM readings have limited precision, so we use a small tolerance
+ * to account for minor variations in the recorded values
+ */
+export const UNICORN_TOLERANCE = 0.05;
+
+/**
  * Minimum percentage threshold to display percentage text in summary bars
  */
 export const MIN_PERCENTAGE_TO_DISPLAY = 5;
@@ -944,15 +964,11 @@ export function countHighLowIncidents(
  * @returns Number of unicorn readings
  */
 export function countUnicorns(readings: GlucoseReading[]): number {
-  // Check for values close to 5.0 mmol/L (90 mg/dL) or 5.6 mmol/L (100 mg/dL)
-  // Using a small tolerance for floating point comparison
-  const tolerance = 0.05;
-  
   return readings.filter(r => {
     const value = r.value;
     // 5.0 mmol/L is considered a "perfect" reading in mmol/L systems
     // 5.6 mmol/L ≈ 100 mg/dL is considered a "perfect" reading in mg/dL systems
-    return Math.abs(value - 5.0) < tolerance || Math.abs(value - 5.6) < tolerance;
+    return Math.abs(value - 5.0) < UNICORN_TOLERANCE || Math.abs(value - 5.6) < UNICORN_TOLERANCE;
   }).length;
 }
 

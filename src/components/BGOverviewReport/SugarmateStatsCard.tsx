@@ -29,6 +29,7 @@ import {
   displayGlucoseValue, 
   getUnitLabel,
   GLUCOSE_RANGE_COLORS,
+  FLUX_GRADE_COLORS,
 } from '../../utils/data';
 import type { 
   QuartileStats, 
@@ -288,21 +289,10 @@ interface SugarmateStatsCardProps {
 
 /** Get color for flux grade */
 function getFluxGradeColor(grade: string): string {
-  switch (grade) {
-    case 'A+':
-    case 'A':
-      return GLUCOSE_RANGE_COLORS.inRange;
-    case 'B':
-      return '#8BC34A'; // Light green
-    case 'C':
-      return GLUCOSE_RANGE_COLORS.high;
-    case 'D':
-      return '#FF9800'; // Orange
-    case 'F':
-      return GLUCOSE_RANGE_COLORS.low;
-    default:
-      return tokens.colorNeutralForeground1;
+  if (grade in FLUX_GRADE_COLORS) {
+    return FLUX_GRADE_COLORS[grade as keyof typeof FLUX_GRADE_COLORS];
   }
+  return tokens.colorNeutralForeground1;
 }
 
 export function SugarmateStatsCard({
@@ -447,7 +437,7 @@ export function SugarmateStatsCard({
 
         {/* High/Low Incidents */}
         <div className={styles.statSection}>
-          <Text className={styles.sectionTitle}>Highs / Lows Incidents</Text>
+          <Text className={styles.sectionTitle}>High/Low Incidents</Text>
           <div className={styles.incidentsContainer}>
             <Tooltip content="Number of transitions into high glucose zone" relationship="description">
               <div className={styles.incidentItem} style={{ backgroundColor: `${GLUCOSE_RANGE_COLORS.high}20` }}>
