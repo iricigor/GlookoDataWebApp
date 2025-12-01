@@ -29,6 +29,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 
 ### Other
 
+<details>
+<summary>605 Add new favicon set, bump version to 1.6, and finalize v1.5 changelog</summary>
+
+[#605](../../pull/605) Add new favicon set, bump version to 1.6, and finalize v1.5 changelog
+  - [Auto-generated entry from PR merge]
+</details>
+
 *(To be added as development progresses)*
 
 ---
