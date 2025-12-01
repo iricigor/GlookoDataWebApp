@@ -41,6 +41,11 @@ export const useBGOverviewStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground2,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     boxShadow: tokens.shadow4,
+    // Reduce padding and gap on mobile to save vertical space
+    '@media (max-width: 767px)': {
+      ...shorthands.padding('12px'),
+      ...shorthands.gap('8px'),
+    },
   },
   controlGrid: {
     display: 'grid',
@@ -50,18 +55,32 @@ export const useBGOverviewStyles = makeStyles({
     '@media (min-width: 768px)': {
       gridTemplateColumns: '1fr 1fr',
     },
+    // Reduce gap between filter rows on mobile
+    '@media (max-width: 767px)': {
+      ...shorthands.gap('6px'),
+    },
   },
   controlRow: {
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('16px'),
     flexWrap: 'wrap',
+    // On mobile, keep label and controls on same row (no wrapping)
+    '@media (max-width: 767px)': {
+      flexWrap: 'nowrap',
+      ...shorthands.gap('8px'),
+    },
   },
   controlLabel: {
     fontSize: tokens.fontSizeBase300,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
     minWidth: '120px',
+    // Reduce label width on mobile to allow more space for controls
+    '@media (max-width: 767px)': {
+      minWidth: '90px',
+      flexShrink: 0,
+    },
   },
   pillGroup: {
     display: 'flex',
