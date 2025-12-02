@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>631 Update visuals on Daily BG page</summary>
+
+[#631](../../pull/631) Update visuals on Daily BG page
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>621 Update AI settings page with horizontal row layout and three-state buttons</summary>
 
 [#621](../../pull/621) Update AI settings page with horizontal row layout and three-state buttons
