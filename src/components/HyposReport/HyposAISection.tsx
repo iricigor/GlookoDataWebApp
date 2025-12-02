@@ -31,6 +31,7 @@ import {
   convertDetailedHypoEventsToCSV,
   parseHypoAIResponseByDate,
   type EventAnalysis,
+  type DetailedHypoEvent,
 } from '../../utils/data/hyposReportAIDataUtils';
 import { base64Encode } from '../../utils/formatting';
 
@@ -204,6 +205,10 @@ export function HyposAISection({
   // Track which dates have been requested for analysis
   const [analyzedDates, setAnalyzedDates] = useState<Set<string>>(new Set());
   
+  // State for async loading of all events (to avoid blocking page render)
+  const [allEvents, setAllEvents] = useState<DetailedHypoEvent[]>([]);
+  const [loadingAllEvents, setLoadingAllEvents] = useState(true);
+  
   // Ref for tracking if component is mounted
   const isMountedRef = useRef(true);
   
@@ -228,14 +233,35 @@ export function HyposAISection({
     );
   }, [allReadings, thresholds, bolusReadings, basalReadings, currentDate]);
   
-  // Get all events for the full dataset (for the AI prompt)
-  const allEvents = useMemo(() => {
-    return extractDetailedHypoEvents(
-      allReadings,
-      thresholds,
-      bolusReadings,
-      basalReadings
-    );
+  // Load all events asynchronously to avoid blocking page render
+  // This computation is deferred to allow the UI to render immediately
+  useEffect(() => {
+    // Reset loading state when dependencies change
+    setLoadingAllEvents(true);
+    
+    // Use setTimeout to defer the heavy computation and allow UI to render first
+    const timeoutId = setTimeout(() => {
+      try {
+        const events = extractDetailedHypoEvents(
+          allReadings,
+          thresholds,
+          bolusReadings,
+          basalReadings
+        );
+        if (isMountedRef.current) {
+          setAllEvents(events);
+          setLoadingAllEvents(false);
+        }
+      } catch (err) {
+        console.error('Failed to extract hypo events:', err);
+        if (isMountedRef.current) {
+          setAllEvents([]);
+          setLoadingAllEvents(false);
+        }
+      }
+    }, 0);
+    
+    return () => clearTimeout(timeoutId);
   }, [allReadings, thresholds, bolusReadings, basalReadings]);
   
   // Check if we have cached analysis for current date
@@ -396,7 +422,14 @@ export function HyposAISection({
           <Text>No hypoglycemic events detected on this day - great glucose control!</Text>
         </div>
         
-        {allEvents.length > 0 && (
+        {loadingAllEvents ? (
+          <div className={styles.loadingContainer}>
+            <Spinner size="small" />
+            <Text className={styles.helperText}>
+              Preparing AI data...
+            </Text>
+          </div>
+        ) : allEvents.length > 0 && (
           <div className={styles.buttonContainer}>
             <Button
               appearance="outline"
@@ -429,19 +462,28 @@ export function HyposAISection({
       
       {/* Analysis Button */}
       {!hasCachedAnalysis && (
-        <div className={styles.buttonContainer}>
-          <Button
-            appearance="primary"
-            icon={analyzing ? <Spinner size="tiny" /> : <SparkleRegular />}
-            onClick={handleAnalyze}
-            disabled={analyzing}
-          >
-            {analyzing ? 'Analyzing...' : `Analyze ${currentDateEvents.length} event${currentDateEvents.length !== 1 ? 's' : ''}`}
-          </Button>
-          <Text className={styles.helperText}>
-            Get AI-powered insights for today's hypo events
-          </Text>
-        </div>
+        loadingAllEvents ? (
+          <div className={styles.loadingContainer}>
+            <Spinner size="small" />
+            <Text className={styles.helperText}>
+              Preparing AI data...
+            </Text>
+          </div>
+        ) : (
+          <div className={styles.buttonContainer}>
+            <Button
+              appearance="primary"
+              icon={analyzing ? <Spinner size="tiny" /> : <SparkleRegular />}
+              onClick={handleAnalyze}
+              disabled={analyzing}
+            >
+              {analyzing ? 'Analyzing...' : `Analyze ${currentDateEvents.length} event${currentDateEvents.length !== 1 ? 's' : ''}`}
+            </Button>
+            <Text className={styles.helperText}>
+              Get AI-powered insights for today's hypo events
+            </Text>
+          </div>
+        )
       )}
       
       {/* Loading State */}
