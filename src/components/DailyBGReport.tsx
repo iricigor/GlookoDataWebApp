@@ -37,7 +37,9 @@ import {
 } from '@fluentui/react-icons';
 import {
   LineChart,
+  ComposedChart,
   Line,
+  Scatter,
   XAxis,
   YAxis,
   Tooltip as RechartsTooltip,
@@ -47,7 +49,7 @@ import {
   CartesianGrid,
   Legend,
 } from 'recharts';
-import type { UploadedFile, GlucoseReading, GlucoseDataSource, GlucoseUnit, InsulinReading, HourlyIOBData, RoCStats } from '../types';
+import type { UploadedFile, GlucoseReading, GlucoseDataSource, GlucoseUnit, InsulinReading, HourlyIOBData, RoCStats, RoCDataPoint } from '../types';
 import { 
   extractGlucoseReadings, 
   smoothGlucoseValues, 
@@ -67,7 +69,9 @@ import {
   calculateRoCStats,
   smoothRoCData,
   ROC_COLORS,
+  ROC_THRESHOLDS,
   formatRoCValue,
+  getRoCColor,
   getRoCMedicalStandards,
   getLongestCategoryPeriod,
   formatDuration,
@@ -369,7 +373,61 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
     flex: 1,
   },
+  rocChartContainer: {
+    height: '300px',
+    width: '100%',
+    ...shorthands.padding('16px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+  },
+  hyposChartContainer: {
+    height: '300px',
+    width: '100%',
+    ...shorthands.padding('16px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+  },
+  legendContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    ...shorthands.gap('16px'),
+    ...shorthands.padding('12px', '16px'),
+    backgroundColor: tokens.colorNeutralBackground2,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    marginTop: '8px',
+    fontSize: tokens.fontSizeBase200,
+  },
+  legendItem: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
+  legendLine: {
+    width: '20px',
+    height: '3px',
+    ...shorthands.borderRadius('2px'),
+  },
+  legendDashedLine: {
+    width: '20px',
+    height: '0',
+    borderTop: `2px dashed ${tokens.colorNeutralStroke1}`,
+  },
+  legendDot: {
+    width: '12px',
+    height: '12px',
+    ...shorthands.borderRadius('50%'),
+  },
 });
+
+// Hypo chart colors (defined at module level for dependency stability)
+const HYPO_CHART_COLORS = {
+  normal: '#4CAF50',    // Green for normal glucose
+  low: '#FFAB91',       // Light red for low
+  veryLow: '#EF5350',   // Dark red for very low
+  nadirDot: '#B71C1C',  // Darker red for nadir markers
+};
 
 interface DailyBGReportProps {
   selectedFile?: UploadedFile;
@@ -620,11 +678,144 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
     return getLongestCategoryPeriod(smoothedRoCValues, 'good');
   }, [smoothedRoCValues]);
 
+  // Prepare RoC chart data with gradient stops for coloring
+  const rocChartData = useMemo(() => {
+    return smoothedRoCValues.map(point => ({
+      ...point,
+      glucoseDisplay: glucoseUnit === 'mg/dL' 
+        ? Math.round(convertGlucoseValue(point.glucoseValue, glucoseUnit))
+        : Math.round(convertGlucoseValue(point.glucoseValue, glucoseUnit) * 10) / 10,
+    }));
+  }, [smoothedRoCValues, glucoseUnit]);
+
+  // Generate gradient stops for the RoC line based on time positions
+  const rocGradientStops = useMemo(() => {
+    if (rocChartData.length === 0) return [];
+    return rocChartData.map(point => ({
+      offset: `${(point.timeDecimal / 24) * 100}%`,
+      color: getRoCColor(point.roc),
+    }));
+  }, [rocChartData]);
+
+  // Prepare glucose line data for RoC chart overlay
+  const rocGlucoseLineData = useMemo(() => {
+    return currentGlucoseReadings.map(reading => {
+      const hour = reading.timestamp.getHours();
+      const minute = reading.timestamp.getMinutes();
+      const glucoseValue = convertGlucoseValue(reading.value, glucoseUnit);
+      return {
+        timeDecimal: hour + minute / 60,
+        glucoseDisplay: glucoseUnit === 'mg/dL' 
+          ? Math.round(glucoseValue)
+          : Math.round(glucoseValue * 10) / 10,
+      };
+    }).sort((a, b) => a.timeDecimal - b.timeDecimal);
+  }, [currentGlucoseReadings, glucoseUnit]);
+
+  // Calculate RoC Y-axis domain
+  const rocYAxisDomain = useMemo((): [number, number] => {
+    const minRocYAxisMax = ROC_THRESHOLDS.medium * 1.2;
+    if (rocChartData.length === 0) {
+      return [0, minRocYAxisMax];
+    }
+    const maxDataRoC = Math.max(...rocChartData.map(d => d.roc));
+    return [0, Math.max(maxDataRoC, minRocYAxisMax)];
+  }, [rocChartData]);
+
   // Calculate Hypoglycemia statistics
   const hypoStats: HypoStats | null = useMemo(() => {
     if (currentGlucoseReadings.length === 0) return null;
     return calculateHypoStats(currentGlucoseReadings, thresholds);
   }, [currentGlucoseReadings, thresholds]);
+
+  // Prepare Hypos chart data with color information for each segment
+  const hyposChartData = useMemo(() => {
+    return smoothedReadings
+      .map((reading, index) => {
+        const time = reading.timestamp;
+        const hours = time.getHours();
+        const minutes = time.getMinutes();
+        const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        
+        const convertedValue = convertGlucoseValue(reading.value, glucoseUnit);
+        const clampedValue = Math.min(convertedValue, maxGlucose);
+        
+        // Determine color based on glucose level
+        let color: string;
+        if (reading.value < thresholds.veryLow) {
+          color = HYPO_CHART_COLORS.veryLow;
+        } else if (reading.value < thresholds.low) {
+          color = HYPO_CHART_COLORS.low;
+        } else {
+          color = HYPO_CHART_COLORS.normal;
+        }
+        
+        return {
+          time: timeString,
+          timeMinutes: hours * 60 + minutes,
+          timeDecimal: hours + minutes / 60,
+          value: clampedValue,
+          originalValue: convertedValue,
+          rawValue: reading.value,
+          color,
+          index,
+        };
+      })
+      .sort((a, b) => a.timeMinutes - b.timeMinutes);
+  }, [smoothedReadings, glucoseUnit, maxGlucose, thresholds]);
+
+  // Create gradient stops for hypos chart
+  const hyposGradientStops = useMemo(() => {
+    if (hyposChartData.length < 2) return [];
+    
+    const stops: { offset: string; color: string }[] = [];
+    let prevColor = hyposChartData[0].color;
+    
+    stops.push({
+      offset: `${(hyposChartData[0].timeDecimal / 24) * 100}%`,
+      color: hyposChartData[0].color,
+    });
+    
+    for (let i = 1; i < hyposChartData.length; i++) {
+      const point = hyposChartData[i];
+      if (point.color !== prevColor) {
+        const prevPoint = hyposChartData[i - 1];
+        const prevOffset = `${(prevPoint.timeDecimal / 24) * 100}%`;
+        if (stops[stops.length - 1].offset !== prevOffset) {
+          stops.push({ offset: prevOffset, color: prevColor });
+        }
+        stops.push({
+          offset: `${(point.timeDecimal / 24) * 100}%`,
+          color: point.color,
+        });
+        prevColor = point.color;
+      }
+    }
+    
+    const lastPoint = hyposChartData[hyposChartData.length - 1];
+    const lastOffset = `${(lastPoint.timeDecimal / 24) * 100}%`;
+    if (stops[stops.length - 1].offset !== lastOffset) {
+      stops.push({ offset: lastOffset, color: lastPoint.color });
+    }
+    
+    return stops;
+  }, [hyposChartData]);
+
+  // Get nadir points from hypo periods for scatter plot
+  const nadirPoints = useMemo(() => {
+    if (!hypoStats || hypoStats.hypoPeriods.length === 0) return [];
+    
+    return hypoStats.hypoPeriods.map(period => {
+      const convertedNadir = convertGlucoseValue(period.nadir, glucoseUnit);
+      return {
+        timeDecimal: period.nadirTimeDecimal,
+        value: Math.min(convertedNadir, maxGlucose),
+        originalValue: convertedNadir,
+        nadir: period.nadir,
+        isSevere: period.isSevere,
+      };
+    });
+  }, [hypoStats, glucoseUnit, maxGlucose]);
 
   // Get medical standards for RoC
   const medicalStandards = getRoCMedicalStandards(glucoseUnit);
@@ -729,6 +920,120 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
           <div style={{ color: tokens.colorNeutralForeground2 }}>
             Bolus in hour: {data.bolusInPreviousHour.toFixed(1)} U
           </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Custom tooltip for RoC chart
+  const RoCTooltip = ({ active, payload }: {
+    active?: boolean;
+    payload?: Array<{
+      payload: RoCDataPoint & { glucoseDisplay?: number };
+    }>;
+  }) => {
+    if (!active || !payload || payload.length === 0) return null;
+    const data = payload[0]?.payload;
+    if (!data || !data.timeLabel) return null;
+    
+    const glucoseValue = data.glucoseDisplay ?? convertGlucoseValue(data.glucoseValue, glucoseUnit);
+    const glucoseDisplay = glucoseUnit === 'mg/dL' 
+      ? Math.round(glucoseValue).toString()
+      : glucoseValue.toFixed(1);
+    
+    return (
+      <div style={{
+        backgroundColor: tokens.colorNeutralBackground1,
+        padding: '12px',
+        border: `1px solid ${tokens.colorNeutralStroke1}`,
+        borderRadius: tokens.borderRadiusMedium,
+        fontSize: tokens.fontSizeBase200,
+        boxShadow: tokens.shadow8,
+      }}>
+        <div style={{ fontWeight: tokens.fontWeightSemibold, marginBottom: '4px' }}>
+          {data.timeLabel}
+        </div>
+        <div style={{ color: data.color, fontWeight: tokens.fontWeightSemibold }}>
+          RoC: {formatRoCValue(data.roc, glucoseUnit)} {glucoseUnit === 'mg/dL' ? 'mg/dL' : 'mmol/L'}/5 min
+        </div>
+        <div style={{ color: tokens.colorNeutralForeground2, marginTop: '4px' }}>
+          Glucose: {glucoseDisplay} {getUnitLabel(glucoseUnit)}
+        </div>
+        <div style={{ 
+          marginTop: '4px',
+          color: data.category === 'good' ? ROC_COLORS.good : 
+                 data.category === 'medium' ? ROC_COLORS.medium : ROC_COLORS.bad,
+          fontStyle: 'italic',
+        }}>
+          {data.category === 'good' ? 'Stable' : data.category === 'medium' ? 'Moderate' : 'Rapid'}
+        </div>
+      </div>
+    );
+  };
+
+  // Custom tooltip for Hypos chart
+  const HyposTooltip = ({ active, payload }: {
+    active?: boolean;
+    payload?: Array<{
+      payload: {
+        time: string;
+        value: number;
+        originalValue: number;
+        rawValue?: number;
+        color: string;
+      };
+    }>;
+  }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      const displayValue = data.originalValue > maxGlucose 
+        ? `${formatGlucoseValue(data.originalValue, glucoseUnit)} (clamped to ${formatGlucoseValue(maxGlucose, glucoseUnit)})`
+        : formatGlucoseValue(data.value, glucoseUnit);
+      
+      let statusText = '';
+      let statusColor: string = HYPO_CHART_COLORS.normal;
+      if (data.rawValue !== undefined) {
+        if (data.rawValue < thresholds.veryLow) {
+          statusText = 'Severe Hypo';
+          statusColor = HYPO_CHART_COLORS.veryLow;
+        } else if (data.rawValue < thresholds.low) {
+          statusText = 'Hypoglycemia';
+          statusColor = HYPO_CHART_COLORS.low;
+        } else {
+          statusText = 'In Range';
+        }
+      }
+      
+      return (
+        <div style={{
+          backgroundColor: tokens.colorNeutralBackground1,
+          padding: '12px',
+          border: `1px solid ${tokens.colorNeutralStroke1}`,
+          borderRadius: tokens.borderRadiusMedium,
+          fontSize: tokens.fontSizeBase300,
+          fontFamily: tokens.fontFamilyBase,
+          boxShadow: tokens.shadow8,
+        }}>
+          <div style={{ 
+            fontWeight: tokens.fontWeightSemibold,
+            marginBottom: '4px',
+            color: tokens.colorNeutralForeground1,
+          }}>
+            {data.time}
+          </div>
+          <div style={{ color: tokens.colorNeutralForeground2 }}>
+            Glucose: {displayValue} {getUnitLabel(glucoseUnit)}
+          </div>
+          {statusText && (
+            <div style={{ 
+              color: statusColor, 
+              fontStyle: 'italic',
+              marginTop: '4px',
+            }}>
+              {statusText}
+            </div>
+          )}
         </div>
       );
     }
@@ -1158,6 +1463,151 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
                 </FluentTooltip>
               </div>
 
+              {/* RoC Graph */}
+              {rocChartData.length > 0 && (
+                <>
+                  <div className={styles.rocChartContainer}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart margin={{ top: 10, right: 50, left: 10, bottom: 0 }} data={rocChartData}>
+                        <defs>
+                          {/* Day/night shading gradients */}
+                          {showDayNightShading && (
+                            <>
+                              <linearGradient id="rocNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#1a237e" stopOpacity="0.25" />
+                                <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
+                              </linearGradient>
+                              <linearGradient id="rocNightGradientRight" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
+                                <stop offset="100%" stopColor="#1a237e" stopOpacity="0.25" />
+                              </linearGradient>
+                            </>
+                          )}
+                          {/* RoC line gradient */}
+                          <linearGradient id="dailyBGRocLineGradient" x1="0" y1="0" x2="1" y2="0">
+                            {rocGradientStops.map((stop, index) => (
+                              <stop key={index} offset={stop.offset} stopColor={stop.color} />
+                            ))}
+                          </linearGradient>
+                        </defs>
+                        
+                        <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
+                        
+                        {/* Day/night shading */}
+                        {showDayNightShading && (
+                          <>
+                            <ReferenceArea x1={0} x2={8} yAxisId="roc" fill="url(#rocNightGradientLeft)" />
+                            <ReferenceArea x1={20} x2={24} yAxisId="roc" fill="url(#rocNightGradientRight)" />
+                          </>
+                        )}
+                        
+                        {/* Reference lines for RoC thresholds */}
+                        <ReferenceLine
+                          y={ROC_THRESHOLDS.good}
+                          yAxisId="roc"
+                          stroke={ROC_COLORS.good}
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          label={{ value: 'Stable', position: 'left', fill: ROC_COLORS.good, fontSize: 10 }}
+                        />
+                        <ReferenceLine
+                          y={ROC_THRESHOLDS.medium}
+                          yAxisId="roc"
+                          stroke={ROC_COLORS.bad}
+                          strokeDasharray="5 5"
+                          strokeWidth={1}
+                          label={{ value: 'Rapid', position: 'left', fill: ROC_COLORS.bad, fontSize: 10 }}
+                        />
+                        
+                        <XAxis
+                          type="number"
+                          dataKey="timeDecimal"
+                          domain={[0, 24]}
+                          ticks={[0, 6, 12, 18, 24]}
+                          tickFormatter={formatXAxis}
+                          stroke={tokens.colorNeutralForeground2}
+                          style={{ fontSize: tokens.fontSizeBase200 }}
+                        />
+                        
+                        <YAxis
+                          yAxisId="roc"
+                          label={{ 
+                            value: `Rate of Change (${rocUnitLabel})`, 
+                            angle: -90, 
+                            position: 'insideLeft', 
+                            style: { fontSize: tokens.fontSizeBase200 } 
+                          }}
+                          stroke={tokens.colorNeutralForeground2}
+                          style={{ fontSize: tokens.fontSizeBase200 }}
+                          domain={rocYAxisDomain}
+                          tickFormatter={(value: number) => formatRoCValue(value, glucoseUnit)}
+                        />
+                        
+                        <YAxis
+                          yAxisId="glucose"
+                          orientation="right"
+                          label={{ 
+                            value: `Glucose (${getUnitLabel(glucoseUnit)})`, 
+                            angle: 90, 
+                            position: 'insideRight', 
+                            style: { fontSize: tokens.fontSizeBase200 } 
+                          }}
+                          stroke={tokens.colorNeutralForeground3}
+                          style={{ fontSize: tokens.fontSizeBase200 }}
+                          domain={[0, maxGlucose]}
+                          tickFormatter={(value: number) => glucoseUnit === 'mg/dL' ? Math.round(value).toString() : value.toFixed(1)}
+                        />
+                        
+                        <RechartsTooltip content={<RoCTooltip />} />
+                        
+                        {/* Glucose line overlay */}
+                        <Line
+                          yAxisId="glucose"
+                          type="monotone"
+                          data={rocGlucoseLineData}
+                          dataKey="glucoseDisplay"
+                          name="Glucose"
+                          stroke={tokens.colorNeutralStroke1}
+                          strokeWidth={1.5}
+                          dot={false}
+                          connectNulls
+                          legendType="none"
+                        />
+                        
+                        {/* RoC line with gradient color */}
+                        <Line
+                          yAxisId="roc"
+                          type="monotone"
+                          dataKey="roc"
+                          name="Rate of Change"
+                          stroke="url(#dailyBGRocLineGradient)"
+                          strokeWidth={2.5}
+                          dot={false}
+                          connectNulls
+                          activeDot={{ r: 5, stroke: tokens.colorNeutralBackground1, strokeWidth: 2 }}
+                          legendType="none"
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  {/* RoC Legend */}
+                  <div className={styles.legendContainer}>
+                    <div className={styles.legendItem}>
+                      <div 
+                        className={styles.legendLine} 
+                        style={{ background: `linear-gradient(to right, ${ROC_COLORS.good}, ${ROC_COLORS.medium}, ${ROC_COLORS.bad})` }} 
+                      />
+                      <Text>Rate of Change (RoC)</Text>
+                    </div>
+                    <div className={styles.legendItem}>
+                      <div className={styles.legendLine} style={{ backgroundColor: tokens.colorNeutralStroke1 }} />
+                      <Text>Glucose</Text>
+                    </div>
+                  </div>
+                </>
+              )}
+
               {/* RoC Summary Bar */}
               <div className={styles.rocSummaryCard}>
                 <Text className={styles.rocSummaryTitle}>
@@ -1342,6 +1792,196 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
                   </Card>
                 </FluentTooltip>
               </div>
+
+              {/* Hypos Graph */}
+              {hyposChartData.length > 0 && (
+                <>
+                  <div className={styles.hyposChartContainer}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart data={hyposChartData} margin={{ top: 10, right: 50, left: 10, bottom: 0 }}>
+                        <defs>
+                          {/* Day/night shading gradients */}
+                          {showDayNightShading && (
+                            <>
+                              <linearGradient id="hyposNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#1a237e" stopOpacity="0.35" />
+                                <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
+                              </linearGradient>
+                              <linearGradient id="hyposNightGradientRight" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
+                                <stop offset="100%" stopColor="#1a237e" stopOpacity="0.35" />
+                              </linearGradient>
+                            </>
+                          )}
+                          {/* Glucose line gradient based on hypo status */}
+                          <linearGradient id="dailyBGHyposLineGradient" x1="0" y1="0" x2="1" y2="0">
+                            {hyposGradientStops.map((stop, index) => (
+                              <stop key={index} offset={stop.offset} stopColor={stop.color} />
+                            ))}
+                          </linearGradient>
+                        </defs>
+                        
+                        {/* Day/night shading */}
+                        {showDayNightShading && (
+                          <>
+                            <ReferenceArea x1={0} x2={8} fill="url(#hyposNightGradientLeft)" />
+                            <ReferenceArea x1={20} x2={24} fill="url(#hyposNightGradientRight)" />
+                          </>
+                        )}
+                        
+                        <XAxis
+                          type="number"
+                          dataKey="timeDecimal"
+                          domain={[0, 24]}
+                          ticks={[0, 6, 12, 18, 24]}
+                          tickFormatter={formatXAxis}
+                          stroke={tokens.colorNeutralStroke1}
+                          tick={{ 
+                            fill: tokens.colorNeutralForeground2,
+                            fontSize: tokens.fontSizeBase200,
+                            fontFamily: tokens.fontFamilyBase,
+                          }}
+                          axisLine={{ strokeWidth: 1 }}
+                          tickLine={false}
+                        />
+                        
+                        <YAxis
+                          domain={[0, maxGlucose]}
+                          label={{ 
+                            value: `Glucose (${getUnitLabel(glucoseUnit)})`, 
+                            angle: -90, 
+                            position: 'insideLeft', 
+                            style: { 
+                              fontSize: tokens.fontSizeBase200,
+                              fontFamily: tokens.fontFamilyBase,
+                              fill: tokens.colorNeutralForeground2,
+                            } 
+                          }}
+                          stroke={tokens.colorNeutralStroke1}
+                          tick={{ 
+                            fill: tokens.colorNeutralForeground2,
+                            fontSize: tokens.fontSizeBase200,
+                            fontFamily: tokens.fontFamilyBase,
+                          }}
+                          axisLine={{ strokeWidth: 1 }}
+                          tickLine={false}
+                        />
+                        
+                        <RechartsTooltip content={<HyposTooltip />} />
+                        
+                        {/* Very low threshold reference line */}
+                        <ReferenceLine 
+                          y={convertGlucoseValue(thresholds.veryLow, glucoseUnit)} 
+                          stroke={HYPO_CHART_COLORS.veryLow}
+                          strokeDasharray="5 5" 
+                          strokeWidth={1.5}
+                          label={{ 
+                            value: `V.Low (${displayGlucoseValue(thresholds.veryLow, glucoseUnit)})`, 
+                            position: 'insideBottomLeft', 
+                            style: { 
+                              fontSize: tokens.fontSizeBase200,
+                              fontFamily: tokens.fontFamilyBase,
+                              fill: HYPO_CHART_COLORS.veryLow,
+                            } 
+                          }}
+                        />
+                        
+                        {/* Low threshold reference line */}
+                        <ReferenceLine 
+                          y={convertGlucoseValue(thresholds.low, glucoseUnit)} 
+                          stroke={HYPO_CHART_COLORS.low}
+                          strokeDasharray="5 5" 
+                          strokeWidth={1.5}
+                          label={{ 
+                            value: `Low (${displayGlucoseValue(thresholds.low, glucoseUnit)})`, 
+                            position: 'insideTopLeft', 
+                            style: { 
+                              fontSize: tokens.fontSizeBase200,
+                              fontFamily: tokens.fontFamilyBase,
+                              fill: HYPO_CHART_COLORS.low,
+                            } 
+                          }}
+                        />
+                        
+                        {/* High threshold reference line */}
+                        <ReferenceLine 
+                          y={convertGlucoseValue(thresholds.high, glucoseUnit)} 
+                          stroke={tokens.colorPaletteMarigoldBorder1}
+                          strokeDasharray="5 5" 
+                          strokeWidth={1.5}
+                          label={{ 
+                            value: `High (${displayGlucoseValue(thresholds.high, glucoseUnit)})`, 
+                            position: 'insideTopLeft', 
+                            style: { 
+                              fontSize: tokens.fontSizeBase200,
+                              fontFamily: tokens.fontFamilyBase,
+                              fill: tokens.colorPaletteMarigoldForeground1,
+                            } 
+                          }}
+                        />
+                        
+                        {/* Nadir dots for each hypo period */}
+                        {nadirPoints.length > 0 && (
+                          <Scatter
+                            data={nadirPoints}
+                            dataKey="value"
+                            fill={HYPO_CHART_COLORS.nadirDot}
+                            shape={(props: unknown) => {
+                              const shapeProps = props as { cx: number; cy: number };
+                              return (
+                                <circle
+                                  cx={shapeProps.cx}
+                                  cy={shapeProps.cy}
+                                  r={6}
+                                  fill={HYPO_CHART_COLORS.nadirDot}
+                                  stroke={tokens.colorNeutralBackground1}
+                                  strokeWidth={2}
+                                />
+                              );
+                            }}
+                          />
+                        )}
+                        
+                        {/* Glucose values line with gradient coloring */}
+                        <Line
+                          type="monotone"
+                          dataKey="value"
+                          stroke="url(#dailyBGHyposLineGradient)"
+                          strokeWidth={2.5}
+                          dot={false}
+                          activeDot={{ 
+                            r: 5, 
+                            strokeWidth: 2,
+                            stroke: tokens.colorNeutralBackground1,
+                            fill: tokens.colorBrandForeground1,
+                          }}
+                          connectNulls
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  {/* Hypos Legend */}
+                  <div className={styles.legendContainer}>
+                    <div className={styles.legendItem}>
+                      <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.normal }} />
+                      <Text>In Range</Text>
+                    </div>
+                    <div className={styles.legendItem}>
+                      <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.low }} />
+                      <Text>Hypoglycemia</Text>
+                    </div>
+                    <div className={styles.legendItem}>
+                      <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.veryLow }} />
+                      <Text>Severe Hypo</Text>
+                    </div>
+                    <div className={styles.legendItem}>
+                      <div className={styles.legendDot} style={{ backgroundColor: HYPO_CHART_COLORS.nadirDot }} />
+                      <Text>Nadir (Lowest Point)</Text>
+                    </div>
+                  </div>
+                </>
+              )}
             </>
           )}
         </>
