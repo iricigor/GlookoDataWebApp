@@ -43,6 +43,7 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
   ReferenceLine,
+  ReferenceArea,
   CartesianGrid,
   Legend,
 } from 'recharts';
@@ -377,7 +378,7 @@ interface DailyBGReportProps {
   showDayNightShading: boolean;
 }
 
-export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, showDayNightShading: _showDayNightShading }: DailyBGReportProps) {
+export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, showDayNightShading }: DailyBGReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
   const { colorScheme, setColorScheme } = useBGColorScheme();
@@ -555,6 +556,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
       const hours = time.getHours();
       const minutes = time.getMinutes();
       const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      const timeDecimal = hours + minutes / 60;  // For numeric X-axis (needed for ReferenceArea)
       
       // Convert to display unit
       const convertedValue = convertGlucoseValue(reading.value, glucoseUnit);
@@ -564,6 +566,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
       return {
         time: timeString,
         timeMinutes: hours * 60 + minutes,
+        timeDecimal,
         value: clampedValue,
         originalValue: convertedValue,
         color: getGlucoseColor(reading.value, colorScheme),
@@ -745,8 +748,14 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
   };
 
   // Format X-axis labels - unified format: 12AM, 6AM, noon, 6PM, 12AM
-  const formatXAxis = (value: string) => {
-    const hour = parseInt(value.split(':')[0]);
+  // Handles both string ("00:00") and number (0) inputs
+  const formatXAxis = (value: string | number) => {
+    let hour: number;
+    if (typeof value === 'string') {
+      hour = parseInt(value.split(':')[0]);
+    } else {
+      hour = Math.floor(value);
+    }
     const unifiedLabels: Record<number, string> = {
       0: '12AM', 6: '6AM', 12: 'noon', 18: '6PM', 24: '12AM'
     };
@@ -754,8 +763,13 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
   };
 
   // Format X-axis labels for IOB - same unified format
-  const formatXAxisIOB = (value: string) => {
-    const hour = parseInt(value.split(':')[0]);
+  const formatXAxisIOB = (value: string | number) => {
+    let hour: number;
+    if (typeof value === 'string') {
+      hour = parseInt(value.split(':')[0]);
+    } else {
+      hour = Math.floor(value);
+    }
     const unifiedLabels: Record<number, string> = {
       0: '12AM', 6: '6AM', 12: 'noon', 18: '6PM', 24: '12AM'
     };
@@ -940,9 +954,42 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
               <div className={styles.chartWrapper}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={glucoseChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    {/* Day/night shading gradients */}
+                    {showDayNightShading && (
+                      <defs>
+                        <linearGradient id="dailyBGNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#1a237e" stopOpacity="0.25" />
+                          <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
+                        </linearGradient>
+                        <linearGradient id="dailyBGNightGradientRight" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
+                          <stop offset="100%" stopColor="#1a237e" stopOpacity="0.25" />
+                        </linearGradient>
+                      </defs>
+                    )}
+                    
+                    {/* Day/night shading - midnight to 8AM */}
+                    {showDayNightShading && (
+                      <ReferenceArea
+                        x1={0}
+                        x2={8}
+                        fill="url(#dailyBGNightGradientLeft)"
+                      />
+                    )}
+                    {/* Day/night shading - 8PM to midnight */}
+                    {showDayNightShading && (
+                      <ReferenceArea
+                        x1={20}
+                        x2={24}
+                        fill="url(#dailyBGNightGradientRight)"
+                      />
+                    )}
+                    
                     <XAxis
-                      dataKey="time"
-                      domain={['00:00', '23:59']}
+                      type="number"
+                      dataKey="timeDecimal"
+                      domain={[0, 24]}
+                      ticks={[0, 6, 12, 18, 24]}
                       tickFormatter={formatXAxis}
                       stroke={tokens.colorNeutralStroke1}
                       tick={{ 
@@ -1333,7 +1380,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
 
           {/* Insulin Timeline Chart - wrapped in Card */}
           <Card className={styles.chartCard}>
-            <InsulinTimeline data={timelineData} />
+            <InsulinTimeline data={timelineData} showDayNightShading={showDayNightShading} />
           </Card>
         </>
       )}
@@ -1352,10 +1399,44 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
           <div className={styles.iobChartContainer}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={hourlyIOBData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                {/* Day/night shading gradients */}
+                {showDayNightShading && (
+                  <defs>
+                    <linearGradient id="iobNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#1a237e" stopOpacity="0.25" />
+                      <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
+                    </linearGradient>
+                    <linearGradient id="iobNightGradientRight" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
+                      <stop offset="100%" stopColor="#1a237e" stopOpacity="0.25" />
+                    </linearGradient>
+                  </defs>
+                )}
+                
+                {/* Day/night shading - midnight to 8AM */}
+                {showDayNightShading && (
+                  <ReferenceArea
+                    x1={0}
+                    x2={8}
+                    fill="url(#iobNightGradientLeft)"
+                  />
+                )}
+                {/* Day/night shading - 8PM to midnight */}
+                {showDayNightShading && (
+                  <ReferenceArea
+                    x1={20}
+                    x2={24}
+                    fill="url(#iobNightGradientRight)"
+                  />
+                )}
+                
                 <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
                 
                 <XAxis
-                  dataKey="timeLabel"
+                  type="number"
+                  dataKey="hour"
+                  domain={[0, 24]}
+                  ticks={[0, 6, 12, 18, 24]}
                   tickFormatter={formatXAxisIOB}
                   stroke={tokens.colorNeutralForeground2}
                   style={{ fontSize: tokens.fontSizeBase200 }}

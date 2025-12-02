@@ -19,6 +19,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ReferenceArea,
 } from 'recharts';
 import { InsulinTotalsBar } from './InsulinTotalsBar';
 
@@ -73,9 +74,10 @@ interface InsulinTimelineProps {
     basalRate: number;
     bolusTotal: number;
   }>;
+  showDayNightShading?: boolean;
 }
 
-export function InsulinTimeline({ data }: InsulinTimelineProps) {
+export function InsulinTimeline({ data, showDayNightShading = true }: InsulinTimelineProps) {
   const styles = useStyles();
 
   // Check if there's any data to display
@@ -151,10 +153,44 @@ export function InsulinTimeline({ data }: InsulinTimelineProps) {
         <div className={styles.chartContainer}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              {/* Day/night shading gradients */}
+              {showDayNightShading && (
+                <defs>
+                  <linearGradient id="insulinNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#1a237e" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient id="insulinNightGradientRight" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
+                    <stop offset="100%" stopColor="#1a237e" stopOpacity="0.25" />
+                  </linearGradient>
+                </defs>
+              )}
+              
+              {/* Day/night shading - midnight to 8AM */}
+              {showDayNightShading && (
+                <ReferenceArea
+                  x1={0}
+                  x2={8}
+                  fill="url(#insulinNightGradientLeft)"
+                />
+              )}
+              {/* Day/night shading - 8PM to midnight */}
+              {showDayNightShading && (
+                <ReferenceArea
+                  x1={20}
+                  x2={24}
+                  fill="url(#insulinNightGradientRight)"
+                />
+              )}
+              
               <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
               
               <XAxis
-                dataKey="timeLabel"
+                type="number"
+                dataKey="hour"
+                domain={[0, 24]}
+                ticks={[0, 6, 12, 18, 24]}
                 tickFormatter={formatXAxis}
                 stroke={tokens.colorNeutralForeground2}
                 style={{ fontSize: tokens.fontSizeBase200 }}
