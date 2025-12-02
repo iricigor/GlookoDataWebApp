@@ -18,6 +18,8 @@ import { HyposReport } from '../components/HyposReport';
 import { DailyBGReport } from '../components/DailyBGReport';
 import type { UploadedFile, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
+import type { ResponseLanguage } from '../hooks/useResponseLanguage';
+import type { AIProvider } from '../utils/api/aiApi';
 
 const useStyles = makeStyles({
   container: {
@@ -78,11 +80,29 @@ interface ReportsProps {
   exportFormat: ExportFormat;
   glucoseUnit: GlucoseUnit;
   insulinDuration?: number;
+  // AI configuration props for HyposReport
+  perplexityApiKey?: string;
+  geminiApiKey?: string;
+  grokApiKey?: string;
+  deepseekApiKey?: string;
+  selectedProvider?: AIProvider | null;
+  responseLanguage?: ResponseLanguage;
 }
 
 const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'detailedCgm', 'detailedInsulin', 'unifiedView', 'iob', 'roc', 'hypos'];
 
-export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDuration }: ReportsProps) {
+export function Reports({ 
+  selectedFile, 
+  exportFormat, 
+  glucoseUnit, 
+  insulinDuration,
+  perplexityApiKey = '',
+  geminiApiKey = '',
+  grokApiKey = '',
+  deepseekApiKey = '',
+  selectedProvider = null,
+  responseLanguage = 'english',
+}: ReportsProps) {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState<string>(() => {
     // Check URL hash for deep linking first (e.g., #reports/bgOverview)
@@ -147,7 +167,18 @@ export function Reports({ selectedFile, exportFormat, glucoseUnit, insulinDurati
       case 'roc':
         return <RoCReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
       case 'hypos':
-        return <HyposReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
+        return (
+          <HyposReport 
+            selectedFile={selectedFile} 
+            glucoseUnit={glucoseUnit}
+            perplexityApiKey={perplexityApiKey}
+            geminiApiKey={geminiApiKey}
+            grokApiKey={grokApiKey}
+            deepseekApiKey={deepseekApiKey}
+            selectedProvider={selectedProvider}
+            responseLanguage={responseLanguage}
+          />
+        );
       default:
         return null;
     }

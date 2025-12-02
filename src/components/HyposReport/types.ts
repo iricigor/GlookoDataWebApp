@@ -4,6 +4,8 @@
 
 import type { GlucoseUnit, UploadedFile, GlucoseThresholds } from '../../types';
 import type { HypoStats } from '../../utils/data/hypoDataUtils';
+import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
+import type { AIProvider } from '../../utils/api/aiApi';
 
 /**
  * Max glucose values for Y-axis toggle
@@ -37,6 +39,13 @@ export const TIME_LABELS: Record<number, string> = {
 export interface HyposReportProps {
   selectedFile?: UploadedFile;
   glucoseUnit: GlucoseUnit;
+  // AI configuration props (optional - AI features disabled if not provided)
+  perplexityApiKey?: string;
+  geminiApiKey?: string;
+  grokApiKey?: string;
+  deepseekApiKey?: string;
+  selectedProvider?: AIProvider | null;
+  responseLanguage?: ResponseLanguage;
 }
 
 /**
