@@ -7,9 +7,11 @@
  * - BG summary cards and glucose graph (from Detailed CGM)
  * - Insulin summary cards and timeline graph (from Detailed Insulin)
  * - IOB graph (from IOB report)
+ * - RoC summary bar and stats (from RoC report)
+ * - Hypo stats cards (from Hypos report)
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   makeStyles,
   Text,
@@ -21,19 +23,30 @@ import {
   Dropdown,
   Option,
   Spinner,
+  Tooltip as FluentTooltip,
+  mergeClasses,
 } from '@fluentui/react-components';
+import {
+  TopSpeedRegular,
+  DataHistogramRegular,
+  TimerRegular,
+  WarningRegular,
+  HeartPulseWarningRegular,
+  ArrowTrendingDownRegular,
+  ClockRegular,
+} from '@fluentui/react-icons';
 import {
   LineChart,
   Line,
   XAxis,
   YAxis,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   ResponsiveContainer,
   ReferenceLine,
   CartesianGrid,
   Legend,
 } from 'recharts';
-import type { UploadedFile, GlucoseReading, GlucoseDataSource, GlucoseUnit, InsulinReading, HourlyIOBData } from '../types';
+import type { UploadedFile, GlucoseReading, GlucoseDataSource, GlucoseUnit, InsulinReading, HourlyIOBData, RoCStats } from '../types';
 import { 
   extractGlucoseReadings, 
   smoothGlucoseValues, 
@@ -49,7 +62,18 @@ import {
   calculateGlucoseRangeStats,
   GLUCOSE_RANGE_COLORS,
   MIN_PERCENTAGE_TO_DISPLAY,
+  calculateRoC,
+  calculateRoCStats,
+  smoothRoCData,
+  ROC_COLORS,
+  formatRoCValue,
+  getRoCMedicalStandards,
+  getLongestCategoryPeriod,
+  formatDuration,
+  calculateHypoStats,
+  formatHypoDuration,
 } from '../utils/data';
+import type { HypoStats } from '../utils/data/hypoDataUtils';
 import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { DayNavigator } from './DayNavigator';
 import { useBGColorScheme } from '../hooks/useBGColorScheme';
@@ -64,6 +88,21 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('24px'),
+  },
+  stickyDatePickerWrapper: {
+    position: 'sticky',
+    top: '0',
+    zIndex: 100,
+    marginLeft: '-24px',
+    marginRight: '-24px',
+    ...shorthands.padding('12px', '24px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    boxShadow: tokens.shadow8,
+    '@media (max-width: 767px)': {
+      marginLeft: '-16px',
+      marginRight: '-16px',
+      ...shorthands.padding('8px', '16px'),
+    },
   },
   sectionTitle: {
     fontSize: tokens.fontSizeBase500,
@@ -190,6 +229,143 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
+  },
+  // Stats cards with icons (RoC and Hypo style)
+  statsRow: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+    ...shorthands.gap('12px'),
+  },
+  statCard: {
+    ...shorthands.padding('12px', '16px'),
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    boxShadow: tokens.shadow4,
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+  },
+  statCardSuccess: {
+    ...shorthands.border('1px', 'solid', tokens.colorPaletteGreenBorder1),
+  },
+  statCardWarning: {
+    ...shorthands.border('1px', 'solid', tokens.colorPaletteMarigoldBorder1),
+  },
+  statCardDanger: {
+    ...shorthands.border('1px', 'solid', tokens.colorPaletteRedBorder1),
+  },
+  statIcon: {
+    fontSize: '24px',
+    color: tokens.colorBrandForeground1,
+    flexShrink: 0,
+  },
+  statIconSuccess: {
+    color: tokens.colorPaletteGreenForeground1,
+  },
+  statIconWarning: {
+    color: tokens.colorPaletteMarigoldForeground1,
+  },
+  statIconDanger: {
+    color: tokens.colorPaletteRedForeground1,
+  },
+  statContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: 0,
+  },
+  statLabel: {
+    fontSize: tokens.fontSizeBase300,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground2,
+  },
+  statValueRow: {
+    display: 'flex',
+    alignItems: 'baseline',
+    ...shorthands.gap('4px'),
+  },
+  statValue: {
+    fontSize: tokens.fontSizeBase600,
+    fontWeight: tokens.fontWeightBold,
+    color: tokens.colorNeutralForeground1,
+    fontFamily: 'monospace',
+  },
+  statUnit: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground3,
+  },
+  // RoC Summary Bar
+  rocSummaryCard: {
+    ...shorthands.padding('20px'),
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    boxShadow: tokens.shadow4,
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+  },
+  rocSummaryTitle: {
+    fontSize: tokens.fontSizeBase500,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    marginBottom: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
+  rocSummaryBar: {
+    display: 'flex',
+    height: '40px',
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.overflow('hidden'),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    marginBottom: '16px',
+  },
+  rocSummarySegment: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: tokens.fontSizeBase300,
+    color: '#FFFFFF',
+    fontWeight: tokens.fontWeightSemibold,
+    transitionProperty: 'all',
+    transitionDuration: tokens.durationNormal,
+    transitionTimingFunction: tokens.curveEasyEase,
+    '&:hover': {
+      opacity: 0.85,
+    },
+  },
+  rocStandardsContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('8px'),
+  },
+  rocStandardRow: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+    ...shorthands.padding('8px', '12px'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    backgroundColor: tokens.colorNeutralBackground2,
+  },
+  rocStandardDot: {
+    width: '12px',
+    height: '12px',
+    ...shorthands.borderRadius('50%'),
+  },
+  rocStandardLabel: {
+    fontWeight: tokens.fontWeightSemibold,
+    fontSize: tokens.fontSizeBase300,
+    minWidth: '70px',
+  },
+  rocStandardThreshold: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+    fontFamily: 'monospace',
+  },
+  rocStandardDescription: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground3,
+    flex: 1,
   },
 });
 
@@ -421,6 +597,34 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
 
   const insulinSummary = getInsulinSummary();
 
+  // Calculate Rate of Change (RoC) statistics
+  const rocStats: RoCStats | null = useMemo(() => {
+    if (currentGlucoseReadings.length === 0) return null;
+    const rocData = calculateRoC(currentGlucoseReadings);
+    const smoothedRoC = smoothRoCData(rocData);
+    return calculateRoCStats(smoothedRoC);
+  }, [currentGlucoseReadings]);
+
+  // Calculate longest stable period (for RoC)
+  const longestStablePeriod = useMemo(() => {
+    if (currentGlucoseReadings.length === 0) return 0;
+    const rocData = calculateRoC(currentGlucoseReadings);
+    const smoothedRoC = smoothRoCData(rocData);
+    return getLongestCategoryPeriod(smoothedRoC, 'good');
+  }, [currentGlucoseReadings]);
+
+  // Calculate Hypoglycemia statistics
+  const hypoStats: HypoStats | null = useMemo(() => {
+    if (currentGlucoseReadings.length === 0) return null;
+    return calculateHypoStats(currentGlucoseReadings, thresholds);
+  }, [currentGlucoseReadings, thresholds]);
+
+  // Get medical standards for RoC
+  const medicalStandards = getRoCMedicalStandards(glucoseUnit);
+
+  // RoC unit label
+  const rocUnitLabel = glucoseUnit === 'mg/dL' ? 'mg/dL/5 min' : 'mmol/L/5 min';
+
   // Navigation handlers
   const handlePreviousDate = () => {
     if (currentDateIndex > 0) {
@@ -595,18 +799,20 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
 
   return (
     <div className={styles.container}>
-      {/* Date Navigation - shared for all sections */}
-      <DayNavigator
-        currentDate={currentDate}
-        onPreviousDay={handlePreviousDate}
-        onNextDay={handleNextDate}
-        canGoPrevious={currentDateIndex > 0}
-        canGoNext={currentDateIndex < availableDates.length - 1}
-        loading={dateChanging}
-        onDateSelect={handleDateSelect}
-        minDate={minDate}
-        maxDate={maxDate}
-      />
+      {/* Date Navigation - shared for all sections - sticky */}
+      <div className={styles.stickyDatePickerWrapper}>
+        <DayNavigator
+          currentDate={currentDate}
+          onPreviousDay={handlePreviousDate}
+          onNextDay={handleNextDate}
+          canGoPrevious={currentDateIndex > 0}
+          canGoNext={currentDateIndex < availableDates.length - 1}
+          loading={dateChanging}
+          onDateSelect={handleDateSelect}
+          minDate={minDate}
+          maxDate={maxDate}
+        />
+      </div>
 
       {/* ========== BG Section ========== */}
       {hasGlucoseData && (
@@ -760,7 +966,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
                       tickLine={false}
                     />
                     
-                    <Tooltip content={<GlucoseTooltip />} />
+                    <RechartsTooltip content={<GlucoseTooltip />} />
                     
                     {/* Target range reference lines */}
                     <ReferenceLine 
@@ -861,6 +1067,239 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
               </div>
             </div>
           </Card>
+
+          {/* ========== Rate of Change (RoC) Section ========== */}
+          {rocStats && rocStats.totalCount > 0 && (
+            <>
+              <Text className={styles.sectionTitle}>Rate of Change Analysis</Text>
+              
+              {/* RoC Stats Cards */}
+              <div className={styles.statsRow}>
+                <FluentTooltip content="Longest continuous period with stable glucose (slow rate of change)" relationship="description">
+                  <Card className={styles.statCard}>
+                    <TimerRegular className={styles.statIcon} />
+                    <div className={styles.statContent}>
+                      <Text className={styles.statLabel}>Longest Stable</Text>
+                      <div className={styles.statValueRow}>
+                        <Text className={styles.statValue}>{formatDuration(longestStablePeriod)}</Text>
+                      </div>
+                    </div>
+                  </Card>
+                </FluentTooltip>
+                
+                <FluentTooltip content="Maximum absolute rate of glucose change (fastest)" relationship="description">
+                  <Card className={styles.statCard}>
+                    <TopSpeedRegular className={styles.statIcon} />
+                    <div className={styles.statContent}>
+                      <Text className={styles.statLabel}>Max RoC</Text>
+                      <div className={styles.statValueRow}>
+                        <Text className={styles.statValue}>{formatRoCValue(rocStats.maxRoC, glucoseUnit)}</Text>
+                        <Text className={styles.statUnit}>{rocUnitLabel}</Text>
+                      </div>
+                    </div>
+                  </Card>
+                </FluentTooltip>
+                
+                <FluentTooltip content="Standard Deviation of Rate of Change - measures variability in glucose change speed" relationship="description">
+                  <Card className={styles.statCard}>
+                    <DataHistogramRegular className={styles.statIcon} />
+                    <div className={styles.statContent}>
+                      <Text className={styles.statLabel}>StDev RoC</Text>
+                      <div className={styles.statValueRow}>
+                        <Text className={styles.statValue}>{formatRoCValue(rocStats.sdRoC, glucoseUnit)}</Text>
+                        <Text className={styles.statUnit}>{rocUnitLabel}</Text>
+                      </div>
+                    </div>
+                  </Card>
+                </FluentTooltip>
+              </div>
+
+              {/* RoC Summary Bar */}
+              <div className={styles.rocSummaryCard}>
+                <Text className={styles.rocSummaryTitle}>
+                  Time by Rate of Change Category
+                </Text>
+                
+                <div className={styles.rocSummaryBar}>
+                  {rocStats.goodPercentage > 0 && (
+                    <div
+                      className={styles.rocSummarySegment}
+                      style={{
+                        width: `${rocStats.goodPercentage}%`,
+                        backgroundColor: ROC_COLORS.good,
+                      }}
+                      title={`Stable: ${rocStats.goodPercentage}% (${rocStats.goodCount} readings)`}
+                    >
+                      {rocStats.goodPercentage >= 8 && `${rocStats.goodPercentage}%`}
+                    </div>
+                  )}
+                  {rocStats.mediumPercentage > 0 && (
+                    <div
+                      className={styles.rocSummarySegment}
+                      style={{
+                        width: `${rocStats.mediumPercentage}%`,
+                        backgroundColor: ROC_COLORS.medium,
+                      }}
+                      title={`Moderate: ${rocStats.mediumPercentage}% (${rocStats.mediumCount} readings)`}
+                    >
+                      {rocStats.mediumPercentage >= 8 && `${rocStats.mediumPercentage}%`}
+                    </div>
+                  )}
+                  {rocStats.badPercentage > 0 && (
+                    <div
+                      className={styles.rocSummarySegment}
+                      style={{
+                        width: `${rocStats.badPercentage}%`,
+                        backgroundColor: ROC_COLORS.bad,
+                      }}
+                      title={`Rapid: ${rocStats.badPercentage}% (${rocStats.badCount} readings)`}
+                    >
+                      {rocStats.badPercentage >= 8 && `${rocStats.badPercentage}%`}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Medical Standards Legend */}
+                <div className={styles.rocStandardsContainer}>
+                  <div className={styles.rocStandardRow}>
+                    <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.good }} />
+                    <Text className={styles.rocStandardLabel}>Stable</Text>
+                    <Text className={styles.rocStandardThreshold}>{medicalStandards.good.threshold}</Text>
+                    <Text className={styles.rocStandardDescription}>{medicalStandards.good.description}</Text>
+                  </div>
+                  <div className={styles.rocStandardRow}>
+                    <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.medium }} />
+                    <Text className={styles.rocStandardLabel}>Moderate</Text>
+                    <Text className={styles.rocStandardThreshold}>{medicalStandards.medium.threshold}</Text>
+                    <Text className={styles.rocStandardDescription}>{medicalStandards.medium.description}</Text>
+                  </div>
+                  <div className={styles.rocStandardRow}>
+                    <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.bad }} />
+                    <Text className={styles.rocStandardLabel}>Rapid</Text>
+                    <Text className={styles.rocStandardThreshold}>{medicalStandards.bad.threshold}</Text>
+                    <Text className={styles.rocStandardDescription}>{medicalStandards.bad.description}</Text>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ========== Hypoglycemia Section ========== */}
+          {hypoStats && (
+            <>
+              <Text className={styles.sectionTitle}>Hypoglycemia Analysis</Text>
+              
+              {/* Hypo Stats Cards */}
+              <div className={styles.statsRow}>
+                <FluentTooltip content="Severe hypoglycemic events (below very low threshold)" relationship="description">
+                  <Card className={mergeClasses(
+                    styles.statCard,
+                    hypoStats.severeCount > 0 ? styles.statCardDanger : styles.statCardSuccess
+                  )}>
+                    <HeartPulseWarningRegular className={mergeClasses(
+                      styles.statIcon,
+                      hypoStats.severeCount > 0 ? styles.statIconDanger : styles.statIconSuccess
+                    )} />
+                    <div className={styles.statContent}>
+                      <Text className={styles.statLabel}>Severe</Text>
+                      <div className={styles.statValueRow}>
+                        <Text className={styles.statValue}>{hypoStats.severeCount}</Text>
+                      </div>
+                    </div>
+                  </Card>
+                </FluentTooltip>
+                
+                <FluentTooltip content="Non-severe hypoglycemic events (below low threshold)" relationship="description">
+                  <Card className={mergeClasses(
+                    styles.statCard,
+                    hypoStats.nonSevereCount > 0 ? styles.statCardWarning : styles.statCardSuccess
+                  )}>
+                    <WarningRegular className={mergeClasses(
+                      styles.statIcon,
+                      hypoStats.nonSevereCount > 0 ? styles.statIconWarning : styles.statIconSuccess
+                    )} />
+                    <div className={styles.statContent}>
+                      <Text className={styles.statLabel}>Non-Severe</Text>
+                      <div className={styles.statValueRow}>
+                        <Text className={styles.statValue}>{hypoStats.nonSevereCount}</Text>
+                      </div>
+                    </div>
+                  </Card>
+                </FluentTooltip>
+                
+                <FluentTooltip content="Lowest glucose value during hypoglycemia" relationship="description">
+                  <Card className={mergeClasses(
+                    styles.statCard,
+                    hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
+                      ? styles.statCardDanger 
+                      : hypoStats.lowestValue !== null ? styles.statCardWarning : styles.statCardSuccess
+                  )}>
+                    <ArrowTrendingDownRegular className={mergeClasses(
+                      styles.statIcon,
+                      hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
+                        ? styles.statIconDanger 
+                        : hypoStats.lowestValue !== null ? styles.statIconWarning : styles.statIconSuccess
+                    )} />
+                    <div className={styles.statContent}>
+                      <Text className={styles.statLabel}>Lowest</Text>
+                      <div className={styles.statValueRow}>
+                        <Text className={styles.statValue}>
+                          {hypoStats.lowestValue !== null 
+                            ? displayGlucoseValue(hypoStats.lowestValue, glucoseUnit)
+                            : 'N/A'}
+                        </Text>
+                        {hypoStats.lowestValue !== null && (
+                          <Text className={styles.statUnit}>{getUnitLabel(glucoseUnit)}</Text>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                </FluentTooltip>
+                
+                <FluentTooltip content="Duration of longest hypoglycemic event" relationship="description">
+                  <Card className={mergeClasses(
+                    styles.statCard,
+                    hypoStats.totalCount > 0 ? styles.statCardWarning : styles.statCardSuccess
+                  )}>
+                    <TimerRegular className={mergeClasses(
+                      styles.statIcon,
+                      hypoStats.totalCount > 0 ? styles.statIconWarning : styles.statIconSuccess
+                    )} />
+                    <div className={styles.statContent}>
+                      <Text className={styles.statLabel}>Longest</Text>
+                      <div className={styles.statValueRow}>
+                        <Text className={styles.statValue}>
+                          {formatHypoDuration(hypoStats.longestDurationMinutes)}
+                        </Text>
+                      </div>
+                    </div>
+                  </Card>
+                </FluentTooltip>
+                
+                <FluentTooltip content="Total time spent in hypoglycemia" relationship="description">
+                  <Card className={mergeClasses(
+                    styles.statCard,
+                    hypoStats.totalCount > 0 ? styles.statCardWarning : styles.statCardSuccess
+                  )}>
+                    <ClockRegular className={mergeClasses(
+                      styles.statIcon,
+                      hypoStats.totalCount > 0 ? styles.statIconWarning : styles.statIconSuccess
+                    )} />
+                    <div className={styles.statContent}>
+                      <Text className={styles.statLabel}>Total Time</Text>
+                      <div className={styles.statValueRow}>
+                        <Text className={styles.statValue}>
+                          {hypoStats.totalCount > 0 
+                            ? formatHypoDuration(hypoStats.totalDurationMinutes)
+                            : '😊'}
+                        </Text>
+                      </div>
+                    </div>
+                  </Card>
+                </FluentTooltip>
+              </div>
+            </>
+          )}
         </>
       )}
 
@@ -921,7 +1360,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
                   style={{ fontSize: tokens.fontSizeBase200 }}
                 />
                 
-                <Tooltip content={<IOBTooltip />} />
+                <RechartsTooltip content={<IOBTooltip />} />
                 
                 <Legend
                   verticalAlign="top"
