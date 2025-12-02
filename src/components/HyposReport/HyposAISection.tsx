@@ -258,6 +258,7 @@ export function HyposAISection({
   useEffect(() => {
     // Reset loading state when dependencies change
     setLoadingAllEvents(true);
+    setError(null);
     
     // Use setTimeout to defer the heavy computation and allow UI to render first
     const timeoutId = setTimeout(() => {
@@ -277,6 +278,7 @@ export function HyposAISection({
         if (isMountedRef.current) {
           setAllEvents([]);
           setLoadingAllEvents(false);
+          setError('Failed to prepare AI data. Please try refreshing the page.');
         }
       }
     }, 0);
