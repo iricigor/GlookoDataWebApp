@@ -11,11 +11,6 @@ import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { BGOverviewReport } from '../components/BGOverviewReport';
 import { DailyBGReport } from '../components/DailyBGReport';
 import { HyposReport } from '../components/HyposReport';
-import { BGValuesReport } from '../components/BGValuesReport';
-import { InsulinDailyReport } from '../components/InsulinDailyReport';
-import { UnifiedDailyReport } from '../components/UnifiedDailyReport';
-import { IOBReport } from '../components/IOBReport';
-import { RoCReport } from '../components/RoCReport';
 import type { UploadedFile, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import type { ResponseLanguage } from '../hooks/useResponseLanguage';
@@ -90,11 +85,27 @@ interface ReportsProps {
   responseLanguage?: ResponseLanguage;
 }
 
-const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'hypos', 'detailedCgm', 'detailedInsulin', 'unifiedView', 'iob', 'roc'];
+const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'hypos'];
 
+/**
+ * Render the Comprehensive Reports interface with selectable report tabs.
+ *
+ * @param selectedFile - Uploaded file whose data will be shown in the reports.
+ * @param glucoseUnit - Unit used to display glucose values.
+ * @param insulinDuration - Insulin action duration in hours used by daily reports.
+ * @param showDayNightShading - When true, daily charts include day/night shading.
+ * @param perplexityApiKey - Optional API key for the Perplexity AI provider (used by the Hypos report).
+ * @param geminiApiKey - Optional API key for the Gemini AI provider (used by the Hypos report).
+ * @param grokApiKey - Optional API key for the Grok AI provider (used by the Hypos report).
+ * @param deepseekApiKey - Optional API key for the DeepSeek AI provider (used by the Hypos report).
+ * @param selectedProvider - Selected AI provider to use for AI-powered reports.
+ * @param responseLanguage - Preferred language for AI-generated responses.
+ * @returns The reports UI as a React element.
+ */
 export function Reports({ 
   selectedFile, 
-  exportFormat,
+  // exportFormat is kept in the interface for backward compatibility but no longer used
+  // since Detailed CGM, Detailed Insulin, Unified View, IOB, and RoC tabs are hidden
   glucoseUnit, 
   insulinDuration,
   showDayNightShading,
@@ -171,16 +182,6 @@ export function Reports({
             responseLanguage={responseLanguage}
           />
         );
-      case 'detailedCgm':
-        return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
-      case 'detailedInsulin':
-        return <InsulinDailyReport selectedFile={selectedFile} />;
-      case 'unifiedView':
-        return <UnifiedDailyReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
-      case 'iob':
-        return <IOBReport selectedFile={selectedFile} insulinDuration={insulinDuration} />;
-      case 'roc':
-        return <RoCReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
       default:
         return null;
     }
@@ -207,11 +208,6 @@ export function Reports({
         <Tab value="bgOverview">BG Overview</Tab>
         <Tab value="dailyBG">Daily BG</Tab>
         <Tab value="hypos">Hypos</Tab>
-        <Tab value="detailedCgm">Detailed CGM</Tab>
-        <Tab value="detailedInsulin">Detailed Insulin</Tab>
-        <Tab value="unifiedView">Unified View</Tab>
-        <Tab value="iob">IOB</Tab>
-        <Tab value="roc">RoC</Tab>
       </TabList>
 
       <div className={styles.contentWrapper}>
@@ -227,11 +223,6 @@ export function Reports({
           <Tab value="bgOverview">BG Overview</Tab>
           <Tab value="dailyBG">Daily BG</Tab>
           <Tab value="hypos">Hypos</Tab>
-          <Tab value="detailedCgm">Detailed CGM</Tab>
-          <Tab value="detailedInsulin">Detailed Insulin</Tab>
-          <Tab value="unifiedView">Unified View</Tab>
-          <Tab value="iob">IOB</Tab>
-          <Tab value="roc">RoC</Tab>
         </TabList>
 
         <div className={styles.contentArea}>
