@@ -1225,13 +1225,35 @@ describe('glucoseRangeUtils', () => {
       expect(countUnicorns(readings)).toBe(2);
     });
 
-    it('should count readings at 5.6 mmol/L (100 mg/dL)', () => {
+    it('should count readings at 100 mg/dL (≈5.55 mmol/L)', () => {
+      // 100 mg/dL = 100/18.018 ≈ 5.55 mmol/L
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.55 },
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.55 },
+      ];
+      expect(countUnicorns(readings)).toBe(2);
+    });
+
+    it('should count readings within tolerance of 100 mg/dL', () => {
+      // Tolerance is 0.5 mg/dL ≈ 0.028 mmol/L
+      // 100 mg/dL ≈ 5.55 mmol/L, so range is ~5.522 to ~5.578
+      const readings: GlucoseReading[] = [
+        { timestamp: new Date('2024-01-15T10:00:00'), value: 5.53 }, // Within tolerance
+        { timestamp: new Date('2024-01-15T11:00:00'), value: 5.57 }, // Within tolerance
+        { timestamp: new Date('2024-01-15T12:00:00'), value: 5.50 }, // Outside tolerance (too low)
+      ];
+      expect(countUnicorns(readings)).toBe(2);
+    });
+
+    it('should not count 5.6 mmol/L as unicorn (outside 100 mg/dL tolerance)', () => {
+      // 5.6 mmol/L is outside the ±0.5 mg/dL tolerance around 100 mg/dL (5.55)
       const readings: GlucoseReading[] = [
         { timestamp: new Date('2024-01-15T10:00:00'), value: 5.6 },
         { timestamp: new Date('2024-01-15T11:00:00'), value: 6.0 },
         { timestamp: new Date('2024-01-15T12:00:00'), value: 5.6 },
       ];
-      expect(countUnicorns(readings)).toBe(2);
+      expect(countUnicorns(readings)).toBe(0);
     });
 
     it('should return 0 when no unicorns present', () => {

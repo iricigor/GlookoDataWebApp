@@ -8,6 +8,10 @@ import {
   Text,
   Card,
   Tooltip,
+  Popover,
+  PopoverTrigger,
+  PopoverSurface,
+  Link,
   tokens,
   makeStyles,
   shorthands,
@@ -16,6 +20,7 @@ import {
   DataTrendingRegular,
   WeatherSunnyRegular,
   WeatherMoonRegular,
+  InfoRegular,
 } from '@fluentui/react-icons';
 import type { GlucoseUnit } from '../../types';
 import { 
@@ -63,6 +68,20 @@ const useStyles = makeStyles({
   cardIcon: {
     fontSize: '24px',
     color: tokens.colorBrandForeground1,
+  },
+  infoIcon: {
+    fontSize: '16px',
+    color: tokens.colorNeutralForeground3,
+    cursor: 'pointer',
+    ':hover': {
+      color: tokens.colorBrandForeground1,
+    },
+  },
+  popoverContent: {
+    ...shorthands.padding('8px', '12px'),
+    maxWidth: '280px',
+    fontSize: tokens.fontSizeBase200,
+    lineHeight: 1.4,
   },
   statsGrid: {
     display: 'grid',
@@ -125,10 +144,10 @@ const useStyles = makeStyles({
     right: '0',
     transform: 'translateY(-50%)',
     display: 'flex',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingLeft: '8%',
-    paddingRight: '8%',
+    paddingLeft: '15%',
+    paddingRight: '15%',
     zIndex: 2,
   },
   quartileValue: {
@@ -343,16 +362,16 @@ function GaussianCurve() {
   const curveColor = '#A8C5E8';
   const lineColor = '#7AA7D6';
   
-  // More points for a smoother, more curvy Gaussian curve
-  // Using a proper Gaussian formula: wider sigma for a wider curve
-  // Curve spans from 5% to 95% of the viewBox width
+  // Gaussian curve with wide sigma for a broader distribution
+  // Curve spans from 15% to 85% of the viewBox width
+  // Numbers will be positioned at 15%, 50%, 85% to align with curve edges
   const curvePoints = [];
-  for (let x = 5; x <= 95; x += 2) {
-    const sigma = 20;
+  for (let x = 15; x <= 85; x += 2) {
+    const sigma = 18;
     const y = 50 - 42 * Math.exp(-Math.pow(x - 50, 2) / (2 * Math.pow(sigma, 2)));
     curvePoints.push(`${x},${y}`);
   }
-  const curvePath = `M 5,50 L ${curvePoints.join(' L ')} L 95,50`;
+  const curvePath = `M 15,50 L ${curvePoints.join(' L ')} L 85,50`;
   const curveOutline = `M ${curvePoints.join(' L ')}`;
   
   return (
@@ -371,12 +390,12 @@ function GaussianCurve() {
         strokeWidth="1.5"
         strokeOpacity="0.6"
       />
-      {/* Q25 marker line at 30% position (shifted for wider curve) */}
-      <line x1="30" y1="8" x2="30" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
+      {/* Q25 marker line at 28% position (closer to center) */}
+      <line x1="28" y1="8" x2="28" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
       {/* Q50 (median) marker line at 50% position */}
       <line x1="50" y1="8" x2="50" y2="50" stroke={lineColor} strokeWidth="1.5" strokeOpacity="0.6" strokeDasharray="2,2" />
-      {/* Q75 marker line at 70% position (shifted for wider curve) */}
-      <line x1="70" y1="8" x2="70" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
+      {/* Q75 marker line at 72% position (closer to center) */}
+      <line x1="72" y1="8" x2="72" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
     </svg>
   );
 }
@@ -388,7 +407,7 @@ function HighLowRing({ highs, lows }: { highs: number; lows: number }) {
   
   // SVG circle parameters - use shared donut size with thicker stroke
   const size = DONUT_SIZE;
-  const strokeWidth = 7;
+  const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   
@@ -449,6 +468,20 @@ export function SugarmateStatsCard({
       <Text className={styles.cardTitle}>
         <DataTrendingRegular className={styles.cardIcon} />
         Additional Statistics
+        <Popover withArrow>
+          <PopoverTrigger disableButtonEnhancement>
+            <InfoRegular className={styles.infoIcon} aria-label="Information about Additional Statistics" />
+          </PopoverTrigger>
+          <PopoverSurface>
+            <div className={styles.popoverContent}>
+              These statistics are inspired by the{' '}
+              <Link href="https://sugarmate.io/" target="_blank" rel="noopener noreferrer" inline>
+                Sugarmate app
+              </Link>
+              , providing insights into your glucose data patterns and variability.
+            </div>
+          </PopoverSurface>
+        </Popover>
       </Text>
 
       <div className={styles.statsGrid}>
@@ -524,7 +557,7 @@ export function SugarmateStatsCard({
                   </div>
                   <div className={styles.fluxInfo}>
                     <Text className={styles.fluxDescription}>{flux.description}</Text>
-                    <Text className={styles.fluxScore}>CV: {flux.score.toFixed(1)}%</Text>
+                    <Text className={styles.fluxScore}>CV {flux.score.toFixed(1)}%</Text>
                   </div>
                 </div>
               </div>
@@ -533,7 +566,7 @@ export function SugarmateStatsCard({
         )}
 
         {/* Unicorns */}
-        <Tooltip content={`"Perfect" glucose readings at exactly 5.0 or 5.6 ${unitLabel}. These are considered ideal glucose levels for many people with diabetes`} relationship="description">
+        <Tooltip content={`"Perfect" glucose readings at exactly 100 mg/dL (± 0.5) or 5 mmol/L (± 0.05). These are considered ideal glucose levels for many people with diabetes`} relationship="description">
           <div className={styles.statSection}>
             <div className={styles.labelColumn}>
               <Text className={styles.sectionTitle}>Unicorns</Text>
