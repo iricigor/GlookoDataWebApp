@@ -489,6 +489,17 @@ interface DailyBGReportProps {
   showDayNightShading: boolean;
 }
 
+/**
+ * Renders a comprehensive daily blood glucose report combining glucose, RoC, hypoglycemia, insulin, and IOB visualizations for a selected date and file.
+ *
+ * Displays a shared date navigator and sections for glucose summary and chart, rate-of-change analysis with interval controls, hypoglycemia analysis, insulin delivery summary and timeline, and hourly IOB — each section is shown only when relevant data is available.
+ *
+ * @param selectedFile - The uploaded file whose glucose and insulin data will be extracted and shown; when undefined, the component prompts to select a file.
+ * @param glucoseUnit - Unit used for glucose display and calculations (`'mg/dL'` or `'mmol/L'`).
+ * @param insulinDuration - Insulin duration (in hours) used when preparing IOB calculations; defaults to 5.
+ * @param showDayNightShading - When true, charts include day/night shaded regions.
+ * @returns The DailyBGReport React element containing the assembled UI and charts for the selected date. 
+ */
 export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, showDayNightShading }: DailyBGReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
