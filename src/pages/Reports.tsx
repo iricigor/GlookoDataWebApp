@@ -11,7 +11,6 @@ import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { BGOverviewReport } from '../components/BGOverviewReport';
 import { DailyBGReport } from '../components/DailyBGReport';
 import { HyposReport } from '../components/HyposReport';
-import { RoCReport } from '../components/RoCReport';
 import type { UploadedFile, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import type { ResponseLanguage } from '../hooks/useResponseLanguage';
@@ -86,7 +85,7 @@ interface ReportsProps {
   responseLanguage?: ResponseLanguage;
 }
 
-const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'hypos', 'roc'];
+const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'hypos'];
 
 /**
  * Render the Comprehensive Reports interface with selectable report tabs.
@@ -106,7 +105,7 @@ const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'hypos', 'roc'];
 export function Reports({ 
   selectedFile, 
   // exportFormat is kept in the interface for backward compatibility but no longer used
-  // since Detailed CGM, Detailed Insulin, Unified View, and IOB tabs are hidden
+  // since Detailed CGM, Detailed Insulin, Unified View, IOB, and RoC tabs are hidden
   glucoseUnit, 
   insulinDuration,
   showDayNightShading,
@@ -183,8 +182,6 @@ export function Reports({
             responseLanguage={responseLanguage}
           />
         );
-      case 'roc':
-        return <RoCReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
       default:
         return null;
     }
@@ -211,7 +208,6 @@ export function Reports({
         <Tab value="bgOverview">BG Overview</Tab>
         <Tab value="dailyBG">Daily BG</Tab>
         <Tab value="hypos">Hypos</Tab>
-        <Tab value="roc">RoC</Tab>
       </TabList>
 
       <div className={styles.contentWrapper}>
@@ -227,7 +223,6 @@ export function Reports({
           <Tab value="bgOverview">BG Overview</Tab>
           <Tab value="dailyBG">Daily BG</Tab>
           <Tab value="hypos">Hypos</Tab>
-          <Tab value="roc">RoC</Tab>
         </TabList>
 
         <div className={styles.contentArea}>
