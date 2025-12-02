@@ -82,6 +82,14 @@ interface InsulinSummaryCardsProps {
   totalInsulin: number;
 }
 
+/**
+ * Renders three summary cards showing total basal, bolus, and combined insulin.
+ *
+ * @param basalTotal - Total basal insulin delivered during the day, in insulin units
+ * @param bolusTotal - Total bolus insulin delivered for meals and corrections, in insulin units
+ * @param totalInsulin - Combined total insulin (basal + bolus), in insulin units
+ * @returns A React element containing three styled cards (Total Basal, Total Bolus, Total Insulin)
+ */
 export function InsulinSummaryCards({
   basalTotal,
   bolusTotal,
