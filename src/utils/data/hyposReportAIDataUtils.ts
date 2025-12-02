@@ -67,7 +67,7 @@ export interface DailyHypoAIResponse {
  * AI analysis for a single hypo event
  */
 export interface EventAnalysis {
-  date?: string;                      // YYYY-MM-DD format (included in JSON response)
+  date: string;                       // YYYY-MM-DD format
   eventTime: string;                  // HH:MM format
   nadirValue: string;                 // X mg/dL
   primarySuspect: string;             // Category of suspected cause
@@ -458,12 +458,17 @@ function tryParseJsonResponse(response: string): Map<string, EventAnalysis[]> {
   
   if (!match) {
     // Also try to find raw JSON array without code block
-    const rawJsonRegex = /\[\s*\{[\s\S]*?\}\s*\]/;
-    const rawMatch = rawJsonRegex.exec(response);
-    if (!rawMatch) {
+    // Match opening bracket, then capture everything until closing bracket
+    // Use a balanced bracket approach by finding [ then the last ]
+    const startIdx = response.indexOf('[');
+    const endIdx = response.lastIndexOf(']');
+    
+    if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) {
       return result;
     }
-    return parseJsonArray(rawMatch[0], result);
+    
+    const potentialJson = response.substring(startIdx, endIdx + 1);
+    return parseJsonArray(potentialJson, result);
   }
   
   return parseJsonArray(match[1].trim(), result);
@@ -477,6 +482,7 @@ function parseJsonArray(jsonString: string, result: Map<string, EventAnalysis[]>
     const parsed = JSON.parse(jsonString);
     
     if (!Array.isArray(parsed)) {
+      console.warn('[HyposAI] JSON response is not an array');
       return result;
     }
     
@@ -499,8 +505,9 @@ function parseJsonArray(jsonString: string, result: Map<string, EventAnalysis[]>
       }
       result.get(item.date)!.push(analysis);
     }
-  } catch {
-    // JSON parsing failed, return empty result
+  } catch (error) {
+    // JSON parsing failed - log for debugging and fall back to markdown parsing
+    console.warn('[HyposAI] JSON parsing failed, will try markdown fallback:', error);
     return result;
   }
   
