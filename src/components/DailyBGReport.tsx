@@ -225,10 +225,11 @@ const useStyles = makeStyles({
   iobChartContainer: {
     height: '300px',
     width: '100%',
-    ...shorthands.padding('16px'),
+    ...shorthands.padding('24px'),
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    boxShadow: tokens.shadow4,
   },
   // Stats cards with icons (RoC and Hypo style)
   statsRow: {
@@ -743,25 +744,22 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
     );
   };
 
-  // Format X-axis labels
+  // Format X-axis labels - unified format: 12AM, 6AM, noon, 6PM, 12AM
   const formatXAxis = (value: string) => {
     const hour = parseInt(value.split(':')[0]);
-    if (hour === 0) return '00:00';
-    if (hour === 6) return '06:00';
-    if (hour === 12) return '12:00';
-    if (hour === 18) return '18:00';
-    if (hour === 23) return '23:59';
-    return '';
+    const unifiedLabels: Record<number, string> = {
+      0: '12AM', 6: '6AM', 12: 'noon', 18: '6PM', 24: '12AM'
+    };
+    return unifiedLabels[hour] || '';
   };
 
-  // Format X-axis labels for IOB (every 3 hours)
+  // Format X-axis labels for IOB - same unified format
   const formatXAxisIOB = (value: string) => {
     const hour = parseInt(value.split(':')[0]);
-    const timeLabels: Record<number, string> = {
-      0: '12A', 3: '3A', 6: '6A', 9: '9A',
-      12: '12P', 15: '3P', 18: '6P', 21: '9P'
+    const unifiedLabels: Record<number, string> = {
+      0: '12AM', 6: '6AM', 12: 'noon', 18: '6PM', 24: '12AM'
     };
-    return timeLabels[hour] || '';
+    return unifiedLabels[hour] || '';
   };
 
   if (!selectedFile) {
@@ -817,46 +815,58 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
       {/* ========== BG Section ========== */}
       {hasGlucoseData && (
         <>
-          {/* BG Summary Cards */}
-          <div className={styles.summarySection}>
-            <Card className={styles.summaryCard}>
-              <Text className={styles.summaryLabel}>Below Range</Text>
-              <div>
-                <Text className={`${styles.summaryValue} ${styles.statValueBelow}`}>
-                  {belowPercentage}%
-                </Text>
-              </div>
-              <Text className={styles.summarySubtext}>({glucoseStats.low} readings)</Text>
-            </Card>
+          {/* BG Summary Cards - unified style with icons */}
+          <div className={styles.statsRow}>
+            <FluentTooltip content="Percentage of readings below target range" relationship="description">
+              <Card className={mergeClasses(styles.statCard, styles.statCardDanger)}>
+                <ArrowTrendingDownRegular className={mergeClasses(styles.statIcon, styles.statIconDanger)} />
+                <div className={styles.statContent}>
+                  <Text className={styles.statLabel}>Below Range</Text>
+                  <div className={styles.statValueRow}>
+                    <Text className={styles.statValue}>{belowPercentage}%</Text>
+                    <Text className={styles.statUnit}>({glucoseStats.low})</Text>
+                  </div>
+                </div>
+              </Card>
+            </FluentTooltip>
 
-            <Card className={styles.summaryCard}>
-              <Text className={styles.summaryLabel}>In Range</Text>
-              <div>
-                <Text className={`${styles.summaryValue} ${styles.statValueInRange}`}>
-                  {inRangePercentage}%
-                </Text>
-              </div>
-              <Text className={styles.summarySubtext}>({glucoseStats.inRange} readings)</Text>
-            </Card>
+            <FluentTooltip content="Percentage of readings in target range" relationship="description">
+              <Card className={mergeClasses(styles.statCard, styles.statCardSuccess)}>
+                <DataHistogramRegular className={mergeClasses(styles.statIcon, styles.statIconSuccess)} />
+                <div className={styles.statContent}>
+                  <Text className={styles.statLabel}>In Range</Text>
+                  <div className={styles.statValueRow}>
+                    <Text className={styles.statValue}>{inRangePercentage}%</Text>
+                    <Text className={styles.statUnit}>({glucoseStats.inRange})</Text>
+                  </div>
+                </div>
+              </Card>
+            </FluentTooltip>
 
-            <Card className={styles.summaryCard}>
-              <Text className={styles.summaryLabel}>Above Range</Text>
-              <div>
-                <Text className={`${styles.summaryValue} ${styles.statValueAbove}`}>
-                  {abovePercentage}%
-                </Text>
-              </div>
-              <Text className={styles.summarySubtext}>({glucoseStats.high} readings)</Text>
-            </Card>
+            <FluentTooltip content="Percentage of readings above target range" relationship="description">
+              <Card className={mergeClasses(styles.statCard, styles.statCardWarning)}>
+                <TopSpeedRegular className={mergeClasses(styles.statIcon, styles.statIconWarning)} />
+                <div className={styles.statContent}>
+                  <Text className={styles.statLabel}>Above Range</Text>
+                  <div className={styles.statValueRow}>
+                    <Text className={styles.statValue}>{abovePercentage}%</Text>
+                    <Text className={styles.statUnit}>({glucoseStats.high})</Text>
+                  </div>
+                </div>
+              </Card>
+            </FluentTooltip>
 
-            <Card className={styles.summaryCard}>
-              <Text className={styles.summaryLabel}>Total Readings</Text>
-              <div>
-                <Text className={styles.summaryValue} style={{ color: tokens.colorNeutralForeground1 }}>
-                  {glucoseStats.total}
-                </Text>
-              </div>
-            </Card>
+            <FluentTooltip content="Total number of glucose readings for the day" relationship="description">
+              <Card className={styles.statCard}>
+                <ClockRegular className={styles.statIcon} />
+                <div className={styles.statContent}>
+                  <Text className={styles.statLabel}>Total Readings</Text>
+                  <div className={styles.statValueRow}>
+                    <Text className={styles.statValue}>{glucoseStats.total}</Text>
+                  </div>
+                </div>
+              </Card>
+            </FluentTooltip>
           </div>
 
           {/* BG Chart */}
@@ -1321,8 +1331,10 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
             totalInsulin={insulinSummary.totalInsulin}
           />
 
-          {/* Insulin Timeline Chart */}
-          <InsulinTimeline data={timelineData} />
+          {/* Insulin Timeline Chart - wrapped in Card */}
+          <Card className={styles.chartCard}>
+            <InsulinTimeline data={timelineData} />
+          </Card>
         </>
       )}
 

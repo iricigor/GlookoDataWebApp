@@ -9,31 +9,60 @@ import {
   Card,
   tokens,
   shorthands,
+  Tooltip,
 } from '@fluentui/react-components';
+import {
+  DrinkWineRegular,
+  FoodRegular,
+  HeartPulseRegular,
+} from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
-  summarySection: {
+  statsRow: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    ...shorthands.gap('16px'),
+    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+    ...shorthands.gap('12px'),
   },
-  summaryCard: {
-    ...shorthands.padding('16px'),
+  statCard: {
+    ...shorthands.padding('12px', '16px'),
+    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    boxShadow: tokens.shadow4,
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
   },
-  summaryLabel: {
+  statIcon: {
+    fontSize: '24px',
+    color: tokens.colorBrandForeground1,
+    flexShrink: 0,
+  },
+  statContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: 0,
+  },
+  statLabel: {
     fontSize: tokens.fontSizeBase300,
-    color: tokens.colorNeutralForeground2,
-    marginBottom: '4px',
-  },
-  summaryValue: {
-    fontSize: tokens.fontSizeHero700,
     fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground1,
-  },
-  summaryUnit: {
-    fontSize: tokens.fontSizeBase400,
     color: tokens.colorNeutralForeground2,
-    marginLeft: '4px',
+  },
+  statValueRow: {
+    display: 'flex',
+    alignItems: 'baseline',
+    ...shorthands.gap('4px'),
+  },
+  statValue: {
+    fontSize: tokens.fontSizeBase600,
+    fontWeight: tokens.fontWeightBold,
+    color: tokens.colorNeutralForeground1,
+    fontFamily: 'monospace',
+  },
+  statUnit: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground3,
   },
 });
 
@@ -51,30 +80,45 @@ export function InsulinSummaryCards({
   const styles = useStyles();
 
   return (
-    <div className={styles.summarySection}>
-      <Card className={styles.summaryCard}>
-        <Text className={styles.summaryLabel}>Total Basal</Text>
-        <div>
-          <Text className={styles.summaryValue}>{basalTotal}</Text>
-          <Text className={styles.summaryUnit}>units</Text>
-        </div>
-      </Card>
+    <div className={styles.statsRow}>
+      <Tooltip content="Total basal insulin delivered throughout the day (background insulin)" relationship="description">
+        <Card className={styles.statCard}>
+          <DrinkWineRegular className={styles.statIcon} />
+          <div className={styles.statContent}>
+            <Text className={styles.statLabel}>Total Basal</Text>
+            <div className={styles.statValueRow}>
+              <Text className={styles.statValue}>{basalTotal}</Text>
+              <Text className={styles.statUnit}>units</Text>
+            </div>
+          </div>
+        </Card>
+      </Tooltip>
 
-      <Card className={styles.summaryCard}>
-        <Text className={styles.summaryLabel}>Total Bolus</Text>
-        <div>
-          <Text className={styles.summaryValue}>{bolusTotal}</Text>
-          <Text className={styles.summaryUnit}>units</Text>
-        </div>
-      </Card>
+      <Tooltip content="Total bolus insulin delivered for meals and corrections" relationship="description">
+        <Card className={styles.statCard}>
+          <FoodRegular className={styles.statIcon} />
+          <div className={styles.statContent}>
+            <Text className={styles.statLabel}>Total Bolus</Text>
+            <div className={styles.statValueRow}>
+              <Text className={styles.statValue}>{bolusTotal}</Text>
+              <Text className={styles.statUnit}>units</Text>
+            </div>
+          </div>
+        </Card>
+      </Tooltip>
 
-      <Card className={styles.summaryCard}>
-        <Text className={styles.summaryLabel}>Total Insulin</Text>
-        <div>
-          <Text className={styles.summaryValue}>{totalInsulin}</Text>
-          <Text className={styles.summaryUnit}>units</Text>
-        </div>
-      </Card>
+      <Tooltip content="Total insulin delivered (basal + bolus)" relationship="description">
+        <Card className={styles.statCard}>
+          <HeartPulseRegular className={styles.statIcon} />
+          <div className={styles.statContent}>
+            <Text className={styles.statLabel}>Total Insulin</Text>
+            <div className={styles.statValueRow}>
+              <Text className={styles.statValue}>{totalInsulin}</Text>
+              <Text className={styles.statUnit}>units</Text>
+            </div>
+          </div>
+        </Card>
+      </Tooltip>
     </div>
   );
 }
