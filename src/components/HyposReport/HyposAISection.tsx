@@ -182,6 +182,26 @@ interface AIResponseCache {
   };
 }
 
+/**
+ * Render UI that provides AI-powered analysis of hypoglycemic events for the specified date.
+ *
+ * Displays status, analysis controls, cached results, and full AI responses; handles asynchronous
+ * preparation of event data and calling the configured AI provider.
+ *
+ * @param currentDate - ISO date string for which to show per-day analysis and events
+ * @param allReadings - All glucose readings used to derive detailed hypo events
+ * @param thresholds - Glucose threshold settings used to identify hypo events
+ * @param glucoseUnit - Unit used for glucose values (e.g., mg/dL or mmol/L)
+ * @param bolusReadings - Optional insulin bolus records used when deriving event context
+ * @param basalReadings - Optional basal insulin records used when deriving event context
+ * @param perplexityApiKey - Optional API key for the Perplexity provider
+ * @param geminiApiKey - Optional API key for the Gemini provider
+ * @param grokApiKey - Optional API key for the Grok provider
+ * @param deepseekApiKey - Optional API key for the DeepSeek provider
+ * @param selectedProvider - Optional selected AI provider; determines which API key is used
+ * @param responseLanguage - Target language for AI responses
+ * @returns A React element containing controls and views for preparing data, triggering AI analysis, showing progress/errors, and rendering cached or newly generated AI analyses for hypoglycemic events
+ */
 export function HyposAISection({
   currentDate,
   allReadings,
