@@ -8,3 +8,4 @@ export * from './columnMapper';
 export * from './rocDataUtils';
 export * from './hypoDataUtils';
 export * from './hypoAIDataUtils';
+export * from './hyposReportAIDataUtils';

@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Text, Link } from '@fluentui/react-components';
-import type { GlucoseReading, GlucoseDataSource } from '../../types';
+import type { GlucoseReading, GlucoseDataSource, InsulinReading } from '../../types';
 import { 
   extractGlucoseReadings, 
   smoothGlucoseValues, 
@@ -16,6 +16,7 @@ import {
   filterReadingsByDate,
   calculateHypoStats,
   calculateLBGI,
+  extractInsulinReadings,
 } from '../../utils/data';
 import type { HypoStats } from '../../utils/data/hypoDataUtils';
 import { useGlucoseThresholds } from '../../hooks/useGlucoseThresholds';
@@ -24,6 +25,7 @@ import { useSelectedDate } from '../../hooks/useSelectedDate';
 import { useHyposStyles } from './styles';
 import { HyposStatsCards } from './HyposStatsCards';
 import { HyposChart } from './HyposChart';
+import { HyposAISection } from './HyposAISection';
 import { 
   MAX_GLUCOSE_VALUES, 
   HYPO_CHART_COLORS,
@@ -33,7 +35,16 @@ import {
   type GradientStop,
 } from './types';
 
-export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
+export function HyposReport({ 
+  selectedFile, 
+  glucoseUnit,
+  perplexityApiKey = '',
+  geminiApiKey = '',
+  grokApiKey = '',
+  deepseekApiKey = '',
+  selectedProvider = null,
+  responseLanguage = 'english',
+}: HyposReportProps) {
   const styles = useHyposStyles();
   const { thresholds } = useGlucoseThresholds();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
@@ -48,6 +59,10 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
   );
   const [dataSource] = useState<GlucoseDataSource>('cgm');
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  
+  // Insulin readings for AI analysis
+  const [bolusReadings, setBolusReadings] = useState<InsulinReading[]>([]);
+  const [basalReadings, setBasalReadings] = useState<InsulinReading[]>([]);
   
   // Track the file ID to detect file changes vs date changes
   const loadedFileIdRef = useRef<string | undefined>(undefined);
@@ -116,10 +131,25 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
         
         // Mark that we've loaded data for this file
         loadedFileIdRef.current = selectedFile.id;
+        
+        // Extract insulin readings for AI analysis
+        try {
+          const insulinReadings = await extractInsulinReadings(selectedFile);
+          const bolus = insulinReadings.filter(r => r.insulinType === 'bolus');
+          const basal = insulinReadings.filter(r => r.insulinType === 'basal');
+          setBolusReadings(bolus);
+          setBasalReadings(basal);
+        } catch (insulinErr) {
+          console.warn('Failed to extract insulin data:', insulinErr);
+          setBolusReadings([]);
+          setBasalReadings([]);
+        }
       } catch (error) {
         console.error('Failed to load glucose data:', error);
         setAllReadings([]);
         setAvailableDates([]);
+        setBolusReadings([]);
+        setBasalReadings([]);
         loadedFileIdRef.current = undefined;
         hasAppliedSavedDateRef.current = false;
       } finally {
@@ -373,6 +403,22 @@ export function HyposReport({ selectedFile, glucoseUnit }: HyposReportProps) {
         glucoseUnit={glucoseUnit}
         thresholds={thresholds}
         windowWidth={windowWidth}
+      />
+      
+      {/* AI Analysis Section */}
+      <HyposAISection
+        currentDate={currentDate}
+        allReadings={allReadings}
+        thresholds={thresholds}
+        glucoseUnit={glucoseUnit}
+        bolusReadings={bolusReadings}
+        basalReadings={basalReadings}
+        perplexityApiKey={perplexityApiKey}
+        geminiApiKey={geminiApiKey}
+        grokApiKey={grokApiKey}
+        deepseekApiKey={deepseekApiKey}
+        selectedProvider={selectedProvider}
+        responseLanguage={responseLanguage}
       />
     </div>
   );

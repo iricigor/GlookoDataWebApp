@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>611 Add Hypos AI analysis to Reports page</summary>
+
+[#611](../../pull/611) Add Hypos AI analysis to Reports page
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>605 Add new favicon set, bump version to 1.6, and finalize v1.5 changelog</summary>
 
 [#605](../../pull/605) Add new favicon set, bump version to 1.6, and finalize v1.5 changelog

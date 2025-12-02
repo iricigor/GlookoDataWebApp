@@ -338,7 +338,21 @@ function App() {
           />
         )
       case 'reports':
-        return <Reports selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} showDayNightShading={showDayNightShading} />
+        return (
+          <Reports 
+            selectedFile={selectedFile} 
+            exportFormat={exportFormat} 
+            glucoseUnit={glucoseUnit} 
+            insulinDuration={insulinDuration}
+            showDayNightShading={showDayNightShading}
+            perplexityApiKey={perplexityApiKey}
+            geminiApiKey={geminiApiKey}
+            grokApiKey={grokApiKey}
+            deepseekApiKey={deepseekApiKey}
+            selectedProvider={selectedProvider}
+            responseLanguage={responseLanguage}
+          />
+        )
       case 'ai':
         return (
           <AIAnalysis 
