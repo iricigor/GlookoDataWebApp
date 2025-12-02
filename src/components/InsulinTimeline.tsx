@@ -135,8 +135,9 @@ export function InsulinTimeline({ data, showDayNightShading = true }: InsulinTim
   };
 
   // Format X-axis labels - unified format: 12AM, 6AM, noon, 6PM, 12AM
-  const formatXAxis = (value: string) => {
-    const hour = parseInt(value.split(':')[0]);
+  // Now receives numeric hour value (not string) since we use dataKey="hour"
+  const formatXAxis = (value: number) => {
+    const hour = Math.floor(value);
     const unifiedLabels: Record<number, string> = {
       0: '12AM', 6: '6AM', 12: 'noon', 18: '6PM', 24: '12AM'
     };
