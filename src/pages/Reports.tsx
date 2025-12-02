@@ -12,8 +12,6 @@ import { BGOverviewReport } from '../components/BGOverviewReport';
 import { DailyBGReport } from '../components/DailyBGReport';
 import type { UploadedFile, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
-import type { ResponseLanguage } from '../hooks/useResponseLanguage';
-import type { AIProvider } from '../utils/api/aiApi';
 
 const useStyles = makeStyles({
   container: {
@@ -71,33 +69,19 @@ const useStyles = makeStyles({
 
 interface ReportsProps {
   selectedFile?: UploadedFile;
-  exportFormat: ExportFormat;
+  exportFormat?: ExportFormat;
   glucoseUnit: GlucoseUnit;
   insulinDuration?: number;
   showDayNightShading: boolean;
-  // AI configuration props for HyposReport
-  perplexityApiKey?: string;
-  geminiApiKey?: string;
-  grokApiKey?: string;
-  deepseekApiKey?: string;
-  selectedProvider?: AIProvider | null;
-  responseLanguage?: ResponseLanguage;
 }
 
 const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG'];
 
 export function Reports({ 
   selectedFile, 
-  exportFormat, 
   glucoseUnit, 
   insulinDuration,
   showDayNightShading,
-  perplexityApiKey = '',
-  geminiApiKey = '',
-  grokApiKey = '',
-  deepseekApiKey = '',
-  selectedProvider = null,
-  responseLanguage = 'english',
 }: ReportsProps) {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState<string>(() => {
@@ -152,29 +136,6 @@ export function Reports({
         return <BGOverviewReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
       case 'dailyBG':
         return <DailyBGReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} showDayNightShading={showDayNightShading} />;
-      case 'detailedCgm':
-        return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
-      case 'detailedInsulin':
-        return <InsulinDailyReport selectedFile={selectedFile} />;
-      case 'unifiedView':
-        return <UnifiedDailyReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
-      case 'iob':
-        return <IOBReport selectedFile={selectedFile} insulinDuration={insulinDuration} />;
-      case 'roc':
-        return <RoCReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
-      case 'hypos':
-        return (
-          <HyposReport 
-            selectedFile={selectedFile} 
-            glucoseUnit={glucoseUnit}
-            perplexityApiKey={perplexityApiKey}
-            geminiApiKey={geminiApiKey}
-            grokApiKey={grokApiKey}
-            deepseekApiKey={deepseekApiKey}
-            selectedProvider={selectedProvider}
-            responseLanguage={responseLanguage}
-          />
-        );
       default:
         return null;
     }
