@@ -91,7 +91,7 @@ const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'hypos', 'roc'];
 export function Reports({ 
   selectedFile, 
   // exportFormat is kept in the interface for backward compatibility but no longer used
-  // since Detailed CGM tab is hidden
+  // since Detailed CGM, Detailed Insulin, Unified View, and IOB tabs are hidden
   glucoseUnit, 
   insulinDuration,
   showDayNightShading,
