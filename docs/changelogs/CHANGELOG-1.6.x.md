@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>616 Add Hypos and RoC graphs to Daily BG report</summary>
+
+[#616](../../pull/616) Add Hypos and RoC graphs to Daily BG report
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>614 Restore Hypos tab to Reports page</summary>
 
 [#614](../../pull/614) Restore Hypos tab to Reports page
