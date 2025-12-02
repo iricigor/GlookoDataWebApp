@@ -11,3 +11,67 @@ reviews:
     drafts: false
     # Do not ignore PRs from GitHub Copilot - ensure bot PRs are reviewed
     # Note: By not listing copilot[bot] in ignore_usernames, CodeRabbit will review Copilot PRs
+
+  # Path-based instructions for enforcing docstrings
+  path_instructions:
+    - path: "src/**/*.ts"
+      instructions: |
+        Ensure all exported functions, classes, interfaces, and type aliases have JSDoc comments.
+        JSDoc comments should include:
+        - A brief description of what the function/class/interface does
+        - @param tags for all parameters with type and description
+        - @returns tag describing what the function returns (if applicable)
+        - @throws tag if the function can throw errors
+        - @example tag for complex functions (recommended but not required)
+        Flag any missing or incomplete JSDoc comments as suggestions for improvement.
+
+    - path: "src/**/*.tsx"
+      instructions: |
+        Ensure all exported React components have JSDoc comments describing:
+        - What the component renders and its purpose
+        - Props interface should have JSDoc comments for each prop
+        Ensure all exported functions and hooks have JSDoc comments with:
+        - A brief description
+        - @param tags for parameters
+        - @returns tag describing the return value
+        Flag any missing or incomplete JSDoc comments as suggestions for improvement.
+
+    - path: "src/hooks/**/*.ts"
+      instructions: |
+        Custom React hooks must have comprehensive JSDoc comments including:
+        - A description of what the hook does
+        - @returns description of the returned values/functions
+        - @example showing basic usage of the hook
+        Flag any hooks without proper documentation.
+
+    - path: "src/utils/**/*.ts"
+      instructions: |
+        Utility functions must have complete JSDoc documentation:
+        - Clear description of the function's purpose
+        - @param tags for all parameters with types and descriptions
+        - @returns tag with description of return value
+        - @throws tag if the function can throw errors
+        - @example for complex utility functions
+        Flag any utility functions without proper JSDoc comments.
+
+    - path: "src/types/**/*.ts"
+      instructions: |
+        Type definitions and interfaces should have JSDoc comments:
+        - Description of what the type/interface represents
+        - Each property should have a JSDoc comment explaining its purpose
+        Flag any types or interfaces without documentation.
+
+    - path: "scripts/**/*.sh"
+      instructions: |
+        Bash scripts should have:
+        - A header comment block explaining the script's purpose
+        - Comments for complex logic sections
+        - Function comments describing what each function does
+        Flag scripts without proper header documentation.
+
+    - path: "scripts/**/*.ps1"
+      instructions: |
+        PowerShell scripts and functions should have:
+        - Comment-based help with .SYNOPSIS, .DESCRIPTION, .PARAMETER, and .EXAMPLE sections
+        - Inline comments for complex logic
+        Flag any functions without proper comment-based help.
