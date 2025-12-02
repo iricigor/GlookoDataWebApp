@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>621 Update AI settings page with horizontal row layout and three-state buttons</summary>
+
+[#621](../../pull/621) Update AI settings page with horizontal row layout and three-state buttons
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>625 Hide 5 tabs from Reports page</summary>
 
 [#625](../../pull/625) Hide 5 tabs from Reports page
