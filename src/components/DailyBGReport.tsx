@@ -748,14 +748,9 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
   };
 
   // Format X-axis labels - unified format: 12AM, 6AM, noon, 6PM, 12AM
-  // Handles both string ("00:00") and number (0) inputs
-  const formatXAxis = (value: string | number) => {
-    let hour: number;
-    if (typeof value === 'string') {
-      hour = parseInt(value.split(':')[0]);
-    } else {
-      hour = Math.floor(value);
-    }
+  // Used with numeric XAxis (dataKey="timeDecimal" and "hour")
+  const formatXAxis = (value: number) => {
+    const hour = Math.floor(value);
     const unifiedLabels: Record<number, string> = {
       0: '12AM', 6: '6AM', 12: 'noon', 18: '6PM', 24: '12AM'
     };
@@ -763,18 +758,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
   };
 
   // Format X-axis labels for IOB - same unified format
-  const formatXAxisIOB = (value: string | number) => {
-    let hour: number;
-    if (typeof value === 'string') {
-      hour = parseInt(value.split(':')[0]);
-    } else {
-      hour = Math.floor(value);
-    }
-    const unifiedLabels: Record<number, string> = {
-      0: '12AM', 6: '6AM', 12: 'noon', 18: '6PM', 24: '12AM'
-    };
-    return unifiedLabels[hour] || '';
-  };
+  const formatXAxisIOB = formatXAxis;
 
   if (!selectedFile) {
     return (
@@ -1348,7 +1332,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
                         <Text className={styles.statValue}>
                           {hypoStats.totalCount > 0 
                             ? formatHypoDuration(hypoStats.totalDurationMinutes)
-                            : '😊'}
+                            : 'None'}
                         </Text>
                       </div>
                     </div>
