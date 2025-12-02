@@ -23,6 +23,7 @@ import { useInsulinDuration } from './hooks/useInsulinDuration'
 import { useCookieConsent } from './hooks/useCookieConsent'
 import { useAuth } from './hooks/useAuth'
 import { useUserSettings } from './hooks/useUserSettings'
+import { useDayNightShading } from './hooks/useDayNightShading'
 import type { UploadedFile, AIAnalysisResult, CloudUserSettings } from './types'
 import { extractZipMetadata } from './features/dataUpload/utils'
 
@@ -55,6 +56,7 @@ function App() {
   const { glucoseUnit, setGlucoseUnit } = useGlucoseUnit()
   const { insulinDuration, setInsulinDuration } = useInsulinDuration()
   const { thresholds: glucoseThresholds, setThresholds: setGlucoseThresholds } = useGlucoseThresholds()
+  const { showDayNightShading, setShowDayNightShading } = useDayNightShading()
   
   // Cookie consent management
   const { hasConsented, acknowledgeConsent } = useCookieConsent()
@@ -339,15 +341,9 @@ function App() {
         return (
           <Reports 
             selectedFile={selectedFile} 
-            exportFormat={exportFormat} 
             glucoseUnit={glucoseUnit} 
             insulinDuration={insulinDuration}
-            perplexityApiKey={perplexityApiKey}
-            geminiApiKey={geminiApiKey}
-            grokApiKey={grokApiKey}
-            deepseekApiKey={deepseekApiKey}
-            selectedProvider={selectedProvider}
-            responseLanguage={responseLanguage}
+            showDayNightShading={showDayNightShading}
           />
         )
       case 'ai':
@@ -369,6 +365,8 @@ function App() {
         return <Settings 
           themeMode={themeMode}
           onThemeChange={setThemeMode}
+          showDayNightShading={showDayNightShading}
+          onShowDayNightShadingChange={setShowDayNightShading}
           exportFormat={exportFormat}
           onExportFormatChange={setExportFormat}
           responseLanguage={responseLanguage}

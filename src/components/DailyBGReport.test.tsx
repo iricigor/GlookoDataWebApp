@@ -23,6 +23,40 @@ vi.mock('../utils/data', () => ({
   calculateGlucoseRangeStats: vi.fn().mockReturnValue({ low: 0, inRange: 0, high: 0, total: 0 }),
   GLUCOSE_RANGE_COLORS: { low: '#ff0000', inRange: '#00ff00', high: '#ffff00' },
   MIN_PERCENTAGE_TO_DISPLAY: 5,
+  // RoC related functions
+  calculateRoC: vi.fn().mockReturnValue([]),
+  calculateRoCStats: vi.fn().mockReturnValue({
+    totalCount: 0,
+    goodCount: 0,
+    mediumCount: 0,
+    badCount: 0,
+    goodPercentage: 0,
+    mediumPercentage: 0,
+    badPercentage: 0,
+    maxRoC: 0,
+    sdRoC: 0,
+  }),
+  smoothRoCData: vi.fn().mockReturnValue([]),
+  ROC_COLORS: { good: '#4CAF50', medium: '#FF9800', bad: '#F44336' },
+  formatRoCValue: vi.fn().mockReturnValue('0.0'),
+  getRoCMedicalStandards: vi.fn().mockReturnValue({
+    good: { threshold: '≤0.3 mmol/L/5 min', description: 'Stable' },
+    medium: { threshold: '0.3-0.55 mmol/L/5 min', description: 'Moderate' },
+    bad: { threshold: '>0.55 mmol/L/5 min', description: 'Rapid' },
+  }),
+  getLongestCategoryPeriod: vi.fn().mockReturnValue(0),
+  formatDuration: vi.fn().mockReturnValue('0m'),
+  // Hypo related functions
+  calculateHypoStats: vi.fn().mockReturnValue({
+    totalCount: 0,
+    severeCount: 0,
+    nonSevereCount: 0,
+    lowestValue: null,
+    longestDurationMinutes: 0,
+    totalDurationMinutes: 0,
+    hypoPeriods: [],
+  }),
+  formatHypoDuration: vi.fn().mockReturnValue('0m'),
 }));
 
 // Mock the hooks
@@ -72,7 +106,7 @@ describe('DailyBGReport', () => {
   });
 
   it('should show "please select a file" message when no file is selected', () => {
-    render(<DailyBGReport glucoseUnit="mmol/L" />);
+    render(<DailyBGReport glucoseUnit="mmol/L" showDayNightShading={true} />);
     
     expect(screen.getByText(/please select a file to view the daily bg report/i)).toBeInTheDocument();
   });
@@ -93,14 +127,14 @@ describe('DailyBGReport', () => {
       () => new Promise(() => {}) // Never resolves to keep loading state
     );
 
-    render(<DailyBGReport selectedFile={mockFile} glucoseUnit="mmol/L" />);
+    render(<DailyBGReport selectedFile={mockFile} glucoseUnit="mmol/L" showDayNightShading={true} />);
     
     // Should show loading state
     expect(screen.getByText(/loading data/i)).toBeInTheDocument();
   });
 
   it('should render with correct props', () => {
-    const { container } = render(<DailyBGReport glucoseUnit="mmol/L" insulinDuration={5} />);
+    const { container } = render(<DailyBGReport glucoseUnit="mmol/L" insulinDuration={5} showDayNightShading={true} />);
     
     expect(container).toBeInTheDocument();
   });

@@ -19,6 +19,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ReferenceArea,
 } from 'recharts';
 import { InsulinTotalsBar } from './InsulinTotalsBar';
 
@@ -37,10 +38,8 @@ const useStyles = makeStyles({
   chartContainer: {
     flex: 1,
     height: '100%',
-    ...shorthands.padding('16px'),
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.padding('8px'),
+    backgroundColor: 'transparent',
   },
   legendContainer: {
     display: 'flex',
@@ -75,9 +74,10 @@ interface InsulinTimelineProps {
     basalRate: number;
     bolusTotal: number;
   }>;
+  showDayNightShading?: boolean;
 }
 
-export function InsulinTimeline({ data }: InsulinTimelineProps) {
+export function InsulinTimeline({ data, showDayNightShading = true }: InsulinTimelineProps) {
   const styles = useStyles();
 
   // Check if there's any data to display
@@ -134,18 +134,14 @@ export function InsulinTimeline({ data }: InsulinTimelineProps) {
     return null;
   };
 
-  // Format X-axis labels (show every 3 hours)
-  const formatXAxis = (value: string) => {
-    const hour = parseInt(value.split(':')[0]);
-    if (hour === 0) return '12A';
-    if (hour === 3) return '3A';
-    if (hour === 6) return '6A';
-    if (hour === 9) return '9A';
-    if (hour === 12) return '12P';
-    if (hour === 15) return '3P';
-    if (hour === 18) return '6P';
-    if (hour === 21) return '9P';
-    return '';
+  // Format X-axis labels - unified format: 12AM, 6AM, noon, 6PM, 12AM
+  // Now receives numeric hour value (not string) since we use dataKey="hour"
+  const formatXAxis = (value: number) => {
+    const hour = Math.floor(value);
+    const unifiedLabels: Record<number, string> = {
+      0: '12AM', 6: '6AM', 12: 'noon', 18: '6PM', 24: '12AM'
+    };
+    return unifiedLabels[hour] || '';
   };
 
   // Calculate daily totals
@@ -158,10 +154,44 @@ export function InsulinTimeline({ data }: InsulinTimelineProps) {
         <div className={styles.chartContainer}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              {/* Day/night shading gradients */}
+              {showDayNightShading && (
+                <defs>
+                  <linearGradient id="insulinNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#1a237e" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient id="insulinNightGradientRight" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
+                    <stop offset="100%" stopColor="#1a237e" stopOpacity="0.25" />
+                  </linearGradient>
+                </defs>
+              )}
+              
+              {/* Day/night shading - midnight to 8AM */}
+              {showDayNightShading && (
+                <ReferenceArea
+                  x1={0}
+                  x2={8}
+                  fill="url(#insulinNightGradientLeft)"
+                />
+              )}
+              {/* Day/night shading - 8PM to midnight */}
+              {showDayNightShading && (
+                <ReferenceArea
+                  x1={20}
+                  x2={24}
+                  fill="url(#insulinNightGradientRight)"
+                />
+              )}
+              
               <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
               
               <XAxis
-                dataKey="timeLabel"
+                type="number"
+                dataKey="hour"
+                domain={[0, 24]}
+                ticks={[0, 6, 12, 18, 24]}
                 tickFormatter={formatXAxis}
                 stroke={tokens.colorNeutralForeground2}
                 style={{ fontSize: tokens.fontSizeBase200 }}
