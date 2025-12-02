@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>619 Restore hidden tabs to Reports page</summary>
+
+[#619](../../pull/619) Restore hidden tabs to Reports page
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>616 Add Hypos and RoC graphs to Daily BG report</summary>
 
 [#616](../../pull/616) Add Hypos and RoC graphs to Daily BG report
