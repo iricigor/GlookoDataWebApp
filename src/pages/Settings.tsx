@@ -317,6 +317,13 @@ interface SettingsProps {
   onSelectedProviderChange: (provider: AIProvider | null) => void;
 }
 
+/**
+ * Renders the Settings UI for configuring theme, export format, glucose units/thresholds, insulin duration, AI provider keys, and application information.
+ *
+ * @param selectedProvider - Currently selected AI provider identifier or null; used to mark which configured provider is active.
+ * @param onSelectedProviderChange - Callback invoked when the user selects a different AI provider or when the component auto-selects one after API key changes.
+ * @returns The Settings component UI as JSX elements.
+ */
 export function Settings({ 
   themeMode, 
   onThemeChange, 
