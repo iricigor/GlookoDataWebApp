@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>609 feat: Improve Sugarmate statistics card styling and unicorn calculation</summary>
+
+[#609](../../pull/609) feat: Improve Sugarmate statistics card styling and unicorn calculation
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>611 Add Hypos AI analysis to Reports page</summary>
 
 [#611](../../pull/611) Add Hypos AI analysis to Reports page
