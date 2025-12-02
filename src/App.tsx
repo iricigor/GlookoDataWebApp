@@ -341,6 +341,7 @@ function App() {
         return (
           <Reports 
             selectedFile={selectedFile} 
+            exportFormat={exportFormat}
             glucoseUnit={glucoseUnit} 
             insulinDuration={insulinDuration}
             showDayNightShading={showDayNightShading}
