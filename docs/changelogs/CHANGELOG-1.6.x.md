@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>614 Restore Hypos tab to Reports page</summary>
+
+[#614](../../pull/614) Restore Hypos tab to Reports page
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>610 Extend Daily BG report with RoC/Hypos sections and unified styling</summary>
 
 [#610](../../pull/610) Extend Daily BG report with RoC/Hypos sections and unified styling
