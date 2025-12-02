@@ -344,6 +344,12 @@ function App() {
             glucoseUnit={glucoseUnit} 
             insulinDuration={insulinDuration}
             showDayNightShading={showDayNightShading}
+            perplexityApiKey={perplexityApiKey}
+            geminiApiKey={geminiApiKey}
+            grokApiKey={grokApiKey}
+            deepseekApiKey={deepseekApiKey}
+            selectedProvider={selectedProvider}
+            responseLanguage={responseLanguage}
           />
         )
       case 'ai':

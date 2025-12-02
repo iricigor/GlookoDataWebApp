@@ -10,8 +10,11 @@ import { useState, useEffect } from 'react';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { BGOverviewReport } from '../components/BGOverviewReport';
 import { DailyBGReport } from '../components/DailyBGReport';
+import { HyposReport } from '../components/HyposReport';
 import type { UploadedFile, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
+import type { ResponseLanguage } from '../hooks/useResponseLanguage';
+import type { AIProvider } from '../utils/api/aiApi';
 
 const useStyles = makeStyles({
   container: {
@@ -73,15 +76,28 @@ interface ReportsProps {
   glucoseUnit: GlucoseUnit;
   insulinDuration?: number;
   showDayNightShading: boolean;
+  // AI configuration props for HyposReport
+  perplexityApiKey?: string;
+  geminiApiKey?: string;
+  grokApiKey?: string;
+  deepseekApiKey?: string;
+  selectedProvider?: AIProvider | null;
+  responseLanguage?: ResponseLanguage;
 }
 
-const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG'];
+const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'hypos'];
 
 export function Reports({ 
   selectedFile, 
   glucoseUnit, 
   insulinDuration,
   showDayNightShading,
+  perplexityApiKey,
+  geminiApiKey,
+  grokApiKey,
+  deepseekApiKey,
+  selectedProvider,
+  responseLanguage,
 }: ReportsProps) {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState<string>(() => {
@@ -136,6 +152,19 @@ export function Reports({
         return <BGOverviewReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
       case 'dailyBG':
         return <DailyBGReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} showDayNightShading={showDayNightShading} />;
+      case 'hypos':
+        return (
+          <HyposReport 
+            selectedFile={selectedFile} 
+            glucoseUnit={glucoseUnit}
+            perplexityApiKey={perplexityApiKey}
+            geminiApiKey={geminiApiKey}
+            grokApiKey={grokApiKey}
+            deepseekApiKey={deepseekApiKey}
+            selectedProvider={selectedProvider}
+            responseLanguage={responseLanguage}
+          />
+        );
       default:
         return null;
     }
@@ -161,6 +190,7 @@ export function Reports({
         <Tab value="fileInfo">File Info</Tab>
         <Tab value="bgOverview">BG Overview</Tab>
         <Tab value="dailyBG">Daily BG</Tab>
+        <Tab value="hypos">Hypos</Tab>
       </TabList>
 
       <div className={styles.contentWrapper}>
@@ -175,6 +205,7 @@ export function Reports({
           <Tab value="fileInfo">File Info</Tab>
           <Tab value="bgOverview">BG Overview</Tab>
           <Tab value="dailyBG">Daily BG</Tab>
+          <Tab value="hypos">Hypos</Tab>
         </TabList>
 
         <div className={styles.contentArea}>
