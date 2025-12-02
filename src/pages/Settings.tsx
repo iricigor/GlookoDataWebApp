@@ -20,7 +20,7 @@ import {
   Switch,
 } from '@fluentui/react-components';
 import { useState, useEffect, useRef } from 'react';
-import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular, DocumentBulletListRegular } from '@fluentui/react-icons';
+import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular, DocumentBulletListRegular, InfoRegular, CheckmarkRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import type { ResponseLanguage } from '../hooks/useResponseLanguage';
@@ -110,36 +110,89 @@ const useStyles = makeStyles({
   apiKeyContainer: {
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.gap('16px'),
+    ...shorthands.gap('12px'),
     marginTop: '24px',
     marginBottom: '16px',
   },
   apiKeyRow: {
     display: 'flex',
-    flexDirection: 'column',
-    ...shorthands.gap('8px'),
+    flexDirection: 'row',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
   },
   apiKeyLabel: {
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
+    minWidth: '160px',
+    flexShrink: 0,
   },
-  apiKeyLabelRow: {
+  apiKeyInputGroup: {
     display: 'flex',
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    ...shorthands.gap('8px'),
-  },
-  privacyLink: {
-    fontSize: tokens.fontSizeBase200,
-    color: tokens.colorBrandForeground1,
-    textDecoration: 'none',
-    '&:hover': {
-      textDecoration: 'underline',
-    },
+    flex: 1,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    backgroundColor: tokens.colorNeutralBackground1,
+    overflow: 'hidden',
   },
   apiKeyInput: {
-    width: '100%',
+    flex: 1,
+    '& .fui-Input': {
+      ...shorthands.border('0', 'none'),
+      ...shorthands.borderRadius('0'),
+    },
+    '& input': {
+      ...shorthands.border('0', 'none'),
+    },
+  },
+  apiKeyInputBorderless: {
+    flex: 1,
+    '& .fui-Input__root': {
+      ...shorthands.border('0', 'none'),
+      backgroundColor: 'transparent',
+    },
+  },
+  statusButton: {
+    ...shorthands.borderRadius('0'),
+    ...shorthands.borderLeft('1px', 'solid', tokens.colorNeutralStroke1),
+    minWidth: '100px',
+    height: '32px',
+  },
+  statusButtonUnavailable: {
+    backgroundColor: tokens.colorNeutralBackground3,
+    color: tokens.colorNeutralForeground3,
+    cursor: 'default',
+    '&:hover': {
+      backgroundColor: tokens.colorNeutralBackground3,
+      color: tokens.colorNeutralForeground3,
+    },
+  },
+  statusButtonSelected: {
+    backgroundColor: tokens.colorBrandBackground,
+    color: tokens.colorNeutralForegroundOnBrand,
+    '&:hover': {
+      backgroundColor: tokens.colorBrandBackground,
+      color: tokens.colorNeutralForegroundOnBrand,
+    },
+  },
+  privacyInfoButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '28px',
+    height: '28px',
+    ...shorthands.borderRadius('50%'),
+    ...shorthands.border('1px', 'solid', tokens.colorBrandForeground1),
+    color: tokens.colorBrandForeground1,
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+    flexShrink: 0,
+    textDecoration: 'none',
+    '&:hover': {
+      backgroundColor: tokens.colorBrandBackground2,
+    },
   },
   versionItem: {
     display: 'flex',
@@ -311,7 +364,6 @@ export function Settings({
   });
 
   // Get available providers and determine active one
-  const availableProviders = getAvailableProviders(perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
   const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
 
   // Handle auto-selection when keys change
@@ -394,32 +446,106 @@ export function Settings({
     };
   }, [perplexityApiKey, grokApiKey, deepseekApiKey, geminiApiKey, activeProvider, onSelectedProviderChange]);
 
-  // Helper function to render the inline selection UI for each API key field
-  const renderKeyStatus = (provider: AIProvider, hasKey: boolean) => {
-    if (!hasKey) return undefined;
-    
+  // Helper function to mask API key: first 4 chars + stars + last 2 chars
+  const maskApiKey = (key: string): string => {
+    if (!key || key.length <= 6) {
+      return key ? '•'.repeat(key.length) : '';
+    }
+    const first4 = key.slice(0, 4);
+    const last2 = key.slice(-2);
+    const middleLength = Math.min(key.length - 6, 30); // Cap the middle stars
+    return `${first4}${'•'.repeat(middleLength)}${last2}`;
+  };
+
+  // Helper function to render the status button for each API key field
+  const renderStatusButton = (provider: AIProvider, hasKey: boolean) => {
     const isActive = activeProvider === provider;
-    const hasMultipleKeys = availableProviders.length > 1;
     
-    if (isActive) {
-      // Show "✓ Selected" for the active provider
-      return <Text className={styles.selectedText}>✓ Selected</Text>;
-    } else if (hasMultipleKeys) {
-      // Show "Select" button for non-active providers when multiple keys exist
+    if (!hasKey) {
+      // Unavailable state - no key present
       return (
         <Button
           appearance="subtle"
           size="small"
-          onClick={() => onSelectedProviderChange(provider)}
-          className={styles.selectButton}
+          disabled
+          className={`${styles.statusButton} ${styles.statusButtonUnavailable}`}
         >
-          Select
+          Unavailable
         </Button>
       );
-    } else {
-      // Single key configured - just show checkmark
-      return '✓';
     }
+    
+    if (isActive) {
+      // Selected state
+      return (
+        <Button
+          appearance="primary"
+          size="small"
+          icon={<CheckmarkRegular />}
+          className={`${styles.statusButton} ${styles.statusButtonSelected}`}
+        >
+          Selected
+        </Button>
+      );
+    }
+    
+    // Select state - clickable to switch provider
+    return (
+      <Button
+        appearance="subtle"
+        size="small"
+        onClick={() => onSelectedProviderChange(provider)}
+        className={styles.statusButton}
+      >
+        Select
+      </Button>
+    );
+  };
+
+  // Helper function to render privacy info icon
+  const renderPrivacyIcon = (privacyUrl: string) => {
+    return (
+      <Link
+        href={privacyUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={styles.privacyInfoButton}
+        title="Privacy Policy"
+      >
+        <InfoRegular />
+      </Link>
+    );
+  };
+
+  // Helper to render a single API key row
+  const renderApiKeyRow = (
+    provider: AIProvider,
+    providerName: string,
+    apiKey: string,
+    onApiKeyChange: (key: string) => void,
+    privacyUrl: string,
+    inputId: string
+  ) => {
+    return (
+      <div className={styles.apiKeyRow}>
+        <Label htmlFor={inputId} className={styles.apiKeyLabel}>
+          {providerName}
+        </Label>
+        <div className={styles.apiKeyInputGroup}>
+          <Input
+            id={inputId}
+            type="password"
+            value={apiKey}
+            onChange={(_, data) => onApiKeyChange(data.value)}
+            placeholder={apiKey ? maskApiKey(apiKey) : `Enter your API key`}
+            appearance="underline"
+            className={styles.apiKeyInputBorderless}
+          />
+          {renderStatusButton(provider, !!apiKey)}
+        </div>
+        {renderPrivacyIcon(privacyUrl)}
+      </div>
+    );
   };
 
   const renderTabContent = () => {
@@ -549,116 +675,45 @@ export function Settings({
               <Title3 className={styles.sectionTitle}>AI Configuration</Title3>
               <Divider className={styles.divider} />
               <Text className={styles.settingDescription}>
-                Configure your AI settings for intelligent analysis.
+                Configure your AI settings for intelligent analysis.Click "Select" next to any configured API key to switch providers.
               </Text>
               
-              {/* Helper text for multiple keys */}
-              {availableProviders.length > 1 && (
-                <Text className={`${styles.settingDescription} ${styles.helperText}`}>
-                  Click "Select" next to any configured API key to switch providers.
-                </Text>
-              )}
-              
               <div className={styles.apiKeyContainer}>
-                <div className={styles.apiKeyRow}>
-                  <div className={styles.apiKeyLabelRow}>
-                    <Label htmlFor="perplexity-api-key" className={styles.apiKeyLabel}>
-                      Perplexity API Key
-                    </Label>
-                    <Link 
-                      href="https://www.perplexity.ai/hub/faq/privacy-and-security" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className={styles.privacyLink}
-                    >
-                      Privacy Policy
-                    </Link>
-                  </div>
-                  <Input
-                    id="perplexity-api-key"
-                    type="password"
-                    value={perplexityApiKey}
-                    onChange={(_, data) => onPerplexityApiKeyChange(data.value)}
-                    placeholder="Enter your Perplexity API key"
-                    contentAfter={renderKeyStatus('perplexity', !!perplexityApiKey)}
-                    className={styles.apiKeyInput}
-                  />
-                </div>
+                {renderApiKeyRow(
+                  'perplexity',
+                  'Perplexity API Key',
+                  perplexityApiKey,
+                  onPerplexityApiKeyChange,
+                  'https://www.perplexity.ai/hub/faq/privacy-and-security',
+                  'perplexity-api-key'
+                )}
                 
-                <div className={styles.apiKeyRow}>
-                  <div className={styles.apiKeyLabelRow}>
-                    <Label htmlFor="grok-api-key" className={styles.apiKeyLabel}>
-                      Grok AI API Key
-                    </Label>
-                    <Link 
-                      href="https://x.ai/legal/privacy-policy" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className={styles.privacyLink}
-                    >
-                      Privacy Policy
-                    </Link>
-                  </div>
-                  <Input
-                    id="grok-api-key"
-                    type="password"
-                    value={grokApiKey}
-                    onChange={(_, data) => onGrokApiKeyChange(data.value)}
-                    placeholder="Enter your Grok AI API key"
-                    contentAfter={renderKeyStatus('grok', !!grokApiKey)}
-                    className={styles.apiKeyInput}
-                  />
-                </div>
+                {renderApiKeyRow(
+                  'grok',
+                  'Grok AI API Key',
+                  grokApiKey,
+                  onGrokApiKeyChange,
+                  'https://x.ai/legal/privacy-policy',
+                  'grok-api-key'
+                )}
                 
-                <div className={styles.apiKeyRow}>
-                  <div className={styles.apiKeyLabelRow}>
-                    <Label htmlFor="deepseek-api-key" className={styles.apiKeyLabel}>
-                      DeepSeek API Key
-                    </Label>
-                    <Link 
-                      href="https://www.deepseek.com/en/privacy" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className={styles.privacyLink}
-                    >
-                      Privacy Policy
-                    </Link>
-                  </div>
-                  <Input
-                    id="deepseek-api-key"
-                    type="password"
-                    value={deepseekApiKey}
-                    onChange={(_, data) => onDeepSeekApiKeyChange(data.value)}
-                    placeholder="Enter your DeepSeek API key"
-                    contentAfter={renderKeyStatus('deepseek', !!deepseekApiKey)}
-                    className={styles.apiKeyInput}
-                  />
-                </div>
+                {renderApiKeyRow(
+                  'deepseek',
+                  'DeepSeek API Key',
+                  deepseekApiKey,
+                  onDeepSeekApiKeyChange,
+                  'https://www.deepseek.com/en/privacy',
+                  'deepseek-api-key'
+                )}
                 
-                <div className={styles.apiKeyRow}>
-                  <div className={styles.apiKeyLabelRow}>
-                    <Label htmlFor="gemini-api-key" className={styles.apiKeyLabel}>
-                      Google Gemini API Key
-                    </Label>
-                    <Link 
-                      href="https://policies.google.com/privacy" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className={styles.privacyLink}
-                    >
-                      Privacy Policy
-                    </Link>
-                  </div>
-                  <Input
-                    id="gemini-api-key"
-                    type="password"
-                    value={geminiApiKey}
-                    onChange={(_, data) => onGeminiApiKeyChange(data.value)}
-                    placeholder="Enter your Google Gemini API key"
-                    contentAfter={renderKeyStatus('gemini', !!geminiApiKey)}
-                    className={styles.apiKeyInput}
-                  />
-                </div>
+                {renderApiKeyRow(
+                  'gemini',
+                  'Google Gemini API Key',
+                  geminiApiKey,
+                  onGeminiApiKeyChange,
+                  'https://policies.google.com/privacy',
+                  'gemini-api-key'
+                )}
               </div>
               
               {/* Information Sections - All in one accordion */}
