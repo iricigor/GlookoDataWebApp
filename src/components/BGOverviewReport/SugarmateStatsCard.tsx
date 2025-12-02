@@ -475,7 +475,7 @@ export function SugarmateStatsCard({
           <PopoverSurface>
             <div className={styles.popoverContent}>
               These statistics are inspired by the{' '}
-              <Link href="https://sugarmate.io/" target="_blank" inline>
+              <Link href="https://sugarmate.io/" target="_blank" rel="noopener noreferrer" inline>
                 Sugarmate app
               </Link>
               , providing insights into your glucose data patterns and variability.
