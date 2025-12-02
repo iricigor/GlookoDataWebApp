@@ -10,6 +10,7 @@ import {
   tokens,
   shorthands,
   Tooltip,
+  mergeClasses,
 } from '@fluentui/react-components';
 import {
   DrinkWineRegular,
@@ -34,10 +35,19 @@ const useStyles = makeStyles({
     alignItems: 'center',
     ...shorthands.gap('12px'),
   },
+  statCardBasal: {
+    ...shorthands.border('1px', 'solid', tokens.colorPaletteGreenBorder1),
+  },
+  statCardBolus: {
+    ...shorthands.border('1px', 'solid', tokens.colorBrandStroke1),
+  },
   statIcon: {
     fontSize: '24px',
     color: tokens.colorBrandForeground1,
     flexShrink: 0,
+  },
+  statIconBasal: {
+    color: tokens.colorPaletteGreenForeground1,
   },
   statContent: {
     display: 'flex',
@@ -82,8 +92,8 @@ export function InsulinSummaryCards({
   return (
     <div className={styles.statsRow}>
       <Tooltip content="Total basal insulin delivered throughout the day (background insulin)" relationship="description">
-        <Card className={styles.statCard}>
-          <DrinkWineRegular className={styles.statIcon} />
+        <Card className={mergeClasses(styles.statCard, styles.statCardBasal)}>
+          <DrinkWineRegular className={mergeClasses(styles.statIcon, styles.statIconBasal)} />
           <div className={styles.statContent}>
             <Text className={styles.statLabel}>Total Basal</Text>
             <div className={styles.statValueRow}>
@@ -95,7 +105,7 @@ export function InsulinSummaryCards({
       </Tooltip>
 
       <Tooltip content="Total bolus insulin delivered for meals and corrections" relationship="description">
-        <Card className={styles.statCard}>
+        <Card className={mergeClasses(styles.statCard, styles.statCardBolus)}>
           <FoodRegular className={styles.statIcon} />
           <div className={styles.statContent}>
             <Text className={styles.statLabel}>Total Bolus</Text>
