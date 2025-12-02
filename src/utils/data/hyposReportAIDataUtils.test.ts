@@ -248,5 +248,137 @@ Here is the analysis:
       const result = parseHypoAIResponseByDate(response);
       expect(result.size).toBe(0);
     });
+
+    it('should parse JSON array format in code block', () => {
+      const response = `
+Here is the analysis:
+
+\`\`\`json
+[
+  {
+    "date": "2024-01-15",
+    "eventTime": "03:45",
+    "nadirValue": "52 mg/dL",
+    "primarySuspect": "Basal Excess (Nocturnal)",
+    "deductedMealTime": null,
+    "actionableInsight": "Reduce overnight basal by 10%"
+  },
+  {
+    "date": "2024-01-15",
+    "eventTime": "14:30",
+    "nadirValue": "58 mg/dL",
+    "primarySuspect": "Bolus Overlap (B1+B2)",
+    "deductedMealTime": "12:45",
+    "actionableInsight": "Extend bolus duration"
+  },
+  {
+    "date": "2024-01-16",
+    "eventTime": "10:00",
+    "nadirValue": "60 mg/dL",
+    "primarySuspect": "Time/Hormonal Shift",
+    "deductedMealTime": null,
+    "actionableInsight": "Monitor patterns"
+  }
+]
+\`\`\`
+`;
+      const result = parseHypoAIResponseByDate(response);
+      
+      expect(result.has('2024-01-15')).toBe(true);
+      expect(result.has('2024-01-16')).toBe(true);
+      
+      const jan15Events = result.get('2024-01-15');
+      expect(jan15Events).toBeDefined();
+      expect(jan15Events!.length).toBe(2);
+      expect(jan15Events![0].eventTime).toBe('03:45');
+      expect(jan15Events![0].primarySuspect).toBe('Basal Excess (Nocturnal)');
+      expect(jan15Events![0].deductedMealTime).toBeNull();
+      
+      expect(jan15Events![1].eventTime).toBe('14:30');
+      expect(jan15Events![1].deductedMealTime).toBe('12:45');
+    });
+
+    it('should parse raw JSON array without code block', () => {
+      const response = `
+Here is the analysis:
+[{"date": "2024-01-15", "eventTime": "03:45", "nadirValue": "52 mg/dL", "primarySuspect": "Basal Excess", "deductedMealTime": null, "actionableInsight": "Reduce basal"}]
+`;
+      const result = parseHypoAIResponseByDate(response);
+      
+      expect(result.has('2024-01-15')).toBe(true);
+      const jan15Events = result.get('2024-01-15');
+      expect(jan15Events).toBeDefined();
+      expect(jan15Events!.length).toBe(1);
+      expect(jan15Events![0].eventTime).toBe('03:45');
+    });
+
+    it('should prefer JSON over markdown table when both present', () => {
+      const response = `
+\`\`\`json
+[{"date": "2024-01-15", "eventTime": "10:00", "nadirValue": "55 mg/dL", "primarySuspect": "JSON Source", "deductedMealTime": null, "actionableInsight": "From JSON"}]
+\`\`\`
+
+| Date | Event Time | Nadir Value | Primary Suspect | Deducted Meal Time | Actionable Insight |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 2024-01-15 | 11:00 | 60 mg/dL | Table Source | N/A | From Table |
+`;
+      const result = parseHypoAIResponseByDate(response);
+      
+      const jan15Events = result.get('2024-01-15');
+      expect(jan15Events).toBeDefined();
+      expect(jan15Events!.length).toBe(1);
+      expect(jan15Events![0].primarySuspect).toBe('JSON Source'); // JSON takes precedence
+    });
+
+    it('should fall back to markdown table if JSON is invalid', () => {
+      const response = `
+\`\`\`json
+[{"date": "2024-01-15", invalid json here}]
+\`\`\`
+
+| Date | Event Time | Nadir Value | Primary Suspect | Deducted Meal Time | Actionable Insight |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 2024-01-15 | 11:00 | 60 mg/dL | Table Fallback | N/A | Works as fallback |
+`;
+      const result = parseHypoAIResponseByDate(response);
+      
+      const jan15Events = result.get('2024-01-15');
+      expect(jan15Events).toBeDefined();
+      expect(jan15Events!.length).toBe(1);
+      expect(jan15Events![0].primarySuspect).toBe('Table Fallback');
+    });
+
+    it('should skip invalid items in JSON array', () => {
+      const response = `
+\`\`\`json
+[
+  {"date": "2024-01-15", "eventTime": "03:45", "nadirValue": "52 mg/dL", "primarySuspect": "Valid", "deductedMealTime": null, "actionableInsight": "Good"},
+  {"date": "2024-01-15", "eventTime": "10:00"},
+  {"invalid": "object"},
+  {"date": "2024-01-16", "eventTime": "08:00", "nadirValue": "55 mg/dL", "primarySuspect": "Also Valid", "deductedMealTime": null, "actionableInsight": "Good too"}
+]
+\`\`\`
+`;
+      const result = parseHypoAIResponseByDate(response);
+      
+      expect(result.has('2024-01-15')).toBe(true);
+      expect(result.has('2024-01-16')).toBe(true);
+      
+      const jan15Events = result.get('2024-01-15');
+      expect(jan15Events!.length).toBe(1); // Only the valid one
+      
+      const jan16Events = result.get('2024-01-16');
+      expect(jan16Events!.length).toBe(1);
+    });
+
+    it('should handle empty JSON array', () => {
+      const response = `
+\`\`\`json
+[]
+\`\`\`
+`;
+      const result = parseHypoAIResponseByDate(response);
+      expect(result.size).toBe(0);
+    });
   });
 });

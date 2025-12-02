@@ -67,11 +67,24 @@ export interface DailyHypoAIResponse {
  * AI analysis for a single hypo event
  */
 export interface EventAnalysis {
+  date?: string;                      // YYYY-MM-DD format (included in JSON response)
   eventTime: string;                  // HH:MM format
   nadirValue: string;                 // X mg/dL
   primarySuspect: string;             // Category of suspected cause
   deductedMealTime: string | null;    // Approximate meal time or null
   actionableInsight: string;          // Specific recommendation
+}
+
+/**
+ * Raw JSON response item from AI
+ */
+interface AIResponseItem {
+  date: string;
+  eventTime: string;
+  nadirValue: string;
+  primarySuspect: string;
+  deductedMealTime: string | null;
+  actionableInsight: string;
 }
 
 /**
@@ -399,8 +412,106 @@ export function hasHypoEventsForDate(
 /**
  * Parse AI response to extract per-event analysis
  * Returns a map of date -> event analyses
+ * 
+ * Attempts JSON parsing first (preferred), falls back to markdown table regex if JSON fails
  */
 export function parseHypoAIResponseByDate(response: string): Map<string, EventAnalysis[]> {
+  // Try JSON parsing first (preferred method)
+  const jsonResult = tryParseJsonResponse(response);
+  if (jsonResult.size > 0) {
+    return jsonResult;
+  }
+  
+  // Fallback to markdown table regex parsing
+  return parseMarkdownTableResponse(response);
+}
+
+/**
+ * Validate that an item has all required fields for EventAnalysis
+ */
+function isValidAIResponseItem(item: unknown): item is AIResponseItem {
+  if (typeof item !== 'object' || item === null) {
+    return false;
+  }
+  
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.date === 'string' &&
+    typeof obj.eventTime === 'string' &&
+    typeof obj.nadirValue === 'string' &&
+    typeof obj.primarySuspect === 'string' &&
+    (obj.deductedMealTime === null || typeof obj.deductedMealTime === 'string') &&
+    typeof obj.actionableInsight === 'string'
+  );
+}
+
+/**
+ * Try to parse JSON response from AI
+ * Returns a Map of date -> event analyses, or empty Map if parsing fails
+ */
+function tryParseJsonResponse(response: string): Map<string, EventAnalysis[]> {
+  const result = new Map<string, EventAnalysis[]>();
+  
+  // Look for JSON array in markdown code block
+  const jsonBlockRegex = /```json\s*([\s\S]*?)```/;
+  const match = jsonBlockRegex.exec(response);
+  
+  if (!match) {
+    // Also try to find raw JSON array without code block
+    const rawJsonRegex = /\[\s*\{[\s\S]*?\}\s*\]/;
+    const rawMatch = rawJsonRegex.exec(response);
+    if (!rawMatch) {
+      return result;
+    }
+    return parseJsonArray(rawMatch[0], result);
+  }
+  
+  return parseJsonArray(match[1].trim(), result);
+}
+
+/**
+ * Parse JSON array string and populate the result map
+ */
+function parseJsonArray(jsonString: string, result: Map<string, EventAnalysis[]>): Map<string, EventAnalysis[]> {
+  try {
+    const parsed = JSON.parse(jsonString);
+    
+    if (!Array.isArray(parsed)) {
+      return result;
+    }
+    
+    for (const item of parsed) {
+      if (!isValidAIResponseItem(item)) {
+        continue;
+      }
+      
+      const analysis: EventAnalysis = {
+        date: item.date,
+        eventTime: item.eventTime,
+        nadirValue: item.nadirValue,
+        primarySuspect: item.primarySuspect,
+        deductedMealTime: item.deductedMealTime,
+        actionableInsight: item.actionableInsight,
+      };
+      
+      if (!result.has(item.date)) {
+        result.set(item.date, []);
+      }
+      result.get(item.date)!.push(analysis);
+    }
+  } catch {
+    // JSON parsing failed, return empty result
+    return result;
+  }
+  
+  return result;
+}
+
+/**
+ * Parse markdown table response (legacy fallback)
+ * Returns a map of date -> event analyses
+ */
+function parseMarkdownTableResponse(response: string): Map<string, EventAnalysis[]> {
   const result = new Map<string, EventAnalysis[]>();
   
   // Look for markdown table with the expected columns
@@ -417,6 +528,7 @@ export function parseHypoAIResponseByDate(response: string): Map<string, EventAn
     const insight = match[6].trim();
     
     const analysis: EventAnalysis = {
+      date,
       eventTime,
       nadirValue,
       primarySuspect,
