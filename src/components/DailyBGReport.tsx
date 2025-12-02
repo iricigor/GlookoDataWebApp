@@ -672,8 +672,10 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
     }
   }, [currentDate, insulinReadings, insulinDuration]);
 
-  // Filter glucose readings for current date
-  const currentGlucoseReadings = currentDate ? filterReadingsByDate(allGlucoseReadings, currentDate) : [];
+  // Filter glucose readings for current date (memoized to prevent useMemo dependency issues)
+  const currentGlucoseReadings = useMemo(() => {
+    return currentDate ? filterReadingsByDate(allGlucoseReadings, currentDate) : [];
+  }, [currentDate, allGlucoseReadings]);
 
   // Apply smoothing to glucose values
   const smoothedReadings = smoothGlucoseValues(currentGlucoseReadings);
@@ -730,8 +732,8 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
 
   const insulinSummary = getInsulinSummary();
 
-  // Get current RoC interval settings
-  const currentRocInterval = ROC_INTERVAL_OPTIONS[rocIntervalIndex];
+  // Get current RoC interval settings (with bounds checking)
+  const currentRocInterval = ROC_INTERVAL_OPTIONS[rocIntervalIndex] ?? ROC_INTERVAL_OPTIONS[0];
 
   // Calculate smoothed RoC data (reused by multiple stats)
   const smoothedRoCValues = useMemo(() => {
@@ -1263,8 +1265,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
           {/* BG Chart */}
           <Card className={styles.chartCard}>
             <div className={styles.controlsRow}>
-              <div />
-              <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginLeft: 'auto' }}>
                 <div className={styles.colorSchemeContainer}>
                   <Text style={{ 
                     fontSize: tokens.fontSizeBase300,
