@@ -124,18 +124,20 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
-    minWidth: '160px',
+    minWidth: '120px',
     flexShrink: 0,
+    textAlign: 'left',
   },
   apiKeyInputGroup: {
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     flex: 1,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     backgroundColor: tokens.colorNeutralBackground1,
     overflow: 'hidden',
+    height: '32px',
   },
   apiKeyInput: {
     flex: 1,
@@ -152,13 +154,17 @@ const useStyles = makeStyles({
     '& .fui-Input__root': {
       ...shorthands.border('0', 'none'),
       backgroundColor: 'transparent',
+      height: '100%',
+    },
+    '& input': {
+      height: '100%',
     },
   },
   statusButton: {
     ...shorthands.borderRadius('0'),
     ...shorthands.borderLeft('1px', 'solid', tokens.colorNeutralStroke1),
     minWidth: '100px',
-    height: '32px',
+    height: '100%',
   },
   statusButtonUnavailable: {
     backgroundColor: tokens.colorNeutralBackground3,
@@ -355,6 +361,7 @@ export function Settings({
   const isValid = validationError === null;
   const versionInfo = getVersionInfo();
   const [selectedTab, setSelectedTab] = useState<string>('general');
+  const [editingField, setEditingField] = useState<string | null>(null);
 
   // Helper function to update a single threshold
   const updateThreshold = (key: keyof GlucoseThresholds, value: number) => {
@@ -453,6 +460,21 @@ export function Settings({
     };
   }, [perplexityApiKey, grokApiKey, deepseekApiKey, geminiApiKey, activeProvider, onSelectedProviderChange]);
 
+  /**
+   * Masks an API key, showing first 4 and last 2 characters with asterisks in between.
+   * For short keys (6 chars or less), masks all characters for security.
+   */
+  const maskApiKey = (key: string): string => {
+    if (!key) return '';
+    if (key.length <= 6) {
+      return '*'.repeat(key.length);
+    }
+    const first4 = key.slice(0, 4);
+    const last2 = key.slice(-2);
+    const middleLength = Math.min(key.length - 6, 20); // Cap the middle stars
+    return `${first4}${'*'.repeat(middleLength)}${last2}`;
+  };
+
   // Helper function to render the status button for each API key field
   const renderStatusButton = (provider: AIProvider, hasKey: boolean) => {
     const isActive = activeProvider === provider;
@@ -522,6 +544,9 @@ export function Settings({
     privacyUrl: string,
     inputId: string
   ) => {
+    const isEditing = editingField === inputId;
+    const displayValue = isEditing ? apiKey : (apiKey ? maskApiKey(apiKey) : '');
+    
     return (
       <div className={styles.apiKeyRow}>
         <Label htmlFor={inputId} className={styles.apiKeyLabel}>
@@ -530,12 +555,19 @@ export function Settings({
         <div className={styles.apiKeyInputGroup}>
           <Input
             id={inputId}
-            type="password"
-            value={apiKey}
-            onChange={(_, data) => onApiKeyChange(data.value)}
+            type={isEditing ? 'password' : 'text'}
+            value={displayValue}
+            onChange={(_, data) => {
+              if (isEditing) {
+                onApiKeyChange(data.value);
+              }
+            }}
+            onFocus={() => setEditingField(inputId)}
+            onBlur={() => setEditingField(null)}
             placeholder="Enter your API key"
             appearance="underline"
             className={styles.apiKeyInputBorderless}
+            readOnly={!isEditing && !!apiKey}
           />
           {renderStatusButton(provider, !!apiKey)}
         </div>
@@ -677,7 +709,7 @@ export function Settings({
               <div className={styles.apiKeyContainer}>
                 {renderApiKeyRow(
                   'perplexity',
-                  'Perplexity API Key',
+                  'Perplexity',
                   perplexityApiKey,
                   onPerplexityApiKeyChange,
                   'https://www.perplexity.ai/hub/faq/privacy-and-security',
@@ -686,7 +718,7 @@ export function Settings({
                 
                 {renderApiKeyRow(
                   'grok',
-                  'Grok AI API Key',
+                  'Grok AI',
                   grokApiKey,
                   onGrokApiKeyChange,
                   'https://x.ai/legal/privacy-policy',
@@ -695,7 +727,7 @@ export function Settings({
                 
                 {renderApiKeyRow(
                   'deepseek',
-                  'DeepSeek API Key',
+                  'DeepSeek',
                   deepseekApiKey,
                   onDeepSeekApiKeyChange,
                   'https://www.deepseek.com/en/privacy',
@@ -704,7 +736,7 @@ export function Settings({
                 
                 {renderApiKeyRow(
                   'gemini',
-                  'Google Gemini API Key',
+                  'Google Gemini',
                   geminiApiKey,
                   onGeminiApiKeyChange,
                   'https://policies.google.com/privacy',
