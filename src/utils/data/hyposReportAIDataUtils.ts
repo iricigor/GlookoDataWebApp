@@ -35,9 +35,9 @@ export interface DetailedHypoEvent {
   
   // BOLUS - Last 2 boluses before event
   lastBolusUnits: number | null;      // Most recent bolus dose
-  lastBolusMinsProir: number | null;  // Minutes from last bolus to start
+  lastBolusMinsPrior: number | null;  // Minutes from last bolus to start
   secondBolusUnits: number | null;    // Second-most recent bolus
-  secondBolusMinsProir: number | null;// Minutes from second bolus to start
+  secondBolusMinsPrior: number | null;// Minutes from second bolus to start
   
   // BASAL - Hourly totals before event
   programmedBasalUhr: number | null;  // Standard basal rate for the hour
@@ -278,9 +278,9 @@ export function extractDetailedHypoEvents(
       
       // BOLUS
       lastBolusUnits: lastBolus ? Math.round(lastBolus.bolus.dose * 10) / 10 : null,
-      lastBolusMinsProir: lastBolus ? lastBolus.minutesBefore : null,
+      lastBolusMinsPrior: lastBolus ? lastBolus.minutesBefore : null,
       secondBolusUnits: secondBolus ? Math.round(secondBolus.bolus.dose * 10) / 10 : null,
-      secondBolusMinsProir: secondBolus ? secondBolus.minutesBefore : null,
+      secondBolusMinsPrior: secondBolus ? secondBolus.minutesBefore : null,
       
       // BASAL
       programmedBasalUhr: programmedBasal,
@@ -347,9 +347,9 @@ export function convertDetailedHypoEventsToCSV(events: DetailedHypoEvent[]): str
       event.timeToNadirMins,
       event.initialRoCMgdlMin ?? 'N/A',
       event.lastBolusUnits ?? 'N/A',
-      event.lastBolusMinsProir ?? 'N/A',
+      event.lastBolusMinsPrior ?? 'N/A',
       event.secondBolusUnits ?? 'N/A',
-      event.secondBolusMinsProir ?? 'N/A',
+      event.secondBolusMinsPrior ?? 'N/A',
       event.programmedBasalUhr ?? 'N/A',
       event.basalUnitsH5Prior ?? 'N/A',
       event.basalUnitsH3Prior ?? 'N/A',
