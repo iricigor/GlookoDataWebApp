@@ -273,7 +273,7 @@ export function HyposAISection({
   
   // Handle AI analysis request
   const handleAnalyze = useCallback(async () => {
-    if (!activeProvider || !hasApiKey || allEvents.length === 0) {
+    if (!activeProvider || !hasApiKey || loadingAllEvents || allEvents.length === 0) {
       return;
     }
     
@@ -348,6 +348,7 @@ export function HyposAISection({
   }, [
     activeProvider,
     hasApiKey,
+    loadingAllEvents,
     allEvents,
     responseLanguage,
     glucoseUnit,
