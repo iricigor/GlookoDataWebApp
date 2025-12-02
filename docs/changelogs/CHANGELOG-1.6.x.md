@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>625 Hide 5 tabs from Reports page</summary>
+
+[#625](../../pull/625) Hide 5 tabs from Reports page
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>623 Make Hypos page AI data loading async to avoid page delay</summary>
 
 [#623](../../pull/623) Make Hypos page AI data loading async to avoid page delay
