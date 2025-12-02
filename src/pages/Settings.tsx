@@ -446,17 +446,6 @@ export function Settings({
     };
   }, [perplexityApiKey, grokApiKey, deepseekApiKey, geminiApiKey, activeProvider, onSelectedProviderChange]);
 
-  // Helper function to mask API key: first 4 chars + stars + last 2 chars
-  const maskApiKey = (key: string): string => {
-    if (!key || key.length <= 6) {
-      return key ? '•'.repeat(key.length) : '';
-    }
-    const first4 = key.slice(0, 4);
-    const last2 = key.slice(-2);
-    const middleLength = Math.min(key.length - 6, 30); // Cap the middle stars
-    return `${first4}${'•'.repeat(middleLength)}${last2}`;
-  };
-
   // Helper function to render the status button for each API key field
   const renderStatusButton = (provider: AIProvider, hasKey: boolean) => {
     const isActive = activeProvider === provider;
@@ -537,7 +526,7 @@ export function Settings({
             type="password"
             value={apiKey}
             onChange={(_, data) => onApiKeyChange(data.value)}
-            placeholder={apiKey ? maskApiKey(apiKey) : `Enter your API key`}
+            placeholder="Enter your API key"
             appearance="underline"
             className={styles.apiKeyInputBorderless}
           />
@@ -675,7 +664,7 @@ export function Settings({
               <Title3 className={styles.sectionTitle}>AI Configuration</Title3>
               <Divider className={styles.divider} />
               <Text className={styles.settingDescription}>
-                Configure your AI settings for intelligent analysis.Click "Select" next to any configured API key to switch providers.
+                Configure your AI settings for intelligent analysis. Click "Select" next to any configured API key to switch providers.
               </Text>
               
               <div className={styles.apiKeyContainer}>
