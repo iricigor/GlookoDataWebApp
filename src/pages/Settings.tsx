@@ -462,17 +462,18 @@ export function Settings({
 
   /**
    * Masks an API key, showing first 4 and last 2 characters with asterisks in between.
-   * For short keys (6 chars or less), masks all characters for security.
+   * Uses a fixed number of asterisks (8) to avoid revealing actual key length.
+   * For short keys (6 chars or less), shows fixed 8 asterisks for security.
    */
   const maskApiKey = (key: string): string => {
     if (!key) return '';
+    const FIXED_MASK_LENGTH = 8;
     if (key.length <= 6) {
-      return '*'.repeat(key.length);
+      return '*'.repeat(FIXED_MASK_LENGTH);
     }
     const first4 = key.slice(0, 4);
     const last2 = key.slice(-2);
-    const middleLength = Math.min(key.length - 6, 20); // Cap the middle stars
-    return `${first4}${'*'.repeat(middleLength)}${last2}`;
+    return `${first4}${'*'.repeat(FIXED_MASK_LENGTH)}${last2}`;
   };
 
   // Helper function to render the status button for each API key field
@@ -546,6 +547,8 @@ export function Settings({
   ) => {
     const isEditing = editingField === inputId;
     const displayValue = isEditing ? apiKey : (apiKey ? maskApiKey(apiKey) : '');
+    // Field is read-only when showing masked value (not editing and has key)
+    const isReadOnly = !isEditing && !!apiKey;
     
     return (
       <div className={styles.apiKeyRow}>
@@ -557,17 +560,13 @@ export function Settings({
             id={inputId}
             type={isEditing ? 'password' : 'text'}
             value={displayValue}
-            onChange={(_, data) => {
-              if (isEditing) {
-                onApiKeyChange(data.value);
-              }
-            }}
+            onChange={(_, data) => onApiKeyChange(data.value)}
             onFocus={() => setEditingField(inputId)}
             onBlur={() => setEditingField(null)}
             placeholder="Enter your API key"
             appearance="underline"
             className={styles.apiKeyInputBorderless}
-            readOnly={!isEditing && !!apiKey}
+            readOnly={isReadOnly}
           />
           {renderStatusButton(provider, !!apiKey)}
         </div>
