@@ -601,21 +601,24 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
 
   const insulinSummary = getInsulinSummary();
 
+  // Calculate smoothed RoC data (reused by multiple stats)
+  const smoothedRoCValues = useMemo(() => {
+    if (currentGlucoseReadings.length === 0) return [];
+    const rocData = calculateRoC(currentGlucoseReadings);
+    return smoothRoCData(rocData);
+  }, [currentGlucoseReadings]);
+
   // Calculate Rate of Change (RoC) statistics
   const rocStats: RoCStats | null = useMemo(() => {
-    if (currentGlucoseReadings.length === 0) return null;
-    const rocData = calculateRoC(currentGlucoseReadings);
-    const smoothedRoC = smoothRoCData(rocData);
-    return calculateRoCStats(smoothedRoC);
-  }, [currentGlucoseReadings]);
+    if (smoothedRoCValues.length === 0) return null;
+    return calculateRoCStats(smoothedRoCValues);
+  }, [smoothedRoCValues]);
 
   // Calculate longest stable period (for RoC)
   const longestStablePeriod = useMemo(() => {
-    if (currentGlucoseReadings.length === 0) return 0;
-    const rocData = calculateRoC(currentGlucoseReadings);
-    const smoothedRoC = smoothRoCData(rocData);
-    return getLongestCategoryPeriod(smoothedRoC, 'good');
-  }, [currentGlucoseReadings]);
+    if (smoothedRoCValues.length === 0) return 0;
+    return getLongestCategoryPeriod(smoothedRoCValues, 'good');
+  }, [smoothedRoCValues]);
 
   // Calculate Hypoglycemia statistics
   const hypoStats: HypoStats | null = useMemo(() => {
