@@ -38,7 +38,9 @@ vi.mock('../utils/data', () => ({
   }),
   smoothRoCData: vi.fn().mockReturnValue([]),
   ROC_COLORS: { good: '#4CAF50', medium: '#FF9800', bad: '#F44336' },
+  ROC_THRESHOLDS: { good: 0.3, medium: 0.55 },
   formatRoCValue: vi.fn().mockReturnValue('0.0'),
+  getRoCColor: vi.fn().mockReturnValue('#4CAF50'),
   getRoCMedicalStandards: vi.fn().mockReturnValue({
     good: { threshold: '≤0.3 mmol/L/5 min', description: 'Stable' },
     medium: { threshold: '0.3-0.55 mmol/L/5 min', description: 'Moderate' },
