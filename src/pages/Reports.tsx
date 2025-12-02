@@ -11,10 +11,6 @@ import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { BGOverviewReport } from '../components/BGOverviewReport';
 import { DailyBGReport } from '../components/DailyBGReport';
 import { HyposReport } from '../components/HyposReport';
-import { BGValuesReport } from '../components/BGValuesReport';
-import { InsulinDailyReport } from '../components/InsulinDailyReport';
-import { UnifiedDailyReport } from '../components/UnifiedDailyReport';
-import { IOBReport } from '../components/IOBReport';
 import { RoCReport } from '../components/RoCReport';
 import type { UploadedFile, GlucoseUnit } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
@@ -90,11 +86,12 @@ interface ReportsProps {
   responseLanguage?: ResponseLanguage;
 }
 
-const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'hypos', 'detailedCgm', 'detailedInsulin', 'unifiedView', 'iob', 'roc'];
+const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'hypos', 'roc'];
 
 export function Reports({ 
   selectedFile, 
-  exportFormat,
+  // exportFormat is kept in the interface for backward compatibility but no longer used
+  // since Detailed CGM tab is hidden
   glucoseUnit, 
   insulinDuration,
   showDayNightShading,
@@ -171,14 +168,6 @@ export function Reports({
             responseLanguage={responseLanguage}
           />
         );
-      case 'detailedCgm':
-        return <BGValuesReport selectedFile={selectedFile} exportFormat={exportFormat} glucoseUnit={glucoseUnit} />;
-      case 'detailedInsulin':
-        return <InsulinDailyReport selectedFile={selectedFile} />;
-      case 'unifiedView':
-        return <UnifiedDailyReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
-      case 'iob':
-        return <IOBReport selectedFile={selectedFile} insulinDuration={insulinDuration} />;
       case 'roc':
         return <RoCReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
       default:
@@ -207,10 +196,6 @@ export function Reports({
         <Tab value="bgOverview">BG Overview</Tab>
         <Tab value="dailyBG">Daily BG</Tab>
         <Tab value="hypos">Hypos</Tab>
-        <Tab value="detailedCgm">Detailed CGM</Tab>
-        <Tab value="detailedInsulin">Detailed Insulin</Tab>
-        <Tab value="unifiedView">Unified View</Tab>
-        <Tab value="iob">IOB</Tab>
         <Tab value="roc">RoC</Tab>
       </TabList>
 
@@ -227,10 +212,6 @@ export function Reports({
           <Tab value="bgOverview">BG Overview</Tab>
           <Tab value="dailyBG">Daily BG</Tab>
           <Tab value="hypos">Hypos</Tab>
-          <Tab value="detailedCgm">Detailed CGM</Tab>
-          <Tab value="detailedInsulin">Detailed Insulin</Tab>
-          <Tab value="unifiedView">Unified View</Tab>
-          <Tab value="iob">IOB</Tab>
           <Tab value="roc">RoC</Tab>
         </TabList>
 
