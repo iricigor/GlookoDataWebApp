@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>634 [WIP] Add docstrings coverage to modified files</summary>
+
+[#634](../../pull/634) [WIP] Add docstrings coverage to modified files
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>631 Update visuals on Daily BG page</summary>
 
 [#631](../../pull/631) Update visuals on Daily BG page
