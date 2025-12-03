@@ -530,6 +530,26 @@ export function Settings({
   }, [geminiApiKey]);
 
   /**
+   * Switch to the next available provider when the current one fails verification
+   * 
+   * @param failedProvider - The provider whose key verification failed
+   */
+  const switchToNextAvailableProvider = (failedProvider: AIProvider) => {
+    if (activeProvider !== failedProvider) return;
+    
+    const availableProviders = getAvailableProviders(
+      perplexityApiKey,
+      geminiApiKey,
+      grokApiKey,
+      deepseekApiKey
+    ).filter(p => p !== failedProvider);
+    
+    if (availableProviders.length > 0) {
+      onSelectedProviderChange(availableProviders[0]);
+    }
+  };
+
+  /**
    * Handle API key verification for a provider
    * 
    * Initiates an async verification request to check if the API key is valid.
@@ -555,35 +575,12 @@ export function Settings({
         [provider]: isValid ? 'valid' : 'invalid' 
       }));
       
-      // If key is invalid and this provider is currently selected, switch to next available
-      if (!isValid && activeProvider === provider) {
-        const availableProviders = getAvailableProviders(
-          perplexityApiKey,
-          geminiApiKey,
-          grokApiKey,
-          deepseekApiKey
-        ).filter(p => p !== provider);
-        
-        if (availableProviders.length > 0) {
-          onSelectedProviderChange(availableProviders[0]);
-        }
+      if (!isValid) {
+        switchToNextAvailableProvider(provider);
       }
     } catch {
       setVerificationState(prev => ({ ...prev, [provider]: 'invalid' }));
-      
-      // If key verification failed and this provider is currently selected, switch to next available
-      if (activeProvider === provider) {
-        const availableProviders = getAvailableProviders(
-          perplexityApiKey,
-          geminiApiKey,
-          grokApiKey,
-          deepseekApiKey
-        ).filter(p => p !== provider);
-        
-        if (availableProviders.length > 0) {
-          onSelectedProviderChange(availableProviders[0]);
-        }
-      }
+      switchToNextAvailableProvider(provider);
     }
   };
 
