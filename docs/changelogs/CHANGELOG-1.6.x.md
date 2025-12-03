@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>652 feat: add toast notification for AI provider auto-switch</summary>
+
+[#652](../../pull/652) feat: add toast notification for AI provider auto-switch
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>650 feat: auto-select newly uploaded valid file with toast notification</summary>
 
 [#650](../../pull/650) feat: auto-select newly uploaded valid file with toast notification
