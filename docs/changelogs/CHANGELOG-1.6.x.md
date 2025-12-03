@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>643 Suppress React 19 peer dependency warnings with .npmrc</summary>
+
+[#643](../../pull/643) Suppress React 19 peer dependency warnings with .npmrc
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>647 feat: add red symbol for failed API key verification and auto-select fallback provider</summary>
 
 [#647](../../pull/647) feat: add red symbol for failed API key verification and auto-select fallback provider
