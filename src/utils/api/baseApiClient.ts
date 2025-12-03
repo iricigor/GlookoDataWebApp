@@ -19,6 +19,14 @@ export interface AIApiResult {
 }
 
 /**
+ * Result interface for API key verification
+ */
+export interface APIKeyVerificationResult {
+  valid: boolean;
+  error?: string;
+}
+
+/**
  * Configuration for an OpenAI-compatible API provider
  */
 export interface OpenAICompatibleConfig {

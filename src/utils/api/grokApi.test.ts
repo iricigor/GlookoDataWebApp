@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { callGrokApi } from './grokApi';
+import { callGrokApi, verifyGrokApiKey } from './grokApi';
 
 describe('grokApi', () => {
   describe('callGrokApi', () => {
@@ -419,6 +419,102 @@ describe('grokApi', () => {
       expect(result.truncated).toBe(true);
       expect(result.content).toContain('⚠️');
       expect(result.content).toContain('truncated due to length limits');
+    });
+  });
+
+  describe('verifyGrokApiKey', () => {
+    // Save original fetch
+    const originalFetch = global.fetch;
+
+    afterEach(() => {
+      global.fetch = originalFetch;
+    });
+
+    it('should return invalid if API key is empty', async () => {
+      const result = await verifyGrokApiKey('');
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('API key is required');
+    });
+
+    it('should return invalid if API key is whitespace', async () => {
+      const result = await verifyGrokApiKey('   ');
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('API key is required');
+    });
+
+    it('should return valid on 200 OK response', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+      });
+
+      const result = await verifyGrokApiKey('valid-key');
+      
+      expect(result.valid).toBe(true);
+      expect(result.error).toBeUndefined();
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://api.x.ai/v1/models',
+        expect.objectContaining({
+          method: 'GET',
+          headers: expect.objectContaining({
+            'Authorization': 'Bearer valid-key',
+          }),
+        })
+      );
+    });
+
+    it('should return invalid on 401 Unauthorized response', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+      });
+
+      const result = await verifyGrokApiKey('invalid-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Invalid API key');
+    });
+
+    it('should return invalid on 403 Forbidden response', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 403,
+      });
+
+      const result = await verifyGrokApiKey('forbidden-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Invalid API key');
+    });
+
+    it('should return invalid on other HTTP errors', async () => {
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+      });
+
+      const result = await verifyGrokApiKey('test-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('API error: 500');
+    });
+
+    it('should return invalid on network error', async () => {
+      global.fetch = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+
+      const result = await verifyGrokApiKey('test-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Network error');
+    });
+
+    it('should return invalid on unknown error', async () => {
+      global.fetch = vi.fn().mockRejectedValue(new Error('Something went wrong'));
+
+      const result = await verifyGrokApiKey('test-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Something went wrong');
     });
   });
 });

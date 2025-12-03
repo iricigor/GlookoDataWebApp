@@ -5,7 +5,7 @@
  * for AI-powered analysis of glucose data.
  */
 
-import { callOpenAICompatibleApi, type AIApiResult } from './baseApiClient';
+import { callOpenAICompatibleApi, type AIApiResult, type APIKeyVerificationResult } from './baseApiClient';
 
 /**
  * Grok API response structure (OpenAI-compatible)
@@ -74,4 +74,42 @@ export async function callGrokApi(
     maxTokens,
     isRetry
   );
+}
+
+/**
+ * Verify if a Grok API key is valid by calling the list models endpoint.
+ * This is a lightweight check that doesn't incur any cost.
+ * 
+ * @param apiKey - Grok API key to verify
+ * @returns Promise with the verification result
+ */
+export async function verifyGrokApiKey(apiKey: string): Promise<APIKeyVerificationResult> {
+  if (!apiKey || apiKey.trim() === '') {
+    return { valid: false, error: 'API key is required' };
+  }
+
+  try {
+    const response = await fetch('https://api.x.ai/v1/models', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      return { valid: true };
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      return { valid: false, error: 'Invalid API key' };
+    }
+
+    return { valid: false, error: `API error: ${response.status}` };
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return { valid: false, error: 'Network error' };
+    }
+    return { valid: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
 }

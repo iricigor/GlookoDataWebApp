@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { callGeminiApi } from './geminiApi';
+import { callGeminiApi, verifyGeminiApiKey } from './geminiApi';
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -419,6 +419,95 @@ describe('geminiApi', () => {
       expect(result.truncated).toBe(true);
       expect(result.content).toContain('⚠️');
       expect(result.content).toContain('truncated due to length limits');
+    });
+  });
+
+  describe('verifyGeminiApiKey', () => {
+    it('should return invalid if API key is empty', async () => {
+      const result = await verifyGeminiApiKey('');
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('API key is required');
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should return invalid if API key is whitespace', async () => {
+      const result = await verifyGeminiApiKey('   ');
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('API key is required');
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should return valid on 200 OK response', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ models: [] }),
+      });
+
+      const result = await verifyGeminiApiKey('valid-key');
+      
+      expect(result.valid).toBe(true);
+      expect(result.error).toBeUndefined();
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('generativelanguage.googleapis.com/v1/models'),
+        expect.objectContaining({
+          method: 'GET',
+        })
+      );
+    });
+
+    it('should return invalid on 401 Unauthorized response', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 401,
+      });
+
+      const result = await verifyGeminiApiKey('invalid-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Invalid API key');
+    });
+
+    it('should return invalid on 403 Forbidden response', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 403,
+      });
+
+      const result = await verifyGeminiApiKey('forbidden-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Invalid API key');
+    });
+
+    it('should return invalid on other HTTP errors', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 500,
+      });
+
+      const result = await verifyGeminiApiKey('test-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('API error: 500');
+    });
+
+    it('should return invalid on network error', async () => {
+      mockFetch.mockRejectedValue(new TypeError('Failed to fetch'));
+
+      const result = await verifyGeminiApiKey('test-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Network error');
+    });
+
+    it('should return invalid on unknown error', async () => {
+      mockFetch.mockRejectedValue(new Error('Something went wrong'));
+
+      const result = await verifyGeminiApiKey('test-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Something went wrong');
     });
   });
 });

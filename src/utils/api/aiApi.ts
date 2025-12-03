@@ -5,10 +5,11 @@
  * (Perplexity or Google Gemini) based on user configuration.
  */
 
-import { callPerplexityApi, type PerplexityResult } from './perplexityApi';
-import { callGeminiApi, type GeminiResult } from './geminiApi';
-import { callGrokApi, type GrokResult } from './grokApi';
-import { callDeepSeekApi, type DeepSeekResult } from './deepseekApi';
+import { callPerplexityApi, verifyPerplexityApiKey, type PerplexityResult } from './perplexityApi';
+import { callGeminiApi, verifyGeminiApiKey, type GeminiResult } from './geminiApi';
+import { callGrokApi, verifyGrokApiKey, type GrokResult } from './grokApi';
+import { callDeepSeekApi, verifyDeepSeekApiKey, type DeepSeekResult } from './deepseekApi';
+import { type APIKeyVerificationResult } from './baseApiClient';
 
 /**
  * Supported AI providers
@@ -201,4 +202,30 @@ export function getAvailableProviders(
   }
   
   return providers;
+}
+
+/**
+ * Verify if an API key is valid for the specified provider.
+ * Uses the most lightweight verification method available for each provider.
+ * 
+ * @param provider - The AI provider to verify the key for
+ * @param apiKey - The API key to verify
+ * @returns Promise with the verification result
+ */
+export async function verifyApiKey(
+  provider: AIProvider,
+  apiKey: string
+): Promise<APIKeyVerificationResult> {
+  switch (provider) {
+    case 'perplexity':
+      return verifyPerplexityApiKey(apiKey);
+    case 'gemini':
+      return verifyGeminiApiKey(apiKey);
+    case 'grok':
+      return verifyGrokApiKey(apiKey);
+    case 'deepseek':
+      return verifyDeepSeekApiKey(apiKey);
+    default:
+      return { valid: false, error: `Unknown provider: ${provider}` };
+  }
 }

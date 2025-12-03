@@ -5,7 +5,7 @@
  * for AI-powered analysis of glucose data.
  */
 
-import { callOpenAICompatibleApi, type AIApiResult } from './baseApiClient';
+import { callOpenAICompatibleApi, type AIApiResult, type APIKeyVerificationResult } from './baseApiClient';
 
 /**
  * Perplexity API response structure
@@ -77,4 +77,48 @@ export async function callPerplexityApi(
     maxTokens,
     isRetry
   );
+}
+
+/**
+ * Verify if a Perplexity API key is valid by making a minimal API call.
+ * Perplexity doesn't have a list models endpoint, so we use a minimal chat completion.
+ * This uses very few tokens to minimize cost.
+ * 
+ * @param apiKey - Perplexity API key to verify
+ * @returns Promise with the verification result
+ */
+export async function verifyPerplexityApiKey(apiKey: string): Promise<APIKeyVerificationResult> {
+  if (!apiKey || apiKey.trim() === '') {
+    return { valid: false, error: 'API key is required' };
+  }
+
+  try {
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'sonar',
+        messages: [{ role: 'user', content: 'ping' }],
+        max_tokens: 1,
+      }),
+    });
+
+    if (response.ok) {
+      return { valid: true };
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      return { valid: false, error: 'Invalid API key' };
+    }
+
+    return { valid: false, error: `API error: ${response.status}` };
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return { valid: false, error: 'Network error' };
+    }
+    return { valid: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
 }

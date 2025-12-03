@@ -10,6 +10,7 @@ import {
   getActiveProvider,
   getAvailableProviders,
   isRequestTooLargeError,
+  verifyApiKey,
   type AIProvider 
 } from './aiApi';
 import * as perplexityApi from './perplexityApi';
@@ -297,6 +298,60 @@ describe('aiApi', () => {
       expect(isRequestTooLargeError('TOO LARGE')).toBe(true);
       expect(isRequestTooLargeError('Too Long')).toBe(true);
       expect(isRequestTooLargeError('EXCEEDS')).toBe(true);
+    });
+  });
+
+  describe('verifyApiKey', () => {
+    it('should call verifyPerplexityApiKey for perplexity provider', async () => {
+      const mockVerify = vi.spyOn(perplexityApi, 'verifyPerplexityApiKey').mockResolvedValue({ valid: true });
+      
+      const result = await verifyApiKey('perplexity', 'test-key');
+      
+      expect(mockVerify).toHaveBeenCalledWith('test-key');
+      expect(result.valid).toBe(true);
+    });
+
+    it('should call verifyGeminiApiKey for gemini provider', async () => {
+      const mockVerify = vi.spyOn(geminiApi, 'verifyGeminiApiKey').mockResolvedValue({ valid: true });
+      
+      const result = await verifyApiKey('gemini', 'test-key');
+      
+      expect(mockVerify).toHaveBeenCalledWith('test-key');
+      expect(result.valid).toBe(true);
+    });
+
+    it('should call verifyGrokApiKey for grok provider', async () => {
+      const mockVerify = vi.spyOn(grokApi, 'verifyGrokApiKey').mockResolvedValue({ valid: true });
+      
+      const result = await verifyApiKey('grok', 'test-key');
+      
+      expect(mockVerify).toHaveBeenCalledWith('test-key');
+      expect(result.valid).toBe(true);
+    });
+
+    it('should call verifyDeepSeekApiKey for deepseek provider', async () => {
+      const mockVerify = vi.spyOn(deepseekApi, 'verifyDeepSeekApiKey').mockResolvedValue({ valid: true });
+      
+      const result = await verifyApiKey('deepseek', 'test-key');
+      
+      expect(mockVerify).toHaveBeenCalledWith('test-key');
+      expect(result.valid).toBe(true);
+    });
+
+    it('should return invalid result for verification failures', async () => {
+      vi.spyOn(perplexityApi, 'verifyPerplexityApiKey').mockResolvedValue({ valid: false, error: 'Invalid API key' });
+      
+      const result = await verifyApiKey('perplexity', 'invalid-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Invalid API key');
+    });
+
+    it('should return invalid for unknown provider', async () => {
+      const result = await verifyApiKey('unknown' as AIProvider, 'test-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Unknown provider: unknown');
     });
   });
 });
