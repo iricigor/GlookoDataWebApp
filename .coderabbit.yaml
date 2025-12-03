@@ -7,11 +7,15 @@ reviews:
   # Enable automatic code reviews for all PRs
   auto_review:
     enabled: true
-    # Review draft PRs as well
+    # Review draft PRs as well (set to true if you want this)
     drafts: false
-    # Do not ignore PRs from GitHub Copilot - ensure bot PRs are reviewed
-    # Note: By not listing copilot[bot] in ignore_usernames, CodeRabbit will review Copilot PRs
-
+    # Do not ignore PRs from any bots, including GitHub Copilot - this empty array ensures all PRs (bot or human) are reviewed
+    ignore_usernames: []  # Empty to review everything; add specific bots like ["dependabot[bot]"] if you want to skip others but not Copilot
+    # Optional: Skip based on PR labels (e.g., don't review WIPs)
+    labels: ["!wip", "!draft"]
+  # Optional: Suppress the "Review skipped" status message entirely
+  review_status: false
+  
   # Path-based instructions for enforcing docstrings
   path_instructions:
     - path: "src/**/*.ts"
