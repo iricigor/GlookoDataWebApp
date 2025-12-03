@@ -112,13 +112,37 @@ const useStyles = makeStyles({
       ...shorthands.padding('8px', '16px'),
     },
   },
+  // Section container that wraps title + stats + graph
+  sectionCard: {
+    ...shorthands.padding('24px'),
+    ...shorthands.borderRadius('14px'),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    backgroundColor: 'rgba(30, 30, 30, 0.5)',
+    boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.05), ${tokens.shadow4}`,
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('16px'),
+    transitionProperty: 'transform, box-shadow',
+    transitionDuration: tokens.durationNormal,
+    transitionTimingFunction: tokens.curveEasyEase,
+    '@media (hover: hover)': {
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.05), ${tokens.shadow16}`,
+      },
+    },
+    '@media (max-width: 767px)': {
+      ...shorthands.padding('16px'),
+      ...shorthands.borderRadius('12px'),
+    },
+  },
   sectionTitle: {
     fontSize: tokens.fontSizeBase500,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
     fontFamily: tokens.fontFamilyBase,
-    marginBottom: '8px',
-    marginTop: '16px',
+    marginBottom: '0',
+    marginTop: '0',
   },
   summarySection: {
     display: 'grid',
@@ -145,12 +169,12 @@ const useStyles = makeStyles({
     fontFamily: tokens.fontFamilyBase,
     marginTop: '4px',
   },
-  chartCard: {
-    ...shorthands.padding('24px'),
+  // Inner container for chart content (used within sectionCard)
+  chartCardInnerContent: {
+    ...shorthands.padding('16px'),
     backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.borderRadius('12px'),
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    boxShadow: tokens.shadow4,
   },
   chartContainer: {
     width: '100%',
@@ -233,21 +257,22 @@ const useStyles = makeStyles({
   iobChartContainer: {
     height: '300px',
     width: '100%',
-    ...shorthands.padding('24px'),
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    boxShadow: tokens.shadow4,
   },
   // Stats cards with icons (RoC and Hypo style)
   statsRow: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
     ...shorthands.gap('12px'),
+    '@media (max-width: 600px)': {
+      gridTemplateColumns: 'repeat(2, 1fr)',
+    },
+    '@media (max-width: 400px)': {
+      gridTemplateColumns: '1fr',
+    },
   },
   statCard: {
     ...shorthands.padding('12px', '16px'),
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.borderRadius('12px'),
     boxShadow: tokens.shadow4,
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
@@ -304,11 +329,10 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground3,
   },
-  // RoC Summary Bar
+  // RoC Summary Bar - now inside sectionCard, so simplified styling
   rocSummaryCard: {
-    ...shorthands.padding('20px'),
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
-    boxShadow: tokens.shadow4,
+    ...shorthands.padding('16px'),
+    ...shorthands.borderRadius('12px'),
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
@@ -452,13 +476,13 @@ const useStyles = makeStyles({
     ...shorthands.padding('16px'),
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.borderRadius('12px'),
   },
   hyposChartCard: {
     ...shorthands.padding('16px'),
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.borderRadius('12px'),
   },
   chartCardInner: {
     height: '300px',
@@ -1204,7 +1228,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
 
       {/* ========== BG Section ========== */}
       {hasGlucoseData && (
-        <>
+        <div className={styles.sectionCard}>
           {/* BG Section Title */}
           <Text className={styles.sectionTitle}>Glucose Values Throughout the Day</Text>
 
@@ -1263,7 +1287,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
           </div>
 
           {/* BG Chart */}
-          <Card className={styles.chartCard}>
+          <div className={styles.chartCardInnerContent}>
             <div className={styles.controlsRow}>
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginLeft: 'auto' }}>
                 <div className={styles.colorSchemeContainer}>
@@ -1510,623 +1534,623 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
                 <Text>High Threshold ({displayGlucoseValue(thresholds.high, glucoseUnit)} {getUnitLabel(glucoseUnit)})</Text>
               </div>
             </div>
-          </Card>
+          </div>
+        </div>
+      )}
 
-          {/* ========== Rate of Change (RoC) Section ========== */}
-          {rocStats && rocStats.totalCount > 0 && (
-            <>
-              <Text className={styles.sectionTitle}>Rate of Change Analysis</Text>
-              
-              {/* RoC Stats Cards */}
-              <div className={styles.statsRow}>
-                <FluentTooltip content="Longest continuous period with stable glucose (slow rate of change)" relationship="description">
-                  <Card className={mergeClasses(styles.statCard, styles.statCardSuccess)}>
-                    <TimerRegular className={mergeClasses(styles.statIcon, styles.statIconSuccess)} />
-                    <div className={styles.statContent}>
-                      <Text className={styles.statLabel}>Longest Stable</Text>
-                      <div className={styles.statValueRow}>
-                        <Text className={styles.statValue}>{formatDuration(longestStablePeriod)}</Text>
-                      </div>
-                    </div>
-                  </Card>
-                </FluentTooltip>
-                
-                <FluentTooltip content="Maximum absolute rate of glucose change (fastest)" relationship="description">
-                  <Card className={mergeClasses(styles.statCard, styles.statCardWarning)}>
-                    <TopSpeedRegular className={mergeClasses(styles.statIcon, styles.statIconWarning)} />
-                    <div className={styles.statContent}>
-                      <Text className={styles.statLabel}>Max RoC</Text>
-                      <div className={styles.statValueRow}>
-                        <Text className={styles.statValue}>{formatRoCValue(rocStats.maxRoC, glucoseUnit)}</Text>
-                        <Text className={styles.statUnit}>{rocUnitLabel}</Text>
-                      </div>
-                    </div>
-                  </Card>
-                </FluentTooltip>
-                
-                <FluentTooltip content="Standard Deviation of Rate of Change - measures variability in glucose change speed" relationship="description">
-                  <Card className={styles.statCard}>
-                    <DataHistogramRegular className={styles.statIcon} />
-                    <div className={styles.statContent}>
-                      <Text className={styles.statLabel}>StDev RoC</Text>
-                      <div className={styles.statValueRow}>
-                        <Text className={styles.statValue}>{formatRoCValue(rocStats.sdRoC, glucoseUnit)}</Text>
-                        <Text className={styles.statUnit}>{rocUnitLabel}</Text>
-                      </div>
-                    </div>
-                  </Card>
-                </FluentTooltip>
-              </div>
-
-              {/* RoC Graph */}
-              {rocChartData.length > 0 && (
-                  <Card className={styles.rocChartCard}>
-                    {/* RoC Controls Row - inside the card to align with other graphs */}
-                    <div className={styles.rocControlsRow}>
-                      <FluentTooltip content="Time window for calculating glucose rate of change" relationship="description">
-                        <div className={styles.sliderContainer}>
-                          <Text className={styles.sliderLabel}>RoC Interval:</Text>
-                          <Slider
-                            min={0}
-                            max={3}
-                            step={1}
-                            value={rocIntervalIndex}
-                            onChange={(_, data) => setRocIntervalIndex(data.value)}
-                            style={{ minWidth: '80px' }}
-                          />
-                          <Text className={styles.sliderValue}>{currentRocInterval.label}</Text>
-                        </div>
-                      </FluentTooltip>
-                      <div className={styles.maxValueContainer}>
-                        <Text className={styles.sliderLabel}>Max BG:</Text>
-                        <TabList
-                          selectedValue={
-                            glucoseUnit === 'mg/dL'
-                              ? (rocMaxGlucose === 288 ? '288' : '396')
-                              : (rocMaxGlucose === 16.0 ? '16.0' : '22.0')
-                          }
-                          onTabSelect={(_, data) => {
-                            if (glucoseUnit === 'mg/dL') {
-                              setRocMaxGlucose(data.value === '288' ? 288 : 396);
-                            } else {
-                              setRocMaxGlucose(data.value === '16.0' ? 16.0 : 22.0);
-                            }
-                          }}
-                          size="small"
-                        >
-                          {glucoseUnit === 'mg/dL' ? (
-                            <>
-                              <Tab value="288">288</Tab>
-                              <Tab value="396">396</Tab>
-                            </>
-                          ) : (
-                            <>
-                              <Tab value="16.0">16.0</Tab>
-                              <Tab value="22.0">22.0</Tab>
-                            </>
-                          )}
-                        </TabList>
-                      </div>
-                    </div>
-                    <div className={styles.chartCardInner}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart margin={{ top: 10, right: 50, left: 10, bottom: 0 }} data={rocChartData}>
-                          <defs>
-                            {/* Day/night shading gradients */}
-                            {showDayNightShading && (
-                              <>
-                                <linearGradient id="rocNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
-                                  <stop offset="0%" stopColor="#1a237e" stopOpacity="0.25" />
-                                  <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
-                                </linearGradient>
-                                <linearGradient id="rocNightGradientRight" x1="0" y1="0" x2="1" y2="0">
-                                  <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
-                                  <stop offset="100%" stopColor="#1a237e" stopOpacity="0.25" />
-                                </linearGradient>
-                              </>
-                            )}
-                            {/* RoC line gradient */}
-                            <linearGradient id="dailyBGRocLineGradient" x1="0" y1="0" x2="1" y2="0">
-                              {rocGradientStops.map((stop, index) => (
-                                <stop key={index} offset={stop.offset} stopColor={stop.color} />
-                              ))}
-                            </linearGradient>
-                          </defs>
-                          
-                          <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
-                          
-                          {/* Day/night shading */}
-                          {showDayNightShading && (
-                            <>
-                              <ReferenceArea x1={0} x2={8} yAxisId="roc" fill="url(#rocNightGradientLeft)" />
-                              <ReferenceArea x1={20} x2={24} yAxisId="roc" fill="url(#rocNightGradientRight)" />
-                            </>
-                          )}
-                          
-                          {/* Reference lines for RoC thresholds */}
-                          <ReferenceLine
-                            y={ROC_THRESHOLDS.good}
-                            yAxisId="roc"
-                            stroke={ROC_COLORS.good}
-                            strokeDasharray="5 5"
-                            strokeWidth={1}
-                            label={{ value: 'Stable', position: 'left', fill: ROC_COLORS.good, fontSize: 10 }}
-                          />
-                          <ReferenceLine
-                            y={ROC_THRESHOLDS.medium}
-                            yAxisId="roc"
-                            stroke={ROC_COLORS.bad}
-                            strokeDasharray="5 5"
-                          strokeWidth={1}
-                            label={{ value: 'Rapid', position: 'left', fill: ROC_COLORS.bad, fontSize: 10 }}
-                          />
-                          
-                          <XAxis
-                            type="number"
-                            dataKey="timeDecimal"
-                            domain={[0, 24]}
-                            ticks={[0, 6, 12, 18, 24]}
-                            tickFormatter={formatXAxis}
-                            stroke={tokens.colorNeutralForeground2}
-                            style={{ fontSize: tokens.fontSizeBase200 }}
-                          />
-                          
-                          <YAxis
-                            yAxisId="roc"
-                            label={{ 
-                              value: `Rate of Change (${rocUnitLabel})`, 
-                              angle: -90, 
-                              position: 'insideLeft', 
-                              style: { fontSize: tokens.fontSizeBase200 } 
-                            }}
-                            stroke={tokens.colorNeutralForeground2}
-                            style={{ fontSize: tokens.fontSizeBase200 }}
-                            domain={rocYAxisDomain}
-                            tickFormatter={(value: number) => formatRoCValue(value, glucoseUnit)}
-                          />
-                          
-                          <YAxis
-                            yAxisId="glucose"
-                            orientation="right"
-                            label={{ 
-                              value: `Glucose (${getUnitLabel(glucoseUnit)})`, 
-                              angle: 90, 
-                              position: 'insideRight', 
-                              style: { fontSize: tokens.fontSizeBase200 } 
-                            }}
-                            stroke={tokens.colorNeutralForeground3}
-                            style={{ fontSize: tokens.fontSizeBase200 }}
-                            domain={[0, rocMaxGlucose]}
-                            tickFormatter={(value: number) => glucoseUnit === 'mg/dL' ? Math.round(value).toString() : value.toFixed(1)}
-                          />
-                          
-                          <RechartsTooltip content={<RoCTooltip />} />
-                          
-                          {/* Glucose line overlay */}
-                          <Line
-                            yAxisId="glucose"
-                            type="monotone"
-                            data={rocGlucoseLineData}
-                            dataKey="glucoseDisplay"
-                            name="Glucose"
-                            stroke={tokens.colorNeutralStroke1}
-                            strokeWidth={1.5}
-                            dot={false}
-                            connectNulls
-                            legendType="none"
-                          />
-                          
-                          {/* RoC line with gradient color */}
-                          <Line
-                            yAxisId="roc"
-                            type="monotone"
-                            dataKey="roc"
-                            name="Rate of Change"
-                            stroke="url(#dailyBGRocLineGradient)"
-                            strokeWidth={2.5}
-                            dot={false}
-                            connectNulls
-                            activeDot={{ r: 5, stroke: tokens.colorNeutralBackground1, strokeWidth: 2 }}
-                            legendType="none"
-                          />
-                        </ComposedChart>
-                      </ResponsiveContainer>
-                    </div>
-                    
-                    {/* RoC Legend inside the card */}
-                    <div className={styles.legendContainer}>
-                      <div className={styles.legendItem}>
-                        <div 
-                          className={styles.legendLine} 
-                          style={{ background: `linear-gradient(to right, ${ROC_COLORS.good}, ${ROC_COLORS.medium}, ${ROC_COLORS.bad})` }} 
-                        />
-                        <Text>Rate of Change (RoC)</Text>
-                      </div>
-                      <div className={styles.legendItem}>
-                        <div className={styles.legendLine} style={{ backgroundColor: tokens.colorNeutralStroke1 }} />
-                        <Text>Glucose</Text>
-                      </div>
-                    </div>
-                  </Card>
-              )}
-
-              {/* RoC Summary Bar */}
-              <div className={styles.rocSummaryCard}>
-                <Text className={styles.rocSummaryTitle}>
-                  Time by Rate of Change Category
-                </Text>
-                
-                <div className={styles.rocSummaryBar}>
-                  {rocStats.goodPercentage > 0 && (
-                    <div
-                      className={styles.rocSummarySegment}
-                      style={{
-                        width: `${rocStats.goodPercentage}%`,
-                        backgroundColor: ROC_COLORS.good,
-                      }}
-                      title={`Stable: ${rocStats.goodPercentage}% (${rocStats.goodCount} readings)`}
-                    >
-                      {rocStats.goodPercentage >= 8 && `${rocStats.goodPercentage}%`}
-                    </div>
-                  )}
-                  {rocStats.mediumPercentage > 0 && (
-                    <div
-                      className={styles.rocSummarySegment}
-                      style={{
-                        width: `${rocStats.mediumPercentage}%`,
-                        backgroundColor: ROC_COLORS.medium,
-                      }}
-                      title={`Moderate: ${rocStats.mediumPercentage}% (${rocStats.mediumCount} readings)`}
-                    >
-                      {rocStats.mediumPercentage >= 8 && `${rocStats.mediumPercentage}%`}
-                    </div>
-                  )}
-                  {rocStats.badPercentage > 0 && (
-                    <div
-                      className={styles.rocSummarySegment}
-                      style={{
-                        width: `${rocStats.badPercentage}%`,
-                        backgroundColor: ROC_COLORS.bad,
-                      }}
-                      title={`Rapid: ${rocStats.badPercentage}% (${rocStats.badCount} readings)`}
-                    >
-                      {rocStats.badPercentage >= 8 && `${rocStats.badPercentage}%`}
-                    </div>
-                  )}
-                </div>
-                
-                {/* Medical Standards Legend */}
-                <div className={styles.rocStandardsContainer}>
-                  <div className={styles.rocStandardRow}>
-                    <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.good }} />
-                    <Text className={styles.rocStandardLabel}>Stable</Text>
-                    <Text className={styles.rocStandardThreshold}>{medicalStandards.good.threshold}</Text>
-                    <Text className={styles.rocStandardDescription}>{medicalStandards.good.description}</Text>
-                  </div>
-                  <div className={styles.rocStandardRow}>
-                    <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.medium }} />
-                    <Text className={styles.rocStandardLabel}>Moderate</Text>
-                    <Text className={styles.rocStandardThreshold}>{medicalStandards.medium.threshold}</Text>
-                    <Text className={styles.rocStandardDescription}>{medicalStandards.medium.description}</Text>
-                  </div>
-                  <div className={styles.rocStandardRow}>
-                    <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.bad }} />
-                    <Text className={styles.rocStandardLabel}>Rapid</Text>
-                    <Text className={styles.rocStandardThreshold}>{medicalStandards.bad.threshold}</Text>
-                    <Text className={styles.rocStandardDescription}>{medicalStandards.bad.description}</Text>
+      {/* ========== Rate of Change (RoC) Section ========== */}
+      {rocStats && rocStats.totalCount > 0 && (
+        <div className={styles.sectionCard}>
+          <Text className={styles.sectionTitle}>Rate of Change Analysis</Text>
+          
+          {/* RoC Stats Cards */}
+          <div className={styles.statsRow}>
+            <FluentTooltip content="Longest continuous period with stable glucose (slow rate of change)" relationship="description">
+              <Card className={mergeClasses(styles.statCard, styles.statCardSuccess)}>
+                <TimerRegular className={mergeClasses(styles.statIcon, styles.statIconSuccess)} />
+                <div className={styles.statContent}>
+                  <Text className={styles.statLabel}>Longest Stable</Text>
+                  <div className={styles.statValueRow}>
+                    <Text className={styles.statValue}>{formatDuration(longestStablePeriod)}</Text>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
+              </Card>
+            </FluentTooltip>
+            
+            <FluentTooltip content="Maximum absolute rate of glucose change (fastest)" relationship="description">
+              <Card className={mergeClasses(styles.statCard, styles.statCardWarning)}>
+                <TopSpeedRegular className={mergeClasses(styles.statIcon, styles.statIconWarning)} />
+                <div className={styles.statContent}>
+                  <Text className={styles.statLabel}>Max RoC</Text>
+                  <div className={styles.statValueRow}>
+                    <Text className={styles.statValue}>{formatRoCValue(rocStats.maxRoC, glucoseUnit)}</Text>
+                    <Text className={styles.statUnit}>{rocUnitLabel}</Text>
+                  </div>
+                </div>
+              </Card>
+            </FluentTooltip>
+            
+            <FluentTooltip content="Standard Deviation of Rate of Change - measures variability in glucose change speed" relationship="description">
+              <Card className={styles.statCard}>
+                <DataHistogramRegular className={styles.statIcon} />
+                <div className={styles.statContent}>
+                  <Text className={styles.statLabel}>StDev RoC</Text>
+                  <div className={styles.statValueRow}>
+                    <Text className={styles.statValue}>{formatRoCValue(rocStats.sdRoC, glucoseUnit)}</Text>
+                    <Text className={styles.statUnit}>{rocUnitLabel}</Text>
+                  </div>
+                </div>
+              </Card>
+            </FluentTooltip>
+          </div>
 
-          {/* ========== Hypoglycemia Section ========== */}
-          {hypoStats && (
-            <>
-              <Text className={styles.sectionTitle}>Hypoglycemia Analysis</Text>
-              
-              {/* Hypo Stats Cards */}
-              <div className={styles.statsRow}>
-                <FluentTooltip content="Severe hypoglycemic events (below very low threshold)" relationship="description">
-                  <Card className={mergeClasses(
-                    styles.statCard,
-                    hypoStats.severeCount > 0 ? styles.statCardDanger : styles.statCardSuccess
-                  )}>
-                    <HeartPulseWarningRegular className={mergeClasses(
-                      styles.statIcon,
-                      hypoStats.severeCount > 0 ? styles.statIconDanger : styles.statIconSuccess
-                    )} />
-                    <div className={styles.statContent}>
-                      <Text className={styles.statLabel}>Severe</Text>
-                      <div className={styles.statValueRow}>
-                        <Text className={styles.statValue}>{hypoStats.severeCount}</Text>
-                      </div>
-                    </div>
-                  </Card>
+          {/* RoC Graph */}
+          {rocChartData.length > 0 && (
+            <div className={styles.rocChartCard}>
+              {/* RoC Controls Row - inside the card to align with other graphs */}
+              <div className={styles.rocControlsRow}>
+                <FluentTooltip content="Time window for calculating glucose rate of change" relationship="description">
+                  <div className={styles.sliderContainer}>
+                    <Text className={styles.sliderLabel}>RoC Interval:</Text>
+                    <Slider
+                      min={0}
+                      max={3}
+                      step={1}
+                      value={rocIntervalIndex}
+                      onChange={(_, data) => setRocIntervalIndex(data.value)}
+                      style={{ minWidth: '80px' }}
+                    />
+                    <Text className={styles.sliderValue}>{currentRocInterval.label}</Text>
+                  </div>
                 </FluentTooltip>
-                
-                <FluentTooltip content="Non-severe hypoglycemic events (below low threshold)" relationship="description">
-                  <Card className={mergeClasses(
-                    styles.statCard,
-                    hypoStats.nonSevereCount > 0 ? styles.statCardWarning : styles.statCardSuccess
-                  )}>
-                    <WarningRegular className={mergeClasses(
-                      styles.statIcon,
-                      hypoStats.nonSevereCount > 0 ? styles.statIconWarning : styles.statIconSuccess
-                    )} />
-                    <div className={styles.statContent}>
-                      <Text className={styles.statLabel}>Non-Severe</Text>
-                      <div className={styles.statValueRow}>
-                        <Text className={styles.statValue}>{hypoStats.nonSevereCount}</Text>
-                      </div>
-                    </div>
-                  </Card>
-                </FluentTooltip>
-                
-                <FluentTooltip content="Lowest glucose value during hypoglycemia" relationship="description">
-                  <Card className={mergeClasses(
-                    styles.statCard,
-                    hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
-                      ? styles.statCardDanger 
-                      : hypoStats.lowestValue !== null ? styles.statCardWarning : styles.statCardSuccess
-                  )}>
-                    <ArrowTrendingDownRegular className={mergeClasses(
-                      styles.statIcon,
-                      hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
-                        ? styles.statIconDanger 
-                        : hypoStats.lowestValue !== null ? styles.statIconWarning : styles.statIconSuccess
-                    )} />
-                    <div className={styles.statContent}>
-                      <Text className={styles.statLabel}>Lowest</Text>
-                      <div className={styles.statValueRow}>
-                        <Text className={styles.statValue}>
-                          {hypoStats.lowestValue !== null 
-                            ? displayGlucoseValue(hypoStats.lowestValue, glucoseUnit)
-                            : 'N/A'}
-                        </Text>
-                        {hypoStats.lowestValue !== null && (
-                          <Text className={styles.statUnit}>{getUnitLabel(glucoseUnit)}</Text>
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-                </FluentTooltip>
-                
-                <FluentTooltip content="Duration of longest hypoglycemic event" relationship="description">
-                  <Card className={mergeClasses(
-                    styles.statCard,
-                    hypoStats.totalCount > 0 ? styles.statCardWarning : styles.statCardSuccess
-                  )}>
-                    <TimerRegular className={mergeClasses(
-                      styles.statIcon,
-                      hypoStats.totalCount > 0 ? styles.statIconWarning : styles.statIconSuccess
-                    )} />
-                    <div className={styles.statContent}>
-                      <Text className={styles.statLabel}>Longest</Text>
-                      <div className={styles.statValueRow}>
-                        <Text className={styles.statValue}>
-                          {formatHypoDuration(hypoStats.longestDurationMinutes)}
-                        </Text>
-                      </div>
-                    </div>
-                  </Card>
-                </FluentTooltip>
-                
-                <FluentTooltip content="Total time spent in hypoglycemia" relationship="description">
-                  <Card className={mergeClasses(
-                    styles.statCard,
-                    hypoStats.totalCount > 0 ? styles.statCardWarning : styles.statCardSuccess
-                  )}>
-                    <ClockRegular className={mergeClasses(
-                      styles.statIcon,
-                      hypoStats.totalCount > 0 ? styles.statIconWarning : styles.statIconSuccess
-                    )} />
-                    <div className={styles.statContent}>
-                      <Text className={styles.statLabel}>Total Time</Text>
-                      <div className={styles.statValueRow}>
-                        <Text className={styles.statValue}>
-                          {hypoStats.totalCount > 0 
-                            ? formatHypoDuration(hypoStats.totalDurationMinutes)
-                            : 'None'}
-                        </Text>
-                      </div>
-                    </div>
-                  </Card>
-                </FluentTooltip>
+                <div className={styles.maxValueContainer}>
+                  <Text className={styles.sliderLabel}>Max BG:</Text>
+                  <TabList
+                    selectedValue={
+                      glucoseUnit === 'mg/dL'
+                        ? (rocMaxGlucose === 288 ? '288' : '396')
+                        : (rocMaxGlucose === 16.0 ? '16.0' : '22.0')
+                    }
+                    onTabSelect={(_, data) => {
+                      if (glucoseUnit === 'mg/dL') {
+                        setRocMaxGlucose(data.value === '288' ? 288 : 396);
+                      } else {
+                        setRocMaxGlucose(data.value === '16.0' ? 16.0 : 22.0);
+                      }
+                    }}
+                    size="small"
+                  >
+                    {glucoseUnit === 'mg/dL' ? (
+                      <>
+                        <Tab value="288">288</Tab>
+                        <Tab value="396">396</Tab>
+                      </>
+                    ) : (
+                      <>
+                        <Tab value="16.0">16.0</Tab>
+                        <Tab value="22.0">22.0</Tab>
+                      </>
+                    )}
+                  </TabList>
+                </div>
               </div>
-
-              {/* Hypos Graph */}
-              {hyposChartData.length > 0 && (
-                <Card className={styles.hyposChartCard}>
-                  <div className={styles.chartCardInner}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={hyposChartData} margin={{ top: 10, right: 50, left: 10, bottom: 0 }}>
-                        <defs>
-                          {/* Day/night shading gradients */}
-                          {showDayNightShading && (
-                            <>
-                              <linearGradient id="hyposNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
-                                <stop offset="0%" stopColor="#1a237e" stopOpacity="0.35" />
-                                <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
-                              </linearGradient>
-                              <linearGradient id="hyposNightGradientRight" x1="0" y1="0" x2="1" y2="0">
-                                <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
-                                <stop offset="100%" stopColor="#1a237e" stopOpacity="0.35" />
-                              </linearGradient>
-                            </>
-                          )}
-                          {/* Glucose line gradient based on hypo status */}
-                          <linearGradient id="dailyBGHyposLineGradient" x1="0" y1="0" x2="1" y2="0">
-                            {hyposGradientStops.map((stop, index) => (
-                              <stop key={index} offset={stop.offset} stopColor={stop.color} />
-                            ))}
+              <div className={styles.chartCardInner}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart margin={{ top: 10, right: 50, left: 10, bottom: 0 }} data={rocChartData}>
+                    <defs>
+                      {/* Day/night shading gradients */}
+                      {showDayNightShading && (
+                        <>
+                          <linearGradient id="rocNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#1a237e" stopOpacity="0.25" />
+                            <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
                           </linearGradient>
-                        </defs>
-                        
-                        {/* Day/night shading */}
-                        {showDayNightShading && (
-                          <>
-                            <ReferenceArea x1={0} x2={8} fill="url(#hyposNightGradientLeft)" />
-                            <ReferenceArea x1={20} x2={24} fill="url(#hyposNightGradientRight)" />
-                          </>
-                        )}
-                        
-                        <XAxis
-                          type="number"
-                          dataKey="timeDecimal"
-                          domain={[0, 24]}
-                          ticks={[0, 6, 12, 18, 24]}
-                          tickFormatter={formatXAxis}
-                          stroke={tokens.colorNeutralStroke1}
-                          tick={{ 
-                            fill: tokens.colorNeutralForeground2,
-                            fontSize: tokens.fontSizeBase200,
-                            fontFamily: tokens.fontFamilyBase,
-                          }}
-                          axisLine={{ strokeWidth: 1 }}
-                          tickLine={false}
-                        />
-                        
-                        <YAxis
-                          domain={[0, maxGlucose]}
-                          label={{ 
-                            value: `Glucose (${getUnitLabel(glucoseUnit)})`, 
-                            angle: -90, 
-                            position: 'insideLeft', 
-                            style: { 
-                              fontSize: tokens.fontSizeBase200,
-                              fontFamily: tokens.fontFamilyBase,
-                              fill: tokens.colorNeutralForeground2,
-                            } 
-                          }}
-                          stroke={tokens.colorNeutralStroke1}
-                          tick={{ 
-                            fill: tokens.colorNeutralForeground2,
-                            fontSize: tokens.fontSizeBase200,
-                            fontFamily: tokens.fontFamilyBase,
-                          }}
-                          axisLine={{ strokeWidth: 1 }}
-                          tickLine={false}
-                        />
-                        
-                        <RechartsTooltip content={<HyposTooltip />} />
-                        
-                        {/* Very low threshold reference line */}
-                        <ReferenceLine 
-                          y={convertGlucoseValue(thresholds.veryLow, glucoseUnit)} 
-                          stroke={HYPO_CHART_COLORS.veryLow}
-                          strokeDasharray="5 5" 
-                          strokeWidth={1.5}
-                          label={{ 
-                            value: `V.Low (${displayGlucoseValue(thresholds.veryLow, glucoseUnit)})`, 
-                            position: 'insideBottomLeft', 
-                            style: { 
-                              fontSize: tokens.fontSizeBase200,
-                              fontFamily: tokens.fontFamilyBase,
-                              fill: HYPO_CHART_COLORS.veryLow,
-                            } 
-                          }}
-                        />
-                        
-                        {/* Low threshold reference line */}
-                        <ReferenceLine 
-                          y={convertGlucoseValue(thresholds.low, glucoseUnit)} 
-                          stroke={HYPO_CHART_COLORS.low}
-                          strokeDasharray="5 5" 
-                          strokeWidth={1.5}
-                          label={{ 
-                            value: `Low (${displayGlucoseValue(thresholds.low, glucoseUnit)})`, 
-                            position: 'insideTopLeft', 
-                            style: { 
-                              fontSize: tokens.fontSizeBase200,
-                              fontFamily: tokens.fontFamilyBase,
-                              fill: HYPO_CHART_COLORS.low,
-                            } 
-                          }}
-                        />
-                        
-                        {/* High threshold reference line */}
-                        <ReferenceLine 
-                          y={convertGlucoseValue(thresholds.high, glucoseUnit)} 
-                          stroke={tokens.colorPaletteMarigoldBorder1}
-                          strokeDasharray="5 5" 
-                          strokeWidth={1.5}
-                          label={{ 
-                            value: `High (${displayGlucoseValue(thresholds.high, glucoseUnit)})`, 
-                            position: 'insideTopLeft', 
-                            style: { 
-                              fontSize: tokens.fontSizeBase200,
-                              fontFamily: tokens.fontFamilyBase,
-                              fill: tokens.colorPaletteMarigoldForeground1,
-                            } 
-                          }}
-                        />
-                        
-                        {/* Nadir dots for each hypo period */}
-                        {nadirPoints.length > 0 && (
-                          <Scatter
-                            data={nadirPoints}
-                            dataKey="value"
-                            fill={HYPO_CHART_COLORS.nadirDot}
-                            shape={(props: unknown) => {
-                              const shapeProps = props as { cx: number; cy: number };
-                              return (
-                                <circle
-                                  cx={shapeProps.cx}
-                                  cy={shapeProps.cy}
-                                  r={6}
-                                  fill={HYPO_CHART_COLORS.nadirDot}
-                                  stroke={tokens.colorNeutralBackground1}
-                                  strokeWidth={2}
-                                />
-                              );
-                            }}
-                          />
-                        )}
-                        
-                        {/* Glucose values line with gradient coloring */}
-                        <Line
-                          type="monotone"
-                          dataKey="value"
-                          stroke="url(#dailyBGHyposLineGradient)"
-                          strokeWidth={2.5}
-                          dot={false}
-                          activeDot={{ 
-                            r: 5, 
-                            strokeWidth: 2,
-                            stroke: tokens.colorNeutralBackground1,
-                            fill: tokens.colorBrandForeground1,
-                          }}
-                          connectNulls
-                        />
-                      </ComposedChart>
-                    </ResponsiveContainer>
-                  </div>
-                  
-                  {/* Hypos Legend inside the card */}
-                  <div className={styles.legendContainer}>
-                    <div className={styles.legendItem}>
-                      <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.normal }} />
-                      <Text>In Range</Text>
-                    </div>
-                    <div className={styles.legendItem}>
-                      <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.low }} />
-                      <Text>Hypoglycemia</Text>
-                    </div>
-                    <div className={styles.legendItem}>
-                      <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.veryLow }} />
-                      <Text>Severe Hypo</Text>
-                    </div>
-                    <div className={styles.legendItem}>
-                      <div className={styles.legendDot} style={{ backgroundColor: HYPO_CHART_COLORS.nadirDot }} />
-                      <Text>Nadir (Lowest Point)</Text>
-                    </div>
-                  </div>
-                </Card>
-              )}
-            </>
+                          <linearGradient id="rocNightGradientRight" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
+                            <stop offset="100%" stopColor="#1a237e" stopOpacity="0.25" />
+                          </linearGradient>
+                        </>
+                      )}
+                      {/* RoC line gradient */}
+                      <linearGradient id="dailyBGRocLineGradient" x1="0" y1="0" x2="1" y2="0">
+                        {rocGradientStops.map((stop, index) => (
+                          <stop key={index} offset={stop.offset} stopColor={stop.color} />
+                        ))}
+                      </linearGradient>
+                    </defs>
+                    
+                    <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
+                    
+                    {/* Day/night shading */}
+                    {showDayNightShading && (
+                      <>
+                        <ReferenceArea x1={0} x2={8} yAxisId="roc" fill="url(#rocNightGradientLeft)" />
+                        <ReferenceArea x1={20} x2={24} yAxisId="roc" fill="url(#rocNightGradientRight)" />
+                      </>
+                    )}
+                    
+                    {/* Reference lines for RoC thresholds */}
+                    <ReferenceLine
+                      y={ROC_THRESHOLDS.good}
+                      yAxisId="roc"
+                      stroke={ROC_COLORS.good}
+                      strokeDasharray="5 5"
+                      strokeWidth={1}
+                      label={{ value: 'Stable', position: 'left', fill: ROC_COLORS.good, fontSize: 10 }}
+                    />
+                    <ReferenceLine
+                      y={ROC_THRESHOLDS.medium}
+                      yAxisId="roc"
+                      stroke={ROC_COLORS.bad}
+                      strokeDasharray="5 5"
+                      strokeWidth={1}
+                      label={{ value: 'Rapid', position: 'left', fill: ROC_COLORS.bad, fontSize: 10 }}
+                    />
+                    
+                    <XAxis
+                      type="number"
+                      dataKey="timeDecimal"
+                      domain={[0, 24]}
+                      ticks={[0, 6, 12, 18, 24]}
+                      tickFormatter={formatXAxis}
+                      stroke={tokens.colorNeutralForeground2}
+                      style={{ fontSize: tokens.fontSizeBase200 }}
+                    />
+                    
+                    <YAxis
+                      yAxisId="roc"
+                      label={{ 
+                        value: `Rate of Change (${rocUnitLabel})`, 
+                        angle: -90, 
+                        position: 'insideLeft', 
+                        style: { fontSize: tokens.fontSizeBase200 } 
+                      }}
+                      stroke={tokens.colorNeutralForeground2}
+                      style={{ fontSize: tokens.fontSizeBase200 }}
+                      domain={rocYAxisDomain}
+                      tickFormatter={(value: number) => formatRoCValue(value, glucoseUnit)}
+                    />
+                    
+                    <YAxis
+                      yAxisId="glucose"
+                      orientation="right"
+                      label={{ 
+                        value: `Glucose (${getUnitLabel(glucoseUnit)})`, 
+                        angle: 90, 
+                        position: 'insideRight', 
+                        style: { fontSize: tokens.fontSizeBase200 } 
+                      }}
+                      stroke={tokens.colorNeutralForeground3}
+                      style={{ fontSize: tokens.fontSizeBase200 }}
+                      domain={[0, rocMaxGlucose]}
+                      tickFormatter={(value: number) => glucoseUnit === 'mg/dL' ? Math.round(value).toString() : value.toFixed(1)}
+                    />
+                    
+                    <RechartsTooltip content={<RoCTooltip />} />
+                    
+                    {/* Glucose line overlay */}
+                    <Line
+                      yAxisId="glucose"
+                      type="monotone"
+                      data={rocGlucoseLineData}
+                      dataKey="glucoseDisplay"
+                      name="Glucose"
+                      stroke={tokens.colorNeutralStroke1}
+                      strokeWidth={1.5}
+                      dot={false}
+                      connectNulls
+                      legendType="none"
+                    />
+                    
+                    {/* RoC line with gradient color */}
+                    <Line
+                      yAxisId="roc"
+                      type="monotone"
+                      dataKey="roc"
+                      name="Rate of Change"
+                      stroke="url(#dailyBGRocLineGradient)"
+                      strokeWidth={2.5}
+                      dot={false}
+                      connectNulls
+                      activeDot={{ r: 5, stroke: tokens.colorNeutralBackground1, strokeWidth: 2 }}
+                      legendType="none"
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+              
+              {/* RoC Legend inside the card */}
+              <div className={styles.legendContainer}>
+                <div className={styles.legendItem}>
+                  <div 
+                    className={styles.legendLine} 
+                    style={{ background: `linear-gradient(to right, ${ROC_COLORS.good}, ${ROC_COLORS.medium}, ${ROC_COLORS.bad})` }} 
+                  />
+                  <Text>Rate of Change (RoC)</Text>
+                </div>
+                <div className={styles.legendItem}>
+                  <div className={styles.legendLine} style={{ backgroundColor: tokens.colorNeutralStroke1 }} />
+                  <Text>Glucose</Text>
+                </div>
+              </div>
+            </div>
           )}
-        </>
+
+          {/* RoC Summary Bar */}
+          <div className={styles.rocSummaryCard}>
+            <Text className={styles.rocSummaryTitle}>
+              Time by Rate of Change Category
+            </Text>
+            
+            <div className={styles.rocSummaryBar}>
+              {rocStats.goodPercentage > 0 && (
+                <div
+                  className={styles.rocSummarySegment}
+                  style={{
+                    width: `${rocStats.goodPercentage}%`,
+                    backgroundColor: ROC_COLORS.good,
+                  }}
+                  title={`Stable: ${rocStats.goodPercentage}% (${rocStats.goodCount} readings)`}
+                >
+                  {rocStats.goodPercentage >= 8 && `${rocStats.goodPercentage}%`}
+                </div>
+              )}
+              {rocStats.mediumPercentage > 0 && (
+                <div
+                  className={styles.rocSummarySegment}
+                  style={{
+                    width: `${rocStats.mediumPercentage}%`,
+                    backgroundColor: ROC_COLORS.medium,
+                  }}
+                  title={`Moderate: ${rocStats.mediumPercentage}% (${rocStats.mediumCount} readings)`}
+                >
+                  {rocStats.mediumPercentage >= 8 && `${rocStats.mediumPercentage}%`}
+                </div>
+              )}
+              {rocStats.badPercentage > 0 && (
+                <div
+                  className={styles.rocSummarySegment}
+                  style={{
+                    width: `${rocStats.badPercentage}%`,
+                    backgroundColor: ROC_COLORS.bad,
+                  }}
+                  title={`Rapid: ${rocStats.badPercentage}% (${rocStats.badCount} readings)`}
+                >
+                  {rocStats.badPercentage >= 8 && `${rocStats.badPercentage}%`}
+                </div>
+              )}
+            </div>
+            
+            {/* Medical Standards Legend */}
+            <div className={styles.rocStandardsContainer}>
+              <div className={styles.rocStandardRow}>
+                <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.good }} />
+                <Text className={styles.rocStandardLabel}>Stable</Text>
+                <Text className={styles.rocStandardThreshold}>{medicalStandards.good.threshold}</Text>
+                <Text className={styles.rocStandardDescription}>{medicalStandards.good.description}</Text>
+              </div>
+              <div className={styles.rocStandardRow}>
+                <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.medium }} />
+                <Text className={styles.rocStandardLabel}>Moderate</Text>
+                <Text className={styles.rocStandardThreshold}>{medicalStandards.medium.threshold}</Text>
+                <Text className={styles.rocStandardDescription}>{medicalStandards.medium.description}</Text>
+              </div>
+              <div className={styles.rocStandardRow}>
+                <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.bad }} />
+                <Text className={styles.rocStandardLabel}>Rapid</Text>
+                <Text className={styles.rocStandardThreshold}>{medicalStandards.bad.threshold}</Text>
+                <Text className={styles.rocStandardDescription}>{medicalStandards.bad.description}</Text>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========== Hypoglycemia Section ========== */}
+      {hypoStats && (
+        <div className={styles.sectionCard}>
+          <Text className={styles.sectionTitle}>Hypoglycemia Analysis</Text>
+          
+          {/* Hypo Stats Cards */}
+          <div className={styles.statsRow}>
+            <FluentTooltip content="Severe hypoglycemic events (below very low threshold)" relationship="description">
+              <Card className={mergeClasses(
+                styles.statCard,
+                hypoStats.severeCount > 0 ? styles.statCardDanger : styles.statCardSuccess
+              )}>
+                <HeartPulseWarningRegular className={mergeClasses(
+                  styles.statIcon,
+                  hypoStats.severeCount > 0 ? styles.statIconDanger : styles.statIconSuccess
+                )} />
+                <div className={styles.statContent}>
+                  <Text className={styles.statLabel}>Severe</Text>
+                  <div className={styles.statValueRow}>
+                    <Text className={styles.statValue}>{hypoStats.severeCount}</Text>
+                  </div>
+                </div>
+              </Card>
+            </FluentTooltip>
+            
+            <FluentTooltip content="Non-severe hypoglycemic events (below low threshold)" relationship="description">
+              <Card className={mergeClasses(
+                styles.statCard,
+                hypoStats.nonSevereCount > 0 ? styles.statCardWarning : styles.statCardSuccess
+              )}>
+                <WarningRegular className={mergeClasses(
+                  styles.statIcon,
+                  hypoStats.nonSevereCount > 0 ? styles.statIconWarning : styles.statIconSuccess
+                )} />
+                <div className={styles.statContent}>
+                  <Text className={styles.statLabel}>Non-Severe</Text>
+                  <div className={styles.statValueRow}>
+                    <Text className={styles.statValue}>{hypoStats.nonSevereCount}</Text>
+                  </div>
+                </div>
+              </Card>
+            </FluentTooltip>
+            
+            <FluentTooltip content="Lowest glucose value during hypoglycemia" relationship="description">
+              <Card className={mergeClasses(
+                styles.statCard,
+                hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
+                  ? styles.statCardDanger 
+                  : hypoStats.lowestValue !== null ? styles.statCardWarning : styles.statCardSuccess
+              )}>
+                <ArrowTrendingDownRegular className={mergeClasses(
+                  styles.statIcon,
+                  hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
+                    ? styles.statIconDanger 
+                    : hypoStats.lowestValue !== null ? styles.statIconWarning : styles.statIconSuccess
+                )} />
+                <div className={styles.statContent}>
+                  <Text className={styles.statLabel}>Lowest</Text>
+                  <div className={styles.statValueRow}>
+                    <Text className={styles.statValue}>
+                      {hypoStats.lowestValue !== null 
+                        ? displayGlucoseValue(hypoStats.lowestValue, glucoseUnit)
+                        : 'N/A'}
+                    </Text>
+                    {hypoStats.lowestValue !== null && (
+                      <Text className={styles.statUnit}>{getUnitLabel(glucoseUnit)}</Text>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </FluentTooltip>
+            
+            <FluentTooltip content="Duration of longest hypoglycemic event" relationship="description">
+              <Card className={mergeClasses(
+                styles.statCard,
+                hypoStats.totalCount > 0 ? styles.statCardWarning : styles.statCardSuccess
+              )}>
+                <TimerRegular className={mergeClasses(
+                  styles.statIcon,
+                  hypoStats.totalCount > 0 ? styles.statIconWarning : styles.statIconSuccess
+                )} />
+                <div className={styles.statContent}>
+                  <Text className={styles.statLabel}>Longest</Text>
+                  <div className={styles.statValueRow}>
+                    <Text className={styles.statValue}>
+                      {formatHypoDuration(hypoStats.longestDurationMinutes)}
+                    </Text>
+                  </div>
+                </div>
+              </Card>
+            </FluentTooltip>
+            
+            <FluentTooltip content="Total time spent in hypoglycemia" relationship="description">
+              <Card className={mergeClasses(
+                styles.statCard,
+                hypoStats.totalCount > 0 ? styles.statCardWarning : styles.statCardSuccess
+              )}>
+                <ClockRegular className={mergeClasses(
+                  styles.statIcon,
+                  hypoStats.totalCount > 0 ? styles.statIconWarning : styles.statIconSuccess
+                )} />
+                <div className={styles.statContent}>
+                  <Text className={styles.statLabel}>Total Time</Text>
+                  <div className={styles.statValueRow}>
+                    <Text className={styles.statValue}>
+                      {hypoStats.totalCount > 0 
+                        ? formatHypoDuration(hypoStats.totalDurationMinutes)
+                        : 'None'}
+                    </Text>
+                  </div>
+                </div>
+              </Card>
+            </FluentTooltip>
+          </div>
+
+          {/* Hypos Graph */}
+          {hyposChartData.length > 0 && (
+            <div className={styles.hyposChartCard}>
+              <div className={styles.chartCardInner}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={hyposChartData} margin={{ top: 10, right: 50, left: 10, bottom: 0 }}>
+                    <defs>
+                      {/* Day/night shading gradients */}
+                      {showDayNightShading && (
+                        <>
+                          <linearGradient id="hyposNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#1a237e" stopOpacity="0.35" />
+                            <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
+                          </linearGradient>
+                          <linearGradient id="hyposNightGradientRight" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
+                            <stop offset="100%" stopColor="#1a237e" stopOpacity="0.35" />
+                          </linearGradient>
+                        </>
+                      )}
+                      {/* Glucose line gradient based on hypo status */}
+                      <linearGradient id="dailyBGHyposLineGradient" x1="0" y1="0" x2="1" y2="0">
+                        {hyposGradientStops.map((stop, index) => (
+                          <stop key={index} offset={stop.offset} stopColor={stop.color} />
+                        ))}
+                      </linearGradient>
+                    </defs>
+                    
+                    {/* Day/night shading */}
+                    {showDayNightShading && (
+                      <>
+                        <ReferenceArea x1={0} x2={8} fill="url(#hyposNightGradientLeft)" />
+                        <ReferenceArea x1={20} x2={24} fill="url(#hyposNightGradientRight)" />
+                      </>
+                    )}
+                    
+                    <XAxis
+                      type="number"
+                      dataKey="timeDecimal"
+                      domain={[0, 24]}
+                      ticks={[0, 6, 12, 18, 24]}
+                      tickFormatter={formatXAxis}
+                      stroke={tokens.colorNeutralStroke1}
+                      tick={{ 
+                        fill: tokens.colorNeutralForeground2,
+                        fontSize: tokens.fontSizeBase200,
+                        fontFamily: tokens.fontFamilyBase,
+                      }}
+                      axisLine={{ strokeWidth: 1 }}
+                      tickLine={false}
+                    />
+                    
+                    <YAxis
+                      domain={[0, maxGlucose]}
+                      label={{ 
+                        value: `Glucose (${getUnitLabel(glucoseUnit)})`, 
+                        angle: -90, 
+                        position: 'insideLeft', 
+                        style: { 
+                          fontSize: tokens.fontSizeBase200,
+                          fontFamily: tokens.fontFamilyBase,
+                          fill: tokens.colorNeutralForeground2,
+                        } 
+                      }}
+                      stroke={tokens.colorNeutralStroke1}
+                      tick={{ 
+                        fill: tokens.colorNeutralForeground2,
+                        fontSize: tokens.fontSizeBase200,
+                        fontFamily: tokens.fontFamilyBase,
+                      }}
+                      axisLine={{ strokeWidth: 1 }}
+                      tickLine={false}
+                    />
+                    
+                    <RechartsTooltip content={<HyposTooltip />} />
+                    
+                    {/* Very low threshold reference line */}
+                    <ReferenceLine 
+                      y={convertGlucoseValue(thresholds.veryLow, glucoseUnit)} 
+                      stroke={HYPO_CHART_COLORS.veryLow}
+                      strokeDasharray="5 5" 
+                      strokeWidth={1.5}
+                      label={{ 
+                        value: `V.Low (${displayGlucoseValue(thresholds.veryLow, glucoseUnit)})`, 
+                        position: 'insideBottomLeft', 
+                        style: { 
+                          fontSize: tokens.fontSizeBase200,
+                          fontFamily: tokens.fontFamilyBase,
+                          fill: HYPO_CHART_COLORS.veryLow,
+                        } 
+                      }}
+                    />
+                    
+                    {/* Low threshold reference line */}
+                    <ReferenceLine 
+                      y={convertGlucoseValue(thresholds.low, glucoseUnit)} 
+                      stroke={HYPO_CHART_COLORS.low}
+                      strokeDasharray="5 5" 
+                      strokeWidth={1.5}
+                      label={{ 
+                        value: `Low (${displayGlucoseValue(thresholds.low, glucoseUnit)})`, 
+                        position: 'insideTopLeft', 
+                        style: { 
+                          fontSize: tokens.fontSizeBase200,
+                          fontFamily: tokens.fontFamilyBase,
+                          fill: HYPO_CHART_COLORS.low,
+                        } 
+                      }}
+                    />
+                    
+                    {/* High threshold reference line */}
+                    <ReferenceLine 
+                      y={convertGlucoseValue(thresholds.high, glucoseUnit)} 
+                      stroke={tokens.colorPaletteMarigoldBorder1}
+                      strokeDasharray="5 5" 
+                      strokeWidth={1.5}
+                      label={{ 
+                        value: `High (${displayGlucoseValue(thresholds.high, glucoseUnit)})`, 
+                        position: 'insideTopLeft', 
+                        style: { 
+                          fontSize: tokens.fontSizeBase200,
+                          fontFamily: tokens.fontFamilyBase,
+                          fill: tokens.colorPaletteMarigoldForeground1,
+                        } 
+                      }}
+                    />
+                    
+                    {/* Nadir dots for each hypo period */}
+                    {nadirPoints.length > 0 && (
+                      <Scatter
+                        data={nadirPoints}
+                        dataKey="value"
+                        fill={HYPO_CHART_COLORS.nadirDot}
+                        shape={(props: unknown) => {
+                          const shapeProps = props as { cx: number; cy: number };
+                          return (
+                            <circle
+                              cx={shapeProps.cx}
+                              cy={shapeProps.cy}
+                              r={6}
+                              fill={HYPO_CHART_COLORS.nadirDot}
+                              stroke={tokens.colorNeutralBackground1}
+                              strokeWidth={2}
+                            />
+                          );
+                        }}
+                      />
+                    )}
+                    
+                    {/* Glucose values line with gradient coloring */}
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="url(#dailyBGHyposLineGradient)"
+                      strokeWidth={2.5}
+                      dot={false}
+                      activeDot={{ 
+                        r: 5, 
+                        strokeWidth: 2,
+                        stroke: tokens.colorNeutralBackground1,
+                        fill: tokens.colorBrandForeground1,
+                      }}
+                      connectNulls
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+              
+              {/* Hypos Legend inside the card */}
+              <div className={styles.legendContainer}>
+                <div className={styles.legendItem}>
+                  <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.normal }} />
+                  <Text>In Range</Text>
+                </div>
+                <div className={styles.legendItem}>
+                  <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.low }} />
+                  <Text>Hypoglycemia</Text>
+                </div>
+                <div className={styles.legendItem}>
+                  <div className={styles.legendLine} style={{ backgroundColor: HYPO_CHART_COLORS.veryLow }} />
+                  <Text>Severe Hypo</Text>
+                </div>
+                <div className={styles.legendItem}>
+                  <div className={styles.legendDot} style={{ backgroundColor: HYPO_CHART_COLORS.nadirDot }} />
+                  <Text>Nadir (Lowest Point)</Text>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {!hasGlucoseData && (
@@ -2137,7 +2161,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
 
       {/* ========== Insulin Section ========== */}
       {hasInsulinData && (
-        <>
+        <div className={styles.sectionCard}>
           <Text className={styles.sectionTitle}>Insulin Delivery</Text>
           
           {/* Insulin Summary Cards */}
@@ -2147,11 +2171,11 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
             totalInsulin={insulinSummary.totalInsulin}
           />
 
-          {/* Insulin Timeline Chart - wrapped in Card */}
-          <Card className={styles.chartCard}>
+          {/* Insulin Timeline Chart */}
+          <div className={styles.chartCardInnerContent}>
             <InsulinTimeline data={timelineData} showDayNightShading={showDayNightShading} />
-          </Card>
-        </>
+          </div>
+        </div>
       )}
 
       {!hasInsulinData && (
@@ -2162,7 +2186,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
 
       {/* ========== IOB Section ========== */}
       {hasIOBData && (
-        <>
+        <div className={styles.sectionCard}>
           <Text className={styles.sectionTitle}>Insulin on Board (IOB)</Text>
           
           <div className={styles.iobChartContainer}>
@@ -2243,7 +2267,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
