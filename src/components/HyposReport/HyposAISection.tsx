@@ -453,12 +453,15 @@ export function HyposAISection({
     const eventsCSV = convertDetailedHypoEventsToCSV(allEvents);
     const base64Data = base64Encode(eventsCSV);
     
+    // Pass activeProvider as-is (can be null/undefined) - generateHyposReportPrompt
+    // handles null provider gracefully by producing a generic prompt without
+    // provider-specific disclaimers
     return generateHyposReportPrompt(
       base64Data,
       allEvents.length,
       responseLanguage,
       glucoseUnit,
-      activeProvider ?? 'gemini'
+      activeProvider ?? undefined
     );
   }, [loadingAllEvents, allEvents, responseLanguage, glucoseUnit, activeProvider]);
   
