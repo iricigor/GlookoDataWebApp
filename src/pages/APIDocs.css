@@ -1,25 +1,336 @@
 /* ==========================================================================
-   OpenAPI Explorer Customizations
-   These styles customize the OpenAPI Explorer component used in the API Docs page.
-   OpenAPI Explorer is a web component for displaying OpenAPI documentation with
-   built-in theming support.
+   Swagger UI Customizations
+   These styles customize the Swagger UI component used in the API Docs page.
+   We hide duplicate elements (info section, authorize button) since the custom 
+   header already provides this functionality with Microsoft authentication.
    ========================================================================== */
 
-/* Ensure OpenAPI Explorer fills its container */
-openapi-explorer {
-  display: block;
-  height: 100%;
-  width: 100%;
+/* Hide the SwaggerUI info section (title, description, version badge) 
+   Our custom header already provides this information */
+.swagger-ui .info {
+  display: none !important;
 }
 
-/* Hide OpenAPI Explorer while loading to prevent flash of unstyled content */
-openapi-explorer:not(:defined) {
-  display: none;
+/* Hide the SwaggerUI Authorize button since we handle auth in our custom header */
+.swagger-ui .auth-wrapper .authorize {
+  display: none !important;
 }
 
-/* Additional dark mode adjustments if needed */
-body.dark-theme openapi-explorer {
-  --nav-bg-color: #292929;
-  --nav-text-color: #ffffff;
-  --nav-hover-bg-color: #383838;
+/* Adjust scheme container now that authorize button is hidden */
+.swagger-ui .scheme-container {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  padding: 16px 0 !important;
+}
+
+/* ==========================================================================
+   Swagger UI Dark Theme Overrides
+   These styles apply when the app is in dark mode (body.dark-theme)
+   ========================================================================== */
+
+/* Main background and text colors */
+body.dark-theme .swagger-ui {
+  background-color: #1f1f1f;
+}
+
+body.dark-theme .swagger-ui,
+body.dark-theme .swagger-ui .info,
+body.dark-theme .swagger-ui .info p,
+body.dark-theme .swagger-ui .info li,
+body.dark-theme .swagger-ui .info table,
+body.dark-theme .swagger-ui .opblock-tag,
+body.dark-theme .swagger-ui .opblock-tag small,
+body.dark-theme .swagger-ui label,
+body.dark-theme .swagger-ui .parameter__name,
+body.dark-theme .swagger-ui .parameter__type,
+body.dark-theme .swagger-ui .parameter__in,
+body.dark-theme .swagger-ui .response-col_status,
+body.dark-theme .swagger-ui .response-col_description,
+body.dark-theme .swagger-ui .response-col_links,
+body.dark-theme .swagger-ui table.model,
+body.dark-theme .swagger-ui .model-title,
+body.dark-theme .swagger-ui .models,
+body.dark-theme .swagger-ui .models h4,
+body.dark-theme .swagger-ui .opblock-description-wrapper,
+body.dark-theme .swagger-ui .opblock-description-wrapper p,
+body.dark-theme .swagger-ui .renderedMarkdown p,
+body.dark-theme .swagger-ui .markdown p,
+body.dark-theme .swagger-ui .tab li,
+body.dark-theme .swagger-ui .opblock .opblock-section-header h4,
+body.dark-theme .swagger-ui .opblock .opblock-summary-description,
+body.dark-theme .swagger-ui .responses-inner h4,
+body.dark-theme .swagger-ui .responses-inner h5 {
+  color: #ffffff !important;
+}
+
+/* Headers and titles */
+body.dark-theme .swagger-ui .info .title,
+body.dark-theme .swagger-ui .opblock-tag {
+  color: #ffffff !important;
+}
+
+/* Links */
+body.dark-theme .swagger-ui .info a,
+body.dark-theme .swagger-ui a.nostyle {
+  color: #479ef5 !important;
+}
+
+/* Scheme container (Servers dropdown area) */
+body.dark-theme .swagger-ui .scheme-container {
+  background-color: #292929 !important;
+  border-color: #484848 !important;
+}
+
+/* Select dropdowns */
+body.dark-theme .swagger-ui select,
+body.dark-theme .swagger-ui .servers > label select,
+body.dark-theme .swagger-ui .opblock-body select,
+body.dark-theme .swagger-ui .parameters-col_description select {
+  background-color: #292929 !important;
+  color: #ffffff !important;
+  border-color: #484848 !important;
+}
+
+/* Opblock (API operation blocks) backgrounds */
+body.dark-theme .swagger-ui .opblock {
+  background-color: #292929 !important;
+  border-color: #484848 !important;
+}
+
+body.dark-theme .swagger-ui .opblock.opblock-get {
+  background-color: rgba(97, 175, 254, 0.1) !important;
+  border-color: #61affe !important;
+}
+
+body.dark-theme .swagger-ui .opblock.opblock-post {
+  background-color: rgba(73, 204, 144, 0.1) !important;
+  border-color: #49cc90 !important;
+}
+
+body.dark-theme .swagger-ui .opblock.opblock-put {
+  background-color: rgba(252, 161, 48, 0.1) !important;
+  border-color: #fca130 !important;
+}
+
+body.dark-theme .swagger-ui .opblock.opblock-delete {
+  background-color: rgba(249, 62, 62, 0.1) !important;
+  border-color: #f93e3e !important;
+}
+
+body.dark-theme .swagger-ui .opblock.opblock-patch {
+  background-color: rgba(80, 227, 194, 0.1) !important;
+  border-color: #50e3c2 !important;
+}
+
+/* Opblock section headers */
+body.dark-theme .swagger-ui .opblock .opblock-section-header {
+  background-color: #383838 !important;
+  border-color: #484848 !important;
+}
+
+/* Parameters table */
+body.dark-theme .swagger-ui .opblock .opblock-body .opblock-section .opblock-section-request-body,
+body.dark-theme .swagger-ui .table-container,
+body.dark-theme .swagger-ui .parameters-container,
+body.dark-theme .swagger-ui table.parameters,
+body.dark-theme .swagger-ui .response-body-container {
+  background-color: transparent !important;
+}
+
+body.dark-theme .swagger-ui table.parameters thead tr th,
+body.dark-theme .swagger-ui table.parameters thead tr td,
+body.dark-theme .swagger-ui .table-container table thead th {
+  color: #d6d6d6 !important;
+  border-color: #484848 !important;
+}
+
+body.dark-theme .swagger-ui table.parameters tbody tr td,
+body.dark-theme .swagger-ui .table-container table tbody tr td {
+  color: #ffffff !important;
+  border-color: #484848 !important;
+}
+
+/* Input fields */
+body.dark-theme .swagger-ui input[type=text],
+body.dark-theme .swagger-ui input[type=password],
+body.dark-theme .swagger-ui input[type=email],
+body.dark-theme .swagger-ui input[type=file],
+body.dark-theme .swagger-ui input[type=search],
+body.dark-theme .swagger-ui textarea {
+  background-color: #292929 !important;
+  color: #ffffff !important;
+  border-color: #484848 !important;
+}
+
+body.dark-theme .swagger-ui input::placeholder,
+body.dark-theme .swagger-ui textarea::placeholder {
+  color: #adadad !important;
+}
+
+/* Code blocks and pre elements */
+body.dark-theme .swagger-ui pre,
+body.dark-theme .swagger-ui code,
+body.dark-theme .swagger-ui .highlight-code,
+body.dark-theme .swagger-ui pre.microlight {
+  background-color: #1f1f1f !important;
+  color: #ffffff !important;
+  border-color: #484848 !important;
+}
+
+body.dark-theme .swagger-ui .highlight-code .microlight {
+  background-color: #1f1f1f !important;
+  color: #d4d4d4 !important;
+}
+
+/* Response body */
+body.dark-theme .swagger-ui .responses-wrapper,
+body.dark-theme .swagger-ui .response,
+body.dark-theme .swagger-ui .response .response-col_description__inner {
+  background-color: transparent !important;
+}
+
+/* Response code examples */
+body.dark-theme .swagger-ui .response-content-type {
+  background-color: #292929 !important;
+  border-color: #484848 !important;
+}
+
+/* Models section */
+body.dark-theme .swagger-ui section.models {
+  border-color: #484848 !important;
+  background-color: transparent !important;
+}
+
+body.dark-theme .swagger-ui section.models .model-container {
+  background-color: #292929 !important;
+  border-color: #484848 !important;
+}
+
+body.dark-theme .swagger-ui section.models .model-box {
+  background-color: transparent !important;
+}
+
+body.dark-theme .swagger-ui .model-toggle {
+  background-color: transparent !important;
+}
+
+body.dark-theme .swagger-ui .model {
+  color: #ffffff !important;
+}
+
+body.dark-theme .swagger-ui .model .property,
+body.dark-theme .swagger-ui .model .property.primitive,
+body.dark-theme .swagger-ui span.model-title__text {
+  color: #ffffff !important;
+}
+
+/* Buttons */
+body.dark-theme .swagger-ui .btn {
+  color: #ffffff !important;
+  border-color: #484848 !important;
+}
+
+body.dark-theme .swagger-ui .btn:hover {
+  background-color: #383838 !important;
+}
+
+body.dark-theme .swagger-ui .btn.execute {
+  background-color: #0078d4 !important;
+  color: #ffffff !important;
+  border-color: #0078d4 !important;
+}
+
+body.dark-theme .swagger-ui .btn.execute:hover {
+  background-color: #106ebe !important;
+}
+
+body.dark-theme .swagger-ui .btn.cancel {
+  background-color: transparent !important;
+}
+
+/* Tab navigation */
+body.dark-theme .swagger-ui .tab li {
+  color: #d6d6d6 !important;
+}
+
+body.dark-theme .swagger-ui .tab li.active {
+  color: #ffffff !important;
+}
+
+body.dark-theme .swagger-ui .tab li button.tablinks {
+  color: inherit !important;
+  background-color: transparent !important;
+}
+
+/* Filter input */
+body.dark-theme .swagger-ui .filter-container .filter input {
+  background-color: #292929 !important;
+  color: #ffffff !important;
+  border-color: #484848 !important;
+}
+
+body.dark-theme .swagger-ui .filter-container .filter {
+  border-color: #484848 !important;
+}
+
+/* Loading spinner */
+body.dark-theme .swagger-ui .loading-container .loading {
+  color: #ffffff !important;
+}
+
+/* Try it out button and response area */
+body.dark-theme .swagger-ui .try-out__btn {
+  color: #ffffff !important;
+  border-color: #484848 !important;
+}
+
+body.dark-theme .swagger-ui .try-out__btn:hover {
+  background-color: #383838 !important;
+}
+
+/* Example value and schema tabs */
+body.dark-theme .swagger-ui .model-example,
+body.dark-theme .swagger-ui .example {
+  background-color: #1f1f1f !important;
+}
+
+/* JSON Schema styles */
+body.dark-theme .swagger-ui .json-schema-2020-12 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+body.dark-theme .swagger-ui .json-schema-2020-12__title,
+body.dark-theme .swagger-ui .json-schema-2020-12-property .json-schema-2020-12__title,
+body.dark-theme .swagger-ui .json-schema-2020-12-keyword__name--primary,
+body.dark-theme .swagger-ui .json-schema-2020-12-keyword__value--primary,
+body.dark-theme .swagger-ui .json-schema-2020-12-json-viewer__name--primary,
+body.dark-theme .swagger-ui .json-schema-2020-12-json-viewer__value--primary {
+  color: #ffffff !important;
+}
+
+body.dark-theme .swagger-ui .json-schema-2020-12-keyword__name--secondary,
+body.dark-theme .swagger-ui .json-schema-2020-12-keyword__value--secondary,
+body.dark-theme .swagger-ui .json-schema-2020-12-json-viewer__name--secondary,
+body.dark-theme .swagger-ui .json-schema-2020-12-json-viewer__value--secondary,
+body.dark-theme .swagger-ui .json-schema-2020-12-keyword--description {
+  color: #d6d6d6 !important;
+}
+
+/* Scrollbar styling for dark mode */
+body.dark-theme .swagger-ui ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+body.dark-theme .swagger-ui ::-webkit-scrollbar-track {
+  background: #1f1f1f;
+}
+
+body.dark-theme .swagger-ui ::-webkit-scrollbar-thumb {
+  background: #484848;
+  border-radius: 4px;
+}
+
+body.dark-theme .swagger-ui ::-webkit-scrollbar-thumb:hover {
+  background: #5c5c5c;
 }
