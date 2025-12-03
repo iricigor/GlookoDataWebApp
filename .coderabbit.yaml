@@ -10,7 +10,8 @@ reviews:
     # Review draft PRs as well (set to true if you want this)
     drafts: false
     # Do not ignore PRs from any bots, including GitHub Copilot - this empty array ensures all PRs (bot or human) are reviewed
-    ignore_usernames: []  # Empty to review everything; add specific bots like ["dependabot[bot]"] if you want to skip others but not Copilot
+    ignore_usernames:
+      - ""          # Allow all users/bots
     # Optional: Skip based on PR labels (e.g., don't review WIPs)
     labels: ["!wip", "!draft"]
   # Optional: Suppress the "Review skipped" status message entirely
