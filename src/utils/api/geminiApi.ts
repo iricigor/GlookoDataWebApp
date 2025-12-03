@@ -174,10 +174,23 @@ export async function callGeminiApi(
 
 /**
  * Verify if a Gemini API key is valid by calling the list models endpoint.
- * This is a lightweight check that doesn't incur any cost.
+ * 
+ * This is a lightweight check that doesn't incur any cost or consume tokens.
+ * The function makes a GET request to Google's models endpoint which only
+ * requires authentication, not actual API usage.
  * 
  * @param apiKey - Google Gemini API key to verify
- * @returns Promise with the verification result
+ * @returns Promise with the verification result containing valid status and optional error
+ * 
+ * @example
+ * ```typescript
+ * const result = await verifyGeminiApiKey('AIzaSy...');
+ * if (result.valid) {
+ *   console.log('API key is valid');
+ * } else {
+ *   console.error('Invalid key:', result.error);
+ * }
+ * ```
  */
 export async function verifyGeminiApiKey(apiKey: string): Promise<APIKeyVerificationResult> {
   if (!apiKey || apiKey.trim() === '') {

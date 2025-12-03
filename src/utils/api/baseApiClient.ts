@@ -20,9 +20,14 @@ export interface AIApiResult {
 
 /**
  * Result interface for API key verification
+ * 
+ * This interface represents the outcome of verifying an API key
+ * against a provider's authentication endpoint.
  */
 export interface APIKeyVerificationResult {
+  /** Whether the API key is valid and can be used for API calls */
   valid: boolean;
+  /** Error message if validation failed (undefined when valid is true) */
   error?: string;
 }
 

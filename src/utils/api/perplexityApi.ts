@@ -81,11 +81,24 @@ export async function callPerplexityApi(
 
 /**
  * Verify if a Perplexity API key is valid by making a minimal API call.
- * Perplexity doesn't have a list models endpoint, so we use a minimal chat completion.
- * This uses very few tokens to minimize cost.
+ * 
+ * Unlike other providers, Perplexity doesn't have a list models endpoint,
+ * so we use a minimal chat completion request with max_tokens=1 to minimize cost.
+ * This approach uses very few tokens (typically less than 10 total) to verify
+ * the API key is valid and has the necessary permissions.
  * 
  * @param apiKey - Perplexity API key to verify
- * @returns Promise with the verification result
+ * @returns Promise with the verification result containing valid status and optional error
+ * 
+ * @example
+ * ```typescript
+ * const result = await verifyPerplexityApiKey('pplx-...');
+ * if (result.valid) {
+ *   console.log('API key is valid');
+ * } else {
+ *   console.error('Invalid key:', result.error);
+ * }
+ * ```
  */
 export async function verifyPerplexityApiKey(apiKey: string): Promise<APIKeyVerificationResult> {
   if (!apiKey || apiKey.trim() === '') {

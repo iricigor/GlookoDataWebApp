@@ -206,11 +206,26 @@ export function getAvailableProviders(
 
 /**
  * Verify if an API key is valid for the specified provider.
- * Uses the most lightweight verification method available for each provider.
  * 
- * @param provider - The AI provider to verify the key for
+ * This function routes verification to the appropriate provider-specific
+ * verification function. Each provider uses the most lightweight verification
+ * method available:
+ * - Gemini, Grok, DeepSeek: GET request to list models endpoint (no cost)
+ * - Perplexity: Minimal chat completion with max_tokens=1 (minimal cost)
+ * 
+ * @param provider - The AI provider to verify the key for ('perplexity', 'gemini', 'grok', or 'deepseek')
  * @param apiKey - The API key to verify
- * @returns Promise with the verification result
+ * @returns Promise with the verification result containing valid status and optional error
+ * 
+ * @example
+ * ```typescript
+ * const result = await verifyApiKey('gemini', 'AIzaSy...');
+ * if (result.valid) {
+ *   console.log('API key is valid');
+ * } else {
+ *   console.error('Invalid key:', result.error);
+ * }
+ * ```
  */
 export async function verifyApiKey(
   provider: AIProvider,

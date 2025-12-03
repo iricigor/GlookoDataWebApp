@@ -78,10 +78,23 @@ export async function callGrokApi(
 
 /**
  * Verify if a Grok API key is valid by calling the list models endpoint.
- * This is a lightweight check that doesn't incur any cost.
  * 
- * @param apiKey - Grok API key to verify
- * @returns Promise with the verification result
+ * This is a lightweight check that doesn't incur any cost or consume tokens.
+ * The function makes a GET request to xAI's models endpoint which only
+ * requires authentication, not actual API usage.
+ * 
+ * @param apiKey - Grok API key to verify (from xAI)
+ * @returns Promise with the verification result containing valid status and optional error
+ * 
+ * @example
+ * ```typescript
+ * const result = await verifyGrokApiKey('xai-...');
+ * if (result.valid) {
+ *   console.log('API key is valid');
+ * } else {
+ *   console.error('Invalid key:', result.error);
+ * }
+ * ```
  */
 export async function verifyGrokApiKey(apiKey: string): Promise<APIKeyVerificationResult> {
   if (!apiKey || apiKey.trim() === '') {

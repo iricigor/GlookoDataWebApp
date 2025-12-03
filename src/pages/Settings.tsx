@@ -34,13 +34,29 @@ import { getProviderDisplayName, getActiveProvider, getAvailableProviders, verif
 
 /**
  * Verification status for each API key
+ * 
+ * Represents the current state of API key verification:
+ * - 'idle': Key has not been verified yet (or was reset after key change)
+ * - 'verifying': Verification request is in progress
+ * - 'valid': Key was verified and is working
+ * - 'invalid': Key verification failed (invalid key or network error)
  */
 type VerificationStatus = 'idle' | 'verifying' | 'valid' | 'invalid';
 
+/**
+ * State object tracking verification status for all AI providers
+ * 
+ * Each provider maintains its own independent verification state,
+ * which is reset when the corresponding API key changes.
+ */
 interface VerificationState {
+  /** Perplexity API key verification status */
   perplexity: VerificationStatus;
+  /** Grok (xAI) API key verification status */
   grok: VerificationStatus;
+  /** DeepSeek API key verification status */
   deepseek: VerificationStatus;
+  /** Google Gemini API key verification status */
   gemini: VerificationStatus;
 }
 
@@ -515,6 +531,13 @@ export function Settings({
 
   /**
    * Handle API key verification for a provider
+   * 
+   * Initiates an async verification request to check if the API key is valid.
+   * Updates the verification state to 'verifying' during the request, then
+   * sets it to 'valid' or 'invalid' based on the result.
+   * 
+   * @param provider - The AI provider whose key should be verified
+   * @param apiKey - The API key to verify
    */
   const handleVerifyApiKey = async (provider: AIProvider, apiKey: string) => {
     if (!apiKey || apiKey.trim() === '') return;
@@ -593,7 +616,20 @@ export function Settings({
     );
   };
 
-  // Helper function to render the verify button for each API key field
+  /**
+   * Render the verification button for an API key field
+   * 
+   * The button displays different states based on verification status:
+   * - Disabled with question mark: No API key entered
+   * - Question mark: Ready to verify (idle state)
+   * - Spinner: Verification in progress
+   * - Green checkmark: API key is valid
+   * - Red X: API key is invalid
+   * 
+   * @param provider - The AI provider for this API key
+   * @param apiKey - The current API key value
+   * @returns JSX element for the verify button with tooltip
+   */
   const renderVerifyButton = (provider: AIProvider, apiKey: string) => {
     const status = verificationState[provider];
     const hasKey = !!apiKey && apiKey.trim() !== '';

@@ -78,10 +78,23 @@ export async function callDeepSeekApi(
 
 /**
  * Verify if a DeepSeek API key is valid by calling the list models endpoint.
- * This is a lightweight check that doesn't incur any cost.
+ * 
+ * This is a lightweight check that doesn't incur any cost or consume tokens.
+ * The function makes a GET request to DeepSeek's models endpoint which only
+ * requires authentication, not actual API usage.
  * 
  * @param apiKey - DeepSeek API key to verify
- * @returns Promise with the verification result
+ * @returns Promise with the verification result containing valid status and optional error
+ * 
+ * @example
+ * ```typescript
+ * const result = await verifyDeepSeekApiKey('sk-...');
+ * if (result.valid) {
+ *   console.log('API key is valid');
+ * } else {
+ *   console.error('Invalid key:', result.error);
+ * }
+ * ```
  */
 export async function verifyDeepSeekApiKey(apiKey: string): Promise<APIKeyVerificationResult> {
   if (!apiKey || apiKey.trim() === '') {
