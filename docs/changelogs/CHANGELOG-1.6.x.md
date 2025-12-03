@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>650 feat: auto-select newly uploaded valid file with toast notification</summary>
+
+[#650](../../pull/650) feat: auto-select newly uploaded valid file with toast notification
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>643 Suppress React 19 peer dependency warnings with .npmrc</summary>
 
 [#643](../../pull/643) Suppress React 19 peer dependency warnings with .npmrc
