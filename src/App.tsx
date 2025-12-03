@@ -33,6 +33,8 @@ import { useAuth } from './hooks/useAuth'
 import { useUserSettings } from './hooks/useUserSettings'
 import { useDayNightShading } from './hooks/useDayNightShading'
 import type { UploadedFile, AIAnalysisResult, CloudUserSettings } from './types'
+import type { AIProvider } from './utils/api'
+import { getProviderDisplayName } from './utils/api'
 import { extractZipMetadata } from './features/dataUpload/utils'
 
 // Page navigation order for swipe gestures
@@ -95,6 +97,19 @@ function App() {
   // Toast notifications
   const toasterId = useId('toaster')
   const { dispatchToast } = useToastController(toasterId)
+
+  // Handle AI provider auto-switch notification
+  const handleProviderAutoSwitch = useCallback((fromProvider: AIProvider, toProvider: AIProvider) => {
+    dispatchToast(
+      <Toast>
+        <ToastTitle>AI provider switched</ToastTitle>
+        <ToastBody>
+          {getProviderDisplayName(fromProvider)} key verification failed. Switched to {getProviderDisplayName(toProvider)}.
+        </ToastBody>
+      </Toast>,
+      { intent: 'warning', timeout: 5000 }
+    )
+  }, [dispatchToast])
 
   // Get current settings as CloudUserSettings object
   const getCurrentSettings = useCallback((): CloudUserSettings => {
@@ -423,6 +438,7 @@ function App() {
           onDeepSeekApiKeyChange={setDeepSeekApiKey}
           selectedProvider={selectedProvider}
           onSelectedProviderChange={setSelectedProvider}
+          onProviderAutoSwitch={handleProviderAutoSwitch}
         />
       case 'api-docs':
         return <APIDocs />
