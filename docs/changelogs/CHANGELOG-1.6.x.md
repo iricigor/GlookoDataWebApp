@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>637 Move RoC controls inside chart card for UI consistency</summary>
+
+[#637](../../pull/637) Move RoC controls inside chart card for UI consistency
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>634 [WIP] Add docstrings coverage to modified files</summary>
 
 [#634](../../pull/634) [WIP] Add docstrings coverage to modified files
