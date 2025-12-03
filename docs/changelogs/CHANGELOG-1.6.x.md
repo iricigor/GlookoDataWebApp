@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>645 Optimize deploy pipeline with npm caching</summary>
+
+[#645](../../pull/645) Optimize deploy pipeline with npm caching
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>641 Update README screenshot with current home page</summary>
 
 [#641](../../pull/641) Update README screenshot with current home page
