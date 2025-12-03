@@ -1560,56 +1560,54 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
 
               {/* RoC Graph */}
               {rocChartData.length > 0 && (
-                <>
-                  {/* RoC Controls Row */}
-                  <div className={styles.rocControlsRow}>
-                    <FluentTooltip content="Time window for calculating glucose rate of change" relationship="description">
-                      <div className={styles.sliderContainer}>
-                        <Text className={styles.sliderLabel}>RoC Interval:</Text>
-                        <Slider
-                          min={0}
-                          max={3}
-                          step={1}
-                          value={rocIntervalIndex}
-                          onChange={(_, data) => setRocIntervalIndex(data.value)}
-                          style={{ minWidth: '80px' }}
-                        />
-                        <Text className={styles.sliderValue}>{currentRocInterval.label}</Text>
-                      </div>
-                    </FluentTooltip>
-                    <div className={styles.maxValueContainer}>
-                      <Text className={styles.sliderLabel}>Max BG:</Text>
-                      <TabList
-                        selectedValue={
-                          glucoseUnit === 'mg/dL'
-                            ? (rocMaxGlucose === 288 ? '288' : '396')
-                            : (rocMaxGlucose === 16.0 ? '16.0' : '22.0')
-                        }
-                        onTabSelect={(_, data) => {
-                          if (glucoseUnit === 'mg/dL') {
-                            setRocMaxGlucose(data.value === '288' ? 288 : 396);
-                          } else {
-                            setRocMaxGlucose(data.value === '16.0' ? 16.0 : 22.0);
-                          }
-                        }}
-                        size="small"
-                      >
-                        {glucoseUnit === 'mg/dL' ? (
-                          <>
-                            <Tab value="288">288</Tab>
-                            <Tab value="396">396</Tab>
-                          </>
-                        ) : (
-                          <>
-                            <Tab value="16.0">16.0</Tab>
-                            <Tab value="22.0">22.0</Tab>
-                          </>
-                        )}
-                      </TabList>
-                    </div>
-                  </div>
-                  
                   <Card className={styles.rocChartCard}>
+                    {/* RoC Controls Row - inside the card to align with other graphs */}
+                    <div className={styles.rocControlsRow}>
+                      <FluentTooltip content="Time window for calculating glucose rate of change" relationship="description">
+                        <div className={styles.sliderContainer}>
+                          <Text className={styles.sliderLabel}>RoC Interval:</Text>
+                          <Slider
+                            min={0}
+                            max={3}
+                            step={1}
+                            value={rocIntervalIndex}
+                            onChange={(_, data) => setRocIntervalIndex(data.value)}
+                            style={{ minWidth: '80px' }}
+                          />
+                          <Text className={styles.sliderValue}>{currentRocInterval.label}</Text>
+                        </div>
+                      </FluentTooltip>
+                      <div className={styles.maxValueContainer}>
+                        <Text className={styles.sliderLabel}>Max BG:</Text>
+                        <TabList
+                          selectedValue={
+                            glucoseUnit === 'mg/dL'
+                              ? (rocMaxGlucose === 288 ? '288' : '396')
+                              : (rocMaxGlucose === 16.0 ? '16.0' : '22.0')
+                          }
+                          onTabSelect={(_, data) => {
+                            if (glucoseUnit === 'mg/dL') {
+                              setRocMaxGlucose(data.value === '288' ? 288 : 396);
+                            } else {
+                              setRocMaxGlucose(data.value === '16.0' ? 16.0 : 22.0);
+                            }
+                          }}
+                          size="small"
+                        >
+                          {glucoseUnit === 'mg/dL' ? (
+                            <>
+                              <Tab value="288">288</Tab>
+                              <Tab value="396">396</Tab>
+                            </>
+                          ) : (
+                            <>
+                              <Tab value="16.0">16.0</Tab>
+                              <Tab value="22.0">22.0</Tab>
+                            </>
+                          )}
+                        </TabList>
+                      </div>
+                    </div>
                     <div className={styles.chartCardInner}>
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart margin={{ top: 10, right: 50, left: 10, bottom: 0 }} data={rocChartData}>
@@ -1750,7 +1748,6 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
                       </div>
                     </div>
                   </Card>
-                </>
               )}
 
               {/* RoC Summary Bar */}
