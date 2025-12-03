@@ -392,6 +392,8 @@ interface SettingsProps {
   selectedProvider: AIProvider | null;
   /** Callback invoked when selected AI provider changes */
   onSelectedProviderChange: (provider: AIProvider | null) => void;
+  /** Callback invoked when provider is auto-switched due to failed key verification */
+  onProviderAutoSwitch?: (fromProvider: AIProvider, toProvider: AIProvider) => void;
 }
 
 /**
@@ -426,6 +428,7 @@ export function Settings({
   onDeepSeekApiKeyChange,
   selectedProvider,
   onSelectedProviderChange,
+  onProviderAutoSwitch,
 }: SettingsProps) {
   const styles = useStyles();
   const validationError = validateGlucoseThresholds(glucoseThresholds);
@@ -572,7 +575,10 @@ export function Settings({
     ).filter(p => p !== failedProvider);
     
     if (availableProviders.length > 0) {
-      onSelectedProviderChange(availableProviders[0]);
+      const newProvider = availableProviders[0];
+      onSelectedProviderChange(newProvider);
+      // Notify parent about the auto-switch for toast notification
+      onProviderAutoSwitch?.(failedProvider, newProvider);
     }
   };
 
