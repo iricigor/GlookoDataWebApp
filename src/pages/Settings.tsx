@@ -340,30 +340,57 @@ const useStyles = makeStyles({
   },
 });
 
+/**
+ * Props for the Settings component
+ */
 interface SettingsProps {
+  /** Current theme mode (light, dark, or system) */
   themeMode: ThemeMode;
+  /** Callback invoked when theme mode changes */
   onThemeChange: (mode: ThemeMode) => void;
+  /** Whether to show day/night shading on glucose graphs */
   showDayNightShading: boolean;
+  /** Callback invoked when day/night shading preference changes */
   onShowDayNightShadingChange: (show: boolean) => void;
+  /** Current export format for table data (CSV or TSV) */
   exportFormat: ExportFormat;
+  /** Callback invoked when export format changes */
   onExportFormatChange: (format: ExportFormat) => void;
+  /** Current language for AI response output */
   responseLanguage: ResponseLanguage;
+  /** Callback invoked when AI response language changes */
   onResponseLanguageChange: (language: ResponseLanguage) => void;
+  /** Current glucose unit (mmol/L or mg/dL) */
   glucoseUnit: GlucoseUnit;
+  /** Callback invoked when glucose unit changes */
   onGlucoseUnitChange: (unit: GlucoseUnit) => void;
+  /** Current glucose threshold values for time-in-range calculations */
   glucoseThresholds: GlucoseThresholds;
+  /** Callback invoked when glucose thresholds change */
   onGlucoseThresholdsChange: (thresholds: GlucoseThresholds) => void;
+  /** Duration of insulin action in hours for IOB calculations */
   insulinDuration: number;
+  /** Callback invoked when insulin duration changes */
   onInsulinDurationChange: (duration: number) => void;
+  /** Perplexity AI API key */
   perplexityApiKey: string;
+  /** Callback invoked when Perplexity API key changes */
   onPerplexityApiKeyChange: (key: string) => void;
+  /** Google Gemini API key */
   geminiApiKey: string;
+  /** Callback invoked when Gemini API key changes */
   onGeminiApiKeyChange: (key: string) => void;
+  /** Grok AI API key */
   grokApiKey: string;
+  /** Callback invoked when Grok API key changes */
   onGrokApiKeyChange: (key: string) => void;
+  /** DeepSeek API key */
   deepseekApiKey: string;
+  /** Callback invoked when DeepSeek API key changes */
   onDeepSeekApiKeyChange: (key: string) => void;
+  /** Currently selected AI provider, or null for auto-selection */
   selectedProvider: AIProvider | null;
+  /** Callback invoked when selected AI provider changes */
   onSelectedProviderChange: (provider: AIProvider | null) => void;
 }
 
@@ -530,11 +557,34 @@ export function Settings({
   }, [geminiApiKey]);
 
   /**
+   * Switch to the next available provider when the current one fails verification
+   * 
+   * @param failedProvider - The provider whose key verification failed
+   */
+  const switchToNextAvailableProvider = (failedProvider: AIProvider) => {
+    if (activeProvider !== failedProvider) return;
+    
+    const availableProviders = getAvailableProviders(
+      perplexityApiKey,
+      geminiApiKey,
+      grokApiKey,
+      deepseekApiKey
+    ).filter(p => p !== failedProvider);
+    
+    if (availableProviders.length > 0) {
+      onSelectedProviderChange(availableProviders[0]);
+    }
+  };
+
+  /**
    * Handle API key verification for a provider
    * 
    * Initiates an async verification request to check if the API key is valid.
    * Updates the verification state to 'verifying' during the request, then
    * sets it to 'valid' or 'invalid' based on the result.
+   * 
+   * If the key is invalid and this provider is currently selected,
+   * automatically switches to the next available provider.
    * 
    * @param provider - The AI provider whose key should be verified
    * @param apiKey - The API key to verify
@@ -546,12 +596,18 @@ export function Settings({
     
     try {
       const result = await verifyApiKey(provider, apiKey);
+      const isValid = result.valid;
       setVerificationState(prev => ({ 
         ...prev, 
-        [provider]: result.valid ? 'valid' : 'invalid' 
+        [provider]: isValid ? 'valid' : 'invalid' 
       }));
+      
+      if (!isValid) {
+        switchToNextAvailableProvider(provider);
+      }
     } catch {
       setVerificationState(prev => ({ ...prev, [provider]: 'invalid' }));
+      switchToNextAvailableProvider(provider);
     }
   };
 
@@ -648,29 +704,18 @@ export function Settings({
       }
     };
     
-    // Get icon based on status
+    // Get icon based on status with appropriate styling
     const getIcon = () => {
       switch (status) {
         case 'verifying':
           return <Spinner size="tiny" />;
         case 'valid':
-          return <CheckmarkCircleRegular />;
+          return <CheckmarkCircleRegular className={styles.verifyButtonValid} />;
         case 'invalid':
-          return <DismissCircleRegular />;
+          return <DismissCircleRegular className={styles.verifyButtonInvalid} />;
         default:
           return <QuestionCircleRegular />;
       }
-    };
-    
-    // Get button class based on status
-    const getButtonClass = () => {
-      let className = styles.verifyButton;
-      if (status === 'valid') {
-        className += ` ${styles.verifyButtonValid}`;
-      } else if (status === 'invalid') {
-        className += ` ${styles.verifyButtonInvalid}`;
-      }
-      return className;
     };
     
     return (
@@ -681,7 +726,7 @@ export function Settings({
           icon={getIcon()}
           disabled={!hasKey || status === 'verifying'}
           onClick={() => handleVerifyApiKey(provider, apiKey)}
-          className={getButtonClass()}
+          className={styles.verifyButton}
           aria-label={getTooltipText()}
         />
       </Tooltip>
