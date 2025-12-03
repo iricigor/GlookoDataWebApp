@@ -62,6 +62,9 @@
   "overrides": {
     "archiver": "^7.0.1",
     "unzipper": "^0.12.3",
-    "lodash.isequal": "npm:lodash@^4.17.21"
+    "lodash.isequal": "npm:lodash@^4.17.21",
+    "swagger-ui-react": {
+      "react-inspector": "^9.0.0"
+    }
   }
 }
