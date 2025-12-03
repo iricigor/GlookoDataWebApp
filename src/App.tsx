@@ -1,5 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { FluentProvider } from '@fluentui/react-components'
+import { 
+  FluentProvider, 
+  Toaster, 
+  useToastController, 
+  useId, 
+  Toast, 
+  ToastTitle, 
+  ToastBody 
+} from '@fluentui/react-components'
 import './App.css'
 import { Navigation, Footer, CookieConsent } from './components/shared'
 import { Home } from './pages/Home'
@@ -83,6 +91,10 @@ function App() {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
   const [aiAnalysisResults, setAiAnalysisResults] = useState<Record<string, AIAnalysisResult>>({})
+
+  // Toast notifications
+  const toasterId = useId('toaster')
+  const { dispatchToast } = useToastController(toasterId)
 
   // Get current settings as CloudUserSettings object
   const getCurrentSettings = useCallback((): CloudUserSettings => {
@@ -286,6 +298,23 @@ function App() {
 
   const handleAddFiles = (newFiles: UploadedFile[]) => {
     setUploadedFiles((prev) => [...prev, ...newFiles])
+    
+    // Auto-select the first valid file if one was uploaded
+    const validFile = newFiles.find(file => file.zipMetadata?.isValid)
+    if (validFile) {
+      setSelectedFileId(validFile.id)
+      
+      // Show toast notification
+      dispatchToast(
+        <Toast>
+          <ToastTitle>File loaded successfully</ToastTitle>
+          <ToastBody>
+            {validFile.name} has been selected for analysis
+          </ToastBody>
+        </Toast>,
+        { intent: 'success', timeout: 5000 }
+      )
+    }
   }
 
   const handleRemoveFile = (id: string) => {
@@ -407,6 +436,7 @@ function App() {
 
   return (
     <FluentProvider theme={theme} className="app-container" data-theme={isDark ? 'dark' : 'light'}>
+      <Toaster toasterId={toasterId} position="top-end" />
       {!isApiDocsPage && (
         <Navigation 
           currentPage={currentPage} 
