@@ -536,6 +536,9 @@ export function Settings({
    * Updates the verification state to 'verifying' during the request, then
    * sets it to 'valid' or 'invalid' based on the result.
    * 
+   * If the key is invalid and this provider is currently selected,
+   * automatically switches to the next available provider.
+   * 
    * @param provider - The AI provider whose key should be verified
    * @param apiKey - The API key to verify
    */
@@ -546,12 +549,41 @@ export function Settings({
     
     try {
       const result = await verifyApiKey(provider, apiKey);
+      const isValid = result.valid;
       setVerificationState(prev => ({ 
         ...prev, 
-        [provider]: result.valid ? 'valid' : 'invalid' 
+        [provider]: isValid ? 'valid' : 'invalid' 
       }));
+      
+      // If key is invalid and this provider is currently selected, switch to next available
+      if (!isValid && activeProvider === provider) {
+        const availableProviders = getAvailableProviders(
+          perplexityApiKey,
+          geminiApiKey,
+          grokApiKey,
+          deepseekApiKey
+        ).filter(p => p !== provider);
+        
+        if (availableProviders.length > 0) {
+          onSelectedProviderChange(availableProviders[0]);
+        }
+      }
     } catch {
       setVerificationState(prev => ({ ...prev, [provider]: 'invalid' }));
+      
+      // If key verification failed and this provider is currently selected, switch to next available
+      if (activeProvider === provider) {
+        const availableProviders = getAvailableProviders(
+          perplexityApiKey,
+          geminiApiKey,
+          grokApiKey,
+          deepseekApiKey
+        ).filter(p => p !== provider);
+        
+        if (availableProviders.length > 0) {
+          onSelectedProviderChange(availableProviders[0]);
+        }
+      }
     }
   };
 
@@ -648,29 +680,18 @@ export function Settings({
       }
     };
     
-    // Get icon based on status
+    // Get icon based on status with appropriate styling
     const getIcon = () => {
       switch (status) {
         case 'verifying':
           return <Spinner size="tiny" />;
         case 'valid':
-          return <CheckmarkCircleRegular />;
+          return <CheckmarkCircleRegular className={styles.verifyButtonValid} />;
         case 'invalid':
-          return <DismissCircleRegular />;
+          return <DismissCircleRegular className={styles.verifyButtonInvalid} />;
         default:
           return <QuestionCircleRegular />;
       }
-    };
-    
-    // Get button class based on status
-    const getButtonClass = () => {
-      let className = styles.verifyButton;
-      if (status === 'valid') {
-        className += ` ${styles.verifyButtonValid}`;
-      } else if (status === 'invalid') {
-        className += ` ${styles.verifyButtonInvalid}`;
-      }
-      return className;
     };
     
     return (
@@ -681,7 +702,7 @@ export function Settings({
           icon={getIcon()}
           disabled={!hasKey || status === 'verifying'}
           onClick={() => handleVerifyApiKey(provider, apiKey)}
-          className={getButtonClass()}
+          className={styles.verifyButton}
           aria-label={getTooltipText()}
         />
       </Tooltip>
