@@ -8,7 +8,7 @@ A web app for importing, visualizing, and analyzing diabetes data exported from 
 
 ## 📸 Application Preview
 
-![GlookoDataWebApp Home Page](https://github.com/user-attachments/assets/9630fcd4-4eca-4fb6-80c5-b4d53215b1c9)
+![GlookoDataWebApp Home Page](https://github.com/user-attachments/assets/3eee211e-a70c-4414-b51d-717e69102c4f)
 
 The application features a modern, Microsoft Fluent UI-based interface with intuitive navigation:
 - **Data Upload** - Upload and manage your Glooko export files (ZIP format)
