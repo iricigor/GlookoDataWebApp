@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>638 Add Hypos AI analysis accordions and two-state behavior</summary>
+
+[#638](../../pull/638) Add Hypos AI analysis accordions and two-state behavior
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>637 Move RoC controls inside chart card for UI consistency</summary>
 
 [#637](../../pull/637) Move RoC controls inside chart card for UI consistency
