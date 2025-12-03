@@ -462,6 +462,12 @@ export function HyposAISection({
     );
   }, [loadingAllEvents, allEvents, responseLanguage, glucoseUnit, activeProvider]);
   
+  // Memoize CSV conversion to avoid recomputation on every render
+  const allEventsCSV = useMemo(() => {
+    if (allEvents.length === 0) return '';
+    return convertDetailedHypoEventsToCSV(allEvents);
+  }, [allEvents]);
+  
   // Render individual event analysis card
   const renderEventCard = (analysis: EventAnalysis, index: number) => (
     <div key={index} className={styles.eventCard}>
@@ -537,9 +543,9 @@ export function HyposAISection({
           <div className={styles.dataTableContainer}>
             {loadingAllEvents ? (
               <Text className={styles.helperText}>Loading data...</Text>
-            ) : allEvents.length > 0 ? (
+            ) : allEventsCSV ? (
               <pre style={{ margin: 0, fontSize: '11px', overflowX: 'auto' }}>
-                {convertDetailedHypoEventsToCSV(allEvents)}
+                {allEventsCSV}
               </pre>
             ) : (
               <Text className={styles.helperText}>No hypo events found in the dataset</Text>
@@ -665,7 +671,7 @@ export function HyposAISection({
         <MessageBar intent="info">
           <MessageBarBody>
             AI analysis was performed but no specific insights were found for {currentDate}. 
-            See the full response below.
+            Expand the "View Full AI Response" accordion to see the complete analysis.
           </MessageBarBody>
         </MessageBar>
       )}
@@ -700,7 +706,7 @@ export function HyposAISection({
           <AccordionHeader>View AI Prompt</AccordionHeader>
           <AccordionPanel>
             <div className={styles.promptTextContainer}>
-              {currentPrompt ?? 'No prompt available'}
+              {currentPrompt ?? <Text className={styles.helperText}>No prompt available</Text>}
             </div>
           </AccordionPanel>
         </AccordionItem>
@@ -710,9 +716,9 @@ export function HyposAISection({
           <AccordionHeader>View Hypo Data ({allEvents.length} events)</AccordionHeader>
           <AccordionPanel>
             <div className={styles.dataTableContainer}>
-              {allEvents.length > 0 ? (
+              {allEventsCSV ? (
                 <pre style={{ margin: 0, fontSize: '11px', overflowX: 'auto' }}>
-                  {convertDetailedHypoEventsToCSV(allEvents)}
+                  {allEventsCSV}
                 </pre>
               ) : (
                 <Text className={styles.helperText}>No hypo events found in the dataset</Text>
