@@ -155,6 +155,41 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
     fontStyle: 'italic',
   },
+  promptTextContainer: {
+    ...shorthands.padding('12px'),
+    backgroundColor: tokens.colorNeutralBackground2,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    fontFamily: 'monospace',
+    fontSize: tokens.fontSizeBase200,
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+    maxHeight: '400px',
+    overflowY: 'auto',
+  },
+  dataTableContainer: {
+    ...shorthands.padding('12px'),
+    backgroundColor: tokens.colorNeutralBackground2,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    overflowX: 'auto',
+  },
+  dataTable: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: tokens.fontSizeBase200,
+  },
+  completedMessage: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+    ...shorthands.padding('12px', '16px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    color: tokens.colorNeutralForeground2,
+  },
+  completedIcon: {
+    fontSize: '20px',
+    color: tokens.colorBrandForeground1,
+  },
 });
 
 interface HyposAISectionProps {
@@ -171,6 +206,8 @@ interface HyposAISectionProps {
   deepseekApiKey: string;
   selectedProvider: AIProvider | null;
   responseLanguage: ResponseLanguage;
+  // File ID for tracking file changes and persisting state
+  fileId?: string;
 }
 
 // Cache structure for storing AI responses by date
@@ -215,6 +252,7 @@ export function HyposAISection({
   deepseekApiKey,
   selectedProvider,
   responseLanguage,
+  fileId,
 }: HyposAISectionProps) {
   const styles = useStyles();
   
@@ -222,8 +260,15 @@ export function HyposAISection({
   const [error, setError] = useState<string | null>(null);
   const [responseCache, setResponseCache] = useState<AIResponseCache>({});
   
-  // Track which dates have been requested for analysis
-  const [analyzedDates, setAnalyzedDates] = useState<Set<string>>(new Set());
+  // Track whether the AI analysis has been completed (button clicked and successful)
+  const [hasCompletedAnalysis, setHasCompletedAnalysis] = useState(false);
+  
+  // Store the full AI response text (for display in accordion)
+  const [fullAIResponse, setFullAIResponse] = useState<string | null>(null);
+  
+  // Track file ID and provider to detect when they change
+  const prevFileIdRef = useRef<string | undefined>(undefined);
+  const prevProviderRef = useRef<AIProvider | null>(null);
   
   // State for async loading of all events (to avoid blocking page render)
   const [allEvents, setAllEvents] = useState<DetailedHypoEvent[]>([]);
@@ -241,6 +286,24 @@ export function HyposAISection({
   // Get active AI provider
   const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
   const hasApiKey = activeProvider !== null;
+  
+  // Clear AI response when file ID or provider changes
+  useEffect(() => {
+    const fileChanged = fileId !== prevFileIdRef.current && prevFileIdRef.current !== undefined;
+    const providerChanged = activeProvider !== prevProviderRef.current && prevProviderRef.current !== null;
+    
+    if (fileChanged || providerChanged) {
+      // Clear all AI-related state
+      setResponseCache({});
+      setHasCompletedAnalysis(false);
+      setFullAIResponse(null);
+      setError(null);
+    }
+    
+    // Update refs for next comparison
+    prevFileIdRef.current = fileId;
+    prevProviderRef.current = activeProvider;
+  }, [fileId, activeProvider]);
   
   // Extract detailed events for the current date
   const currentDateEvents = useMemo(() => {
@@ -354,7 +417,8 @@ export function HyposAISection({
         }
         
         setResponseCache(newCache);
-        setAnalyzedDates(new Set([...analyzedDates, currentDate]));
+        setFullAIResponse(result.content);
+        setHasCompletedAnalysis(true);
       } else {
         setError(result.error || 'Failed to get AI response');
       }
@@ -379,9 +443,24 @@ export function HyposAISection({
     grokApiKey,
     deepseekApiKey,
     responseCache,
-    analyzedDates,
     currentDate,
   ]);
+  
+  // Generate the AI prompt for display in accordion
+  const currentPrompt = useMemo(() => {
+    if (loadingAllEvents || allEvents.length === 0) return null;
+    
+    const eventsCSV = convertDetailedHypoEventsToCSV(allEvents);
+    const base64Data = base64Encode(eventsCSV);
+    
+    return generateHyposReportPrompt(
+      base64Data,
+      allEvents.length,
+      responseLanguage,
+      glucoseUnit,
+      activeProvider ?? 'gemini'
+    );
+  }, [loadingAllEvents, allEvents, responseLanguage, glucoseUnit, activeProvider]);
   
   // Render individual event analysis card
   const renderEventCard = (analysis: EventAnalysis, index: number) => (
@@ -432,19 +511,63 @@ export function HyposAISection({
     );
   }
   
-  // If no hypos on current date and no cached analysis
-  if (!hasHyposToday && !hasCachedAnalysis) {
+  // Helper: Render the accordions for AI Prompt and Data (shown in both states)
+  const renderDataAccordions = () => (
+    <Accordion collapsible>
+      {/* AI Prompt Accordion */}
+      <AccordionItem value="aiPrompt">
+        <AccordionHeader>View AI Prompt</AccordionHeader>
+        <AccordionPanel>
+          <div className={styles.promptTextContainer}>
+            {loadingAllEvents ? (
+              <Text className={styles.helperText}>Loading data...</Text>
+            ) : currentPrompt ? (
+              currentPrompt
+            ) : (
+              <Text className={styles.helperText}>No data available to generate prompt</Text>
+            )}
+          </div>
+        </AccordionPanel>
+      </AccordionItem>
+      
+      {/* Pre-prepared Data Accordion */}
+      <AccordionItem value="hypoData">
+        <AccordionHeader>View Hypo Data ({allEvents.length} events)</AccordionHeader>
+        <AccordionPanel>
+          <div className={styles.dataTableContainer}>
+            {loadingAllEvents ? (
+              <Text className={styles.helperText}>Loading data...</Text>
+            ) : allEvents.length > 0 ? (
+              <pre style={{ margin: 0, fontSize: '11px', overflowX: 'auto' }}>
+                {convertDetailedHypoEventsToCSV(allEvents)}
+              </pre>
+            ) : (
+              <Text className={styles.helperText}>No hypo events found in the dataset</Text>
+            )}
+          </div>
+        </AccordionPanel>
+      </AccordionItem>
+    </Accordion>
+  );
+  
+  // STATE 1: Before AI analysis is performed
+  if (!hasCompletedAnalysis) {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
           <SparkleRegular className={styles.headerIcon} />
           <Text className={styles.title}>AI Analysis</Text>
         </div>
-        <div className={styles.noHyposMessage}>
-          <CheckmarkCircleRegular className={styles.noHyposIcon} />
-          <Text>No hypoglycemic events detected on this day - great glucose control!</Text>
-        </div>
         
+        {/* Show message about no hypos today but overall status is still "ready to analyze" */}
+        {!hasHyposToday && (
+          <div className={styles.noHyposMessage}>
+            <CheckmarkCircleRegular className={styles.noHyposIcon} />
+            <Text>No hypoglycemic events detected on this day - great glucose control!</Text>
+          </div>
+        )}
+        
+        {/* Analysis Button - shows count of ALL events */}
         {loadingAllEvents ? (
           <div className={styles.loadingContainer}>
             <Spinner size="small" />
@@ -452,47 +575,7 @@ export function HyposAISection({
               Preparing AI data...
             </Text>
           </div>
-        ) : allEvents.length > 0 && (
-          <div className={styles.buttonContainer}>
-            <Button
-              appearance="outline"
-              icon={analyzing ? <Spinner size="tiny" /> : <SparkleRegular />}
-              onClick={handleAnalyze}
-              disabled={analyzing}
-            >
-              {analyzing ? 'Analyzing all events...' : `Analyze all ${allEvents.length} hypo events`}
-            </Button>
-            <Text className={styles.helperText}>
-              Get AI analysis for all hypo events in the dataset
-            </Text>
-          </div>
-        )}
-      </div>
-    );
-  }
-  
-  return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <SparkleRegular className={styles.headerIcon} />
-        <Text className={styles.title}>AI Analysis</Text>
-        {hasCachedAnalysis && (
-          <Text className={styles.cachedIndicator}>
-            (cached)
-          </Text>
-        )}
-      </div>
-      
-      {/* Analysis Button */}
-      {!hasCachedAnalysis && (
-        loadingAllEvents ? (
-          <div className={styles.loadingContainer}>
-            <Spinner size="small" />
-            <Text className={styles.helperText}>
-              Preparing AI data...
-            </Text>
-          </div>
-        ) : (
+        ) : allEvents.length > 0 ? (
           <div className={styles.buttonContainer}>
             <Button
               appearance="primary"
@@ -500,23 +583,91 @@ export function HyposAISection({
               onClick={handleAnalyze}
               disabled={analyzing}
             >
-              {analyzing ? 'Analyzing...' : `Analyze ${currentDateEvents.length} event${currentDateEvents.length !== 1 ? 's' : ''}`}
+              {analyzing ? 'Analyzing...' : `Analyze all ${allEvents.length} hypo events`}
             </Button>
             <Text className={styles.helperText}>
-              Get AI-powered insights for today's hypo events
+              AI will analyze all hypo events in the dataset. Navigate dates after analysis to see per-day insights.
             </Text>
           </div>
-        )
+        ) : (
+          <div className={styles.noHyposMessage}>
+            <CheckmarkCircleRegular className={styles.noHyposIcon} />
+            <Text>No hypoglycemic events found in the entire dataset.</Text>
+          </div>
+        )}
+        
+        {/* Loading State */}
+        {analyzing && (
+          <div className={styles.loadingContainer}>
+            <Spinner size="small" />
+            <Text className={styles.helperText}>
+              Analyzing all hypoglycemic events... This may take a few seconds.
+            </Text>
+          </div>
+        )}
+        
+        {/* Error State */}
+        {error && (
+          <div className={styles.errorContainer}>
+            <MessageBar intent="error" icon={<ErrorCircleRegular />}>
+              <MessageBarBody>
+                <strong>Error:</strong> {error}
+              </MessageBarBody>
+            </MessageBar>
+          </div>
+        )}
+        
+        {/* Accordions for AI prompt and data */}
+        {renderDataAccordions()}
+      </div>
+    );
+  }
+  
+  // STATE 2: After AI analysis is completed
+  return (
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <SparkleRegular className={styles.headerIcon} />
+        <Text className={styles.title}>AI Analysis</Text>
+        <Text className={styles.cachedIndicator}>
+          (analysis complete - navigate dates to see per-day insights)
+        </Text>
+      </div>
+      
+      {/* Analysis Complete Status */}
+      <div className={styles.completedMessage}>
+        <CheckmarkCircleRegular className={styles.completedIcon} />
+        <Text>
+          Analysis complete! Showing results for {currentDate}. 
+          Use the date filter above to view insights for other days.
+        </Text>
+      </div>
+      
+      {/* Show message if no hypos on current date */}
+      {!hasHyposToday && (
+        <div className={styles.noHyposMessage}>
+          <CheckmarkCircleRegular className={styles.noHyposIcon} />
+          <Text>No hypoglycemic events detected on {currentDate} - great glucose control!</Text>
+        </div>
       )}
       
-      {/* Loading State */}
-      {analyzing && (
-        <div className={styles.loadingContainer}>
-          <Spinner size="small" />
-          <Text className={styles.helperText}>
-            Analyzing hypoglycemic events... This may take a few seconds.
-          </Text>
+      {/* Display cached analysis for current date if available */}
+      {hasCachedAnalysis && cachedAnalysis.parsedAnalyses.length > 0 && (
+        <div className={styles.analysisContainer}>
+          {cachedAnalysis.parsedAnalyses.map((analysis, index) => 
+            renderEventCard(analysis, index)
+          )}
         </div>
+      )}
+      
+      {/* If there are hypos but no parsed analyses, show full response in accordion */}
+      {hasHyposToday && (!hasCachedAnalysis || cachedAnalysis.parsedAnalyses.length === 0) && fullAIResponse && (
+        <MessageBar intent="info">
+          <MessageBarBody>
+            AI analysis was performed but no specific insights were found for {currentDate}. 
+            See the full response below.
+          </MessageBarBody>
+        </MessageBar>
       )}
       
       {/* Error State */}
@@ -530,56 +681,46 @@ export function HyposAISection({
         </div>
       )}
       
-      {/* Cached Analysis Display */}
-      {hasCachedAnalysis && cachedAnalysis.parsedAnalyses.length > 0 && (
-        <div className={styles.analysisContainer}>
-          {cachedAnalysis.parsedAnalyses.map((analysis, index) => 
-            renderEventCard(analysis, index)
-          )}
-        </div>
-      )}
-      
-      {/* No parsed results but have response */}
-      {hasCachedAnalysis && cachedAnalysis.parsedAnalyses.length === 0 && hasHyposToday && (
-        <Accordion collapsible>
+      {/* Accordions - data, prompt, and full response */}
+      <Accordion collapsible>
+        {/* Full AI Response Accordion */}
+        {fullAIResponse && (
           <AccordionItem value="fullResponse">
             <AccordionHeader>View Full AI Response</AccordionHeader>
             <AccordionPanel>
               <div className={styles.responseContainer}>
-                <MarkdownRenderer content={cachedAnalysis.response} />
+                <MarkdownRenderer content={fullAIResponse} />
               </div>
             </AccordionPanel>
           </AccordionItem>
-        </Accordion>
-      )}
-      
-      {/* Re-analyze button when cached */}
-      {hasCachedAnalysis && (
-        <div className={styles.buttonContainer}>
-          <Button
-            appearance="outline"
-            icon={analyzing ? <Spinner size="tiny" /> : <SparkleRegular />}
-            onClick={handleAnalyze}
-            disabled={analyzing}
-          >
-            {analyzing ? 'Re-analyzing...' : 'Re-analyze'}
-          </Button>
-        </div>
-      )}
-      
-      {/* Accordion for full response when we have parsed results */}
-      {hasCachedAnalysis && cachedAnalysis.parsedAnalyses.length > 0 && (
-        <Accordion collapsible>
-          <AccordionItem value="fullResponse">
-            <AccordionHeader>View Full AI Response</AccordionHeader>
-            <AccordionPanel>
-              <div className={styles.responseContainer}>
-                <MarkdownRenderer content={cachedAnalysis.response} />
-              </div>
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
-      )}
+        )}
+        
+        {/* AI Prompt Accordion */}
+        <AccordionItem value="aiPrompt">
+          <AccordionHeader>View AI Prompt</AccordionHeader>
+          <AccordionPanel>
+            <div className={styles.promptTextContainer}>
+              {currentPrompt ?? 'No prompt available'}
+            </div>
+          </AccordionPanel>
+        </AccordionItem>
+        
+        {/* Pre-prepared Data Accordion */}
+        <AccordionItem value="hypoData">
+          <AccordionHeader>View Hypo Data ({allEvents.length} events)</AccordionHeader>
+          <AccordionPanel>
+            <div className={styles.dataTableContainer}>
+              {allEvents.length > 0 ? (
+                <pre style={{ margin: 0, fontSize: '11px', overflowX: 'auto' }}>
+                  {convertDetailedHypoEventsToCSV(allEvents)}
+                </pre>
+              ) : (
+                <Text className={styles.helperText}>No hypo events found in the dataset</Text>
+              )}
+            </div>
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 }

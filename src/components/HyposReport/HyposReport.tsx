@@ -419,6 +419,7 @@ export function HyposReport({
         deepseekApiKey={deepseekApiKey}
         selectedProvider={selectedProvider}
         responseLanguage={responseLanguage}
+        fileId={selectedFile?.id}
       />
     </div>
   );
