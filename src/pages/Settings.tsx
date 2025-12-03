@@ -18,9 +18,11 @@ import {
   AccordionHeader,
   AccordionPanel,
   Switch,
+  Spinner,
+  Tooltip,
 } from '@fluentui/react-components';
 import { useState, useEffect, useRef } from 'react';
-import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular, DocumentBulletListRegular, InfoRegular, CheckmarkRegular } from '@fluentui/react-icons';
+import { BugRegular, LightbulbRegular, CodeRegular, WarningRegular, DocumentBulletListRegular, InfoRegular, CheckmarkRegular, CheckmarkCircleRegular, DismissCircleRegular, QuestionCircleRegular } from '@fluentui/react-icons';
 import type { ThemeMode } from '../hooks/useTheme';
 import type { ExportFormat } from '../hooks/useExportFormat';
 import type { ResponseLanguage } from '../hooks/useResponseLanguage';
@@ -28,7 +30,35 @@ import type { GlucoseUnit, GlucoseThresholds } from '../types';
 import { validateGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { GlucoseThresholdsSection } from '../components/GlucoseThresholdsSection';
 import { getVersionInfo, formatBuildDate } from '../utils/version';
-import { getProviderDisplayName, getActiveProvider, getAvailableProviders, type AIProvider } from '../utils/api';
+import { getProviderDisplayName, getActiveProvider, getAvailableProviders, verifyApiKey, type AIProvider } from '../utils/api';
+
+/**
+ * Verification status for each API key
+ * 
+ * Represents the current state of API key verification:
+ * - 'idle': Key has not been verified yet (or was reset after key change)
+ * - 'verifying': Verification request is in progress
+ * - 'valid': Key was verified and is working
+ * - 'invalid': Key verification failed (invalid key or network error)
+ */
+type VerificationStatus = 'idle' | 'verifying' | 'valid' | 'invalid';
+
+/**
+ * State object tracking verification status for all AI providers
+ * 
+ * Each provider maintains its own independent verification state,
+ * which is reset when the corresponding API key changes.
+ */
+interface VerificationState {
+  /** Perplexity API key verification status */
+  perplexity: VerificationStatus;
+  /** Grok (xAI) API key verification status */
+  grok: VerificationStatus;
+  /** DeepSeek API key verification status */
+  deepseek: VerificationStatus;
+  /** Google Gemini API key verification status */
+  gemini: VerificationStatus;
+}
 
 const useStyles = makeStyles({
   container: {
@@ -182,6 +212,20 @@ const useStyles = makeStyles({
       backgroundColor: tokens.colorBrandBackground,
       color: tokens.colorNeutralForegroundOnBrand,
     },
+  },
+  verifyButton: {
+    ...shorthands.borderRadius('0'),
+    ...shorthands.borderLeft('1px', 'solid', tokens.colorNeutralStroke1),
+    minWidth: '32px',
+    width: '32px',
+    height: '100%',
+    padding: '0',
+  },
+  verifyButtonValid: {
+    color: tokens.colorStatusSuccessForeground1,
+  },
+  verifyButtonInvalid: {
+    color: tokens.colorStatusDangerForeground1,
   },
   privacyInfoButton: {
     display: 'flex',
@@ -362,6 +406,14 @@ export function Settings({
   const versionInfo = getVersionInfo();
   const [selectedTab, setSelectedTab] = useState<string>('general');
   const [editingField, setEditingField] = useState<string | null>(null);
+  
+  // Verification state for each API key
+  const [verificationState, setVerificationState] = useState<VerificationState>({
+    perplexity: 'idle',
+    grok: 'idle',
+    deepseek: 'idle',
+    gemini: 'idle',
+  });
 
   // Helper function to update a single threshold
   const updateThreshold = (key: keyof GlucoseThresholds, value: number) => {
@@ -460,6 +512,49 @@ export function Settings({
     };
   }, [perplexityApiKey, grokApiKey, deepseekApiKey, geminiApiKey, activeProvider, onSelectedProviderChange]);
 
+  // Reset verification state when API key changes
+  useEffect(() => {
+    setVerificationState(prev => ({ ...prev, perplexity: 'idle' }));
+  }, [perplexityApiKey]);
+  
+  useEffect(() => {
+    setVerificationState(prev => ({ ...prev, grok: 'idle' }));
+  }, [grokApiKey]);
+  
+  useEffect(() => {
+    setVerificationState(prev => ({ ...prev, deepseek: 'idle' }));
+  }, [deepseekApiKey]);
+  
+  useEffect(() => {
+    setVerificationState(prev => ({ ...prev, gemini: 'idle' }));
+  }, [geminiApiKey]);
+
+  /**
+   * Handle API key verification for a provider
+   * 
+   * Initiates an async verification request to check if the API key is valid.
+   * Updates the verification state to 'verifying' during the request, then
+   * sets it to 'valid' or 'invalid' based on the result.
+   * 
+   * @param provider - The AI provider whose key should be verified
+   * @param apiKey - The API key to verify
+   */
+  const handleVerifyApiKey = async (provider: AIProvider, apiKey: string) => {
+    if (!apiKey || apiKey.trim() === '') return;
+    
+    setVerificationState(prev => ({ ...prev, [provider]: 'verifying' }));
+    
+    try {
+      const result = await verifyApiKey(provider, apiKey);
+      setVerificationState(prev => ({ 
+        ...prev, 
+        [provider]: result.valid ? 'valid' : 'invalid' 
+      }));
+    } catch {
+      setVerificationState(prev => ({ ...prev, [provider]: 'invalid' }));
+    }
+  };
+
   /**
    * Masks an API key, showing first 4 and last 2 characters with asterisks in between.
    * Uses a fixed number of asterisks (8) to avoid revealing actual key length.
@@ -521,6 +616,78 @@ export function Settings({
     );
   };
 
+  /**
+   * Render the verification button for an API key field
+   * 
+   * The button displays different states based on verification status:
+   * - Disabled with question mark: No API key entered
+   * - Question mark: Ready to verify (idle state)
+   * - Spinner: Verification in progress
+   * - Green checkmark: API key is valid
+   * - Red X: API key is invalid
+   * 
+   * @param provider - The AI provider for this API key
+   * @param apiKey - The current API key value
+   * @returns JSX element for the verify button with tooltip
+   */
+  const renderVerifyButton = (provider: AIProvider, apiKey: string) => {
+    const status = verificationState[provider];
+    const hasKey = !!apiKey && apiKey.trim() !== '';
+    
+    // Get tooltip text based on status
+    const getTooltipText = () => {
+      switch (status) {
+        case 'verifying':
+          return 'Verifying API key...';
+        case 'valid':
+          return 'API key is valid';
+        case 'invalid':
+          return 'API key is invalid';
+        default:
+          return hasKey ? 'Click to verify API key' : 'No API key to verify';
+      }
+    };
+    
+    // Get icon based on status
+    const getIcon = () => {
+      switch (status) {
+        case 'verifying':
+          return <Spinner size="tiny" />;
+        case 'valid':
+          return <CheckmarkCircleRegular />;
+        case 'invalid':
+          return <DismissCircleRegular />;
+        default:
+          return <QuestionCircleRegular />;
+      }
+    };
+    
+    // Get button class based on status
+    const getButtonClass = () => {
+      let className = styles.verifyButton;
+      if (status === 'valid') {
+        className += ` ${styles.verifyButtonValid}`;
+      } else if (status === 'invalid') {
+        className += ` ${styles.verifyButtonInvalid}`;
+      }
+      return className;
+    };
+    
+    return (
+      <Tooltip content={getTooltipText()} relationship="label">
+        <Button
+          appearance="subtle"
+          size="small"
+          icon={getIcon()}
+          disabled={!hasKey || status === 'verifying'}
+          onClick={() => handleVerifyApiKey(provider, apiKey)}
+          className={getButtonClass()}
+          aria-label={getTooltipText()}
+        />
+      </Tooltip>
+    );
+  };
+
   // Helper function to render privacy info icon
   const renderPrivacyIcon = (privacyUrl: string) => {
     return (
@@ -568,6 +735,7 @@ export function Settings({
             className={styles.apiKeyInputBorderless}
             readOnly={isReadOnly}
           />
+          {renderVerifyButton(provider, apiKey)}
           {renderStatusButton(provider, !!apiKey)}
         </div>
         {renderPrivacyIcon(privacyUrl)}

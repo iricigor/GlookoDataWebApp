@@ -5,7 +5,7 @@
  * for AI-powered analysis of glucose data.
  */
 
-import { callOpenAICompatibleApi, type AIApiResult } from './baseApiClient';
+import { callOpenAICompatibleApi, type AIApiResult, type APIKeyVerificationResult } from './baseApiClient';
 
 /**
  * DeepSeek API response structure (OpenAI-compatible)
@@ -74,4 +74,55 @@ export async function callDeepSeekApi(
     maxTokens,
     isRetry
   );
+}
+
+/**
+ * Verify if a DeepSeek API key is valid by calling the list models endpoint.
+ * 
+ * This is a lightweight check that doesn't incur any cost or consume tokens.
+ * The function makes a GET request to DeepSeek's models endpoint which only
+ * requires authentication, not actual API usage.
+ * 
+ * @param apiKey - DeepSeek API key to verify
+ * @returns Promise with the verification result containing valid status and optional error
+ * 
+ * @example
+ * ```typescript
+ * const result = await verifyDeepSeekApiKey('sk-...');
+ * if (result.valid) {
+ *   console.log('API key is valid');
+ * } else {
+ *   console.error('Invalid key:', result.error);
+ * }
+ * ```
+ */
+export async function verifyDeepSeekApiKey(apiKey: string): Promise<APIKeyVerificationResult> {
+  if (!apiKey || apiKey.trim() === '') {
+    return { valid: false, error: 'API key is required' };
+  }
+
+  try {
+    const response = await fetch('https://api.deepseek.com/models', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      return { valid: true };
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      return { valid: false, error: 'Invalid API key' };
+    }
+
+    return { valid: false, error: `API error: ${response.status}` };
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return { valid: false, error: 'Network error' };
+    }
+    return { valid: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
 }

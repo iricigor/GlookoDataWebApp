@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { callPerplexityApi } from './perplexityApi';
+import { callPerplexityApi, verifyPerplexityApiKey } from './perplexityApi';
 
 // Mock fetch globally
 const mockFetch = vi.fn();
@@ -411,6 +411,119 @@ describe('perplexityApi', () => {
       expect(result.truncated).toBe(true);
       expect(result.content).toContain('⚠️');
       expect(result.content).toContain('truncated due to length limits');
+    });
+  });
+
+  describe('verifyPerplexityApiKey', () => {
+    beforeEach(() => {
+      mockFetch.mockClear();
+    });
+
+    it('should return invalid if API key is empty', async () => {
+      const result = await verifyPerplexityApiKey('');
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('API key is required');
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should return invalid if API key is whitespace', async () => {
+      const result = await verifyPerplexityApiKey('   ');
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('API key is required');
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('should return valid on 200 OK response', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ choices: [] }),
+      });
+
+      const result = await verifyPerplexityApiKey('valid-key');
+      
+      expect(result.valid).toBe(true);
+      expect(result.error).toBeUndefined();
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.perplexity.ai/chat/completions',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Authorization': 'Bearer valid-key',
+          }),
+        })
+      );
+    });
+
+    it('should use minimal request body with max_tokens=1', async () => {
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+      });
+
+      await verifyPerplexityApiKey('test-key');
+      
+      const callArgs = mockFetch.mock.calls[0][1];
+      const body = JSON.parse(callArgs.body);
+      
+      expect(body.model).toBe('sonar');
+      expect(body.max_tokens).toBe(1);
+      expect(body.messages).toHaveLength(1);
+      expect(body.messages[0].content).toBe('ping');
+    });
+
+    it('should return invalid on 401 Unauthorized response', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 401,
+      });
+
+      const result = await verifyPerplexityApiKey('invalid-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Invalid API key');
+    });
+
+    it('should return invalid on 403 Forbidden response', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 403,
+      });
+
+      const result = await verifyPerplexityApiKey('forbidden-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Invalid API key');
+    });
+
+    it('should return invalid on other HTTP errors', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 500,
+      });
+
+      const result = await verifyPerplexityApiKey('test-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('API error: 500');
+    });
+
+    it('should return invalid on network error', async () => {
+      mockFetch.mockRejectedValue(new TypeError('Failed to fetch'));
+
+      const result = await verifyPerplexityApiKey('test-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Network error');
+    });
+
+    it('should return invalid on unknown error', async () => {
+      mockFetch.mockRejectedValue(new Error('Something went wrong'));
+
+      const result = await verifyPerplexityApiKey('test-key');
+      
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('Something went wrong');
     });
   });
 });

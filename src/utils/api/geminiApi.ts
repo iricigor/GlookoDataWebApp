@@ -6,7 +6,7 @@
  */
 
 import { AI_SYSTEM_PROMPT } from './aiPrompts';
-import { validateInputs, handleHttpError, handleException, type AIApiResult } from './baseApiClient';
+import { validateInputs, handleHttpError, handleException, type AIApiResult, type APIKeyVerificationResult } from './baseApiClient';
 
 /**
  * Gemini API response structure
@@ -169,5 +169,56 @@ export async function callGeminiApi(
   } catch (error) {
     // Handle exceptions using common handler
     return handleException(error);
+  }
+}
+
+/**
+ * Verify if a Gemini API key is valid by calling the list models endpoint.
+ * 
+ * This is a lightweight check that doesn't incur any cost or consume tokens.
+ * The function makes a GET request to Google's models endpoint which only
+ * requires authentication, not actual API usage.
+ * 
+ * @param apiKey - Google Gemini API key to verify
+ * @returns Promise with the verification result containing valid status and optional error
+ * 
+ * @example
+ * ```typescript
+ * const result = await verifyGeminiApiKey('AIzaSy...');
+ * if (result.valid) {
+ *   console.log('API key is valid');
+ * } else {
+ *   console.error('Invalid key:', result.error);
+ * }
+ * ```
+ */
+export async function verifyGeminiApiKey(apiKey: string): Promise<APIKeyVerificationResult> {
+  if (!apiKey || apiKey.trim() === '') {
+    return { valid: false, error: 'API key is required' };
+  }
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1/models?key=${apiKey}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      return { valid: true };
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      return { valid: false, error: 'Invalid API key' };
+    }
+
+    return { valid: false, error: `API error: ${response.status}` };
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return { valid: false, error: 'Network error' };
+    }
+    return { valid: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
