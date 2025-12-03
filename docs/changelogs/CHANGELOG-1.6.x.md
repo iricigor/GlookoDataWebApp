@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>647 feat: add red symbol for failed API key verification and auto-select fallback provider</summary>
+
+[#647](../../pull/647) feat: add red symbol for failed API key verification and auto-select fallback provider
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>645 Optimize deploy pipeline with npm caching</summary>
 
 [#645](../../pull/645) Optimize deploy pipeline with npm caching
