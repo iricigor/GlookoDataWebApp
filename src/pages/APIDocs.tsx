@@ -32,9 +32,14 @@ interface OpenAPIExplorerProps {
   idToken?: string | null;
 }
 
+// Type definition for OpenAPI Explorer web component methods
+interface OpenAPIExplorerElement extends HTMLElement {
+  setAuthenticationConfiguration?: (config: { bearerAuth?: { token: string } } | null) => void;
+}
+
 function OpenAPIExplorerComponent({ specUrl, isDarkMode, onSpecLoaded, onLoadFailed, idToken }: OpenAPIExplorerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const explorerRef = useRef<HTMLElement | null>(null)
+  const explorerRef = useRef<OpenAPIExplorerElement | null>(null)
 
   const createExplorer = useCallback(() => {
     if (!containerRef.current) return
@@ -102,14 +107,19 @@ function OpenAPIExplorerComponent({ specUrl, isDarkMode, onSpecLoaded, onLoadFai
 
   // Set Bearer token when idToken changes
   useEffect(() => {
-    if (explorerRef.current && idToken) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const explorer = explorerRef.current as any
-      if (typeof explorer.setAuthenticationConfiguration === 'function') {
-        explorer.setAuthenticationConfiguration({
-          bearerAuth: { token: idToken }
-        })
-      }
+    const explorer = explorerRef.current
+    if (!explorer || typeof explorer.setAuthenticationConfiguration !== 'function') {
+      return
+    }
+
+    if (idToken) {
+      // Set the Bearer token when logged in
+      explorer.setAuthenticationConfiguration({
+        bearerAuth: { token: idToken }
+      })
+    } else {
+      // Clear authentication when logged out
+      explorer.setAuthenticationConfiguration(null)
     }
   }, [idToken])
 
