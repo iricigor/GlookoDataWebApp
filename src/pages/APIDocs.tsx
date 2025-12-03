@@ -41,13 +41,9 @@ function OpenAPIExplorerComponent({ specUrl, isDarkMode, onSpecLoaded, onLoadFai
   const containerRef = useRef<HTMLDivElement>(null)
   const explorerRef = useRef<OpenAPIExplorerElement | null>(null)
 
-  const createExplorer = useCallback(() => {
+  // Create explorer on mount (only once)
+  useEffect(() => {
     if (!containerRef.current) return
-
-    // Remove existing explorer if any
-    if (explorerRef.current) {
-      explorerRef.current.remove()
-    }
 
     // Create the web component
     const explorer = document.createElement('openapi-explorer')
@@ -65,13 +61,7 @@ function OpenAPIExplorerComponent({ specUrl, isDarkMode, onSpecLoaded, onLoadFai
     explorer.setAttribute('schema-description-expanded', 'true')
     explorer.setAttribute('default-schema-tab', 'example')
     explorer.setAttribute('layout', 'row')
-    explorer.setAttribute('bg-color', isDarkMode ? '#1f1f1f' : '#ffffff')
-    explorer.setAttribute('text-color', isDarkMode ? '#ffffff' : '#1f1f1f')
     explorer.setAttribute('primary-color', '#0078d4')
-    explorer.setAttribute('nav-bg-color', isDarkMode ? '#292929' : '#f5f5f5')
-    explorer.setAttribute('nav-text-color', isDarkMode ? '#ffffff' : '#1f1f1f')
-    explorer.setAttribute('nav-hover-bg-color', isDarkMode ? '#383838' : '#e0e0e0')
-    explorer.setAttribute('nav-hover-text-color', isDarkMode ? '#ffffff' : '#1f1f1f')
     explorer.setAttribute('nav-accent-color', '#0078d4')
     explorer.style.height = '100%'
     explorer.style.width = '100%'
@@ -89,13 +79,6 @@ function OpenAPIExplorerComponent({ specUrl, isDarkMode, onSpecLoaded, onLoadFai
     containerRef.current.appendChild(explorer)
     explorerRef.current = explorer
 
-    return explorer
-  }, [specUrl, isDarkMode, onSpecLoaded, onLoadFailed])
-
-  // Create explorer on mount and when dependencies change
-  useEffect(() => {
-    createExplorer()
-    
     // Cleanup on unmount
     return () => {
       if (explorerRef.current) {
@@ -103,7 +86,21 @@ function OpenAPIExplorerComponent({ specUrl, isDarkMode, onSpecLoaded, onLoadFai
         explorerRef.current = null
       }
     }
-  }, [createExplorer])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [specUrl]) // Only recreate when specUrl changes
+
+  // Update theme attributes dynamically without recreating the explorer
+  useEffect(() => {
+    const explorer = explorerRef.current
+    if (!explorer) return
+
+    explorer.setAttribute('bg-color', isDarkMode ? '#1f1f1f' : '#ffffff')
+    explorer.setAttribute('text-color', isDarkMode ? '#ffffff' : '#1f1f1f')
+    explorer.setAttribute('nav-bg-color', isDarkMode ? '#292929' : '#f5f5f5')
+    explorer.setAttribute('nav-text-color', isDarkMode ? '#ffffff' : '#1f1f1f')
+    explorer.setAttribute('nav-hover-bg-color', isDarkMode ? '#383838' : '#e0e0e0')
+    explorer.setAttribute('nav-hover-text-color', isDarkMode ? '#ffffff' : '#1f1f1f')
+  }, [isDarkMode])
 
   // Set Bearer token when idToken changes
   useEffect(() => {
@@ -213,6 +210,17 @@ const useStyles = makeStyles({
   },
 })
 
+/**
+ * APIDocs component renders the interactive API documentation page.
+ * 
+ * Displays OpenAPI documentation using the openapi-explorer web component with:
+ * - Microsoft authentication integration for testing endpoints
+ * - Dark/light theme support
+ * - Bearer token authentication for logged-in users
+ * - Loading states and error handling
+ * 
+ * @returns The API documentation page with authentication controls and interactive explorer
+ */
 export function APIDocs() {
   const styles = useStyles()
   const proBadgeStyles = useProUserBadgeStyles()
@@ -221,25 +229,31 @@ export function APIDocs() {
   const isDarkMode = useIsDarkMode()
   const [isLoading, setIsLoading] = useState(true)
   const [specError, setSpecError] = useState<string | null>(null)
+  const [specLoaded, setSpecLoaded] = useState(false)
 
   // Callbacks for OpenAPI Explorer events
   const handleSpecLoaded = useCallback(() => {
     setIsLoading(false)
     setSpecError(null)
+    setSpecLoaded(true)
   }, [])
 
   const handleLoadFailed = useCallback((error: string) => {
     setIsLoading(false)
     setSpecError(error)
+    setSpecLoaded(true)
   }, [])
 
   // Set a timeout to hide loading indicator if spec doesn't load quickly
+  // Only triggers if spec hasn't loaded via events yet
   useEffect(() => {
+    if (specLoaded) return // Don't set timeout if already loaded
+    
     const timeout = setTimeout(() => {
       setIsLoading(false)
     }, 5000)
     return () => clearTimeout(timeout)
-  }, [])
+  }, [specLoaded])
 
   if (!isInitialized) {
     return (
