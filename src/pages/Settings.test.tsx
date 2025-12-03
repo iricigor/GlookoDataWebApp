@@ -7,14 +7,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Settings } from './Settings';
+import type { AIProvider } from '../utils/api';
 import * as apiUtils from '../utils/api';
 
 // Mock the API utilities
 vi.mock('../utils/api', () => ({
   getActiveProvider: vi.fn(),
   getAvailableProviders: vi.fn(),
-  getProviderDisplayName: vi.fn().mockImplementation((provider: string) => {
-    const names: Record<string, string> = {
+  getProviderDisplayName: vi.fn().mockImplementation((provider: AIProvider) => {
+    const names: Record<AIProvider, string> = {
       perplexity: 'Perplexity AI',
       gemini: 'Google Gemini AI',
       grok: 'Grok AI',
