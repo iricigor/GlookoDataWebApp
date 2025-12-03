@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>641 Update README screenshot with current home page</summary>
+
+[#641](../../pull/641) Update README screenshot with current home page
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>638 Add Hypos AI analysis accordions and two-state behavior</summary>
 
 [#638](../../pull/638) Add Hypos AI analysis accordions and two-state behavior
