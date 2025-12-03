@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   makeStyles,
   Text,
@@ -16,12 +16,105 @@ import {
   SignOutRegular,
   CheckmarkCircleRegular,
 } from '@fluentui/react-icons'
-import SwaggerUI from 'swagger-ui-react'
-import 'swagger-ui-react/swagger-ui.css'
+import 'openapi-explorer'
 import './APIDocs.css'
 import { useAuth } from '../hooks/useAuth'
 import { useProUserCheck } from '../hooks/useProUserCheck'
 import { useProUserBadgeStyles } from '../styles/proUserBadge'
+import { useIsDarkMode } from '../hooks/useIsDarkMode'
+
+// OpenAPI Explorer wrapper component that creates the web component dynamically
+interface OpenAPIExplorerProps {
+  specUrl: string;
+  isDarkMode: boolean;
+  onSpecLoaded?: () => void;
+  onLoadFailed?: (error: string) => void;
+  idToken?: string | null;
+}
+
+function OpenAPIExplorerComponent({ specUrl, isDarkMode, onSpecLoaded, onLoadFailed, idToken }: OpenAPIExplorerProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const explorerRef = useRef<HTMLElement | null>(null)
+
+  const createExplorer = useCallback(() => {
+    if (!containerRef.current) return
+
+    // Remove existing explorer if any
+    if (explorerRef.current) {
+      explorerRef.current.remove()
+    }
+
+    // Create the web component
+    const explorer = document.createElement('openapi-explorer')
+    explorer.setAttribute('spec-url', specUrl)
+    explorer.setAttribute('show-header', 'false')
+    explorer.setAttribute('show-side-nav', 'true')
+    explorer.setAttribute('allow-try', 'true')
+    explorer.setAttribute('allow-server-selection', 'true')
+    explorer.setAttribute('allow-authentication', 'false')
+    explorer.setAttribute('allow-search', 'true')
+    explorer.setAttribute('fill-request-fields-with-example', 'true')
+    explorer.setAttribute('persist-auth', 'false')
+    explorer.setAttribute('schema-style', 'tree')
+    explorer.setAttribute('schema-expand-level', '1')
+    explorer.setAttribute('schema-description-expanded', 'true')
+    explorer.setAttribute('default-schema-tab', 'example')
+    explorer.setAttribute('layout', 'row')
+    explorer.setAttribute('bg-color', isDarkMode ? '#1f1f1f' : '#ffffff')
+    explorer.setAttribute('text-color', isDarkMode ? '#ffffff' : '#1f1f1f')
+    explorer.setAttribute('primary-color', '#0078d4')
+    explorer.setAttribute('nav-bg-color', isDarkMode ? '#292929' : '#f5f5f5')
+    explorer.setAttribute('nav-text-color', isDarkMode ? '#ffffff' : '#1f1f1f')
+    explorer.setAttribute('nav-hover-bg-color', isDarkMode ? '#383838' : '#e0e0e0')
+    explorer.setAttribute('nav-hover-text-color', isDarkMode ? '#ffffff' : '#1f1f1f')
+    explorer.setAttribute('nav-accent-color', '#0078d4')
+    explorer.style.height = '100%'
+    explorer.style.width = '100%'
+    explorer.style.display = 'block'
+
+    // Add event listeners
+    explorer.addEventListener('spec-loaded', () => {
+      onSpecLoaded?.()
+    })
+    explorer.addEventListener('request-failed', (e: Event) => {
+      const customEvent = e as CustomEvent
+      onLoadFailed?.(customEvent.detail?.message || 'Failed to load API documentation')
+    })
+
+    containerRef.current.appendChild(explorer)
+    explorerRef.current = explorer
+
+    return explorer
+  }, [specUrl, isDarkMode, onSpecLoaded, onLoadFailed])
+
+  // Create explorer on mount and when dependencies change
+  useEffect(() => {
+    createExplorer()
+    
+    // Cleanup on unmount
+    return () => {
+      if (explorerRef.current) {
+        explorerRef.current.remove()
+        explorerRef.current = null
+      }
+    }
+  }, [createExplorer])
+
+  // Set Bearer token when idToken changes
+  useEffect(() => {
+    if (explorerRef.current && idToken) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const explorer = explorerRef.current as any
+      if (typeof explorer.setAuthenticationConfiguration === 'function') {
+        explorer.setAuthenticationConfiguration({
+          bearerAuth: { token: idToken }
+        })
+      }
+    }
+  }, [idToken])
+
+  return <div ref={containerRef} style={{ height: '100%', width: '100%' }} />
+}
 
 const useStyles = makeStyles({
   container: {
@@ -115,42 +208,28 @@ export function APIDocs() {
   const proBadgeStyles = useProUserBadgeStyles()
   const { isLoggedIn, userName, userEmail, idToken, isInitialized, login, logout } = useAuth()
   const { isProUser } = useProUserCheck(isLoggedIn ? idToken : null)
-  const [swaggerSpec, setSwaggerSpec] = useState<object | null>(null)
+  const isDarkMode = useIsDarkMode()
+  const [isLoading, setIsLoading] = useState(true)
   const [specError, setSpecError] = useState<string | null>(null)
 
-  // Load OpenAPI spec
-  useEffect(() => {
-    const controller = new AbortController()
-    const loadSpec = async () => {
-      try {
-        const response = await fetch('/api-docs/openapi.json', { signal: controller.signal })
-        if (!response.ok) {
-          throw new Error(`Failed to load OpenAPI specification (${response.status}): ${response.statusText}`)
-        }
-        const spec = await response.json()
-        setSwaggerSpec(spec)
-      } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') return
-        console.error('Failed to load OpenAPI spec:', error)
-        setSpecError(error instanceof Error ? error.message : 'Failed to load API documentation')
-      }
-    }
-    loadSpec()
-    return () => controller.abort()
+  // Callbacks for OpenAPI Explorer events
+  const handleSpecLoaded = useCallback(() => {
+    setIsLoading(false)
+    setSpecError(null)
   }, [])
 
-  // Custom request interceptor to add Bearer token
-  const requestInterceptor = useCallback((request: Record<string, unknown>) => {
-    if (idToken) {
-      const existingHeaders = request.headers
-      const headers: Record<string, string> = typeof existingHeaders === 'object' && existingHeaders !== null
-        ? { ...(existingHeaders as Record<string, string>) }
-        : {}
-      headers['Authorization'] = `Bearer ${idToken}`
-      request.headers = headers
-    }
-    return request
-  }, [idToken])
+  const handleLoadFailed = useCallback((error: string) => {
+    setIsLoading(false)
+    setSpecError(error)
+  }, [])
+
+  // Set a timeout to hide loading indicator if spec doesn't load quickly
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsLoading(false)
+    }, 5000)
+    return () => clearTimeout(timeout)
+  }, [])
 
   if (!isInitialized) {
     return (
@@ -236,25 +315,20 @@ export function APIDocs() {
           </div>
         )}
 
-        {swaggerSpec ? (
-          <SwaggerUI
-            key={idToken ? 'authenticated' : 'anonymous'}
-            spec={swaggerSpec}
-            requestInterceptor={requestInterceptor}
-            docExpansion="list"
-            defaultModelsExpandDepth={1}
-            displayRequestDuration={true}
-            filter={true}
-            showExtensions={true}
-            showCommonExtensions={true}
-            tryItOutEnabled={true}
-          />
-        ) : !specError && (
+        {isLoading && !specError && (
           <div className={styles.loadingContainer}>
             <Spinner size="medium" />
             <Text>Loading API documentation...</Text>
           </div>
         )}
+
+        <OpenAPIExplorerComponent
+          specUrl="/api-docs/openapi.json"
+          isDarkMode={isDarkMode}
+          onSpecLoaded={handleSpecLoaded}
+          onLoadFailed={handleLoadFailed}
+          idToken={idToken}
+        />
       </div>
     </div>
   )
