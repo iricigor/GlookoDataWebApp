@@ -268,6 +268,9 @@ export function HyposAISection({
   // Store the full AI response text (for display in accordion)
   const [fullAIResponse, setFullAIResponse] = useState<string | null>(null);
   
+  // Track elapsed time during analysis to show user that something is happening
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  
   // Track file ID and provider to detect when they change
   const prevFileIdRef = useRef<string | undefined>(undefined);
   const prevProviderRef = useRef<AIProvider | null>(null);
@@ -284,6 +287,20 @@ export function HyposAISection({
       isMountedRef.current = false;
     };
   }, []);
+  
+  // Update elapsed time every second while analyzing
+  useEffect(() => {
+    if (!analyzing) {
+      setElapsedSeconds(0);
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [analyzing]);
   
   // Get active AI provider
   const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
@@ -351,15 +368,33 @@ export function HyposAISection({
     return () => clearTimeout(timeoutId);
   }, [allReadings, thresholds, bolusReadings, basalReadings]);
   
-  // Get analyses for current date's events from the cache (using eventId matching)
+  // Get analyses for current date's events from the cache
+  // Supports both eventId matching (new format) and date matching (legacy format)
   const currentDateAnalyses: EventAnalysis[] = useMemo(() => {
     if (Object.keys(responseCache).length === 0) return [];
     
-    // Get event IDs for the current date
-    return currentDateEvents
-      .map(event => responseCache[event.eventId])
-      .filter((analysis): analysis is EventAnalysis => analysis !== undefined);
-  }, [currentDateEvents, responseCache]);
+    const analyses: EventAnalysis[] = [];
+    
+    // First, try to match by eventId (new format)
+    for (const event of currentDateEvents) {
+      const cachedAnalysis = responseCache[event.eventId];
+      if (cachedAnalysis) {
+        analyses.push(cachedAnalysis);
+      }
+    }
+    
+    // If no matches by eventId, try to find legacy format analyses by date
+    if (analyses.length === 0) {
+      Object.values(responseCache).forEach(analysis => {
+        // Legacy format includes date field
+        if (analysis.date === currentDate) {
+          analyses.push(analysis);
+        }
+      });
+    }
+    
+    return analyses;
+  }, [currentDateEvents, responseCache, currentDate]);
   
   // Check if we have any cached analysis at all
   const hasCachedAnalysis = Object.keys(responseCache).length > 0;
@@ -622,13 +657,19 @@ export function HyposAISection({
           </div>
         )}
         
-        {/* Loading State */}
+        {/* Loading State with elapsed time indicator */}
         {analyzing && (
           <div className={styles.loadingContainer}>
             <Spinner size="small" />
-            <Text className={styles.helperText}>
-              Analyzing all hypoglycemic events... This may take a few seconds.
-            </Text>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <Text className={styles.helperText}>
+                Analyzing all hypoglycemic events... This may take up to a minute.
+              </Text>
+              <Text className={styles.helperText} style={{ fontSize: tokens.fontSizeBase100 }}>
+                Elapsed: {Math.floor(elapsedSeconds / 60)}:{String(elapsedSeconds % 60).padStart(2, '0')}
+                {elapsedSeconds >= 30 && ' — Still working, AI is generating insights...'}
+              </Text>
+            </div>
           </div>
         )}
         
