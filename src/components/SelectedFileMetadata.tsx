@@ -41,14 +41,9 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground1,
   },
   metadataLine: {
-    fontSize: tokens.fontSizeBase200,
-    color: tokens.colorNeutralForeground2,
-    ...shorthands.padding('8px', '12px'),
-    backgroundColor: tokens.colorNeutralBackground3,
-    ...shorthands.borderRadius(tokens.borderRadiusSmall),
-    fontFamily: 'Consolas, Monaco, monospace',
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground1,
     wordBreak: 'break-all',
-    marginTop: '16px',
   },
   noSelection: {
     fontSize: tokens.fontSizeBase300,
@@ -140,16 +135,14 @@ export function SelectedFileMetadata({ selectedFile }: SelectedFileMetadataProps
             )}
           </>
         )}
-      </div>
 
-      {selectedFile.zipMetadata?.metadataLine && (
-        <div>
-          <Text className={styles.label} style={{ marginBottom: '4px', display: 'block', marginTop: '16px' }}>Raw Metadata:</Text>
-          <div className={styles.metadataLine}>
-            {selectedFile.zipMetadata.metadataLine}
-          </div>
-        </div>
-      )}
+        {selectedFile.zipMetadata?.metadataLine && (
+          <>
+            <Text className={styles.label}>Raw Metadata:</Text>
+            <Text className={styles.metadataLine}>{selectedFile.zipMetadata.metadataLine}</Text>
+          </>
+        )}
+      </div>
     </div>
   );
 }
