@@ -215,7 +215,39 @@ describe('hyposReportAIDataUtils', () => {
       expect(result.size).toBe(0);
     });
 
-    it('should parse new compact JSON format with eventId', () => {
+    it('should parse column-oriented JSON format', () => {
+      const response = `
+Here is the analysis:
+
+\`\`\`json
+{
+  "columns": ["eventId", "primarySuspect", "mealTime", "actionableInsight"],
+  "data": [
+    ["E-001", "Basal Excess (Nocturnal)", null, "Review Basal Rate Profile between 01:00 and 04:00. Consider reducing overnight basal by 10-15%."],
+    ["E-002", "Bolus Overlap (B1+B2)", "12:45", "The hypo appears related to stacked boluses. Consider waiting at least 3 hours between meal and correction boluses."]
+  ]
+}
+\`\`\`
+`;
+      const result = parseHypoAIResponseByEventId(response);
+      
+      expect(result.has('E-001')).toBe(true);
+      expect(result.has('E-002')).toBe(true);
+      
+      const event1 = result.get('E-001');
+      expect(event1).toBeDefined();
+      expect(event1!.eventId).toBe('E-001');
+      expect(event1!.primarySuspect).toBe('Basal Excess (Nocturnal)');
+      expect(event1!.mealTime).toBeNull();
+      expect(event1!.actionableInsight).toContain('Basal Rate Profile');
+      
+      const event2 = result.get('E-002');
+      expect(event2).toBeDefined();
+      expect(event2!.eventId).toBe('E-002');
+      expect(event2!.mealTime).toBe('12:45');
+    });
+
+    it('should parse new compact JSON format with eventId (legacy array format)', () => {
       const response = `
 Here is the analysis:
 
@@ -293,6 +325,19 @@ Here is the analysis:
       expect(result.has('E-001')).toBe(true);
       expect(result.has('E-003')).toBe(true);
       expect(result.has('E-002')).toBe(false);
+    });
+
+    it('should handle column-oriented format with empty data', () => {
+      const response = `
+\`\`\`json
+{
+  "columns": ["eventId", "primarySuspect", "mealTime", "actionableInsight"],
+  "data": []
+}
+\`\`\`
+`;
+      const result = parseHypoAIResponseByEventId(response);
+      expect(result.size).toBe(0);
     });
   });
 

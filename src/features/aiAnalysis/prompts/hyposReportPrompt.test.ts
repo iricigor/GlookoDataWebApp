@@ -46,15 +46,17 @@ E-002,2024-01-15T14:30:00.000Z,58,25,1.5,10,1.2,5.0,180,2.0,300,0.8,0.8,0.8,0.8,
       expect(result).toContain('Time/Hormonal Shift');
     });
 
-    it('should include output JSON format', () => {
+    it('should include column-oriented JSON format', () => {
       const base64Data = base64Encode(sampleEventsData);
       const result = generateHyposReportPrompt(base64Data, 2);
       
-      expect(result).toContain('valid JSON array');
+      expect(result).toContain('column-oriented JSON format');
       expect(result).toContain('```json');
-      expect(result).toContain('"eventId":');
-      expect(result).toContain('"primarySuspect":');
-      expect(result).toContain('"mealTime":');
+      expect(result).toContain('"columns":');
+      expect(result).toContain('"data":');
+      expect(result).toContain('"eventId"');
+      expect(result).toContain('"primarySuspect"');
+      expect(result).toContain('"mealTime"');
     });
 
     it('should include formatting rules', () => {

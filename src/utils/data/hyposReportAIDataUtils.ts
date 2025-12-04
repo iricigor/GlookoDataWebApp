@@ -509,10 +509,10 @@ function isValidLegacyResponseItem(item: unknown): item is AIResponseItemLegacy 
 }
 
 /**
- * Extract JSON string from response (handles code blocks and raw JSON)
+ * Extract JSON string from response (handles code blocks, objects, and arrays)
  */
 function extractJsonString(response: string): string | null {
-  // Look for JSON array in markdown code block
+  // Look for JSON in markdown code block
   const jsonBlockRegex = /```json\s*([\s\S]*?)```/;
   const match = jsonBlockRegex.exec(response);
   
@@ -520,19 +520,59 @@ function extractJsonString(response: string): string | null {
     return match[1].trim();
   }
   
-  // Try to find raw JSON array without code block
-  const startIdx = response.indexOf('[');
-  const endIdx = response.lastIndexOf(']');
+  // Try to find raw JSON without code block - check which comes first: { or [
+  const objStartIdx = response.indexOf('{');
+  const arrStartIdx = response.indexOf('[');
   
-  if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-    return response.substring(startIdx, endIdx + 1);
+  // If we find a column-oriented object (starts with {), use it
+  if (objStartIdx !== -1 && (arrStartIdx === -1 || objStartIdx < arrStartIdx)) {
+    const objEndIdx = response.lastIndexOf('}');
+    if (objEndIdx !== -1 && objEndIdx > objStartIdx) {
+      const potentialJson = response.substring(objStartIdx, objEndIdx + 1);
+      // Verify it looks like column-oriented format (has "columns" and "data")
+      if (potentialJson.includes('"columns"') && potentialJson.includes('"data"')) {
+        return potentialJson;
+      }
+    }
+  }
+  
+  // Try to find raw JSON array (legacy format) without code block
+  if (arrStartIdx !== -1) {
+    const arrEndIdx = response.lastIndexOf(']');
+    if (arrEndIdx !== -1 && arrEndIdx > arrStartIdx) {
+      return response.substring(arrStartIdx, arrEndIdx + 1);
+    }
   }
   
   return null;
 }
 
 /**
- * Try to parse JSON response in the new compact format (eventId-based)
+ * Column-oriented JSON format from AI response
+ */
+interface ColumnOrientedResponse {
+  columns: string[];
+  data: (string | null)[][];
+}
+
+/**
+ * Check if response is in column-oriented format
+ */
+function isColumnOrientedFormat(parsed: unknown): parsed is ColumnOrientedResponse {
+  if (typeof parsed !== 'object' || parsed === null) {
+    return false;
+  }
+  
+  const obj = parsed as Record<string, unknown>;
+  return (
+    Array.isArray(obj.columns) &&
+    Array.isArray(obj.data) &&
+    obj.columns.every((c: unknown) => typeof c === 'string')
+  );
+}
+
+/**
+ * Try to parse JSON response in the new column-oriented format or compact format
  * Returns a Map of eventId -> event analysis, or empty Map if parsing fails
  */
 function tryParseJsonResponseByEventId(response: string): Map<string, EventAnalysis> {
@@ -546,22 +586,60 @@ function tryParseJsonResponseByEventId(response: string): Map<string, EventAnaly
   try {
     const parsed = JSON.parse(jsonString);
     
-    if (!Array.isArray(parsed)) {
-      console.warn('[HyposAI] JSON response is not an array');
+    // Check if it's the new column-oriented format
+    if (isColumnOrientedFormat(parsed)) {
+      const columns = parsed.columns;
+      const eventIdIdx = columns.indexOf('eventId');
+      const primarySuspectIdx = columns.indexOf('primarySuspect');
+      const mealTimeIdx = columns.indexOf('mealTime');
+      const actionableInsightIdx = columns.indexOf('actionableInsight');
+      
+      if (eventIdIdx === -1 || primarySuspectIdx === -1 || actionableInsightIdx === -1) {
+        console.warn('[HyposAI] Column-oriented JSON missing required columns');
+        return result;
+      }
+      
+      for (const row of parsed.data) {
+        if (!Array.isArray(row) || row.length < columns.length) {
+          continue;
+        }
+        
+        const eventId = row[eventIdIdx];
+        const primarySuspect = row[primarySuspectIdx];
+        const mealTime = mealTimeIdx !== -1 ? row[mealTimeIdx] : null;
+        const actionableInsight = row[actionableInsightIdx];
+        
+        if (typeof eventId === 'string' && typeof primarySuspect === 'string' && typeof actionableInsight === 'string') {
+          const analysis: EventAnalysis = {
+            eventId,
+            primarySuspect,
+            mealTime: mealTime,
+            actionableInsight,
+          };
+          
+          result.set(eventId, analysis);
+        }
+      }
+      
       return result;
     }
     
-    for (const item of parsed) {
-      if (isValidCompactResponseItem(item)) {
-        const analysis: EventAnalysis = {
-          eventId: item.eventId,
-          primarySuspect: item.primarySuspect,
-          mealTime: item.mealTime,
-          actionableInsight: item.actionableInsight,
-        };
-        
-        result.set(item.eventId, analysis);
+    // Fallback: Check if it's the old array format
+    if (Array.isArray(parsed)) {
+      for (const item of parsed) {
+        if (isValidCompactResponseItem(item)) {
+          const analysis: EventAnalysis = {
+            eventId: item.eventId,
+            primarySuspect: item.primarySuspect,
+            mealTime: item.mealTime,
+            actionableInsight: item.actionableInsight,
+          };
+          
+          result.set(item.eventId, analysis);
+        }
       }
+    } else {
+      console.warn('[HyposAI] JSON response is neither column-oriented nor array format');
     }
   } catch (error) {
     // JSON parsing failed - log for debugging

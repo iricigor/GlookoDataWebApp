@@ -73,45 +73,38 @@ For **every individual event**, perform the following deductions:
 2. **Avoid Diagnosis:** Do not use clinical diagnostic terms.
 3. **Acknowledge Limits:** Clearly state when the cause is ambiguous due to the lack of exercise/carb data (e.g., use the "Time/Hormonal Shift" suspect category).
 
-**4. Required Output Format (Compact JSON)**
+**4. Required Output Format (Column-Oriented JSON)**
 
-Return your analysis as a **valid JSON array** wrapped in a markdown code block. Each element represents one hypo event analysis.
+Return your analysis using a **column-oriented JSON format** where column names are defined ONCE at the beginning, followed by data rows. This reduces redundancy and response size.
 
 **CRITICAL RULES:**
-1. Your response MUST contain a valid JSON array inside a \`\`\`json code block
-2. Use **eventId** to identify each event (matches \`Event_ID\` from the dataset, e.g., "E-001")
-3. Do NOT include date, eventTime, or nadirValue in your response - we already have this data
-4. The **actionableInsight** should be detailed (2-4 sentences) with specific recommendations
-5. Do not add any trailing commas in JSON
+1. Your response MUST contain valid JSON inside a \`\`\`json code block
+2. Define columns ONCE in the "columns" array, then list data rows in "data" array
+3. Each data row is an array of values in the SAME ORDER as columns
+4. Use **eventId** to identify each event (matches \`Event_ID\` from the dataset, e.g., "E-001")
+5. Do NOT include date, eventTime, or nadirValue - we already have this data
+6. The **actionableInsight** should be detailed (2-4 sentences) with specific recommendations
+7. For null values, use \`null\` (not "null" string)
 
 **JSON Schema:**
 \`\`\`json
-[
-  {
-    "eventId": "E-001",
-    "primarySuspect": "Category name",
-    "mealTime": "HH:MM or null",
-    "actionableInsight": "Detailed specific recommendation (2-4 sentences)"
-  }
-]
+{
+  "columns": ["eventId", "primarySuspect", "mealTime", "actionableInsight"],
+  "data": [
+    ["E-001", "Category name", "HH:MM or null", "Detailed recommendation"]
+  ]
+}
 \`\`\`
 
 **Example output:**
 \`\`\`json
-[
-  {
-    "eventId": "E-001",
-    "primarySuspect": "Basal Excess (Nocturnal)",
-    "mealTime": null,
-    "actionableInsight": "Review your Basal Rate Profile between 01:00 and 04:00. Consider reducing overnight basal by 10-15% starting from 01:00. The glucose drop pattern suggests basal insulin is peaking during deep sleep when insulin sensitivity is highest."
-  },
-  {
-    "eventId": "E-002",
-    "primarySuspect": "Bolus Overlap (B1+B2)",
-    "mealTime": "12:45",
-    "actionableInsight": "The hypo appears related to stacked boluses around lunch. Consider waiting at least 3 hours between meal and correction boluses, or reduce the correction factor. Using an extended/dual wave bolus for high-carb meals may also help prevent the glucose drop."
-  }
-]
+{
+  "columns": ["eventId", "primarySuspect", "mealTime", "actionableInsight"],
+  "data": [
+    ["E-001", "Basal Excess (Nocturnal)", null, "Review your Basal Rate Profile between 01:00 and 04:00. Consider reducing overnight basal by 10-15% starting from 01:00. The glucose drop pattern suggests basal insulin is peaking during deep sleep when insulin sensitivity is highest."],
+    ["E-002", "Bolus Overlap (B1+B2)", "12:45", "The hypo appears related to stacked boluses around lunch. Consider waiting at least 3 hours between meal and correction boluses, or reduce the correction factor. Using an extended/dual wave bolus for high-carb meals may also help prevent the glucose drop."]
+  ]
+}
 \`\`\`
 
 **Dataset: Hypoglycemic Events (hypo_events.csv)**
