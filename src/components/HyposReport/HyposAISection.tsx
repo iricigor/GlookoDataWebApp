@@ -15,6 +15,12 @@ import {
   AccordionItem,
   AccordionHeader,
   AccordionPanel,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHeaderCell,
+  TableBody,
+  TableCell,
   makeStyles,
   tokens,
   shorthands,
@@ -29,7 +35,7 @@ import { generateHyposReportPrompt } from '../../features/aiAnalysis/prompts';
 import { 
   extractDetailedHypoEvents, 
   convertDetailedHypoEventsToCSV,
-  parseHypoAIResponseByDate,
+  parseHypoAIResponseByEventId,
   type EventAnalysis,
   type DetailedHypoEvent,
 } from '../../utils/data/hyposReportAIDataUtils';
@@ -210,13 +216,9 @@ interface HyposAISectionProps {
   fileId?: string;
 }
 
-// Cache structure for storing AI responses by date
+// Cache structure for storing AI responses by eventId
 interface AIResponseCache {
-  [date: string]: {
-    response: string;
-    parsedAnalyses: EventAnalysis[];
-    timestamp: Date;
-  };
+  [eventId: string]: EventAnalysis;
 }
 
 /**
@@ -266,6 +268,9 @@ export function HyposAISection({
   // Store the full AI response text (for display in accordion)
   const [fullAIResponse, setFullAIResponse] = useState<string | null>(null);
   
+  // Track elapsed time during analysis to show user that something is happening
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  
   // Track file ID and provider to detect when they change
   const prevFileIdRef = useRef<string | undefined>(undefined);
   const prevProviderRef = useRef<AIProvider | null>(null);
@@ -282,6 +287,20 @@ export function HyposAISection({
       isMountedRef.current = false;
     };
   }, []);
+  
+  // Update elapsed time every second while analyzing
+  useEffect(() => {
+    if (!analyzing) {
+      setElapsedSeconds(0);
+      return;
+    }
+    
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [analyzing]);
   
   // Get active AI provider
   const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
@@ -349,9 +368,36 @@ export function HyposAISection({
     return () => clearTimeout(timeoutId);
   }, [allReadings, thresholds, bolusReadings, basalReadings]);
   
-  // Check if we have cached analysis for current date
-  const cachedAnalysis = responseCache[currentDate];
-  const hasCachedAnalysis = !!cachedAnalysis;
+  // Get analyses for current date's events from the cache
+  // Supports both eventId matching (new format) and date matching (legacy format)
+  const currentDateAnalyses: EventAnalysis[] = useMemo(() => {
+    if (Object.keys(responseCache).length === 0) return [];
+    
+    const analyses: EventAnalysis[] = [];
+    
+    // First, try to match by eventId (new format)
+    for (const event of currentDateEvents) {
+      const cachedAnalysis = responseCache[event.eventId];
+      if (cachedAnalysis) {
+        analyses.push(cachedAnalysis);
+      }
+    }
+    
+    // If no matches by eventId, try to find legacy format analyses by date
+    if (analyses.length === 0) {
+      Object.values(responseCache).forEach(analysis => {
+        // Legacy format includes date field
+        if (analysis.date === currentDate) {
+          analyses.push(analysis);
+        }
+      });
+    }
+    
+    return analyses;
+  }, [currentDateEvents, responseCache, currentDate]);
+  
+  // Check if we have any cached analysis at all
+  const hasCachedAnalysis = Object.keys(responseCache).length > 0;
   
   // Check if there are hypos for the current date
   const hasHyposToday = currentDateEvents.length > 0;
@@ -392,29 +438,14 @@ export function HyposAISection({
       if (!isMountedRef.current) return;
       
       if (result.success && result.content) {
-        // Parse the response to extract per-date analyses
-        const parsedByDate = parseHypoAIResponseByDate(result.content);
+        // Parse the response to extract per-event analyses using eventId
+        const parsedByEventId = parseHypoAIResponseByEventId(result.content);
         
-        // Update cache with parsed results for each date
-        const newCache: AIResponseCache = { ...responseCache };
-        
-        // Store the full response and parse analyses by date
-        parsedByDate.forEach((analyses, date) => {
-          newCache[date] = {
-            response: result.content!,
-            parsedAnalyses: analyses,
-            timestamp: new Date(),
-          };
+        // Convert Map to cache object
+        const newCache: AIResponseCache = {};
+        parsedByEventId.forEach((analysis, eventId) => {
+          newCache[eventId] = analysis;
         });
-        
-        // Also mark current date as analyzed even if no hypos
-        if (!newCache[currentDate]) {
-          newCache[currentDate] = {
-            response: result.content,
-            parsedAnalyses: [],
-            timestamp: new Date(),
-          };
-        }
         
         setResponseCache(newCache);
         setFullAIResponse(result.content);
@@ -442,8 +473,6 @@ export function HyposAISection({
     geminiApiKey,
     grokApiKey,
     deepseekApiKey,
-    responseCache,
-    currentDate,
   ]);
   
   // Generate the AI prompt for display in accordion
@@ -465,43 +494,43 @@ export function HyposAISection({
     );
   }, [loadingAllEvents, allEvents, responseLanguage, glucoseUnit, activeProvider]);
   
-  // Memoize CSV conversion to avoid recomputation on every render
-  const allEventsCSV = useMemo(() => {
-    if (allEvents.length === 0) return '';
-    return convertDetailedHypoEventsToCSV(allEvents);
-  }, [allEvents]);
-  
-  // Render individual event analysis card
-  const renderEventCard = (analysis: EventAnalysis, index: number) => (
-    <div key={index} className={styles.eventCard}>
-      <div className={styles.eventHeader}>
-        <Text className={styles.eventTime}>
-          Event at {analysis.eventTime}
+  // Render individual event analysis card with merged event data
+  const renderEventCard = (analysis: EventAnalysis, event: DetailedHypoEvent | undefined, index: number) => {
+    // Get time and nadir from the local event data (more reliable than AI response)
+    const eventTime = event ? event.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : analysis.eventTime || 'Unknown';
+    const nadirValue = event ? `${event.nadirValueMgdl} mg/dL` : analysis.nadirValue || 'Unknown';
+    
+    return (
+      <div key={index} className={styles.eventCard}>
+        <div className={styles.eventHeader}>
+          <Text className={styles.eventTime}>
+            {analysis.eventId} - Event at {eventTime}
+          </Text>
+          <span className={styles.nadirBadge}>
+            Nadir: {nadirValue}
+          </span>
+        </div>
+        
+        <div className={styles.suspectLabel}>
+          <InfoRegular />
+          <Text>Primary Suspect:</Text>
+          <span className={styles.suspectTag}>
+            {analysis.primarySuspect}
+          </span>
+        </div>
+        
+        <Text className={styles.insightText}>
+          <strong>Recommendation:</strong> {analysis.actionableInsight}
         </Text>
-        <span className={styles.nadirBadge}>
-          Nadir: {analysis.nadirValue}
-        </span>
+        
+        {analysis.mealTime && (
+          <Text className={styles.mealTimeText}>
+            Estimated meal time: {analysis.mealTime}
+          </Text>
+        )}
       </div>
-      
-      <div className={styles.suspectLabel}>
-        <InfoRegular />
-        <Text>Primary Suspect:</Text>
-        <span className={styles.suspectTag}>
-          {analysis.primarySuspect}
-        </span>
-      </div>
-      
-      <Text className={styles.insightText}>
-        <strong>Recommendation:</strong> {analysis.actionableInsight}
-      </Text>
-      
-      {analysis.deductedMealTime && (
-        <Text className={styles.mealTimeText}>
-          Estimated meal time: {analysis.deductedMealTime}
-        </Text>
-      )}
-    </div>
-  );
+    );
+  };
   
   // If no API key configured
   if (!hasApiKey) {
@@ -546,10 +575,33 @@ export function HyposAISection({
           <div className={styles.dataTableContainer}>
             {loadingAllEvents ? (
               <Text className={styles.helperText}>Loading data...</Text>
-            ) : allEventsCSV ? (
-              <pre style={{ margin: 0, fontSize: '11px', overflowX: 'auto' }}>
-                {allEventsCSV}
-              </pre>
+            ) : allEvents.length > 0 ? (
+              <Table size="small" style={{ minWidth: '800px' }}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHeaderCell>Event ID</TableHeaderCell>
+                    <TableHeaderCell>Start Time</TableHeaderCell>
+                    <TableHeaderCell>Nadir (mg/dL)</TableHeaderCell>
+                    <TableHeaderCell>Duration (min)</TableHeaderCell>
+                    <TableHeaderCell>Time of Day</TableHeaderCell>
+                    <TableHeaderCell>Last Bolus</TableHeaderCell>
+                    <TableHeaderCell>Bolus Prior (min)</TableHeaderCell>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {allEvents.map(event => (
+                    <TableRow key={event.eventId}>
+                      <TableCell>{event.eventId}</TableCell>
+                      <TableCell>{event.startTime.toLocaleString()}</TableCell>
+                      <TableCell>{event.nadirValueMgdl}</TableCell>
+                      <TableCell>{event.durationMins}</TableCell>
+                      <TableCell>{event.timeOfDayCode}:00</TableCell>
+                      <TableCell>{event.lastBolusUnits ?? 'N/A'}</TableCell>
+                      <TableCell>{event.lastBolusMinsPrior ?? 'N/A'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             ) : (
               <Text className={styles.helperText}>No hypo events found in the dataset</Text>
             )}
@@ -605,13 +657,19 @@ export function HyposAISection({
           </div>
         )}
         
-        {/* Loading State */}
+        {/* Loading State with elapsed time indicator */}
         {analyzing && (
           <div className={styles.loadingContainer}>
             <Spinner size="small" />
-            <Text className={styles.helperText}>
-              Analyzing all hypoglycemic events... This may take a few seconds.
-            </Text>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <Text className={styles.helperText}>
+                Analyzing all hypoglycemic events... This may take up to a minute.
+              </Text>
+              <Text className={styles.helperText} style={{ fontSize: tokens.fontSizeBase100 }}>
+                Elapsed: {Math.floor(elapsedSeconds / 60)}:{String(elapsedSeconds % 60).padStart(2, '0')}
+                {elapsedSeconds >= 30 && ' — Still working, AI is generating insights...'}
+              </Text>
+            </div>
           </div>
         )}
         
@@ -661,16 +719,18 @@ export function HyposAISection({
       )}
       
       {/* Display cached analysis for current date if available */}
-      {hasCachedAnalysis && cachedAnalysis.parsedAnalyses.length > 0 && (
+      {hasCachedAnalysis && currentDateAnalyses.length > 0 && (
         <div className={styles.analysisContainer}>
-          {cachedAnalysis.parsedAnalyses.map((analysis, index) => 
-            renderEventCard(analysis, index)
-          )}
+          {currentDateAnalyses.map((analysis, index) => {
+            // Find the matching event for this analysis
+            const matchingEvent = currentDateEvents.find(e => e.eventId === analysis.eventId);
+            return renderEventCard(analysis, matchingEvent, index);
+          })}
         </div>
       )}
       
       {/* If there are hypos but no parsed analyses, show full response in accordion */}
-      {hasHyposToday && (!hasCachedAnalysis || cachedAnalysis.parsedAnalyses.length === 0) && fullAIResponse && (
+      {hasHyposToday && (!hasCachedAnalysis || currentDateAnalyses.length === 0) && fullAIResponse && (
         <MessageBar intent="info">
           <MessageBarBody>
             AI analysis was performed but no specific insights were found for {currentDate}. 
@@ -719,10 +779,33 @@ export function HyposAISection({
           <AccordionHeader>View Hypo Data ({allEvents.length} events)</AccordionHeader>
           <AccordionPanel>
             <div className={styles.dataTableContainer}>
-              {allEventsCSV ? (
-                <pre style={{ margin: 0, fontSize: '11px', overflowX: 'auto' }}>
-                  {allEventsCSV}
-                </pre>
+              {allEvents.length > 0 ? (
+                <Table size="small" style={{ minWidth: '800px' }}>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHeaderCell>Event ID</TableHeaderCell>
+                      <TableHeaderCell>Start Time</TableHeaderCell>
+                      <TableHeaderCell>Nadir (mg/dL)</TableHeaderCell>
+                      <TableHeaderCell>Duration (min)</TableHeaderCell>
+                      <TableHeaderCell>Time of Day</TableHeaderCell>
+                      <TableHeaderCell>Last Bolus</TableHeaderCell>
+                      <TableHeaderCell>Bolus Prior (min)</TableHeaderCell>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {allEvents.map(event => (
+                      <TableRow key={event.eventId}>
+                        <TableCell>{event.eventId}</TableCell>
+                        <TableCell>{event.startTime.toLocaleString()}</TableCell>
+                        <TableCell>{event.nadirValueMgdl}</TableCell>
+                        <TableCell>{event.durationMins}</TableCell>
+                        <TableCell>{event.timeOfDayCode}:00</TableCell>
+                        <TableCell>{event.lastBolusUnits ?? 'N/A'}</TableCell>
+                        <TableCell>{event.lastBolusMinsPrior ?? 'N/A'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               ) : (
                 <Text className={styles.helperText}>No hypo events found in the dataset</Text>
               )}

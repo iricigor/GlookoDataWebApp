@@ -9,6 +9,7 @@ import {
   getHypoEventCountForDate,
   hasHypoEventsForDate,
   parseHypoAIResponseByDate,
+  parseHypoAIResponseByEventId,
 } from './hyposReportAIDataUtils';
 import type { GlucoseReading, GlucoseThresholds, InsulinReading } from '../../types';
 
@@ -207,7 +208,140 @@ describe('hyposReportAIDataUtils', () => {
     });
   });
 
-  describe('parseHypoAIResponseByDate', () => {
+  describe('parseHypoAIResponseByEventId', () => {
+    it('should return empty map for response without JSON', () => {
+      const response = 'Some text without JSON';
+      const result = parseHypoAIResponseByEventId(response);
+      expect(result.size).toBe(0);
+    });
+
+    it('should parse column-oriented JSON format', () => {
+      const response = `
+Here is the analysis:
+
+\`\`\`json
+{
+  "columns": ["eventId", "primarySuspect", "mealTime", "actionableInsight"],
+  "data": [
+    ["E-001", "Basal Excess (Nocturnal)", null, "Review Basal Rate Profile between 01:00 and 04:00. Consider reducing overnight basal by 10-15%."],
+    ["E-002", "Bolus Overlap (B1+B2)", "12:45", "The hypo appears related to stacked boluses. Consider waiting at least 3 hours between meal and correction boluses."]
+  ]
+}
+\`\`\`
+`;
+      const result = parseHypoAIResponseByEventId(response);
+      
+      expect(result.has('E-001')).toBe(true);
+      expect(result.has('E-002')).toBe(true);
+      
+      const event1 = result.get('E-001');
+      expect(event1).toBeDefined();
+      expect(event1!.eventId).toBe('E-001');
+      expect(event1!.primarySuspect).toBe('Basal Excess (Nocturnal)');
+      expect(event1!.mealTime).toBeNull();
+      expect(event1!.actionableInsight).toContain('Basal Rate Profile');
+      
+      const event2 = result.get('E-002');
+      expect(event2).toBeDefined();
+      expect(event2!.eventId).toBe('E-002');
+      expect(event2!.mealTime).toBe('12:45');
+    });
+
+    it('should parse new compact JSON format with eventId (legacy array format)', () => {
+      const response = `
+Here is the analysis:
+
+\`\`\`json
+[
+  {
+    "eventId": "E-001",
+    "primarySuspect": "Basal Excess (Nocturnal)",
+    "mealTime": null,
+    "actionableInsight": "Review Basal Rate Profile between 01:00 and 04:00. Consider reducing overnight basal by 10-15%."
+  },
+  {
+    "eventId": "E-002",
+    "primarySuspect": "Bolus Overlap (B1+B2)",
+    "mealTime": "12:45",
+    "actionableInsight": "The hypo appears related to stacked boluses. Consider waiting at least 3 hours between meal and correction boluses."
+  }
+]
+\`\`\`
+`;
+      const result = parseHypoAIResponseByEventId(response);
+      
+      expect(result.has('E-001')).toBe(true);
+      expect(result.has('E-002')).toBe(true);
+      
+      const event1 = result.get('E-001');
+      expect(event1).toBeDefined();
+      expect(event1!.eventId).toBe('E-001');
+      expect(event1!.primarySuspect).toBe('Basal Excess (Nocturnal)');
+      expect(event1!.mealTime).toBeNull();
+      expect(event1!.actionableInsight).toContain('Basal Rate Profile');
+      
+      const event2 = result.get('E-002');
+      expect(event2).toBeDefined();
+      expect(event2!.eventId).toBe('E-002');
+      expect(event2!.mealTime).toBe('12:45');
+    });
+
+    it('should parse raw JSON array without code block', () => {
+      const response = `
+Here is the analysis:
+[{"eventId": "E-001", "primarySuspect": "Basal Excess", "mealTime": null, "actionableInsight": "Reduce basal rate."}]
+`;
+      const result = parseHypoAIResponseByEventId(response);
+      
+      expect(result.has('E-001')).toBe(true);
+      const event1 = result.get('E-001');
+      expect(event1!.primarySuspect).toBe('Basal Excess');
+    });
+
+    it('should handle empty JSON array', () => {
+      const response = `
+\`\`\`json
+[]
+\`\`\`
+`;
+      const result = parseHypoAIResponseByEventId(response);
+      expect(result.size).toBe(0);
+    });
+
+    it('should skip invalid items in JSON array', () => {
+      const response = `
+\`\`\`json
+[
+  {"eventId": "E-001", "primarySuspect": "Valid", "mealTime": null, "actionableInsight": "Good recommendation."},
+  {"eventId": "E-002"},
+  {"invalid": "object"},
+  {"eventId": "E-003", "primarySuspect": "Also Valid", "mealTime": null, "actionableInsight": "Another good recommendation."}
+]
+\`\`\`
+`;
+      const result = parseHypoAIResponseByEventId(response);
+      
+      expect(result.size).toBe(2);
+      expect(result.has('E-001')).toBe(true);
+      expect(result.has('E-003')).toBe(true);
+      expect(result.has('E-002')).toBe(false);
+    });
+
+    it('should handle column-oriented format with empty data', () => {
+      const response = `
+\`\`\`json
+{
+  "columns": ["eventId", "primarySuspect", "mealTime", "actionableInsight"],
+  "data": []
+}
+\`\`\`
+`;
+      const result = parseHypoAIResponseByEventId(response);
+      expect(result.size).toBe(0);
+    });
+  });
+
+  describe('parseHypoAIResponseByDate (legacy)', () => {
     it('should return empty map for response without table', () => {
       const response = 'Some text without a table';
       const result = parseHypoAIResponseByDate(response);
@@ -234,10 +368,10 @@ Here is the analysis:
       expect(jan15Events!.length).toBe(2);
       expect(jan15Events![0].eventTime).toBe('03:45');
       expect(jan15Events![0].primarySuspect).toBe('Basal Excess');
-      expect(jan15Events![0].deductedMealTime).toBeNull(); // N/A becomes null
+      expect(jan15Events![0].mealTime).toBeNull(); // N/A becomes null
       
       expect(jan15Events![1].eventTime).toBe('14:30');
-      expect(jan15Events![1].deductedMealTime).toBe('12:45');
+      expect(jan15Events![1].mealTime).toBe('12:45');
     });
 
     it('should handle empty table', () => {
@@ -249,7 +383,7 @@ Here is the analysis:
       expect(result.size).toBe(0);
     });
 
-    it('should parse JSON array format in code block', () => {
+    it('should parse legacy JSON format with date/eventTime', () => {
       const response = `
 Here is the analysis:
 
@@ -292,93 +426,10 @@ Here is the analysis:
       expect(jan15Events!.length).toBe(2);
       expect(jan15Events![0].eventTime).toBe('03:45');
       expect(jan15Events![0].primarySuspect).toBe('Basal Excess (Nocturnal)');
-      expect(jan15Events![0].deductedMealTime).toBeNull();
+      expect(jan15Events![0].mealTime).toBeNull();
       
       expect(jan15Events![1].eventTime).toBe('14:30');
-      expect(jan15Events![1].deductedMealTime).toBe('12:45');
-    });
-
-    it('should parse raw JSON array without code block', () => {
-      const response = `
-Here is the analysis:
-[{"date": "2024-01-15", "eventTime": "03:45", "nadirValue": "52 mg/dL", "primarySuspect": "Basal Excess", "deductedMealTime": null, "actionableInsight": "Reduce basal"}]
-`;
-      const result = parseHypoAIResponseByDate(response);
-      
-      expect(result.has('2024-01-15')).toBe(true);
-      const jan15Events = result.get('2024-01-15');
-      expect(jan15Events).toBeDefined();
-      expect(jan15Events!.length).toBe(1);
-      expect(jan15Events![0].eventTime).toBe('03:45');
-    });
-
-    it('should prefer JSON over markdown table when both present', () => {
-      const response = `
-\`\`\`json
-[{"date": "2024-01-15", "eventTime": "10:00", "nadirValue": "55 mg/dL", "primarySuspect": "JSON Source", "deductedMealTime": null, "actionableInsight": "From JSON"}]
-\`\`\`
-
-| Date | Event Time | Nadir Value | Primary Suspect | Deducted Meal Time | Actionable Insight |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| 2024-01-15 | 11:00 | 60 mg/dL | Table Source | N/A | From Table |
-`;
-      const result = parseHypoAIResponseByDate(response);
-      
-      const jan15Events = result.get('2024-01-15');
-      expect(jan15Events).toBeDefined();
-      expect(jan15Events!.length).toBe(1);
-      expect(jan15Events![0].primarySuspect).toBe('JSON Source'); // JSON takes precedence
-    });
-
-    it('should fall back to markdown table if JSON is invalid', () => {
-      const response = `
-\`\`\`json
-[{"date": "2024-01-15", invalid json here}]
-\`\`\`
-
-| Date | Event Time | Nadir Value | Primary Suspect | Deducted Meal Time | Actionable Insight |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| 2024-01-15 | 11:00 | 60 mg/dL | Table Fallback | N/A | Works as fallback |
-`;
-      const result = parseHypoAIResponseByDate(response);
-      
-      const jan15Events = result.get('2024-01-15');
-      expect(jan15Events).toBeDefined();
-      expect(jan15Events!.length).toBe(1);
-      expect(jan15Events![0].primarySuspect).toBe('Table Fallback');
-    });
-
-    it('should skip invalid items in JSON array', () => {
-      const response = `
-\`\`\`json
-[
-  {"date": "2024-01-15", "eventTime": "03:45", "nadirValue": "52 mg/dL", "primarySuspect": "Valid", "deductedMealTime": null, "actionableInsight": "Good"},
-  {"date": "2024-01-15", "eventTime": "10:00"},
-  {"invalid": "object"},
-  {"date": "2024-01-16", "eventTime": "08:00", "nadirValue": "55 mg/dL", "primarySuspect": "Also Valid", "deductedMealTime": null, "actionableInsight": "Good too"}
-]
-\`\`\`
-`;
-      const result = parseHypoAIResponseByDate(response);
-      
-      expect(result.has('2024-01-15')).toBe(true);
-      expect(result.has('2024-01-16')).toBe(true);
-      
-      const jan15Events = result.get('2024-01-15');
-      expect(jan15Events!.length).toBe(1); // Only the valid one
-      
-      const jan16Events = result.get('2024-01-16');
-      expect(jan16Events!.length).toBe(1);
-    });
-
-    it('should handle empty JSON array', () => {
-      const response = `
-\`\`\`json
-[]
-\`\`\`
-`;
-      const result = parseHypoAIResponseByDate(response);
-      expect(result.size).toBe(0);
+      expect(jan15Events![1].mealTime).toBe('12:45');
     });
   });
 });

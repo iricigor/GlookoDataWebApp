@@ -64,21 +64,33 @@ export interface DailyHypoAIResponse {
 }
 
 /**
- * AI analysis for a single hypo event
+ * AI analysis for a single hypo event (new compact format using eventId)
  */
 export interface EventAnalysis {
-  date: string;                       // YYYY-MM-DD format
-  eventTime: string;                  // HH:MM format
-  nadirValue: string;                 // X mg/dL
+  eventId: string;                    // Event ID (e.g., "E-001")
   primarySuspect: string;             // Category of suspected cause
-  deductedMealTime: string | null;    // Approximate meal time or null
-  actionableInsight: string;          // Specific recommendation
+  mealTime: string | null;            // Approximate meal time or null
+  actionableInsight: string;          // Specific recommendation (2-4 sentences)
+  // These fields are populated from our local data using eventId
+  date?: string;                      // YYYY-MM-DD format (derived)
+  eventTime?: string;                 // HH:MM format (derived)
+  nadirValue?: string;                // X mg/dL (derived)
 }
 
 /**
- * Raw JSON response item from AI
+ * Raw JSON response item from AI (new compact format)
  */
-interface AIResponseItem {
+interface AIResponseItemCompact {
+  eventId: string;
+  primarySuspect: string;
+  mealTime: string | null;
+  actionableInsight: string;
+}
+
+/**
+ * Raw JSON response item from AI (legacy format with date/time)
+ */
+interface AIResponseItemLegacy {
   date: string;
   eventTime: string;
   nadirValue: string;
@@ -411,25 +423,76 @@ export function hasHypoEventsForDate(
 
 /**
  * Parse AI response to extract per-event analysis
- * Returns a map of date -> event analyses
+ * Returns a map of eventId -> event analysis
  * 
- * Attempts JSON parsing first (preferred), falls back to markdown table regex if JSON fails
+ * Supports both:
+ * 1. New compact format with eventId (preferred)
+ * 2. Legacy format with date/eventTime
+ * 
+ * Attempts JSON parsing first, falls back to markdown table regex if JSON fails
  */
-export function parseHypoAIResponseByDate(response: string): Map<string, EventAnalysis[]> {
+export function parseHypoAIResponseByEventId(response: string): Map<string, EventAnalysis> {
   // Try JSON parsing first (preferred method)
-  const jsonResult = tryParseJsonResponse(response);
+  const jsonResult = tryParseJsonResponseByEventId(response);
   if (jsonResult.size > 0) {
     return jsonResult;
   }
   
-  // Fallback to markdown table regex parsing
-  return parseMarkdownTableResponse(response);
+  // Fallback to markdown table regex parsing (legacy)
+  return parseMarkdownTableResponseByEventId(response);
 }
 
 /**
- * Validate that an item has all required fields for EventAnalysis
+ * Parse AI response to extract per-event analysis grouped by date
+ * Returns a map of date -> event analyses
+ * 
+ * @deprecated Use parseHypoAIResponseByEventId and merge with event data for date info
  */
-function isValidAIResponseItem(item: unknown): item is AIResponseItem {
+export function parseHypoAIResponseByDate(response: string): Map<string, EventAnalysis[]> {
+  // Try the new eventId-based parsing first
+  const eventIdResult = parseHypoAIResponseByEventId(response);
+  
+  // If we got results with eventId format, group them by date
+  if (eventIdResult.size > 0) {
+    const result = new Map<string, EventAnalysis[]>();
+    // Note: date will be derived from event data in the caller
+    // For now, we just return events by their eventId's date portion
+    eventIdResult.forEach((analysis) => {
+      // If analysis has date, use it; otherwise, this will be handled by caller
+      const date = analysis.date || 'unknown';
+      if (!result.has(date)) {
+        result.set(date, []);
+      }
+      result.get(date)!.push(analysis);
+    });
+    return result;
+  }
+  
+  // Try legacy format with date/eventTime
+  return tryParseLegacyJsonResponse(response);
+}
+
+/**
+ * Validate that an item is in the new compact format (eventId-based)
+ */
+function isValidCompactResponseItem(item: unknown): item is AIResponseItemCompact {
+  if (typeof item !== 'object' || item === null) {
+    return false;
+  }
+  
+  const obj = item as Record<string, unknown>;
+  return (
+    typeof obj.eventId === 'string' &&
+    typeof obj.primarySuspect === 'string' &&
+    (obj.mealTime === null || typeof obj.mealTime === 'string') &&
+    typeof obj.actionableInsight === 'string'
+  );
+}
+
+/**
+ * Validate that an item is in the legacy format (date/eventTime-based)
+ */
+function isValidLegacyResponseItem(item: unknown): item is AIResponseItemLegacy {
   if (typeof item !== 'object' || item === null) {
     return false;
   }
@@ -446,38 +509,160 @@ function isValidAIResponseItem(item: unknown): item is AIResponseItem {
 }
 
 /**
- * Try to parse JSON response from AI
- * Returns a Map of date -> event analyses, or empty Map if parsing fails
+ * Extract JSON string from response (handles code blocks, objects, and arrays)
  */
-function tryParseJsonResponse(response: string): Map<string, EventAnalysis[]> {
-  const result = new Map<string, EventAnalysis[]>();
-  
-  // Look for JSON array in markdown code block
+function extractJsonString(response: string): string | null {
+  // Look for JSON in markdown code block
   const jsonBlockRegex = /```json\s*([\s\S]*?)```/;
   const match = jsonBlockRegex.exec(response);
   
-  if (!match) {
-    // Also try to find raw JSON array without code block
-    // Match opening bracket, then capture everything until closing bracket
-    // Use a balanced bracket approach by finding [ then the last ]
-    const startIdx = response.indexOf('[');
-    const endIdx = response.lastIndexOf(']');
-    
-    if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) {
-      return result;
-    }
-    
-    const potentialJson = response.substring(startIdx, endIdx + 1);
-    return parseJsonArray(potentialJson, result);
+  if (match) {
+    return match[1].trim();
   }
   
-  return parseJsonArray(match[1].trim(), result);
+  // Try to find raw JSON without code block - check which comes first: { or [
+  const objStartIdx = response.indexOf('{');
+  const arrStartIdx = response.indexOf('[');
+  
+  // If we find a column-oriented object (starts with {), use it
+  if (objStartIdx !== -1 && (arrStartIdx === -1 || objStartIdx < arrStartIdx)) {
+    const objEndIdx = response.lastIndexOf('}');
+    if (objEndIdx !== -1 && objEndIdx > objStartIdx) {
+      const potentialJson = response.substring(objStartIdx, objEndIdx + 1);
+      // Verify it looks like column-oriented format (has "columns" and "data")
+      if (potentialJson.includes('"columns"') && potentialJson.includes('"data"')) {
+        return potentialJson;
+      }
+    }
+  }
+  
+  // Try to find raw JSON array (legacy format) without code block
+  if (arrStartIdx !== -1) {
+    const arrEndIdx = response.lastIndexOf(']');
+    if (arrEndIdx !== -1 && arrEndIdx > arrStartIdx) {
+      return response.substring(arrStartIdx, arrEndIdx + 1);
+    }
+  }
+  
+  return null;
 }
 
 /**
- * Parse JSON array string and populate the result map
+ * Column-oriented JSON format from AI response
  */
-function parseJsonArray(jsonString: string, result: Map<string, EventAnalysis[]>): Map<string, EventAnalysis[]> {
+interface ColumnOrientedResponse {
+  columns: string[];
+  data: (string | null)[][];
+}
+
+/**
+ * Check if response is in column-oriented format
+ */
+function isColumnOrientedFormat(parsed: unknown): parsed is ColumnOrientedResponse {
+  if (typeof parsed !== 'object' || parsed === null) {
+    return false;
+  }
+  
+  const obj = parsed as Record<string, unknown>;
+  return (
+    Array.isArray(obj.columns) &&
+    Array.isArray(obj.data) &&
+    obj.columns.every((c: unknown) => typeof c === 'string')
+  );
+}
+
+/**
+ * Try to parse JSON response in the new column-oriented format or compact format
+ * Returns a Map of eventId -> event analysis, or empty Map if parsing fails
+ */
+function tryParseJsonResponseByEventId(response: string): Map<string, EventAnalysis> {
+  const result = new Map<string, EventAnalysis>();
+  
+  const jsonString = extractJsonString(response);
+  if (!jsonString) {
+    return result;
+  }
+  
+  try {
+    const parsed = JSON.parse(jsonString);
+    
+    // Check if it's the new column-oriented format
+    if (isColumnOrientedFormat(parsed)) {
+      const columns = parsed.columns;
+      const eventIdIdx = columns.indexOf('eventId');
+      const primarySuspectIdx = columns.indexOf('primarySuspect');
+      const mealTimeIdx = columns.indexOf('mealTime');
+      const actionableInsightIdx = columns.indexOf('actionableInsight');
+      
+      if (eventIdIdx === -1 || primarySuspectIdx === -1 || actionableInsightIdx === -1) {
+        console.warn('[HyposAI] Column-oriented JSON missing required columns');
+        return result;
+      }
+      
+      for (const row of parsed.data) {
+        // Skip rows that don't have at least the required number of columns
+        const requiredLength = Math.max(eventIdIdx, primarySuspectIdx, actionableInsightIdx) + 1;
+        if (!Array.isArray(row) || row.length < requiredLength) {
+          continue;
+        }
+        
+        const eventId = row[eventIdIdx];
+        const primarySuspect = row[primarySuspectIdx];
+        const mealTime = mealTimeIdx !== -1 && row.length > mealTimeIdx ? row[mealTimeIdx] : null;
+        const actionableInsight = row[actionableInsightIdx];
+        
+        if (typeof eventId === 'string' && typeof primarySuspect === 'string' && typeof actionableInsight === 'string') {
+          const analysis: EventAnalysis = {
+            eventId,
+            primarySuspect,
+            mealTime,
+            actionableInsight,
+          };
+          
+          result.set(eventId, analysis);
+        }
+      }
+      
+      return result;
+    }
+    
+    // Fallback: Check if it's the old array format
+    if (Array.isArray(parsed)) {
+      for (const item of parsed) {
+        if (isValidCompactResponseItem(item)) {
+          const analysis: EventAnalysis = {
+            eventId: item.eventId,
+            primarySuspect: item.primarySuspect,
+            mealTime: item.mealTime,
+            actionableInsight: item.actionableInsight,
+          };
+          
+          result.set(item.eventId, analysis);
+        }
+      }
+    } else {
+      console.warn('[HyposAI] JSON response is neither column-oriented nor array format');
+    }
+  } catch (error) {
+    // JSON parsing failed - log for debugging
+    console.warn('[HyposAI] JSON parsing failed for compact format:', error);
+  }
+  
+  return result;
+}
+
+/**
+ * Try to parse JSON response in the legacy format (date/eventTime-based)
+ * Returns a Map of date -> event analyses, or empty Map if parsing fails
+ */
+function tryParseLegacyJsonResponse(response: string): Map<string, EventAnalysis[]> {
+  const result = new Map<string, EventAnalysis[]>();
+  
+  const jsonString = extractJsonString(response);
+  if (!jsonString) {
+    return result;
+  }
+  
   try {
     const parsed = JSON.parse(jsonString);
     
@@ -487,45 +672,48 @@ function parseJsonArray(jsonString: string, result: Map<string, EventAnalysis[]>
     }
     
     for (const item of parsed) {
-      if (!isValidAIResponseItem(item)) {
-        continue;
+      if (isValidLegacyResponseItem(item)) {
+        // Create a synthetic eventId from date and time
+        const syntheticEventId = `${item.date}-${item.eventTime}`;
+        
+        const analysis: EventAnalysis = {
+          eventId: syntheticEventId,
+          primarySuspect: item.primarySuspect,
+          mealTime: item.deductedMealTime,
+          actionableInsight: item.actionableInsight,
+          // Include legacy fields for backward compatibility
+          date: item.date,
+          eventTime: item.eventTime,
+          nadirValue: item.nadirValue,
+        };
+        
+        if (!result.has(item.date)) {
+          result.set(item.date, []);
+        }
+        result.get(item.date)!.push(analysis);
       }
-      
-      const analysis: EventAnalysis = {
-        date: item.date,
-        eventTime: item.eventTime,
-        nadirValue: item.nadirValue,
-        primarySuspect: item.primarySuspect,
-        deductedMealTime: item.deductedMealTime,
-        actionableInsight: item.actionableInsight,
-      };
-      
-      if (!result.has(item.date)) {
-        result.set(item.date, []);
-      }
-      result.get(item.date)!.push(analysis);
     }
   } catch (error) {
-    // JSON parsing failed - log for debugging and fall back to markdown parsing
-    console.warn('[HyposAI] JSON parsing failed, will try markdown fallback:', error);
-    return result;
+    // JSON parsing failed - log for debugging
+    console.warn('[HyposAI] JSON parsing failed for legacy format:', error);
   }
   
   return result;
 }
 
 /**
- * Parse markdown table response (legacy fallback)
- * Returns a map of date -> event analyses
+ * Parse markdown table response and convert to eventId map (legacy fallback)
+ * Note: This only works with the old date-based format
  */
-function parseMarkdownTableResponse(response: string): Map<string, EventAnalysis[]> {
-  const result = new Map<string, EventAnalysis[]>();
+function parseMarkdownTableResponseByEventId(response: string): Map<string, EventAnalysis> {
+  const result = new Map<string, EventAnalysis>();
   
   // Look for markdown table with the expected columns
   // | Date | Event Time | Nadir Value | Primary Suspect | Deducted Meal Time | Actionable Insight |
   const tableRegex = /\|[\s]*(\d{4}-\d{2}-\d{2})[\s]*\|[\s]*(\d{1,2}:\d{2})[\s]*\|[\s]*([^|]+)[\s]*\|[\s]*([^|]+)[\s]*\|[\s]*([^|]+)[\s]*\|[\s]*([^|]+)[\s]*\|/g;
   
   let match;
+  let eventCounter = 1;
   while ((match = tableRegex.exec(response)) !== null) {
     const date = match[1].trim();
     const eventTime = match[2].trim();
@@ -534,19 +722,21 @@ function parseMarkdownTableResponse(response: string): Map<string, EventAnalysis
     const mealTime = match[5].trim();
     const insight = match[6].trim();
     
+    // Create a synthetic eventId
+    const syntheticEventId = `E-${String(eventCounter).padStart(3, '0')}`;
+    eventCounter++;
+    
     const analysis: EventAnalysis = {
+      eventId: syntheticEventId,
+      primarySuspect,
+      mealTime: mealTime === 'N/A' ? null : mealTime,
+      actionableInsight: insight,
       date,
       eventTime,
       nadirValue,
-      primarySuspect,
-      deductedMealTime: mealTime === 'N/A' ? null : mealTime,
-      actionableInsight: insight,
     };
     
-    if (!result.has(date)) {
-      result.set(date, []);
-    }
-    result.get(date)!.push(analysis);
+    result.set(syntheticEventId, analysis);
   }
   
   return result;
