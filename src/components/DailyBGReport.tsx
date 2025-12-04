@@ -117,8 +117,8 @@ const useStyles = makeStyles({
     ...shorthands.padding('24px'),
     ...shorthands.borderRadius('14px'),
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    backgroundColor: 'rgba(30, 30, 30, 0.5)',
-    boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.05), ${tokens.shadow4}`,
+    backgroundColor: tokens.colorNeutralBackground2,
+    boxShadow: tokens.shadow4,
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('16px'),
@@ -128,7 +128,7 @@ const useStyles = makeStyles({
     '@media (hover: hover)': {
       '&:hover': {
         transform: 'translateY(-2px)',
-        boxShadow: `inset 0 1px 0 0 rgba(255, 255, 255, 0.05), ${tokens.shadow16}`,
+        boxShadow: tokens.shadow16,
       },
     },
     '@media (max-width: 767px)': {
@@ -2189,83 +2189,85 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
         <div className={styles.sectionCard}>
           <Text className={styles.sectionTitle}>Insulin on Board (IOB)</Text>
           
-          <div className={styles.iobChartContainer}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={hourlyIOBData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                {/* Day/night shading gradients */}
-                {showDayNightShading && (
-                  <defs>
-                    <linearGradient id="iobNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#1a237e" stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
-                    </linearGradient>
-                    <linearGradient id="iobNightGradientRight" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
-                      <stop offset="100%" stopColor="#1a237e" stopOpacity="0.25" />
-                    </linearGradient>
-                  </defs>
-                )}
-                
-                {/* Day/night shading - midnight to 8AM */}
-                {showDayNightShading && (
-                  <ReferenceArea
-                    x1={0}
-                    x2={8}
-                    fill="url(#iobNightGradientLeft)"
+          <div className={styles.chartCardInnerContent}>
+            <div className={styles.iobChartContainer}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={hourlyIOBData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  {/* Day/night shading gradients */}
+                  {showDayNightShading && (
+                    <defs>
+                      <linearGradient id="iobNightGradientLeft" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#1a237e" stopOpacity="0.25" />
+                        <stop offset="100%" stopColor="#1a237e" stopOpacity="0" />
+                      </linearGradient>
+                      <linearGradient id="iobNightGradientRight" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#1a237e" stopOpacity="0" />
+                        <stop offset="100%" stopColor="#1a237e" stopOpacity="0.25" />
+                      </linearGradient>
+                    </defs>
+                  )}
+                  
+                  {/* Day/night shading - midnight to 8AM */}
+                  {showDayNightShading && (
+                    <ReferenceArea
+                      x1={0}
+                      x2={8}
+                      fill="url(#iobNightGradientLeft)"
+                    />
+                  )}
+                  {/* Day/night shading - 8PM to midnight */}
+                  {showDayNightShading && (
+                    <ReferenceArea
+                      x1={20}
+                      x2={24}
+                      fill="url(#iobNightGradientRight)"
+                    />
+                  )}
+                  
+                  <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
+                  
+                  <XAxis
+                    type="number"
+                    dataKey="hour"
+                    domain={[0, 24]}
+                    ticks={[0, 6, 12, 18, 24]}
+                    tickFormatter={formatXAxisIOB}
+                    stroke={tokens.colorNeutralForeground2}
+                    style={{ fontSize: tokens.fontSizeBase200 }}
                   />
-                )}
-                {/* Day/night shading - 8PM to midnight */}
-                {showDayNightShading && (
-                  <ReferenceArea
-                    x1={20}
-                    x2={24}
-                    fill="url(#iobNightGradientRight)"
+                  
+                  <YAxis
+                    label={{ 
+                      value: 'Active IOB (Units)', 
+                      angle: -90, 
+                      position: 'insideLeft', 
+                      style: { fontSize: tokens.fontSizeBase200 } 
+                    }}
+                    stroke={tokens.colorNeutralForeground2}
+                    style={{ fontSize: tokens.fontSizeBase200 }}
                   />
-                )}
-                
-                <CartesianGrid strokeDasharray="3 3" stroke={tokens.colorNeutralStroke2} />
-                
-                <XAxis
-                  type="number"
-                  dataKey="hour"
-                  domain={[0, 24]}
-                  ticks={[0, 6, 12, 18, 24]}
-                  tickFormatter={formatXAxisIOB}
-                  stroke={tokens.colorNeutralForeground2}
-                  style={{ fontSize: tokens.fontSizeBase200 }}
-                />
-                
-                <YAxis
-                  label={{ 
-                    value: 'Active IOB (Units)', 
-                    angle: -90, 
-                    position: 'insideLeft', 
-                    style: { fontSize: tokens.fontSizeBase200 } 
-                  }}
-                  stroke={tokens.colorNeutralForeground2}
-                  style={{ fontSize: tokens.fontSizeBase200 }}
-                />
-                
-                <RechartsTooltip content={<IOBTooltip />} />
-                
-                <Legend
-                  verticalAlign="top"
-                  height={36}
-                  iconType="line"
-                  wrapperStyle={{ fontSize: tokens.fontSizeBase200 }}
-                />
-                
-                <Line
-                  type="monotone"
-                  dataKey="activeIOB"
-                  name="Active IOB"
-                  stroke="#1976D2"
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  activeDot={{ r: 5 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+                  
+                  <RechartsTooltip content={<IOBTooltip />} />
+                  
+                  <Legend
+                    verticalAlign="top"
+                    height={36}
+                    iconType="line"
+                    wrapperStyle={{ fontSize: tokens.fontSizeBase200 }}
+                  />
+                  
+                  <Line
+                    type="monotone"
+                    dataKey="activeIOB"
+                    name="Active IOB"
+                    stroke="#1976D2"
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                    activeDot={{ r: 5 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       )}
