@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>661 Optimize Day/Night Shading section in Settings</summary>
+
+[#661](../../pull/661) Optimize Day/Night Shading section in Settings
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>655 Fix Hypos AI analysis: column-oriented JSON format, eventId-based parsing, table display</summary>
 
 [#655](../../pull/655) Fix Hypos AI analysis: column-oriented JSON format, eventId-based parsing, table display
