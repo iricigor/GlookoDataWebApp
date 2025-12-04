@@ -78,11 +78,14 @@ const useStyles = makeStyles({
       ...shorthands.overflow('auto'),
       marginTop: '12px',
       marginBottom: '12px',
+      maxWidth: '100%',
     },
     '& pre code': {
       backgroundColor: 'transparent',
       padding: '0',
       fontSize: tokens.fontSizeBase300,
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'break-word',
     },
     '& blockquote': {
       ...shorthands.borderLeft('4px', 'solid', tokens.colorNeutralStroke2),
