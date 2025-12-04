@@ -4,6 +4,9 @@
   "version": "1.6.0",
   "type": "module",
   "license": "MIT",
+  "scarfSettings": {
+    "enabled": false
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
