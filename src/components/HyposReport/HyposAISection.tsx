@@ -155,6 +155,8 @@ const useStyles = makeStyles({
     ...shorthands.padding('16px'),
     backgroundColor: tokens.colorNeutralBackground3,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    overflowX: 'auto',
+    maxWidth: '100%',
   },
   cachedIndicator: {
     fontSize: tokens.fontSizeBase100,
@@ -369,14 +371,20 @@ export function HyposAISection({
   }, [allReadings, thresholds, bolusReadings, basalReadings]);
   
   // Get analyses for current date's events from the cache
-  // Supports both eventId matching (new format) and date matching (legacy format)
+  // Uses allEvents (which has consistent eventIds matching the AI response) 
+  // then filters by currentDate for display
   const currentDateAnalyses: EventAnalysis[] = useMemo(() => {
     if (Object.keys(responseCache).length === 0) return [];
     
     const analyses: EventAnalysis[] = [];
     
-    // First, try to match by eventId (new format)
-    for (const event of currentDateEvents) {
+    // Match events from allEvents (which have the same eventIds as sent to AI)
+    // then filter to only include events on the current date
+    for (const event of allEvents) {
+      // Check if this event is on the current date
+      const eventDateStr = event.startTime.toISOString().split('T')[0];
+      if (eventDateStr !== currentDate) continue;
+      
       const cachedAnalysis = responseCache[event.eventId];
       if (cachedAnalysis) {
         analyses.push(cachedAnalysis);
@@ -394,7 +402,7 @@ export function HyposAISection({
     }
     
     return analyses;
-  }, [currentDateEvents, responseCache, currentDate]);
+  }, [allEvents, responseCache, currentDate]);
   
   // Check if we have any cached analysis at all
   const hasCachedAnalysis = Object.keys(responseCache).length > 0;
@@ -722,8 +730,8 @@ export function HyposAISection({
       {hasCachedAnalysis && currentDateAnalyses.length > 0 && (
         <div className={styles.analysisContainer}>
           {currentDateAnalyses.map((analysis, index) => {
-            // Find the matching event for this analysis
-            const matchingEvent = currentDateEvents.find(e => e.eventId === analysis.eventId);
+            // Find the matching event for this analysis from allEvents (has consistent eventIds)
+            const matchingEvent = allEvents.find(e => e.eventId === analysis.eventId);
             return renderEventCard(analysis, matchingEvent, index);
           })}
         </div>

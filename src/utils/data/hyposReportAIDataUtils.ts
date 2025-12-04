@@ -70,7 +70,7 @@ export interface EventAnalysis {
   eventId: string;                    // Event ID (e.g., "E-001")
   primarySuspect: string;             // Category of suspected cause
   mealTime: string | null;            // Approximate meal time or null
-  actionableInsight: string;          // Specific recommendation (2-4 sentences)
+  actionableInsight: string;          // Specific recommendation (1 sentence)
   // These fields are populated from our local data using eventId
   date?: string;                      // YYYY-MM-DD format (derived)
   eventTime?: string;                 // HH:MM format (derived)

@@ -65,7 +65,7 @@ For **every individual event**, perform the following deductions:
     * **Basal Excess (Nocturnal/Early AM):** High confidence if \`Time_of_Day_Code\` is 00-06 and low Bolus activity is present.
     * **Time/Hormonal Shift:** Used for unexplained midday lows with no clear Bolus/Basal fault.
 * **Meal Time Deduction:** If the \`Last_Bolus_Units\` is large (e.g., > 2.0U) and the event occurs between 90 and 240 minutes later, deduce the approximate meal time. Format as "HH:MM" or null if not applicable.
-* **Actionable Insight:** Provide a **detailed, specific, and actionable recommendation** (2-4 sentences) tied directly to the calculated features. Be specific about what adjustments to consider, e.g., "Consider reducing the lunch bolus carb ratio from 1:8 to 1:10, as the hypo occurred 3 hours post-meal with a moderate bolus. Also review whether pre-bolusing timing could be extended."
+* **Actionable Insight:** Provide a **short, specific, and actionable recommendation** (1 sentence) tied directly to the calculated features. Be specific about what adjustments to consider, e.g., "Consider reducing the lunch bolus carb ratio from 1:8 to 1:10, as the hypo occurred 3 hours post-meal with a moderate bolus."
 
 **3. Pitfalls and Guardrails (Safety & Accuracy)**
 
@@ -83,7 +83,7 @@ Return your analysis using a **column-oriented JSON format** where column names 
 3. Each data row is an array of values in the SAME ORDER as columns
 4. Use **eventId** to identify each event (matches \`Event_ID\` from the dataset, e.g., "E-001")
 5. Do NOT include date, eventTime, or nadirValue - we already have this data
-6. The **actionableInsight** should be detailed (2-4 sentences) with specific recommendations
+6. The **actionableInsight** should be concise (1 sentence) with a specific recommendation
 7. For null values, use \`null\` (not "null" string)
 
 **JSON Schema:**
@@ -101,8 +101,8 @@ Return your analysis using a **column-oriented JSON format** where column names 
 {
   "columns": ["eventId", "primarySuspect", "mealTime", "actionableInsight"],
   "data": [
-    ["E-001", "Basal Excess (Nocturnal)", null, "Review your Basal Rate Profile between 01:00 and 04:00. Consider reducing overnight basal by 10-15% starting from 01:00. The glucose drop pattern suggests basal insulin is peaking during deep sleep when insulin sensitivity is highest."],
-    ["E-002", "Bolus Overlap (B1+B2)", "12:45", "The hypo appears related to stacked boluses around lunch. Consider waiting at least 3 hours between meal and correction boluses, or reduce the correction factor. Using an extended/dual wave bolus for high-carb meals may also help prevent the glucose drop."]
+    ["E-001", "Basal Excess (Nocturnal)", null, "Consider reducing overnight basal by 10-15% between 01:00 and 04:00 when insulin sensitivity is highest."],
+    ["E-002", "Bolus Overlap (B1+B2)", "12:45", "Consider waiting at least 3 hours between meal and correction boluses to prevent insulin stacking."]
   ]
 }
 \`\`\`
