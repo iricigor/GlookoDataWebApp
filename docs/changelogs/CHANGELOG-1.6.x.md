@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>663 Fix AI Hypos eventId matching and response overflow</summary>
+
+[#663](../../pull/663) Fix AI Hypos eventId matching and response overflow
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>661 Optimize Day/Night Shading section in Settings</summary>
 
 [#661](../../pull/661) Optimize Day/Night Shading section in Settings
