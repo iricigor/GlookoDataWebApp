@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>657 Fix Raw Metadata row styling in File Info tab</summary>
+
+[#657](../../pull/657) Fix Raw Metadata row styling in File Info tab
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>653 Add section boxes around Daily BG tab sections with glassmorphic styling</summary>
 
 [#653](../../pull/653) Add section boxes around Daily BG tab sections with glassmorphic styling
