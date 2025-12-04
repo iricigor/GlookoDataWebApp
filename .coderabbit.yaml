@@ -8,7 +8,7 @@ reviews:
   auto_review:
     enabled: true
     # Review draft PRs as well (set to true if you want this)
-    drafts: false
+    drafts: true
     # Do not ignore PRs from any bots, including GitHub Copilot - this empty array ensures all PRs (bot or human) are reviewed
     ignore_usernames:
       - ""          # Allow all users/bots
