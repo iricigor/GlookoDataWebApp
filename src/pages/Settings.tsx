@@ -136,6 +136,7 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
     marginBottom: '12px',
+    display: 'block',
   },
   apiKeyContainer: {
     display: 'flex',
