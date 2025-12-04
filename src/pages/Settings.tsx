@@ -819,7 +819,7 @@ export function Settings({
               <Title3 className={styles.sectionTitle}>Day/Night Shading</Title3>
               <Divider className={styles.divider} />
               <Text className={styles.settingDescription}>
-                Show day/night background shading on 24-hour glucose graphs. Night hours (midnight to 8AM and 8PM to midnight) are shaded to help visualize glucose patterns during sleep.
+                Show day/night background shading on 24-hour glucose graphs.
               </Text>
               <Switch
                 checked={showDayNightShading}
