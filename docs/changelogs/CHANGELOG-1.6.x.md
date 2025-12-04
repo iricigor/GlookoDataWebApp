@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>653 Add section boxes around Daily BG tab sections with glassmorphic styling</summary>
+
+[#653](../../pull/653) Add section boxes around Daily BG tab sections with glassmorphic styling
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>652 feat: add toast notification for AI provider auto-switch</summary>
 
 [#652](../../pull/652) feat: add toast notification for AI provider auto-switch
