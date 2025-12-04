@@ -600,20 +600,22 @@ function tryParseJsonResponseByEventId(response: string): Map<string, EventAnaly
       }
       
       for (const row of parsed.data) {
-        if (!Array.isArray(row) || row.length < columns.length) {
+        // Skip rows that don't have at least the required number of columns
+        const requiredLength = Math.max(eventIdIdx, primarySuspectIdx, actionableInsightIdx) + 1;
+        if (!Array.isArray(row) || row.length < requiredLength) {
           continue;
         }
         
         const eventId = row[eventIdIdx];
         const primarySuspect = row[primarySuspectIdx];
-        const mealTime = mealTimeIdx !== -1 ? row[mealTimeIdx] : null;
+        const mealTime = mealTimeIdx !== -1 && row.length > mealTimeIdx ? row[mealTimeIdx] : null;
         const actionableInsight = row[actionableInsightIdx];
         
         if (typeof eventId === 'string' && typeof primarySuspect === 'string' && typeof actionableInsight === 'string') {
           const analysis: EventAnalysis = {
             eventId,
             primarySuspect,
-            mealTime: mealTime,
+            mealTime,
             actionableInsight,
           };
           
