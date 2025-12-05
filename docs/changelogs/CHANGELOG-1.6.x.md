@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>668 BG Overview tab styling improvements</summary>
+
+[#668](../../pull/668) BG Overview tab styling improvements
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>670 Add Getting Started Guide to Data Upload page</summary>
 
 [#670](../../pull/670) Add Getting Started Guide to Data Upload page
