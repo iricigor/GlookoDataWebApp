@@ -33,6 +33,7 @@ import type {
   HighLowIncidents, 
   FluxResult 
 } from '../../utils/data/glucoseRangeUtils';
+import { cardBaseStyle } from './styles';
 
 /** Fixed box height for consistent sizing */
 const BOX_HEIGHT = '90px';
@@ -50,27 +51,7 @@ const MOON_COLOR = '#7B68EE';
 
 const useStyles = makeStyles({
   card: {
-    ...shorthands.padding('24px'),
-    ...shorthands.borderRadius('14px'),
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
-    backgroundColor: tokens.colorNeutralBackground2,
-    boxShadow: tokens.shadow4,
-    display: 'flex',
-    flexDirection: 'column',
-    ...shorthands.gap('16px'),
-    transitionProperty: 'transform, box-shadow',
-    transitionDuration: tokens.durationNormal,
-    transitionTimingFunction: tokens.curveEasyEase,
-    '@media (hover: hover)': {
-      '&:hover': {
-        transform: 'translateY(-2px)',
-        boxShadow: tokens.shadow16,
-      },
-    },
-    '@media (max-width: 767px)': {
-      ...shorthands.padding('16px'),
-      ...shorthands.borderRadius('12px'),
-    },
+    ...cardBaseStyle,
   },
   cardTitle: {
     fontSize: tokens.fontSizeBase600,
@@ -154,6 +135,7 @@ const useStyles = makeStyles({
     position: 'relative',
     height: '100%',
   },
+  // Overlay positions numbers at ~8%, 50%, 92% using space-between with 8% padding
   quartileValuesOverlay: {
     position: 'absolute',
     top: '50%',
@@ -391,12 +373,16 @@ function getFluxGradeColor(grade: string): string {
   return tokens.colorNeutralForeground1;
 }
 
+// Quartile marker x-positions (aligned with overlay padding of 8%)
+// Q25 at ~12%, Q50 at 50%, Q75 at ~88% to match space-between layout
+const QUARTILE_POSITIONS = { q25: 12, q50: 50, q75: 88 };
+
 /**
  * Renders an inline SVG Gaussian-like curve with a shaded area and vertical markers for quartiles.
  *
- * The curve spans from 5% to 95% of the viewBox width and is drawn inside a 100x55 viewBox.
- * Vertical marker lines indicate the 25th, 50th (median), and 75th percentiles at approximately
- * 23%, 50%, and 77% of the width respectively.
+ * The curve spans from 0% to 100% of the viewBox width with a very wide sigma to ensure all three
+ * quartile numbers appear visually over the curve. Vertical marker lines indicate the 25th, 50th
+ * (median), and 75th percentiles at positions matching the overlay layout.
  *
  * @returns An SVG element containing the shaded Gaussian curve and the Q25, Q50, Q75 marker lines.
  */
@@ -405,15 +391,15 @@ function GaussianCurve() {
   const curveColor = '#A8C5E8';
   const lineColor = '#7AA7D6';
   
-  // Gaussian curve spans from 5% to 95% of the viewBox width for almost full coverage
-  // Numbers will be positioned at approximately 15%, 50%, 85% to align with curve edges
+  // Gaussian curve spans full width (0-100%) with very wide sigma so all numbers appear over the curve
+  // Using sigma=50 creates a wide, flat curve that covers the entire right column
   const curvePoints = [];
-  for (let x = 5; x <= 95; x += 2) {
-    const sigma = 25;
-    const y = 50 - 42 * Math.exp(-Math.pow(x - 50, 2) / (2 * Math.pow(sigma, 2)));
+  for (let x = 0; x <= 100; x += 2) {
+    const sigma = 50;
+    const y = 50 - 38 * Math.exp(-Math.pow(x - 50, 2) / (2 * Math.pow(sigma, 2)));
     curvePoints.push(`${x},${y}`);
   }
-  const curvePath = `M 5,50 L ${curvePoints.join(' L ')} L 95,50`;
+  const curvePath = `M 0,50 L ${curvePoints.join(' L ')} L 100,50`;
   const curveOutline = `M ${curvePoints.join(' L ')}`;
   
   return (
@@ -432,12 +418,12 @@ function GaussianCurve() {
         strokeWidth="1.5"
         strokeOpacity="0.6"
       />
-      {/* Q25 marker line at 23% position */}
-      <line x1="23" y1="8" x2="23" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
-      {/* Q50 (median) marker line at 50% position */}
-      <line x1="50" y1="8" x2="50" y2="50" stroke={lineColor} strokeWidth="1.5" strokeOpacity="0.6" strokeDasharray="2,2" />
-      {/* Q75 marker line at 77% position */}
-      <line x1="77" y1="8" x2="77" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
+      {/* Q25 marker line - position matches overlay layout */}
+      <line x1={QUARTILE_POSITIONS.q25} y1="8" x2={QUARTILE_POSITIONS.q25} y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
+      {/* Q50 (median) marker line - center position */}
+      <line x1={QUARTILE_POSITIONS.q50} y1="8" x2={QUARTILE_POSITIONS.q50} y2="50" stroke={lineColor} strokeWidth="1.5" strokeOpacity="0.6" strokeDasharray="2,2" />
+      {/* Q75 marker line - position matches overlay layout */}
+      <line x1={QUARTILE_POSITIONS.q75} y1="8" x2={QUARTILE_POSITIONS.q75} y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
     </svg>
   );
 }
