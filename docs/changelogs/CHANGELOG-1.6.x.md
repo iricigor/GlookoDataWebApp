@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>676 Change default demo data from Joshua to Larry</summary>
+
+[#676](../../pull/676) Change default demo data from Joshua to Larry
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>674 Add Settings page deep linking</summary>
 
 [#674](../../pull/674) Add Settings page deep linking
