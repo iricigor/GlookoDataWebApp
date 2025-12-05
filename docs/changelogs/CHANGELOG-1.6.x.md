@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>674 Add Settings page deep linking</summary>
+
+[#674](../../pull/674) Add Settings page deep linking
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>668 BG Overview tab styling improvements</summary>
 
 [#668](../../pull/668) BG Overview tab styling improvements
