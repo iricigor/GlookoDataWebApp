@@ -397,18 +397,29 @@ function GaussianCurve() {
   const lineColor = '#7AA7D6';
   
   // Gaussian curve spans full width (0-100%) with very wide sigma so all numbers appear over the curve
-  // Using sigma=50 creates a wide, flat curve that covers the entire right column
+  // Using sigma=80 creates a very wide, flat curve that covers the entire container width
   const curvePoints = [];
   for (let x = 0; x <= 100; x += 2) {
-    const sigma = 50;
-    const y = 50 - 38 * Math.exp(-Math.pow(x - 50, 2) / (2 * Math.pow(sigma, 2)));
+    const sigma = 80;
+    const y = 50 - 35 * Math.exp(-Math.pow(x - 50, 2) / (2 * Math.pow(sigma, 2)));
     curvePoints.push(`${x},${y}`);
   }
   const curvePath = `M 0,50 L ${curvePoints.join(' L ')} L 100,50`;
   const curveOutline = `M ${curvePoints.join(' L ')}`;
   
   return (
-    <svg viewBox="0 0 100 55" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
+    <svg 
+      viewBox="0 0 100 50" 
+      preserveAspectRatio="none" 
+      style={{ 
+        width: '100%', 
+        height: '100%', 
+        position: 'absolute', 
+        top: 0, 
+        left: 0, 
+        zIndex: 1 
+      }}
+    >
       {/* Shaded area under curve - soft blue fill */}
       <path
         d={curvePath}
