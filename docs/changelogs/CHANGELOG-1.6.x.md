@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>678 Setup Azure Static Web Apps PR preview environments</summary>
+
+[#678](../../pull/678) Setup Azure Static Web Apps PR preview environments
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>676 Change default demo data from Joshua to Larry</summary>
 
 [#676](../../pull/676) Change default demo data from Joshua to Larry
