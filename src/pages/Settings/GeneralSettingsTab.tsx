@@ -105,14 +105,13 @@ export function GeneralSettingsTab({
         </Text>
         <Dropdown
           placeholder="Select language"
-          value={LANGUAGE_OPTIONS.find(opt => opt.value === responseLanguage)?.label || 'English'}
           selectedOptions={[responseLanguage]}
           onOptionSelect={(_, data) => onResponseLanguageChange(data.optionValue as ResponseLanguage)}
           appearance="outline"
           style={{ maxWidth: '280px' }}
         >
           {LANGUAGE_OPTIONS.map(option => (
-            <Option key={option.value} value={option.value} text={option.label}>
+            <Option key={option.value} value={option.value}>
               {option.label}
             </Option>
           ))}
