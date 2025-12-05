@@ -14,8 +14,6 @@ reviews:
       - ""          # Allow all users/bots
     # Optional: Skip based on PR labels (e.g., don't review WIPs)
     labels: ["!wip", "!draft"]
-  # Optional: Suppress the "Review skipped" status message entirely
-  review_status: false
   
   # Path-based instructions for enforcing docstrings
   path_instructions:
