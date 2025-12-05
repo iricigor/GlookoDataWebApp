@@ -4,17 +4,12 @@
 language: "en-US"
 
 reviews:
-  # Enable automatic code reviews for all PRs
   auto_review:
-    enabled: true
-    # Review draft PRs as well (set to true if you want this)
-    drafts: true
-    # Do not ignore PRs from any bots, including GitHub Copilot - this empty array ensures all PRs (bot or human) are reviewed
-    ignore_usernames:
-      - ""          # Allow all users/bots
-    # Optional: Skip based on PR labels (e.g., don't review WIPs)
+    enabled: true         # Enable automatic code reviews for all PRs
+    drafts: true          # Review draft PRs as well (set to true if you want this)
+    ignore_usernames: []  # Empty array allows all users/bots
     labels: ["!wip", "!draft"]
-  
+
   # Path-based instructions for enforcing docstrings
   path_instructions:
     - path: "src/**/*.ts"
