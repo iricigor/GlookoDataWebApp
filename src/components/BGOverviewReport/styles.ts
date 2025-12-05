@@ -8,6 +8,35 @@ import {
   shorthands,
 } from '@fluentui/react-components';
 
+/**
+ * Shared base card style for all section cards in BG Overview.
+ * This object is spread into individual card styles to ensure consistency.
+ * Exported for use in other component files that need matching card styling.
+ */
+export const cardBaseStyle = {
+  ...shorthands.padding('24px'),
+  ...shorthands.borderRadius('14px'),
+  ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+  backgroundColor: tokens.colorNeutralBackground2,
+  boxShadow: tokens.shadow4,
+  display: 'flex',
+  flexDirection: 'column' as const,
+  ...shorthands.gap('16px'),
+  transitionProperty: 'transform, box-shadow',
+  transitionDuration: tokens.durationNormal,
+  transitionTimingFunction: tokens.curveEasyEase,
+  '@media (hover: hover)': {
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      boxShadow: tokens.shadow16,
+    },
+  },
+  '@media (max-width: 767px)': {
+    ...shorthands.padding('16px'),
+    ...shorthands.borderRadius('12px'),
+  },
+};
+
 export const useBGOverviewStyles = makeStyles({
   container: {
     display: 'flex',
@@ -98,11 +127,7 @@ export const useBGOverviewStyles = makeStyles({
     flexWrap: 'wrap',
   },
   tirCard: {
-    ...shorthands.padding('20px'),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    boxShadow: tokens.shadow16,
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...cardBaseStyle,
   },
   cardTitle: {
     fontSize: tokens.fontSizeBase600,
@@ -185,11 +210,7 @@ export const useBGOverviewStyles = makeStyles({
     textAlign: 'center',
   },
   hba1cCard: {
-    ...shorthands.padding('16px', '20px'),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    boxShadow: tokens.shadow16,
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...cardBaseStyle,
   },
   hba1cMainRow: {
     display: 'flex',
@@ -258,11 +279,7 @@ export const useBGOverviewStyles = makeStyles({
     flexShrink: 0,
   },
   riskCard: {
-    ...shorthands.padding('16px', '20px'),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    boxShadow: tokens.shadow16,
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...cardBaseStyle,
   },
   riskGrid: {
     display: 'grid',
@@ -316,25 +333,13 @@ export const useBGOverviewStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
   },
   baseCard: {
-    ...shorthands.padding('20px'),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    boxShadow: tokens.shadow16,
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...cardBaseStyle,
   },
   sectionCard: {
-    ...shorthands.padding('20px'),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    boxShadow: tokens.shadow16,
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...cardBaseStyle,
   },
   agpCard: {
-    ...shorthands.padding('20px'),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    boxShadow: tokens.shadow16,
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...cardBaseStyle,
   },
   accordion: {
     ...shorthands.borderRadius(tokens.borderRadiusMedium),

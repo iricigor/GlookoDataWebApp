@@ -33,6 +33,7 @@ import type {
   HighLowIncidents, 
   FluxResult 
 } from '../../utils/data/glucoseRangeUtils';
+import { cardBaseStyle } from './styles';
 
 /** Fixed box height for consistent sizing */
 const BOX_HEIGHT = '90px';
@@ -50,11 +51,7 @@ const MOON_COLOR = '#7B68EE';
 
 const useStyles = makeStyles({
   card: {
-    ...shorthands.padding('16px', '20px'),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    boxShadow: tokens.shadow16,
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    ...cardBaseStyle,
   },
   cardTitle: {
     fontSize: tokens.fontSizeBase600,
@@ -87,10 +84,10 @@ const useStyles = makeStyles({
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
     ...shorthands.gap('12px'),
-    '@media (max-width: 900px)': {
+    '@media (max-width: 1024px)': {
       gridTemplateColumns: 'repeat(2, 1fr)',
     },
-    '@media (max-width: 600px)': {
+    '@media (max-width: 768px)': {
       gridTemplateColumns: '1fr',
     },
   },
@@ -100,10 +97,14 @@ const useStyles = makeStyles({
     flexDirection: 'row',
     ...shorthands.padding('10px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    backgroundColor: tokens.colorNeutralBackground2,
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     height: BOX_HEIGHT,
     boxSizing: 'border-box',
     alignItems: 'center',
+    ...shorthands.overflow('visible'),
+    minWidth: 0, // Prevent overflow on narrow screens
+    width: '100%', // Ensure full width in grid
   },
   labelColumn: {
     display: 'flex',
@@ -120,6 +121,7 @@ const useStyles = makeStyles({
     flexGrow: 1,
     height: '100%',
     position: 'relative',
+    ...shorthands.overflow('visible'),
   },
   sectionTitle: {
     fontSize: tokens.fontSizeBase200,
@@ -127,7 +129,7 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     lineHeight: 1.2,
   },
-  // Quartile Gaussian curve styles - wider, more curvy
+  // Quartile Gaussian curve styles - full width for right column
   gaussianContainer: {
     display: 'flex',
     flexDirection: 'column',
@@ -136,7 +138,10 @@ const useStyles = makeStyles({
     width: '100%',
     position: 'relative',
     height: '100%',
+    ...shorthands.overflow('visible'),
   },
+  // Overlay positions numbers using space-between with 8% horizontal padding.
+  // With space-between, the first number is at ~8%, middle at 50%, last at ~92%.
   quartileValuesOverlay: {
     position: 'absolute',
     top: '50%',
@@ -146,8 +151,8 @@ const useStyles = makeStyles({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingLeft: '15%',
-    paddingRight: '15%',
+    paddingLeft: '8%',
+    paddingRight: '8%',
     zIndex: 2,
   },
   quartileValue: {
@@ -292,13 +297,26 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
   },
   // Summary stats row - inline format, darker background
+  summarySection: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('8px'),
+    marginTop: '12px',
+  },
+  summaryHeader: {
+    fontSize: tokens.fontSizeBase400,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
   summaryRow: {
     display: 'flex',
     justifyContent: 'space-around',
     alignItems: 'center',
     flexWrap: 'wrap',
     ...shorthands.padding('8px', '12px'),
-    marginTop: '12px',
     backgroundColor: tokens.colorNeutralBackground3,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     ...shorthands.gap('12px'),
@@ -348,7 +366,12 @@ interface SugarmateStatsCardProps {
   bedtimeAverage: number | null;
 }
 
-/** Get color for flux grade */
+/**
+ * Map a flux grade identifier to its display color.
+ *
+ * @param grade - The flux grade identifier to look up.
+ * @returns The color value associated with `grade`. If `grade` is not found, returns the neutral foreground color.
+ */
 function getFluxGradeColor(grade: string): string {
   if (grade in FLUX_GRADE_COLORS) {
     return FLUX_GRADE_COLORS[grade as keyof typeof FLUX_GRADE_COLORS];
@@ -356,26 +379,49 @@ function getFluxGradeColor(grade: string): string {
   return tokens.colorNeutralForeground1;
 }
 
-/** SVG Gaussian curve component for quartiles - wider to ensure numbers are in front */
+// Quartile marker x-positions for SVG.
+// The CSS overlay uses 8% padding with space-between, placing labels roughly at 8%, 50%, 92%.
+// SVG markers are positioned at 12%, 50%, 88% to align visually with these label positions.
+const QUARTILE_POSITIONS = { q25: 12, q50: 50, q75: 88 };
+
+/**
+ * Renders an inline SVG Gaussian-like curve with a shaded area and vertical markers for quartiles.
+ *
+ * The curve spans from 0% to 100% of the viewBox width with a very wide sigma to ensure all three
+ * quartile numbers appear visually over the curve. Vertical marker lines indicate the 25th, 50th
+ * (median), and 75th percentiles at positions matching the overlay layout.
+ *
+ * @returns An SVG element containing the shaded Gaussian curve and the Q25, Q50, Q75 marker lines.
+ */
 function GaussianCurve() {
   // Soft blue color for the curve
   const curveColor = '#A8C5E8';
   const lineColor = '#7AA7D6';
   
-  // Gaussian curve with wide sigma for a broader distribution
-  // Curve spans from 15% to 85% of the viewBox width
-  // Numbers will be positioned at 15%, 50%, 85% to align with curve edges
+  // Gaussian curve with sigma=25 creates a balanced bell curve shape
+  // Wide enough to cover all three quartile numbers with a visible peak in the center
   const curvePoints = [];
-  for (let x = 15; x <= 85; x += 2) {
-    const sigma = 18;
+  for (let x = 0; x <= 100; x += 2) {
+    const sigma = 25;
     const y = 50 - 42 * Math.exp(-Math.pow(x - 50, 2) / (2 * Math.pow(sigma, 2)));
     curvePoints.push(`${x},${y}`);
   }
-  const curvePath = `M 15,50 L ${curvePoints.join(' L ')} L 85,50`;
+  const curvePath = `M 0,50 L ${curvePoints.join(' L ')} L 100,50`;
   const curveOutline = `M ${curvePoints.join(' L ')}`;
   
   return (
-    <svg viewBox="0 0 100 55" preserveAspectRatio="xMidYMid meet" style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 1 }}>
+    <svg 
+      viewBox="0 0 100 50" 
+      preserveAspectRatio="none" 
+      style={{ 
+        width: '100%', 
+        height: '100%', 
+        position: 'absolute', 
+        top: 0, 
+        left: 0, 
+        zIndex: 1 
+      }}
+    >
       {/* Shaded area under curve - soft blue fill */}
       <path
         d={curvePath}
@@ -390,12 +436,12 @@ function GaussianCurve() {
         strokeWidth="1.5"
         strokeOpacity="0.6"
       />
-      {/* Q25 marker line at 28% position (closer to center) */}
-      <line x1="28" y1="8" x2="28" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
-      {/* Q50 (median) marker line at 50% position */}
-      <line x1="50" y1="8" x2="50" y2="50" stroke={lineColor} strokeWidth="1.5" strokeOpacity="0.6" strokeDasharray="2,2" />
-      {/* Q75 marker line at 72% position (closer to center) */}
-      <line x1="72" y1="8" x2="72" y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
+      {/* Q25 marker line - position matches overlay layout */}
+      <line x1={QUARTILE_POSITIONS.q25} y1="8" x2={QUARTILE_POSITIONS.q25} y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
+      {/* Q50 (median) marker line - center position */}
+      <line x1={QUARTILE_POSITIONS.q50} y1="8" x2={QUARTILE_POSITIONS.q50} y2="50" stroke={lineColor} strokeWidth="1.5" strokeOpacity="0.6" strokeDasharray="2,2" />
+      {/* Q75 marker line - position matches overlay layout */}
+      <line x1={QUARTILE_POSITIONS.q75} y1="8" x2={QUARTILE_POSITIONS.q75} y2="50" stroke={lineColor} strokeWidth="1" strokeOpacity="0.5" strokeDasharray="2,2" />
     </svg>
   );
 }
@@ -445,6 +491,21 @@ function HighLowRing({ highs, lows }: { highs: number; lows: number }) {
   );
 }
 
+/**
+ * Render a statistics card that displays glucose distribution, incident counts, stability (flux), and summary metrics inspired by the Sugarmate app.
+ *
+ * @param glucoseUnit - Unit used to format glucose values (e.g., mg/dL or mmol/L)
+ * @param averageGlucose - Mean glucose value for the selected period, or `null` if unavailable
+ * @param medianGlucose - Median glucose value for the selected period, or `null` if unavailable
+ * @param standardDeviation - Standard deviation of glucose values, or `null` if unavailable
+ * @param quartiles - Quartile statistics (q25, q50, q75); when provided, renders a Gaussian curve with quartile markers
+ * @param incidents - Counts of high/very-high and low/very-low incidents used to render the high/low donut and labels
+ * @param flux - Stability result containing `grade`, `description`, and `score` (CV); when provided, renders the flux grade visual and score
+ * @param unicornCount - Number of "perfect" unicorn readings to display
+ * @param wakeupAverage - Average glucose at wake-up (6–9 AM), or `null` to show a placeholder
+ * @param bedtimeAverage - Average glucose at bedtime (9 PM–12 AM), or `null` to show a placeholder
+ * @returns A JSX element rendering the Sugarmate-style additional statistics card
+ */
 export function SugarmateStatsCard({
   glucoseUnit,
   averageGlucose,
@@ -624,35 +685,38 @@ export function SugarmateStatsCard({
         </Tooltip>
       </div>
 
-      {/* Summary Row with Average, Median, StDev - inline format */}
-      <div className={styles.summaryRow}>
-        <Tooltip content="Average of all glucose values in the selected period. A key metric for overall glucose control assessment" relationship="description">
-          <div className={styles.summaryItem}>
-            <Text className={styles.summaryLabel}>Avg</Text>
-            <Text className={styles.summaryValue}>
-              {averageGlucose !== null ? displayGlucoseValue(averageGlucose, glucoseUnit) : '-'}
-            </Text>
-            <Text className={styles.summaryUnit}>{unitLabel}</Text>
-          </div>
-        </Tooltip>
-        <Tooltip content="Median (middle) glucose value. Less affected by extreme highs or lows than the average, representing a typical reading" relationship="description">
-          <div className={styles.summaryItem}>
-            <Text className={styles.summaryLabel}>Median</Text>
-            <Text className={styles.summaryValue}>
-              {medianGlucose !== null ? displayGlucoseValue(medianGlucose, glucoseUnit) : '-'}
-            </Text>
-            <Text className={styles.summaryUnit}>{unitLabel}</Text>
-          </div>
-        </Tooltip>
-        <Tooltip content="Standard deviation - measures glucose variability. Lower values indicate more stable glucose levels with less fluctuation" relationship="description">
-          <div className={styles.summaryItem}>
-            <Text className={styles.summaryLabel}>StDev</Text>
-            <Text className={styles.summaryValue}>
-              {standardDeviation !== null ? displayGlucoseValue(standardDeviation, glucoseUnit) : '-'}
-            </Text>
-            <Text className={styles.summaryUnit}>{unitLabel}</Text>
-          </div>
-        </Tooltip>
+      {/* Summary Section with Average, Median, StDev - inline format */}
+      <div className={styles.summarySection}>
+        <Text className={styles.summaryHeader}>Summary Statistics</Text>
+        <div className={styles.summaryRow}>
+          <Tooltip content="Average of all glucose values in the selected period. A key metric for overall glucose control assessment" relationship="description">
+            <div className={styles.summaryItem}>
+              <Text className={styles.summaryLabel}>Avg</Text>
+              <Text className={styles.summaryValue}>
+                {averageGlucose !== null ? displayGlucoseValue(averageGlucose, glucoseUnit) : '-'}
+              </Text>
+              <Text className={styles.summaryUnit}>{unitLabel}</Text>
+            </div>
+          </Tooltip>
+          <Tooltip content="Median (middle) glucose value. Less affected by extreme highs or lows than the average, representing a typical reading" relationship="description">
+            <div className={styles.summaryItem}>
+              <Text className={styles.summaryLabel}>Median</Text>
+              <Text className={styles.summaryValue}>
+                {medianGlucose !== null ? displayGlucoseValue(medianGlucose, glucoseUnit) : '-'}
+              </Text>
+              <Text className={styles.summaryUnit}>{unitLabel}</Text>
+            </div>
+          </Tooltip>
+          <Tooltip content="Standard deviation - measures glucose variability. Lower values indicate more stable glucose levels with less fluctuation" relationship="description">
+            <div className={styles.summaryItem}>
+              <Text className={styles.summaryLabel}>StDev</Text>
+              <Text className={styles.summaryValue}>
+                {standardDeviation !== null ? displayGlucoseValue(standardDeviation, glucoseUnit) : '-'}
+              </Text>
+              <Text className={styles.summaryUnit}>{unitLabel}</Text>
+            </div>
+          </Tooltip>
+        </div>
       </div>
     </Card>
   );
