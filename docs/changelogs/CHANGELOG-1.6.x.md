@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>670 Add Getting Started Guide to Data Upload page</summary>
+
+[#670](../../pull/670) Add Getting Started Guide to Data Upload page
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>665 Split three largest files into smaller modules < 800 lines</summary>
 
 [#665](../../pull/665) Split three largest files into smaller modules < 800 lines
