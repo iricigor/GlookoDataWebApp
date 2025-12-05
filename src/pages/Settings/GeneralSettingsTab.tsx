@@ -10,21 +10,11 @@ import {
   Divider,
   Title3,
   Switch,
-  Dropdown,
-  Option,
 } from '@fluentui/react-components';
 import type { ThemeMode } from '../../hooks/useTheme';
 import type { ExportFormat } from '../../hooks/useExportFormat';
 import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
 import type { GeneralSettingsTabProps } from './types';
-
-// Language options with display labels
-const LANGUAGE_OPTIONS: { value: ResponseLanguage; label: string }[] = [
-  { value: 'english', label: 'English' },
-  { value: 'czech', label: 'Czech (Čeština)' },
-  { value: 'german', label: 'German (Deutsch)' },
-  { value: 'serbian', label: 'Serbian (Srpski - latinica)' },
-];
 
 /**
  * Renders the General settings tab with controls for theme, day/night shading, export format, and AI response language.
@@ -103,19 +93,15 @@ export function GeneralSettingsTab({
         <Text className={styles.settingDescription}>
           Choose the language for AI analysis responses. This affects all AI-generated insights and recommendations. Note: This does not change the application interface, which is only available in English.
         </Text>
-        <Dropdown
-          placeholder="Select language"
-          selectedOptions={[responseLanguage]}
-          onOptionSelect={(_, data) => onResponseLanguageChange(data.optionValue as ResponseLanguage)}
-          appearance="outline"
-          style={{ maxWidth: '280px' }}
+        <RadioGroup
+          value={responseLanguage}
+          onChange={(_, data) => onResponseLanguageChange(data.value as ResponseLanguage)}
         >
-          {LANGUAGE_OPTIONS.map(option => (
-            <Option key={option.value} value={option.value}>
-              {option.label}
-            </Option>
-          ))}
-        </Dropdown>
+          <Radio value="english" label="English" />
+          <Radio value="czech" label="Czech (Čeština)" />
+          <Radio value="german" label="German (Deutsch)" />
+          <Radio value="serbian" label="Serbian (Srpski - latinica)" />
+        </RadioGroup>
       </div>
     </>
   );

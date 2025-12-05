@@ -9,8 +9,8 @@ import {
   RadioGroup,
   Divider,
   Title3,
+  Input,
   Label,
-  SpinButton,
 } from '@fluentui/react-components';
 import type { GlucoseUnit, GlucoseThresholds } from '../../types';
 import { validateGlucoseThresholds } from '../../hooks/useGlucoseThresholds';
@@ -79,20 +79,20 @@ export function GlucoseSettingsTab({
           Set the duration of insulin action in hours for IOB (Insulin On Board) calculations. This affects how long insulin is considered active in your system. Typical values range from 3 to 6 hours.
         </Text>
         <Label htmlFor="insulin-duration-input">Duration (hours)</Label>
-        <SpinButton
+        <Input
           id="insulin-duration-input"
-          value={insulinDuration}
+          type="number"
+          value={insulinDuration.toString()}
           onChange={(_, data) => {
-            if (data.value !== null && data.value !== undefined && data.value > 0) {
-              onInsulinDurationChange(data.value);
+            const value = parseFloat(data.value);
+            if (!isNaN(value) && value > 0) {
+              onInsulinDurationChange(value);
             }
           }}
           min={1}
           max={12}
           step={0.5}
-          precision={1}
           style={{ maxWidth: '200px' }}
-          aria-label="Insulin duration in hours"
         />
       </div>
     </>

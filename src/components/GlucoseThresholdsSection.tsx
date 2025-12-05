@@ -65,7 +65,21 @@ const useStyles = makeStyles({
     fontFamily: 'Segoe UI, sans-serif',
   },
   spinButton: {
-    width: '120px',
+    width: '140px',
+    // Ensure proper Fluent UI styling with clear borders and focus states
+    '& .fui-SpinButton': {
+      ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+      ...shorthands.borderRadius(tokens.borderRadiusMedium),
+      backgroundColor: tokens.colorNeutralBackground1,
+    },
+    '& .fui-SpinButton:hover': {
+      ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1Hover),
+    },
+    '& .fui-SpinButton:focus-within': {
+      ...shorthands.border('1px', 'solid', tokens.colorBrandStroke1),
+      ...shorthands.outline('2px', 'solid', tokens.colorBrandStroke2),
+      outlineOffset: '1px',
+    },
   },
   rangeText: {
     fontSize: tokens.fontSizeBase400,

@@ -40,7 +40,7 @@ export function AboutTab({ styles }: SettingsTabProps) {
             rel="noopener noreferrer"
           >
             <Button 
-              appearance="secondary" 
+              appearance="primary" 
               icon={<BugRegular />}
             >
               Report a Bug
@@ -52,7 +52,7 @@ export function AboutTab({ styles }: SettingsTabProps) {
             rel="noopener noreferrer"
           >
             <Button 
-              appearance="secondary" 
+              appearance="primary" 
               icon={<LightbulbRegular />}
             >
               Request a Feature

@@ -44,8 +44,28 @@ export const useStyles = makeStyles({
   tabList: {
     flexShrink: 0,
     width: '200px',
+    backgroundColor: tokens.colorNeutralBackground2,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.padding('8px'),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
     '@media (max-width: 768px)': {
       width: '100%',
+    },
+    // Style the tabs within for better visual hierarchy
+    '& .fui-Tab': {
+      ...shorthands.borderRadius(tokens.borderRadiusSmall),
+      marginBottom: '4px',
+      '&:last-child': {
+        marginBottom: '0',
+      },
+    },
+    '& .fui-Tab[aria-selected="true"]': {
+      backgroundColor: tokens.colorBrandBackground,
+      color: tokens.colorNeutralForegroundOnBrand,
+      fontWeight: tokens.fontWeightSemibold,
+    },
+    '& .fui-Tab:hover:not([aria-selected="true"])': {
+      backgroundColor: tokens.colorNeutralBackground3,
     },
   },
   contentArea: {
