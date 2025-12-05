@@ -165,17 +165,17 @@ export function HypoSection({
         <FluentTooltip content="Total time spent in hypoglycemia" relationship="description">
           <Card className={mergeClasses(
             styles.statCard,
-            hypoStats.totalDuration > 0 ? styles.statCardWarning : styles.statCardSuccess
+            hypoStats.totalDurationMinutes > 0 ? styles.statCardWarning : styles.statCardSuccess
           )}>
             <ClockRegular className={mergeClasses(
               styles.statIcon,
-              hypoStats.totalDuration > 0 ? styles.statIconWarning : styles.statIconSuccess
+              hypoStats.totalDurationMinutes > 0 ? styles.statIconWarning : styles.statIconSuccess
             )} />
             <div className={styles.statContent}>
               <Text className={styles.statLabel}>Total Duration</Text>
               <div className={styles.statValueRow}>
                 <Text className={styles.statValue}>
-                  {formatHypoDuration(hypoStats.totalDuration)}
+                  {formatHypoDuration(hypoStats.totalDurationMinutes)}
                 </Text>
               </div>
             </div>
@@ -318,8 +318,8 @@ export function HypoSection({
                 <Scatter
                   data={nadirPoints}
                   dataKey="value"
-                  shape={(props: { cx: number; cy: number; payload: { isSevere: boolean } }) => {
-                    const { cx, cy, payload } = props;
+                  shape={(props: unknown) => {
+                    const { cx, cy, payload } = props as { cx: number; cy: number; payload: { isSevere: boolean } };
                     const color = payload.isSevere ? HYPO_CHART_COLORS.veryLow : HYPO_CHART_COLORS.nadirDot;
                     return (
                       <polygon

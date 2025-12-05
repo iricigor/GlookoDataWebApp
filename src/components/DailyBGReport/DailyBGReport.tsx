@@ -246,24 +246,14 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
     const filteredGlucose = filterReadingsByDate(activeReadings, currentDate);
     setCurrentGlucoseReadings(filteredGlucose);
     
-    // Filter insulin readings for current date
-    const filteredInsulin = filterReadingsByDate(
-      allInsulinReadings.map(r => ({ timestamp: r.timestamp, value: r.units })),
-      currentDate
-    ).map((r, i) => allInsulinReadings.find(ir => ir.timestamp.getTime() === r.timestamp.getTime()) || allInsulinReadings[i]);
-    
     // Prepare timeline data if insulin is available
-    if (filteredInsulin.length > 0) {
-      const timeline = prepareInsulinTimelineData(filteredInsulin as InsulinReading[]);
+    if (allInsulinReadings.length > 0) {
+      const timeline = prepareInsulinTimelineData(allInsulinReadings, currentDate);
       setTimelineData(timeline);
       
-      // Calculate insulin summary
-      const basalTotal = (filteredInsulin as InsulinReading[])
-        .filter(r => r.type === 'basal')
-        .reduce((sum, r) => sum + r.units, 0);
-      const bolusTotal = (filteredInsulin as InsulinReading[])
-        .filter(r => r.type === 'bolus')
-        .reduce((sum, r) => sum + r.units, 0);
+      // Calculate insulin summary from timeline data
+      const basalTotal = timeline.reduce((sum, d) => sum + d.basalRate, 0);
+      const bolusTotal = timeline.reduce((sum, d) => sum + d.bolusTotal, 0);
       setInsulinSummary({
         basalTotal,
         bolusTotal,
@@ -271,7 +261,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
       });
       
       // Prepare IOB data
-      const iobData = prepareHourlyIOBData(filteredInsulin as InsulinReading[], insulinDuration);
+      const iobData = prepareHourlyIOBData(allInsulinReadings, currentDate, insulinDuration);
       setHourlyIOBData(iobData);
     } else {
       setTimelineData([]);
@@ -371,9 +361,9 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
       setHyposGradientStops(hypoGradientStops);
       
       // Prepare nadir points
-      const nadirs = hypoStatsResult.events.map(event => {
+      const nadirs = hypoStatsResult.hypoPeriods.map(period => {
         const nadirReading = smoothedReadings.find(r => 
-          r.timestamp.getTime() === event.nadir.timestamp.getTime()
+          r.timestamp.getTime() === period.nadirTime.getTime()
         );
         if (!nadirReading) return null;
         
@@ -386,7 +376,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
           value: Math.min(glucoseValue, maxGlucose),
           originalValue: glucoseValue,
           nadir: glucoseValue,
-          isSevere: event.severity === 'severe',
+          isSevere: period.isSevere,
         };
       }).filter(Boolean) as Array<{
         timeDecimal: number;
@@ -441,7 +431,7 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
         timeDecimal: hour + minute / 60,
         value: Math.min(glucoseValue, maxGlucose),
         originalValue: glucoseValue,
-        color: getGlucoseColor(reading.value, thresholds, colorScheme),
+        color: getGlucoseColor(reading.value, colorScheme),
       };
     });
   }, [currentGlucoseReadings, glucoseUnit, maxGlucose, thresholds, colorScheme]);
