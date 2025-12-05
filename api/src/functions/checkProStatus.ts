@@ -83,7 +83,13 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
 }
 
 /**
- * Main HTTP handler for check-pro-status endpoint
+ * HTTP handler for GET /api/user/check-pro-status that validates the caller, determines whether the user is a Pro user, and returns the pro status.
+ *
+ * Validates the Authorization header and ID token, requires the token to contain an email claim, checks the ProUsers table for the user, and—if the user is a Pro user—attempts to retrieve an optional secret from Key Vault without failing the request if secret retrieval fails. Logs authentication, storage, and operational events while masking PII in logs.
+ *
+ * @param request - Incoming HTTP request; must include an Authorization header containing a valid ID token.
+ * @param context - Azure Functions invocation context used for logging and telemetry.
+ * @returns An HTTP response with a JSON body containing `isProUser` (boolean) and `userId` (string); when available, includes `secretValue` (string).
  */
 async function checkProStatus(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   const requestLogger = createRequestLogger(request, context);

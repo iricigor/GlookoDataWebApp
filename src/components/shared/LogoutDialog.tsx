@@ -92,6 +92,19 @@ interface LogoutDialogProps {
   onLogout: () => Promise<void>;
 }
 
+/**
+ * Render a logout dialog that displays the user's avatar, name, optional email and pro-user badge,
+ * conditionally shows a Key Vault secret for pro users, and provides Cancel and Logout actions.
+ *
+ * @param userName - The display name shown in the trigger and dialog
+ * @param userEmail - Optional email displayed in the dialog when provided
+ * @param userPhoto - Optional avatar image URL
+ * @param isProUser - Whether to show the pro-user badge and the secret section
+ * @param secretValue - Optional Key Vault secret to display for pro users; if absent, "Not available" is shown
+ * @param isSecretLoading - When true, displays a loading indicator instead of the secret value
+ * @param onLogout - Async handler invoked when the user confirms logout; the dialog closes on successful completion
+ * @returns The dialog element containing the user trigger and logout confirmation UI
+ */
 export function LogoutDialog({ 
   userName, 
   userEmail, 

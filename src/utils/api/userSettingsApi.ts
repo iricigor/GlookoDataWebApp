@@ -478,13 +478,11 @@ interface ProUserCheckApiResponse {
 }
 
 /**
- * Check if the current user is a pro user
- * 
- * This function calls the Azure Function to check the ProUsers table.
- * 
- * @param idToken - The ID token from MSAL authentication (has app's client ID as audience)
- * @param config - Optional API configuration (defaults to /api)
- * @returns Promise with the result containing success status and isProUser flag or error
+ * Determine whether the current user has a pro account.
+ *
+ * @param idToken - The ID token obtained from MSAL authentication used for API authorization
+ * @param config - Optional API configuration; defaults to the module's default (baseUrl '/api')
+ * @returns The result object: on success includes `isProUser` and optional `secretValue`; on failure includes `error`, `errorType`, and optional `statusCode`
  */
 export async function checkProUserStatus(
   idToken: string,
