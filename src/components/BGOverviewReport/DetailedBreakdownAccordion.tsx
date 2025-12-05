@@ -6,7 +6,6 @@
 
 import { 
   Text,
-  Button,
   Accordion,
   AccordionItem,
   AccordionHeader,
@@ -256,26 +255,6 @@ export function DetailedBreakdownAccordion({
           </AccordionPanel>
         </AccordionItem>
       )}
-      
-      {/* Link to Detailed CGM Data */}
-      <AccordionItem value="cgmLink">
-        <AccordionHeader>Detailed CGM Data</AccordionHeader>
-        <AccordionPanel>
-          <div className={styles.accordionContent}>
-            <Text>For a complete view of all CGM readings with timestamps, please visit the Detailed CGM tab.</Text>
-            {/* TODO: Consider using React Router navigation when available */}
-            <Button
-              appearance="primary"
-              onClick={() => {
-                window.location.hash = 'reports/detailedCgm';
-              }}
-              style={{ marginTop: '12px' }}
-            >
-              Go to Detailed CGM
-            </Button>
-          </div>
-        </AccordionPanel>
-      </AccordionItem>
     </Accordion>
   );
 }
