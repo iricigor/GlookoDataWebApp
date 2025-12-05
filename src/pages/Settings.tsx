@@ -60,9 +60,6 @@ interface VerificationState {
   gemini: VerificationStatus;
 }
 
-// Valid tab values for deep linking
-const VALID_TABS = ['general', 'glucose', 'ai', 'about'];
-
 const useStyles = makeStyles({
   container: {
     display: 'flex',
@@ -438,43 +435,9 @@ export function Settings({
   const validationError = validateGlucoseThresholds(glucoseThresholds);
   const isValid = validationError === null;
   const versionInfo = getVersionInfo();
-  const [selectedTab, setSelectedTab] = useState<string>(() => {
-    // Check URL hash for deep linking first (e.g., #settings/ai)
-    const hash = window.location.hash.slice(1);
-    const parts = hash.split('/');
-    if (parts.length > 1 && parts[0] === 'settings' && VALID_TABS.includes(parts[1])) {
-      return parts[1];
-    }
-    return 'general';
-  });
+  const [selectedTab, setSelectedTab] = useState<string>('general');
   const [editingField, setEditingField] = useState<string | null>(null);
   
-  // Sync URL hash with selected tab (update URL when tab changes)
-  useEffect(() => {
-    const currentHash = window.location.hash.slice(1);
-    const expectedHash = `settings/${selectedTab}`;
-    if (currentHash !== expectedHash) {
-      window.history.replaceState(null, '', `#${expectedHash}`);
-    }
-  }, [selectedTab]);
-
-  // Listen for hash changes to sync URL → tab state
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1);
-      const parts = hash.split('/');
-      if (parts.length > 1 && parts[0] === 'settings' && VALID_TABS.includes(parts[1])) {
-        const newTab = parts[1];
-        if (newTab !== selectedTab) {
-          setSelectedTab(newTab);
-        }
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [selectedTab]);
-
   // Verification state for each API key
   const [verificationState, setVerificationState] = useState<VerificationState>({
     perplexity: 'idle',

@@ -171,13 +171,13 @@ export function DataUploadGuide() {
   };
 
   const handleNavigateToAI = () => {
-    // Navigate to Settings page AI tab using deep linking
-    window.location.hash = 'settings/ai';
+    // Navigate to Settings page - the AI Settings tab is clearly visible there
+    window.location.hash = 'settings';
   };
 
   const handleNavigateToAbout = () => {
-    // Navigate to Settings page About tab using deep linking
-    window.location.hash = 'settings/about';
+    // Navigate to Settings page - the About tab is clearly visible there
+    window.location.hash = 'settings';
   };
 
   // Collapsed state - show only the toggle button
