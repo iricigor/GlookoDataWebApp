@@ -3,7 +3,7 @@
  * Provides UI for configuring theme, glucose settings, AI providers, and viewing app information
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Text,
   TabList,
@@ -21,6 +21,9 @@ import { GeneralSettingsTab } from './GeneralSettingsTab';
 import { GlucoseSettingsTab } from './GlucoseSettingsTab';
 import { AISettingsTab } from './AISettingsTab';
 import { AboutTab } from './AboutTab';
+
+// Valid tab values for deep linking
+const VALID_TABS = ['general', 'glucose', 'ai', 'about'];
 
 /**
  * Props for the Settings component
@@ -113,7 +116,38 @@ export function Settings({
   onProviderAutoSwitch,
 }: SettingsProps) {
   const styles = useStyles();
-  const [selectedTab, setSelectedTab] = useState<string>('general');
+  const [selectedTab, setSelectedTab] = useState<string>(() => {
+    // Check URL hash for deep linking first (e.g., #settings/ai)
+    const hash = window.location.hash.slice(1);
+    const parts = hash.split('/');
+    if (parts.length > 1 && parts[0] === 'settings' && VALID_TABS.includes(parts[1])) {
+      return parts[1];
+    }
+    return 'general';
+  });
+
+  // Sync URL hash with selected tab (update URL when tab changes)
+  useEffect(() => {
+    const currentHash = window.location.hash.slice(1);
+    const expectedHash = `settings/${selectedTab}`;
+    if (currentHash !== expectedHash) {
+      window.history.replaceState(null, '', `#${expectedHash}`);
+    }
+  }, [selectedTab]);
+
+  // Listen for hash changes to sync URL → tab state
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      const parts = hash.split('/');
+      if (parts.length > 1 && parts[0] === 'settings' && VALID_TABS.includes(parts[1])) {
+        setSelectedTab(parts[1]);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const renderTabContent = () => {
     switch (selectedTab) {
