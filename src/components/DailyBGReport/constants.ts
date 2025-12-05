@@ -2,15 +2,8 @@
  * Constants for the DailyBGReport component
  */
 
-import type { RoCIntervalMinutes } from '../../utils/data/rocDataUtils';
-
-// RoC interval options mapping slider value to minutes
-export const ROC_INTERVAL_OPTIONS: { value: number; label: string; minutes: RoCIntervalMinutes }[] = [
-  { value: 0, label: '15min', minutes: 15 },
-  { value: 1, label: '30min', minutes: 30 },
-  { value: 2, label: '1h', minutes: 60 },
-  { value: 3, label: '2h', minutes: 120 },
-];
+// Re-export ROC_INTERVAL_OPTIONS from RoCReport to avoid duplication
+export { ROC_INTERVAL_OPTIONS } from '../RoCReport/constants';
 
 // Hypo chart colors (defined at module level for dependency stability)
 export const HYPO_CHART_COLORS = {

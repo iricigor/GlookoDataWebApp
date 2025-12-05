@@ -6,7 +6,7 @@ import type { RoCIntervalMinutes } from '../../utils/data/rocDataUtils';
 
 // Time labels for X-axis formatting (show every 6 hours)
 export const TIME_LABELS: Record<number, string> = {
-  0: '12AM', 6: '6AM', 12: '12PM', 18: '6PM', 24: '12AM'
+  0: '12AM', 6: '6AM', 12: 'noon', 18: '6PM', 24: '12AM'
 };
 
 /**

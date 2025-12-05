@@ -72,8 +72,6 @@ export function AboutTab({ styles }: SettingsTabProps) {
           </Link>
           <Link 
             href="#api-docs"
-            target="_blank"
-            rel="noopener noreferrer"
           >
             <Button 
               appearance="secondary" 

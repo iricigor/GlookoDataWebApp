@@ -50,13 +50,13 @@ The following source files exceed the recommended 200-line guideline.
 | File | Lines | Type |
 |------|-------|------|
 | `src/utils/data/hyposReportAIDataUtils.ts` | 743 | Utility |
-| `src/components/RoCReport/RoCReport.tsx` | 735 | Component |
+| `src/components/RoCReport/RoCReport.tsx` | 743 | Component |
 | `src/components/BGValuesReport.tsx` | 730 | Component |
 | `src/utils/data/rocDataUtils.ts` | 676 | Utility |
 | `src/components/BGOverviewReport/SugarmateStatsCard.tsx` | 659 | Component |
-| `src/components/DailyBGReport/DailyBGReport.tsx` | 614 | Component |
+| `src/components/DailyBGReport/DailyBGReport.tsx` | 622 | Component |
+| `src/pages/Settings/AISettingsTab.tsx` | 605 | Component |
 | `src/utils/api/userSettingsApi.ts` | 604 | Utility |
-| `src/pages/Settings/AISettingsTab.tsx` | 594 | Component |
 | `src/components/UnifiedTimeline.tsx` | 577 | Component |
 | `src/utils/data/insulinDataUtils.ts` | 523 | Utility |
 | `src/components/BGOverviewReport/styles.ts` | 521 | Styles |
@@ -69,15 +69,15 @@ The following source files exceed the recommended 200-line guideline.
 | `src/App.tsx` | 478 | App Root |
 | `src/pages/AIAnalysis/tabs/HyposTab.tsx` | 469 | Component |
 | `src/utils/data/hypoAIDataUtils.ts` | 465 | Utility |
+| `src/components/DailyBGReport/sections/RoCSection.tsx` | 457 | Component |
 | `src/components/BGOverviewReport/BGOverviewReport.tsx` | 438 | Component |
 | `src/utils/xlsxUtils.ts` | 435 | Utility |
-| `src/components/DailyBGReport/sections/RoCSection.tsx` | 435 | Component |
 | `src/components/AGPReport.tsx` | 432 | Component |
+| `src/components/DailyBGReport/sections/GlucoseSection.tsx` | 427 | Component |
 | `src/components/HyposReport/HyposReport.tsx` | 426 | Component |
 | `src/components/IOBReport.tsx` | 419 | Component |
-| `src/components/DailyBGReport/sections/GlucoseSection.tsx` | 410 | Component |
 | `src/components/DailyBGReport/styles.ts` | 408 | Styles |
-| `src/components/DailyBGReport/sections/HypoSection.tsx` | 370 | Component |
+| `src/components/DailyBGReport/sections/HypoSection.tsx` | 383 | Component |
 | `src/components/HyposReport/HyposChart.tsx` | 359 | Component |
 | `src/components/shared/Navigation.tsx` | 349 | Component |
 | `src/pages/AIAnalysis/AIAnalysis.tsx` | 335 | Page |
@@ -99,11 +99,11 @@ The following source files exceed the recommended 200-line guideline.
 | `src/pages/APIDocs.tsx` | 261 | Page |
 | `src/components/InsulinDailyReport.tsx` | 260 | Component |
 | `src/utils/data/hypoDataUtils.ts` | 258 | Utility |
+| `src/components/DailyBGReport/tooltips.tsx` | 255 | Component |
 | `src/utils/api/baseApiClient.ts` | 248 | Utility |
 | `scripts/capture-screenshots.ts` | 243 | Script |
 | `src/utils/data/columnMapper.ts` | 240 | Utility |
 | `src/components/InsulinTimeline.tsx` | 236 | Component |
-| `src/components/DailyBGReport/tooltips.tsx` | 232 | Component |
 | `api/src/functions/userSettings.ts` | 225 | Function |
 | `src/pages/AIAnalysis/AnalysisComponents.tsx` | 219 | Component |
 | `src/components/RoCReport/styles.ts` | 218 | Styles |
@@ -113,7 +113,7 @@ The following source files exceed the recommended 200-line guideline.
 | `src/utils/data/glucoseDataUtils.ts` | 205 | Utility |
 | `src/utils/api/aiApi.ts` | 204 | Utility |
 | `src/utils/visualization/agpUtils.ts` | 203 | Utility |
-| `src/pages/Settings/Settings.tsx` | 199 | Page |
+| `src/pages/Settings/Settings.tsx` | 202 | Page |
 
 ---
 

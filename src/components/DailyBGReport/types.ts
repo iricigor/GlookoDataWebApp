@@ -2,7 +2,7 @@
  * Types for the DailyBGReport component
  */
 
-import type { GlucoseThresholds, RoCStats, RoCDataPoint, HourlyIOBData } from '../../types';
+import type { GlucoseThresholds, RoCStats, RoCDataPoint, HourlyIOBData, UploadedFile, GlucoseUnit } from '../../types';
 import type { HypoStats } from '../../utils/data/hypoDataUtils';
 import type { BGColorScheme } from '../../hooks/useBGColorScheme';
 import type { useStyles } from './styles';
