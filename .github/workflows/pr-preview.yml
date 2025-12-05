@@ -38,6 +38,10 @@ jobs:
 
       # Build and deploy the static web app preview
       # Azure SWA automatically creates a unique preview URL for each PR
+      # Note: Preview environments only deploy the static frontend.
+      # The Azure Function API is NOT deployed to preview environments,
+      # so features requiring backend services (e.g., user settings, authentication)
+      # will use the production API or may not be fully testable.
       - name: Build and Deploy Preview
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -49,7 +53,7 @@ jobs:
           action: "upload"
           # Repository/Build Configurations
           app_location: "/"           # App source code path
-          api_location: ""            # No API deployment for preview environments
+          api_location: ""            # API not deployed to preview (uses production API)
           output_location: "dist"     # Built app content directory (Vite output)
           # Build command is handled automatically by SWA deploy action
           # It runs npm ci and npm run build by default
