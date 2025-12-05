@@ -5,6 +5,7 @@ import {
   shorthands,
 } from '@fluentui/react-components';
 import { FileUploadZone, FileList, extractZipMetadata } from '../features/dataUpload';
+import { DataUploadGuide } from '../components/DataUploadGuide';
 import type { UploadedFile } from '../types';
 import type { ExportFormat } from '../hooks/useExportFormat';
 
@@ -84,6 +85,8 @@ export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll
       <div className={styles.uploadSection}>
         <FileUploadZone onFilesSelected={handleFilesSelected} />
       </div>
+
+      <DataUploadGuide />
 
       <FileList
         files={uploadedFiles}
