@@ -122,6 +122,20 @@ interface NavigationProps {
   syncStatus?: SyncStatus;
 }
 
+/**
+ * Renders the application's top navigation bar with page navigation, authentication controls, theme toggle, and first-login / error dialogs.
+ *
+ * @param currentPage - The currently active page id used to highlight the active navigation item.
+ * @param onNavigate - Callback invoked with a page id when the user navigates.
+ * @param themeMode - Optional theme mode used to determine the current color scheme.
+ * @param onThemeToggle - Optional callback to toggle between light and dark theme modes.
+ * @param onFirstLoginAccept - Optional callback invoked when a first-time user accepts using cloud settings.
+ * @param onFirstLoginCancel - Optional callback invoked when a first-time user declines cloud settings (the component will log the user out after invoking this).
+ * @param onBeforeLogout - Optional async callback that, if provided, will be awaited before performing logout (used to persist settings).
+ * @param onReturningUserLogin - Optional callback invoked once when a returning user's initial post-login checks complete to trigger loading of user settings.
+ * @param syncStatus - Sync status used to indicate and visually mark when settings are syncing; defaults to `'idle'`.
+ * @returns The navigation bar React element including navigation buttons, responsive menu, auth dialogs, and related UI.
+ */
 export function Navigation({ 
   currentPage, 
   onNavigate, 
@@ -158,8 +172,8 @@ export function Navigation({
     clearError,
   } = useFirstLoginCheck();
 
-  // Check if user is a pro user after login
-  const { isProUser, resetState: resetProUserState } = useProUserCheck(isLoggedIn ? idToken : null);
+  // Check if user is a pro user after login (also fetches secret for pro users)
+  const { isProUser, secretValue, isChecking: isSecretLoading, resetState: resetProUserState } = useProUserCheck(isLoggedIn ? idToken : null);
 
   // Track if we've already handled the returning user login to prevent duplicate calls
   const hasHandledReturningUserLogin = useRef(false);
@@ -319,6 +333,8 @@ export function Navigation({
                 userEmail={userEmail}
                 userPhoto={userPhoto}
                 isProUser={isProUser}
+                secretValue={secretValue}
+                isSecretLoading={isSecretLoading}
                 onLogout={handleLogout} 
               />
             </>

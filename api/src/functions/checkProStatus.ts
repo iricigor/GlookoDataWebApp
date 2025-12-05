@@ -29,7 +29,7 @@
  */
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import { extractUserInfoFromToken, getTableClient, isNotFoundError } from "../utils/azureUtils";
+import { extractUserInfoFromToken, getTableClient, isNotFoundError, getSecretFromKeyVault } from "../utils/azureUtils";
 import { createRequestLogger } from "../utils/logger";
 
 /**
@@ -83,7 +83,13 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
 }
 
 /**
- * Main HTTP handler for check-pro-status endpoint
+ * HTTP handler for GET /api/user/check-pro-status that validates the caller, determines whether the user is a Pro user, and returns the pro status.
+ *
+ * Validates the Authorization header and ID token, requires the token to contain an email claim, checks the ProUsers table for the user, and—if the user is a Pro user—attempts to retrieve an optional secret from Key Vault without failing the request if secret retrieval fails. Logs authentication, storage, and operational events while masking PII in logs.
+ *
+ * @param request - Incoming HTTP request; must include an Authorization header containing a valid ID token.
+ * @param context - Azure Functions invocation context used for logging and telemetry.
+ * @returns An HTTP response with a JSON body containing `isProUser` (boolean) and `userId` (string); when available, includes `secretValue` (string).
  */
 async function checkProStatus(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   const requestLogger = createRequestLogger(request, context);
@@ -116,11 +122,28 @@ async function checkProStatus(request: HttpRequest, context: InvocationContext):
     requestLogger.logStorage('checkProUser', true, { userId, email: maskedEmailForLog, isProUser });
     requestLogger.logInfo('Pro status check completed', { userId, email: maskedEmailForLog, isProUser });
     
+    // If user is a pro user, also fetch the secret from Key Vault
+    let secretValue: string | undefined;
+    if (isProUser) {
+      try {
+        secretValue = await getSecretFromKeyVault();
+        requestLogger.logInfo('Secret retrieved successfully', { userId });
+      } catch (secretError: unknown) {
+        // Log the error but don't fail the request - the pro status check succeeded
+        requestLogger.logWarn('Failed to retrieve secret from Key Vault', { 
+          userId, 
+          error: secretError instanceof Error ? secretError.message : 'Unknown error' 
+        });
+        // secretValue remains undefined
+      }
+    }
+    
     return requestLogger.logSuccess({
       status: 200,
       jsonBody: {
         isProUser,
         userId,
+        ...(secretValue !== undefined && { secretValue }),
       },
     });
   } catch (error: unknown) {

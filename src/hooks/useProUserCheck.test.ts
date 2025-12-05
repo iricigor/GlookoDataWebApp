@@ -30,6 +30,7 @@ describe('useProUserCheck', () => {
     expect(result.current.isChecking).toBe(false);
     expect(result.current.hasChecked).toBe(false);
     expect(result.current.isProUser).toBe(false);
+    expect(result.current.secretValue).toBeNull();
     expect(result.current.hasError).toBe(false);
     expect(result.current.errorMessage).toBeNull();
   });
@@ -38,6 +39,7 @@ describe('useProUserCheck', () => {
     mockCheckProUserStatus.mockResolvedValueOnce({
       success: true,
       isProUser: true,
+      secretValue: 'test-secret',
     });
 
     const { result } = renderHook(() => useProUserCheck('test-token'));
@@ -45,6 +47,7 @@ describe('useProUserCheck', () => {
     await waitFor(() => {
       expect(result.current.hasChecked).toBe(true);
       expect(result.current.isProUser).toBe(true);
+      expect(result.current.secretValue).toBe('test-secret');
     });
     
     expect(mockCheckProUserStatus).toHaveBeenCalledWith('test-token');
@@ -209,6 +212,7 @@ describe('useProUserCheck', () => {
     mockCheckProUserStatus.mockResolvedValueOnce({
       success: true,
       isProUser: true,
+      secretValue: 'test-secret',
     });
 
     const { result } = renderHook(() => useProUserCheck());
@@ -219,6 +223,7 @@ describe('useProUserCheck', () => {
     
     await waitFor(() => {
       expect(result.current.isProUser).toBe(true);
+      expect(result.current.secretValue).toBe('test-secret');
     });
     
     act(() => {
@@ -228,6 +233,7 @@ describe('useProUserCheck', () => {
     expect(result.current.isChecking).toBe(false);
     expect(result.current.hasChecked).toBe(false);
     expect(result.current.isProUser).toBe(false);
+    expect(result.current.secretValue).toBeNull();
     expect(result.current.hasError).toBe(false);
     expect(result.current.errorMessage).toBeNull();
   });

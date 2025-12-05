@@ -18,6 +18,8 @@ export interface ProUserCheckState {
   hasChecked: boolean;
   /** Whether the user is a pro user */
   isProUser: boolean;
+  /** Secret value from Key Vault (only for pro users) */
+  secretValue: string | null;
   /** Whether there was an error during the check */
   hasError: boolean;
   /** Error message if the check failed */
@@ -41,20 +43,26 @@ const initialState: ProUserCheckState = {
   isChecking: false,
   hasChecked: false,
   isProUser: false,
+  secretValue: null,
   hasError: false,
   errorMessage: null,
 };
 
 /**
- * Hook for checking if the current user is a pro user
- * 
- * This hook should be called after successful authentication. It will:
- * 1. Call the Azure Function API to check if the user exists in ProUsers table
- * 2. Return whether the user is a pro user (show ✨ symbol)
- * 3. Handle errors gracefully (user is not pro by default on error)
- * 
- * @param idToken - Optional ID token to use for the check (will auto-check when provided)
- * @returns State and functions for managing the pro user check
+ * Determines whether the current authenticated user is a pro user and provides controls to run or reset that check.
+ *
+ * When an ID token is provided, the hook will automatically trigger a pro-user status check unless one has already completed.
+ *
+ * @param idToken - Optional ID token used to authenticate the pro-user check; supplying a token triggers an automatic check when one has not already run
+ * @returns An object with the pro-user check state and control functions:
+ *  - `isChecking`: whether a check is currently in progress
+ *  - `hasChecked`: whether a check has completed at least once
+ *  - `isProUser`: whether the user is identified as a pro user
+ *  - `secretValue`: a secret value returned for pro users, or `null`
+ *  - `hasError`: whether the last check resulted in an error
+ *  - `errorMessage`: error message from the last check, or `null`
+ *  - `performCheck(idToken: string)`: function to trigger a pro-user check with a specific token
+ *  - `resetState()`: function to reset the hook to its initial state
  */
 export function useProUserCheck(idToken?: string | null): UseProUserCheckReturn {
   const [state, setState] = useState<ProUserCheckState>(initialState);
@@ -103,6 +111,7 @@ export function useProUserCheck(idToken?: string | null): UseProUserCheckReturn 
           isChecking: false,
           hasChecked: true,
           isProUser: result.isProUser ?? false,
+          secretValue: result.secretValue ?? null,
           hasError: false,
           errorMessage: null,
         });
@@ -112,6 +121,7 @@ export function useProUserCheck(idToken?: string | null): UseProUserCheckReturn 
           isChecking: false,
           hasChecked: true,
           isProUser: false,
+          secretValue: null,
           hasError: true,
           errorMessage: result.error ?? 'Unknown error occurred',
         });
@@ -125,6 +135,7 @@ export function useProUserCheck(idToken?: string | null): UseProUserCheckReturn 
         isChecking: false,
         hasChecked: true,
         isProUser: false,
+        secretValue: null,
         hasError: true,
         errorMessage: error instanceof Error ? error.message : 'Unexpected error occurred',
       });
