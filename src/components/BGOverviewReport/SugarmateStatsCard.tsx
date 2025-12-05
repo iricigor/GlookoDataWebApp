@@ -102,6 +102,7 @@ const useStyles = makeStyles({
     height: BOX_HEIGHT,
     boxSizing: 'border-box',
     alignItems: 'center',
+    ...shorthands.overflow('visible'),
   },
   labelColumn: {
     display: 'flex',
@@ -118,6 +119,7 @@ const useStyles = makeStyles({
     flexGrow: 1,
     height: '100%',
     position: 'relative',
+    ...shorthands.overflow('visible'),
   },
   sectionTitle: {
     fontSize: tokens.fontSizeBase200,
@@ -134,6 +136,7 @@ const useStyles = makeStyles({
     width: '100%',
     position: 'relative',
     height: '100%',
+    ...shorthands.overflow('visible'),
   },
   // Overlay positions numbers using space-between with 8% horizontal padding.
   // With space-between, the first number is at ~8%, middle at 50%, last at ~92%.
