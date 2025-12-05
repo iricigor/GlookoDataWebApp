@@ -1,14 +1,14 @@
 # Large Files Documentation
 
 This document identifies large files in the GlookoDataWebApp repository and provides recommendations for potential splitting or optimization.
-Last update on December 1, 2025.
+Last update on December 5, 2025.
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Large Source Code Files](#large-source-code-files)
-  - [Files Over 1000 Lines](#files-over-1000-lines)
-  - [Files 500-999 Lines](#files-500-999-lines)
+  - [Files Over 800 Lines](#files-over-800-lines)
+  - [Files 500-799 Lines](#files-500-799-lines)
   - [Files 200-499 Lines](#files-200-499-lines)
 - [Splitting Recommendations](#splitting-recommendations)
 - [Large Non-Source Files](#large-non-source-files)
@@ -27,7 +27,9 @@ Large files in a repository can cause:
 - Higher memory usage during development
 - Longer build times
 
-The project guidelines recommend keeping component files **under 200 lines** when possible to minimize merge conflicts.
+The project guidelines recommend:
+- Keeping component files **under 200 lines** when possible
+- **Maximum file size limit of 800 lines** - no source file should exceed this in a PR
 
 ---
 
@@ -35,22 +37,25 @@ The project guidelines recommend keeping component files **under 200 lines** whe
 
 The following source files exceed the recommended 200-line guideline.
 
-### Files Over 1000 Lines
+### Files Over 800 Lines
 
 | File | Lines | Type |
 |------|-------|------|
-| `src/components/RoCReport.tsx` | 1,040 | Component |
-
-### Files 500-999 Lines
-
-| File | Lines | Type |
-|------|-------|------|
-| `src/pages/Settings.tsx` | 996 | Page |
-| `src/components/DailyBGReport.tsx` | 948 | Component |
+| `src/utils/data/glucoseRangeUtils.ts` | 1,083 | Utility |
+| `src/components/HyposReport/HyposAISection.tsx` | 825 | Component |
 | `src/components/InRangeReport.tsx` | 820 | Component |
-| `src/utils/data/glucoseRangeUtils.ts` | 801 | Utility |
+
+### Files 500-799 Lines
+
+| File | Lines | Type |
+|------|-------|------|
+| `src/utils/data/hyposReportAIDataUtils.ts` | 743 | Utility |
+| `src/components/RoCReport/RoCReport.tsx` | 743 | Component |
 | `src/components/BGValuesReport.tsx` | 730 | Component |
 | `src/utils/data/rocDataUtils.ts` | 676 | Utility |
+| `src/components/BGOverviewReport/SugarmateStatsCard.tsx` | 659 | Component |
+| `src/components/DailyBGReport/DailyBGReport.tsx` | 622 | Component |
+| `src/pages/Settings/AISettingsTab.tsx` | 605 | Component |
 | `src/utils/api/userSettingsApi.ts` | 604 | Utility |
 | `src/components/UnifiedTimeline.tsx` | 577 | Component |
 | `src/utils/data/insulinDataUtils.ts` | 523 | Utility |
@@ -61,20 +66,25 @@ The following source files exceed the recommended 200-line guideline.
 
 | File | Lines | Type |
 |------|-------|------|
+| `src/App.tsx` | 478 | App Root |
 | `src/pages/AIAnalysis/tabs/HyposTab.tsx` | 469 | Component |
 | `src/utils/data/hypoAIDataUtils.ts` | 465 | Utility |
+| `src/components/DailyBGReport/sections/RoCSection.tsx` | 457 | Component |
+| `src/components/BGOverviewReport/BGOverviewReport.tsx` | 438 | Component |
 | `src/utils/xlsxUtils.ts` | 435 | Utility |
 | `src/components/AGPReport.tsx` | 432 | Component |
-| `src/components/BGOverviewReport/BGOverviewReport.tsx` | 431 | Component |
+| `src/components/DailyBGReport/sections/GlucoseSection.tsx` | 427 | Component |
+| `src/components/HyposReport/HyposReport.tsx` | 426 | Component |
 | `src/components/IOBReport.tsx` | 419 | Component |
-| `src/App.tsx` | 414 | App Root |
-| `src/components/HyposReport/HyposReport.tsx` | 379 | Component |
+| `src/components/DailyBGReport/styles.ts` | 408 | Styles |
+| `src/components/DailyBGReport/sections/HypoSection.tsx` | 383 | Component |
 | `src/components/HyposReport/HyposChart.tsx` | 359 | Component |
-| `src/components/shared/Navigation.tsx` | 336 | Component |
+| `src/components/shared/Navigation.tsx` | 349 | Component |
 | `src/pages/AIAnalysis/AIAnalysis.tsx` | 335 | Page |
 | `src/types/index.ts` | 333 | Types |
 | `api/src/utils/azureUtils.ts` | 331 | Utility |
 | `src/utils/logger.ts` | 305 | Utility |
+| `src/pages/Settings/styles.ts` | 290 | Styles |
 | `src/utils/data/csvUtils.ts` | 288 | Utility |
 | `src/components/AGPGraph.tsx` | 286 | Component |
 | `api/src/utils/logger.ts` | 284 | Utility |
@@ -89,18 +99,21 @@ The following source files exceed the recommended 200-line guideline.
 | `src/pages/APIDocs.tsx` | 261 | Page |
 | `src/components/InsulinDailyReport.tsx` | 260 | Component |
 | `src/utils/data/hypoDataUtils.ts` | 258 | Utility |
+| `src/components/DailyBGReport/tooltips.tsx` | 255 | Component |
 | `src/utils/api/baseApiClient.ts` | 248 | Utility |
 | `scripts/capture-screenshots.ts` | 243 | Script |
 | `src/utils/data/columnMapper.ts` | 240 | Utility |
 | `src/components/InsulinTimeline.tsx` | 236 | Component |
 | `api/src/functions/userSettings.ts` | 225 | Function |
 | `src/pages/AIAnalysis/AnalysisComponents.tsx` | 219 | Component |
+| `src/components/RoCReport/styles.ts` | 218 | Styles |
 | `src/hooks/useUserSettings.ts` | 215 | Hook |
 | `src/pages/Reports.tsx` | 210 | Page |
 | `src/components/GlucoseThresholdsSection.tsx` | 206 | Component |
 | `src/utils/data/glucoseDataUtils.ts` | 205 | Utility |
 | `src/utils/api/aiApi.ts` | 204 | Utility |
 | `src/utils/visualization/agpUtils.ts` | 203 | Utility |
+| `src/pages/Settings/Settings.tsx` | 202 | Page |
 
 ---
 
@@ -178,13 +191,15 @@ The screenshot files range from 64 KB to 132 KB each.
 
 | Category | Count | Recommendation |
 |----------|-------|----------------|
-| Files over 1000 lines | 1 file | **Split recommended** |
-| Files 500-999 lines | 11 files | Split when modifying |
-| Files 200-499 lines | 40 files | Monitor and split as needed |
+| Files over 800 lines | 3 files | **Split recommended** |
+| Files 500-799 lines | 13 files | Split when modifying |
+| Files 200-499 lines | 48 files | Monitor and split as needed |
 | Demo Data | 10 files (~7.9 MB) | Consider Git LFS if repo size becomes an issue |
 | Package Lock | 1 file (444 KB) | Keep as-is (auto-generated) |
 | Screenshots | 48 files | Keep as-is (documentation) |
 
-**Total source files in repo:** 172 (excluding test files)
+**Note:** The project enforces a maximum file size limit of 800 lines per source file.
 
-**Files exceeding 200-line guideline:** 52 files (~30% of source files)
+**Total source files in repo:** ~180 (excluding test files)
+
+**Files exceeding 200-line guideline:** ~64 files (~36% of source files)
