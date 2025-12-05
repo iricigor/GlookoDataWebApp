@@ -18,6 +18,9 @@ import {
   AccordionPanel,
   Spinner,
   Tooltip,
+  MessageBar,
+  MessageBarBody,
+  MessageBarTitle,
 } from '@fluentui/react-components';
 import { 
   WarningRegular, 
@@ -424,6 +427,16 @@ export function AISettingsTab({
             'gemini-api-key'
           )}
         </div>
+        
+        {/* Important Data Handling Warning - Prominent MessageBar */}
+        <MessageBar intent="warning" style={{ marginTop: '24px', marginBottom: '16px' }}>
+          <MessageBarBody>
+            <MessageBarTitle>Important: Data Handling & Your Responsibility</MessageBarTitle>
+            When you use AI analysis features, your sensitive health data will be sent to the selected AI provider ({activeProvider ? getProviderDisplayName(activeProvider) : 'the configured AI service'}). 
+            You are responsible for the security of this information and its use in accordance with all applicable data protection rules. 
+            Review the privacy policies of your chosen AI provider before using these features.
+          </MessageBarBody>
+        </MessageBar>
         
         {/* Information Sections - All in one accordion */}
         <div className={styles.infoSection}>
