@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>665 Split three largest files into smaller modules < 800 lines</summary>
+
+[#665](../../pull/665) Split three largest files into smaller modules < 800 lines
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>663 Fix AI Hypos eventId matching and response overflow</summary>
 
 [#663](../../pull/663) Fix AI Hypos eventId matching and response overflow
