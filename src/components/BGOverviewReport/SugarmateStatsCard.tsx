@@ -84,10 +84,10 @@ const useStyles = makeStyles({
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
     ...shorthands.gap('12px'),
-    '@media (max-width: 900px)': {
+    '@media (max-width: 1024px)': {
       gridTemplateColumns: 'repeat(2, 1fr)',
     },
-    '@media (max-width: 600px)': {
+    '@media (max-width: 768px)': {
       gridTemplateColumns: '1fr',
     },
   },
@@ -103,6 +103,8 @@ const useStyles = makeStyles({
     boxSizing: 'border-box',
     alignItems: 'center',
     ...shorthands.overflow('visible'),
+    minWidth: 0, // Prevent overflow on narrow screens
+    width: '100%', // Ensure full width in grid
   },
   labelColumn: {
     display: 'flex',
