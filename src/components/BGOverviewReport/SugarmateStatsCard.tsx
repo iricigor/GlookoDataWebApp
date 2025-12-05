@@ -135,7 +135,8 @@ const useStyles = makeStyles({
     position: 'relative',
     height: '100%',
   },
-  // Overlay positions numbers at ~8%, 50%, 92% using space-between with 8% padding
+  // Overlay positions numbers using space-between with 8% horizontal padding.
+  // With space-between, the first number is at ~8%, middle at 50%, last at ~92%.
   quartileValuesOverlay: {
     position: 'absolute',
     top: '50%',
@@ -373,8 +374,9 @@ function getFluxGradeColor(grade: string): string {
   return tokens.colorNeutralForeground1;
 }
 
-// Quartile marker x-positions (aligned with overlay padding of 8%)
-// Q25 at ~12%, Q50 at 50%, Q75 at ~88% to match space-between layout
+// Quartile marker x-positions for SVG.
+// The CSS overlay uses 8% padding with space-between, placing labels roughly at 8%, 50%, 92%.
+// SVG markers are positioned at 12%, 50%, 88% to align visually with these label positions.
 const QUARTILE_POSITIONS = { q25: 12, q50: 50, q75: 88 };
 
 /**
