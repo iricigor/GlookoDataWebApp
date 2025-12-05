@@ -379,7 +379,6 @@ function App() {
             onSelectFile={handleSelectFile}
             exportFormat={exportFormat}
             isLoadingDemoData={isLoadingDemoData}
-            onNavigate={handleNavigate}
           />
         )
       case 'reports':

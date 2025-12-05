@@ -49,10 +49,9 @@ interface DataUploadProps {
   onSelectFile: (id: string | null) => void;
   exportFormat: ExportFormat;
   isLoadingDemoData?: boolean;
-  onNavigate?: (page: string) => void;
 }
 
-export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll, selectedFileId, onSelectFile, exportFormat, isLoadingDemoData, onNavigate }: DataUploadProps) {
+export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll, selectedFileId, onSelectFile, exportFormat, isLoadingDemoData }: DataUploadProps) {
   const styles = useStyles();
 
   const handleFilesSelected = async (files: File[]) => {
@@ -87,7 +86,7 @@ export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll
         <FileUploadZone onFilesSelected={handleFilesSelected} />
       </div>
 
-      <DataUploadGuide onNavigate={onNavigate} />
+      <DataUploadGuide />
 
       <FileList
         files={uploadedFiles}

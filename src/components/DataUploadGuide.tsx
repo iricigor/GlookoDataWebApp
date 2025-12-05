@@ -146,18 +146,12 @@ const useStyles = makeStyles({
   },
 });
 
-interface DataUploadGuideProps {
-  /** Callback invoked when the user clicks to navigate to a page */
-  onNavigate?: (page: string) => void;
-}
-
 /**
  * Renders a collapsible guide section for the Data Upload page with numbered accordion items.
  *
- * @param onNavigate - Optional callback to handle navigation to other pages (e.g., Settings/AI tab)
  * @returns The DataUploadGuide React element
  */
-export function DataUploadGuide({ onNavigate }: DataUploadGuideProps) {
+export function DataUploadGuide() {
   const styles = useStyles();
   
   // Initialize visibility from localStorage
@@ -177,19 +171,13 @@ export function DataUploadGuide({ onNavigate }: DataUploadGuideProps) {
   };
 
   const handleNavigateToAI = () => {
-    if (onNavigate) {
-      onNavigate('settings');
-      // Use hash to navigate to AI tab within settings
-      window.location.hash = 'settings/ai';
-    }
+    // Navigate to Settings page - the AI Settings tab is clearly visible there
+    window.location.hash = 'settings';
   };
 
   const handleNavigateToAbout = () => {
-    if (onNavigate) {
-      onNavigate('settings');
-      // Use hash to navigate to About tab within settings
-      window.location.hash = 'settings/about';
-    }
+    // Navigate to Settings page - the About tab is clearly visible there
+    window.location.hash = 'settings';
   };
 
   // Collapsed state - show only the toggle button
