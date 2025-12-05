@@ -18,6 +18,16 @@ interface RoCChartTooltipProps {
   glucoseUnit: GlucoseUnit;
 }
 
+/**
+ * Render a styled tooltip for a rate-of-change (RoC) chart data point.
+ *
+ * Displays the data point's time label, formatted RoC with the appropriate unit suffix (mg/dL or mmol/L per 5 minutes), a glucose value formatted according to `glucoseUnit`, and a category label (Stable, Moderate, or Rapid) colored according to the category.
+ *
+ * @param active - Whether the tooltip should be visible
+ * @param payload - Chart tooltip payload array; the component reads the first entry's `payload` object containing the RoC data point
+ * @param glucoseUnit - Unit used to format glucose values (`'mg/dL'` or other units such as `'mmol/L'`)
+ * @returns The tooltip element when `active` and valid payload data are present, otherwise `null`
+ */
 export function RoCChartTooltip({ 
   active, 
   payload,

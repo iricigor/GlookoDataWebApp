@@ -67,6 +67,24 @@ interface GlucoseSectionProps {
   showDayNightShading: boolean;
 }
 
+/**
+ * Renders the "Glucose Values Throughout the Day" section, including summary statistic cards, a configurable glucose line chart with optional day/night shading, a vertical distribution bar, and a legend.
+ *
+ * @param styles - Styling classes produced by the component's useStyles hook.
+ * @param glucoseUnit - Unit for glucose values (e.g., "mg/dL" or "mmol/L"); used for axis labels, thresholds, and unit-aware controls.
+ * @param thresholds - Low and high glucose threshold values (in the component's canonical unit) used to draw reference lines and labels on the chart.
+ * @param glucoseStats - Counts for readings: `{ low, inRange, high, total }`.
+ * @param belowPercentage - Percentage string for readings below range (e.g., "12.3").
+ * @param inRangePercentage - Percentage string for readings in range.
+ * @param abovePercentage - Percentage string for readings above range.
+ * @param maxGlucose - Current maximum value shown on the chart Y axis.
+ * @param setMaxGlucose - Setter to update `maxGlucose` (called when the max-value tabs change).
+ * @param colorScheme - Selected background/point color scheme identifier.
+ * @param setColorScheme - Setter to update the color scheme (called when the dropdown changes).
+ * @param glucoseChartData - Array of chart points containing time and value fields (and optional per-point color) used to plot the line.
+ * @param showDayNightShading - When true, renders shaded regions for night periods on the chart.
+ * @returns The React element for the glucose section UI.
+ */
 export function GlucoseSection({
   styles,
   glucoseUnit,

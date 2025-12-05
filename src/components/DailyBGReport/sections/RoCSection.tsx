@@ -60,6 +60,29 @@ interface RoCSectionProps {
   showDayNightShading: boolean;
 }
 
+/**
+ * Render the Rate of Change (RoC) analysis section used in the DailyBGReport.
+ *
+ * Renders RoC statistic cards, an optional RoC vs Glucose composed chart with controls
+ * (interval slider and max-BG selector), a custom legend, and a summary bar with
+ * medical-standard thresholds and descriptions.
+ *
+ * @param styles - Styling object from useStyles applied to section elements
+ * @param glucoseUnit - Display unit for glucose values ('mg/dL' or 'mmol/L')
+ * @param thresholds - Patient glucose thresholds (used to compute display low threshold)
+ * @param rocStats - Precomputed RoC statistics and category percentages/counts
+ * @param longestStablePeriod - Duration of the longest stable-glucose period
+ * @param rocChartData - Time-series data for the RoC chart (includes RoC and timeDecimal)
+ * @param rocGlucoseLineData - Time-series data for the glucose overlay line on the chart
+ * @param rocGradientStops - Gradient stops used to color the RoC line by value
+ * @param rocYAxisDomain - [min, max] domain for the RoC (left) Y-axis
+ * @param rocIntervalIndex - Selected index for the RoC time-interval option
+ * @param setRocIntervalIndex - Setter to update the selected RoC interval index
+ * @param rocMaxGlucose - Maximum glucose value used for the glucose (right) Y-axis domain
+ * @param setRocMaxGlucose - Setter to update the rocMaxGlucose value
+ * @param showDayNightShading - When true, apply shaded areas for nighttime periods on the chart
+ * @returns The React element for the RoC analysis section
+ */
 export function RoCSection({
   styles,
   glucoseUnit,

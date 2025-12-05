@@ -79,7 +79,11 @@ interface SettingsProps {
 }
 
 /**
- * Renders the Settings UI for configuring theme, export format, glucose units/thresholds, insulin duration, AI provider keys, and application information.
+ * Render the Settings page UI for configuring theme, export format, glucose settings, AI providers, and application information.
+ *
+ * @param selectedProvider - The currently selected AI provider, or `null` to allow automatic provider selection
+ * @param onProviderAutoSwitch - Optional callback invoked when the app automatically switches AI providers; called with `(fromProvider, toProvider)`
+ * @returns The Settings page element
  */
 export function Settings({ 
   themeMode, 

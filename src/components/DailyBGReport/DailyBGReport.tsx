@@ -52,7 +52,16 @@ import { GlucoseSection, RoCSection, HypoSection, IOBSection } from './sections'
 import type { DailyBGReportProps, TimelineDataPoint } from './types';
 
 /**
- * Renders a comprehensive daily blood glucose report combining glucose, RoC, hypoglycemia, insulin, and IOB visualizations for a selected date and file.
+ * Render the daily blood glucose report view for a selected file and date.
+ *
+ * Renders combined visualizations and summaries for glucose (CGM or BG), rate of change (RoC),
+ * hypoglycemia events, insulin delivery (timeline and summary), and hourly IOB.
+ *
+ * @param selectedFile - The currently selected file containing glucose and insulin data; if undefined, the component prompts to upload/select a file
+ * @param glucoseUnit - Display unit for glucose values (`'mg/dL'` or `'mmol/L'`)
+ * @param insulinDuration - Duration in hours used when computing hourly IOB (defaults to 5)
+ * @param showDayNightShading - Whether to display day/night background shading on charts
+ * @returns The JSX element containing the composed daily report UI
  */
 export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, showDayNightShading }: DailyBGReportProps) {
   const styles = useStyles();

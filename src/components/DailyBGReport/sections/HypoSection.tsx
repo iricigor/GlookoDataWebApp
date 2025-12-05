@@ -67,6 +67,20 @@ interface HypoSectionProps {
   showDayNightShading: boolean;
 }
 
+/**
+ * Render the hypoglycemia analysis section with summary statistic cards and an optional hypoglycemia chart.
+ *
+ * @param styles - Style object returned from useStyles for layout and visual classes
+ * @param glucoseUnit - Unit for glucose values (used for display and axis labels)
+ * @param thresholds - Threshold values for `veryLow` and `low` hypoglycemia markers
+ * @param hypoStats - Aggregate hypoglycemia statistics (e.g., severeCount, nonSevereCount, lowestValue, totalDuration)
+ * @param hyposChartData - Time-series data points used to plot the glucose line on the chart
+ * @param hyposGradientStops - Gradient stop definitions used to color the glucose line
+ * @param nadirPoints - Points marking nadirs (lowest points) on the chart, including severity flags
+ * @param maxGlucose - Maximum glucose value used to set the chart's Y-axis domain
+ * @param showDayNightShading - When true, render day/night shaded regions on the chart
+ * @returns The section's rendered JSX element
+ */
 export function HypoSection({
   styles,
   glucoseUnit,
