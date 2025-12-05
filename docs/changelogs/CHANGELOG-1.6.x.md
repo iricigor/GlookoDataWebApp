@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>680 Add KeyVault secret reading for pro users</summary>
+
+[#680](../../pull/680) Add KeyVault secret reading for pro users
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>678 Setup Azure Static Web Apps PR preview environments</summary>
 
 [#678](../../pull/678) Setup Azure Static Web Apps PR preview environments
