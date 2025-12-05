@@ -316,10 +316,10 @@ export function getTableClient(tableName: string = 'UserSettings'): TableClient 
 }
 
 /**
- * Check if an error is a "not found" (404) error from Azure Table Storage
- * 
- * @param error - The error to check
- * @returns True if the error indicates a 404 Not Found response
+ * Determine whether an error represents a 404 Not Found response from Azure Table Storage.
+ *
+ * @param error - The error object to inspect
+ * @returns `true` if the error's `statusCode` equals 404, `false` otherwise.
  */
 export function isNotFoundError(error: unknown): boolean {
   return (
@@ -337,12 +337,16 @@ const DEFAULT_KEY_VAULT_NAME = 'glookodatawebapp-kv';
 const DEFAULT_SECRET_NAME = 'GlookoTest';
 
 /**
- * Get a secret from Azure Key Vault using managed identity
- * 
- * @param keyVaultName - Name of the Key Vault (defaults to 'glookodatawebapp-kv')
- * @param secretName - Name of the secret to retrieve (defaults to 'GlookoTest')
- * @returns The secret value
- * @throws Error if the secret cannot be retrieved
+ * Retrieve a secret value from an Azure Key Vault using the managed identity.
+ *
+ * The function resolves the vault name from the `KEY_VAULT_NAME` environment variable if set,
+ * otherwise uses the `keyVaultName` parameter. The secret name is resolved from
+ * `KEY_VAULT_SECRET_NAME` if set, otherwise uses the `secretName` parameter.
+ *
+ * @param keyVaultName - Fallback Key Vault name used when `KEY_VAULT_NAME` is not set
+ * @param secretName - Fallback secret name used when `KEY_VAULT_SECRET_NAME` is not set
+ * @returns The secret value retrieved from the Key Vault
+ * @throws Error if the retrieved secret has no value
  */
 export async function getSecretFromKeyVault(
   keyVaultName: string = DEFAULT_KEY_VAULT_NAME,
