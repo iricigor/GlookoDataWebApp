@@ -40,9 +40,9 @@ export const DEMO_DATASETS: DemoDataset[] = [
     description: 'Regular schedule, balanced diet (Subject 11: Male, 59, A1c 7.3%)',
   },
   {
-    id: 'albert',
-    name: 'Albert (Male, 65-85)',
-    filename: 'albert-demo-data.zip',
+    id: 'larry',
+    name: 'Larry (Male, 65-85)',
+    filename: 'larry-demo-data.zip',
     description: 'Retired, consistent routine (Subject 18: Male, 65, A1c 6.9%)',
   },
   {
