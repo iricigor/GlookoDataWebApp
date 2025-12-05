@@ -110,7 +110,7 @@ describe('DailyBGReport', () => {
   it('should show "please select a file" message when no file is selected', () => {
     render(<DailyBGReport glucoseUnit="mmol/L" showDayNightShading={true} />);
     
-    expect(screen.getByText(/please select a file to view the daily bg report/i)).toBeInTheDocument();
+    expect(screen.getByText(/please upload and select a file to view the daily report/i)).toBeInTheDocument();
   });
 
   it('should show loading state when loading data', async () => {

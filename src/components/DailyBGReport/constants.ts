@@ -1,0 +1,34 @@
+/**
+ * Constants for the DailyBGReport component
+ */
+
+import type { RoCIntervalMinutes } from '../../utils/data/rocDataUtils';
+
+// RoC interval options mapping slider value to minutes
+export const ROC_INTERVAL_OPTIONS: { value: number; label: string; minutes: RoCIntervalMinutes }[] = [
+  { value: 0, label: '15min', minutes: 15 },
+  { value: 1, label: '30min', minutes: 30 },
+  { value: 2, label: '1h', minutes: 60 },
+  { value: 3, label: '2h', minutes: 120 },
+];
+
+// Hypo chart colors (defined at module level for dependency stability)
+export const HYPO_CHART_COLORS = {
+  normal: '#4CAF50',    // Green for normal glucose
+  low: '#FFAB91',       // Light red for low
+  veryLow: '#EF5350',   // Dark red for very low
+  nadirDot: '#B71C1C',  // Darker red for nadir markers
+};
+
+// Format X-axis labels - unified format: 12AM, 6AM, noon, 6PM, 12AM
+// Used with numeric XAxis (dataKey="timeDecimal" and "hour")
+export const formatXAxis = (value: number): string => {
+  const hour = Math.floor(value);
+  const unifiedLabels: Record<number, string> = {
+    0: '12AM', 6: '6AM', 12: 'noon', 18: '6PM', 24: '12AM'
+  };
+  return unifiedLabels[hour] || '';
+};
+
+// Format X-axis labels for IOB - same unified format
+export const formatXAxisIOB = formatXAxis;
