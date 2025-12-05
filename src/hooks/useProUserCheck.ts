@@ -18,6 +18,8 @@ export interface ProUserCheckState {
   hasChecked: boolean;
   /** Whether the user is a pro user */
   isProUser: boolean;
+  /** Secret value from Key Vault (only for pro users) */
+  secretValue: string | null;
   /** Whether there was an error during the check */
   hasError: boolean;
   /** Error message if the check failed */
@@ -41,6 +43,7 @@ const initialState: ProUserCheckState = {
   isChecking: false,
   hasChecked: false,
   isProUser: false,
+  secretValue: null,
   hasError: false,
   errorMessage: null,
 };
@@ -103,6 +106,7 @@ export function useProUserCheck(idToken?: string | null): UseProUserCheckReturn 
           isChecking: false,
           hasChecked: true,
           isProUser: result.isProUser ?? false,
+          secretValue: result.secretValue ?? null,
           hasError: false,
           errorMessage: null,
         });
@@ -112,6 +116,7 @@ export function useProUserCheck(idToken?: string | null): UseProUserCheckReturn 
           isChecking: false,
           hasChecked: true,
           isProUser: false,
+          secretValue: null,
           hasError: true,
           errorMessage: result.error ?? 'Unknown error occurred',
         });
@@ -125,6 +130,7 @@ export function useProUserCheck(idToken?: string | null): UseProUserCheckReturn 
         isChecking: false,
         hasChecked: true,
         isProUser: false,
+        secretValue: null,
         hasError: true,
         errorMessage: error instanceof Error ? error.message : 'Unexpected error occurred',
       });

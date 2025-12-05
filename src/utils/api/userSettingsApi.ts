@@ -459,6 +459,8 @@ export async function loadUserSettings(
 export interface ProUserCheckResult {
   success: boolean;
   isProUser?: boolean;
+  /** Secret value from Key Vault (only for pro users) */
+  secretValue?: string;
   error?: string;
   errorType?: 'unauthorized' | 'infrastructure' | 'network' | 'unknown';
   /** HTTP status code when available */
@@ -471,6 +473,8 @@ export interface ProUserCheckResult {
 interface ProUserCheckApiResponse {
   isProUser: boolean;
   userId?: string;
+  /** Secret value from Key Vault (only for pro users) */
+  secretValue?: string;
 }
 
 /**
@@ -576,10 +580,11 @@ export async function checkProUserStatus(
     // Parse successful response
     const data: ProUserCheckApiResponse = await response.json();
     
-    apiLogger.logSuccess(200, { isProUser: data.isProUser });
+    apiLogger.logSuccess(200, { isProUser: data.isProUser, hasSecret: !!data.secretValue });
     return {
       success: true,
       isProUser: data.isProUser,
+      secretValue: data.secretValue,
     };
 
   } catch (error) {

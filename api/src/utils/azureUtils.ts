@@ -329,3 +329,40 @@ export function isNotFoundError(error: unknown): boolean {
     (error as { statusCode: number }).statusCode === 404
   );
 }
+
+/**
+ * Default Key Vault configuration
+ */
+const DEFAULT_KEY_VAULT_NAME = 'glookodatawebapp-kv';
+const DEFAULT_SECRET_NAME = 'GlookoTest';
+
+/**
+ * Get a secret from Azure Key Vault using managed identity
+ * 
+ * @param keyVaultName - Name of the Key Vault (defaults to 'glookodatawebapp-kv')
+ * @param secretName - Name of the secret to retrieve (defaults to 'GlookoTest')
+ * @returns The secret value
+ * @throws Error if the secret cannot be retrieved
+ */
+export async function getSecretFromKeyVault(
+  keyVaultName: string = DEFAULT_KEY_VAULT_NAME,
+  secretName: string = DEFAULT_SECRET_NAME
+): Promise<string> {
+  // Dynamic import to avoid loading the module if not needed
+  const { SecretClient } = await import('@azure/keyvault-secrets');
+  
+  const vaultName = process.env.KEY_VAULT_NAME || keyVaultName;
+  const secret = process.env.KEY_VAULT_SECRET_NAME || secretName;
+  
+  const keyVaultUrl = `https://${vaultName}.vault.azure.net`;
+  const credential = new DefaultAzureCredential();
+  const client = new SecretClient(keyVaultUrl, credential);
+  
+  const secretResponse = await client.getSecret(secret);
+  
+  if (!secretResponse.value) {
+    throw new Error(`Secret ${secret} has no value`);
+  }
+  
+  return secretResponse.value;
+}

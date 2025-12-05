@@ -29,7 +29,7 @@
  */
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import { extractUserInfoFromToken, getTableClient, isNotFoundError } from "../utils/azureUtils";
+import { extractUserInfoFromToken, getTableClient, isNotFoundError, getSecretFromKeyVault } from "../utils/azureUtils";
 import { createRequestLogger } from "../utils/logger";
 
 /**
@@ -116,11 +116,28 @@ async function checkProStatus(request: HttpRequest, context: InvocationContext):
     requestLogger.logStorage('checkProUser', true, { userId, email: maskedEmailForLog, isProUser });
     requestLogger.logInfo('Pro status check completed', { userId, email: maskedEmailForLog, isProUser });
     
+    // If user is a pro user, also fetch the secret from Key Vault
+    let secretValue: string | undefined;
+    if (isProUser) {
+      try {
+        secretValue = await getSecretFromKeyVault();
+        requestLogger.logInfo('Secret retrieved successfully', { userId });
+      } catch (secretError: unknown) {
+        // Log the error but don't fail the request - the pro status check succeeded
+        requestLogger.logWarn('Failed to retrieve secret from Key Vault', { 
+          userId, 
+          error: secretError instanceof Error ? secretError.message : 'Unknown error' 
+        });
+        // secretValue remains undefined
+      }
+    }
+    
     return requestLogger.logSuccess({
       status: 200,
       jsonBody: {
         isProUser,
         userId,
+        ...(secretValue !== undefined && { secretValue }),
       },
     });
   } catch (error: unknown) {

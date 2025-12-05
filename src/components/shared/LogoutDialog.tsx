@@ -13,6 +13,7 @@ import {
   Text,
   tokens,
   Tooltip,
+  Spinner,
 } from '@fluentui/react-components';
 import { useState } from 'react';
 import { useProUserBadgeStyles } from '../../styles/proUserBadge';
@@ -48,6 +49,35 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground2,
   },
+  secretContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('4px'),
+    ...shorthands.padding('12px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+  },
+  secretLabel: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+  },
+  secretValue: {
+    fontFamily: 'monospace',
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorBrandForeground1,
+    wordBreak: 'break-all',
+  },
+  secretLoading: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+    color: tokens.colorNeutralForeground2,
+  },
+  secretNotAvailable: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+    fontStyle: 'italic',
+  },
 });
 
 interface LogoutDialogProps {
@@ -55,10 +85,22 @@ interface LogoutDialogProps {
   userEmail?: string | null;
   userPhoto?: string | null;
   isProUser?: boolean;
+  /** Secret value from Key Vault (only for pro users) */
+  secretValue?: string | null;
+  /** Whether the secret is currently being fetched */
+  isSecretLoading?: boolean;
   onLogout: () => Promise<void>;
 }
 
-export function LogoutDialog({ userName, userEmail, userPhoto, isProUser, onLogout }: LogoutDialogProps) {
+export function LogoutDialog({ 
+  userName, 
+  userEmail, 
+  userPhoto, 
+  isProUser, 
+  secretValue,
+  isSecretLoading,
+  onLogout,
+}: LogoutDialogProps) {
   const styles = useStyles();
   const proBadgeStyles = useProUserBadgeStyles();
   const [open, setOpen] = useState(false);
@@ -117,6 +159,21 @@ export function LogoutDialog({ userName, userEmail, userPhoto, isProUser, onLogo
                 )}
               </div>
             </div>
+            {isProUser && (
+              <div className={styles.secretContainer}>
+                <Text className={styles.secretLabel}>Key Vault Secret:</Text>
+                {isSecretLoading ? (
+                  <div className={styles.secretLoading}>
+                    <Spinner size="tiny" />
+                    <Text>Loading secret...</Text>
+                  </div>
+                ) : secretValue ? (
+                  <Text className={styles.secretValue}>{secretValue}</Text>
+                ) : (
+                  <Text className={styles.secretNotAvailable}>Not available</Text>
+                )}
+              </div>
+            )}
             <Text>Are you sure you want to logout?</Text>
           </DialogContent>
           <DialogActions>

@@ -158,8 +158,8 @@ export function Navigation({
     clearError,
   } = useFirstLoginCheck();
 
-  // Check if user is a pro user after login
-  const { isProUser, resetState: resetProUserState } = useProUserCheck(isLoggedIn ? idToken : null);
+  // Check if user is a pro user after login (also fetches secret for pro users)
+  const { isProUser, secretValue, isChecking: isSecretLoading, resetState: resetProUserState } = useProUserCheck(isLoggedIn ? idToken : null);
 
   // Track if we've already handled the returning user login to prevent duplicate calls
   const hasHandledReturningUserLogin = useRef(false);
@@ -319,6 +319,8 @@ export function Navigation({
                 userEmail={userEmail}
                 userPhoto={userPhoto}
                 isProUser={isProUser}
+                secretValue={secretValue}
+                isSecretLoading={isSecretLoading}
                 onLogout={handleLogout} 
               />
             </>
