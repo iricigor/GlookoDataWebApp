@@ -396,12 +396,12 @@ function GaussianCurve() {
   const curveColor = '#A8C5E8';
   const lineColor = '#7AA7D6';
   
-  // Gaussian curve with sigma=35 creates a natural bell curve shape
-  // that's wide enough to cover all three quartile numbers while maintaining a visible peak
+  // Gaussian curve with sigma=25 creates a balanced bell curve shape
+  // Wide enough to cover all three quartile numbers with a visible peak in the center
   const curvePoints = [];
   for (let x = 0; x <= 100; x += 2) {
-    const sigma = 35;
-    const y = 50 - 40 * Math.exp(-Math.pow(x - 50, 2) / (2 * Math.pow(sigma, 2)));
+    const sigma = 25;
+    const y = 50 - 42 * Math.exp(-Math.pow(x - 50, 2) / (2 * Math.pow(sigma, 2)));
     curvePoints.push(`${x},${y}`);
   }
   const curvePath = `M 0,50 L ${curvePoints.join(' L ')} L 100,50`;
