@@ -63,6 +63,15 @@ interface RoCReportProps {
   glucoseUnit: GlucoseUnit;
 }
 
+/**
+ * Render a Rate of Change (RoC) report view for a selected glucose data file.
+ *
+ * Displays an interactive chart, statistics, date navigation, and summary bar for the currently selected file and date.
+ *
+ * @param selectedFile - Optional uploaded file whose glucose readings will be analyzed and displayed.
+ * @param glucoseUnit - Glucose display unit used for charting and value formatting (`'mg/dL'` or `'mmol/L'`).
+ * @returns A React element that renders the RoC report UI for the provided file and unit.
+ */
 export function RoCReport({ selectedFile, glucoseUnit }: RoCReportProps) {
   const styles = useStyles();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);

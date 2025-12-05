@@ -14,6 +14,14 @@ import { BugRegular, LightbulbRegular, CodeRegular, DocumentBulletListRegular } 
 import { getVersionInfo, formatBuildDate } from '../../utils/version';
 import type { SettingsTabProps } from './types';
 
+/**
+ * Render the About tab UI that provides support links, version details, and demo data attribution.
+ *
+ * Renders action buttons for reporting bugs, requesting features, viewing the repository, and opening API docs; displays version, build ID, build date, and full version (the version and full version link to the release URL when available); and shows citation and links for the demo dataset.
+ *
+ * @param styles - Styles applied to sections and elements of the About tab
+ * @returns The About tab React element
+ */
 export function AboutTab({ styles }: SettingsTabProps) {
   const versionInfo = getVersionInfo();
 

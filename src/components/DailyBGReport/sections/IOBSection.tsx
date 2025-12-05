@@ -27,6 +27,13 @@ interface IOBSectionProps {
   showDayNightShading: boolean;
 }
 
+/**
+ * Render an Insulin on Board (IOB) line chart section for a DailyBGReport.
+ *
+ * @param hourlyIOBData - Array of hourly data points used to plot `activeIOB` by hour.
+ * @param showDayNightShading - When true, add shaded regions for midnight–8:00 AM and 8:00 PM–midnight.
+ * @returns A React element containing the section title and a responsive IOB line chart.
+ */
 export function IOBSection({
   styles,
   hourlyIOBData,

@@ -27,7 +27,13 @@ interface GlucoseTooltipProps {
 }
 
 /**
- * Custom tooltip for glucose chart
+ * Render a styled tooltip showing the data time and a formatted glucose value when the chart tooltip is active and contains data.
+ *
+ * @param active - Whether the chart tooltip is currently active
+ * @param payload - Chart payload; the function reads the first element's `payload` which must include `time`, `value`, and `originalValue`
+ * @param glucoseUnit - Unit used to format the glucose value (e.g., mg/dL or mmol/L)
+ * @param maxGlucose - Maximum glucose threshold used to determine and label clamped values
+ * @returns The tooltip JSX element when active and data is present, or `null` otherwise
  */
 export function GlucoseTooltip({ active, payload, glucoseUnit, maxGlucose }: GlucoseTooltipProps) {
   if (active && payload && payload.length) {
@@ -74,7 +80,16 @@ interface IOBTooltipProps {
 }
 
 /**
- * Custom tooltip for IOB chart
+ * Render a tooltip showing IOB, basal, and bolus values for a hovered timepoint.
+ *
+ * Displays the time label, active IOB (two decimal places), basal in the previous hour
+ * (one decimal place), and bolus in the previous hour (one decimal place).
+ *
+ * @param active - Tooltip active state; tooltip is rendered only when `true`.
+ * @param payload - Chart payload array where the first item's `payload` object must include:
+ *   `timeLabel` (string), `activeIOB` (number), `basalInPreviousHour` (number),
+ *   and `bolusInPreviousHour` (number).
+ * @returns The tooltip element when `active` is `true` and `payload` contains data, `null` otherwise.
  */
 export function IOBTooltip({ active, payload }: IOBTooltipProps) {
   if (active && payload && payload.length) {
@@ -114,7 +129,10 @@ interface RoCTooltipProps {
 }
 
 /**
- * Custom tooltip for RoC chart
+ * Render a tooltip showing rate-of-change, glucose value, time, and a categorical status for a RoC chart.
+ *
+ * @param glucoseUnit - Unit used to format glucose and RoC values (`'mg/dL'` or `'mmol/L'`)
+ * @returns A tooltip element with time, formatted RoC (per 5 minutes), glucose value with unit, and a colored status label, or `null` when inactive or payload data is missing
  */
 export function RoCTooltip({ active, payload, glucoseUnit }: RoCTooltipProps) {
   if (!active || !payload || payload.length === 0) return null;
@@ -173,7 +191,13 @@ interface HyposTooltipProps {
 }
 
 /**
- * Custom tooltip for Hypos chart
+ * Render a tooltip for the hypos chart showing time, formatted glucose with unit, and a hypo status.
+ *
+ * If the hovered point's `originalValue` exceeds `maxGlucose`, the original value is shown with a note that it is clamped to `maxGlucose`.
+ *
+ * @param maxGlucose - Maximum glucose used to detect and indicate clamped values in the displayed text
+ * @param thresholds - Thresholds used to classify `rawValue` into "Severe Hypo" and "Hypoglycemia"; when `rawValue` is present the tooltip shows the matching status
+ * @returns A React element containing the time, glucose value with unit, and an optional colored status line, or `null` when not active or lacking payload
  */
 export function HyposTooltip({ active, payload, glucoseUnit, maxGlucose, thresholds }: HyposTooltipProps) {
   if (active && payload && payload.length) {

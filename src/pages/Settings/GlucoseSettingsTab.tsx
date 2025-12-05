@@ -17,6 +17,18 @@ import { validateGlucoseThresholds } from '../../hooks/useGlucoseThresholds';
 import { GlucoseThresholdsSection } from '../../components/GlucoseThresholdsSection';
 import type { GlucoseSettingsTabProps } from './types';
 
+/**
+ * Render the Glucose Settings tab UI for configuring glucose unit, thresholds, and insulin duration.
+ *
+ * @param styles - CSS module or style object applied to sections and controls
+ * @param glucoseUnit - Currently selected glucose unit ("mmol/L" or "mg/dL")
+ * @param onGlucoseUnitChange - Called when the user selects a different glucose unit; receives the new `GlucoseUnit`
+ * @param glucoseThresholds - Current glucose threshold values
+ * @param onGlucoseThresholdsChange - Called when any threshold is updated; receives the updated `GlucoseThresholds` object
+ * @param insulinDuration - Current insulin duration in hours
+ * @param onInsulinDurationChange - Called when a valid positive insulin duration is entered; receives the new duration (hours)
+ * @returns The React element tree for the Glucose Settings tab
+ */
 export function GlucoseSettingsTab({
   styles,
   glucoseUnit,
