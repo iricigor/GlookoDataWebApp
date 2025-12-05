@@ -46,6 +46,18 @@ interface DetailedBreakdownAccordionProps {
   agpStats: AGPTimeSlotStats[];
 }
 
+/**
+ * Render an accordion presenting detailed glucose time-in-range and AGP statistics across multiple breakdowns.
+ *
+ * @param categoryMode - Numeric mode that controls column layout; when equal to `5` the tables include Very Low and Very High columns.
+ * @param glucoseUnit - Unit used for displaying glucose values.
+ * @param dayFilter - Current day filter label; when not "All Days" a filter indicator is shown in relevant section headers.
+ * @param hourlyStats - Array of hourly time-in-range statistics used to populate the hourly table.
+ * @param dayOfWeekReports - Array of day-of-week reports used to populate the Glucose Range by Day of Week table.
+ * @param weeklyReports - Array of weekly reports used to populate the Glucose Range by Week table.
+ * @param agpStats - Array of AGP time-slot statistics used to populate the Detailed AGP Time Slots table.
+ * @returns A React element containing the collapsible detailed breakdown accordion with tables for hourly TIR, day-of-week, weekly, and AGP time-slot data.
+ */
 export function DetailedBreakdownAccordion({
   categoryMode,
   glucoseUnit,

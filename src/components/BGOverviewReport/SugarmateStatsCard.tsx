@@ -378,7 +378,12 @@ interface SugarmateStatsCardProps {
   bedtimeAverage: number | null;
 }
 
-/** Get color for flux grade */
+/**
+ * Map a flux grade identifier to its display color.
+ *
+ * @param grade - The flux grade identifier to look up.
+ * @returns The color value associated with `grade`. If `grade` is not found, returns the neutral foreground color.
+ */
 function getFluxGradeColor(grade: string): string {
   if (grade in FLUX_GRADE_COLORS) {
     return FLUX_GRADE_COLORS[grade as keyof typeof FLUX_GRADE_COLORS];
@@ -386,7 +391,15 @@ function getFluxGradeColor(grade: string): string {
   return tokens.colorNeutralForeground1;
 }
 
-/** SVG Gaussian curve component for quartiles - full width of right column */
+/**
+ * Renders an inline SVG Gaussian-like curve with a shaded area and vertical markers for quartiles.
+ *
+ * The curve spans from 5% to 95% of the viewBox width and is drawn inside a 100x55 viewBox.
+ * Vertical marker lines indicate the 25th, 50th (median), and 75th percentiles at approximately
+ * 23%, 50%, and 77% of the width respectively.
+ *
+ * @returns An SVG element containing the shaded Gaussian curve and the Q25, Q50, Q75 marker lines.
+ */
 function GaussianCurve() {
   // Soft blue color for the curve
   const curveColor = '#A8C5E8';
@@ -474,6 +487,21 @@ function HighLowRing({ highs, lows }: { highs: number; lows: number }) {
   );
 }
 
+/**
+ * Render a statistics card that displays glucose distribution, incident counts, stability (flux), and summary metrics inspired by the Sugarmate app.
+ *
+ * @param glucoseUnit - Unit used to format glucose values (e.g., mg/dL or mmol/L)
+ * @param averageGlucose - Mean glucose value for the selected period, or `null` if unavailable
+ * @param medianGlucose - Median glucose value for the selected period, or `null` if unavailable
+ * @param standardDeviation - Standard deviation of glucose values, or `null` if unavailable
+ * @param quartiles - Quartile statistics (q25, q50, q75); when provided, renders a Gaussian curve with quartile markers
+ * @param incidents - Counts of high/very-high and low/very-low incidents used to render the high/low donut and labels
+ * @param flux - Stability result containing `grade`, `description`, and `score` (CV); when provided, renders the flux grade visual and score
+ * @param unicornCount - Number of "perfect" unicorn readings to display
+ * @param wakeupAverage - Average glucose at wake-up (6–9 AM), or `null` to show a placeholder
+ * @param bedtimeAverage - Average glucose at bedtime (9 PM–12 AM), or `null` to show a placeholder
+ * @returns A JSX element rendering the Sugarmate-style additional statistics card
+ */
 export function SugarmateStatsCard({
   glucoseUnit,
   averageGlucose,
