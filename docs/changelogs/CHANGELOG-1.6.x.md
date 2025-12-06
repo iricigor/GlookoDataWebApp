@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>692 Fix hypoglycemia chart rendering issues</summary>
+
+[#692](../../pull/692) Fix hypoglycemia chart rendering issues
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>683 Enhance Settings pages alignment with Fluent UI components</summary>
 
 [#683](../../pull/683) Enhance Settings pages alignment with Fluent UI components
