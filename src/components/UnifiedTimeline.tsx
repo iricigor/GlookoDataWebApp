@@ -31,6 +31,7 @@ import { useGlucoseThresholds } from '../hooks/useGlucoseThresholds';
 import { calculateGlucoseRangeStats, GLUCOSE_RANGE_COLORS, MIN_PERCENTAGE_TO_DISPLAY, convertGlucoseValue, getUnitLabel, formatGlucoseValue } from '../utils/data';
 import { COLOR_SCHEME_DESCRIPTORS, getGlucoseColor, isDynamicColorScheme } from '../utils/formatting';
 import type { BGColorScheme } from '../hooks/useBGColorScheme';
+import { formatInsulinDose } from '../utils/formatting/formatters';
 
 const useStyles = makeStyles({
   container: {
@@ -272,12 +273,12 @@ export function UnifiedTimeline({ insulinData, glucoseReadings, colorScheme, set
           )}
           {data.basalRate > 0 && (
             <div style={{ color: '#2E7D32' }}>
-              Basal Rate: {data.basalRate.toFixed(2)} U
+              Basal Rate: {formatInsulinDose(data.basalRate, 2)} U
             </div>
           )}
           {data.bolusTotal > 0 && (
             <div style={{ color: '#1976D2' }}>
-              Bolus Total: {data.bolusTotal.toFixed(1)} U
+              Bolus Total: {formatInsulinDose(data.bolusTotal, 1)} U
             </div>
           )}
         </div>

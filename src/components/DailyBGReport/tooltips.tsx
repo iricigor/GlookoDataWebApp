@@ -11,6 +11,7 @@ import {
   ROC_COLORS,
 } from '../../utils/data';
 import { HYPO_CHART_COLORS } from './constants';
+import { formatInsulinDose } from '../../utils/formatting/formatters';
 
 interface GlucoseTooltipProps {
   active?: boolean;
@@ -106,13 +107,13 @@ export function IOBTooltip({ active, payload }: IOBTooltipProps) {
           {data.timeLabel}
         </div>
         <div style={{ color: '#1976D2' }}>
-          Active IOB: {data.activeIOB.toFixed(2)} U
+          Active IOB: {formatInsulinDose(data.activeIOB, 2)} U
         </div>
         <div style={{ color: tokens.colorNeutralForeground2, marginTop: '4px' }}>
-          Basal in hour: {data.basalInPreviousHour.toFixed(1)} U
+          Basal in hour: {formatInsulinDose(data.basalInPreviousHour, 1)} U
         </div>
         <div style={{ color: tokens.colorNeutralForeground2 }}>
-          Bolus in hour: {data.bolusInPreviousHour.toFixed(1)} U
+          Bolus in hour: {formatInsulinDose(data.bolusInPreviousHour, 1)} U
         </div>
       </div>
     );
@@ -140,9 +141,7 @@ export function RoCTooltip({ active, payload, glucoseUnit }: RoCTooltipProps) {
   if (!data || !data.timeLabel) return null;
   
   const glucoseValue = data.glucoseDisplay ?? data.glucoseValue;
-  const glucoseDisplay = glucoseUnit === 'mg/dL' 
-    ? Math.round(glucoseValue).toString()
-    : glucoseValue.toFixed(1);
+  const glucoseDisplay = formatGlucoseValue(glucoseValue, glucoseUnit);
   
   return (
     <div style={{
