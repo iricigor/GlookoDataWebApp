@@ -321,14 +321,30 @@ export function Navigation({
             <>
               {onThemeToggle && (
                 <Tooltip 
-                  content={isDarkMode ? t('navigation.switchToLightMode') : t('navigation.switchToDarkMode')}
+                  content={
+                    syncStatus === 'syncing' 
+                      ? t('navigation.syncingSettings') 
+                      : isDarkMode 
+                        ? t('navigation.switchToLightMode') 
+                        : t('navigation.switchToDarkMode')
+                  }
                   relationship="label"
                 >
                   <Button
                     appearance="subtle"
-                    icon={isDarkMode ? <WeatherSunnyRegular /> : <WeatherMoonRegular />}
+                    icon={
+                      isDarkMode 
+                        ? <WeatherSunnyRegular className={syncStatus === 'syncing' ? styles.pulsingIcon : undefined} /> 
+                        : <WeatherMoonRegular className={syncStatus === 'syncing' ? styles.pulsingIcon : undefined} />
+                    }
                     onClick={onThemeToggle}
-                    aria-label={isDarkMode ? t('navigation.switchToLightMode') : t('navigation.switchToDarkMode')}
+                    aria-label={
+                      syncStatus === 'syncing'
+                        ? t('navigation.syncingSettings')
+                        : isDarkMode 
+                          ? t('navigation.switchToLightMode') 
+                          : t('navigation.switchToDarkMode')
+                    }
                   />
                 </Tooltip>
               )}
@@ -345,14 +361,7 @@ export function Navigation({
                   {uiLanguage.toUpperCase()}
                 </Button>
               </Tooltip>
-              <Tooltip content={syncStatus === 'syncing' ? t('navigation.syncingSettings') : t('navigation.settingsLabel')} relationship="label">
-                <Button
-                  appearance="subtle"
-                  icon={<SettingsRegular className={syncStatus === 'syncing' ? styles.pulsingIcon : undefined} />}
-                  onClick={() => onNavigate('settings')}
-                  aria-label={syncStatus === 'syncing' ? t('navigation.syncingSettings') : t('navigation.settingsLabel')}
-                />
-              </Tooltip>
+
               <LogoutDialog 
                 userName={userName} 
                 userEmail={userEmail}
