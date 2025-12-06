@@ -45,6 +45,8 @@ export function GeneralSettingsTab({
   onUILanguageChange,
   responseLanguage,
   onResponseLanguageChange,
+  syncWithUILanguage,
+  onSyncWithUILanguageChange,
 }: GeneralSettingsTabProps) {
   return (
     <>
@@ -110,12 +112,27 @@ export function GeneralSettingsTab({
       <div className={styles.settingSection}>
         <Title3 className={styles.sectionTitle}>AI Response Language</Title3>
         <Divider className={styles.divider} />
-        <Text className={styles.settingDescription}>
-          Choose the language for AI analysis responses. This affects all AI-generated insights and recommendations. Note: This does not change the application interface language.
+        
+        {/* Sync toggle */}
+        <div className={styles.settingControl} style={{ marginBottom: '16px' }}>
+          <Switch
+            checked={syncWithUILanguage}
+            onChange={(_, data) => onSyncWithUILanguageChange(data.checked)}
+            label="Automatically sync with UI language"
+          />
+          <Text className={styles.settingDescription} style={{ marginTop: '8px' }}>
+            When enabled, the AI response language will automatically match your UI language. When disabled, you can select a specific language below.
+          </Text>
+        </div>
+
+        {/* Language selector - disabled when sync is enabled */}
+        <Text className={styles.settingDescription} style={{ marginTop: '16px' }}>
+          Choose the language for AI analysis responses. This affects all AI-generated insights and recommendations.
         </Text>
         <RadioGroup
           value={responseLanguage}
           onChange={(_, data) => onResponseLanguageChange(data.value as ResponseLanguage)}
+          disabled={syncWithUILanguage}
         >
           <Radio value="english" label="English" />
           <Radio value="czech" label="Czech (Čeština)" />

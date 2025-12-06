@@ -50,6 +50,8 @@ describe('Settings', () => {
     onUILanguageChange: vi.fn(),
     responseLanguage: 'english' as const,
     onResponseLanguageChange: vi.fn(),
+    syncWithUILanguage: true,
+    onSyncWithUILanguageChange: vi.fn(),
     glucoseUnit: 'mmol/L' as const,
     onGlucoseUnitChange: vi.fn(),
     glucoseThresholds: {
