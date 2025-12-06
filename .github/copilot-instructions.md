@@ -35,6 +35,335 @@ GlookoDataWebApp is a modern web application for importing, visualizing, and ana
 - **Custom hooks** for reusable logic
 - **TypeScript interfaces** for data structure definitions
 
+## 🌐 Code Language Standards (MANDATORY)
+
+**All generated code MUST strictly adhere to English.**
+
+This is a **non-negotiable requirement** for all code contributions, whether written by humans or AI assistants.
+
+### What Must Be in English
+
+1. **Programming Identifiers** (100% English required):
+   - Variable names: `userName`, `fileList`, `isLoading` ✅
+   - Function names: `handleUpload`, `processData`, `calculateAverage` ✅
+   - Class names: `DataProcessor`, `FileManager`, `AnalysisEngine` ✅
+   - Interface names: `UserData`, `ReportConfig`, `ChartOptions` ✅
+   - Type names: `GlucoseReading`, `InsulinDose`, `MealEntry` ✅
+   - Property names: `firstName`, `lastName`, `dateOfBirth` ✅
+   - Constants: `MAX_FILE_SIZE`, `DEFAULT_TIMEOUT`, `API_ENDPOINT` ✅
+   - Enum values: `Status.Active`, `FileType.ZIP`, `Theme.Dark` ✅
+
+2. **Code Comments** (English required):
+   - Single-line comments: `// Calculate average glucose level`
+   - Multi-line comments: `/* Processing algorithm explanation */`
+   - TSDoc/JSDoc comments: `@param userName - The user's display name`
+   - TODO comments: `// TODO: Add error handling for edge cases`
+
+3. **File and Folder Names** (English required):
+   - Component files: `FileUploadZone.tsx`, `NavigationBar.tsx` ✅
+   - Utility files: `dateHelpers.ts`, `dataProcessor.ts` ✅
+   - Test files: `helpers.test.ts`, `DataUpload.test.tsx` ✅
+   - Directories: `components/`, `hooks/`, `utils/` ✅
+
+4. **Console Output** (English required):
+   - Debug messages: `console.log('Processing file:', fileName)`
+   - Error messages: `console.error('Failed to load data')`
+   - Warning messages: `console.warn('Deprecated function used')`
+
+### Examples: Correct vs. Incorrect
+
+```tsx
+// ✅ CORRECT - All English
+interface UserProfile {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: Date;
+}
+
+function calculateAverageGlucose(readings: GlucoseReading[]): number {
+  // Calculate the average glucose level from all readings
+  const total = readings.reduce((sum, reading) => sum + reading.value, 0);
+  return total / readings.length;
+}
+
+// ❌ INCORRECT - Mixed languages or non-English identifiers
+interface BenutzerProfil {  // German - NOT ALLOWED
+  vorname: string;          // German - NOT ALLOWED
+  nachname: string;         // German - NOT ALLOWED
+  geburtsdatum: Date;       // German - NOT ALLOWED
+}
+
+function рассчитатьСреднее(данные: any[]): number {  // Russian - NOT ALLOWED
+  // Calculate average - mixing languages in comments
+  const сумма = данные.reduce((s, d) => s + d.значение, 0);
+  return сумма / данные.length;
+}
+```
+
+### Why English Only?
+
+1. **International Collaboration**: English is the lingua franca of software development
+2. **Consistency**: Uniform codebase is easier to maintain and review
+3. **Tooling Compatibility**: Better IDE support, linting, and autocomplete
+4. **Documentation**: Seamless integration with English documentation
+5. **Onboarding**: Easier for new developers from any country to contribute
+6. **Code Review**: Reviewers from any background can understand the code
+
+### Note on User-Facing Text
+
+**User-facing text is different** and should NEVER be hardcoded in English. Instead, use the i18next localization system (see "Localization Workflow" section below).
+
+```tsx
+// ❌ WRONG - Hardcoded user-facing text
+<Button>Upload File</Button>
+
+// ✅ CORRECT - User-facing text via i18next
+<Button>{t('buttons.uploadFile')}</Button>
+```
+
+---
+
+## 🔄 Localization Workflow (i18next) - MANDATORY
+
+**All user-facing text MUST use the i18next localization system.**
+
+This project uses `react-i18next` for multi-language support. Currently supported languages: **English (en)** and **German (de)**.
+
+### ⚠️ CRITICAL RULE: Never Hardcode User-Facing Text
+
+**For ANY new feature that includes user-facing text:**
+
+1. ✅ **MUST use the `t()` function** from `react-i18next`
+2. ✅ **MUST add the translation key and English string** to `public/locales/en/translation.json`
+3. ✅ **MUST add the translation key for ALL supported languages** (currently: en, de)
+
+This ensures that:
+- The translation key exists in all supported languages immediately
+- The feature is localization-ready from day one
+- Translators can easily find and translate new keys
+
+### Quick Start: Using i18next in Components
+
+```tsx
+import { useTranslation } from 'react-i18next';
+
+export function MyComponent() {
+  const { t } = useTranslation();
+
+  return (
+    <div>
+      <h1>{t('myFeature.title')}</h1>
+      <p>{t('myFeature.description')}</p>
+      <Button>{t('buttons.save')}</Button>
+    </div>
+  );
+}
+```
+
+### Step-by-Step: Adding New Localized Text
+
+#### Step 1: Use `t()` Function in Code
+
+```tsx
+import { useTranslation } from 'react-i18next';
+
+export function NewFeature() {
+  const { t } = useTranslation();
+
+  return (
+    <div>
+      <h2>{t('newFeature.header')}</h2>
+      <Text>{t('newFeature.instructions')}</Text>
+      <Button>{t('buttons.analyze')}</Button>
+      {error && <Text>{t('errors.analysisFailedMessage')}</Text>}
+    </div>
+  );
+}
+```
+
+#### Step 2: Add English Strings to `public/locales/en/translation.json`
+
+```json
+{
+  "newFeature": {
+    "header": "New Analysis Feature",
+    "instructions": "Click the button below to start analyzing your data"
+  },
+  "buttons": {
+    "analyze": "Analyze Data"
+  },
+  "errors": {
+    "analysisFailedMessage": "Analysis failed. Please try again."
+  }
+}
+```
+
+#### Step 3: Add Translation Keys to ALL Other Language Files
+
+**REQUIRED**: Add the same keys to `public/locales/de/translation.json` (and any other supported languages):
+
+```json
+{
+  "newFeature": {
+    "header": "Neue Analysefunktion",
+    "instructions": "Klicken Sie auf die Schaltfläche unten, um mit der Analyse Ihrer Daten zu beginnen"
+  },
+  "buttons": {
+    "analyze": "Daten analysieren"
+  },
+  "errors": {
+    "analysisFailedMessage": "Analyse fehlgeschlagen. Bitte versuchen Sie es erneut."
+  }
+}
+```
+
+**Note for AI Assistants**: If you don't know the translation for non-English languages, you can:
+- Add a placeholder: `"header": "[DE] New Analysis Feature"` (mark with `[LANG_CODE]` prefix)
+- Or use machine translation services
+- Or leave identical to English (suboptimal but acceptable for initial PR)
+
+### Translation Key Naming Conventions
+
+Follow a hierarchical structure that mirrors the component/feature organization:
+
+```json
+{
+  "navigation": { ... },           // Navigation bar strings
+  "home": { ... },                 // Home page strings
+  "dataUpload": { ... },           // Data Upload page strings
+  "reports": { ... },              // Reports page strings
+  "aiAnalysis": { ... },           // AI Analysis page strings
+  "settings": { ... },             // Settings page strings
+  
+  "buttons": { ... },              // Reusable button labels
+  "errors": { ... },               // Error messages
+  "warnings": { ... },             // Warning messages
+  "validation": { ... },           // Form validation messages
+  "common": { ... }                // Common UI strings
+}
+```
+
+**Good key names:**
+- `dataUpload.dragAndDropPrompt`
+- `reports.glucoseTrends.title`
+- `aiAnalysis.analyzingMessage`
+- `settings.general.languageLabel`
+
+**Bad key names:**
+- `text1`, `message2` (non-descriptive)
+- `UploadFileText` (should be camelCase)
+- `german_translation` (should use camelCase)
+
+### Pluralization and Interpolation
+
+#### Interpolation (variables in translations)
+
+```tsx
+// In component
+<Text>{t('welcome.greeting', { name: userName })}</Text>
+
+// In translation.json
+{
+  "welcome": {
+    "greeting": "Hello, {{name}}!"
+  }
+}
+```
+
+#### Pluralization
+
+```tsx
+// In component
+<Text>{t('fileUpload.filesSelected', { count: fileCount })}</Text>
+
+// In translation.json
+{
+  "fileUpload": {
+    "filesSelected_one": "{{count}} file selected",
+    "filesSelected_other": "{{count}} files selected"
+  }
+}
+```
+
+### What Should NOT Be Localized
+
+The following should remain in code (NOT in translation files):
+
+1. **Programming identifiers** (variable names, function names, etc.)
+2. **API endpoints and URLs**
+3. **Data format strings** (e.g., date format codes like `YYYY-MM-DD`)
+4. **Technical constants** (e.g., `MAX_FILE_SIZE`, `DEFAULT_TIMEOUT`)
+5. **Console logs for debugging** (optional - debug logs can stay in English)
+6. **Data values** (e.g., actual glucose readings, timestamps)
+
+### Testing Localized Features
+
+1. **Switch languages in the UI**: Use the language switcher in Settings or Navigation
+2. **Check all text appears correctly**: No missing translations or broken keys
+3. **Verify fallbacks work**: If a key is missing, it should show the key name (i18next default)
+4. **Test with longer German text**: German words are often longer, ensure UI doesn't break
+
+### Translation File Structure
+
+```
+public/
+└── locales/
+    ├── en/
+    │   └── translation.json  (English - source of truth)
+    └── de/
+        └── translation.json  (German - must mirror en structure)
+```
+
+### Common Mistakes to Avoid
+
+❌ **Hardcoding user-facing text**
+```tsx
+<Button>Upload File</Button>  // WRONG
+```
+
+✅ **Using i18next**
+```tsx
+<Button>{t('buttons.uploadFile')}</Button>  // CORRECT
+```
+
+❌ **Forgetting to add keys to all languages**
+```json
+// Only added to en/translation.json, forgot de/translation.json
+```
+
+✅ **Adding keys to ALL supported languages**
+```json
+// Added to both en/translation.json AND de/translation.json
+```
+
+❌ **Using English variable names in translation keys**
+```json
+{
+  "myFeature": {
+    "BeschreibungsText": "Description text"  // Mixed language in key name
+  }
+}
+```
+
+✅ **Using English for ALL translation keys**
+```json
+{
+  "myFeature": {
+    "descriptionText": "Description text"  // Key in English, value translated
+  }
+}
+```
+
+### Resources
+
+- [react-i18next Documentation](https://react.i18next.com/)
+- [i18next Documentation](https://www.i18next.com/)
+- Project's i18n configuration: `src/i18n.ts`
+- Translation files: `public/locales/*/translation.json`
+- Example usage: See any component in `src/components/` or `src/pages/`
+
+---
+
 ## Coding Guidelines
 
 ### TypeScript Best Practices
@@ -538,6 +867,8 @@ zip.forEach((relativePath, zipEntry) => {
 5. **No backend** - This is a pure frontend application
 6. **Data stays local** - All processing happens in the browser
 7. **TypeScript strict mode** - Enabled in tsconfig.json, follow strict typing
+8. **🌐 English code MANDATORY** - All code identifiers, comments, and file names must be in English (see "Code Language Standards" section)
+9. **🔄 i18next MANDATORY for user-facing text** - Never hardcode user-facing strings, always use `t()` function (see "Localization Workflow" section)
 
 ## Adding New AI Analysis Prompts
 

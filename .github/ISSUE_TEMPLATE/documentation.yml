@@ -7,6 +7,11 @@ body:
     attributes:
       value: |
         Thanks for helping improve our documentation!
+        
+        **⚠️ Important for Developers and AI Tools:**
+        Before beginning work on this documentation, please consult [`.github/copilot-instructions.md`](../copilot-instructions.md) for:
+        - 🌐 **Code Language Standards** (English-only requirement for all code examples and identifiers)
+        - 🔄 **Localization Workflow** (if documenting user-facing features, include i18next usage)
 
   - type: textarea
     id: documentation-issue

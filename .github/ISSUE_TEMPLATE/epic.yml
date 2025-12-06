@@ -13,6 +13,13 @@ body:
         - ❌ **Do NOT assign this Epic to Copilot** - Epics cannot be implemented directly
         - ❌ **Do NOT create PRs from this Epic** - Work should be done in subtasks
         - ✅ **Add sub-issues** using the "Create sub-issue" button below this description after creating the Epic
+        
+        ---
+        
+        **⚠️ Important for Developers and AI Tools (applies to all subtasks):**
+        Before beginning work on any subtask, please consult [`.github/copilot-instructions.md`](../copilot-instructions.md) for:
+        - 🌐 **Code Language Standards** (English-only requirement for all code)
+        - 🔄 **Localization Workflow** (mandatory i18next usage for user-facing text)
 
   - type: textarea
     id: epic-goal
