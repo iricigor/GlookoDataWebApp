@@ -1,3 +1,10 @@
 {
-  "appTitle": "Glooko Daten Web App"
+  "appTitle": "Glooko Daten Web App",
+  "brandName": "Glooko Insights",
+  "brandAltText": "Glooko Insights Logo",
+  
+  "home": {
+    "title": "Glooko Insights",
+    "subtitle": "Eine Web-App zum Importieren, Visualisieren und Analysieren von Diabetes-Daten, die von der Glooko-Plattform exportiert wurden"
+  }
 }
