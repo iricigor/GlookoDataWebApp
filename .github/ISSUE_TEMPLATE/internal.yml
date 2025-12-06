@@ -7,11 +7,6 @@ body:
     attributes:
       value: |
         Report issues with build tools, CI/CD, development environment, or other internal functionality.
-        
-        **⚠️ Important for Developers and AI Tools:**
-        Before beginning work on this issue, please consult [`.github/copilot-instructions.md`](../copilot-instructions.md) for:
-        - 🌐 **Code Language Standards** (English-only requirement for all code, scripts, and configuration)
-        - 🔄 **Localization Workflow** (if the issue involves user-facing messages)
 
   - type: textarea
     id: internal-issue
