@@ -81,17 +81,28 @@ interface AGPGraphProps {
 export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
   const styles = useStyles();
 
-  // Detect mobile viewport for responsive margins
+  // Detect mobile viewport for responsive margins (using 768px to match other components)
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 767);
+      setIsMobile(window.innerWidth <= 768);
     };
     
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    
+    // Debounced resize handler to avoid excessive re-renders
+    let timeoutId: NodeJS.Timeout;
+    const debouncedResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkMobile, 150);
+    };
+    
+    window.addEventListener('resize', debouncedResize);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', debouncedResize);
+    };
   }, []);
 
   // Filter data to only include slots with readings

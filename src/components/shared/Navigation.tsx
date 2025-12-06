@@ -50,11 +50,6 @@ const useStyles = makeStyles({
       ...shorthands.padding('12px', '16px'),
     },
   },
-  loginButtonText: {
-    '@media (max-width: 768px)': {
-      display: 'none',
-    },
-  },
   brand: {
     display: 'flex',
     alignItems: 'center',
