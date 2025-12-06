@@ -3,8 +3,109 @@
   "brandName": "Glooko Insights",
   "brandAltText": "Glooko Insights Logo",
   
+  "navigation": {
+    "home": "Startseite",
+    "dataUpload": "Daten hochladen",
+    "reports": "Berichte",
+    "aiAnalysis": "KI-Analyse",
+    "settings": "Einstellungen",
+    "navigationMenu": "Navigationsmenü",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "switchToLightMode": "Zum hellen Modus wechseln",
+    "switchToDarkMode": "Zum dunklen Modus wechseln",
+    "switchToLanguage": "Zu {{language}} wechseln",
+    "currentLanguage": "Aktuelle Sprache: {{language}}. Klicken Sie zum Wechseln.",
+    "settingsLabel": "Einstellungen",
+    "syncingSettings": "Synchronisiere Einstellungen..."
+  },
+
   "home": {
     "title": "Glooko Insights",
-    "subtitle": "Eine Web-App zum Importieren, Visualisieren und Analysieren von Diabetes-Daten, die von der Glooko-Plattform exportiert wurden"
+    "subtitle": "Eine Web-App zum Importieren, Visualisieren und Analysieren von Diabetes-Daten, die von der Glooko-Plattform exportiert wurden",
+    "dataUploadTitle": "Daten hochladen",
+    "dataUploadDescription": "Laden Sie Ihre Glooko-Exportdateien mit Drag-and-Drop-Unterstützung hoch und verwalten Sie diese",
+    "comprehensiveReportsTitle": "Umfassende Berichte",
+    "comprehensiveReportsDescription": "Sehen Sie detaillierte Analysen einschließlich Zeit im Zielbereich, Muster und Trends",
+    "aiAnalysisTitle": "KI-Analyse",
+    "aiAnalysisDescription": "Erhalten Sie intelligente Einblicke und Empfehlungen durch fortschrittliche KI-Algorithmen",
+    "settingsTitle": "Einstellungen",
+    "settingsDescription": "Ihre Daten werden lokal mit konfigurierbaren Persistenzoptionen gespeichert"
+  },
+
+  "footer": {
+    "version": "Version {{version}}"
+  },
+
+  "cookieConsent": {
+    "message": "Diese App verwendet <strong>nur funktionale Cookies</strong>, um Ihre Einstellungen (Design, Einstellungen, Datumsauswahl) zu speichern. Wir <strong>sammeln keine personenbezogenen Daten über Cookies</strong>, verwenden keine Tracking-Cookies und senden keine Cookie-Daten an externe Server. Die gesamte Datenverarbeitung erfolgt lokal in Ihrem Browser.",
+    "learnMore": "Mehr über Datenschutz erfahren",
+    "gotIt": "Verstanden"
+  },
+
+  "loginDialog": {
+    "title": "Mit Microsoft anmelden",
+    "description": "Melden Sie sich mit Ihrem persönlichen Microsoft-Konto an, um auf alle Funktionen zuzugreifen.",
+    "signInButton": "Mit Microsoft anmelden",
+    "signingIn": "Anmeldung läuft...",
+    "cancel": "Abbrechen",
+    "errorMessage": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut."
+  },
+
+  "logoutDialog": {
+    "title": "Abmelden",
+    "confirmMessage": "Möchten Sie sich wirklich abmelden?",
+    "loggingOut": "Abmeldung läuft...",
+    "cancel": "Abbrechen",
+    "proUser": "Pro-Benutzer",
+    "keyVaultSecret": "Key Vault Secret:",
+    "loadingSecret": "Lade Secret...",
+    "secretNotAvailable": "Nicht verfügbar"
+  },
+
+  "welcomeDialog": {
+    "title": "Willkommen!",
+    "greeting": "Willkommen, {{userName}}!",
+    "greetingDefault": "Willkommen in unserer App!",
+    "thankYou": "Vielen Dank, dass Sie sich uns angeschlossen haben! Wir freuen uns, Ihnen bei der Verwaltung und Analyse Ihrer Diabetes-Daten zu helfen.",
+    "cloudSettingsSync": "Cloud-Einstellungssynchronisierung:",
+    "cloudSettingsSyncDescription": "Ihre App-Einstellungen (Design, Glukose-Einheit, Schwellenwerte usw.) werden in der Cloud gespeichert, damit sie auf allen Ihren Geräten synchronisiert werden.",
+    "privacyFirst": "Datenschutz an erster Stelle:",
+    "privacyFirstDescription": "Wir speichern nur Ihre E-Mail-Adresse zur Kontoidentifikation und Ihre App-Einstellungen. Keine persönlichen Gesundheitsdaten, Glukosewerte oder medizinischen Informationen werden jemals in unserer Cloud gespeichert.",
+    "privacyNote": "Wenn Sie Einstellungen nicht in der Cloud speichern möchten, klicken Sie auf \"Abbrechen\", um sich abzumelden. Sie können die App auch ohne Anmeldung nutzen.",
+    "saveSettings": "Einstellungen speichern",
+    "cancel": "Abbrechen"
+  },
+
+  "infrastructureErrorDialog": {
+    "defaultTitle": "Etwas ist schiefgelaufen",
+    "defaultDescription": "Bei der Verbindung zu unseren Diensten ist ein Fehler aufgetreten.",
+    "serviceUnavailableTitle": "Dienst nicht verfügbar",
+    "serviceUnavailableDescription": "Unsere Dienste sind derzeit nicht verfügbar. Dies könnte bedeuten, dass die Infrastruktur gerade eingerichtet wird oder dass es vorübergehende Zugriffsprobleme gibt.",
+    "networkErrorTitle": "Netzwerkfehler",
+    "networkErrorDescription": "Verbindung zu unseren Diensten nicht möglich. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
+    "accessDeniedTitle": "Zugriff verweigert",
+    "accessDeniedDescription": "Ihre Sitzung ist möglicherweise abgelaufen. Bitte versuchen Sie, sich erneut anzumelden.",
+    "errorWithCode": "Fehler {{statusCode}}: {{message}}",
+    "ok": "OK"
+  },
+
+  "toast": {
+    "fileLoadedSuccessTitle": "Datei erfolgreich geladen",
+    "fileLoadedSuccessBody": "{{fileName}} wurde zur Analyse ausgewählt",
+    "aiProviderSwitchedTitle": "KI-Anbieter gewechselt",
+    "aiProviderSwitchedBody": "{{fromProvider}}-Schlüsselüberprüfung fehlgeschlagen. Zu {{toProvider}} gewechselt."
+  },
+
+  "common": {
+    "cancel": "Abbrechen",
+    "ok": "OK",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "english": "Englisch",
+    "german": "Deutsch",
+    "loading": "Laden..."
   }
 }
