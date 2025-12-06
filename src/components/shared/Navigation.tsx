@@ -259,7 +259,6 @@ export function Navigation({
     : isDarkMode
       ? t('navigation.switchToLightMode')
       : t('navigation.switchToDarkMode');
-  
   const themeIconClass = syncStatus === 'syncing' ? styles.pulsingIcon : undefined;
 
   const navItems = [
