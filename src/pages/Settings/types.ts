@@ -56,6 +56,10 @@ export interface GeneralSettingsTabProps extends SettingsTabProps {
   exportFormat: import('../../hooks/useExportFormat').ExportFormat;
   /** Callback invoked when export format changes */
   onExportFormatChange: (format: import('../../hooks/useExportFormat').ExportFormat) => void;
+  /** Current UI language (English or German) */
+  uiLanguage: import('../../hooks/useUILanguage').UILanguage;
+  /** Callback invoked when UI language changes */
+  onUILanguageChange: (language: import('../../hooks/useUILanguage').UILanguage) => void;
   /** Current language for AI response output */
   responseLanguage: import('../../hooks/useResponseLanguage').ResponseLanguage;
   /** Callback invoked when AI response language changes */

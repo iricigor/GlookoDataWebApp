@@ -21,10 +21,12 @@ import {
   NavigationRegular,
   WeatherSunnyRegular,
   WeatherMoonRegular,
+  LocalLanguageRegular,
 } from '@fluentui/react-icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useFirstLoginCheck } from '../../hooks/useFirstLoginCheck';
 import { useProUserCheck } from '../../hooks/useProUserCheck';
+import { useUILanguage } from '../../hooks/useUILanguage';
 import { LoginDialog } from './LoginDialog';
 import { LogoutDialog } from './LogoutDialog';
 import { WelcomeDialog } from './WelcomeDialog';
@@ -175,6 +177,9 @@ export function Navigation({
   // Check if user is a pro user after login (also fetches secret for pro users)
   const { isProUser, secretValue, isChecking: isSecretLoading, resetState: resetProUserState } = useProUserCheck(isLoggedIn ? idToken : null);
 
+  // UI Language switcher hook
+  const { uiLanguage, setUILanguage } = useUILanguage();
+
   // Track if we've already handled the returning user login to prevent duplicate calls
   const hasHandledReturningUserLogin = useRef(false);
 
@@ -240,6 +245,11 @@ export function Navigation({
 
   // Determine if we're in dark mode (either explicitly dark or system-dark)
   const isDarkMode = themeMode ? isDarkTheme(themeMode) : false;
+
+  // Toggle UI language between English and German
+  const handleLanguageToggle = () => {
+    setUILanguage(uiLanguage === 'en' ? 'de' : 'en');
+  };
 
   const navItems = [
     { page: 'home', label: 'Home', icon: <HomeRegular /> },
@@ -320,6 +330,19 @@ export function Navigation({
                   />
                 </Tooltip>
               )}
+              <Tooltip 
+                content={`Switch to ${uiLanguage === 'en' ? 'German' : 'English'}`} 
+                relationship="label"
+              >
+                <Button
+                  appearance="subtle"
+                  icon={<LocalLanguageRegular />}
+                  onClick={handleLanguageToggle}
+                  aria-label={`Current language: ${uiLanguage === 'en' ? 'English' : 'German'}. Click to switch.`}
+                >
+                  {uiLanguage.toUpperCase()}
+                </Button>
+              </Tooltip>
               <Tooltip content={syncStatus === 'syncing' ? 'Syncing settings...' : 'Settings'} relationship="label">
                 <Button
                   appearance="subtle"

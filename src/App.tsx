@@ -19,6 +19,7 @@ import { APIDocs } from './pages/APIDocs'
 import { useTheme, isDarkTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
 import { useResponseLanguage } from './hooks/useResponseLanguage'
+import { useUILanguage } from './hooks/useUILanguage'
 import { useGlucoseUnit } from './hooks/useGlucoseUnit'
 import { useGlucoseThresholds } from './hooks/useGlucoseThresholds'
 import { usePerplexityApiKey } from './hooks/usePerplexityApiKey'
@@ -63,6 +64,7 @@ function App() {
   }, [isDark]);
   const { exportFormat, setExportFormat } = useExportFormat()
   const { responseLanguage, setResponseLanguage } = useResponseLanguage()
+  const { uiLanguage, setUILanguage } = useUILanguage()
   const { glucoseUnit, setGlucoseUnit } = useGlucoseUnit()
   const { insulinDuration, setInsulinDuration } = useInsulinDuration()
   const { thresholds: glucoseThresholds, setThresholds: setGlucoseThresholds } = useGlucoseThresholds()
@@ -420,6 +422,8 @@ function App() {
           onShowDayNightShadingChange={setShowDayNightShading}
           exportFormat={exportFormat}
           onExportFormatChange={setExportFormat}
+          uiLanguage={uiLanguage}
+          onUILanguageChange={setUILanguage}
           responseLanguage={responseLanguage}
           onResponseLanguageChange={setResponseLanguage}
           glucoseUnit={glucoseUnit}

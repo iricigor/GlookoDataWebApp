@@ -12,6 +12,7 @@ import {
 import type { ThemeMode } from '../../hooks/useTheme';
 import type { ExportFormat } from '../../hooks/useExportFormat';
 import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
+import type { UILanguage } from '../../hooks/useUILanguage';
 import type { GlucoseUnit, GlucoseThresholds } from '../../types';
 import type { AIProvider } from '../../utils/api';
 
@@ -41,6 +42,10 @@ interface SettingsProps {
   exportFormat: ExportFormat;
   /** Callback invoked when export format changes */
   onExportFormatChange: (format: ExportFormat) => void;
+  /** Current UI language (English or German) */
+  uiLanguage: UILanguage;
+  /** Callback invoked when UI language changes */
+  onUILanguageChange: (language: UILanguage) => void;
   /** Current language for AI response output */
   responseLanguage: ResponseLanguage;
   /** Callback invoked when AI response language changes */
@@ -95,6 +100,8 @@ export function Settings({
   onShowDayNightShadingChange,
   exportFormat, 
   onExportFormatChange,
+  uiLanguage,
+  onUILanguageChange,
   responseLanguage,
   onResponseLanguageChange,
   glucoseUnit,
@@ -161,6 +168,8 @@ export function Settings({
             onShowDayNightShadingChange={onShowDayNightShadingChange}
             exportFormat={exportFormat}
             onExportFormatChange={onExportFormatChange}
+            uiLanguage={uiLanguage}
+            onUILanguageChange={onUILanguageChange}
             responseLanguage={responseLanguage}
             onResponseLanguageChange={onResponseLanguageChange}
           />

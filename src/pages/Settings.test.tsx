@@ -46,6 +46,8 @@ describe('Settings', () => {
     onShowDayNightShadingChange: vi.fn(),
     exportFormat: 'csv' as const,
     onExportFormatChange: vi.fn(),
+    uiLanguage: 'en' as const,
+    onUILanguageChange: vi.fn(),
     responseLanguage: 'english' as const,
     onResponseLanguageChange: vi.fn(),
     glucoseUnit: 'mmol/L' as const,
