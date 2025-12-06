@@ -16,6 +16,7 @@ import {
   Link,
 } from '@fluentui/react-components';
 import { CookiesRegular, DismissRegular } from '@fluentui/react-icons';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles({
   banner: {
@@ -81,6 +82,7 @@ interface CookieConsentProps {
  */
 export function CookieConsent({ onAccept }: CookieConsentProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
 
   return (
     <div className={styles.banner}>
@@ -93,17 +95,14 @@ export function CookieConsent({ onAccept }: CookieConsentProps) {
           <div className={styles.content}>
             <div className={styles.textContent}>
               <Text className={styles.text}>
-                This app uses <strong>functional cookies only</strong> to save your preferences 
-                (theme, settings, date selections). We do <strong>not collect personal data via cookies</strong>, 
-                use tracking cookies, or send cookie data to external servers. 
-                All data processing happens locally in your browser.{' '}
+                <span dangerouslySetInnerHTML={{ __html: t('cookieConsent.message') }} />{' '}
                 <Link
                   href="https://github.com/iricigor/GlookoDataWebApp#-privacy-first"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.link}
                 >
-                  Learn more about privacy
+                  {t('cookieConsent.learnMore')}
                 </Link>
               </Text>
             </div>
@@ -113,7 +112,7 @@ export function CookieConsent({ onAccept }: CookieConsentProps) {
                 icon={<DismissRegular />}
                 onClick={onAccept}
               >
-                Got it
+                {t('cookieConsent.gotIt')}
               </Button>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { makeStyles, Text, tokens, shorthands } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
 import { getVersionInfo } from '../../utils/version';
 
 const useStyles = makeStyles({
@@ -19,12 +20,13 @@ const useStyles = makeStyles({
 
 export function Footer() {
   const styles = useStyles();
+  const { t } = useTranslation();
   const versionInfo = getVersionInfo();
 
   return (
     <footer className={styles.footer}>
       <Text className={styles.versionText}>
-        Version {versionInfo.fullVersion}
+        {t('footer.version', { version: versionInfo.fullVersion })}
       </Text>
     </footer>
   );

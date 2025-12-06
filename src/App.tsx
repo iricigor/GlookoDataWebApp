@@ -8,6 +8,7 @@ import {
   ToastTitle, 
   ToastBody 
 } from '@fluentui/react-components'
+import { useTranslation } from 'react-i18next'
 import './App.css'
 import { Navigation, Footer, CookieConsent } from './components/shared'
 import { Home } from './pages/Home'
@@ -44,6 +45,7 @@ const PAGE_ORDER = ['home', 'upload', 'reports', 'ai', 'settings'] as const
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const [isLoadingDemoData, setIsLoadingDemoData] = useState(true)
+  const { t } = useTranslation()
   
   // Authentication state
   const { isLoggedIn, idToken, userEmail } = useAuth()
@@ -104,14 +106,17 @@ function App() {
   const handleProviderAutoSwitch = useCallback((fromProvider: AIProvider, toProvider: AIProvider) => {
     dispatchToast(
       <Toast>
-        <ToastTitle>AI provider switched</ToastTitle>
+        <ToastTitle>{t('toast.aiProviderSwitchedTitle')}</ToastTitle>
         <ToastBody>
-          {getProviderDisplayName(fromProvider)} key verification failed. Switched to {getProviderDisplayName(toProvider)}.
+          {t('toast.aiProviderSwitchedBody', { 
+            fromProvider: getProviderDisplayName(fromProvider), 
+            toProvider: getProviderDisplayName(toProvider) 
+          })}
         </ToastBody>
       </Toast>,
       { intent: 'warning', timeout: 5000 }
     )
-  }, [dispatchToast])
+  }, [dispatchToast, t])
 
   // Get current settings as CloudUserSettings object
   const getCurrentSettings = useCallback((): CloudUserSettings => {
@@ -324,9 +329,9 @@ function App() {
       // Show toast notification
       dispatchToast(
         <Toast>
-          <ToastTitle>File loaded successfully</ToastTitle>
+          <ToastTitle>{t('toast.fileLoadedSuccessTitle')}</ToastTitle>
           <ToastBody>
-            {validFile.name} has been selected for analysis
+            {t('toast.fileLoadedSuccessBody', { fileName: validFile.name })}
           </ToastBody>
         </Toast>,
         { intent: 'success', timeout: 5000 }

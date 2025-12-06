@@ -22,6 +22,7 @@ import {
   ErrorCircleRegular,
   WarningRegular,
 } from '@fluentui/react-icons';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles({
   dialogContent: {
@@ -92,23 +93,24 @@ export function InfrastructureErrorDialog({
   statusCode
 }: InfrastructureErrorDialogProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
 
   // Determine the title and description based on error type
-  let title = 'Something went wrong';
-  let description = 'An error occurred while connecting to our services.';
+  let title = t('infrastructureErrorDialog.defaultTitle');
+  let description = t('infrastructureErrorDialog.defaultDescription');
 
   switch (errorType) {
     case 'infrastructure':
-      title = 'Service Unavailable';
-      description = 'Our services are currently unavailable. This could mean the infrastructure is being set up or there are temporary access issues.';
+      title = t('infrastructureErrorDialog.serviceUnavailableTitle');
+      description = t('infrastructureErrorDialog.serviceUnavailableDescription');
       break;
     case 'network':
-      title = 'Network Error';
-      description = 'Unable to connect to our services. Please check your internet connection and try again.';
+      title = t('infrastructureErrorDialog.networkErrorTitle');
+      description = t('infrastructureErrorDialog.networkErrorDescription');
       break;
     case 'unauthorized':
-      title = 'Access Denied';
-      description = 'Your session may have expired. Please try logging in again.';
+      title = t('infrastructureErrorDialog.accessDeniedTitle');
+      description = t('infrastructureErrorDialog.accessDeniedDescription');
       break;
     default:
       break;
@@ -116,7 +118,7 @@ export function InfrastructureErrorDialog({
 
   // Format error details with status code if available
   const errorDetails = statusCode 
-    ? `Error ${statusCode}: ${errorMessage}`
+    ? t('infrastructureErrorDialog.errorWithCode', { statusCode, message: errorMessage })
     : errorMessage;
 
   return (
@@ -139,7 +141,7 @@ export function InfrastructureErrorDialog({
         </DialogBody>
         <DialogActions>
           <Button appearance="primary" onClick={onClose}>
-            OK
+            {t('infrastructureErrorDialog.ok')}
           </Button>
         </DialogActions>
       </DialogSurface>
