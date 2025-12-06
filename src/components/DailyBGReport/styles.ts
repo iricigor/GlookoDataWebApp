@@ -102,10 +102,16 @@ export const useStyles = makeStyles({
     display: 'flex',
     ...shorthands.gap('16px'),
     marginTop: '16px',
+    '@media (max-width: 767px)': {
+      ...shorthands.gap('8px'),
+    },
   },
   chartWrapper: {
     flex: 1,
     height: '400px',
+    '@media (max-width: 767px)': {
+      height: '350px',
+    },
   },
   summaryBarContainer: {
     display: 'flex',
@@ -113,6 +119,10 @@ export const useStyles = makeStyles({
     width: '60px',
     height: '400px',
     ...shorthands.gap('4px'),
+    '@media (max-width: 767px)': {
+      width: '40px',
+      height: '350px',
+    },
   },
   summaryBarSegment: {
     display: 'flex',
@@ -134,19 +144,52 @@ export const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: '16px',
+    '@media (max-width: 767px)': {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      ...shorthands.gap('12px'),
+    },
   },
   maxValueContainer: {
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('12px'),
+    '@media (max-width: 767px)': {
+      justifyContent: 'center',
+    },
   },
   colorSchemeContainer: {
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('12px'),
+    '@media (max-width: 767px)': {
+      width: '100%',
+      ...shorthands.gap('8px'),
+    },
   },
   colorSchemeDropdown: {
     minWidth: '200px',
+    '@media (max-width: 767px)': {
+      minWidth: 'auto',
+      flex: 1,
+    },
+  },
+  colorSchemeLabel: {
+    fontSize: tokens.fontSizeBase300,
+    fontFamily: tokens.fontFamilyBase,
+    color: tokens.colorNeutralForeground2,
+    whiteSpace: 'nowrap',
+  },
+  colorSchemeLabelShort: {
+    '@media (max-width: 767px)': {
+      display: 'none',
+    },
+  },
+  colorSchemeLabelLong: {
+    display: 'none',
+    '@media (max-width: 767px)': {
+      display: 'inline',
+    },
   },
   statValueBelow: {
     color: tokens.colorPaletteRedForeground1,
@@ -174,6 +217,9 @@ export const useStyles = makeStyles({
   iobChartContainer: {
     height: '300px',
     width: '100%',
+    '@media (max-width: 767px)': {
+      height: '250px',
+    },
   },
   // Stats cards with icons (RoC and Hypo style)
   statsRow: {

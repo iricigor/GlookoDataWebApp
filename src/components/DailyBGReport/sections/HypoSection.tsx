@@ -35,6 +35,7 @@ import {
   convertGlucoseValue,
   formatHypoDuration,
 } from '../../../utils/data';
+import { useIsMobile } from '../../../hooks/useIsMobile';
 import { HyposTooltip } from '../tooltips';
 import { formatXAxis, HYPO_CHART_COLORS } from '../constants';
 import type { useStyles } from '../styles';
@@ -91,6 +92,13 @@ export function HypoSection({
   maxGlucose,
   showDayNightShading,
 }: HypoSectionProps) {
+  const isMobile = useIsMobile();
+  
+  // Adjust chart margins for mobile
+  const chartMargin = isMobile 
+    ? { top: 10, right: 10, left: 0, bottom: 0 }
+    : { top: 10, right: 30, left: 0, bottom: 0 };
+  
   return (
     <div className={styles.sectionCard}>
       <Text className={styles.sectionTitle}>Hypoglycemia Analysis</Text>
@@ -187,7 +195,7 @@ export function HypoSection({
         <div className={styles.hyposChartCard}>
           <div className={styles.chartCardInner}>
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={hyposChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <ComposedChart data={hyposChartData} margin={chartMargin}>
                 <defs>
                   {/* Day/night shading gradients */}
                   {showDayNightShading && (
@@ -226,6 +234,36 @@ export function HypoSection({
                     fill="url(#hyposNightGradientRight)"
                   />
                 )}
+                
+                {/* Vertical time reference lines (6AM, noon, 6PM, midnight) */}
+                <ReferenceLine 
+                  x={0} 
+                  stroke={tokens.colorNeutralStroke2}
+                  strokeDasharray="3 3" 
+                  strokeWidth={1}
+                  strokeOpacity={0.5}
+                />
+                <ReferenceLine 
+                  x={6} 
+                  stroke={tokens.colorNeutralStroke2}
+                  strokeDasharray="3 3" 
+                  strokeWidth={1}
+                  strokeOpacity={0.5}
+                />
+                <ReferenceLine 
+                  x={12} 
+                  stroke={tokens.colorNeutralStroke2}
+                  strokeDasharray="3 3" 
+                  strokeWidth={1}
+                  strokeOpacity={0.5}
+                />
+                <ReferenceLine 
+                  x={18} 
+                  stroke={tokens.colorNeutralStroke2}
+                  strokeDasharray="3 3" 
+                  strokeWidth={1}
+                  strokeOpacity={0.5}
+                />
                 
                 <XAxis
                   type="number"

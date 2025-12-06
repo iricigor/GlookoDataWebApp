@@ -34,10 +34,17 @@ const useStyles = makeStyles({
     ...shorthands.padding('16px'),
     backgroundColor: tokens.colorNeutralBackground2,
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    '@media (max-width: 767px)': {
+      ...shorthands.padding('12px', '8px'),
+      ...shorthands.gap('8px'),
+    },
   },
   navigationButtons: {
     display: 'flex',
     ...shorthands.gap('8px'),
+    '@media (max-width: 767px)': {
+      ...shorthands.gap('4px'),
+    },
   },
   navButton: {
     backgroundColor: tokens.colorNeutralBackground3,
@@ -50,11 +57,21 @@ const useStyles = makeStyles({
       color: tokens.colorNeutralForegroundDisabled,
       boxShadow: 'none',
     },
+    '@media (max-width: 767px)': {
+      minWidth: '40px',
+      ...shorthands.padding('6px', '8px'),
+      fontSize: tokens.fontSizeBase200,
+    },
   },
   dateDisplay: {
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('12px'),
+    '@media (max-width: 767px)': {
+      ...shorthands.gap('8px'),
+      flex: 1,
+      justifyContent: 'center',
+    },
   },
   datePickerContainer: {
     // Override RSuite DatePicker styles to follow Fluent UI theme
@@ -77,6 +94,20 @@ const useStyles = makeStyles({
     // Style the calendar icon
     '& .rs-picker-toggle-caret': {
       color: tokens.colorNeutralForeground2,
+    },
+    '@media (max-width: 767px)': {
+      flex: 1,
+      '& .rs-picker-toggle': {
+        minWidth: 'auto',
+        width: '100%',
+        fontSize: tokens.fontSizeBase300,
+        ...shorthands.padding('6px', '12px'),
+      },
+    },
+  },
+  buttonText: {
+    '@media (max-width: 767px)': {
+      display: 'none',
     },
   },
 });
@@ -143,7 +174,7 @@ export function DayNavigator({
             onClick={onPreviousDay}
             disabled={!canGoPrevious || loading}
           >
-            Previous Day
+            <span className={styles.buttonText}>Previous Day</span>
           </Button>
         </div>
         
@@ -181,7 +212,7 @@ export function DayNavigator({
             onClick={onNextDay}
             disabled={!canGoNext || loading}
           >
-            Next Day
+            <span className={styles.buttonText}>Next Day</span>
           </Button>
         </div>
       </div>
