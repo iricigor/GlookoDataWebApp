@@ -28,6 +28,14 @@ interface TimeInRangeByTimeOfDaySectionProps {
   hourlyStats: HourlyTIRStats[];
 }
 
+/**
+ * Renders a card showing an hourly Time in Range (TIR) stacked bar chart with hour labels and a descriptive caption.
+ *
+ * @param categoryMode - The range category mode (controls whether veryLow/veryHigh categories are shown)
+ * @param dayFilter - Current day-of-week filter; when not `'All Days'` a filter indicator is displayed
+ * @param hourlyStats - Array of hourly TIR statistics used to build stacked bars and tooltips
+ * @returns A JSX element containing the TIR by time-of-day card, or `null` if `hourlyStats` is empty
+ */
 export function TimeInRangeByTimeOfDaySection({
   categoryMode,
   dayFilter,
@@ -61,7 +69,8 @@ export function TimeInRangeByTimeOfDaySection({
     <Card className={styles.sectionCard}>
       <Text className={styles.cardTitle}>
         <ClockRegular className={styles.cardIcon} />
-        Time in Range by Time of Day
+        <span className={styles.desktopOnly}>Time in Range by Time of Day</span>
+        <span className={styles.mobileOnly}>TIR by Time of Day</span>
         {dayFilter !== 'All Days' && (
           <Tooltip content={`Filtered by: ${dayFilter}`} relationship="description">
             <FilterRegular className={styles.filterIcon} aria-label="Filter indicator" />
