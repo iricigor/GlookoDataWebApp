@@ -50,6 +50,10 @@ interface SettingsProps {
   responseLanguage: ResponseLanguage;
   /** Callback invoked when AI response language changes */
   onResponseLanguageChange: (language: ResponseLanguage) => void;
+  /** Whether to sync AI language with UI language */
+  syncWithUILanguage: boolean;
+  /** Callback invoked when sync preference changes */
+  onSyncWithUILanguageChange: (sync: boolean) => void;
   /** Current glucose unit (mmol/L or mg/dL) */
   glucoseUnit: GlucoseUnit;
   /** Callback invoked when glucose unit changes */
@@ -104,6 +108,8 @@ export function Settings({
   onUILanguageChange,
   responseLanguage,
   onResponseLanguageChange,
+  syncWithUILanguage,
+  onSyncWithUILanguageChange,
   glucoseUnit,
   onGlucoseUnitChange,
   glucoseThresholds,
@@ -172,6 +178,8 @@ export function Settings({
             onUILanguageChange={onUILanguageChange}
             responseLanguage={responseLanguage}
             onResponseLanguageChange={onResponseLanguageChange}
+            syncWithUILanguage={syncWithUILanguage}
+            onSyncWithUILanguageChange={onSyncWithUILanguageChange}
           />
         );
       

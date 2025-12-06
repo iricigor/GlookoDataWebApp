@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getLanguageInstruction, getDisclaimerInstruction, resolveResponseLanguage } from './promptUtils';
+import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils';
 
 describe('promptUtils', () => {
   describe('getLanguageInstruction', () => {
@@ -136,38 +136,6 @@ describe('promptUtils', () => {
         const serbianResult = getDisclaimerInstruction(undefined, 'serbian');
         expect(serbianResult).toContain('AI');
       });
-    });
-  });
-
-  describe('resolveResponseLanguage', () => {
-    it('should return english when auto is selected and UI language is en', () => {
-      const result = resolveResponseLanguage('auto', 'en');
-      expect(result).toBe('english');
-    });
-
-    it('should return german when auto is selected and UI language is de', () => {
-      const result = resolveResponseLanguage('auto', 'de');
-      expect(result).toBe('german');
-    });
-
-    it('should return the selected language when not auto - english', () => {
-      const result = resolveResponseLanguage('english', 'de');
-      expect(result).toBe('english');
-    });
-
-    it('should return the selected language when not auto - czech', () => {
-      const result = resolveResponseLanguage('czech', 'en');
-      expect(result).toBe('czech');
-    });
-
-    it('should return the selected language when not auto - german', () => {
-      const result = resolveResponseLanguage('german', 'en');
-      expect(result).toBe('german');
-    });
-
-    it('should return the selected language when not auto - serbian', () => {
-      const result = resolveResponseLanguage('serbian', 'de');
-      expect(result).toBe('serbian');
     });
   });
 });

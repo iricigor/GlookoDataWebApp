@@ -306,8 +306,8 @@ export interface CloudUserSettings {
   themeMode: 'light' | 'dark' | 'system';
   /** Export format preference */
   exportFormat: 'csv' | 'tsv';
-  /** AI response language preference (can be 'auto' to follow UI language) */
-  responseLanguage: 'auto' | 'english' | 'czech' | 'german' | 'serbian';
+  /** AI response language preference */
+  responseLanguage: 'english' | 'czech' | 'german' | 'serbian';
   /** Glucose unit preference */
   glucoseUnit: GlucoseUnit;
   /** Insulin duration for IOB calculations (hours) */

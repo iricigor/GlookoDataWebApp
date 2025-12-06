@@ -28,7 +28,7 @@ import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils'
 export function generateHyposReportPrompt(
   base64EventsData: string,
   totalEventCount: number,
-  language: Exclude<ResponseLanguage, 'auto'> = 'english',
+  language: ResponseLanguage = 'english',
   unit: GlucoseUnit = 'mmol/L',
   provider?: AIProvider
 ): string {

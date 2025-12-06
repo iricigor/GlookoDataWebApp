@@ -64,6 +64,10 @@ export interface GeneralSettingsTabProps extends SettingsTabProps {
   responseLanguage: import('../../hooks/useResponseLanguage').ResponseLanguage;
   /** Callback invoked when AI response language changes */
   onResponseLanguageChange: (language: import('../../hooks/useResponseLanguage').ResponseLanguage) => void;
+  /** Whether to sync AI language with UI language */
+  syncWithUILanguage: boolean;
+  /** Callback invoked when sync preference changes */
+  onSyncWithUILanguageChange: (sync: boolean) => void;
 }
 
 /**

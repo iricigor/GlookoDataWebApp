@@ -20,7 +20,7 @@ const MMOL_TO_MGDL_FACTOR = 18;
  * 
  * @param stats - Glucose range statistics
  * @param thresholds - Glucose thresholds
- * @param language - Response language (english, czech, german, or serbian - NOT 'auto')
+ * @param language - Response language (english, czech, german, or serbian)
  * @param unit - Glucose unit (mmol/L or mg/dL)
  * @param provider - AI provider being used (optional)
  * @returns Formatted prompt for AI analysis
@@ -28,7 +28,7 @@ const MMOL_TO_MGDL_FACTOR = 18;
 export function generateTimeInRangePrompt(
   stats: GlucoseRangeStats,
   thresholds: GlucoseThresholds,
-  language: Exclude<ResponseLanguage, 'auto'> = 'english',
+  language: ResponseLanguage = 'english',
   unit: GlucoseUnit = 'mmol/L',
   provider?: AIProvider
 ): string {

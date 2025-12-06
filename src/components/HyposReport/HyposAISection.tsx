@@ -32,7 +32,6 @@ import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
 import type { AIProvider } from '../../utils/api/aiApi';
 import { callAIApi, getActiveProvider } from '../../utils/api';
 import { generateHyposReportPrompt } from '../../features/aiAnalysis/prompts';
-import { resolveResponseLanguage } from '../../features/aiAnalysis/prompts/promptUtils';
 import { 
   extractDetailedHypoEvents, 
   convertDetailedHypoEventsToCSV,
@@ -215,7 +214,6 @@ interface HyposAISectionProps {
   deepseekApiKey: string;
   selectedProvider: AIProvider | null;
   responseLanguage: ResponseLanguage;
-  uiLanguage: 'en' | 'de';
   // File ID for tracking file changes and persisting state
   fileId?: string;
 }
@@ -258,7 +256,6 @@ export function HyposAISection({
   deepseekApiKey,
   selectedProvider,
   responseLanguage,
-  uiLanguage,
   fileId,
 }: HyposAISectionProps) {
   const styles = useStyles();
@@ -427,14 +424,11 @@ export function HyposAISection({
       const eventsCSV = convertDetailedHypoEventsToCSV(allEvents);
       const base64Data = base64Encode(eventsCSV);
       
-      // Resolve 'auto' to actual language based on UI language
-      const resolvedLanguage = resolveResponseLanguage(responseLanguage, uiLanguage);
-      
       // Generate the prompt
       const prompt = generateHyposReportPrompt(
         base64Data,
         allEvents.length,
-        resolvedLanguage,
+        responseLanguage,
         glucoseUnit,
         activeProvider
       );
@@ -496,20 +490,17 @@ export function HyposAISection({
     const eventsCSV = convertDetailedHypoEventsToCSV(allEvents);
     const base64Data = base64Encode(eventsCSV);
     
-    // Resolve 'auto' to actual language based on UI language
-    const resolvedLanguage = resolveResponseLanguage(responseLanguage, uiLanguage);
-    
     // Pass activeProvider as-is (can be null/undefined) - generateHyposReportPrompt
     // handles null provider gracefully by producing a generic prompt without
     // provider-specific disclaimers
     return generateHyposReportPrompt(
       base64Data,
       allEvents.length,
-      resolvedLanguage,
+      responseLanguage,
       glucoseUnit,
       activeProvider ?? undefined
     );
-  }, [loadingAllEvents, allEvents, responseLanguage, uiLanguage, glucoseUnit, activeProvider]);
+  }, [loadingAllEvents, allEvents, responseLanguage, glucoseUnit, activeProvider]);
   
   // Render individual event analysis card with merged event data
   const renderEventCard = (analysis: EventAnalysis, event: DetailedHypoEvent | undefined, index: number) => {

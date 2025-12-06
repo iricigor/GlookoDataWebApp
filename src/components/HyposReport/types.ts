@@ -46,7 +46,6 @@ export interface HyposReportProps {
   deepseekApiKey?: string;
   selectedProvider?: AIProvider | null;
   responseLanguage?: ResponseLanguage;
-  uiLanguage?: 'en' | 'de';
 }
 
 /**

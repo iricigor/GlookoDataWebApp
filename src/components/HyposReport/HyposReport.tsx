@@ -44,7 +44,6 @@ export function HyposReport({
   deepseekApiKey = '',
   selectedProvider = null,
   responseLanguage = 'english',
-  uiLanguage = 'en',
 }: HyposReportProps) {
   const styles = useHyposStyles();
   const { thresholds } = useGlucoseThresholds();
@@ -420,7 +419,6 @@ export function HyposReport({
         deepseekApiKey={deepseekApiKey}
         selectedProvider={selectedProvider}
         responseLanguage={responseLanguage}
-        uiLanguage={uiLanguage}
         fileId={selectedFile?.id}
       />
     </div>

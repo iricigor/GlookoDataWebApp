@@ -73,8 +73,8 @@ function App() {
     }
   }, [isDark]);
   const { exportFormat, setExportFormat } = useExportFormat()
-  const { responseLanguage, setResponseLanguage } = useResponseLanguage()
   const { uiLanguage, setUILanguage } = useUILanguage()
+  const { responseLanguage, setResponseLanguage, syncWithUILanguage, setSyncWithUILanguage } = useResponseLanguage(uiLanguage)
   const { glucoseUnit, setGlucoseUnit } = useGlucoseUnit()
   const { insulinDuration, setInsulinDuration } = useInsulinDuration()
   const { thresholds: glucoseThresholds, setThresholds: setGlucoseThresholds } = useGlucoseThresholds()
@@ -441,6 +441,8 @@ function App() {
           onUILanguageChange={setUILanguage}
           responseLanguage={responseLanguage}
           onResponseLanguageChange={setResponseLanguage}
+          syncWithUILanguage={syncWithUILanguage}
+          onSyncWithUILanguageChange={setSyncWithUILanguage}
           glucoseUnit={glucoseUnit}
           onGlucoseUnitChange={setGlucoseUnit}
           glucoseThresholds={glucoseThresholds}

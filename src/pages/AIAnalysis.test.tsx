@@ -108,7 +108,6 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         selectedProvider={null}
         responseLanguage="english"
-        uiLanguage="en"
         glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
@@ -127,7 +126,6 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         selectedProvider={null}
         responseLanguage="english"
-        uiLanguage="en"
         glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
@@ -154,7 +152,6 @@ describe('AIAnalysis', () => {
         deepseekApiKey=""
         selectedProvider={null}
         responseLanguage="english"
-        uiLanguage="en"
         glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
@@ -183,7 +180,6 @@ describe('AIAnalysis', () => {
         existingAnalysis={existingAnalysis}
         selectedProvider={null}
         responseLanguage="english"
-        uiLanguage="en"
         glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />
@@ -205,7 +201,6 @@ describe('AIAnalysis', () => {
         deepseekApiKey="deepseek-key"
         selectedProvider="grok"
         responseLanguage="english"
-        uiLanguage="en"
         glucoseUnit="mmol/L"
         onAnalysisComplete={mockAnalysisComplete}
       />

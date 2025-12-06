@@ -26,7 +26,7 @@ export function generatePumpSettingsPrompt(
   base64CgmData: string,
   base64BolusData: string,
   base64BasalData: string,
-  language: Exclude<ResponseLanguage, 'auto'> = 'english',
+  language: ResponseLanguage = 'english',
   unit: GlucoseUnit = 'mmol/L',
   provider?: AIProvider
 ): string {
