@@ -21,6 +21,7 @@ import {
   Button,
   Link,
 } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
 import {
   ChevronDownRegular,
   ChevronUpRegular,
@@ -153,6 +154,7 @@ const useStyles = makeStyles({
  */
 export function DataUploadGuide() {
   const styles = useStyles();
+  const { t } = useTranslation();
   
   // Initialize visibility from localStorage
   const [isVisible, setIsVisible] = useState(() => {
@@ -189,14 +191,14 @@ export function DataUploadGuide() {
           onClick={handleToggle}
           role="button"
           tabIndex={0}
-          aria-label="Show getting started guide"
+          aria-label={t('dataUpload.guide.showAriaLabel')}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               handleToggle();
             }
           }}
         >
-          <Text className={styles.sectionTitle}>📚 Getting Started Guide</Text>
+          <Text className={styles.sectionTitle}>📚 {t('dataUpload.guide.title')}</Text>
           <Button
             appearance="subtle"
             icon={<ChevronDownRegular />}
@@ -205,9 +207,9 @@ export function DataUploadGuide() {
               handleToggle();
             }}
             className={styles.toggleButton}
-            aria-label="Show guide"
+            aria-label={t('dataUpload.guide.showAriaLabel')}
           >
-            Show
+            {t('dataUpload.guide.show')}
           </Button>
         </div>
       </div>
@@ -219,15 +221,15 @@ export function DataUploadGuide() {
     <div className={styles.container}>
       <div className={styles.sectionCard}>
         <div className={styles.headerRow}>
-          <Text className={styles.sectionTitle}>📚 Getting Started Guide</Text>
+          <Text className={styles.sectionTitle}>📚 {t('dataUpload.guide.title')}</Text>
           <Button
             appearance="subtle"
             icon={<ChevronUpRegular />}
             onClick={handleToggle}
             className={styles.toggleButton}
-            aria-label="Hide guide"
+            aria-label={t('dataUpload.guide.hideAriaLabel')}
           >
-            Hide
+            {t('dataUpload.guide.hide')}
           </Button>
         </div>
 
@@ -238,23 +240,23 @@ export function DataUploadGuide() {
               <div className={styles.accordionHeader}>
                 <span className={styles.numberBadge}>1</span>
                 <DatabaseRegular className={styles.headerIcon} />
-                <Text className={styles.headerText}>Try Demo Data</Text>
+                <Text className={styles.headerText}>{t('dataUpload.guide.demoData.title')}</Text>
               </div>
             </AccordionHeader>
             <AccordionPanel>
               <div className={styles.accordionContent}>
                 <p>
-                  <strong>New here?</strong> Start by exploring the app with our demo datasets. A pre-loaded demo file is already available in the file list below.
+                  <strong>{t('dataUpload.guide.demoData.newHere')}</strong> {t('dataUpload.guide.demoData.description1')}
                 </p>
                 <p>
-                  You can also load additional demo datasets by clicking the <strong>"Load Demo Data"</strong> button in the file list header. These datasets are inspired by real-world Type 1 Diabetes data patterns.
+                  {t('dataUpload.guide.demoData.description2')} <strong>"{t('dataUpload.guide.demoData.loadDemoDataButton')}"</strong> {t('dataUpload.guide.demoData.description3')}
                 </p>
                 <p>
-                  For attribution and more information about the demo data source, visit the{' '}
+                  {t('dataUpload.guide.demoData.description4')}{' '}
                   <Link className={styles.link} onClick={handleNavigateToAbout} tabIndex={0}>
-                    Settings → About
+                    {t('dataUpload.guide.demoData.settingsAboutLink')}
                   </Link>{' '}
-                  page.
+                  {t('dataUpload.guide.demoData.description5')}
                 </p>
               </div>
             </AccordionPanel>
@@ -266,19 +268,19 @@ export function DataUploadGuide() {
               <div className={styles.accordionHeader}>
                 <span className={styles.numberBadge}>2</span>
                 <ShieldLockRegular className={styles.headerIcon} />
-                <Text className={styles.headerText}>Your Privacy is Protected</Text>
+                <Text className={styles.headerText}>{t('dataUpload.guide.privacy.title')}</Text>
               </div>
             </AccordionHeader>
             <AccordionPanel>
               <div className={styles.accordionContent}>
                 <p>
-                  <strong>Your data never leaves your device.</strong> All graph processing and analysis happens entirely in your browser. We do not upload your files to any server.
+                  <strong>{t('dataUpload.guide.privacy.dataStaysLocal')}</strong> {t('dataUpload.guide.privacy.description1')}
                 </p>
                 <p>
-                  Files are maintained only in your browser's memory while you use the app. When you close the browser tab, your data is gone—unless you explicitly save it.
+                  {t('dataUpload.guide.privacy.description2')}
                 </p>
                 <p>
-                  For AI-powered analysis, data handling is different. See the <strong>AI Analysis</strong> section below for details.
+                  {t('dataUpload.guide.privacy.description3')} <strong>{t('dataUpload.guide.privacy.aiAnalysisSection')}</strong> {t('dataUpload.guide.privacy.description4')}
                 </p>
               </div>
             </AccordionPanel>
@@ -290,19 +292,19 @@ export function DataUploadGuide() {
               <div className={styles.accordionHeader}>
                 <span className={styles.numberBadge}>3</span>
                 <CloudArrowUpRegular className={styles.headerIcon} />
-                <Text className={styles.headerText}>Upload Your Data</Text>
+                <Text className={styles.headerText}>{t('dataUpload.guide.upload.title')}</Text>
               </div>
             </AccordionHeader>
             <AccordionPanel>
               <div className={styles.accordionContent}>
                 <p>
-                  <strong>Drag and drop</strong> your Glooko export ZIP files into the upload zone above, or click to browse and select files from your computer.
+                  <strong>{t('dataUpload.guide.upload.dragAndDrop')}</strong> {t('dataUpload.guide.upload.description1')}
                 </p>
                 <p>
-                  Once uploaded, select a file from the list to view it in the <strong>Comprehensive Reports</strong> page—including BG Overview, Daily BG charts, and Hypoglycemia analysis.
+                  {t('dataUpload.guide.upload.description2')} <strong>{t('dataUpload.guide.upload.comprehensiveReports')}</strong> {t('dataUpload.guide.upload.description3')}
                 </p>
                 <p>
-                  You can also export your data to Excel format (XLSX) using the download button next to each file.
+                  {t('dataUpload.guide.upload.description4')}
                 </p>
               </div>
             </AccordionPanel>
@@ -314,23 +316,23 @@ export function DataUploadGuide() {
               <div className={styles.accordionHeader}>
                 <span className={styles.numberBadge}>4</span>
                 <BrainCircuitRegular className={styles.headerIcon} />
-                <Text className={styles.headerText}>AI Analysis (Data Leaves Your Device)</Text>
+                <Text className={styles.headerText}>{t('dataUpload.guide.aiAnalysis.title')}</Text>
               </div>
             </AccordionHeader>
             <AccordionPanel>
               <div className={styles.accordionContent}>
                 <p>
-                  <strong>Important:</strong> When you use AI-powered analysis features, your health data is sent to the selected AI provider (Perplexity, Grok, DeepSeek, or Google Gemini).
+                  <strong>{t('dataUpload.guide.aiAnalysis.important')}</strong> {t('dataUpload.guide.aiAnalysis.description1')}
                 </p>
                 <p>
-                  The data is sent <strong>without personally identifiable information</strong> (such as your name or email), but the AI provider may associate your API key with the health data you send.
+                  {t('dataUpload.guide.aiAnalysis.description2')} <strong>{t('dataUpload.guide.aiAnalysis.withoutPII')}</strong> {t('dataUpload.guide.aiAnalysis.description3')}
                 </p>
                 <p>
-                  For detailed information about AI data handling, security best practices, and privacy policies, visit the{' '}
+                  {t('dataUpload.guide.aiAnalysis.description4')}{' '}
                   <Link className={styles.link} onClick={handleNavigateToAI} tabIndex={0}>
-                    Settings → AI Settings
+                    {t('dataUpload.guide.aiAnalysis.settingsAILink')}
                   </Link>{' '}
-                  page.
+                  {t('dataUpload.guide.aiAnalysis.description5')}
                 </p>
               </div>
             </AccordionPanel>

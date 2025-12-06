@@ -4,6 +4,7 @@ import {
   tokens,
   shorthands,
 } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
 import { FileUploadZone, FileList, extractZipMetadata } from '../features/dataUpload';
 import { DataUploadGuide } from '../components/DataUploadGuide';
 import type { UploadedFile } from '../types';
@@ -53,6 +54,7 @@ interface DataUploadProps {
 
 export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll, selectedFileId, onSelectFile, exportFormat, isLoadingDemoData }: DataUploadProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
 
   const handleFilesSelected = async (files: File[]) => {
     // Process files and extract ZIP metadata
@@ -76,9 +78,9 @@ export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Text className={styles.title}>Data Upload</Text>
+        <Text className={styles.title}>{t('dataUpload.title')}</Text>
         <Text className={styles.description}>
-          Upload and manage your Glooko export files with drag-and-drop support
+          {t('dataUpload.description')}
         </Text>
       </div>
 
