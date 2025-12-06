@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithProviders } from '../../testUtils/i18nTestProvider';
 import { Navigation } from './Navigation';
 
 // Mock the useAuth hook
@@ -63,13 +64,13 @@ describe('Navigation', () => {
 
   describe('when user is not logged in', () => {
     it('should render Login button', () => {
-      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+      renderWithProviders(<Navigation currentPage="home" onNavigate={vi.fn()} />);
       
       expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
     });
 
     it('should not render theme toggle button', () => {
-      render(
+      renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={vi.fn()} 
@@ -83,7 +84,7 @@ describe('Navigation', () => {
     });
 
     it('should not render settings shortcut button next to avatar', () => {
-      render(
+      renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={vi.fn()} 
@@ -110,7 +111,7 @@ describe('Navigation', () => {
     });
 
     it('should render theme toggle button when onThemeToggle is provided', () => {
-      render(
+      renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={vi.fn()} 
@@ -123,7 +124,7 @@ describe('Navigation', () => {
     });
 
     it('should render settings shortcut button', () => {
-      render(
+      renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={vi.fn()} 
@@ -136,7 +137,7 @@ describe('Navigation', () => {
     });
 
     it('should show "Syncing settings..." on settings button when syncStatus is syncing', () => {
-      render(
+      renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={vi.fn()} 
@@ -150,7 +151,7 @@ describe('Navigation', () => {
 
     it('should keep settings icon clickable and functional during syncing', () => {
       const onNavigate = vi.fn();
-      render(
+      renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={onNavigate} 
@@ -169,7 +170,7 @@ describe('Navigation', () => {
 
     it('should call onThemeToggle when theme button is clicked', () => {
       const onThemeToggle = vi.fn();
-      render(
+      renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={vi.fn()} 
@@ -186,7 +187,7 @@ describe('Navigation', () => {
 
     it('should navigate to settings when settings shortcut is clicked', () => {
       const onNavigate = vi.fn();
-      render(
+      renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={onNavigate} 
@@ -203,7 +204,7 @@ describe('Navigation', () => {
 
     it('should show sun icon in dark mode', () => {
       mockIsDarkTheme.mockReturnValue(true); // Mock dark mode
-      render(
+      renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={vi.fn()} 
@@ -217,7 +218,7 @@ describe('Navigation', () => {
 
     it('should show moon icon in light mode', () => {
       mockIsDarkTheme.mockReturnValue(false); // Mock light mode
-      render(
+      renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={vi.fn()} 
@@ -230,7 +231,7 @@ describe('Navigation', () => {
     });
 
     it('should render user button for logout', () => {
-      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+      renderWithProviders(<Navigation currentPage="home" onNavigate={vi.fn()} />);
       
       expect(screen.getByRole('button', { name: /john doe/i })).toBeInTheDocument();
     });
@@ -238,7 +239,7 @@ describe('Navigation', () => {
 
   describe('navigation items', () => {
     it('should render all navigation items', () => {
-      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+      renderWithProviders(<Navigation currentPage="home" onNavigate={vi.fn()} />);
       
       expect(screen.getByRole('button', { name: /home/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /data upload/i })).toBeInTheDocument();
@@ -249,7 +250,7 @@ describe('Navigation', () => {
 
     it('should call onNavigate when navigation button is clicked', () => {
       const onNavigate = vi.fn();
-      render(<Navigation currentPage="home" onNavigate={onNavigate} />);
+      renderWithProviders(<Navigation currentPage="home" onNavigate={onNavigate} />);
       
       fireEvent.click(screen.getByRole('button', { name: /data upload/i }));
       
@@ -257,7 +258,7 @@ describe('Navigation', () => {
     });
 
     it('should highlight current page button', () => {
-      render(<Navigation currentPage="reports" onNavigate={vi.fn()} />);
+      renderWithProviders(<Navigation currentPage="reports" onNavigate={vi.fn()} />);
       
       const reportsButton = screen.getByRole('button', { name: /reports/i });
       // The current page button should have "primary" appearance (implemented via class)
@@ -281,7 +282,7 @@ describe('Navigation', () => {
         performCheck,
       });
 
-      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+      renderWithProviders(<Navigation currentPage="home" onNavigate={vi.fn()} />);
 
       expect(performCheck).toHaveBeenCalledWith('test-id-token');
     });
@@ -301,7 +302,7 @@ describe('Navigation', () => {
         performCheck,
       });
 
-      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+      renderWithProviders(<Navigation currentPage="home" onNavigate={vi.fn()} />);
 
       expect(performCheck).not.toHaveBeenCalled();
     });
@@ -321,7 +322,7 @@ describe('Navigation', () => {
         isFirstLogin: true,
       });
 
-      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+      renderWithProviders(<Navigation currentPage="home" onNavigate={vi.fn()} />);
 
       expect(screen.getByText('Welcome!')).toBeInTheDocument();
       expect(screen.getByText('Welcome, John Doe!')).toBeInTheDocument();
@@ -342,7 +343,7 @@ describe('Navigation', () => {
         isFirstLogin: false,
       });
 
-      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+      renderWithProviders(<Navigation currentPage="home" onNavigate={vi.fn()} />);
 
       expect(screen.queryByText('Welcome!')).not.toBeInTheDocument();
     });
@@ -366,7 +367,7 @@ describe('Navigation', () => {
         isFirstLogin: false,
       });
 
-      render(
+      renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={vi.fn()} 
@@ -395,7 +396,7 @@ describe('Navigation', () => {
         isFirstLogin: true,
       });
 
-      render(
+      renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={vi.fn()} 
@@ -423,7 +424,7 @@ describe('Navigation', () => {
         errorType: 'infrastructure',
       });
 
-      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+      renderWithProviders(<Navigation currentPage="home" onNavigate={vi.fn()} />);
 
       expect(screen.getAllByText('Service Unavailable').length).toBeGreaterThan(0);
       expect(screen.getByText('Cannot connect to Table Storage')).toBeInTheDocument();
@@ -448,7 +449,7 @@ describe('Navigation', () => {
         resetState,
       });
 
-      render(<Navigation currentPage="home" onNavigate={vi.fn()} />);
+      renderWithProviders(<Navigation currentPage="home" onNavigate={vi.fn()} />);
 
       // Find the logout button inside the LogoutDialog trigger
       const userButton = screen.getByRole('button', { name: /john doe/i });

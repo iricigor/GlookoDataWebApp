@@ -1,11 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { renderWithProviders } from '../../testUtils/i18nTestProvider';
 import { LoginDialog } from './LoginDialog';
 
 describe('LoginDialog', () => {
   it('should render login button', () => {
     const onLogin = vi.fn().mockResolvedValue(undefined);
-    render(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} />);
     
     const button = screen.getByRole('button', { name: /login/i });
     expect(button).toBeInTheDocument();
@@ -13,7 +14,7 @@ describe('LoginDialog', () => {
 
   it('should open dialog when login button is clicked', () => {
     const onLogin = vi.fn().mockResolvedValue(undefined);
-    render(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} />);
     
     const button = screen.getByRole('button', { name: /login/i });
     fireEvent.click(button);
@@ -23,7 +24,7 @@ describe('LoginDialog', () => {
 
   it('should call onLogin when login is confirmed', async () => {
     const onLogin = vi.fn().mockResolvedValue(undefined);
-    render(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /login/i });
@@ -40,7 +41,7 @@ describe('LoginDialog', () => {
 
   it('should close dialog when cancel is clicked', () => {
     const onLogin = vi.fn().mockResolvedValue(undefined);
-    render(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /login/i });
@@ -55,7 +56,7 @@ describe('LoginDialog', () => {
 
   it('should show loading state during login', async () => {
     const onLogin = vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
-    render(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /login/i });

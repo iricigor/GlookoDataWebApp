@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from '../../testUtils/i18nTestProvider';
 import { WelcomeDialog } from './WelcomeDialog';
 
@@ -11,7 +11,7 @@ describe('WelcomeDialog', () => {
   it('should not render when closed', () => {
     const onAccept = vi.fn();
     const onCancel = vi.fn();
-    render(renderWithProviders(<WelcomeDialog open={false} onAccept={onAccept} onCancel={onCancel} />));
+    renderWithProviders(<WelcomeDialog open={false} onAccept={onAccept} onCancel={onCancel} />);
     
     expect(screen.queryByText('Welcome!')).not.toBeInTheDocument();
   });
@@ -19,7 +19,7 @@ describe('WelcomeDialog', () => {
   it('should render when open', () => {
     const onAccept = vi.fn();
     const onCancel = vi.fn();
-    render(renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} />));
+    renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} />);
     
     expect(screen.getByText('Welcome!')).toBeInTheDocument();
   });
@@ -27,7 +27,7 @@ describe('WelcomeDialog', () => {
   it('should display generic welcome message when no user name provided', () => {
     const onAccept = vi.fn();
     const onCancel = vi.fn();
-    render(renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} />));
+    renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} />);
     
     expect(screen.getByText('Welcome to our app!')).toBeInTheDocument();
   });
@@ -35,7 +35,7 @@ describe('WelcomeDialog', () => {
   it('should display personalized welcome message when user name provided', () => {
     const onAccept = vi.fn();
     const onCancel = vi.fn();
-    render(renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} userName="John" />));
+    renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} userName="John" />);
     
     expect(screen.getByText('Welcome, John!')).toBeInTheDocument();
   });
@@ -43,7 +43,7 @@ describe('WelcomeDialog', () => {
   it('should display generic message when user name is null', () => {
     const onAccept = vi.fn();
     const onCancel = vi.fn();
-    render(renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} userName={null} />));
+    renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} userName={null} />);
     
     expect(screen.getByText('Welcome to our app!')).toBeInTheDocument();
   });
@@ -51,7 +51,7 @@ describe('WelcomeDialog', () => {
   it('should display cloud settings explanation', () => {
     const onAccept = vi.fn();
     const onCancel = vi.fn();
-    render(renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} />));
+    renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} />);
     
     expect(screen.getByText(/Cloud Settings Sync/)).toBeInTheDocument();
     expect(screen.getByText(/Privacy First/)).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe('WelcomeDialog', () => {
   it('should call onAccept when Save Settings button is clicked', () => {
     const onAccept = vi.fn();
     const onCancel = vi.fn();
-    render(renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} />));
+    renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} />);
     
     const saveButton = screen.getByRole('button', { name: /Save Settings/i });
     fireEvent.click(saveButton);
@@ -72,7 +72,7 @@ describe('WelcomeDialog', () => {
   it('should call onCancel when Cancel button is clicked', () => {
     const onAccept = vi.fn();
     const onCancel = vi.fn();
-    render(renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} />));
+    renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} />);
     
     const cancelButton = screen.getByRole('button', { name: /Cancel/i });
     fireEvent.click(cancelButton);
@@ -84,7 +84,7 @@ describe('WelcomeDialog', () => {
   it('should have both Save Settings and Cancel buttons', () => {
     const onAccept = vi.fn();
     const onCancel = vi.fn();
-    render(renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} />));
+    renderWithProviders(<WelcomeDialog open={true} onAccept={onAccept} onCancel={onCancel} />);
     
     expect(screen.getByRole('button', { name: /Save Settings/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Cancel/i })).toBeInTheDocument();

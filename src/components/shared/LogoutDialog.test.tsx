@@ -1,11 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { LogoutDialog } from './LogoutDialog';
+import { renderWithProviders } from '../../testUtils/i18nTestProvider';
 
 describe('LogoutDialog', () => {
   it('should render user button with name and avatar', () => {
     const onLogout = vi.fn().mockResolvedValue(undefined);
-    render(<LogoutDialog userName="John Doe" onLogout={onLogout} />);
+    renderWithProviders(<LogoutDialog userName="John Doe" onLogout={onLogout} />);
     
     const button = screen.getByRole('button', { name: /john doe/i });
     expect(button).toBeInTheDocument();
@@ -13,7 +14,7 @@ describe('LogoutDialog', () => {
 
   it('should open dialog when user button is clicked', () => {
     const onLogout = vi.fn().mockResolvedValue(undefined);
-    render(<LogoutDialog userName="John Doe" onLogout={onLogout} />);
+    renderWithProviders(<LogoutDialog userName="John Doe" onLogout={onLogout} />);
     
     const button = screen.getByRole('button', { name: /john doe/i });
     fireEvent.click(button);
@@ -23,7 +24,7 @@ describe('LogoutDialog', () => {
 
   it('should call onLogout when logout is confirmed', async () => {
     const onLogout = vi.fn().mockResolvedValue(undefined);
-    render(<LogoutDialog userName="John Doe" onLogout={onLogout} />);
+    renderWithProviders(<LogoutDialog userName="John Doe" onLogout={onLogout} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /john doe/i });
@@ -40,7 +41,7 @@ describe('LogoutDialog', () => {
 
   it('should close dialog when cancel is clicked', () => {
     const onLogout = vi.fn().mockResolvedValue(undefined);
-    render(<LogoutDialog userName="John Doe" onLogout={onLogout} />);
+    renderWithProviders(<LogoutDialog userName="John Doe" onLogout={onLogout} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /john doe/i });
@@ -55,7 +56,7 @@ describe('LogoutDialog', () => {
 
   it('should render different user names correctly', () => {
     const onLogout = vi.fn().mockResolvedValue(undefined);
-    const { rerender } = render(<LogoutDialog userName="Jane Smith" onLogout={onLogout} />);
+    const { rerender } = renderWithProviders(<LogoutDialog userName="Jane Smith" onLogout={onLogout} />);
     
     expect(screen.getByRole('button', { name: /jane smith/i })).toBeInTheDocument();
     
@@ -65,7 +66,7 @@ describe('LogoutDialog', () => {
 
   it('should display user email when provided', () => {
     const onLogout = vi.fn().mockResolvedValue(undefined);
-    render(<LogoutDialog userName="John Doe" userEmail="john@example.com" onLogout={onLogout} />);
+    renderWithProviders(<LogoutDialog userName="John Doe" userEmail="john@example.com" onLogout={onLogout} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /john doe/i });
@@ -76,7 +77,7 @@ describe('LogoutDialog', () => {
 
   it('should display user photo when provided', () => {
     const onLogout = vi.fn().mockResolvedValue(undefined);
-    render(<LogoutDialog userName="John Doe" userPhoto="https://example.com/photo.jpg" onLogout={onLogout} />);
+    renderWithProviders(<LogoutDialog userName="John Doe" userPhoto="https://example.com/photo.jpg" onLogout={onLogout} />);
     
     const button = screen.getByRole('button', { name: /john doe/i });
     expect(button).toBeInTheDocument();
@@ -85,7 +86,7 @@ describe('LogoutDialog', () => {
 
   it('should display pro user badge when isProUser is true', () => {
     const onLogout = vi.fn().mockResolvedValue(undefined);
-    render(<LogoutDialog userName="John Doe" isProUser={true} onLogout={onLogout} />);
+    renderWithProviders(<LogoutDialog userName="John Doe" isProUser={true} onLogout={onLogout} />);
     
     // Pro user badge should be visible in the button
     expect(screen.getByLabelText('Pro user')).toBeInTheDocument();
@@ -93,7 +94,7 @@ describe('LogoutDialog', () => {
 
   it('should not display pro user badge when isProUser is false', () => {
     const onLogout = vi.fn().mockResolvedValue(undefined);
-    render(<LogoutDialog userName="John Doe" isProUser={false} onLogout={onLogout} />);
+    renderWithProviders(<LogoutDialog userName="John Doe" isProUser={false} onLogout={onLogout} />);
     
     // Pro user badge should not be visible
     expect(screen.queryByLabelText('Pro user')).not.toBeInTheDocument();
@@ -101,7 +102,7 @@ describe('LogoutDialog', () => {
 
   it('should not display pro user badge when isProUser is undefined', () => {
     const onLogout = vi.fn().mockResolvedValue(undefined);
-    render(<LogoutDialog userName="John Doe" onLogout={onLogout} />);
+    renderWithProviders(<LogoutDialog userName="John Doe" onLogout={onLogout} />);
     
     // Pro user badge should not be visible
     expect(screen.queryByLabelText('Pro user')).not.toBeInTheDocument();
@@ -109,7 +110,7 @@ describe('LogoutDialog', () => {
 
   it('should display pro user badge in dialog when isProUser is true', () => {
     const onLogout = vi.fn().mockResolvedValue(undefined);
-    render(<LogoutDialog userName="John Doe" isProUser={true} onLogout={onLogout} />);
+    renderWithProviders(<LogoutDialog userName="John Doe" isProUser={true} onLogout={onLogout} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /john doe/i });

@@ -3,13 +3,14 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import { CookieConsent } from './CookieConsent';
+import { renderWithProviders } from '../../testUtils/i18nTestProvider';
 
 describe('CookieConsent', () => {
   it('should render the cookie consent banner', () => {
     const mockOnAccept = vi.fn();
-    render(<CookieConsent onAccept={mockOnAccept} />);
+    renderWithProviders(<CookieConsent onAccept={mockOnAccept} />);
     
     expect(screen.getByText(/functional cookies only/i)).toBeInTheDocument();
     expect(screen.getByText(/not collect personal data via cookies/i)).toBeInTheDocument();
@@ -17,7 +18,7 @@ describe('CookieConsent', () => {
 
   it('should display cookie icon', () => {
     const mockOnAccept = vi.fn();
-    render(<CookieConsent onAccept={mockOnAccept} />);
+    renderWithProviders(<CookieConsent onAccept={mockOnAccept} />);
     
     // The icon should be present in the document
     const banner = screen.getByRole('group'); // MessageBar has role="group"
@@ -26,7 +27,7 @@ describe('CookieConsent', () => {
 
   it('should have a "Got it" button', () => {
     const mockOnAccept = vi.fn();
-    render(<CookieConsent onAccept={mockOnAccept} />);
+    renderWithProviders(<CookieConsent onAccept={mockOnAccept} />);
     
     const button = screen.getByRole('button', { name: /got it/i });
     expect(button).toBeInTheDocument();
@@ -34,7 +35,7 @@ describe('CookieConsent', () => {
 
   it('should call onAccept when "Got it" button is clicked', () => {
     const mockOnAccept = vi.fn();
-    render(<CookieConsent onAccept={mockOnAccept} />);
+    renderWithProviders(<CookieConsent onAccept={mockOnAccept} />);
     
     const button = screen.getByRole('button', { name: /got it/i });
     fireEvent.click(button);
@@ -44,7 +45,7 @@ describe('CookieConsent', () => {
 
   it('should have a link to privacy documentation', () => {
     const mockOnAccept = vi.fn();
-    render(<CookieConsent onAccept={mockOnAccept} />);
+    renderWithProviders(<CookieConsent onAccept={mockOnAccept} />);
     
     const link = screen.getByRole('link', { name: /learn more about privacy/i });
     expect(link).toBeInTheDocument();
@@ -55,14 +56,14 @@ describe('CookieConsent', () => {
 
   it('should explain what cookies are used for', () => {
     const mockOnAccept = vi.fn();
-    render(<CookieConsent onAccept={mockOnAccept} />);
+    renderWithProviders(<CookieConsent onAccept={mockOnAccept} />);
     
     expect(screen.getByText(/theme, settings, date selections/i)).toBeInTheDocument();
   });
 
   it('should clarify no tracking cookies are used', () => {
     const mockOnAccept = vi.fn();
-    render(<CookieConsent onAccept={mockOnAccept} />);
+    renderWithProviders(<CookieConsent onAccept={mockOnAccept} />);
     
     expect(screen.getByText(/not collect personal data via cookies/i)).toBeInTheDocument();
     expect(screen.getByText(/locally in your browser/i)).toBeInTheDocument();
@@ -70,7 +71,7 @@ describe('CookieConsent', () => {
 
   it('should be positioned at the bottom of the page', () => {
     const mockOnAccept = vi.fn();
-    const { container } = render(<CookieConsent onAccept={mockOnAccept} />);
+    const { container } = renderWithProviders(<CookieConsent onAccept={mockOnAccept} />);
     
     const banner = container.firstChild as HTMLElement;
     
