@@ -398,10 +398,10 @@ function App() {
         )
       case 'reports':
         return (
-          <Reports 
-            selectedFile={selectedFile} 
+          <Reports
+            selectedFile={selectedFile}
             exportFormat={exportFormat}
-            glucoseUnit={glucoseUnit} 
+            glucoseUnit={glucoseUnit}
             insulinDuration={insulinDuration}
             showDayNightShading={showDayNightShading}
             perplexityApiKey={perplexityApiKey}
@@ -410,6 +410,7 @@ function App() {
             deepseekApiKey={deepseekApiKey}
             selectedProvider={selectedProvider}
             responseLanguage={responseLanguage}
+            uiLanguage={uiLanguage}
           />
         )
       case 'ai':

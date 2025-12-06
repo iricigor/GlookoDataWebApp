@@ -26,7 +26,7 @@ export function generateMealTimingPrompt(
   base64CgmData: string,
   base64BolusData: string,
   base64BasalData: string,
-  language: ResponseLanguage = 'english',
+  language: Exclude<ResponseLanguage, 'auto'> = 'english',
   unit: GlucoseUnit = 'mmol/L',
   provider?: AIProvider
 ): string {

@@ -83,6 +83,7 @@ interface ReportsProps {
   deepseekApiKey?: string;
   selectedProvider?: AIProvider | null;
   responseLanguage?: ResponseLanguage;
+  uiLanguage?: 'en' | 'de';
 }
 
 const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'hypos'];
@@ -115,6 +116,7 @@ export function Reports({
   deepseekApiKey,
   selectedProvider,
   responseLanguage,
+  uiLanguage = 'en',
 }: ReportsProps) {
   const styles = useStyles();
   const [selectedTab, setSelectedTab] = useState<string>(() => {
@@ -180,6 +182,7 @@ export function Reports({
             deepseekApiKey={deepseekApiKey}
             selectedProvider={selectedProvider}
             responseLanguage={responseLanguage}
+            uiLanguage={uiLanguage}
           />
         );
       default:

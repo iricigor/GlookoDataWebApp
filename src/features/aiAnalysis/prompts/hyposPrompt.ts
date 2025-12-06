@@ -25,7 +25,7 @@ import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils'
 export function generateHyposPrompt(
   base64HypoEventsData: string,
   base64HypoSummaryData: string,
-  language: ResponseLanguage = 'english',
+  language: Exclude<ResponseLanguage, 'auto'> = 'english',
   unit: GlucoseUnit = 'mmol/L',
   provider?: AIProvider,
   base64HypoEventSummaryData?: string

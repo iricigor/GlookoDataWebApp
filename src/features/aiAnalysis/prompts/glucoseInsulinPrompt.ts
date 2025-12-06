@@ -20,7 +20,7 @@ import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils'
  * @param provider - AI provider being used (optional)
  * @returns Formatted prompt for AI analysis with tercile analysis, hypoglycemia risk, and variance analysis
  */
-export function generateGlucoseInsulinPrompt(base64CsvData: string, language: ResponseLanguage = 'english', unit: GlucoseUnit = 'mmol/L', provider?: AIProvider): string {
+export function generateGlucoseInsulinPrompt(base64CsvData: string, language: Exclude<ResponseLanguage, 'auto'> = 'english', unit: GlucoseUnit = 'mmol/L', provider?: AIProvider): string {
   const csvData = base64Decode(base64CsvData);
   const languageInstruction = getLanguageInstruction(language);
   const disclaimerInstruction = getDisclaimerInstruction(provider, language);
