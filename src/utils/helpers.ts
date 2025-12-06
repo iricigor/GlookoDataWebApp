@@ -2,28 +2,27 @@
  * Utility functions for data formatting and manipulation
  */
 
+import { formatDate as formatDateLocalized, formatNumber as formatNumberLocalized } from './formatting/formatters';
+
 /**
- * Format a date object to a readable string
+ * Format a date object to a readable string with localization
  * 
  * @param date - The date to format
- * @returns Formatted date string (MM/DD/YYYY)
+ * @returns Formatted date string with proper locale (e.g., MM/DD/YYYY in English, DD.MM.YYYY in German)
  */
 export function formatDate(date: Date): string {
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${month}/${day}/${year}`;
+  return formatDateLocalized(date);
 }
 
 /**
- * Format a number with specified decimal places
+ * Format a number with specified decimal places and localization
  * 
  * @param value - The number to format
  * @param decimals - Number of decimal places (default: 2)
- * @returns Formatted number string
+ * @returns Formatted number string with proper locale (e.g., 1,234.56 in English, 1.234,56 in German)
  */
 export function formatNumber(value: number, decimals: number = 2): string {
-  return value.toFixed(decimals);
+  return formatNumberLocalized(value, decimals);
 }
 
 /**

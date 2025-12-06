@@ -2,7 +2,7 @@
  * Unit tests for glucose unit conversion utilities
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   MMOL_TO_MGDL,
   mmolToMgdl,
@@ -13,8 +13,19 @@ import {
   getUnitLabel,
   detectGlucoseUnit,
 } from './glucoseUnitUtils';
+import i18n from '../../i18n';
 
 describe('glucoseUnitUtils', () => {
+  let originalLanguage: string;
+
+  beforeEach(() => {
+    originalLanguage = i18n.language;
+    i18n.language = 'en'; // Set to English for consistent tests
+  });
+
+  afterEach(() => {
+    i18n.language = originalLanguage;
+  });
   describe('MMOL_TO_MGDL constant', () => {
     it('should have the correct conversion factor', () => {
       expect(MMOL_TO_MGDL).toBe(18.018);
@@ -77,10 +88,18 @@ describe('glucoseUnitUtils', () => {
       expect(formatGlucoseValue(180, 'mg/dL')).toBe('180');
     });
 
-    it('should format mmol/L with 1 decimal place', () => {
+    it('should format mmol/L with 1 decimal place (English)', () => {
+      i18n.language = 'en';
       expect(formatGlucoseValue(5.0, 'mmol/L')).toBe('5.0');
-      expect(formatGlucoseValue(5.55, 'mmol/L')).toBe('5.5'); // toFixed rounds 5.55 to 5.5
+      expect(formatGlucoseValue(5.55, 'mmol/L')).toBe('5.6'); // Standard rounding: 5.55 -> 5.6
       expect(formatGlucoseValue(10.12, 'mmol/L')).toBe('10.1');
+    });
+
+    it('should format mmol/L with 1 decimal place (German)', () => {
+      i18n.language = 'de';
+      expect(formatGlucoseValue(5.0, 'mmol/L')).toBe('5,0');
+      expect(formatGlucoseValue(5.55, 'mmol/L')).toBe('5,6'); // Standard rounding: 5.55 -> 5.6
+      expect(formatGlucoseValue(10.12, 'mmol/L')).toBe('10,1');
     });
   });
 
@@ -91,10 +110,18 @@ describe('glucoseUnitUtils', () => {
       expect(displayGlucoseValue(7.0, 'mg/dL')).toBe('126');
     });
 
-    it('should format mmol/L with 1 decimal place', () => {
+    it('should format mmol/L with 1 decimal place (English)', () => {
+      i18n.language = 'en';
       expect(displayGlucoseValue(5.0, 'mmol/L')).toBe('5.0');
       expect(displayGlucoseValue(10.0, 'mmol/L')).toBe('10.0');
       expect(displayGlucoseValue(7.5, 'mmol/L')).toBe('7.5');
+    });
+
+    it('should format mmol/L with 1 decimal place (German)', () => {
+      i18n.language = 'de';
+      expect(displayGlucoseValue(5.0, 'mmol/L')).toBe('5,0');
+      expect(displayGlucoseValue(10.0, 'mmol/L')).toBe('10,0');
+      expect(displayGlucoseValue(7.5, 'mmol/L')).toBe('7,5');
     });
   });
 
