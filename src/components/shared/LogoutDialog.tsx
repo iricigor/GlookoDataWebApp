@@ -16,6 +16,7 @@ import {
   Spinner,
 } from '@fluentui/react-components';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProUserBadgeStyles } from '../../styles/proUserBadge';
 
 const useStyles = makeStyles({
@@ -116,6 +117,7 @@ export function LogoutDialog({
 }: LogoutDialogProps) {
   const styles = useStyles();
   const proBadgeStyles = useProUserBadgeStyles();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -142,15 +144,15 @@ export function LogoutDialog({
           />
           {userName}
           {isProUser && (
-            <Tooltip content="Pro user" relationship="label">
-              <span className={proBadgeStyles.proUserBadge} aria-label="Pro user">✨</span>
+            <Tooltip content={t('logoutDialog.proUser')} relationship="label">
+              <span className={proBadgeStyles.proUserBadge} aria-label={t('logoutDialog.proUser')}>✨</span>
             </Tooltip>
           )}
         </Button>
       </DialogTrigger>
       <DialogSurface>
         <DialogBody>
-          <DialogTitle>Logout</DialogTitle>
+          <DialogTitle>{t('logoutDialog.title')}</DialogTitle>
           <DialogContent className={styles.dialogContent}>
             <div className={styles.userInfo}>
               <Avatar 
@@ -162,8 +164,8 @@ export function LogoutDialog({
                 <div className={proBadgeStyles.userNameContainer}>
                   <Text className={styles.userName}>{userName}</Text>
                   {isProUser && (
-                    <Tooltip content="Pro user" relationship="label">
-                      <span className={proBadgeStyles.proUserBadge} aria-label="Pro user">✨</span>
+                    <Tooltip content={t('logoutDialog.proUser')} relationship="label">
+                      <span className={proBadgeStyles.proUserBadge} aria-label={t('logoutDialog.proUser')}>✨</span>
                     </Tooltip>
                   )}
                 </div>
@@ -174,31 +176,31 @@ export function LogoutDialog({
             </div>
             {isProUser && (
               <div className={styles.secretContainer}>
-                <Text className={styles.secretLabel}>Key Vault Secret:</Text>
+                <Text className={styles.secretLabel}>{t('logoutDialog.keyVaultSecret')}</Text>
                 {isSecretLoading ? (
                   <div className={styles.secretLoading}>
                     <Spinner size="tiny" />
-                    <Text>Loading secret...</Text>
+                    <Text>{t('logoutDialog.loadingSecret')}</Text>
                   </div>
                 ) : secretValue ? (
                   <Text className={styles.secretValue}>{secretValue}</Text>
                 ) : (
-                  <Text className={styles.secretNotAvailable}>Not available</Text>
+                  <Text className={styles.secretNotAvailable}>{t('logoutDialog.secretNotAvailable')}</Text>
                 )}
               </div>
             )}
-            <Text>Are you sure you want to logout?</Text>
+            <Text>{t('logoutDialog.confirmMessage')}</Text>
           </DialogContent>
           <DialogActions>
             <DialogTrigger disableButtonEnhancement>
-              <Button appearance="secondary" disabled={loading}>Cancel</Button>
+              <Button appearance="secondary" disabled={loading}>{t('logoutDialog.cancel')}</Button>
             </DialogTrigger>
             <Button 
               appearance="primary" 
               onClick={handleLogout}
               disabled={loading}
             >
-              {loading ? 'Logging out...' : 'Logout'}
+              {loading ? t('logoutDialog.loggingOut') : t('navigation.logout')}
             </Button>
           </DialogActions>
         </DialogBody>

@@ -13,6 +13,7 @@ import {
 } from '@fluentui/react-components';
 import { PersonRegular } from '@fluentui/react-icons';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // Microsoft logo SVG component
 const MicrosoftLogo = () => (
@@ -41,8 +42,19 @@ interface LoginDialogProps {
   onLogin: () => Promise<void>;
 }
 
+/**
+ * Renders a login dialog with a trigger button, handling sign-in flow, loading state, and error display.
+ *
+ * The dialog presents translated UI text and a Microsoft-branded sign-in action. When the sign-in button
+ * is pressed the provided `onLogin` function is invoked; the component shows a loading indicator while
+ * the call is pending, closes the dialog on success, and displays a translated error message on failure.
+ *
+ * @param onLogin - Function invoked to perform the sign-in action; should return a Promise that resolves on successful login or rejects on failure.
+ * @returns The JSX element for the login dialog and its trigger button.
+ */
 export function LoginDialog({ onLogin }: LoginDialogProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +68,7 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
       setOpen(false);
     } catch (err) {
       console.error('Login error:', err);
-      setError('Failed to login. Please try again.');
+      setError(t('loginDialog.errorMessage'));
     } finally {
       setLoading(false);
     }
@@ -66,19 +78,19 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
     <Dialog open={open} onOpenChange={(_, data) => setOpen(data.open)}>
       <DialogTrigger disableButtonEnhancement>
         <Button appearance="primary" icon={<PersonRegular />}>
-          Login
+          {t('navigation.login')}
         </Button>
       </DialogTrigger>
       <DialogSurface>
         <DialogBody>
-          <DialogTitle>Login with Microsoft</DialogTitle>
+          <DialogTitle>{t('loginDialog.title')}</DialogTitle>
           <DialogContent className={styles.dialogContent}>
-            Sign in with your personal Microsoft account to access all features.
+            {t('loginDialog.description')}
             {error && <div style={{ color: 'red' }}>{error}</div>}
           </DialogContent>
           <DialogActions>
             <DialogTrigger disableButtonEnhancement>
-              <Button appearance="secondary" disabled={loading}>Cancel</Button>
+              <Button appearance="secondary" disabled={loading}>{t('loginDialog.cancel')}</Button>
             </DialogTrigger>
             <Button 
               appearance="primary" 
@@ -89,12 +101,12 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
               {loading ? (
                 <>
                   <Spinner size="tiny" />
-                  <span>Signing in...</span>
+                  <span>{t('loginDialog.signingIn')}</span>
                 </>
               ) : (
                 <>
                   <MicrosoftLogo />
-                  <span>Sign in with Microsoft</span>
+                  <span>{t('loginDialog.signInButton')}</span>
                 </>
               )}
             </Button>

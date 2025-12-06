@@ -23,6 +23,7 @@ import {
   WeatherMoonRegular,
   LocalLanguageRegular,
 } from '@fluentui/react-icons';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { useFirstLoginCheck } from '../../hooks/useFirstLoginCheck';
 import { useProUserCheck } from '../../hooks/useProUserCheck';
@@ -150,6 +151,7 @@ export function Navigation({
   syncStatus = 'idle',
 }: NavigationProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const { 
     isLoggedIn, 
     userName, 
@@ -252,11 +254,11 @@ export function Navigation({
   };
 
   const navItems = [
-    { page: 'home', label: 'Home', icon: <HomeRegular /> },
-    { page: 'upload', label: 'Data Upload', icon: <CloudArrowUpRegular /> },
-    { page: 'reports', label: 'Reports', icon: <ChartMultipleRegular /> },
-    { page: 'ai', label: 'AI Analysis', icon: <BrainCircuitRegular /> },
-    { page: 'settings', label: 'Settings', icon: <SettingsRegular /> },
+    { page: 'home', label: t('navigation.home'), icon: <HomeRegular /> },
+    { page: 'upload', label: t('navigation.dataUpload'), icon: <CloudArrowUpRegular /> },
+    { page: 'reports', label: t('navigation.reports'), icon: <ChartMultipleRegular /> },
+    { page: 'ai', label: t('navigation.aiAnalysis'), icon: <BrainCircuitRegular /> },
+    { page: 'settings', label: t('navigation.settings'), icon: <SettingsRegular /> },
   ];
 
   return (
@@ -265,10 +267,10 @@ export function Navigation({
         <div className={styles.brand}>
           <img 
             src="/favicon/favicon.svg" 
-            alt="Glooko Insights Logo" 
+            alt={t('brandAltText')}
             className={styles.brandIcon}
           />
-          <Text className={styles.brandText}>Glooko Insights</Text>
+          <Text className={styles.brandText}>{t('brandName')}</Text>
         </div>
         
         <div className={styles.centerSection}>
@@ -293,7 +295,7 @@ export function Navigation({
                 <Button 
                   appearance="subtle" 
                   icon={<NavigationRegular />}
-                  aria-label="Navigation menu"
+                  aria-label={t('navigation.navigationMenu')}
                 />
               </MenuTrigger>
               <MenuPopover>
@@ -319,36 +321,36 @@ export function Navigation({
             <>
               {onThemeToggle && (
                 <Tooltip 
-                  content={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'} 
+                  content={isDarkMode ? t('navigation.switchToLightMode') : t('navigation.switchToDarkMode')}
                   relationship="label"
                 >
                   <Button
                     appearance="subtle"
                     icon={isDarkMode ? <WeatherSunnyRegular /> : <WeatherMoonRegular />}
                     onClick={onThemeToggle}
-                    aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                    aria-label={isDarkMode ? t('navigation.switchToLightMode') : t('navigation.switchToDarkMode')}
                   />
                 </Tooltip>
               )}
               <Tooltip 
-                content={`Switch to ${uiLanguage === 'en' ? 'German' : 'English'}`} 
+                content={t('navigation.switchToLanguage', { language: uiLanguage === 'en' ? t('common.german') : t('common.english') })} 
                 relationship="label"
               >
                 <Button
                   appearance="subtle"
                   icon={<LocalLanguageRegular />}
                   onClick={handleLanguageToggle}
-                  aria-label={`Current language: ${uiLanguage === 'en' ? 'English' : 'German'}. Click to switch.`}
+                  aria-label={t('navigation.currentLanguage', { language: uiLanguage === 'en' ? t('common.english') : t('common.german') })}
                 >
                   {uiLanguage.toUpperCase()}
                 </Button>
               </Tooltip>
-              <Tooltip content={syncStatus === 'syncing' ? 'Syncing settings...' : 'Settings'} relationship="label">
+              <Tooltip content={syncStatus === 'syncing' ? t('navigation.syncingSettings') : t('navigation.settingsLabel')} relationship="label">
                 <Button
                   appearance="subtle"
                   icon={<SettingsRegular className={syncStatus === 'syncing' ? styles.pulsingIcon : undefined} />}
                   onClick={() => onNavigate('settings')}
-                  aria-label={syncStatus === 'syncing' ? 'Syncing settings...' : 'Settings'}
+                  aria-label={syncStatus === 'syncing' ? t('navigation.syncingSettings') : t('navigation.settingsLabel')}
                 />
               </Tooltip>
               <LogoutDialog 

@@ -11,6 +11,7 @@ import {
   BrainCircuitRegular,
   SettingsRegular,
 } from '@fluentui/react-icons';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles({
   container: {
@@ -125,31 +126,38 @@ interface HomeProps {
   onNavigate: (page: string) => void;
 }
 
+/**
+ * Renders the home page containing a header and a set of navigation cards.
+ *
+ * @param onNavigate - Callback invoked with the target page identifier when a navigation card is clicked.
+ * @returns The rendered home page element
+ */
 export function Home({ onNavigate }: HomeProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
 
   const navigationItems = [
     {
-      title: 'Data Upload',
-      description: 'Upload and manage your Glooko export files with drag-and-drop support',
+      title: t('home.dataUploadTitle'),
+      description: t('home.dataUploadDescription'),
       icon: <CloudArrowUpRegular />,
       page: 'upload',
     },
     {
-      title: 'Comprehensive Reports',
-      description: 'View detailed analytics including time-in-range, patterns, and trends',
+      title: t('home.comprehensiveReportsTitle'),
+      description: t('home.comprehensiveReportsDescription'),
       icon: <ChartMultipleRegular />,
       page: 'reports',
     },
     {
-      title: 'AI Analysis',
-      description: 'Get intelligent insights and recommendations using advanced AI algorithms',
+      title: t('home.aiAnalysisTitle'),
+      description: t('home.aiAnalysisDescription'),
       icon: <BrainCircuitRegular />,
       page: 'ai',
     },
     {
-      title: 'Settings',
-      description: 'Your data is stored locally with configurable persistence options',
+      title: t('home.settingsTitle'),
+      description: t('home.settingsDescription'),
       icon: <SettingsRegular />,
       page: 'settings',
     },
@@ -158,9 +166,9 @@ export function Home({ onNavigate }: HomeProps) {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Text className={styles.title}>Glooko Insights</Text>
+        <Text className={styles.title}>{t('home.title')}</Text>
         <Text className={styles.subtitle}>
-          A web app for importing, visualizing, and analyzing diabetes data exported from the Glooko platform
+          {t('home.subtitle')}
         </Text>
       </div>
 

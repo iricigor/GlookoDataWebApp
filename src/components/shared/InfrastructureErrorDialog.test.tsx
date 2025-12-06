@@ -3,23 +3,14 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithProviders } from '../../testUtils/i18nTestProvider';
 import { InfrastructureErrorDialog } from './InfrastructureErrorDialog';
-
-// Wrapper to provide FluentProvider context
-function renderWithProvider(component: React.ReactNode) {
-  return render(
-    <FluentProvider theme={webLightTheme}>
-      {component}
-    </FluentProvider>
-  );
-}
 
 describe('InfrastructureErrorDialog', () => {
   it('should not render when closed', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    renderWithProviders(
       <InfrastructureErrorDialog 
         open={false} 
         onClose={onClose} 
@@ -32,7 +23,7 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should render when open', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
@@ -46,7 +37,7 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should display infrastructure error message', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
@@ -62,7 +53,7 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should display network error message', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
@@ -77,7 +68,7 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should display unauthorized error message', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
@@ -92,7 +83,7 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should display generic error message for unknown type', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
@@ -108,7 +99,7 @@ describe('InfrastructureErrorDialog', () => {
   it('should display error details', () => {
     const onClose = vi.fn();
     const errorMessage = 'Detailed error: Connection refused at port 443';
-    renderWithProvider(
+    renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
@@ -121,7 +112,7 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should display error with status code when provided', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
@@ -137,7 +128,7 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should call onClose when OK button is clicked', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
@@ -153,7 +144,7 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should have an OK button', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
@@ -167,7 +158,7 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should default to unknown error type when not provided', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 

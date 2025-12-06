@@ -24,6 +24,7 @@ import {
   CloudRegular,
   ShieldCheckmarkRegular,
 } from '@fluentui/react-icons';
+import { useTranslation } from 'react-i18next';
 
 const useStyles = makeStyles({
   dialogContent: {
@@ -105,20 +106,28 @@ interface WelcomeDialogProps {
 }
 
 /**
- * Dialog component that welcomes first-time users to the app
- * and explains cloud settings storage
+ * Display a welcome dialog that explains cloud settings storage and prompts the user to save or cancel.
+ *
+ * @param open - Whether the dialog is visible.
+ * @param onAccept - Callback invoked when the user accepts and chooses to save settings.
+ * @param onCancel - Callback invoked when the user cancels the dialog.
+ * @param userName - Optional user name to personalize the greeting; if not provided a default greeting is used.
+ * @returns The React element for the welcome dialog.
  */
 export function WelcomeDialog({ open, onAccept, onCancel, userName }: WelcomeDialogProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
 
-  const greeting = userName ? `Welcome, ${userName}!` : 'Welcome to our app!';
+  const greeting = userName 
+    ? t('welcomeDialog.greeting', { userName }) 
+    : t('welcomeDialog.greetingDefault');
 
   return (
     <Dialog open={open} modalType="alert">
       <DialogSurface>
         <DialogTitle>
           <SparkleRegular className={styles.sparkle} />
-          Welcome!
+          {t('welcomeDialog.title')}
         </DialogTitle>
         <DialogBody>
           <DialogContent className={styles.dialogContent}>
@@ -127,39 +136,35 @@ export function WelcomeDialog({ open, onAccept, onCancel, userName }: WelcomeDia
             </div>
             <Text className={styles.title}>{greeting}</Text>
             <Text className={styles.message}>
-              Thank you for joining us! We're excited to help you manage and analyze your diabetes data.
+              {t('welcomeDialog.thankYou')}
             </Text>
             
             <div className={styles.settingsSection}>
               <div className={styles.settingsItem}>
                 <CloudRegular className={styles.settingsIcon} />
                 <Text className={styles.settingsText}>
-                  <strong>Cloud Settings Sync:</strong> Your app preferences (theme, glucose unit, thresholds, etc.) 
-                  will be saved to the cloud so they sync across all your devices.
+                  <strong>{t('welcomeDialog.cloudSettingsSync')}</strong> {t('welcomeDialog.cloudSettingsSyncDescription')}
                 </Text>
               </div>
               <div className={styles.settingsItem}>
                 <ShieldCheckmarkRegular className={styles.settingsIcon} />
                 <Text className={styles.settingsText}>
-                  <strong>Privacy First:</strong> We only store your email address for account identification 
-                  and your app preferences. No personal health data, glucose readings, or medical information 
-                  is ever stored in our cloud.
+                  <strong>{t('welcomeDialog.privacyFirst')}</strong> {t('welcomeDialog.privacyFirstDescription')}
                 </Text>
               </div>
             </div>
             
             <Text className={styles.privacyNote}>
-              If you prefer not to save settings to the cloud, click "Cancel" to log out. 
-              You can still use the app without logging in.
+              {t('welcomeDialog.privacyNote')}
             </Text>
           </DialogContent>
         </DialogBody>
         <DialogActions>
           <Button appearance="secondary" onClick={onCancel}>
-            Cancel
+            {t('welcomeDialog.cancel')}
           </Button>
           <Button appearance="primary" onClick={onAccept}>
-            Save Settings
+            {t('welcomeDialog.saveSettings')}
           </Button>
         </DialogActions>
       </DialogSurface>

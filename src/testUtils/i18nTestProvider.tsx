@@ -1,8 +1,17 @@
-{
-  "appTitle": "Glooko Data Web App",
-  "brandName": "Glooko Insights",
-  "brandAltText": "Glooko Insights Logo",
-  
+/**
+ * I18n Test Provider Wrapper
+ * Provides i18next context for component testing
+ */
+
+import type { ReactElement } from 'react';
+import { render, type RenderOptions } from '@testing-library/react';
+import { I18nextProvider } from 'react-i18next';
+import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+// English translations for tests
+const enTranslations = {
   "navigation": {
     "home": "Home",
     "dataUpload": "Data Upload",
@@ -12,38 +21,37 @@
     "navigationMenu": "Navigation menu",
     "login": "Login",
     "logout": "Logout",
-    "switchToLightMode": "Switch to light mode",
     "switchToDarkMode": "Switch to dark mode",
+    "switchToLightMode": "Switch to light mode",
     "switchToLanguage": "Switch to {{language}}",
     "currentLanguage": "Current language: {{language}}. Click to switch.",
     "settingsLabel": "Settings",
-    "syncingSettings": "Syncing settings..."
+    "syncingSettings": "Syncing settings...",
+    "settingsShortcut": "Settings"
   },
-
   "home": {
     "title": "Glooko Insights",
     "subtitle": "A web app for importing, visualizing, and analyzing diabetes data exported from the Glooko platform",
     "dataUploadTitle": "Data Upload",
     "dataUploadDescription": "Upload and manage your Glooko export files with drag-and-drop support",
-    "comprehensiveReportsTitle": "Comprehensive Reports",
-    "comprehensiveReportsDescription": "View detailed analytics including time-in-range, patterns, and trends",
+    "reportsTitle": "Comprehensive Reports",
+    "reportsDescription": "View detailed analytics including time-in-range, patterns, and trends",
     "aiAnalysisTitle": "AI Analysis",
     "aiAnalysisDescription": "Get intelligent insights and recommendations using advanced AI algorithms",
     "settingsTitle": "Settings",
     "settingsDescription": "Your data is stored locally with configurable persistence options"
   },
-
+  "toast": {
+    "aiProviderSwitchedTitle": "AI provider switched",
+    "aiProviderSwitchedBody": "{{fromProvider}} key verification failed. Switched to {{toProvider}}.",
+    "fileLoadedSuccessTitle": "File loaded successfully",
+    "fileLoadedSuccessBody": "{{fileName}} has been selected for analysis"
+  },
   "footer": {
     "version": "Version {{version}}"
   },
-
-  "cookieConsent": {
-    "message": "This app uses <strong>functional cookies only</strong> to save your preferences (theme, settings, date selections). We do <strong>not collect personal data via cookies</strong>, use tracking cookies, or send cookie data to external servers. All data processing happens locally in your browser.",
-    "learnMore": "Learn more about privacy",
-    "gotIt": "Got it"
-  },
-
   "loginDialog": {
+    "login": "Login",
     "title": "Login with Microsoft",
     "description": "Sign in with your personal Microsoft account to access all features.",
     "signInButton": "Sign in with Microsoft",
@@ -51,8 +59,8 @@
     "cancel": "Cancel",
     "errorMessage": "Failed to login. Please try again."
   },
-
   "logoutDialog": {
+    "logout": "Logout",
     "title": "Logout",
     "confirmMessage": "Are you sure you want to logout?",
     "loggingOut": "Logging out...",
@@ -62,7 +70,6 @@
     "loadingSecret": "Loading secret...",
     "secretNotAvailable": "Not available"
   },
-
   "welcomeDialog": {
     "title": "Welcome!",
     "greeting": "Welcome, {{userName}}!",
@@ -76,7 +83,6 @@
     "saveSettings": "Save Settings",
     "cancel": "Cancel"
   },
-
   "infrastructureErrorDialog": {
     "defaultTitle": "Something went wrong",
     "defaultDescription": "An error occurred while connecting to our services.",
@@ -89,23 +95,62 @@
     "errorWithCode": "Error {{statusCode}}: {{message}}",
     "ok": "OK"
   },
-
-  "toast": {
-    "fileLoadedSuccessTitle": "File loaded successfully",
-    "fileLoadedSuccessBody": "{{fileName}} has been selected for analysis",
-    "aiProviderSwitchedTitle": "AI provider switched",
-    "aiProviderSwitchedBody": "{{fromProvider}} key verification failed. Switched to {{toProvider}}."
+  "cookieConsent": {
+    "message": "This app uses <strong>functional cookies only</strong> to save your preferences (theme, settings, date selections). We do <strong>not collect personal data via cookies</strong>, use tracking cookies, or send cookie data to external servers. All data processing happens locally in your browser.",
+    "learnMore": "Learn more about privacy",
+    "gotIt": "Got it"
   },
-
   "common": {
-    "cancel": "Cancel",
-    "ok": "OK",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "close": "Close",
     "english": "English",
-    "german": "German",
-    "loading": "Loading..."
+    "german": "German"
   }
+};
+
+// Initialize i18n for tests
+i18n
+  .use(initReactI18next)
+  .init({
+    lng: 'en',
+    fallbackLng: 'en',
+    resources: {
+      en: {
+        translation: enTranslations
+      }
+    },
+    interpolation: {
+      escapeValue: false,
+    },
+  });
+
+/**
+ * Render a React element wrapped with the configured i18n provider and Fluent UI theme for testing.
+ *
+ * Wraps the given element with the module's i18n instance and FluentProvider using `webLightTheme`, then calls
+ * `render` from @testing-library/react with any provided render options.
+ *
+ * @param ui - The React element to render
+ * @param options - Additional render options forwarded to @testing-library/react (the `wrapper` option is ignored)
+ * @returns The render result from @testing-library/react
+ */
+export function renderWithProviders(
+  ui: ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>
+) {
+  /**
+   * Wraps children with the i18next provider and Fluent UI theme provider for tests.
+   *
+   * @param children - React nodes to be rendered inside the configured i18n and Fluent UI theme context.
+   * @returns A JSX element containing `children` nested within `I18nextProvider` (configured `i18n`) and `FluentProvider` (`webLightTheme`).
+   */
+  function Wrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <I18nextProvider i18n={i18n}>
+        <FluentProvider theme={webLightTheme}>
+          {children}
+        </FluentProvider>
+      </I18nextProvider>
+    );
+  }
+
+  return render(ui, { wrapper: Wrapper, ...options });
 }
