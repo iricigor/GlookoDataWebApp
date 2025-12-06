@@ -6,11 +6,23 @@
 import { useState, useEffect } from 'react';
 
 export function useIsMobile(): boolean {
-  const [isMobile, setIsMobile] = useState(false);
+  // Initialize state based on window width if available (for SSR compatibility)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth <= 767;
+    }
+    return false;
+  });
 
   useEffect(() => {
+    // Debounce the resize handler to improve performance
+    let timeoutId: NodeJS.Timeout;
+    
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 767);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsMobile(window.innerWidth <= 767);
+      }, 150); // 150ms debounce delay
     };
 
     // Check on mount
@@ -20,7 +32,10 @@ export function useIsMobile(): boolean {
     window.addEventListener('resize', checkIsMobile);
 
     // Cleanup
-    return () => window.removeEventListener('resize', checkIsMobile);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', checkIsMobile);
+    };
   }, []);
 
   return isMobile;
