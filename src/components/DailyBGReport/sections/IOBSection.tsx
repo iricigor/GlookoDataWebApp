@@ -14,9 +14,11 @@ import {
   YAxis,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
+  ReferenceLine,
   ReferenceArea,
 } from 'recharts';
 import type { HourlyIOBData } from '../../../types';
+import { useIsMobile } from '../../../hooks/useIsMobile';
 import { IOBTooltip } from '../tooltips';
 import { formatXAxisIOB } from '../constants';
 import type { useStyles } from '../styles';
@@ -39,6 +41,13 @@ export function IOBSection({
   hourlyIOBData,
   showDayNightShading,
 }: IOBSectionProps) {
+  const isMobile = useIsMobile();
+  
+  // Adjust chart margins for mobile
+  const chartMargin = isMobile 
+    ? { top: 10, right: 10, left: 0, bottom: 0 }
+    : { top: 10, right: 30, left: 0, bottom: 0 };
+  
   return (
     <div className={styles.sectionCard}>
       <Text className={styles.sectionTitle}>Insulin on Board (IOB)</Text>
@@ -46,7 +55,7 @@ export function IOBSection({
       <div className={styles.chartCardInnerContent}>
         <div className={styles.iobChartContainer}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={hourlyIOBData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+            <LineChart data={hourlyIOBData} margin={chartMargin}>
               {/* Day/night shading gradients */}
               {showDayNightShading && (
                 <defs>
@@ -77,6 +86,36 @@ export function IOBSection({
                   fill="url(#iobNightGradientRight)"
                 />
               )}
+              
+              {/* Vertical time reference lines (6AM, noon, 6PM, midnight) */}
+              <ReferenceLine 
+                x={0} 
+                stroke={tokens.colorNeutralStroke2}
+                strokeDasharray="3 3" 
+                strokeWidth={1}
+                strokeOpacity={0.5}
+              />
+              <ReferenceLine 
+                x={6} 
+                stroke={tokens.colorNeutralStroke2}
+                strokeDasharray="3 3" 
+                strokeWidth={1}
+                strokeOpacity={0.5}
+              />
+              <ReferenceLine 
+                x={12} 
+                stroke={tokens.colorNeutralStroke2}
+                strokeDasharray="3 3" 
+                strokeWidth={1}
+                strokeOpacity={0.5}
+              />
+              <ReferenceLine 
+                x={18} 
+                stroke={tokens.colorNeutralStroke2}
+                strokeDasharray="3 3" 
+                strokeWidth={1}
+                strokeOpacity={0.5}
+              />
               
               <XAxis
                 type="number"

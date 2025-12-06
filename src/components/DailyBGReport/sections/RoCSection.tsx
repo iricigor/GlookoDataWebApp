@@ -39,6 +39,7 @@ import {
   getRoCMedicalStandards,
   formatDuration,
 } from '../../../utils/data';
+import { useIsMobile } from '../../../hooks/useIsMobile';
 import { RoCTooltip } from '../tooltips';
 import { formatXAxis, ROC_INTERVAL_OPTIONS } from '../constants';
 import type { useStyles } from '../styles';
@@ -99,9 +100,15 @@ export function RoCSection({
   setRocMaxGlucose,
   showDayNightShading,
 }: RoCSectionProps) {
+  const isMobile = useIsMobile();
   const rocUnitLabel = glucoseUnit === 'mg/dL' ? 'mg/dL/5 min' : 'mmol/L/5 min';
   const medicalStandards = getRoCMedicalStandards(glucoseUnit);
   const currentInterval = ROC_INTERVAL_OPTIONS[rocIntervalIndex];
+  
+  // Adjust chart margins for mobile
+  const chartMargin = isMobile 
+    ? { top: 10, right: 20, left: 5, bottom: 0 }
+    : { top: 10, right: 50, left: 10, bottom: 0 };
   
   // Calculate thresholds in the display unit
   const glucoseHighThreshold = glucoseUnit === 'mg/dL' ? 288 : 16.0;
@@ -210,7 +217,7 @@ export function RoCSection({
           
           <div className={styles.chartCardInner}>
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart margin={{ top: 10, right: 50, left: 10, bottom: 0 }} data={rocChartData}>
+              <ComposedChart margin={chartMargin} data={rocChartData}>
                 <defs>
                   {/* Day/night shading gradients */}
                   {showDayNightShading && (
@@ -253,6 +260,36 @@ export function RoCSection({
                     fill="url(#rocNightGradientRight)"
                   />
                 )}
+                
+                {/* Vertical time reference lines (6AM, noon, 6PM, midnight) */}
+                <ReferenceLine 
+                  x={0} 
+                  stroke={tokens.colorNeutralStroke2}
+                  strokeDasharray="3 3" 
+                  strokeWidth={1}
+                  strokeOpacity={0.5}
+                />
+                <ReferenceLine 
+                  x={6} 
+                  stroke={tokens.colorNeutralStroke2}
+                  strokeDasharray="3 3" 
+                  strokeWidth={1}
+                  strokeOpacity={0.5}
+                />
+                <ReferenceLine 
+                  x={12} 
+                  stroke={tokens.colorNeutralStroke2}
+                  strokeDasharray="3 3" 
+                  strokeWidth={1}
+                  strokeOpacity={0.5}
+                />
+                <ReferenceLine 
+                  x={18} 
+                  stroke={tokens.colorNeutralStroke2}
+                  strokeDasharray="3 3" 
+                  strokeWidth={1}
+                  strokeOpacity={0.5}
+                />
                 
                 {/* Reference lines for RoC thresholds - labels on left axis */}
                 <ReferenceLine
