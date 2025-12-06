@@ -111,12 +111,13 @@ export function GeneralSettingsTab({
         <Title3 className={styles.sectionTitle}>AI Response Language</Title3>
         <Divider className={styles.divider} />
         <Text className={styles.settingDescription}>
-          Choose the language for AI analysis responses. This affects all AI-generated insights and recommendations. Note: This does not change the application interface language.
+          Choose the language for AI analysis responses. This affects all AI-generated insights and recommendations. Select "Automatic" to use the same language as your application interface, or choose a specific language.
         </Text>
         <RadioGroup
           value={responseLanguage}
           onChange={(_, data) => onResponseLanguageChange(data.value as ResponseLanguage)}
         >
+          <Radio value="auto" label="Automatic (Follow UI Language)" />
           <Radio value="english" label="English" />
           <Radio value="czech" label="Czech (Čeština)" />
           <Radio value="german" label="German (Deutsch)" />

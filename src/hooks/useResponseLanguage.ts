@@ -6,7 +6,7 @@
 
 import { useState, useCallback } from 'react';
 
-export type ResponseLanguage = 'english' | 'czech' | 'german' | 'serbian';
+export type ResponseLanguage = 'auto' | 'english' | 'czech' | 'german' | 'serbian';
 
 export interface UseResponseLanguageReturn {
   responseLanguage: ResponseLanguage;
@@ -25,7 +25,7 @@ function getLanguageFromCookie(): ResponseLanguage | null {
     const [name, value] = cookie.trim().split('=');
     if (name === RESPONSE_LANGUAGE_COOKIE_NAME) {
       const languageValue = value as ResponseLanguage;
-      if (languageValue === 'english' || languageValue === 'czech' || languageValue === 'german' || languageValue === 'serbian') {
+      if (languageValue === 'auto' || languageValue === 'english' || languageValue === 'czech' || languageValue === 'german' || languageValue === 'serbian') {
         return languageValue;
       }
     }
@@ -47,8 +47,8 @@ function saveLanguageToCookie(language: ResponseLanguage): void {
  */
 export function useResponseLanguage(): UseResponseLanguageReturn {
   const [responseLanguage, setResponseLanguageState] = useState<ResponseLanguage>(() => {
-    // Initialize from cookie or default to English
-    return getLanguageFromCookie() || 'english';
+    // Initialize from cookie or default to 'auto' (follows UI language)
+    return getLanguageFromCookie() || 'auto';
   });
 
   const setResponseLanguage = useCallback((language: ResponseLanguage) => {

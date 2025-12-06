@@ -3,16 +3,35 @@
  */
 
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
+import type { UILanguage } from '../../../hooks/useUILanguage';
 import type { AIProvider } from '../../../utils/api/aiApi';
 import { getProviderDisplayName } from '../../../utils/api/aiApi';
 
 /**
+ * Resolve 'auto' response language to actual language based on UI language
+ * 
+ * @param responseLanguage - Response language preference (can be 'auto')
+ * @param uiLanguage - Current UI language ('en' or 'de')
+ * @returns Resolved response language (never 'auto')
+ */
+export function resolveResponseLanguage(
+  responseLanguage: ResponseLanguage,
+  uiLanguage: UILanguage
+): Exclude<ResponseLanguage, 'auto'> {
+  if (responseLanguage === 'auto') {
+    // Map UI language to AI response language
+    return uiLanguage === 'de' ? 'german' : 'english';
+  }
+  return responseLanguage;
+}
+
+/**
  * Get the language instruction for AI prompts based on the selected language
  * 
- * @param language - Response language (english, czech, german, or serbian)
+ * @param language - Response language (english, czech, german, or serbian, NOT 'auto')
  * @returns Language instruction string for AI prompt
  */
-export function getLanguageInstruction(language: ResponseLanguage): string {
+export function getLanguageInstruction(language: Exclude<ResponseLanguage, 'auto'>): string {
   switch (language) {
     case 'czech':
       return 'Respond in Czech language (česky). IMPORTANT: Use formal mode of address (vykání - use "Vy/Váš" instead of "ty/tvůj").';
@@ -30,10 +49,10 @@ export function getLanguageInstruction(language: ResponseLanguage): string {
  * Get the disclaimer instruction for AI prompts in the specified language
  * 
  * @param provider - AI provider being used
- * @param language - Response language (english, czech, german, or serbian)
+ * @param language - Response language (english, czech, german, or serbian, NOT 'auto')
  * @returns Disclaimer instruction string for AI prompt in the requested language
  */
-export function getDisclaimerInstruction(provider?: AIProvider, language: ResponseLanguage = 'english'): string {
+export function getDisclaimerInstruction(provider?: AIProvider, language: Exclude<ResponseLanguage, 'auto'> = 'english'): string {
   const providerName = provider ? getProviderDisplayName(provider) : 'AI';
   
   let disclaimerText: string;

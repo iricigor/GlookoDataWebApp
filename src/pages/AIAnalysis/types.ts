@@ -12,6 +12,7 @@ import type {
   GlucoseRangeStats 
 } from '../../types';
 import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
+import type { UILanguage } from '../../hooks/useUILanguage';
 import type { AIProvider } from '../../utils/api';
 import type { HypoAnalysisDatasets } from '../../utils/data';
 
@@ -24,6 +25,7 @@ export interface AIAnalysisProps {
   deepseekApiKey: string;
   selectedProvider: AIProvider | null;
   responseLanguage: ResponseLanguage;
+  uiLanguage: UILanguage;
   glucoseUnit: GlucoseUnit;
   existingAnalysis?: AIAnalysisResult;
   onAnalysisComplete: (fileId: string, response: string, inRangePercentage: number) => void;
@@ -70,6 +72,7 @@ export interface TimeInRangeTabProps extends TabContentProps {
   inRangePercentage: number | null;
   glucoseStats: GlucoseRangeStats | null;
   responseLanguage: ResponseLanguage;
+  uiLanguage: UILanguage;
   glucoseUnit: GlucoseUnit;
   perplexityApiKey: string;
   geminiApiKey: string;
@@ -83,6 +86,7 @@ export interface TimeInRangeTabProps extends TabContentProps {
 export interface GlucoseInsulinTabProps extends TabContentProps {
   combinedDataset: DailyReport[];
   responseLanguage: ResponseLanguage;
+  uiLanguage: UILanguage;
   glucoseUnit: GlucoseUnit;
   perplexityApiKey: string;
   geminiApiKey: string;
@@ -93,6 +97,7 @@ export interface GlucoseInsulinTabProps extends TabContentProps {
 export interface MealTimingTabProps extends TabContentProps {
   mealTimingDatasets: MealTimingDatasets;
   responseLanguage: ResponseLanguage;
+  uiLanguage: UILanguage;
   glucoseUnit: GlucoseUnit;
   perplexityApiKey: string;
   geminiApiKey: string;
@@ -103,6 +108,7 @@ export interface MealTimingTabProps extends TabContentProps {
 export interface PumpSettingsTabProps extends TabContentProps {
   mealTimingDatasets: MealTimingDatasets;
   responseLanguage: ResponseLanguage;
+  uiLanguage: UILanguage;
   glucoseUnit: GlucoseUnit;
   perplexityApiKey: string;
   geminiApiKey: string;
@@ -114,6 +120,7 @@ export interface PumpSettingsTabProps extends TabContentProps {
 export interface HyposTabProps extends TabContentProps {
   hypoDatasets: HypoAnalysisDatasets | null;
   responseLanguage: ResponseLanguage;
+  uiLanguage: UILanguage;
   glucoseUnit: GlucoseUnit;
   perplexityApiKey: string;
   geminiApiKey: string;

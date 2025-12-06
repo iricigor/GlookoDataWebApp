@@ -21,6 +21,7 @@ import {
 import { InfoRegular } from '@fluentui/react-icons';
 import { TableContainer } from '../../../components/TableContainer';
 import { generateHyposPrompt } from '../../../features/aiAnalysis/prompts';
+import { resolveResponseLanguage } from '../../../features/aiAnalysis/prompts/promptUtils';
 import { callAIApi, isRequestTooLargeError } from '../../../utils/api';
 import { convertHypoEventsToCSV, convertHypoSummariesToCSV, convertHypoEventSummaryToCSV } from '../../../utils/data';
 import { base64Encode } from '../../../utils/formatting';
@@ -103,6 +104,7 @@ export function HyposTab({
   activeProvider,
   hypoDatasets,
   responseLanguage,
+  uiLanguage,
   glucoseUnit,
   perplexityApiKey,
   geminiApiKey,
@@ -146,11 +148,14 @@ export function HyposTab({
     const base64SummariesData = base64Encode(hypoSummariesCSV);
     const base64EventSummaryData = hypoEventSummaryCSV ? base64Encode(hypoEventSummaryCSV) : undefined;
 
+    // Resolve 'auto' to actual language based on UI language
+    const resolvedLanguage = resolveResponseLanguage(responseLanguage, uiLanguage);
+
     // Generate the prompt with the base64 CSV data
     const prompt = generateHyposPrompt(
       base64EventsData,
       base64SummariesData,
-      responseLanguage,
+      resolvedLanguage,
       glucoseUnit,
       activeProvider!,
       base64EventSummaryData
@@ -346,7 +351,7 @@ export function HyposTab({
                 const hypoSummariesCSV = convertHypoSummariesToCSV(hypoDatasets!.dailySummaries);
                 const base64EventsData = base64Encode(hypoEventsCSV);
                 const base64SummariesData = base64Encode(hypoSummariesCSV);
-                return generateHyposPrompt(base64EventsData, base64SummariesData, responseLanguage, glucoseUnit, activeProvider || undefined);
+                return generateHyposPrompt(base64EventsData, base64SummariesData, resolveResponseLanguage(responseLanguage, uiLanguage), glucoseUnit, activeProvider || undefined);
               })()}
             </div>
           </AccordionPanel>

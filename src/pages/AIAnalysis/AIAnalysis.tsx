@@ -36,6 +36,7 @@ export function AIAnalysis({
   deepseekApiKey, 
   selectedProvider,
   responseLanguage,
+  uiLanguage,
   glucoseUnit,
   existingAnalysis, 
   onAnalysisComplete 
@@ -181,6 +182,7 @@ export function AIAnalysis({
             inRangePercentage={inRangePercentage}
             glucoseStats={glucoseStats}
             responseLanguage={responseLanguage}
+            uiLanguage={uiLanguage}
             glucoseUnit={glucoseUnit}
             perplexityApiKey={perplexityApiKey}
             geminiApiKey={geminiApiKey}
@@ -199,6 +201,7 @@ export function AIAnalysis({
             activeProvider={activeProvider}
             combinedDataset={combinedDataset}
             responseLanguage={responseLanguage}
+            uiLanguage={uiLanguage}
             glucoseUnit={glucoseUnit}
             perplexityApiKey={perplexityApiKey}
             geminiApiKey={geminiApiKey}
@@ -214,6 +217,7 @@ export function AIAnalysis({
             activeProvider={activeProvider}
             mealTimingDatasets={mealTimingDatasets}
             responseLanguage={responseLanguage}
+            uiLanguage={uiLanguage}
             glucoseUnit={glucoseUnit}
             perplexityApiKey={perplexityApiKey}
             geminiApiKey={geminiApiKey}
@@ -229,6 +233,7 @@ export function AIAnalysis({
             activeProvider={activeProvider}
             mealTimingDatasets={mealTimingDatasets}
             responseLanguage={responseLanguage}
+            uiLanguage={uiLanguage}
             glucoseUnit={glucoseUnit}
             perplexityApiKey={perplexityApiKey}
             geminiApiKey={geminiApiKey}
@@ -245,6 +250,7 @@ export function AIAnalysis({
             activeProvider={activeProvider}
             hypoDatasets={hypoDatasets}
             responseLanguage={responseLanguage}
+            uiLanguage={uiLanguage}
             glucoseUnit={glucoseUnit}
             perplexityApiKey={perplexityApiKey}
             geminiApiKey={geminiApiKey}

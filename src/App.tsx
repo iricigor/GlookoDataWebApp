@@ -422,6 +422,7 @@ function App() {
             deepseekApiKey={deepseekApiKey}
             selectedProvider={selectedProvider}
             responseLanguage={responseLanguage}
+            uiLanguage={uiLanguage}
             glucoseUnit={glucoseUnit}
             existingAnalysis={currentAIAnalysis}
             onAnalysisComplete={handleAIAnalysisComplete}

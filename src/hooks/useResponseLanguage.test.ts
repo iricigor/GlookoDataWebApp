@@ -12,9 +12,19 @@ describe('useResponseLanguage', () => {
     document.cookie = 'glooko-response-language=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
   });
 
-  it('should initialize with english as default', () => {
+  it('should initialize with auto as default', () => {
     const { result } = renderHook(() => useResponseLanguage());
-    expect(result.current.responseLanguage).toBe('english');
+    expect(result.current.responseLanguage).toBe('auto');
+  });
+
+  it('should update language to auto', () => {
+    const { result } = renderHook(() => useResponseLanguage());
+    
+    act(() => {
+      result.current.setResponseLanguage('auto');
+    });
+    
+    expect(result.current.responseLanguage).toBe('auto');
   });
 
   it('should update language to czech', () => {
@@ -79,6 +89,24 @@ describe('useResponseLanguage', () => {
     document.cookie = 'glooko-response-language=invalid; path=/; SameSite=Strict';
     
     const { result } = renderHook(() => useResponseLanguage());
-    expect(result.current.responseLanguage).toBe('english');
+    expect(result.current.responseLanguage).toBe('auto');
+  });
+
+  it('should persist auto preference in cookie', () => {
+    const { result } = renderHook(() => useResponseLanguage());
+    
+    act(() => {
+      result.current.setResponseLanguage('auto');
+    });
+    
+    expect(document.cookie).toContain('glooko-response-language=auto');
+  });
+
+  it('should read auto from existing cookie', () => {
+    // Set cookie before hook initialization
+    document.cookie = 'glooko-response-language=auto; path=/; SameSite=Strict';
+    
+    const { result } = renderHook(() => useResponseLanguage());
+    expect(result.current.responseLanguage).toBe('auto');
   });
 });

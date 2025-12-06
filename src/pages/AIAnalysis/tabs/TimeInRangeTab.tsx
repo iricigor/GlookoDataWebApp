@@ -11,6 +11,7 @@ import {
   AccordionPanel,
 } from '@fluentui/react-components';
 import { generateTimeInRangePrompt } from '../../../features/aiAnalysis/prompts';
+import { resolveResponseLanguage } from '../../../features/aiAnalysis/prompts/promptUtils';
 import { callAIApi } from '../../../utils/api';
 import { useGlucoseThresholds } from '../../../hooks/useGlucoseThresholds';
 import { useAIAnalysisStyles } from '../styles';
@@ -32,6 +33,7 @@ export function TimeInRangeTab({
   inRangePercentage,
   glucoseStats,
   responseLanguage,
+  uiLanguage,
   glucoseUnit,
   perplexityApiKey,
   geminiApiKey,
@@ -96,8 +98,11 @@ export function TimeInRangeTab({
     const previousResponse = response;
 
     try {
+      // Resolve 'auto' to actual language based on UI language
+      const resolvedLanguage = resolveResponseLanguage(responseLanguage, uiLanguage);
+      
       // Generate the prompt with the glucose stats and thresholds
-      const prompt = generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, activeProvider);
+      const prompt = generateTimeInRangePrompt(glucoseStats, thresholds, resolvedLanguage, glucoseUnit, activeProvider);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
@@ -176,7 +181,7 @@ export function TimeInRangeTab({
           <AccordionHeader>View AI Prompt</AccordionHeader>
           <AccordionPanel>
             <div className={styles.promptTextContainer}>
-              {glucoseStats && generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, activeProvider || undefined)}
+              {glucoseStats && generateTimeInRangePrompt(glucoseStats, thresholds, resolveResponseLanguage(responseLanguage, uiLanguage), glucoseUnit, activeProvider || undefined)}
             </div>
           </AccordionPanel>
         </AccordionItem>
