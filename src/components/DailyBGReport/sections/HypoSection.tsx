@@ -26,7 +26,6 @@ import {
   ResponsiveContainer,
   ReferenceLine,
   ReferenceArea,
-  Legend,
 } from 'recharts';
 import type { GlucoseUnit, GlucoseThresholds } from '../../../types';
 import type { HypoStats } from '../../../utils/data/hypoDataUtils';
@@ -274,30 +273,12 @@ export function HypoSection({
                   stroke={HYPO_CHART_COLORS.veryLow}
                   strokeDasharray="5 5" 
                   strokeWidth={1.5}
-                  label={{ 
-                    value: `Very Low (${displayGlucoseValue(thresholds.veryLow, glucoseUnit)})`, 
-                    position: 'insideTopLeft', 
-                    style: { 
-                      fontSize: tokens.fontSizeBase200,
-                      fontFamily: tokens.fontFamilyBase,
-                      fill: HYPO_CHART_COLORS.veryLow,
-                    } 
-                  }}
                 />
                 <ReferenceLine 
                   y={convertGlucoseValue(thresholds.low, glucoseUnit)} 
                   stroke={HYPO_CHART_COLORS.low}
                   strokeDasharray="5 5" 
                   strokeWidth={1.5}
-                  label={{ 
-                    value: `Low (${displayGlucoseValue(thresholds.low, glucoseUnit)})`, 
-                    position: 'insideTopLeft', 
-                    style: { 
-                      fontSize: tokens.fontSizeBase200,
-                      fontFamily: tokens.fontFamilyBase,
-                      fill: HYPO_CHART_COLORS.low,
-                    } 
-                  }}
                 />
                 
                 {/* Glucose values line with gradient color */}
@@ -315,32 +296,25 @@ export function HypoSection({
                 />
                 
                 {/* Nadir markers - triangles pointing down at lowest points */}
-                <Scatter
-                  data={nadirPoints}
-                  dataKey="value"
-                  shape={(props: unknown) => {
-                    const { cx, cy, payload } = props as { cx: number; cy: number; payload: { isSevere: boolean } };
-                    const color = payload.isSevere ? HYPO_CHART_COLORS.veryLow : HYPO_CHART_COLORS.nadirDot;
-                    return (
-                      <polygon
-                        points={`${cx},${cy + 8} ${cx - 6},${cy - 4} ${cx + 6},${cy - 4}`}
-                        fill={color}
-                        stroke={tokens.colorNeutralBackground1}
-                        strokeWidth={1}
-                      />
-                    );
-                  }}
-                  legendType="triangle"
-                />
-                
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={36}
-                  formatter={(value: string) => {
-                    if (value === 'value') return 'Glucose';
-                    return 'Nadir (Lowest Point)';
-                  }}
-                />
+                {nadirPoints.length > 0 && (
+                  <Scatter
+                    data={nadirPoints}
+                    dataKey="value"
+                    shape={(props: unknown) => {
+                      const { cx, cy, payload } = props as { cx: number; cy: number; payload: { isSevere: boolean } };
+                      const color = payload.isSevere ? HYPO_CHART_COLORS.veryLow : HYPO_CHART_COLORS.nadirDot;
+                      return (
+                        <polygon
+                          points={`${cx},${cy + 8} ${cx - 6},${cy - 4} ${cx + 6},${cy - 4}`}
+                          fill={color}
+                          stroke={tokens.colorNeutralBackground1}
+                          strokeWidth={1}
+                        />
+                      );
+                    }}
+                    legendType="triangle"
+                  />
+                )}
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -354,7 +328,7 @@ export function HypoSection({
                   background: `linear-gradient(to right, ${HYPO_CHART_COLORS.normal}, ${HYPO_CHART_COLORS.low}, ${HYPO_CHART_COLORS.veryLow})` 
                 }} 
               />
-              <Text>Glucose (colored by range)</Text>
+              <Text>Glucose</Text>
             </div>
             <div className={styles.legendItem}>
               <div 
