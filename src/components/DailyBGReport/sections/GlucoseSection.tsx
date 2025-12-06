@@ -187,8 +187,8 @@ export function GlucoseSection({
         <div className={styles.controlsRow}>
           <div className={styles.colorSchemeContainer}>
             <Text className={styles.colorSchemeLabel}>
-              <span className={styles.colorSchemeLabelShort}>Color Scheme:</span>
-              <span className={styles.colorSchemeLabelLong}>Color:</span>
+              <span className={styles.colorSchemeLabelLong}>Color Scheme:</span>
+              <span className={styles.colorSchemeLabelShort}>Color:</span>
             </Text>
             <Dropdown
               value={COLOR_SCHEME_DESCRIPTORS[colorScheme].name}

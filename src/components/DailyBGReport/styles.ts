@@ -180,12 +180,12 @@ export const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     whiteSpace: 'nowrap',
   },
-  colorSchemeLabelShort: {
+  colorSchemeLabelLong: {
     '@media (max-width: 767px)': {
       display: 'none',
     },
   },
-  colorSchemeLabelLong: {
+  colorSchemeLabelShort: {
     display: 'none',
     '@media (max-width: 767px)': {
       display: 'inline',
