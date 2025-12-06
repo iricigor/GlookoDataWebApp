@@ -6,6 +6,7 @@ import {
   tokens,
   shorthands,
 } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
 import { CloudArrowUpRegular, DocumentRegular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
@@ -59,6 +60,7 @@ interface FileUploadZoneProps {
 
 export function FileUploadZone({ onFilesSelected }: FileUploadZoneProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -127,12 +129,12 @@ export function FileUploadZone({ onFilesSelected }: FileUploadZoneProps) {
         {isDragging ? <DocumentRegular /> : <CloudArrowUpRegular />}
       </div>
       <Text className={styles.title}>
-        Drop ZIP files here or click to browse
+        {t('dataUpload.uploadZone.dropFilesPrompt')}
       </Text>
       <Text className={styles.description}>
-        Upload one or multiple ZIP files from Glooko export
+        {t('dataUpload.uploadZone.uploadDescription')}
       </Text>
-      <Button appearance="primary">Select Files</Button>
+      <Button appearance="primary">{t('dataUpload.uploadZone.selectFilesButton')}</Button>
     </div>
   );
 }

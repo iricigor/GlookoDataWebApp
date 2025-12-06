@@ -107,5 +107,109 @@
     "english": "Englisch",
     "german": "Deutsch",
     "loading": "Laden..."
+  },
+
+  "dataUpload": {
+    "title": "Daten hochladen",
+    "description": "Laden Sie Ihre Glooko-Exportdateien mit Drag-and-Drop-Unterstützung hoch und verwalten Sie diese",
+    
+    "uploadZone": {
+      "dropFilesPrompt": "ZIP-Dateien hier ablegen oder zum Durchsuchen klicken",
+      "uploadDescription": "Eine oder mehrere ZIP-Dateien aus dem Glooko-Export hochladen",
+      "selectFilesButton": "Dateien auswählen"
+    },
+
+    "guide": {
+      "title": "Erste Schritte Anleitung",
+      "show": "Anzeigen",
+      "hide": "Ausblenden",
+      "showAriaLabel": "Erste-Schritte-Anleitung anzeigen",
+      "hideAriaLabel": "Anleitung ausblenden",
+      
+      "demoData": {
+        "title": "Demo-Daten ausprobieren",
+        "newHere": "Neu hier?",
+        "description1": "Erkunden Sie die App zunächst mit unseren Demo-Datensätzen. Eine vorgeladene Demo-Datei ist bereits in der unten stehenden Dateiliste verfügbar.",
+        "description2": "Sie können auch zusätzliche Demo-Datensätze laden, indem Sie auf die Schaltfläche",
+        "loadDemoDataButton": "Demo-Daten laden",
+        "description3": "in der Kopfzeile der Dateiliste klicken. Diese Datensätze basieren auf realen Typ-1-Diabetes-Datenmustern.",
+        "description4": "Informationen zur Quellenangabe und weitere Informationen über die Demo-Datenquelle finden Sie auf der Seite",
+        "settingsAboutLink": "Einstellungen → Über",
+        "description5": "."
+      },
+
+      "privacy": {
+        "title": "Ihr Datenschutz ist geschützt",
+        "dataStaysLocal": "Ihre Daten verlassen niemals Ihr Gerät.",
+        "description1": "Die gesamte Graphenverarbeitung und -analyse erfolgt vollständig in Ihrem Browser. Wir laden Ihre Dateien nicht auf einen Server hoch.",
+        "description2": "Dateien werden nur im Speicher Ihres Browsers aufbewahrt, während Sie die App verwenden. Wenn Sie den Browser-Tab schließen, sind Ihre Daten weg—es sei denn, Sie speichern sie ausdrücklich.",
+        "description3": "Für KI-gestützte Analysen ist die Datenverarbeitung anders. Siehe Abschnitt",
+        "aiAnalysisSection": "KI-Analyse",
+        "description4": "unten für Details."
+      },
+
+      "upload": {
+        "title": "Ihre Daten hochladen",
+        "dragAndDrop": "Ziehen Sie",
+        "description1": "Ihre Glooko-Export-ZIP-Dateien per Drag & Drop in die Upload-Zone oben, oder klicken Sie zum Durchsuchen und Auswählen von Dateien auf Ihrem Computer.",
+        "description2": "Nach dem Hochladen wählen Sie eine Datei aus der Liste aus, um sie auf der Seite",
+        "comprehensiveReports": "Umfassende Berichte",
+        "description3": "anzuzeigen—einschließlich BG-Übersicht, täglicher BG-Diagramme und Hypoglykämie-Analyse.",
+        "description4": "Sie können Ihre Daten auch in das Excel-Format (XLSX) exportieren, indem Sie die Download-Schaltfläche neben jeder Datei verwenden."
+      },
+
+      "aiAnalysis": {
+        "title": "KI-Analyse (Daten verlassen Ihr Gerät)",
+        "important": "Wichtig:",
+        "description1": "Wenn Sie KI-gestützte Analysefunktionen verwenden, werden Ihre Gesundheitsdaten an den ausgewählten KI-Anbieter gesendet (Perplexity, Grok, DeepSeek oder Google Gemini).",
+        "description2": "Die Daten werden",
+        "withoutPII": "ohne personenbezogene Informationen",
+        "description3": "(wie Ihren Namen oder Ihre E-Mail-Adresse) gesendet, aber der KI-Anbieter kann Ihren API-Schlüssel mit den von Ihnen gesendeten Gesundheitsdaten verknüpfen.",
+        "description4": "Ausführliche Informationen zur KI-Datenverarbeitung, zu Best Practices für die Sicherheit und zu Datenschutzrichtlinien finden Sie auf der Seite",
+        "settingsAILink": "Einstellungen → KI-Einstellungen",
+        "description5": "."
+      }
+    },
+
+    "fileList": {
+      "title": "Hochgeladene Dateien",
+      "titleWithCount": "Hochgeladene Dateien ({{count}})",
+      "loadingDemoData": "Demo-Daten werden geladen...",
+      "noFiles": "Noch keine Dateien hochgeladen. Laden Sie ZIP-Dateien hoch, um zu beginnen.",
+      "loadDemoDataButton": "Demo-Daten laden",
+      "loadingButton": "Laden...",
+      "clearAllButton": "Alle löschen",
+      
+      "table": {
+        "selectColumn": "Auswählen",
+        "fileNameColumn": "Dateiname",
+        "uploadTimeColumn": "Upload-Zeit",
+        "fileSizeColumn": "Dateigröße",
+        "actionsColumn": "Aktionen",
+        "selectFileAriaLabel": "{{fileName}} auswählen",
+        "collapseDetailsAriaLabel": "Details einklappen",
+        "expandDetailsAriaLabel": "Details ausklappen",
+        "validBadge": "Gültig",
+        "invalidBadge": "Ungültig",
+        "exportToXlsxAriaLabel": "{{fileName}} nach XLSX exportieren",
+        "exportToXlsxTitle": "Nach XLSX exportieren",
+        "removeFileAriaLabel": "{{fileName}} entfernen"
+      },
+
+      "details": {
+        "metadataHeader": "Metadaten",
+        "dataSetsHeader": "Datensätze ({{count}})",
+        "mergedFromFiles": "zusammengeführt aus {{count}} Dateien",
+        "row": "Zeile",
+        "rows": "Zeilen",
+        "errorPrefix": "Fehler: {{error}}",
+        "invalidZipFile": "Ungültige ZIP-Datei"
+      },
+
+      "export": {
+        "copyAriaLabel": "Tabelle hochgeladener Dateien als {{format}} kopieren",
+        "downloadAriaLabel": "Tabelle hochgeladener Dateien als {{format}} herunterladen"
+      }
+    }
   }
 }

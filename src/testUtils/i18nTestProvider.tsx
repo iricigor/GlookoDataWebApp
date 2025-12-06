@@ -103,6 +103,52 @@ const enTranslations = {
   "common": {
     "english": "English",
     "german": "German"
+  },
+  "dataUpload": {
+    "title": "Data Upload",
+    "description": "Upload and manage your Glooko export files with drag-and-drop support",
+    "uploadZone": {
+      "dropFilesPrompt": "Drop ZIP files here or click to browse",
+      "uploadDescription": "Upload one or multiple ZIP files from Glooko export",
+      "selectFilesButton": "Select Files"
+    },
+    "fileList": {
+      "title": "Uploaded Files",
+      "titleWithCount": "Uploaded Files ({{count}})",
+      "loadingDemoData": "Loading demo data...",
+      "noFiles": "No files uploaded yet. Upload ZIP files to get started.",
+      "loadDemoDataButton": "Load Demo Data",
+      "loadingButton": "Loading...",
+      "clearAllButton": "Clear All",
+      "table": {
+        "selectColumn": "Select",
+        "fileNameColumn": "File Name",
+        "uploadTimeColumn": "Upload Time",
+        "fileSizeColumn": "File Size",
+        "actionsColumn": "Actions",
+        "selectFileAriaLabel": "Select {{fileName}}",
+        "collapseDetailsAriaLabel": "Collapse details",
+        "expandDetailsAriaLabel": "Expand details",
+        "validBadge": "Valid",
+        "invalidBadge": "Invalid",
+        "exportToXlsxAriaLabel": "Export {{fileName}} to XLSX",
+        "exportToXlsxTitle": "Export to XLSX",
+        "removeFileAriaLabel": "Remove {{fileName}}"
+      },
+      "details": {
+        "metadataHeader": "Metadata",
+        "dataSetsHeader": "Data Sets ({{count}})",
+        "mergedFromFiles": "merged from {{count}} files",
+        "row": "row",
+        "rows": "rows",
+        "errorPrefix": "Error: {{error}}",
+        "invalidZipFile": "Invalid ZIP file"
+      },
+      "export": {
+        "copyAriaLabel": "Copy uploaded files table as {{format}}",
+        "downloadAriaLabel": "Download uploaded files table as {{format}}"
+      }
+    }
   }
 };
 

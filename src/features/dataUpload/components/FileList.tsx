@@ -19,6 +19,7 @@ import {
   TableCell,
   Radio,
 } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
 import { DeleteRegular, ChevronRightRegular, ChevronDownRegular, ArrowDownloadRegular, DatabaseRegular } from '@fluentui/react-icons';
 import type { UploadedFile } from '../../../types';
 import type { ExportFormat } from '../../../hooks/useExportFormat';
@@ -198,6 +199,7 @@ function getDataSetColor(rowCount: number): string {
 
 export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selectedFileId, onSelectFile, exportFormat, isLoadingDemoData }: FileListProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
   const [exportingFiles, setExportingFiles] = useState<Set<string>>(new Set());
   const [loadingDemo, setLoadingDemo] = useState(false);
@@ -296,10 +298,10 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <Text className={styles.title}>Uploaded Files</Text>
+          <Text className={styles.title}>{t('dataUpload.fileList.title')}</Text>
         </div>
         <div className={styles.emptyState}>
-          <Text>Loading demo data...</Text>
+          <Text>{t('dataUpload.fileList.loadingDemoData')}</Text>
         </div>
       </div>
     );
@@ -309,10 +311,10 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <Text className={styles.title}>Uploaded Files</Text>
+          <Text className={styles.title}>{t('dataUpload.fileList.title')}</Text>
         </div>
         <div className={styles.emptyState}>
-          <Text>No files uploaded yet. Upload ZIP files to get started.</Text>
+          <Text>{t('dataUpload.fileList.noFiles')}</Text>
         </div>
       </div>
     );
@@ -322,7 +324,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
     <div className={styles.container}>
       <div className={styles.header}>
         <Text className={styles.title}>
-          Uploaded Files ({files.length})
+          {t('dataUpload.fileList.titleWithCount', { count: files.length })}
         </Text>
         <div className={styles.buttonGroup}>
           <Tooltip 
@@ -336,7 +338,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
                     icon={<DatabaseRegular />}
                     disabled={loadingDemo}
                   >
-                    {loadingDemo ? 'Loading...' : 'Load Demo Data'}
+                    {loadingDemo ? t('dataUpload.fileList.loadingButton') : t('dataUpload.fileList.loadDemoDataButton')}
                   </Button>
                 </MenuTrigger>
                 <MenuPopover>
@@ -363,7 +365,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
             onClick={onClearAll}
             className={styles.clearButton}
           >
-            Clear All
+            {t('dataUpload.fileList.clearAllButton')}
           </Button>
         </div>
       </div>
@@ -371,17 +373,17 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
         data={getFilesListAsCSV()}
         exportFormat={exportFormat}
         fileName="uploaded-files"
-        copyAriaLabel={`Copy uploaded files table as ${exportFormat.toUpperCase()}`}
-        downloadAriaLabel={`Download uploaded files table as ${exportFormat.toUpperCase()}`}
+        copyAriaLabel={t('dataUpload.fileList.export.copyAriaLabel', { format: exportFormat.toUpperCase() })}
+        downloadAriaLabel={t('dataUpload.fileList.export.downloadAriaLabel', { format: exportFormat.toUpperCase() })}
       >
         <Table className={styles.table}>
         <TableHeader>
           <TableRow>
-            {onSelectFile && <TableHeaderCell className={styles.selectCell}>Select</TableHeaderCell>}
-            <TableHeaderCell>File Name</TableHeaderCell>
-            <TableHeaderCell className={styles.hideOnMobile}>Upload Time</TableHeaderCell>
-            <TableHeaderCell className={styles.hideOnMobile}>File Size</TableHeaderCell>
-            <TableHeaderCell>Actions</TableHeaderCell>
+            {onSelectFile && <TableHeaderCell className={styles.selectCell}>{t('dataUpload.fileList.table.selectColumn')}</TableHeaderCell>}
+            <TableHeaderCell>{t('dataUpload.fileList.table.fileNameColumn')}</TableHeaderCell>
+            <TableHeaderCell className={styles.hideOnMobile}>{t('dataUpload.fileList.table.uploadTimeColumn')}</TableHeaderCell>
+            <TableHeaderCell className={styles.hideOnMobile}>{t('dataUpload.fileList.table.fileSizeColumn')}</TableHeaderCell>
+            <TableHeaderCell>{t('dataUpload.fileList.table.actionsColumn')}</TableHeaderCell>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -400,7 +402,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
                         checked={selectedFileId === file.id}
                         onChange={() => onSelectFile(file.id)}
                         disabled={!isValidFile}
-                        aria-label={`Select ${file.name}`}
+                        aria-label={t('dataUpload.fileList.table.selectFileAriaLabel', { fileName: file.name })}
                       />
                     </TableCell>
                   )}
@@ -412,13 +414,13 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
                           icon={isExpanded ? <ChevronDownRegular /> : <ChevronRightRegular />}
                           onClick={() => toggleExpand(file.id)}
                           className={styles.expandButton}
-                          aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
+                          aria-label={isExpanded ? t('dataUpload.fileList.table.collapseDetailsAriaLabel') : t('dataUpload.fileList.table.expandDetailsAriaLabel')}
                         />
                       )}
                       <span className={styles.fileName} title={file.name}>{file.name}</span>
                       {file.zipMetadata && (
                         <span className={`${styles.validationBadge} ${file.zipMetadata.isValid ? styles.validBadge : styles.invalidBadge}`}>
-                          {file.zipMetadata.isValid ? 'Valid' : 'Invalid'}
+                          {file.zipMetadata.isValid ? t('dataUpload.fileList.table.validBadge') : t('dataUpload.fileList.table.invalidBadge')}
                         </span>
                       )}
                     </div>
@@ -433,8 +435,8 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
                         onClick={() => handleExportToXlsx(file)}
                         className={styles.exportButton}
                         disabled={exportingFiles.has(file.id)}
-                        aria-label={`Export ${file.name} to XLSX`}
-                        title="Export to XLSX"
+                        aria-label={t('dataUpload.fileList.table.exportToXlsxAriaLabel', { fileName: file.name })}
+                        title={t('dataUpload.fileList.table.exportToXlsxTitle')}
                       />
                     )}
                     <Button
@@ -442,7 +444,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
                       icon={<DeleteRegular />}
                       onClick={() => onRemoveFile(file.id)}
                       className={styles.deleteButton}
-                      aria-label={`Remove ${file.name}`}
+                      aria-label={t('dataUpload.fileList.table.removeFileAriaLabel', { fileName: file.name })}
                     />
                   </TableCell>
                 </TableRow>
@@ -455,7 +457,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
                             {file.zipMetadata.metadataLine && (
                               <>
                                 <Text className={styles.metadataHeader}>
-                                  Metadata
+                                  {t('dataUpload.fileList.details.metadataHeader')}
                                 </Text>
                                 <div className={styles.zipMetadataLine}>
                                   {file.zipMetadata.metadataLine}
@@ -463,7 +465,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
                               </>
                             )}
                             <Text className={styles.metadataHeader}>
-                              Data Sets ({file.zipMetadata.csvFiles.length})
+                              {t('dataUpload.fileList.details.dataSetsHeader', { count: file.zipMetadata.csvFiles.length })}
                             </Text>
                             {file.zipMetadata.csvFiles.map((csvFile) => (
                               <div key={csvFile.name} className={styles.csvFileItem}>
@@ -476,7 +478,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
                                         fontSize: tokens.fontSizeBase200,
                                         color: tokens.colorNeutralForeground2,
                                       }}>
-                                        (merged from {csvFile.fileCount} files)
+                                        ({t('dataUpload.fileList.details.mergedFromFiles', { count: csvFile.fileCount })})
                                       </span>
                                     )}
                                   </div>
@@ -491,14 +493,14 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
                                   )}
                                 </div>
                                 <span className={styles.csvRowCount}>
-                                  {csvFile.rowCount} {csvFile.rowCount === 1 ? 'row' : 'rows'}
+                                  {csvFile.rowCount} {csvFile.rowCount === 1 ? t('dataUpload.fileList.details.row') : t('dataUpload.fileList.details.rows')}
                                 </span>
                               </div>
                             ))}
                           </>
                         ) : (
                           <Text className={styles.errorText}>
-                            Error: {file.zipMetadata.error || 'Invalid ZIP file'}
+                            {t('dataUpload.fileList.details.errorPrefix', { error: file.zipMetadata.error || t('dataUpload.fileList.details.invalidZipFile') })}
                           </Text>
                         )}
                       </div>
