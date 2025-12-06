@@ -9,7 +9,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import i18n from '../i18n';
 
-export type UILanguage = 'en' | 'de';
+export type UILanguage = 'en' | 'de' | 'cs';
 
 export interface UseUILanguageReturn {
   uiLanguage: UILanguage;
@@ -24,7 +24,7 @@ const UI_LANGUAGE_STORAGE_KEY = 'glookoUILanguagePreference';
 function getLanguageFromStorage(): UILanguage | null {
   try {
     const stored = localStorage.getItem(UI_LANGUAGE_STORAGE_KEY);
-    if (stored === 'en' || stored === 'de') {
+    if (stored === 'en' || stored === 'de' || stored === 'cs') {
       return stored;
     }
   } catch (error) {
