@@ -1,6 +1,6 @@
 /**
  * General Settings Tab
- * Contains theme, day/night shading, export format, and response language settings
+ * Contains theme, day/night shading, export format, UI language, and response language settings
  */
 
 import {
@@ -14,10 +14,11 @@ import {
 import type { ThemeMode } from '../../hooks/useTheme';
 import type { ExportFormat } from '../../hooks/useExportFormat';
 import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
+import type { UILanguage } from '../../hooks/useUILanguage';
 import type { GeneralSettingsTabProps } from './types';
 
 /**
- * Renders the General settings tab with controls for theme, day/night shading, export format, and AI response language.
+ * Renders the General settings tab with controls for theme, day/night shading, export format, UI language, and AI response language.
  *
  * @param styles - CSS module classes used to style each settings section and controls.
  * @param themeMode - Currently selected theme mode (`"light" | "dark" | "system"`).
@@ -26,6 +27,8 @@ import type { GeneralSettingsTabProps } from './types';
  * @param onShowDayNightShadingChange - Callback invoked with the new checked state when the shading switch changes.
  * @param exportFormat - Currently selected export format (`"csv" | "tsv"`).
  * @param onExportFormatChange - Callback invoked with the new `ExportFormat` when the export format selection changes.
+ * @param uiLanguage - Currently selected UI language (`"en" | "de"`).
+ * @param onUILanguageChange - Callback invoked with the new `UILanguage` when the UI language selection changes.
  * @param responseLanguage - Currently selected AI response language (`"english" | "czech" | "german" | "serbian"`).
  * @param onResponseLanguageChange - Callback invoked with the new `ResponseLanguage` when the AI language selection changes.
  * @returns The settings tab UI as a JSX element.
@@ -38,6 +41,8 @@ export function GeneralSettingsTab({
   onShowDayNightShadingChange,
   exportFormat,
   onExportFormatChange,
+  uiLanguage,
+  onUILanguageChange,
   responseLanguage,
   onResponseLanguageChange,
 }: GeneralSettingsTabProps) {
@@ -88,10 +93,25 @@ export function GeneralSettingsTab({
       </div>
 
       <div className={styles.settingSection}>
+        <Title3 className={styles.sectionTitle}>UI Language</Title3>
+        <Divider className={styles.divider} />
+        <Text className={styles.settingDescription}>
+          Choose the language for the application interface. This affects all menus, labels, and button text throughout the application.
+        </Text>
+        <RadioGroup
+          value={uiLanguage}
+          onChange={(_, data) => onUILanguageChange(data.value as UILanguage)}
+        >
+          <Radio value="en" label="English" />
+          <Radio value="de" label="Deutsch (German)" />
+        </RadioGroup>
+      </div>
+
+      <div className={styles.settingSection}>
         <Title3 className={styles.sectionTitle}>AI Response Language</Title3>
         <Divider className={styles.divider} />
         <Text className={styles.settingDescription}>
-          Choose the language for AI analysis responses. This affects all AI-generated insights and recommendations. Note: This does not change the application interface, which is only available in English.
+          Choose the language for AI analysis responses. This affects all AI-generated insights and recommendations. Note: This does not change the application interface language.
         </Text>
         <RadioGroup
           value={responseLanguage}

@@ -2,12 +2,25 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import HttpBackend from 'i18next-http-backend';
 
+// Get stored UI language preference from LocalStorage
+function getStoredUILanguage(): string {
+  try {
+    const stored = localStorage.getItem('glookoUILanguagePreference');
+    if (stored === 'en' || stored === 'de') {
+      return stored;
+    }
+  } catch (error) {
+    console.error('Failed to read UI language from localStorage:', error);
+  }
+  return 'en'; // Default to English
+}
+
 // Initialize i18next with react-i18next and http backend
 i18n
   .use(HttpBackend) // Load translations from public/locales
   .use(initReactI18next) // Pass i18n to react-i18next
   .init({
-    lng: 'en', // Default language
+    lng: getStoredUILanguage(), // Initialize with stored language or default to English
     fallbackLng: 'en', // Fallback language when translation is missing
     interpolation: {
       escapeValue: false, // React already escapes values (XSS protection)

@@ -7,3 +7,4 @@ export { LogoutDialog } from './LogoutDialog';
 export { CookieConsent } from './CookieConsent';
 export { WelcomeDialog } from './WelcomeDialog';
 export { InfrastructureErrorDialog } from './InfrastructureErrorDialog';
+export { LanguageSwitcher } from './LanguageSwitcher';
