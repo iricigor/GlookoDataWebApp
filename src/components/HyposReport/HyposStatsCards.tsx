@@ -18,6 +18,7 @@ import {
   ShieldRegular,
 } from '@fluentui/react-icons';
 import { displayGlucoseValue, getUnitLabel, formatHypoDuration } from '../../utils/data';
+import { formatNumber } from '../../utils/formatting/formatters';
 import { useHyposStyles } from './styles';
 import type { HyposStatsCardsProps } from './types';
 import { getLBGIInterpretation, LBGI_THRESHOLDS } from './types';
@@ -71,7 +72,7 @@ export function HyposStatsCards({ hypoStats, thresholds, glucoseUnit, lbgi }: Hy
           <Text className={styles.summaryLabel}>LBGI</Text>
           <div className={styles.summaryValueRow}>
             <Text className={styles.summaryValue}>
-              {lbgi !== null ? lbgi.toFixed(1) : 'N/A'}
+              {lbgi !== null ? formatNumber(lbgi, 1) : 'N/A'}
             </Text>
           </div>
           {lbgiInterpretation && (

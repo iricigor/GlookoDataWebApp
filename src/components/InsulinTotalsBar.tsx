@@ -9,6 +9,7 @@ import {
   tokens,
   shorthands,
 } from '@fluentui/react-components';
+import { formatInsulinDose } from '../utils/formatting/formatters';
 
 const useStyles = makeStyles({
   container: {
@@ -98,9 +99,9 @@ export function InsulinTotalsBar({ basalTotal, bolusTotal }: InsulinTotalsBarPro
           <div
             className={styles.bolusSection}
             style={{ height: `${bolusPercent}%`, minHeight: getMinHeight(bolusPercent) }}
-            aria-label={`Bolus insulin: ${bolusTotal.toFixed(1)} units`}
+            aria-label={`Bolus insulin: ${formatInsulinDose(bolusTotal, 1)} units`}
           >
-            <Text>{bolusTotal.toFixed(1)}</Text>
+            <Text>{formatInsulinDose(bolusTotal, 1)}</Text>
           </div>
         )}
 
@@ -109,9 +110,9 @@ export function InsulinTotalsBar({ basalTotal, bolusTotal }: InsulinTotalsBarPro
           <div
             className={styles.basalSection}
             style={{ height: `${basalPercent}%`, minHeight: getMinHeight(basalPercent) }}
-            aria-label={`Basal insulin: ${basalTotal.toFixed(1)} units`}
+            aria-label={`Basal insulin: ${formatInsulinDose(basalTotal, 1)} units`}
           >
-            <Text>{basalTotal.toFixed(1)}</Text>
+            <Text>{formatInsulinDose(basalTotal, 1)}</Text>
           </div>
         )}
       </div>
