@@ -8,7 +8,7 @@ reviews:
     enabled: true         # Enable automatic code reviews for all PRs
     drafts: true          # Review draft PRs as well (set to true if you want this)
     ignore_usernames: []  # Empty array allows all users/bots
-    labels: ["!wip", "!draft"]
+    labels: []            # An empty array means no labels are excluded.
 
   # Path-based instructions for enforcing docstrings
   path_instructions:
