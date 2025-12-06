@@ -13,6 +13,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-gutter: stable; /* Prevent layout shift from scrollbar */
 }
 
 /* Fix Fluent UI portal overlay blocking page content */
