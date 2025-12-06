@@ -18,6 +18,7 @@ import {
   MIN_DAYS_FOR_RELIABLE_HBA1C,
   CV_TARGET_THRESHOLD,
 } from '../../utils/data';
+import { formatNumber } from '../../utils/formatting/formatters';
 import { useBGOverviewStyles } from './styles';
 import type { HbA1cStats } from './types';
 
@@ -43,7 +44,7 @@ export function HbA1cEstimateCard({ hba1cStats, glucoseUnit }: HbA1cEstimateCard
       <div className={styles.hba1cMainRow}>
         <div className={styles.hba1cValueSection}>
           <Text className={styles.hba1cValue}>
-            {hba1cStats.hba1c.toFixed(1)}%
+            {formatNumber(hba1cStats.hba1c, 1)}%
           </Text>
           <Text className={styles.hba1cMmolMol}>
             ({Math.round(convertHbA1cToMmolMol(hba1cStats.hba1c))} mmol/mol)
@@ -73,7 +74,7 @@ export function HbA1cEstimateCard({ hba1cStats, glucoseUnit }: HbA1cEstimateCard
                     : tokens.colorStatusSuccessForeground1 
                 }}
               >
-                {hba1cStats.cv !== null ? `${hba1cStats.cv.toFixed(1)}%` : '-'}
+                {hba1cStats.cv !== null ? `${formatNumber(hba1cStats.cv, 1)}%` : '-'}
               </Text>
             </div>
           </Tooltip>

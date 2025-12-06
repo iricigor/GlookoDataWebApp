@@ -4,6 +4,7 @@
 
 import type { GlucoseUnit } from '../../types';
 import { findColumnIndex, getColumnVariants } from './columnMapper';
+import { formatGlucoseNumber } from '../formatting/formatters';
 
 /**
  * Conversion factor from mmol/L to mg/dL
@@ -43,16 +44,17 @@ export function convertGlucoseValue(value: number, targetUnit: GlucoseUnit): num
 }
 
 /**
- * Format glucose value with appropriate precision based on unit
+ * Format glucose value with appropriate precision based on unit and localization
  * @param value - Glucose value in the specified unit
  * @param unit - Unit of the value (mmol/L or mg/dL)
- * @returns Formatted string with appropriate decimal places
+ * @returns Formatted string with appropriate decimal places and locale-specific formatting
  */
 export function formatGlucoseValue(value: number, unit: GlucoseUnit): string {
   if (unit === 'mg/dL') {
     return Math.round(value).toString();
   }
-  return value.toFixed(1);
+  // Use localized number formatting for mmol/L values
+  return formatGlucoseNumber(value, 1);
 }
 
 /**

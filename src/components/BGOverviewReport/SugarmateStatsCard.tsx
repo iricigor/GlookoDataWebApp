@@ -28,6 +28,7 @@ import {
   getUnitLabel,
   FLUX_GRADE_COLORS,
 } from '../../utils/data';
+import { formatNumber } from '../../utils/formatting/formatters';
 import type { 
   QuartileStats, 
   HighLowIncidents, 
@@ -603,7 +604,7 @@ export function SugarmateStatsCard({
 
         {/* Flux Grade */}
         {flux && (
-          <Tooltip content={`Glucose stability grade based on coefficient of variation. A+ means very steady glucose, F means high variability (CV: ${flux.score.toFixed(1)}%)`} relationship="description">
+          <Tooltip content={`Glucose stability grade based on coefficient of variation. A+ means very steady glucose, F means high variability (CV: ${formatNumber(flux.score, 1)}%)`} relationship="description">
             <div className={styles.statSection}>
               <div className={styles.labelColumn}>
                 <Text className={styles.sectionTitle}>Flux (Stability)</Text>
@@ -618,7 +619,7 @@ export function SugarmateStatsCard({
                   </div>
                   <div className={styles.fluxInfo}>
                     <Text className={styles.fluxDescription}>{flux.description}</Text>
-                    <Text className={styles.fluxScore}>CV {flux.score.toFixed(1)}%</Text>
+                    <Text className={styles.fluxScore}>CV {formatNumber(flux.score, 1)}%</Text>
                   </div>
                 </div>
               </div>

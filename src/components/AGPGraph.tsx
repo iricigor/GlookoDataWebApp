@@ -21,6 +21,7 @@ import {
 } from 'recharts';
 import type { AGPTimeSlotStats, GlucoseUnit } from '../types';
 import { convertGlucoseValue, getUnitLabel } from '../utils/data';
+import { formatGlucoseNumber } from '../utils/formatting/formatters';
 
 const useStyles = makeStyles({
   container: {
@@ -130,6 +131,7 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string; median: number; p25_p75_min: number; p25_p75_max: number; p10_p90_min: number; p10_p90_max: number } }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      const decimals = glucoseUnit === 'mg/dL' ? 0 : 1;
       return (
         <div style={{
           backgroundColor: tokens.colorNeutralBackground1,
@@ -141,9 +143,9 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
           <div style={{ fontWeight: tokens.fontWeightSemibold, marginBottom: '4px' }}>
             {data.time}
           </div>
-          <div>Median: {data.median.toFixed(glucoseUnit === 'mg/dL' ? 0 : 1)} {unitLabel}</div>
-          <div>25-75%: {data.p25_p75_min.toFixed(glucoseUnit === 'mg/dL' ? 0 : 1)} - {data.p25_p75_max.toFixed(glucoseUnit === 'mg/dL' ? 0 : 1)} {unitLabel}</div>
-          <div>10-90%: {data.p10_p90_min.toFixed(glucoseUnit === 'mg/dL' ? 0 : 1)} - {data.p10_p90_max.toFixed(glucoseUnit === 'mg/dL' ? 0 : 1)} {unitLabel}</div>
+          <div>Median: {formatGlucoseNumber(data.median, decimals)} {unitLabel}</div>
+          <div>25-75%: {formatGlucoseNumber(data.p25_p75_min, decimals)} - {formatGlucoseNumber(data.p25_p75_max, decimals)} {unitLabel}</div>
+          <div>10-90%: {formatGlucoseNumber(data.p10_p90_min, decimals)} - {formatGlucoseNumber(data.p10_p90_max, decimals)} {unitLabel}</div>
         </div>
       );
     }

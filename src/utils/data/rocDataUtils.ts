@@ -16,6 +16,7 @@
 
 import type { GlucoseReading, RoCDataPoint, RoCStats, GlucoseUnit } from '../../types';
 import { MMOL_TO_MGDL } from './glucoseUnitUtils';
+import { formatGlucoseNumber } from '../formatting/formatters';
 
 /**
  * Standard CGM measurement interval in minutes.
@@ -473,8 +474,8 @@ export function formatRoCValue(roc: number, unit?: GlucoseUnit): string {
     const rocMgdl = roc * MMOL_TO_MGDL;
     return Math.round(rocMgdl).toString();
   }
-  // mmol/L: 1 decimal place
-  return roc.toFixed(1);
+  // mmol/L: 1 decimal place with localized formatting
+  return formatGlucoseNumber(roc, 1);
 }
 
 /**

@@ -24,6 +24,7 @@ import { generateHyposPrompt } from '../../../features/aiAnalysis/prompts';
 import { callAIApi, isRequestTooLargeError } from '../../../utils/api';
 import { convertHypoEventsToCSV, convertHypoSummariesToCSV, convertHypoEventSummaryToCSV } from '../../../utils/data';
 import { base64Encode } from '../../../utils/formatting';
+import { formatDateTime, formatTime, formatGlucoseNumber, formatNumber } from '../../../utils/formatting/formatters';
 import { useAIAnalysisStyles } from '../styles';
 import { useAnalysisState } from '../useAnalysisState';
 import {
@@ -55,13 +56,13 @@ function convertHypoEventsToArray(events: HypoEventData[]): (string | number)[][
     const lastBolus = event.lastBolusBeforeHypo;
     return [
       event.eventId,
-      event.hypoPeriod.startTime.toLocaleString(),
+      formatDateTime(event.hypoPeriod.startTime),
       Math.round(event.hypoPeriod.durationMinutes),
-      event.hypoPeriod.nadir.toFixed(1),
-      event.hypoPeriod.nadirTime.toLocaleTimeString(),
+      formatGlucoseNumber(event.hypoPeriod.nadir, 1),
+      formatTime(event.hypoPeriod.nadirTime),
       event.hypoPeriod.isSevere ? 'Yes' : 'No',
-      lastBolus ? lastBolus.timestamp.toLocaleTimeString() : '-',
-      lastBolus ? lastBolus.dose.toFixed(1) : '-',
+      lastBolus ? formatTime(lastBolus.timestamp) : '-',
+      lastBolus ? formatGlucoseNumber(lastBolus.dose, 1) : '-',
     ];
   });
 
@@ -88,10 +89,10 @@ function convertSummariesToArray(summaries: DailyHypoSummary[]): (string | numbe
     summary.severeCount,
     summary.nonSevereCount,
     summary.totalCount,
-    summary.lowestValue !== null ? summary.lowestValue.toFixed(1) : 'N/A',
+    summary.lowestValue !== null ? formatGlucoseNumber(summary.lowestValue, 1) : 'N/A',
     Math.round(summary.longestDurationMinutes),
     Math.round(summary.totalDurationMinutes),
-    summary.lbgi.toFixed(2),
+    formatNumber(summary.lbgi, 2),
   ]);
 
   return [headers, ...rows];
@@ -303,7 +304,7 @@ export function HyposTab({
           • Hypos with bolus 2-4h before: {hyposWithPrecedingBolus} ({stats.totalHypoEvents > 0 ? Math.round(hyposWithPrecedingBolus / stats.totalHypoEvents * 100) : 0}%)
         </Text>
         <Text className={styles.helperText} style={{ display: 'block' }}>
-          • Average LBGI: {stats.averageLBGI.toFixed(2)}
+          • Average LBGI: {formatNumber(stats.averageLBGI, 2)}
         </Text>
         <Text className={styles.helperText} style={{ display: 'block' }}>
           • Days with LBGI &gt;2.5: {stats.daysWithLBGIAbove2_5} | Days with LBGI &gt;5.0: {stats.daysWithLBGIAbove5_0}
@@ -389,11 +390,11 @@ export function HyposTab({
                       <TableCell>{summary.nonSevereCount}</TableCell>
                       <TableCell className={styles.emphasizedCell}>{summary.totalCount}</TableCell>
                       <TableCell className={styles.emphasizedCell}>
-                        {summary.lowestValue !== null ? summary.lowestValue.toFixed(1) : 'N/A'}
+                        {summary.lowestValue !== null ? formatGlucoseNumber(summary.lowestValue, 1) : 'N/A'}
                       </TableCell>
                       <TableCell>{Math.round(summary.longestDurationMinutes)}</TableCell>
                       <TableCell>{Math.round(summary.totalDurationMinutes)}</TableCell>
-                      <TableCell className={styles.emphasizedCell}>{summary.lbgi.toFixed(2)}</TableCell>
+                      <TableCell className={styles.emphasizedCell}>{formatNumber(summary.lbgi, 2)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -435,21 +436,21 @@ export function HyposTab({
                       <TableRow key={event.eventId}>
                         <TableCell>{event.eventId}</TableCell>
                         <TableCell className={styles.emphasizedCell}>
-                          {event.hypoPeriod.startTime.toLocaleString()}
+                          {formatDateTime(event.hypoPeriod.startTime)}
                         </TableCell>
                         <TableCell>{Math.round(event.hypoPeriod.durationMinutes)}</TableCell>
                         <TableCell className={styles.emphasizedCell}>
-                          {event.hypoPeriod.nadir.toFixed(1)}
+                          {formatGlucoseNumber(event.hypoPeriod.nadir, 1)}
                         </TableCell>
-                        <TableCell>{event.hypoPeriod.nadirTime.toLocaleTimeString()}</TableCell>
+                        <TableCell>{formatTime(event.hypoPeriod.nadirTime)}</TableCell>
                         <TableCell className={styles.emphasizedCell}>
                           {event.hypoPeriod.isSevere ? 'Yes' : 'No'}
                         </TableCell>
                         <TableCell>
-                          {event.lastBolusBeforeHypo ? event.lastBolusBeforeHypo.timestamp.toLocaleTimeString() : '-'}
+                          {event.lastBolusBeforeHypo ? formatTime(event.lastBolusBeforeHypo.timestamp) : '-'}
                         </TableCell>
                         <TableCell>
-                          {event.lastBolusBeforeHypo ? `${event.lastBolusBeforeHypo.dose.toFixed(1)}U` : '-'}
+                          {event.lastBolusBeforeHypo ? `${formatGlucoseNumber(event.lastBolusBeforeHypo.dose, 1)}U` : '-'}
                         </TableCell>
                       </TableRow>
                     ))}

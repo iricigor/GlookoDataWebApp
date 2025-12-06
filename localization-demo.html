@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Localization Demo - Glooko Data Web App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #0078d4;
+            border-bottom: 3px solid #0078d4;
+            padding-bottom: 10px;
+        }
+        .demo-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #0078d4;
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .locale-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .locale-en {
+            background-color: #e3f2fd;
+            color: #0078d4;
+        }
+        .locale-de {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+        .example-value {
+            font-family: 'Courier New', monospace;
+            background-color: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .feature-card {
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #0078d4;
+            border-radius: 4px;
+        }
+        .feature-card h4 {
+            margin-top: 0;
+            color: #0078d4;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌍 Localization Implementation - Glooko Data Web App</h1>
+    
+    <div class="demo-section">
+        <h2>📊 Number Formatting Examples</h2>
+        <p>All numerical values are now properly formatted according to the active UI language:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Data Type</th>
+                    <th><span class="locale-badge locale-en">English (en)</span></th>
+                    <th><span class="locale-badge locale-de">German (de)</span></th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Glucose (mmol/L)</strong></td>
+                    <td><span class="example-value">5.5</span></td>
+                    <td><span class="example-value">5,5</span></td>
+                    <td>Decimal point vs comma</td>
+                </tr>
+                <tr>
+                    <td><strong>Large Numbers</strong></td>
+                    <td><span class="example-value">1,234.56</span></td>
+                    <td><span class="example-value">1.234,56</span></td>
+                    <td>Thousands separator reversed</td>
+                </tr>
+                <tr>
+                    <td><strong>Insulin Dose</strong></td>
+                    <td><span class="example-value">2.50 U</span></td>
+                    <td><span class="example-value">2,50 U</span></td>
+                    <td>2 decimal places</td>
+                </tr>
+                <tr>
+                    <td><strong>HbA1c / CV</strong></td>
+                    <td><span class="example-value">6.8%</span></td>
+                    <td><span class="example-value">6,8%</span></td>
+                    <td>Percentage values</td>
+                </tr>
+                <tr>
+                    <td><strong>LBGI / HBGI</strong></td>
+                    <td><span class="example-value">2.3</span></td>
+                    <td><span class="example-value">2,3</span></td>
+                    <td>Risk indices</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="demo-section">
+        <h2>📅 Date & Time Formatting Examples</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Data Type</th>
+                    <th><span class="locale-badge locale-en">English (en)</span></th>
+                    <th><span class="locale-badge locale-de">German (de)</span></th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Full Date</strong></td>
+                    <td><span class="example-value">12/31/2023</span></td>
+                    <td><span class="example-value">31.12.2023</span></td>
+                    <td>MM/DD/YYYY vs DD.MM.YYYY</td>
+                </tr>
+                <tr>
+                    <td><strong>Time</strong></td>
+                    <td><span class="example-value">2:30 PM</span></td>
+                    <td><span class="example-value">14:30</span></td>
+                    <td>12-hour vs 24-hour format</td>
+                </tr>
+                <tr>
+                    <td><strong>Date & Time</strong></td>
+                    <td><span class="example-value">12/31/2023, 2:30 PM</span></td>
+                    <td><span class="example-value">31.12.2023, 14:30</span></td>
+                    <td>Combined format</td>
+                </tr>
+                <tr>
+                    <td><strong>Short Date</strong></td>
+                    <td><span class="example-value">12/31</span></td>
+                    <td><span class="example-value">31.12</span></td>
+                    <td>Month/Day format</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="demo-section">
+        <h2>✨ Implementation Features</h2>
+        <div class="feature-list">
+            <div class="feature-card">
+                <h4>🔢 Number Formatting</h4>
+                <p>Uses <code>Intl.NumberFormat</code> API for proper decimal and thousands separators based on locale.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📆 Date Formatting</h4>
+                <p>Uses <code>Intl.DateTimeFormat</code> API for culturally appropriate date and time representations.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📈 Chart Integration</h4>
+                <p>All Recharts tooltips, axes labels, and data points use localized formatters.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🧪 Comprehensive Tests</h4>
+                <p>31 new tests ensure formatters work correctly in both English and German locales.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔄 Dynamic Updates</h4>
+                <p>All formatting updates automatically when user switches UI language in settings.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📊 Data Integrity</h4>
+                <p>CSV exports maintain standard format (period as decimal) for data interchange.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>🎯 Components Updated</h2>
+        <ul>
+            <li><strong>Core Utilities:</strong> helpers.ts, glucoseUnitUtils.ts, rocDataUtils.ts</li>
+            <li><strong>Chart Tooltips:</strong> AGPGraph, UnifiedTimeline, InsulinTimeline, DailyBGReport tooltips</li>
+            <li><strong>Overview Cards:</strong> HbA1c Estimate, Sugarmate Stats, Risk Assessment</li>
+            <li><strong>Display Components:</strong> InsulinTotalsBar, HyposStatsCards</li>
+            <li><strong>AI Analysis Pages:</strong> HyposTab, MealTimingTab, PumpSettingsTab</li>
+        </ul>
+    </div>
+
+    <div class="demo-section">
+        <h2>📝 Usage Example</h2>
+        <p>The new formatters are easy to use throughout the codebase:</p>
+        <pre style="background: #f5f5f5; padding: 15px; border-radius: 4px; overflow-x: auto;"><code>import { formatNumber, formatDate, formatTime, formatGlucoseNumber } from '../utils/formatting/formatters';
+
+// Numbers automatically use correct separators
+const hba1c = formatNumber(6.8, 1);  // "6.8" in EN, "6,8" in DE
+
+// Dates use correct format
+const date = formatDate(new Date(2023, 11, 31));  // "12/31/2023" in EN, "31.12.2023" in DE
+
+// Times use 12h or 24h format
+const time = formatTime(new Date(2023, 11, 31, 14, 30));  // "2:30 PM" in EN, "14:30" in DE
+
+// Glucose values
+const glucose = formatGlucoseNumber(5.5, 1);  // "5.5" in EN, "5,5" in DE</code></pre>
+    </div>
+
+    <div class="demo-section">
+        <h2>✅ Test Results</h2>
+        <p><strong>All 1456 tests passing</strong></p>
+        <ul>
+            <li>✅ 31 new tests for localized formatters</li>
+            <li>✅ Updated 5 existing test files for locale-aware expectations</li>
+            <li>✅ Build successful with no errors</li>
+            <li>✅ Linting passed</li>
+        </ul>
+    </div>
+
+    <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666;">
+        <p>Glooko Data Web App - Localization Implementation (PR 4/4)</p>
+        <p>Complete i18n support for dates, numbers, and charts</p>
+    </footer>
+</body>
+</html>

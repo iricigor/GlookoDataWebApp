@@ -22,6 +22,7 @@ import {
   ReferenceArea,
 } from 'recharts';
 import { InsulinTotalsBar } from './InsulinTotalsBar';
+import { formatInsulinDose } from '../utils/formatting/formatters';
 
 const useStyles = makeStyles({
   container: {
@@ -120,12 +121,12 @@ export function InsulinTimeline({ data, showDayNightShading = true }: InsulinTim
           </div>
           {data.basalRate > 0 && (
             <div style={{ color: '#2E7D32' }}>
-              Basal Rate: {data.basalRate.toFixed(2)} U
+              Basal Rate: {formatInsulinDose(data.basalRate, 2)} U
             </div>
           )}
           {data.bolusTotal > 0 && (
             <div style={{ color: '#1976D2' }}>
-              Bolus Total: {data.bolusTotal.toFixed(1)} U
+              Bolus Total: {formatInsulinDose(data.bolusTotal, 1)} U
             </div>
           )}
         </div>

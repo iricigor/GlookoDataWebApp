@@ -20,6 +20,7 @@ import {
   filterInsulinReadingsToLastDays,
 } from '../../../utils/data';
 import { base64Encode } from '../../../utils/formatting';
+import { formatDate } from '../../../utils/formatting/formatters';
 import { useAIAnalysisStyles } from '../styles';
 import { useAnalysisState } from '../useAnalysisState';
 import {
@@ -262,7 +263,7 @@ export function MealTimingTab({
               {cgmReadings.length > 0 && (
                 <>
                   <Text>
-                    <strong>Date Range:</strong> {cgmReadings[0].timestamp.toLocaleDateString()} - {cgmReadings[cgmReadings.length - 1].timestamp.toLocaleDateString()}
+                    <strong>Date Range:</strong> {formatDate(cgmReadings[0].timestamp)} - {formatDate(cgmReadings[cgmReadings.length - 1].timestamp)}
                   </Text>
                 </>
               )}

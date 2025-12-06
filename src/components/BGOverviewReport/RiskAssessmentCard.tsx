@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from '@fluentui/react-components';
 import { ShieldRegular } from '@fluentui/react-icons';
+import { formatNumber } from '../../utils/formatting/formatters';
 import { useBGOverviewStyles } from './styles';
 import type { RiskStats } from './types';
 import { 
@@ -55,7 +56,7 @@ export function RiskAssessmentCard({ riskStats }: RiskAssessmentCardProps) {
           >
             <div className={styles.riskItem}>
               <Text className={styles.riskLabel}>LBGI (Hypo Risk)</Text>
-              <Text className={styles.riskValue}>{riskStats.lbgi.toFixed(1)}</Text>
+              <Text className={styles.riskValue}>{formatNumber(riskStats.lbgi, 1)}</Text>
               <Text className={`${styles.riskInterpretation} ${getRiskStyleClass(getLBGIInterpretation(riskStats.lbgi).level)}`}>
                 {getLBGIInterpretation(riskStats.lbgi).text}
               </Text>
@@ -70,7 +71,7 @@ export function RiskAssessmentCard({ riskStats }: RiskAssessmentCardProps) {
           >
             <div className={styles.riskItem}>
               <Text className={styles.riskLabel}>HBGI (Hyper Risk)</Text>
-              <Text className={styles.riskValue}>{riskStats.hbgi.toFixed(1)}</Text>
+              <Text className={styles.riskValue}>{formatNumber(riskStats.hbgi, 1)}</Text>
               <Text className={`${styles.riskInterpretation} ${getRiskStyleClass(getHBGIInterpretation(riskStats.hbgi).level)}`}>
                 {getHBGIInterpretation(riskStats.hbgi).text}
               </Text>
@@ -85,7 +86,7 @@ export function RiskAssessmentCard({ riskStats }: RiskAssessmentCardProps) {
           >
             <div className={styles.riskItem}>
               <Text className={styles.riskLabel}>BGRI (Overall)</Text>
-              <Text className={styles.riskValue}>{riskStats.bgri.toFixed(1)}</Text>
+              <Text className={styles.riskValue}>{formatNumber(riskStats.bgri, 1)}</Text>
             </div>
           </Tooltip>
         )}
@@ -97,7 +98,7 @@ export function RiskAssessmentCard({ riskStats }: RiskAssessmentCardProps) {
           >
             <div className={styles.riskItem}>
               <Text className={styles.riskLabel}>J-Index</Text>
-              <Text className={styles.riskValue}>{riskStats.jIndex.toFixed(1)}</Text>
+              <Text className={styles.riskValue}>{formatNumber(riskStats.jIndex, 1)}</Text>
               <Text className={`${styles.riskInterpretation} ${getRiskStyleClass(getJIndexInterpretation(riskStats.jIndex).level)}`}>
                 {getJIndexInterpretation(riskStats.jIndex).text}
               </Text>
