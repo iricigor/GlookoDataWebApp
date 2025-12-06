@@ -253,6 +253,14 @@ export function Navigation({
     setUILanguage(uiLanguage === 'en' ? 'de' : 'en');
   };
 
+  // Compute theme button label and icon class based on sync status and theme mode
+  const themeButtonLabel = syncStatus === 'syncing'
+    ? t('navigation.syncingSettings')
+    : isDarkMode
+      ? t('navigation.switchToLightMode')
+      : t('navigation.switchToDarkMode');
+  const themeIconClass = syncStatus === 'syncing' ? styles.pulsingIcon : undefined;
+
   const navItems = [
     { page: 'home', label: t('navigation.home'), icon: <HomeRegular /> },
     { page: 'upload', label: t('navigation.dataUpload'), icon: <CloudArrowUpRegular /> },
@@ -321,14 +329,14 @@ export function Navigation({
             <>
               {onThemeToggle && (
                 <Tooltip 
-                  content={isDarkMode ? t('navigation.switchToLightMode') : t('navigation.switchToDarkMode')}
+                  content={themeButtonLabel}
                   relationship="label"
                 >
                   <Button
                     appearance="subtle"
-                    icon={isDarkMode ? <WeatherSunnyRegular /> : <WeatherMoonRegular />}
+                    icon={isDarkMode ? <WeatherSunnyRegular className={themeIconClass} /> : <WeatherMoonRegular className={themeIconClass} />}
                     onClick={onThemeToggle}
-                    aria-label={isDarkMode ? t('navigation.switchToLightMode') : t('navigation.switchToDarkMode')}
+                    aria-label={themeButtonLabel}
                   />
                 </Tooltip>
               )}
@@ -345,14 +353,7 @@ export function Navigation({
                   {uiLanguage.toUpperCase()}
                 </Button>
               </Tooltip>
-              <Tooltip content={syncStatus === 'syncing' ? t('navigation.syncingSettings') : t('navigation.settingsLabel')} relationship="label">
-                <Button
-                  appearance="subtle"
-                  icon={<SettingsRegular className={syncStatus === 'syncing' ? styles.pulsingIcon : undefined} />}
-                  onClick={() => onNavigate('settings')}
-                  aria-label={syncStatus === 'syncing' ? t('navigation.syncingSettings') : t('navigation.settingsLabel')}
-                />
-              </Tooltip>
+
               <LogoutDialog 
                 userName={userName} 
                 userEmail={userEmail}

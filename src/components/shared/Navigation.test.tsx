@@ -123,7 +123,7 @@ describe('Navigation', () => {
       expect(screen.getByRole('button', { name: /switch to dark mode/i })).toBeInTheDocument();
     });
 
-    it('should render settings shortcut button', () => {
+    it('should not render settings shortcut button even when logged in', () => {
       renderWithProviders(
         <Navigation 
           currentPage="home" 
@@ -131,41 +131,45 @@ describe('Navigation', () => {
         />
       );
       
-      // Settings should be in main nav AND as a shortcut next to avatar
+      // Settings should only be in the main nav, no shortcut
       const settingsButtons = screen.getAllByRole('button', { name: /settings/i });
-      expect(settingsButtons.length).toBe(2); // Main nav + shortcut
+      expect(settingsButtons.length).toBe(1); // Only main nav Settings button
     });
 
-    it('should show "Syncing settings..." on settings button when syncStatus is syncing', () => {
+    it('should show "Syncing settings..." on theme toggle button when syncStatus is syncing', () => {
       renderWithProviders(
         <Navigation 
           currentPage="home" 
           onNavigate={vi.fn()} 
+          themeMode="light"
+          onThemeToggle={vi.fn()}
           syncStatus="syncing"
         />
       );
       
-      // The settings shortcut button should show syncing tooltip
+      // The theme toggle button should show syncing tooltip
       expect(screen.getByRole('button', { name: /syncing settings/i })).toBeInTheDocument();
     });
 
-    it('should keep settings icon clickable and functional during syncing', () => {
-      const onNavigate = vi.fn();
+    it('should keep theme button clickable and functional during syncing', () => {
+      const onThemeToggle = vi.fn();
       renderWithProviders(
         <Navigation 
           currentPage="home" 
-          onNavigate={onNavigate} 
+          onNavigate={vi.fn()} 
+          themeMode="light"
+          onThemeToggle={onThemeToggle}
           syncStatus="syncing"
         />
       );
       
-      // The settings shortcut button should still be present and clickable during syncing
+      // The theme toggle button should still be present and clickable during syncing
       const syncingButton = screen.getByRole('button', { name: /syncing settings/i });
       expect(syncingButton).toBeInTheDocument();
       
-      // Click the settings button and verify navigation still works
+      // Click the theme button and verify toggle still works
       fireEvent.click(syncingButton);
-      expect(onNavigate).toHaveBeenCalledWith('settings');
+      expect(onThemeToggle).toHaveBeenCalledTimes(1);
     });
 
     it('should call onThemeToggle when theme button is clicked', () => {
@@ -183,23 +187,6 @@ describe('Navigation', () => {
       fireEvent.click(themeButton);
       
       expect(onThemeToggle).toHaveBeenCalledTimes(1);
-    });
-
-    it('should navigate to settings when settings shortcut is clicked', () => {
-      const onNavigate = vi.fn();
-      renderWithProviders(
-        <Navigation 
-          currentPage="home" 
-          onNavigate={onNavigate} 
-        />
-      );
-      
-      // Get the shortcut settings button (aria-label="Settings")
-      const settingsButtons = screen.getAllByRole('button', { name: /settings/i });
-      // The shortcut button should be the one with just the icon (second one)
-      fireEvent.click(settingsButtons[1]);
-      
-      expect(onNavigate).toHaveBeenCalledWith('settings');
     });
 
     it('should show sun icon in dark mode', () => {
