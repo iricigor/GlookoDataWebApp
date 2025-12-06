@@ -119,6 +119,10 @@ export const useBGOverviewStyles = makeStyles({
   pillButton: {
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     minWidth: '100px',
+    // On mobile, extend buttons to use available space
+    '@media (max-width: 767px)': {
+      flex: 1,
+    },
   },
   datePickerGroup: {
     display: 'flex',
@@ -485,6 +489,11 @@ export const useBGOverviewStyles = makeStyles({
       opacity: 0.9,
       transform: 'scaleY(1.02)',
     },
+    // On mobile, ensure all 24 bars fit by removing max-width
+    '@media (max-width: 767px)': {
+      maxWidth: 'none',
+      minWidth: '0',
+    },
   },
   hourlySegment: {
     display: 'flex',
@@ -507,6 +516,12 @@ export const useBGOverviewStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     textAlign: 'center',
     paddingTop: '4px',
+    // On mobile, ensure all 24 labels fit by removing max-width
+    '@media (max-width: 767px)': {
+      maxWidth: 'none',
+      minWidth: '0',
+      fontSize: '10px',
+    },
   },
   chartDescription: {
     fontSize: tokens.fontSizeBase200,
@@ -522,5 +537,17 @@ export const useBGOverviewStyles = makeStyles({
   accordionHeaderContent: {
     display: 'flex',
     alignItems: 'center',
+  },
+  desktopOnly: {
+    display: 'inline',
+    '@media (max-width: 767px)': {
+      display: 'none',
+    },
+  },
+  mobileOnly: {
+    display: 'none',
+    '@media (max-width: 767px)': {
+      display: 'inline',
+    },
   },
 });

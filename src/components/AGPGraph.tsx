@@ -35,6 +35,10 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
     ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    // Reduce padding on mobile for less blank space
+    '@media (max-width: 767px)': {
+      ...shorthands.padding('8px', '4px'),
+    },
   },
   legendContainer: {
     display: 'flex',

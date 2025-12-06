@@ -6,6 +6,7 @@
 
 import { 
   Text,
+  Card,
   Accordion,
   AccordionItem,
   AccordionHeader,
@@ -18,7 +19,7 @@ import {
   TableCell,
   Tooltip,
 } from '@fluentui/react-components';
-import { FilterRegular } from '@fluentui/react-icons';
+import { FilterRegular, TableRegular } from '@fluentui/react-icons';
 import type { 
   RangeCategoryMode, 
   GlucoseUnit,
@@ -109,7 +110,12 @@ export function DetailedBreakdownAccordion({
   };
 
   return (
-    <Accordion collapsible className={styles.accordion} defaultOpenItems={[]}>
+    <Card className={styles.sectionCard}>
+      <Text className={styles.cardTitle}>
+        <TableRegular className={styles.cardIcon} />
+        Data Tables
+      </Text>
+      <Accordion collapsible className={styles.accordion} defaultOpenItems={[]}>
       {/* 24-Hour Hourly TIR Data Table (graphs are now in standalone TimeInRangeByTimeOfDaySection) */}
       {hourlyStats.length > 0 && (
         <AccordionItem value="hourlyTIR">
@@ -268,5 +274,6 @@ export function DetailedBreakdownAccordion({
         </AccordionItem>
       )}
     </Accordion>
+    </Card>
   );
 }

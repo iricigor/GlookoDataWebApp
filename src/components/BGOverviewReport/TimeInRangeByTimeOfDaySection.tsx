@@ -61,7 +61,8 @@ export function TimeInRangeByTimeOfDaySection({
     <Card className={styles.sectionCard}>
       <Text className={styles.cardTitle}>
         <ClockRegular className={styles.cardIcon} />
-        Time in Range by Time of Day
+        <span className={styles.desktopOnly}>Time in Range by Time of Day</span>
+        <span className={styles.mobileOnly}>TIR by Time of Day</span>
         {dayFilter !== 'All Days' && (
           <Tooltip content={`Filtered by: ${dayFilter}`} relationship="description">
             <FilterRegular className={styles.filterIcon} aria-label="Filter indicator" />
