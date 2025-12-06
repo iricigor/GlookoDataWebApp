@@ -36,6 +36,11 @@ const useStyles = makeStyles({
     alignItems: 'center',
     ...shorthands.gap('8px'),
   },
+  loginButtonText: {
+    '@media (max-width: 768px)': {
+      display: 'none',
+    },
+  },
 });
 
 interface LoginDialogProps {
@@ -78,7 +83,7 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
     <Dialog open={open} onOpenChange={(_, data) => setOpen(data.open)}>
       <DialogTrigger disableButtonEnhancement>
         <Button appearance="primary" icon={<PersonRegular />}>
-          {t('navigation.login')}
+          <span className={styles.loginButtonText}>{t('navigation.login')}</span>
         </Button>
       </DialogTrigger>
       <DialogSurface>
