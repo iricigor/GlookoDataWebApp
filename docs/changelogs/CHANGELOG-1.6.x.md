@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>683 Enhance Settings pages alignment with Fluent UI components</summary>
+
+[#683](../../pull/683) Enhance Settings pages alignment with Fluent UI components
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>680 Add KeyVault secret reading for pro users</summary>
 
 [#680](../../pull/680) Add KeyVault secret reading for pro users
