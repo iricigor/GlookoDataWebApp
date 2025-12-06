@@ -4,41 +4,32 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+import { renderWithProviders } from '../../testUtils/i18nTestProvider';
 import { InfrastructureErrorDialog } from './InfrastructureErrorDialog';
-
-// Wrapper to provide FluentProvider context
-function renderWithProvider(component: React.ReactNode) {
-  return render(
-    <FluentProvider theme={webLightTheme}>
-      {component}
-    </FluentProvider>
-  );
-}
 
 describe('InfrastructureErrorDialog', () => {
   it('should not render when closed', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    render(renderWithProviders(
       <InfrastructureErrorDialog 
         open={false} 
         onClose={onClose} 
         errorMessage="Test error"
       />
-    );
+    ));
     
     expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
   });
 
   it('should render when open', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    render(renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
         errorMessage="Test error"
       />
-    );
+    ));
     
     // Title appears in header
     expect(screen.getAllByText('Something went wrong').length).toBeGreaterThan(0);
@@ -46,14 +37,14 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should display infrastructure error message', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    render(renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
         errorMessage="Cannot connect to Table Storage"
         errorType="infrastructure"
       />
-    );
+    ));
     
     expect(screen.getAllByText('Service Unavailable').length).toBeGreaterThan(0);
     expect(screen.getByText(/infrastructure is being set up/)).toBeInTheDocument();
@@ -62,14 +53,14 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should display network error message', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    render(renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
         errorMessage="Network timeout"
         errorType="network"
       />
-    );
+    ));
     
     expect(screen.getAllByText('Network Error').length).toBeGreaterThan(0);
     expect(screen.getByText(/check your internet connection/)).toBeInTheDocument();
@@ -77,14 +68,14 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should display unauthorized error message', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    render(renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
         errorMessage="Token expired"
         errorType="unauthorized"
       />
-    );
+    ));
     
     expect(screen.getAllByText('Access Denied').length).toBeGreaterThan(0);
     expect(screen.getByText(/session may have expired/)).toBeInTheDocument();
@@ -92,14 +83,14 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should display generic error message for unknown type', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    render(renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
         errorMessage="Some error"
         errorType="unknown"
       />
-    );
+    ));
     
     expect(screen.getAllByText('Something went wrong').length).toBeGreaterThan(0);
     expect(screen.getByText(/error occurred while connecting/)).toBeInTheDocument();
@@ -108,20 +99,20 @@ describe('InfrastructureErrorDialog', () => {
   it('should display error details', () => {
     const onClose = vi.fn();
     const errorMessage = 'Detailed error: Connection refused at port 443';
-    renderWithProvider(
+    render(renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
         errorMessage={errorMessage}
       />
-    );
+    ));
     
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
   it('should display error with status code when provided', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    render(renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
@@ -129,7 +120,7 @@ describe('InfrastructureErrorDialog', () => {
         errorType="infrastructure"
         statusCode={500}
       />
-    );
+    ));
     
     // Should show "Error 500: Internal server error"
     expect(screen.getByText('Error 500: Internal server error')).toBeInTheDocument();
@@ -137,13 +128,13 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should call onClose when OK button is clicked', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    render(renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
         errorMessage="Test error"
       />
-    );
+    ));
     
     const okButton = screen.getByRole('button', { name: /OK/i });
     fireEvent.click(okButton);
@@ -153,13 +144,13 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should have an OK button', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    render(renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
         errorMessage="Test error"
       />
-    );
+    ));
     
     const okButton = screen.getByRole('button', { name: /OK/i });
     expect(okButton).toBeInTheDocument();
@@ -167,13 +158,13 @@ describe('InfrastructureErrorDialog', () => {
 
   it('should default to unknown error type when not provided', () => {
     const onClose = vi.fn();
-    renderWithProvider(
+    render(renderWithProviders(
       <InfrastructureErrorDialog 
         open={true} 
         onClose={onClose} 
         errorMessage="Some error"
       />
-    );
+    ));
     
     expect(screen.getAllByText('Something went wrong').length).toBeGreaterThan(0);
   });

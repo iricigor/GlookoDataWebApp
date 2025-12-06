@@ -3,7 +3,7 @@
  * Provides i18next context for component testing
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import i18n from '../i18n';
