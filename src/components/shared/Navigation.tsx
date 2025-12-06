@@ -319,35 +319,32 @@ export function Navigation({
         <div className={styles.rightSection}>
           {isLoggedIn && userName ? (
             <>
-              {onThemeToggle && (
-                <Tooltip 
-                  content={
-                    syncStatus === 'syncing' 
-                      ? t('navigation.syncingSettings') 
-                      : isDarkMode 
-                        ? t('navigation.switchToLightMode') 
-                        : t('navigation.switchToDarkMode')
-                  }
-                  relationship="label"
-                >
-                  <Button
-                    appearance="subtle"
-                    icon={
-                      isDarkMode 
-                        ? <WeatherSunnyRegular className={syncStatus === 'syncing' ? styles.pulsingIcon : undefined} /> 
-                        : <WeatherMoonRegular className={syncStatus === 'syncing' ? styles.pulsingIcon : undefined} />
-                    }
-                    onClick={onThemeToggle}
-                    aria-label={
-                      syncStatus === 'syncing'
-                        ? t('navigation.syncingSettings')
-                        : isDarkMode 
-                          ? t('navigation.switchToLightMode') 
-                          : t('navigation.switchToDarkMode')
-                    }
-                  />
-                </Tooltip>
-              )}
+              {onThemeToggle && (() => {
+                // Determine theme button label based on sync status and theme mode
+                const themeButtonLabel = syncStatus === 'syncing'
+                  ? t('navigation.syncingSettings')
+                  : isDarkMode
+                    ? t('navigation.switchToLightMode')
+                    : t('navigation.switchToDarkMode');
+                
+                return (
+                  <Tooltip 
+                    content={themeButtonLabel}
+                    relationship="label"
+                  >
+                    <Button
+                      appearance="subtle"
+                      icon={
+                        isDarkMode 
+                          ? <WeatherSunnyRegular className={syncStatus === 'syncing' ? styles.pulsingIcon : undefined} /> 
+                          : <WeatherMoonRegular className={syncStatus === 'syncing' ? styles.pulsingIcon : undefined} />
+                      }
+                      onClick={onThemeToggle}
+                      aria-label={themeButtonLabel}
+                    />
+                  </Tooltip>
+                );
+              })()}
               <Tooltip 
                 content={t('navigation.switchToLanguage', { language: uiLanguage === 'en' ? t('common.german') : t('common.english') })} 
                 relationship="label"
