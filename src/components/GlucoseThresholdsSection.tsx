@@ -7,7 +7,6 @@ import {
   SpinButton,
   MessageBar,
   MessageBarBody,
-  Card,
   Divider,
   Title3,
 } from '@fluentui/react-components';
@@ -41,24 +40,23 @@ const useStyles = makeStyles({
     marginBottom: '16px',
     fontFamily: 'Segoe UI, sans-serif',
   },
-  thresholdCard: {
-    backgroundColor: tokens.colorNeutralBackground2,
-    ...shorthands.padding('20px'),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-  },
   thresholdContainer: {
     display: 'flex',
     flexDirection: 'column',
-    ...shorthands.gap('16px'),
+    ...shorthands.gap('12px'),
   },
   thresholdRow: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    ...shorthands.gap('16px'),
+    ...shorthands.gap('12px'),
+    '@media (max-width: 480px)': {
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      ...shorthands.gap('4px'),
+    },
   },
   thresholdLabel: {
-    minWidth: '100px',
+    minWidth: '80px',
     fontSize: tokens.fontSizeBase400,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
@@ -66,13 +64,16 @@ const useStyles = makeStyles({
   },
   spinButton: {
     width: '120px',
+    '@media (max-width: 480px)': {
+      width: '100%',
+    },
   },
   rangeText: {
     fontSize: tokens.fontSizeBase400,
     color: tokens.colorNeutralForeground3,
     fontFamily: 'Segoe UI, sans-serif',
-    marginTop: '16px',
-    paddingTop: '16px',
+    marginTop: '12px',
+    paddingTop: '12px',
     borderTopWidth: '1px',
     borderTopStyle: 'solid',
     borderTopColor: tokens.colorNeutralStroke2,
@@ -128,73 +129,71 @@ export function GlucoseThresholdsSection({
         Configure your blood glucose threshold values in {getUnitLabel(glucoseUnit)}. Values must be in ascending order.
       </Text>
 
-      <Card className={styles.thresholdCard}>
-        <div className={styles.thresholdContainer}>
-          <div className={styles.thresholdRow}>
-            <Label className={styles.thresholdLabel}>Very High</Label>
-            <SpinButton
-              value={convertGlucoseValue(thresholds.veryHigh, glucoseUnit)}
-              onChange={(_, data) => handleSpinButtonChange('veryHigh', data.value)}
-              min={min}
-              max={max}
-              step={step}
-              precision={precision}
-              className={styles.spinButton}
-              aria-label="Very high threshold"
-            />
-          </div>
-
-          <div className={styles.thresholdRow}>
-            <Label className={styles.thresholdLabel}>High</Label>
-            <SpinButton
-              value={convertGlucoseValue(thresholds.high, glucoseUnit)}
-              onChange={(_, data) => handleSpinButtonChange('high', data.value)}
-              min={min}
-              max={max}
-              step={step}
-              precision={precision}
-              className={styles.spinButton}
-              aria-label="High threshold"
-            />
-          </div>
-
-          <div className={styles.thresholdRow}>
-            <Label className={styles.thresholdLabel}>Low</Label>
-            <SpinButton
-              value={convertGlucoseValue(thresholds.low, glucoseUnit)}
-              onChange={(_, data) => handleSpinButtonChange('low', data.value)}
-              min={min}
-              max={max}
-              step={step}
-              precision={precision}
-              className={styles.spinButton}
-              aria-label="Low threshold"
-            />
-          </div>
-
-          <div className={styles.thresholdRow}>
-            <Label className={styles.thresholdLabel}>Very Low</Label>
-            <SpinButton
-              value={convertGlucoseValue(thresholds.veryLow, glucoseUnit)}
-              onChange={(_, data) => handleSpinButtonChange('veryLow', data.value)}
-              min={min}
-              max={max}
-              step={step}
-              precision={precision}
-              className={styles.spinButton}
-              aria-label="Very low threshold"
-            />
-          </div>
-
-          {isValid && (
-            <Text className={styles.rangeText}>
-              In Range: <span className={styles.rangeValue}>
-                {convertGlucoseValue(thresholds.low, glucoseUnit).toFixed(precision)}-{convertGlucoseValue(thresholds.high, glucoseUnit).toFixed(precision)} {getUnitLabel(glucoseUnit)}
-              </span>
-            </Text>
-          )}
+      <div className={styles.thresholdContainer}>
+        <div className={styles.thresholdRow}>
+          <Label className={styles.thresholdLabel}>Very High</Label>
+          <SpinButton
+            value={convertGlucoseValue(thresholds.veryHigh, glucoseUnit)}
+            onChange={(_, data) => handleSpinButtonChange('veryHigh', data.value)}
+            min={min}
+            max={max}
+            step={step}
+            precision={precision}
+            className={styles.spinButton}
+            aria-label="Very high threshold"
+          />
         </div>
-      </Card>
+
+        <div className={styles.thresholdRow}>
+          <Label className={styles.thresholdLabel}>High</Label>
+          <SpinButton
+            value={convertGlucoseValue(thresholds.high, glucoseUnit)}
+            onChange={(_, data) => handleSpinButtonChange('high', data.value)}
+            min={min}
+            max={max}
+            step={step}
+            precision={precision}
+            className={styles.spinButton}
+            aria-label="High threshold"
+          />
+        </div>
+
+        <div className={styles.thresholdRow}>
+          <Label className={styles.thresholdLabel}>Low</Label>
+          <SpinButton
+            value={convertGlucoseValue(thresholds.low, glucoseUnit)}
+            onChange={(_, data) => handleSpinButtonChange('low', data.value)}
+            min={min}
+            max={max}
+            step={step}
+            precision={precision}
+            className={styles.spinButton}
+            aria-label="Low threshold"
+          />
+        </div>
+
+        <div className={styles.thresholdRow}>
+          <Label className={styles.thresholdLabel}>Very Low</Label>
+          <SpinButton
+            value={convertGlucoseValue(thresholds.veryLow, glucoseUnit)}
+            onChange={(_, data) => handleSpinButtonChange('veryLow', data.value)}
+            min={min}
+            max={max}
+            step={step}
+            precision={precision}
+            className={styles.spinButton}
+            aria-label="Very low threshold"
+          />
+        </div>
+
+        {isValid && (
+          <Text className={styles.rangeText}>
+            In Range: <span className={styles.rangeValue}>
+              {convertGlucoseValue(thresholds.low, glucoseUnit).toFixed(precision)}-{convertGlucoseValue(thresholds.high, glucoseUnit).toFixed(precision)} {getUnitLabel(glucoseUnit)}
+            </span>
+          </Text>
+        )}
+      </div>
 
       {!isValid && validationError && (
         <MessageBar intent="error" className={styles.errorMessage}>

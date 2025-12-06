@@ -78,22 +78,24 @@ export function GlucoseSettingsTab({
         <Text className={styles.settingDescription}>
           Set the duration of insulin action in hours for IOB (Insulin On Board) calculations. This affects how long insulin is considered active in your system. Typical values range from 3 to 6 hours.
         </Text>
-        <Label htmlFor="insulin-duration-input">Duration (hours)</Label>
-        <Input
-          id="insulin-duration-input"
-          type="number"
-          value={insulinDuration.toString()}
-          onChange={(_, data) => {
-            const value = parseFloat(data.value);
-            if (!isNaN(value) && value > 0) {
-              onInsulinDurationChange(value);
-            }
-          }}
-          min={1}
-          max={12}
-          step={0.5}
-          style={{ maxWidth: '200px' }}
-        />
+        <div className={styles.insulinDurationRow}>
+          <Label htmlFor="insulin-duration-input">Duration (hours)</Label>
+          <Input
+            id="insulin-duration-input"
+            type="number"
+            value={insulinDuration.toString()}
+            onChange={(_, data) => {
+              const value = parseFloat(data.value);
+              if (!isNaN(value) && value > 0) {
+                onInsulinDurationChange(value);
+              }
+            }}
+            min={1}
+            max={12}
+            step={0.5}
+            className={styles.insulinDurationInput}
+          />
+        </div>
       </div>
     </>
   );

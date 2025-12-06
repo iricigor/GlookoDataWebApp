@@ -44,8 +44,28 @@ export const useStyles = makeStyles({
   tabList: {
     flexShrink: 0,
     width: '200px',
+    backgroundColor: tokens.colorNeutralBackground2,
+    ...shorthands.borderRadius(tokens.borderRadiusXLarge),
+    ...shorthands.padding('8px'),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
     '@media (max-width: 768px)': {
       width: '100%',
+    },
+    // Style the tabs within for better visual hierarchy
+    '& .fui-Tab': {
+      ...shorthands.borderRadius(tokens.borderRadiusMedium),
+      marginBottom: '4px',
+      '&:last-child': {
+        marginBottom: '0',
+      },
+    },
+    '& .fui-Tab[aria-selected="true"]': {
+      backgroundColor: tokens.colorBrandBackground,
+      color: tokens.colorNeutralForegroundOnBrand,
+      fontWeight: tokens.fontWeightSemibold,
+    },
+    '& .fui-Tab:hover:not([aria-selected="true"])': {
+      backgroundColor: tokens.colorNeutralBackground3,
     },
   },
   contentArea: {
@@ -85,6 +105,14 @@ export const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     marginBottom: '12px',
     display: 'block',
+  },
+  insulinDurationRow: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+  },
+  insulinDurationInput: {
+    width: '100px',
   },
   apiKeyContainer: {
     display: 'flex',
@@ -276,15 +304,5 @@ export const useStyles = makeStyles({
     lineHeight: tokens.lineHeightBase400,
     marginBottom: '0',
     display: 'block',
-  },
-  warningHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    ...shorthands.gap('8px'),
-  },
-  warningIcon: {
-    fontSize: tokens.fontSizeBase400,
-    color: tokens.colorPaletteYellowForeground1,
-    flexShrink: 0,
   },
 });

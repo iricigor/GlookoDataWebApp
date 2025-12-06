@@ -20,7 +20,6 @@ import {
   Tooltip,
 } from '@fluentui/react-components';
 import { 
-  WarningRegular, 
   InfoRegular, 
   CheckmarkRegular, 
   CheckmarkCircleRegular, 
@@ -468,12 +467,9 @@ export function AISettingsTab({
             {/* Important: Data Handling & Your Responsibility */}
             <AccordionItem value="datahandling">
               <AccordionHeader>
-                <div className={styles.warningHeader}>
-                  <WarningRegular className={styles.warningIcon} />
-                  <Text className={styles.accordionSummary}>
-                    <strong>Important: Data Handling & Your Responsibility</strong> — Your health data is sent to AI providers when using analysis features.
-                  </Text>
-                </div>
+                <Text className={styles.accordionSummary}>
+                  <strong>⚠️ Important: Data Handling & Your Responsibility</strong> — Your health data is sent to AI providers when using analysis features.
+                </Text>
               </AccordionHeader>
               <AccordionPanel>
                 <div className={styles.accordionContent}>
