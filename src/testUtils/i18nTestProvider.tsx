@@ -123,15 +123,25 @@ i18n
   });
 
 /**
- * Custom render function that wraps components with necessary providers for testing
- * @param ui - The component to render
- * @param options - Optional render options
+ * Render a React element wrapped with the configured i18n provider and Fluent UI theme for testing.
+ *
+ * Wraps the given element with the module's i18n instance and FluentProvider using `webLightTheme`, then calls
+ * `render` from @testing-library/react with any provided render options.
+ *
+ * @param ui - The React element to render
+ * @param options - Additional render options forwarded to @testing-library/react (the `wrapper` option is ignored)
  * @returns The render result from @testing-library/react
  */
 export function renderWithProviders(
   ui: ReactElement,
   options?: Omit<RenderOptions, 'wrapper'>
 ) {
+  /**
+   * Wraps children with the i18next provider and Fluent UI theme provider for tests.
+   *
+   * @param children - React nodes to be rendered inside the configured i18n and Fluent UI theme context.
+   * @returns A JSX element containing `children` nested within `I18nextProvider` (configured `i18n`) and `FluentProvider` (`webLightTheme`).
+   */
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <I18nextProvider i18n={i18n}>

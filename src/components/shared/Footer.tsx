@@ -18,6 +18,14 @@ const useStyles = makeStyles({
   },
 });
 
+/**
+ * Renders the application footer showing the localized version string.
+ *
+ * The displayed text uses the i18n key `footer.version` with the `version` placeholder
+ * set to the current full version from getVersionInfo().
+ *
+ * @returns A footer element containing the localized application version text.
+ */
 export function Footer() {
   const styles = useStyles();
   const { t } = useTranslation();

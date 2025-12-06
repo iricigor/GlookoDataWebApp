@@ -76,9 +76,11 @@ interface CookieConsentProps {
 }
 
 /**
- * Cookie consent banner component
- * 
- * Shows a dismissible banner at the bottom of the page explaining cookie usage
+ * Renders a bottom-aligned, dismissible cookie consent banner.
+ *
+ * Displays a brief message with a "Learn More" link and a primary action button that calls `onAccept` when clicked.
+ *
+ * @param onAccept - Callback invoked when the user accepts (dismisses) the banner
  */
 export function CookieConsent({ onAccept }: CookieConsentProps) {
   const styles = useStyles();

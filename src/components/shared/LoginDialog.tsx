@@ -42,6 +42,16 @@ interface LoginDialogProps {
   onLogin: () => Promise<void>;
 }
 
+/**
+ * Renders a login dialog with a trigger button, handling sign-in flow, loading state, and error display.
+ *
+ * The dialog presents translated UI text and a Microsoft-branded sign-in action. When the sign-in button
+ * is pressed the provided `onLogin` function is invoked; the component shows a loading indicator while
+ * the call is pending, closes the dialog on success, and displays a translated error message on failure.
+ *
+ * @param onLogin - Function invoked to perform the sign-in action; should return a Promise that resolves on successful login or rejects on failure.
+ * @returns The JSX element for the login dialog and its trigger button.
+ */
 export function LoginDialog({ onLogin }: LoginDialogProps) {
   const styles = useStyles();
   const { t } = useTranslation();

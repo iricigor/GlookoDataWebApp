@@ -126,6 +126,12 @@ interface HomeProps {
   onNavigate: (page: string) => void;
 }
 
+/**
+ * Renders the home page containing a header and a set of navigation cards.
+ *
+ * @param onNavigate - Callback invoked with the target page identifier when a navigation card is clicked.
+ * @returns The rendered home page element
+ */
 export function Home({ onNavigate }: HomeProps) {
   const styles = useStyles();
   const { t } = useTranslation();
