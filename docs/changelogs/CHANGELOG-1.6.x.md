@@ -30,6 +30,13 @@ Version 1.6 focuses on branding updates, UI improvements, and continued refineme
 ### Other
 
 <details>
+<summary>690 Fix scrollbar layout shift with scrollbar-gutter: stable</summary>
+
+[#690](../../pull/690) Fix scrollbar layout shift with scrollbar-gutter: stable
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>692 Fix hypoglycemia chart rendering issues</summary>
 
 [#692](../../pull/692) Fix hypoglycemia chart rendering issues
