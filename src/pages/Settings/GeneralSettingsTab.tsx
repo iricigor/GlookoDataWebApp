@@ -106,6 +106,7 @@ export function GeneralSettingsTab({
         >
           <Radio value="en" label="English" />
           <Radio value="de" label="Deutsch (German)" />
+          <Radio value="cs" label="Čeština (Czech)" />
         </RadioGroup>
       </div>
 
