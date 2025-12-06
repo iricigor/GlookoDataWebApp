@@ -81,6 +81,11 @@ export const useStyles = makeStyles({
       marginBottom: '0',
     },
   },
+  settingControl: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('8px'),
+  },
   sectionTitle: {
     fontFamily: 'Segoe UI, sans-serif',
     fontSize: tokens.fontSizeHero700,

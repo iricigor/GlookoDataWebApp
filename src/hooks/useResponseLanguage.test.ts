@@ -25,17 +25,20 @@ describe('useResponseLanguage', () => {
     expect(result.current.syncWithUILanguage).toBe(true);
   });
 
-  it('should update language to czech', () => {
+  it('should update language to czech and disable sync', () => {
     const { result } = renderHook(() => useResponseLanguage('en'));
+    
+    expect(result.current.syncWithUILanguage).toBe(true); // starts with sync enabled
     
     act(() => {
       result.current.setResponseLanguage('czech');
     });
     
     expect(result.current.responseLanguage).toBe('czech');
+    expect(result.current.syncWithUILanguage).toBe(false); // sync disabled after manual selection
   });
 
-  it('should update language to german', () => {
+  it('should update language to german and disable sync', () => {
     const { result } = renderHook(() => useResponseLanguage('en'));
     
     act(() => {
@@ -43,9 +46,10 @@ describe('useResponseLanguage', () => {
     });
     
     expect(result.current.responseLanguage).toBe('german');
+    expect(result.current.syncWithUILanguage).toBe(false);
   });
 
-  it('should update language to serbian', () => {
+  it('should update language to serbian and disable sync', () => {
     const { result } = renderHook(() => useResponseLanguage('en'));
     
     act(() => {
@@ -53,6 +57,7 @@ describe('useResponseLanguage', () => {
     });
     
     expect(result.current.responseLanguage).toBe('serbian');
+    expect(result.current.syncWithUILanguage).toBe(false);
   });
 
   it('should update language to english', () => {
@@ -65,7 +70,7 @@ describe('useResponseLanguage', () => {
     expect(result.current.responseLanguage).toBe('english');
   });
 
-  it('should persist language preference in cookie', () => {
+  it('should persist language preference in cookie and disable sync', () => {
     const { result } = renderHook(() => useResponseLanguage('en'));
     
     act(() => {
@@ -73,6 +78,7 @@ describe('useResponseLanguage', () => {
     });
     
     expect(document.cookie).toContain('glooko-response-language=czech');
+    expect(document.cookie).toContain('glooko-sync-ai-with-ui=false');
   });
 
   it('should read language from existing cookie', () => {
@@ -93,13 +99,13 @@ describe('useResponseLanguage', () => {
   it('should sync language when UI language changes and sync is enabled', () => {
     const { result, rerender } = renderHook(
       ({ uiLanguage }) => useResponseLanguage(uiLanguage),
-      { initialProps: { uiLanguage: 'en' as const } }
+      { initialProps: { uiLanguage: 'en' as 'en' | 'de' } }
     );
     
     expect(result.current.responseLanguage).toBe('english');
     
     // Change UI language to German
-    rerender({ uiLanguage: 'de' });
+    rerender({ uiLanguage: 'de' as 'en' | 'de' });
     
     expect(result.current.responseLanguage).toBe('german');
   });
@@ -107,7 +113,7 @@ describe('useResponseLanguage', () => {
   it('should not sync language when sync is disabled', () => {
     const { result, rerender } = renderHook(
       ({ uiLanguage }) => useResponseLanguage(uiLanguage),
-      { initialProps: { uiLanguage: 'en' as const } }
+      { initialProps: { uiLanguage: 'en' as 'en' | 'de' } }
     );
     
     // Disable sync
@@ -116,7 +122,7 @@ describe('useResponseLanguage', () => {
     });
     
     // Change UI language to German
-    rerender({ uiLanguage: 'de' });
+    rerender({ uiLanguage: 'de' as 'en' | 'de' });
     
     // Should still be English because sync is disabled
     expect(result.current.responseLanguage).toBe('english');

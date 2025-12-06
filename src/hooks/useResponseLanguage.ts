@@ -85,7 +85,19 @@ export function mapUILanguageToResponseLanguage(uiLanguage: UILanguage): Respons
  */
 export function useResponseLanguage(uiLanguage: UILanguage): UseResponseLanguageReturn {
   const [syncWithUILanguage, setSyncWithUILanguageState] = useState<boolean>(() => {
-    return getSyncFromCookie();
+    const savedSync = getSyncFromCookie();
+    const savedLanguage = getLanguageFromCookie();
+    
+    // If there's a saved language that doesn't match UI language, user likely disabled sync
+    if (savedLanguage) {
+      const expectedLanguage = mapUILanguageToResponseLanguage(uiLanguage);
+      if (savedLanguage !== expectedLanguage) {
+        // Language was manually set, so sync should be false
+        return false;
+      }
+    }
+    
+    return savedSync;
   });
 
   const [responseLanguage, setResponseLanguageState] = useState<ResponseLanguage>(() => {
@@ -118,7 +130,12 @@ export function useResponseLanguage(uiLanguage: UILanguage): UseResponseLanguage
   const setResponseLanguage = useCallback((language: ResponseLanguage) => {
     setResponseLanguageState(language);
     saveLanguageToCookie(language);
-  }, []);
+    // When user manually selects a language, disable sync
+    if (syncWithUILanguage) {
+      setSyncWithUILanguageState(false);
+      saveSyncToCookie(false);
+    }
+  }, [syncWithUILanguage]);
 
   const setSyncWithUILanguage = useCallback((sync: boolean) => {
     setSyncWithUILanguageState(sync);
