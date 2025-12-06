@@ -11,7 +11,6 @@ import {
   AccordionPanel,
 } from '@fluentui/react-components';
 import { generateMealTimingPrompt } from '../../../features/aiAnalysis/prompts';
-import { resolveResponseLanguage } from '../../../features/aiAnalysis/prompts/promptUtils';
 import { callAIApi, isRequestTooLargeError } from '../../../utils/api';
 import { 
   convertGlucoseReadingsToCSV, 
@@ -41,7 +40,6 @@ export function MealTimingTab({
   activeProvider,
   mealTimingDatasets,
   responseLanguage,
-  uiLanguage,
   glucoseUnit,
   perplexityApiKey,
   geminiApiKey,
@@ -91,10 +89,7 @@ export function MealTimingTab({
     const base64BasalData = base64Encode(basalCsv);
 
     // Generate the prompt with the base64 CSV data
-    // Resolve 'auto' to actual language based on UI language
-    const resolvedLanguage = resolveResponseLanguage(responseLanguage, uiLanguage);
-    
-    const prompt = generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, resolvedLanguage, glucoseUnit, activeProvider!);
+    const prompt = generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, activeProvider!);
 
     // Get the appropriate API key for the active provider
     const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
@@ -242,7 +237,7 @@ export function MealTimingTab({
                 const base64CgmData = base64Encode(cgmCsv);
                 const base64BolusData = base64Encode(bolusCsv);
                 const base64BasalData = base64Encode(basalCsv);
-                return generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, resolveResponseLanguage(responseLanguage, uiLanguage), glucoseUnit, activeProvider || undefined);
+                return generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, activeProvider || undefined);
               })()}
             </div>
           </AccordionPanel>

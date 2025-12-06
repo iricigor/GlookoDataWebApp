@@ -410,20 +410,18 @@ function App() {
             deepseekApiKey={deepseekApiKey}
             selectedProvider={selectedProvider}
             responseLanguage={responseLanguage}
-            uiLanguage={uiLanguage}
           />
         )
       case 'ai':
         return (
-          <AIAnalysis 
-            selectedFile={selectedFile} 
-            perplexityApiKey={perplexityApiKey} 
+          <AIAnalysis
+            selectedFile={selectedFile}
+            perplexityApiKey={perplexityApiKey}
             geminiApiKey={geminiApiKey}
             grokApiKey={grokApiKey}
             deepseekApiKey={deepseekApiKey}
             selectedProvider={selectedProvider}
             responseLanguage={responseLanguage}
-            uiLanguage={uiLanguage}
             glucoseUnit={glucoseUnit}
             existingAnalysis={currentAIAnalysis}
             onAnalysisComplete={handleAIAnalysisComplete}

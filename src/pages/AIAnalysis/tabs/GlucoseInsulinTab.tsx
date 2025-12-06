@@ -18,7 +18,6 @@ import {
 } from '@fluentui/react-components';
 import { TableContainer } from '../../../components/TableContainer';
 import { generateGlucoseInsulinPrompt } from '../../../features/aiAnalysis/prompts';
-import { resolveResponseLanguage } from '../../../features/aiAnalysis/prompts/promptUtils';
 import { callAIApi } from '../../../utils/api';
 import { convertDailyReportsToCSV, calculatePercentage } from '../../../utils/data';
 import { base64Encode } from '../../../utils/formatting';
@@ -75,7 +74,6 @@ export function GlucoseInsulinTab({
   activeProvider,
   combinedDataset,
   responseLanguage,
-  uiLanguage,
   glucoseUnit,
   perplexityApiKey,
   geminiApiKey,
@@ -130,11 +128,8 @@ export function GlucoseInsulinTab({
       // Base64 encode the CSV data
       const base64CsvData = base64Encode(csvData);
 
-      // Resolve 'auto' to actual language based on UI language
-      const resolvedLanguage = resolveResponseLanguage(responseLanguage, uiLanguage);
-
       // Generate the prompt with the base64 CSV data
-      const prompt = generateGlucoseInsulinPrompt(base64CsvData, resolvedLanguage, glucoseUnit, activeProvider);
+      const prompt = generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, activeProvider);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
@@ -212,7 +207,7 @@ export function GlucoseInsulinTab({
               {(() => {
                 const csvData = convertDailyReportsToCSV(combinedDataset);
                 const base64CsvData = base64Encode(csvData);
-                return generateGlucoseInsulinPrompt(base64CsvData, resolveResponseLanguage(responseLanguage, uiLanguage), glucoseUnit, activeProvider || undefined);
+                return generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, activeProvider || undefined);
               })()}
             </div>
           </AccordionPanel>
