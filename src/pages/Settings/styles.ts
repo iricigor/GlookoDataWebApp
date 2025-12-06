@@ -86,6 +86,14 @@ export const useStyles = makeStyles({
     marginBottom: '12px',
     display: 'block',
   },
+  insulinDurationRow: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+  },
+  insulinDurationInput: {
+    width: '100px',
+  },
   apiKeyContainer: {
     display: 'flex',
     flexDirection: 'column',
