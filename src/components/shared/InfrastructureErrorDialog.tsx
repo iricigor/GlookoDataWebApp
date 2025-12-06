@@ -83,7 +83,14 @@ interface InfrastructureErrorDialogProps {
 }
 
 /**
- * Dialog component that displays infrastructure or access error messages
+ * Renders a modal dialog that presents infrastructure, network, or access error information.
+ *
+ * @param open - Whether the dialog is visible
+ * @param onClose - Callback invoked when the dialog is closed
+ * @param errorMessage - Human-readable error message to display in the dialog
+ * @param errorType - One of `'infrastructure' | 'network' | 'unauthorized' | 'unknown'`; selects the title and description shown
+ * @param statusCode - Optional HTTP status code to include with the error details
+ * @returns The rendered dialog element
  */
 export function InfrastructureErrorDialog({ 
   open, 

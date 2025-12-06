@@ -106,8 +106,13 @@ interface WelcomeDialogProps {
 }
 
 /**
- * Dialog component that welcomes first-time users to the app
- * and explains cloud settings storage
+ * Display a welcome dialog that explains cloud settings storage and prompts the user to save or cancel.
+ *
+ * @param open - Whether the dialog is visible.
+ * @param onAccept - Callback invoked when the user accepts and chooses to save settings.
+ * @param onCancel - Callback invoked when the user cancels the dialog.
+ * @param userName - Optional user name to personalize the greeting; if not provided a default greeting is used.
+ * @returns The React element for the welcome dialog.
  */
 export function WelcomeDialog({ open, onAccept, onCancel, userName }: WelcomeDialogProps) {
   const styles = useStyles();

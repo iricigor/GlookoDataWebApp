@@ -42,6 +42,14 @@ import { extractZipMetadata } from './features/dataUpload/utils'
 // Page navigation order for swipe gestures
 const PAGE_ORDER = ['home', 'upload', 'reports', 'ai', 'settings'] as const
 
+/**
+ * Main application component that renders the app shell and manages global state, routing, and user settings.
+ *
+ * Responsible for page navigation and rendering, theme and UI settings, file upload and selection state, AI analysis results,
+ * toast notifications, cookie consent, demo data loading, and cloud settings sync for authenticated users.
+ *
+ * @returns The root React element for the application UI.
+ */
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const [isLoadingDemoData, setIsLoadingDemoData] = useState(true)
