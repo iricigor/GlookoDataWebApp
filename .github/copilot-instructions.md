@@ -39,36 +39,27 @@ GlookoDataWebApp is a modern web application for importing, visualizing, and ana
 
 **All generated code MUST strictly adhere to English.**
 
-This is a **non-negotiable requirement** for all code contributions, whether written by humans or AI assistants.
+This is a **non-negotiable requirement** for all code contributions.
 
 ### What Must Be in English
 
 1. **Programming Identifiers** (100% English required):
-   - Variable names: `userName`, `fileList`, `isLoading` ✅
-   - Function names: `handleUpload`, `processData`, `calculateAverage` ✅
-   - Class names: `DataProcessor`, `FileManager`, `AnalysisEngine` ✅
-   - Interface names: `UserData`, `ReportConfig`, `ChartOptions` ✅
-   - Type names: `GlucoseReading`, `InsulinDose`, `MealEntry` ✅
-   - Property names: `firstName`, `lastName`, `dateOfBirth` ✅
-   - Constants: `MAX_FILE_SIZE`, `DEFAULT_TIMEOUT`, `API_ENDPOINT` ✅
-   - Enum values: `Status.Active`, `FileType.ZIP`, `Theme.Dark` ✅
+   - Variable names: `userName`, `isLoading`
+   - Function names: `handleUpload`, `processData`
+   - Class/Interface names: `UserData`, `DataProcessor`
+   - Constants: `MAX_FILE_SIZE`, `API_ENDPOINT`
 
 2. **Code Comments** (English required):
-   - Single-line comments: `// Calculate average glucose level`
-   - Multi-line comments: `/* Processing algorithm explanation */`
-   - TSDoc/JSDoc comments: `@param userName - The user's display name`
-   - TODO comments: `// TODO: Add error handling for edge cases`
+   - Single-line: `// Calculate average glucose level`
+   - TSDoc/JSDoc: `@param userName - The user's display name`
 
 3. **File and Folder Names** (English required):
-   - Component files: `FileUploadZone.tsx`, `NavigationBar.tsx` ✅
-   - Utility files: `dateHelpers.ts`, `dataProcessor.ts` ✅
-   - Test files: `helpers.test.ts`, `DataUpload.test.tsx` ✅
-   - Directories: `components/`, `hooks/`, `utils/` ✅
+   - Files: `FileUploadZone.tsx`, `helpers.test.ts`
+   - Directories: `components/`, `hooks/`, `utils/`
 
 4. **Console Output** (English required):
-   - Debug messages: `console.log('Processing file:', fileName)`
-   - Error messages: `console.error('Failed to load data')`
-   - Warning messages: `console.warn('Deprecated function used')`
+   - `console.log('Processing file:', fileName)`
+   - `console.error('Failed to load data')`
 
 ### Examples: Correct vs. Incorrect
 
@@ -81,22 +72,14 @@ interface UserProfile {
 }
 
 function calculateAverageGlucose(readings: GlucoseReading[]): number {
-  // Calculate the average glucose level from all readings
   const total = readings.reduce((sum, reading) => sum + reading.value, 0);
   return total / readings.length;
 }
 
-// ❌ INCORRECT - Mixed languages or non-English identifiers
+// ❌ INCORRECT - Non-English identifiers
 interface BenutzerProfil {  // German - NOT ALLOWED
   vorname: string;          // German - NOT ALLOWED
   nachname: string;         // German - NOT ALLOWED
-  geburtsdatum: Date;       // German - NOT ALLOWED
-}
-
-function рассчитатьСреднее(данные: any[]): number {  // Russian - NOT ALLOWED
-  // Calculate average - mixing languages in comments
-  const сумма = данные.reduce((s, d) => s + d.значение, 0);
-  return сумма / данные.length;
 }
 ```
 
@@ -334,24 +317,6 @@ public/
 ✅ **Adding keys to ALL supported languages**
 ```json
 // Added to both en/translation.json AND de/translation.json
-```
-
-❌ **Using English variable names in translation keys**
-```json
-{
-  "myFeature": {
-    "BeschreibungsText": "Description text"  // Mixed language in key name
-  }
-}
-```
-
-✅ **Using English for ALL translation keys**
-```json
-{
-  "myFeature": {
-    "descriptionText": "Description text"  // Key in English, value translated
-  }
-}
 ```
 
 ### Resources
