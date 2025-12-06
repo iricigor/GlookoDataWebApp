@@ -520,7 +520,7 @@ export const useBGOverviewStyles = makeStyles({
     '@media (max-width: 767px)': {
       maxWidth: 'none',
       minWidth: '0',
-      fontSize: '10px',
+      fontSize: tokens.fontSizeBase100,
     },
   },
   chartDescription: {
