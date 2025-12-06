@@ -253,12 +253,14 @@ export function Navigation({
     setUILanguage(uiLanguage === 'en' ? 'de' : 'en');
   };
 
-  // Compute theme button label based on sync status and theme mode
+  // Compute theme button label and icon class based on sync status and theme mode
   const themeButtonLabel = syncStatus === 'syncing'
     ? t('navigation.syncingSettings')
     : isDarkMode
       ? t('navigation.switchToLightMode')
       : t('navigation.switchToDarkMode');
+  
+  const themeIconClass = syncStatus === 'syncing' ? styles.pulsingIcon : undefined;
 
   const navItems = [
     { page: 'home', label: t('navigation.home'), icon: <HomeRegular /> },
@@ -333,11 +335,7 @@ export function Navigation({
                 >
                   <Button
                     appearance="subtle"
-                    icon={
-                      isDarkMode 
-                        ? <WeatherSunnyRegular className={syncStatus === 'syncing' ? styles.pulsingIcon : undefined} /> 
-                        : <WeatherMoonRegular className={syncStatus === 'syncing' ? styles.pulsingIcon : undefined} />
-                    }
+                    icon={isDarkMode ? <WeatherSunnyRegular className={themeIconClass} /> : <WeatherMoonRegular className={themeIconClass} />}
                     onClick={onThemeToggle}
                     aria-label={themeButtonLabel}
                   />
