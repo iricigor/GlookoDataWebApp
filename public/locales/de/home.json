@@ -1,0 +1,14 @@
+{
+  "home": {
+    "title": "Glooko Insights",
+    "subtitle": "Eine Web-App zum Importieren, Visualisieren und Analysieren von Diabetes-Daten, die von der Glooko-Plattform exportiert wurden",
+    "dataUploadTitle": "Daten hochladen",
+    "dataUploadDescription": "Laden Sie Ihre Glooko-Exportdateien mit Drag-and-Drop-Unterstützung hoch und verwalten Sie diese",
+    "comprehensiveReportsTitle": "Umfassende Berichte",
+    "comprehensiveReportsDescription": "Sehen Sie detaillierte Analysen einschließlich Zeit im Zielbereich, Muster und Trends",
+    "aiAnalysisTitle": "KI-Analyse",
+    "aiAnalysisDescription": "Erhalten Sie intelligente Einblicke und Empfehlungen durch fortschrittliche KI-Algorithmen",
+    "settingsTitle": "Einstellungen",
+    "settingsDescription": "Ihre Daten werden lokal mit konfigurierbaren Persistenzoptionen gespeichert"
+  }
+}

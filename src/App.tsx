@@ -53,7 +53,7 @@ const PAGE_ORDER = ['home', 'upload', 'reports', 'ai', 'settings'] as const
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
   const [isLoadingDemoData, setIsLoadingDemoData] = useState(true)
-  const { t } = useTranslation()
+  const { t } = useTranslation('notifications')
   
   // Authentication state
   const { isLoggedIn, idToken, userEmail } = useAuth()

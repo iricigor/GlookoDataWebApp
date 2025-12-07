@@ -54,7 +54,7 @@ interface LoginDialogProps {
  */
 export function LoginDialog({ onLogin }: LoginDialogProps) {
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t } = useTranslation('dialogs');
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

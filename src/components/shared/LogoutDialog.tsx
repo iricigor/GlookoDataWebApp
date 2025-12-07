@@ -117,7 +117,7 @@ export function LogoutDialog({
 }: LogoutDialogProps) {
   const styles = useStyles();
   const proBadgeStyles = useProUserBadgeStyles();
-  const { t } = useTranslation();
+  const { t } = useTranslation('dialogs');
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 

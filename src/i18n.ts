@@ -29,9 +29,17 @@ i18n
       // Path to load translation files from public folder
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
-    // Default namespace
-    defaultNS: 'translation',
-    ns: ['translation'],
+    // Default namespace - commonly used translations
+    defaultNS: 'common',
+    // All available namespaces
+    ns: [
+      'common',        // Shared UI elements, buttons, actions
+      'navigation',    // Navigation menu
+      'home',          // Home page
+      'dataUpload',    // Data upload page and features
+      'dialogs',       // All dialog components
+      'notifications', // Toast and notification messages
+    ],
   });
 
 export default i18n;

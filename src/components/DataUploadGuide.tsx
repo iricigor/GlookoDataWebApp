@@ -154,7 +154,7 @@ const useStyles = makeStyles({
  */
 export function DataUploadGuide() {
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t } = useTranslation('dataUpload');
   
   // Initialize visibility from localStorage
   const [isVisible, setIsVisible] = useState(() => {

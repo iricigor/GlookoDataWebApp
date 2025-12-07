@@ -1,0 +1,14 @@
+{
+  "home": {
+    "title": "Glooko Insights",
+    "subtitle": "A web app for importing, visualizing, and analyzing diabetes data exported from the Glooko platform",
+    "dataUploadTitle": "Data Upload",
+    "dataUploadDescription": "Upload and manage your Glooko export files with drag-and-drop support",
+    "comprehensiveReportsTitle": "Comprehensive Reports",
+    "comprehensiveReportsDescription": "View detailed analytics including time-in-range, patterns, and trends",
+    "aiAnalysisTitle": "AI Analysis",
+    "aiAnalysisDescription": "Get intelligent insights and recommendations using advanced AI algorithms",
+    "settingsTitle": "Settings",
+    "settingsDescription": "Your data is stored locally with configurable persistence options"
+  }
+}

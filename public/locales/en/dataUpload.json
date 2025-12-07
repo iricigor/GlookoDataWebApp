@@ -1,0 +1,95 @@
+{
+  "dataUpload": {
+    "title": "Data Upload",
+    "description": "Upload and manage your Glooko export files with drag-and-drop support",
+    "uploadZone": {
+      "dropFilesPrompt": "Drop ZIP files here or click to browse",
+      "uploadDescription": "Upload one or multiple ZIP files from Glooko export",
+      "selectFilesButton": "Select Files"
+    },
+    "guide": {
+      "title": "Getting Started Guide",
+      "show": "Show",
+      "hide": "Hide",
+      "showAriaLabel": "Show getting started guide",
+      "hideAriaLabel": "Hide guide",
+      "demoData": {
+        "title": "Try Demo Data",
+        "newHere": "New here?",
+        "description1": "Start by exploring the app with our demo datasets. A pre-loaded demo file is already available in the file list below.",
+        "description2": "You can also load additional demo datasets by clicking the",
+        "loadDemoDataButton": "Load Demo Data",
+        "description3": "button in the file list header. These datasets are inspired by real-world Type 1 Diabetes data patterns.",
+        "description4": "For attribution and more information about the demo data source, visit the",
+        "settingsAboutLink": "Settings → About",
+        "description5": "page."
+      },
+      "privacy": {
+        "title": "Your Privacy is Protected",
+        "dataStaysLocal": "Your data never leaves your device.",
+        "description1": "All graph processing and analysis happens entirely in your browser. We do not upload your files to any server.",
+        "description2": "Files are maintained only in your browser's memory while you use the app. When you close the browser tab, your data is gone—unless you explicitly save it.",
+        "description3": "For AI-powered analysis, data handling is different. See the",
+        "aiAnalysisSection": "AI Analysis",
+        "description4": "section below for details."
+      },
+      "upload": {
+        "title": "Upload Your Data",
+        "dragAndDrop": "Drag and drop",
+        "description1": "your Glooko export ZIP files into the upload zone above, or click to browse and select files from your computer.",
+        "description2": "Once uploaded, select a file from the list to view it in the",
+        "comprehensiveReports": "Comprehensive Reports",
+        "description3": "page—including BG Overview, Daily BG charts, and Hypoglycemia analysis.",
+        "description4": "You can also export your data to Excel format (XLSX) using the download button next to each file."
+      },
+      "aiAnalysis": {
+        "title": "AI Analysis (Data Leaves Your Device)",
+        "important": "Important:",
+        "description1": "When you use AI-powered analysis features, your health data is sent to the selected AI provider (Perplexity, Grok, DeepSeek, or Google Gemini).",
+        "description2": "The data is sent",
+        "withoutPII": "without personally identifiable information",
+        "description3": "(such as your name or email), but the AI provider may associate your API key with the health data you send.",
+        "description4": "For detailed information about AI data handling, security best practices, and privacy policies, visit the",
+        "settingsAILink": "Settings → AI Settings",
+        "description5": "page."
+      }
+    },
+    "fileList": {
+      "title": "Uploaded Files",
+      "titleWithCount": "Uploaded Files ({{count}})",
+      "loadingDemoData": "Loading demo data...",
+      "noFiles": "No files uploaded yet. Upload ZIP files to get started.",
+      "loadDemoDataButton": "Load Demo Data",
+      "loadingButton": "Loading...",
+      "clearAllButton": "Clear All",
+      "table": {
+        "selectColumn": "Select",
+        "fileNameColumn": "File Name",
+        "uploadTimeColumn": "Upload Time",
+        "fileSizeColumn": "File Size",
+        "actionsColumn": "Actions",
+        "selectFileAriaLabel": "Select {{fileName}}",
+        "collapseDetailsAriaLabel": "Collapse details",
+        "expandDetailsAriaLabel": "Expand details",
+        "validBadge": "Valid",
+        "invalidBadge": "Invalid",
+        "exportToXlsxAriaLabel": "Export {{fileName}} to XLSX",
+        "exportToXlsxTitle": "Export to XLSX",
+        "removeFileAriaLabel": "Remove {{fileName}}"
+      },
+      "details": {
+        "metadataHeader": "Metadata",
+        "dataSetsHeader": "Data Sets ({{count}})",
+        "mergedFromFiles": "merged from {{count}} files",
+        "row": "row",
+        "rows": "rows",
+        "errorPrefix": "Error: {{error}}",
+        "invalidZipFile": "Invalid ZIP file"
+      },
+      "export": {
+        "copyAriaLabel": "Copy uploaded files table as {{format}}",
+        "downloadAriaLabel": "Download uploaded files table as {{format}}"
+      }
+    }
+  }
+}

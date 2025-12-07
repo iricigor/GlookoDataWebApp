@@ -1,0 +1,18 @@
+{
+  "navigation": {
+    "home": "Home",
+    "dataUpload": "Data Upload",
+    "reports": "Reports",
+    "aiAnalysis": "AI Analysis",
+    "settings": "Settings",
+    "navigationMenu": "Navigation menu",
+    "login": "Login",
+    "logout": "Logout",
+    "switchToLightMode": "Switch to light mode",
+    "switchToDarkMode": "Switch to dark mode",
+    "switchToLanguage": "Switch to {{language}}",
+    "currentLanguage": "Current language: {{language}}. Click to switch.",
+    "settingsLabel": "Settings",
+    "syncingSettings": "Syncing settings..."
+  }
+}

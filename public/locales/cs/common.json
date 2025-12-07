@@ -1,0 +1,20 @@
+{
+  "common": {
+    "cancel": "Zrušit",
+    "ok": "OK",
+    "save": "Uložit",
+    "delete": "Smazat",
+    "edit": "Upravit",
+    "close": "Zavřít",
+    "english": "Angličtina",
+    "german": "Němčina",
+    "czech": "Čeština",
+    "loading": "Načítání..."
+  },
+  "appTitle": "Glooko Data Web App",
+  "brandName": "Glooko Insights",
+  "brandAltText": "Logo Glooko Insights",
+  "footer": {
+    "version": "Verze {{version}}"
+  }
+}

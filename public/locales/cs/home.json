@@ -1,0 +1,14 @@
+{
+  "home": {
+    "title": "Glooko Insights",
+    "subtitle": "Webová aplikace pro import, vizualizaci a analýzu diabetických dat exportovaných z platformy Glooko",
+    "dataUploadTitle": "Nahrání dat",
+    "dataUploadDescription": "Nahrajte a spravujte své exportní soubory Glooko s podporou přetažení",
+    "comprehensiveReportsTitle": "Komplexní zprávy",
+    "comprehensiveReportsDescription": "Zobrazit podrobné analýzy včetně času v cílovém rozsahu, vzorců a trendů",
+    "aiAnalysisTitle": "AI analýza",
+    "aiAnalysisDescription": "Získejte inteligentní poznatky a doporučení pomocí pokročilých AI algoritmů",
+    "settingsTitle": "Nastavení",
+    "settingsDescription": "Vaše data jsou uložena lokálně s konfigurovatelnými možnostmi perzistence"
+  }
+}

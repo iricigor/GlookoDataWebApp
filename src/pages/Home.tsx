@@ -134,7 +134,7 @@ interface HomeProps {
  */
 export function Home({ onNavigate }: HomeProps) {
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t } = useTranslation('home');
 
   const navigationItems = [
     {

@@ -54,7 +54,7 @@ interface DataUploadProps {
 
 export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll, selectedFileId, onSelectFile, exportFormat, isLoadingDemoData }: DataUploadProps) {
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t } = useTranslation('dataUpload');
 
   const handleFilesSelected = async (files: File[]) => {
     // Process files and extract ZIP metadata

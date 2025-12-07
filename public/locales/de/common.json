@@ -1,0 +1,20 @@
+{
+  "common": {
+    "cancel": "Abbrechen",
+    "ok": "OK",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "english": "Englisch",
+    "german": "Deutsch",
+    "czech": "Tschechisch",
+    "loading": "Laden..."
+  },
+  "appTitle": "Glooko Daten Web App",
+  "brandName": "Glooko Insights",
+  "brandAltText": "Glooko Insights Logo",
+  "footer": {
+    "version": "Version {{version}}"
+  }
+}
