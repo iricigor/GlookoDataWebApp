@@ -152,9 +152,9 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
   const yAxisMax = glucoseUnit === 'mg/dL' ? 360 : 20;
   const unitLabel = getUnitLabel(glucoseUnit);
 
-  // Responsive margins - minimal on mobile (2px right margin, negative left to expand graph towards label)
+  // Responsive margins - minimal on mobile (2px right, -5px left to extend graph while keeping label visible)
   const chartMargin = isMobile 
-    ? { top: 10, right: 2, left: -15, bottom: 0 }
+    ? { top: 10, right: 2, left: -5, bottom: 0 }
     : { top: 10, right: 30, left: 0, bottom: 0 };
 
   // Custom tooltip
@@ -219,7 +219,7 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
             
             <YAxis 
               domain={[0, yAxisMax]}
-              label={{ value: `Glucose (${unitLabel})`, angle: -90, position: 'insideLeft', dx: isMobile ? 8 : 10, style: { fontSize: tokens.fontSizeBase200 } }}
+              label={{ value: `Glucose (${unitLabel})`, angle: -90, position: 'insideLeft', dx: isMobile ? 0 : 10, style: { fontSize: tokens.fontSizeBase200 } }}
               stroke={tokens.colorNeutralForeground2}
               style={{ fontSize: tokens.fontSizeBase200 }}
             />
