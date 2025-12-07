@@ -9,25 +9,25 @@
     "english": "English",
     "german": "German",
     "czech": "Czech",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "glucoseThresholds": {
+      "title": "Blood Glucose Thresholds",
+      "description": "Configure your blood glucose threshold values in {{unit}}. Values must be in ascending order.",
+      "veryHigh": "Very High",
+      "high": "High",
+      "low": "Low",
+      "veryLow": "Very Low",
+      "inRange": "In Range:",
+      "veryHighAriaLabel": "Very high threshold",
+      "highAriaLabel": "High threshold",
+      "lowAriaLabel": "Low threshold",
+      "veryLowAriaLabel": "Very low threshold"
+    }
   },
   "appTitle": "Glooko Data Web App",
   "brandName": "Glooko Insights",
   "brandAltText": "Glooko Insights Logo",
   "footer": {
     "version": "Version {{version}}"
-  },
-  "glucoseThresholds": {
-    "title": "Blood Glucose Thresholds",
-    "description": "Configure your blood glucose threshold values in {{unit}}. Values must be in ascending order.",
-    "veryHigh": "Very High",
-    "high": "High",
-    "low": "Low",
-    "veryLow": "Very Low",
-    "inRange": "In Range:",
-    "veryHighAriaLabel": "Very high threshold",
-    "highAriaLabel": "High threshold",
-    "lowAriaLabel": "Low threshold",
-    "veryLowAriaLabel": "Very low threshold"
   }
 }

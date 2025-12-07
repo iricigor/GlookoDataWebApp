@@ -123,17 +123,17 @@ export function GlucoseThresholdsSection({
   return (
     <div className={styles.settingSection}>
       <div className={styles.sectionHeader}>
-        <Title3 className={styles.sectionTitle}>{t('glucoseThresholds.title')}</Title3>
+        <Title3 className={styles.sectionTitle}>{t('common.glucoseThresholds.title')}</Title3>
       </div>
       <Divider className={styles.divider} />
       
       <Text className={styles.settingDescription}>
-        {t('glucoseThresholds.description', { unit: getUnitLabel(glucoseUnit) })}
+        {t('common.glucoseThresholds.description', { unit: getUnitLabel(glucoseUnit) })}
       </Text>
 
       <div className={styles.thresholdContainer}>
         <div className={styles.thresholdRow}>
-          <Label className={styles.thresholdLabel}>{t('glucoseThresholds.veryHigh')}</Label>
+          <Label className={styles.thresholdLabel}>{t('common.glucoseThresholds.veryHigh')}</Label>
           <SpinButton
             value={convertGlucoseValue(thresholds.veryHigh, glucoseUnit)}
             onChange={(_, data) => handleSpinButtonChange('veryHigh', data.value)}
@@ -142,12 +142,12 @@ export function GlucoseThresholdsSection({
             step={step}
             precision={precision}
             className={styles.spinButton}
-            aria-label={t('glucoseThresholds.veryHighAriaLabel')}
+            aria-label={t('common.glucoseThresholds.veryHighAriaLabel')}
           />
         </div>
 
         <div className={styles.thresholdRow}>
-          <Label className={styles.thresholdLabel}>{t('glucoseThresholds.high')}</Label>
+          <Label className={styles.thresholdLabel}>{t('common.glucoseThresholds.high')}</Label>
           <SpinButton
             value={convertGlucoseValue(thresholds.high, glucoseUnit)}
             onChange={(_, data) => handleSpinButtonChange('high', data.value)}
@@ -156,12 +156,12 @@ export function GlucoseThresholdsSection({
             step={step}
             precision={precision}
             className={styles.spinButton}
-            aria-label={t('glucoseThresholds.highAriaLabel')}
+            aria-label={t('common.glucoseThresholds.highAriaLabel')}
           />
         </div>
 
         <div className={styles.thresholdRow}>
-          <Label className={styles.thresholdLabel}>{t('glucoseThresholds.low')}</Label>
+          <Label className={styles.thresholdLabel}>{t('common.glucoseThresholds.low')}</Label>
           <SpinButton
             value={convertGlucoseValue(thresholds.low, glucoseUnit)}
             onChange={(_, data) => handleSpinButtonChange('low', data.value)}
@@ -170,12 +170,12 @@ export function GlucoseThresholdsSection({
             step={step}
             precision={precision}
             className={styles.spinButton}
-            aria-label={t('glucoseThresholds.lowAriaLabel')}
+            aria-label={t('common.glucoseThresholds.lowAriaLabel')}
           />
         </div>
 
         <div className={styles.thresholdRow}>
-          <Label className={styles.thresholdLabel}>{t('glucoseThresholds.veryLow')}</Label>
+          <Label className={styles.thresholdLabel}>{t('common.glucoseThresholds.veryLow')}</Label>
           <SpinButton
             value={convertGlucoseValue(thresholds.veryLow, glucoseUnit)}
             onChange={(_, data) => handleSpinButtonChange('veryLow', data.value)}
@@ -184,13 +184,13 @@ export function GlucoseThresholdsSection({
             step={step}
             precision={precision}
             className={styles.spinButton}
-            aria-label={t('glucoseThresholds.veryLowAriaLabel')}
+            aria-label={t('common.glucoseThresholds.veryLowAriaLabel')}
           />
         </div>
 
         {isValid && (
           <Text className={styles.rangeText}>
-            {t('glucoseThresholds.inRange')} <span className={styles.rangeValue}>
+            {t('common.glucoseThresholds.inRange')} <span className={styles.rangeValue}>
               {convertGlucoseValue(thresholds.low, glucoseUnit).toFixed(precision)}-{convertGlucoseValue(thresholds.high, glucoseUnit).toFixed(precision)} {getUnitLabel(glucoseUnit)}
             </span>
           </Text>
