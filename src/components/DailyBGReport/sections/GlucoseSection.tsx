@@ -177,59 +177,57 @@ export function GlucoseSection({
       {/* BG Chart */}
       <div className={styles.chartCardInnerContent}>
         <div className={styles.controlsRow}>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginLeft: 'auto' }}>
-            <div className={styles.colorSchemeContainer}>
-              <Text style={{ 
-                fontSize: tokens.fontSizeBase300,
-                fontFamily: tokens.fontFamilyBase,
-                color: tokens.colorNeutralForeground2,
-              }}>
-                Color Scheme:
-              </Text>
-              <Dropdown
-                value={COLOR_SCHEME_DESCRIPTORS[colorScheme].name}
-                selectedOptions={[colorScheme]}
-                onOptionSelect={(_, data) => setColorScheme(data.optionValue as BGColorScheme)}
-                className={styles.colorSchemeDropdown}
-                size="small"
-                positioning="below-start"
-                inlinePopup
-              >
-                <Option value="monochrome">{COLOR_SCHEME_DESCRIPTORS.monochrome.name}</Option>
-                <Option value="basic">{COLOR_SCHEME_DESCRIPTORS.basic.name}</Option>
-                <Option value="hsv">{COLOR_SCHEME_DESCRIPTORS.hsv.name}</Option>
-                <Option value="clinical">{COLOR_SCHEME_DESCRIPTORS.clinical.name}</Option>
-              </Dropdown>
-            </div>
-            <div className={styles.maxValueContainer}>
-              <TabList
-                selectedValue={
-                  glucoseUnit === 'mg/dL'
-                    ? (maxGlucose === 288 ? '288' : '396')
-                    : (maxGlucose === 16.0 ? '16.0' : '22.0')
+          <div className={styles.colorSchemeContainer}>
+            <Text style={{ 
+              fontSize: tokens.fontSizeBase300,
+              fontFamily: tokens.fontFamilyBase,
+              color: tokens.colorNeutralForeground2,
+            }}>
+              Color Scheme:
+            </Text>
+            <Dropdown
+              value={COLOR_SCHEME_DESCRIPTORS[colorScheme].name}
+              selectedOptions={[colorScheme]}
+              onOptionSelect={(_, data) => setColorScheme(data.optionValue as BGColorScheme)}
+              className={styles.colorSchemeDropdown}
+              size="small"
+              positioning="below-start"
+              inlinePopup
+            >
+              <Option value="monochrome">{COLOR_SCHEME_DESCRIPTORS.monochrome.name}</Option>
+              <Option value="basic">{COLOR_SCHEME_DESCRIPTORS.basic.name}</Option>
+              <Option value="hsv">{COLOR_SCHEME_DESCRIPTORS.hsv.name}</Option>
+              <Option value="clinical">{COLOR_SCHEME_DESCRIPTORS.clinical.name}</Option>
+            </Dropdown>
+          </div>
+          <div className={styles.maxValueContainer}>
+            <TabList
+              selectedValue={
+                glucoseUnit === 'mg/dL'
+                  ? (maxGlucose === 288 ? '288' : '396')
+                  : (maxGlucose === 16.0 ? '16.0' : '22.0')
+              }
+              onTabSelect={(_, data) => {
+                if (glucoseUnit === 'mg/dL') {
+                  setMaxGlucose(data.value === '288' ? 288 : 396);
+                } else {
+                  setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0);
                 }
-                onTabSelect={(_, data) => {
-                  if (glucoseUnit === 'mg/dL') {
-                    setMaxGlucose(data.value === '288' ? 288 : 396);
-                  } else {
-                    setMaxGlucose(data.value === '16.0' ? 16.0 : 22.0);
-                  }
-                }}
-                size="small"
-              >
-                {glucoseUnit === 'mg/dL' ? (
-                  <>
-                    <Tab value="288">288</Tab>
-                    <Tab value="396">396</Tab>
-                  </>
-                ) : (
-                  <>
-                    <Tab value="16.0">16.0</Tab>
-                    <Tab value="22.0">22.0</Tab>
-                  </>
-                )}
-              </TabList>
-            </div>
+              }}
+              size="small"
+            >
+              {glucoseUnit === 'mg/dL' ? (
+                <>
+                  <Tab value="288">288</Tab>
+                  <Tab value="396">396</Tab>
+                </>
+              ) : (
+                <>
+                  <Tab value="16.0">16.0</Tab>
+                  <Tab value="22.0">22.0</Tab>
+                </>
+              )}
+            </TabList>
           </div>
         </div>
         
