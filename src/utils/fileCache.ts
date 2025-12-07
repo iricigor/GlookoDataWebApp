@@ -43,8 +43,13 @@ async function openDatabase(): Promise<IDBDatabase> {
 
 /**
  * Save a file to permanent cache (IndexedDB + localStorage)
+ * @param {UploadedFile} file - The file to cache
+ * @returns {Promise<void>}
+ * @throws {Error} If the file cannot be saved to IndexedDB or localStorage
  */
 export async function saveFileToCache(file: UploadedFile): Promise<void> {
+  let db: IDBDatabase | null = null;
+  
   try {
     // Don't cache demo files
     if (file.id.startsWith('demo-')) {
@@ -52,7 +57,7 @@ export async function saveFileToCache(file: UploadedFile): Promise<void> {
       return;
     }
 
-    const db = await openDatabase();
+    db = await openDatabase();
     
     // Convert File to ArrayBuffer for storage
     const arrayBuffer = await file.file.arrayBuffer();
@@ -83,48 +88,82 @@ export async function saveFileToCache(file: UploadedFile): Promise<void> {
       isPermanentlyCached: true,
     };
     
-    localStorage.setItem(
-      `${METADATA_KEY_PREFIX}${file.id}`,
-      JSON.stringify(metadata)
-    );
-    
-    db.close();
+    try {
+      localStorage.setItem(
+        `${METADATA_KEY_PREFIX}${file.id}`,
+        JSON.stringify(metadata)
+      );
+    } catch (localStorageError) {
+      console.error('Failed to save metadata to localStorage:', localStorageError);
+      
+      // Roll back IndexedDB write to maintain consistency
+      const rollbackTransaction = db.transaction([STORE_NAME], 'readwrite');
+      const rollbackStore = rollbackTransaction.objectStore(STORE_NAME);
+      
+      await new Promise<void>((resolve, reject) => {
+        const deleteRequest = rollbackStore.delete(file.id);
+        deleteRequest.onsuccess = () => resolve();
+        deleteRequest.onerror = () => reject(deleteRequest.error);
+      });
+      
+      // Attempt to clean up any partial localStorage entry
+      try {
+        localStorage.removeItem(`${METADATA_KEY_PREFIX}${file.id}`);
+      } catch {
+        // Ignore cleanup errors
+      }
+      
+      throw localStorageError;
+    }
   } catch (error) {
     console.error('Failed to save file to cache:', error);
-    // Attempt to clean up on failure
-    try {
-      localStorage.removeItem(`${METADATA_KEY_PREFIX}${file.id}`);
-    } catch {
-      // Ignore cleanup errors
-    }
     throw error;
+  } finally {
+    // Always close the database connection
+    if (db) {
+      db.close();
+    }
   }
 }
 
 /**
  * Remove a file from permanent cache
+ * @param {string} fileId - The ID of the file to remove
+ * @returns {Promise<void>}
+ * @throws {Error} If the file cannot be removed from IndexedDB or localStorage
  */
 export async function removeFileFromCache(fileId: string): Promise<void> {
+  let db: IDBDatabase | null = null;
+  
   try {
-    const db = await openDatabase();
+    db = await openDatabase();
     
-    // Remove from IndexedDB
+    // Remove from IndexedDB with transaction completion guarantee
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
     
     await new Promise<void>((resolve, reject) => {
       const request = store.delete(fileId);
-      request.onsuccess = () => resolve();
+      
+      // Handle request-level errors
       request.onerror = () => reject(request.error);
+      
+      // Handle transaction-level errors and completion
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(new Error('Transaction aborted'));
+      transaction.oncomplete = () => resolve();
     });
     
     // Remove metadata from localStorage
     localStorage.removeItem(`${METADATA_KEY_PREFIX}${fileId}`);
-    
-    db.close();
   } catch (error) {
     console.error('Failed to remove file from cache:', error);
     throw error;
+  } finally {
+    // Always close the database connection
+    if (db) {
+      db.close();
+    }
   }
 }
 
@@ -210,19 +249,29 @@ export function isFileCached(fileId: string): boolean {
 
 /**
  * Clear all cached files
+ * @returns {Promise<void>}
+ * @throws {Error} If files cannot be cleared from IndexedDB or localStorage
  */
 export async function clearAllCachedFiles(): Promise<void> {
+  let db: IDBDatabase | null = null;
+  
   try {
-    const db = await openDatabase();
+    db = await openDatabase();
     
-    // Clear IndexedDB
+    // Clear IndexedDB with transaction completion guarantee
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
     
     await new Promise<void>((resolve, reject) => {
       const request = store.clear();
-      request.onsuccess = () => resolve();
+      
+      // Handle request-level errors
       request.onerror = () => reject(request.error);
+      
+      // Handle transaction-level errors and completion
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(new Error('Transaction aborted'));
+      transaction.oncomplete = () => resolve();
     });
     
     // Clear localStorage metadata
@@ -230,11 +279,21 @@ export async function clearAllCachedFiles(): Promise<void> {
       key.startsWith(METADATA_KEY_PREFIX)
     );
     
-    metadataKeys.forEach(key => localStorage.removeItem(key));
-    
-    db.close();
+    for (const key of metadataKeys) {
+      try {
+        localStorage.removeItem(key);
+      } catch (err) {
+        console.error(`Failed to remove localStorage key ${key}:`, err);
+        // Continue removing other keys
+      }
+    }
   } catch (error) {
     console.error('Failed to clear cached files:', error);
     throw error;
+  } finally {
+    // Always close the database connection
+    if (db) {
+      db.close();
+    }
   }
 }
