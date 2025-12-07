@@ -259,6 +259,112 @@ Use Copilot Chat for:
 - Refactoring suggestions
 - Finding bugs
 
+## 🌐 Localization and i18next
+
+This project uses **i18next with namespace segmentation** for internationalization. All user-facing text must be localized.
+
+### Namespace Structure
+
+Translations are organized into functional namespaces:
+
+| Namespace | Description | Use In |
+|-----------|-------------|--------|
+| `common` | Shared UI elements (buttons, actions, app title) | All components (default) |
+| `navigation` | Navigation menu items and related text | Navigation component |
+| `home` | Home page content | Home page |
+| `dataUpload` | Data upload features | Upload page and components |
+| `dialogs` | All dialog components | Login, Logout, Welcome, Cookie, Error dialogs |
+| `notifications` | Toast notifications | App-level notifications |
+
+Translation files are located in:
+```
+public/locales/
+├── en/
+│   ├── common.json
+│   ├── navigation.json
+│   ├── home.json
+│   ├── dataUpload.json
+│   ├── dialogs.json
+│   └── notifications.json
+├── de/  # Same structure
+└── cs/  # Same structure
+```
+
+### Adding New Translations
+
+1. **Choose the appropriate namespace** based on your feature
+2. **Add the translation key** to all language files in that namespace
+3. **Use the translation** in your component with the correct namespace
+
+**Example: Adding a new button to the navigation**
+
+```tsx
+// 1. Add to public/locales/en/navigation.json
+{
+  "navigation": {
+    "myNewButton": "My New Feature"
+  }
+}
+
+// 2. Add to public/locales/de/navigation.json
+{
+  "navigation": {
+    "myNewButton": "Meine neue Funktion"
+  }
+}
+
+// 3. Add to public/locales/cs/navigation.json
+{
+  "navigation": {
+    "myNewButton": "Moje nová funkce"
+  }
+}
+
+// 4. Use in your component
+import { useTranslation } from 'react-i18next';
+
+export function MyComponent() {
+  const { t } = useTranslation('navigation');
+  return <Button>{t('navigation.myNewButton')}</Button>;
+}
+```
+
+### Best Practices
+
+1. **NEVER hardcode user-facing text** - Always use `t()` function
+2. **Add translations to ALL languages** - Don't leave any language incomplete
+3. **Use the correct namespace** - Choose the namespace that matches your feature area
+4. **Test translations** - Switch languages in the UI to verify your translations work
+5. **Keep keys organized** - Use nested structures within namespaces for clarity
+
+### Loading Multiple Namespaces
+
+If your component needs translations from multiple namespaces:
+
+```tsx
+const { t } = useTranslation(['navigation', 'dialogs']);
+
+// Access navigation namespace (first in array, so default)
+t('navigation.home')
+
+// Access dialogs namespace explicitly
+t('dialogs:loginDialog.title')
+```
+
+### Default Namespace
+
+Components that don't specify a namespace automatically use `common`:
+
+```tsx
+const { t } = useTranslation();  // Uses 'common' namespace
+t('appTitle')  // Accesses common.appTitle
+t('common.save')  // Accesses common.common.save
+```
+
+For detailed information, see:
+- [i18next Namespace Design Documentation](docs/i18n-namespace-design.md)
+- [Repository Custom Instructions](repository_custom_instructions.md) - Localization Workflow section
+
 ## 🔍 Code Review Checklist
 
 Before submitting your PR, ensure:
@@ -272,6 +378,9 @@ Before submitting your PR, ensure:
 - [ ] Fluent UI components are used appropriately
 - [ ] Code is well-commented where necessary
 - [ ] No console errors or warnings
+- [ ] **All user-facing text is localized** using i18next (no hardcoded strings)
+- [ ] **Translations added to ALL supported languages** (en, de, cs)
+- [ ] **Correct namespace used** for translations
 - [ ] Responsive design works on different screen sizes
 
 ## 📦 Commit Guidelines
