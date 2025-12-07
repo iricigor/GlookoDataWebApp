@@ -12,6 +12,7 @@ import {
   Input,
   Label,
 } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
 import type { GlucoseUnit, GlucoseThresholds } from '../../types';
 import { validateGlucoseThresholds } from '../../hooks/useGlucoseThresholds';
 import { GlucoseThresholdsSection } from '../../components/GlucoseThresholdsSection';
@@ -38,6 +39,7 @@ export function GlucoseSettingsTab({
   insulinDuration,
   onInsulinDurationChange,
 }: GlucoseSettingsTabProps) {
+  const { t } = useTranslation('settings');
   const validationError = validateGlucoseThresholds(glucoseThresholds);
   const isValid = validationError === null;
 
@@ -50,17 +52,17 @@ export function GlucoseSettingsTab({
   return (
     <>
       <div className={styles.settingSection}>
-        <Title3 className={styles.sectionTitle}>Glucose Unit</Title3>
+        <Title3 className={styles.sectionTitle}>{t('settings.glucose.unit.title')}</Title3>
         <Divider className={styles.divider} />
         <Text className={styles.settingDescription}>
-          Choose your preferred unit for displaying blood glucose values. This setting affects all glucose readings, charts, and thresholds throughout the app.
+          {t('settings.glucose.unit.description')}
         </Text>
         <RadioGroup
           value={glucoseUnit}
           onChange={(_, data) => onGlucoseUnitChange(data.value as GlucoseUnit)}
         >
-          <Radio value="mmol/L" label="mmol/L (millimoles per liter)" />
-          <Radio value="mg/dL" label="mg/dL (milligrams per deciliter)" />
+          <Radio value="mmol/L" label={t('settings.glucose.unit.mmol')} />
+          <Radio value="mg/dL" label={t('settings.glucose.unit.mgdl')} />
         </RadioGroup>
       </div>
 
@@ -73,13 +75,13 @@ export function GlucoseSettingsTab({
       />
 
       <div className={styles.settingSection}>
-        <Title3 className={styles.sectionTitle}>Insulin Duration</Title3>
+        <Title3 className={styles.sectionTitle}>{t('settings.glucose.insulinDuration.title')}</Title3>
         <Divider className={styles.divider} />
         <Text className={styles.settingDescription}>
-          Set the duration of insulin action in hours for IOB (Insulin On Board) calculations. This affects how long insulin is considered active in your system. Typical values range from 3 to 6 hours.
+          {t('settings.glucose.insulinDuration.description')}
         </Text>
         <div className={styles.insulinDurationRow}>
-          <Label htmlFor="insulin-duration-input">Duration (hours)</Label>
+          <Label htmlFor="insulin-duration-input">{t('settings.glucose.insulinDuration.label')}</Label>
           <Input
             id="insulin-duration-input"
             type="number"
