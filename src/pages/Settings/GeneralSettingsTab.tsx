@@ -127,6 +127,7 @@ export function GeneralSettingsTab({
           <Radio value="en" label={t('settings.general.uiLanguage.english')} />
           <Radio value="de" label={t('settings.general.uiLanguage.german')} />
           <Radio value="cs" label={t('settings.general.uiLanguage.czech')} />
+          <Radio value="sr" label={t('settings.general.uiLanguage.serbian')} />
         </RadioGroup>
       </div>
 

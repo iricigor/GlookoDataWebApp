@@ -1,0 +1,12 @@
+{
+  "reports": {
+    "title": "Sveobuhvatni izveštaji",
+    "description": "Pogledajte detaljnu analitiku uključujući vreme u opsegu, obrasce i trendove",
+    "tabs": {
+      "fileInfo": "Informacije o fajlu",
+      "bgOverview": "BG pregled",
+      "dailyBG": "Dnevni BG",
+      "hypos": "Hipo"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "home": {
+    "welcome": "Dobrodošli u Glooko Insights",
+    "description": "Moderna web aplikacija za uvoz, vizualizaciju i analizu podataka o dijabetesu izvezenih iz Glooko platforme.",
+    "gettingStarted": {
+      "title": "Početak rada",
+      "uploadData": "Dodajte Vaše Glooko podatke",
+      "viewReports": "Pregledajte detaljan izveštaj",
+      "analyzeWithAI": "Dobijte AI-powered uvide"
+    },
+    "features": {
+      "title": "Ključne funkcije",
+      "dataUpload": "Jednostavno dodavanje podataka",
+      "comprehensiveReports": "Sveobuhvatni izveštaji",
+      "aiAnalysis": "Inteligentna analiza"
+    }
+  }
+}

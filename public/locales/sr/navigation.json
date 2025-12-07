@@ -1,0 +1,11 @@
+{
+  "navigation": {
+    "home": "Početna",
+    "dataUpload": "Dodavanje podataka",
+    "reports": "Izveštaji",
+    "aiAnalysis": "AI analiza",
+    "settings": "Podešavanja",
+    "apiDocs": "API dokumentacija",
+    "logoAltText": "Glooko Insights Logo"
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "settings": {
+    "title": "Podešavanja",
+    "description": "Konfigurišite Vaše postavke aplikacije",
+    "tabs": {
+      "general": "Opšte",
+      "glucose": "Podaci o glukozi",
+      "ai": "AI podešavanja",
+      "about": "O aplikaciji"
+    },
+    "general": {
+      "theme": {
+        "title": "Tema",
+        "description": "Izaberite Vašu preferiranu temu boje. Sistemska opcija prati podešavanja Vašeg operativnog sistema.",
+        "light": "Svetla",
+        "dark": "Tamna",
+        "system": "Sistem (preporučeno)"
+      },
+      "dayNightShading": {
+        "title": "Senčenje dan/noć",
+        "description": "Prikažite senčenje pozadine dan/noć na 24-časovnim grafikonima glukoze.",
+        "enabled": "Senčenje dan/noć omogućeno",
+        "disabled": "Senčenje dan/noć onemogućeno"
+      },
+      "geekStats": {
+        "title": "Geek statistike",
+        "description": "Prikažite tehničke detalje kao što su AI promptovi i detaljne tabele podataka. Ovo je korisno za napredne korisnike koji žele da vide osnovne podatke i promptove.",
+        "enabled": "Geek statistike omogućene",
+        "disabled": "Geek statistike onemogućene"
+      },
+      "exportFormat": {
+        "title": "Format izvoza",
+        "description": "Izaberite format za izvoz podataka tabele u clipboard (CSV ili TSV).",
+        "csv": "CSV (vrednosti odvojene zarezom)",
+        "tsv": "TSV (vrednosti odvojene tabulatorom)"
+      },
+      "uiLanguage": {
+        "title": "Jezik korisničkog interfejsa",
+        "description": "Izaberite jezik za interfejs aplikacije. Ovo utiče na sve menije, oznake i tekst dugmadi u celoj aplikaciji.",
+        "english": "English",
+        "german": "Deutsch (nemački)",
+        "czech": "Čeština (češki)",
+        "serbian": "Srpski (Serbian - latinica)"
+      },
+      "responseLanguage": {
+        "title": "Jezik AI odgovora",
+        "syncLabel": "Automatski sinhronizuj sa jezikom korisničkog interfejsa",
+        "syncDescription": "Kada je omogućeno, jezik AI odgovora će automatski odgovarati jeziku Vašeg korisničkog interfejsa. Kada je onemogućeno, možete izabrati određeni jezik ispod.",
+        "description": "Izaberite jezik za AI odgovore analize. Ovo utiče na sve AI-generisane uvide i preporuke.",
+        "english": "English",
+        "czech": "Czech (čeština)",
+        "german": "German (Deutsch)",
+        "serbian": "Serbian (srpski - latinica)"
+      }
+    },
+    "glucose": {
+      "unit": {
+        "title": "Jedinica glukoze",
+        "description": "Izaberite Vašu preferiranu jedinicu za prikaz vrednosti glukoze u krvi. Ovo podešavanje utiče na sve očitavanja glukoze, grafikone i pragove u celoj aplikaciji.",
+        "mmol": "mmol/L (milimol po litru)",
+        "mgdl": "mg/dL (miligrami po decilitru)"
+      },
+      "insulinDuration": {
+        "title": "Trajanje insulina",
+        "description": "Podesite trajanje dejstva insulina u satima za IOB (Insulin On Board) proračune. Ovo utiče na to koliko dugo se insulin smatra aktivnim u Vašem sistemu. Tipične vrednosti kreću se od 3 do 6 sati.",
+        "label": "Trajanje (sati)"
+      }
+    },
+    "ai": {
+      "title": "AI konfiguracija",
+      "description": "Konfigurišite Vaša AI podešavanja za inteligentnu analizu. Kliknite \"Izaberi\" pored bilo kog konfiguriranog API ključa da biste promenili provajdere.",
+      "apiKeyPlaceholder": "Unesite Vaš API ključ",
+      "unavailable": "Nedostupno",
+      "selected": "Izabrano",
+      "select": "Izaberi",
+      "verify": {
+        "verifying": "Provera API ključa...",
+        "valid": "API ključ je validan",
+        "invalid": "API ključ je nevalidan",
+        "clickToVerify": "Kliknite da proverite API ključ",
+        "noKey": "Nema API ključa za proveru"
+      },
+      "privacyPolicy": "Politika privatnosti",
+      "accordion": {
+        "freeApi": {
+          "title": "🎁 Dostupnost besplatnog API ključa",
+          "summary": "Informacije o besplatnim opcijama nivoa za svakog AI provajdera.",
+          "gemini": "✅ Nudi besplatan nivo sa mesečnom kvotom za API pozive.",
+          "deepseek": "✅ Nudi ograničen besplatan cloud API nivo sa mesečnim zahtevima.",
+          "perplexity": "⚠️ API je uglavnom plaćen sa ograničenim besplatnim nivoom.",
+          "grok": "❌ Nema besplatnog API pristupa. Zahteva X Premium+ pretplatu ($30/mesečno).",
+          "getFreeKey": "Nabavite Vaš besplatni API ključ",
+          "checkPricing": "Proverite cene",
+          "learnMore": "Saznajte više"
+        },
+        "dataHandling": {
+          "title": "⚠️ Važno: Rukovanje podacima i Vaša odgovornost",
+          "summary": "Vaši zdravstveni podaci se šalju AI provajderima kada koristite funkcije analize.",
+          "description1": "Kada koristite AI funkcije analize, Vaši osetljivi zdravstveni podaci će biti poslati izabranom AI provajderu. Podaci se šalju",
+          "withoutPII": "bez lično identifikujućih informacija",
+          "description2": "(kao što su Vaše ime ili email), ali AI provajder može povezati Vaš API ključ sa zdravstvenim podacima koje šaljete.",
+          "responsibility": "Vaša odgovornost:",
+          "responsibilityText": "Vi ste odgovorni za sigurnost ovih informacija i njihovu upotrebu u skladu sa svim primenljivim pravilima i propisima o zaštiti podataka. Pregledajte politike privatnosti Vašeg izabranog AI provajdera pre korišćenja ovih funkcija.",
+          "bestPractices": "Najbolje prakse:",
+          "bestPracticesText": "Redovno pratite upotrebu Vašeg API ključa preko kontrolne table Vašeg provajdera, primenjujte dozvole pristupa sa najmanjim privilegijama prilikom kreiranja API ključeva i postavite dnevna ograničenja potrošnje da biste sprečili neočekivane troškove i neovlašćenu upotrebu."
+        },
+        "storage": {
+          "title": "Skladištenje API ključa:",
+          "summary": "Vaši API ključevi se skladište lokalno u Vašem pretraživaču i nikada se ne šalju na naše servere.",
+          "description": "Vaši API ključevi se skladište lokalno u lokalnom skladištu Vašeg pretraživača (ne kolačićima) i ostaju dok ih ručno ne obrišete ili obrišete podatke pretraživača. Ključevi se nikada ne prenose na naše servere ili treće strane.",
+          "technicalDetails": "Tehnički detalji:",
+          "technicalDetailsText": "Koristimo API lokalnog skladišta pretraživača, koji pruža trajno skladište koje ostaje dostupno kroz sesije pretraživača. Ovi podaci se skladište samo na Vašem uređaju i dostupni su samo ovoj web aplikaciji sa iste domene."
+        },
+        "communication": {
+          "title": "AI komunikacija:",
+          "summary": "Sva AI analiza se dešava direktno između Vašeg pretraživača i AI provajdera—nema posredničkih servera.",
+          "description": "Kada zatražite AI analizu, Vaš pretraživač šalje zahtev direktno na API izabranog AI provajdera. Naša aplikacija ne deluje kao posrednik—komunikacija ide direktno od Vašeg pretraživača do AI provajdera.",
+          "priority": "Prioritet provajdera:",
+          "priorityText": "Ako je konfigurisano više API ključeva, koriste se ovim redosledom: Perplexity → Grok AI → DeepSeek → Google Gemini. Da biste koristili drugi provajder, uklonite API ključeve sa višim prioritetom."
+        },
+        "bestPractices": {
+          "title": "Najbolje prakse sigurnosti:",
+          "summary": "Pratite ove preporuke da biste održali Vaše API ključeve i podatke bezbednim.",
+          "createSecure": "Kreirajte sigurne API ključeve:",
+          "createSecureText": "Koristite minimalne dozvole prilikom kreiranja API ključeva na:",
+          "perplexitySettings": "Perplexity podešavanja",
+          "xaiConsole": "xAI konzola",
+          "grokNote": "(za Grok AI)",
+          "deepseekPlatform": "DeepSeek platforma",
+          "googleAIStudio": "Google AI Studio",
+          "protectKeys": "Zaštitite Vaše ključeve:",
+          "protectKeysText": "Birajte ključeve označene za aplikacije na strani klijenta i postavite ograničenja potrošnje da biste sprečili neočekivane troškove. Redovno pratite upotrebu Vašeg API ključa preko kontrolne table Vašeg provajdera.",
+          "riskMitigation": "Ublažavanje rizika:",
+          "riskMitigationText": "Ako neko dobije pristup Vašoj sesiji pretraživača ili računaru, mogao bi potencijalno pristupiti Vašem sačuvanom API ključu. Da biste smanjili ovaj rizik:",
+          "riskItem1": "Odjavite se sa deljenih računara",
+          "riskItem2": "Koristite funkcije privatnosti pretraživača (privatni/inkognito režim kada je potrebno)",
+          "riskItem3": "Redovno rotirajte Vaše API ključeve",
+          "riskItem4": "Pratite upotrebu Vašeg API-ja na kontrolnoj tabli Vašeg provajdera",
+          "riskItem5": "Obrišite podatke pretraživača kada koristite javne računare"
+        },
+        "dataStorage": {
+          "title": "Skladištenje podataka:",
+          "summary": "Vaši podaci se skladište lokalno sa konfigurabilnim opcijama trajnosti.",
+          "description1": "Vaši podaci se skladište lokalno sa konfigurabilnim opcijama trajnosti. Sva obrada se dešava u Vašem pretraživaču. Ova aplikacija je u potpunosti otvorenog koda—možete",
+          "reviewCode": "pregledati kod na GitHub-u",
+          "description2": "ili postaviti sopstvenu instancu za potpunu kontrolu."
+        }
+      }
+    },
+    "about": {
+      "support": {
+        "title": "Podrška",
+        "description": "Pomozite nam da poboljšamo aplikaciju prijavljivanjem grešaka ili predlaganjem novih funkcija.",
+        "reportBug": "Prijavite grešku",
+        "requestFeature": "Zatražite funkciju",
+        "viewGitHub": "Pogledajte na GitHub-u",
+        "apiDocs": "API dokumentacija"
+      },
+      "version": {
+        "title": "Informacije o verziji",
+        "version": "Verzija:",
+        "buildId": "Build ID:",
+        "buildDate": "Datum build-a:",
+        "fullVersion": "Potpuna verzija:"
+      },
+      "demoData": {
+        "title": "Atribucija demo podataka",
+        "description": "Demo skupovi podataka uključeni u ovu aplikaciju inspirisani su stvarnim obrascima podataka tipa 1 dijabetesa iz",
+        "dataset": "AZT1D skupa podataka",
+        "authors": "(Khamesian i dr., 2025), koji je dostupan pod Creative Commons Attribution 4.0 (CC BY 4.0) licencom.",
+        "citation": "Citiranje:",
+        "citationText": "Khamesian, S., Arefeen, A., Thompson, B. M., Grando, M. A., & Ghasemzadeh, H. (2025). AZT1D: A Real-World Dataset for Type 1 Diabetes. arXiv:2506.14789. DOI:",
+        "moreInfo": "Za više informacija o originalnom skupu podataka, posetite:"
+      }
+    }
+  }
+}

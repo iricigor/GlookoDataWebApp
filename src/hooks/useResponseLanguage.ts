@@ -1,5 +1,5 @@
 /**
- * Custom hook for managing AI response language preferences (English/Czech)
+ * Custom hook for managing AI response language preferences
  * 
  * This hook manages response language state with cookie persistence.
  * Supports automatic syncing with UI language.
@@ -75,7 +75,17 @@ function saveSyncToCookie(sync: boolean): void {
  * Map UI language to AI response language
  */
 export function mapUILanguageToResponseLanguage(uiLanguage: UILanguage): ResponseLanguage {
-  return uiLanguage === 'de' ? 'german' : 'english';
+  switch (uiLanguage) {
+    case 'de':
+      return 'german';
+    case 'cs':
+      return 'czech';
+    case 'sr':
+      return 'serbian';
+    case 'en':
+    default:
+      return 'english';
+  }
 }
 
 /**

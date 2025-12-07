@@ -1,0 +1,8 @@
+{
+  "toast": {
+    "fileLoadedSuccessTitle": "Fajl uspešno učitan",
+    "fileLoadedSuccessBody": "{{fileName}} je izabran za analizu",
+    "aiProviderSwitchedTitle": "AI provajder promenjen",
+    "aiProviderSwitchedBody": "{{fromProvider}} verifikacija ključa neuspešna. Prebačeno na {{toProvider}}."
+  }
+}

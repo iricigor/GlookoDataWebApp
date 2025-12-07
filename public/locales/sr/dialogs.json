@@ -1,0 +1,50 @@
+{
+  "cookieConsent": {
+    "message": "Ova aplikacija koristi <strong>samo funkcionalne kolačiće</strong> da bi sačuvala Vaše postavke (tema, podešavanja, izbori datuma). Mi <strong>ne prikupljamo lične podatke preko kolačića</strong>, ne koristimo kolačiće za praćenje, niti šaljemo podatke kolačića na spoljne servere. Sva obrada podataka se dešava lokalno u Vašem pretraživaču.",
+    "learnMore": "Saznajte više o privatnosti",
+    "gotIt": "Razumem"
+  },
+  "loginDialog": {
+    "title": "Prijavite se sa Microsoft-om",
+    "description": "Prijavite se sa Vašim ličnim Microsoft nalogom da pristupite svim funkcijama.",
+    "signInButton": "Prijavite se sa Microsoft-om",
+    "signingIn": "Prijavljivanje...",
+    "cancel": "Otkaži",
+    "errorMessage": "Neuspešna prijava. Molimo pokušajte ponovo."
+  },
+  "logoutDialog": {
+    "title": "Odjava",
+    "confirmMessage": "Da li ste sigurni da želite da se odjavite?",
+    "loggingOut": "Odjavljivanje...",
+    "cancel": "Otkaži",
+    "proUser": "Pro korisnik",
+    "keyVaultSecret": "Key Vault tajna:",
+    "loadingSecret": "Učitavanje tajne...",
+    "secretNotAvailable": "Nije dostupno"
+  },
+  "welcomeDialog": {
+    "title": "Dobrodošli!",
+    "greeting": "Dobrodošli, {{userName}}!",
+    "greetingDefault": "Dobrodošli u našu aplikaciju!",
+    "thankYou": "Hvala Vam što ste nam se pridružili! Uzbuđeni smo da Vam pomognemo da upravljate i analizirate Vaše podatke o dijabetesu.",
+    "cloudSettingsSync": "Sinhronizacija podešavanja u oblaku:",
+    "cloudSettingsSyncDescription": "Vaše postavke aplikacije (tema, jedinica glukoze, pragovi, itd.) biće sačuvane u oblaku tako da se sinhronizuju na svim Vašim uređajima.",
+    "privacyFirst": "Privatnost na prvom mestu:",
+    "privacyFirstDescription": "Mi skladištimo samo Vašu email adresu za identifikaciju naloga i Vaše postavke aplikacije. Nikakvi lični zdravstveni podaci, očitavanja glukoze ili medicinske informacije se nikada ne skladište u našem oblaku.",
+    "privacyNote": "Ako ne želite da čuvate podešavanja u oblaku, kliknite \"Otkaži\" da se odjavite. I dalje možete koristiti aplikaciju bez prijavljivanja.",
+    "saveSettings": "Sačuvaj podešavanja",
+    "cancel": "Otkaži"
+  },
+  "infrastructureErrorDialog": {
+    "defaultTitle": "Nešto nije u redu",
+    "defaultDescription": "Došlo je do greške prilikom povezivanja sa našim servisima.",
+    "serviceUnavailableTitle": "Servis nije dostupan",
+    "serviceUnavailableDescription": "Naši servisi trenutno nisu dostupni. Ovo može značiti da se infrastruktura postavlja ili da postoje privremeni problemi sa pristupom.",
+    "networkErrorTitle": "Greška mreže",
+    "networkErrorDescription": "Nije moguće povezati se sa našim servisima. Molimo proverite Vašu internet konekciju i pokušajte ponovo.",
+    "accessDeniedTitle": "Pristup odbijen",
+    "accessDeniedDescription": "Vaša sesija je možda istekla. Molimo pokušajte da se ponovo prijavite.",
+    "errorWithCode": "Greška {{statusCode}}: {{message}}",
+    "ok": "U redu"
+  }
+}

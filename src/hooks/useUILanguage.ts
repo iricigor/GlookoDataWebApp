@@ -1,5 +1,5 @@
 /**
- * Custom hook for managing UI language preferences (English/German)
+ * Custom hook for managing UI language preferences
  * 
  * This hook manages UI language state with LocalStorage persistence.
  * It is separate from AI response language which controls content localization.
@@ -9,7 +9,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import i18n from '../i18n';
 
-export type UILanguage = 'en' | 'de' | 'cs';
+export type UILanguage = 'en' | 'de' | 'cs' | 'sr';
 
 export interface UseUILanguageReturn {
   uiLanguage: UILanguage;
@@ -24,7 +24,7 @@ const UI_LANGUAGE_STORAGE_KEY = 'glookoUILanguagePreference';
 function getLanguageFromStorage(): UILanguage | null {
   try {
     const stored = localStorage.getItem(UI_LANGUAGE_STORAGE_KEY);
-    if (stored === 'en' || stored === 'de' || stored === 'cs') {
+    if (stored === 'en' || stored === 'de' || stored === 'cs' || stored === 'sr') {
       return stored;
     }
   } catch (error) {
