@@ -18,14 +18,28 @@ vi.mock('../../hooks/useTheme', () => ({
   isDarkTheme: vi.fn(),
 }));
 
+// Mock the useUILanguage hook
+vi.mock('../../hooks/useUILanguage', () => ({
+  useUILanguage: vi.fn(),
+}));
+
+// Mock the useProUserCheck hook
+vi.mock('../../hooks/useProUserCheck', () => ({
+  useProUserCheck: vi.fn(),
+}));
+
 // Import the mocked modules
 import { useAuth } from '../../hooks/useAuth';
 import { useFirstLoginCheck } from '../../hooks/useFirstLoginCheck';
 import { isDarkTheme } from '../../hooks/useTheme';
+import { useUILanguage } from '../../hooks/useUILanguage';
+import { useProUserCheck } from '../../hooks/useProUserCheck';
 
 const mockUseAuth = vi.mocked(useAuth);
 const mockUseFirstLoginCheck = vi.mocked(useFirstLoginCheck);
 const mockIsDarkTheme = vi.mocked(isDarkTheme);
+const mockUseUILanguage = vi.mocked(useUILanguage);
+const mockUseProUserCheck = vi.mocked(useProUserCheck);
 
 describe('Navigation', () => {
   const defaultAuthState = {
@@ -60,6 +74,20 @@ describe('Navigation', () => {
     mockUseAuth.mockReturnValue(defaultAuthState);
     mockUseFirstLoginCheck.mockReturnValue(defaultFirstLoginCheckState);
     mockIsDarkTheme.mockReturnValue(false); // Default to light mode
+    mockUseUILanguage.mockReturnValue({
+      uiLanguage: 'en',
+      setUILanguage: vi.fn(),
+    });
+    mockUseProUserCheck.mockReturnValue({
+      isProUser: false,
+      secretValue: null,
+      isChecking: false,
+      hasChecked: false,
+      hasError: false,
+      errorMessage: null,
+      performCheck: vi.fn(),
+      resetState: vi.fn(),
+    });
   });
 
   describe('when user is not logged in', () => {
@@ -445,6 +473,112 @@ describe('Navigation', () => {
       // We expect handleLogout to be wired to LogoutDialog's onLogout
       // Since LogoutDialog shows a confirmation, we can verify resetState is accessible
       expect(resetState).toBeDefined();
+    });
+  });
+
+  describe('language toggle for logged in users', () => {
+    beforeEach(() => {
+      mockUseAuth.mockReturnValue({
+        ...defaultAuthState,
+        isLoggedIn: true,
+        userName: 'John Doe',
+        userEmail: 'john@example.com',
+        accessToken: 'test-token',
+        idToken: 'test-id-token',
+        logout: vi.fn().mockResolvedValue(undefined),
+      });
+    });
+
+    it('should render language toggle button with current language when user is logged in', () => {
+      mockUseUILanguage.mockReturnValue({
+        uiLanguage: 'en',
+        setUILanguage: vi.fn(),
+      });
+
+      renderWithProviders(
+        <Navigation 
+          currentPage="home" 
+          onNavigate={vi.fn()} 
+        />
+      );
+
+      const languageButton = screen.getByText('EN');
+      expect(languageButton).toBeInTheDocument();
+    });
+
+    it('should cycle from English to German when language toggle is clicked', () => {
+      const setUILanguage = vi.fn();
+      mockUseUILanguage.mockReturnValue({
+        uiLanguage: 'en',
+        setUILanguage,
+      });
+
+      renderWithProviders(
+        <Navigation 
+          currentPage="home" 
+          onNavigate={vi.fn()} 
+        />
+      );
+
+      const languageButton = screen.getByText('EN');
+      fireEvent.click(languageButton);
+
+      expect(setUILanguage).toHaveBeenCalledWith('de');
+    });
+
+    it('should cycle from German to Czech when language toggle is clicked', () => {
+      const setUILanguage = vi.fn();
+      mockUseUILanguage.mockReturnValue({
+        uiLanguage: 'de',
+        setUILanguage,
+      });
+
+      renderWithProviders(
+        <Navigation 
+          currentPage="home" 
+          onNavigate={vi.fn()} 
+        />
+      );
+
+      const languageButton = screen.getByText('DE');
+      fireEvent.click(languageButton);
+
+      expect(setUILanguage).toHaveBeenCalledWith('cs');
+    });
+
+    it('should cycle from Czech to English when language toggle is clicked', () => {
+      const setUILanguage = vi.fn();
+      mockUseUILanguage.mockReturnValue({
+        uiLanguage: 'cs',
+        setUILanguage,
+      });
+
+      renderWithProviders(
+        <Navigation 
+          currentPage="home" 
+          onNavigate={vi.fn()} 
+        />
+      );
+
+      const languageButton = screen.getByText('CS');
+      fireEvent.click(languageButton);
+
+      expect(setUILanguage).toHaveBeenCalledWith('en');
+    });
+
+    it('should not render language toggle button when user is not logged in', () => {
+      mockUseAuth.mockReturnValue(defaultAuthState); // Not logged in
+
+      renderWithProviders(
+        <Navigation 
+          currentPage="home" 
+          onNavigate={vi.fn()} 
+        />
+      );
+
+      expect(screen.queryByText('EN')).not.toBeInTheDocument();
+      expect(screen.queryByText('DE')).not.toBeInTheDocument();
+      expect(screen.queryByText('CS')).not.toBeInTheDocument();
     });
   });
 });
