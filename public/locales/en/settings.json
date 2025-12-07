@@ -40,7 +40,8 @@
         "description": "Choose the language for the application interface. This affects all menus, labels, and button text throughout the application.",
         "english": "English",
         "german": "Deutsch (German)",
-        "czech": "Čeština (Czech)"
+        "czech": "Čeština (Czech)",
+        "serbian": "Srpski (Serbian)"
       },
       "responseLanguage": {
         "title": "AI Response Language",

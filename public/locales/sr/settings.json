@@ -6,6 +6,7 @@
       "general": "Opšte",
       "glucose": "Podaci o glukozi",
       "ai": "AI podešavanja",
+      "pro": "Pro korisnici",
       "about": "O aplikaciji"
     },
     "general": {
@@ -40,7 +41,7 @@
         "english": "English",
         "german": "Deutsch (nemački)",
         "czech": "Čeština (češki)",
-        "serbian": "Srpski (Serbian - latinica)"
+        "serbian": "Srpski (latinica)"
       },
       "responseLanguage": {
         "title": "Jezik AI odgovora",
@@ -145,6 +146,28 @@
           "reviewCode": "pregledati kod na GitHub-u",
           "description2": "ili postaviti sopstvenu instancu za potpunu kontrolu."
         }
+      }
+    },
+    "proUsers": {
+      "title": "Pro korisnici",
+      "notEnabledMessage": "Pro korisničke funkcije još nisu omogućene. Ova funkcija je trenutno u razvoju i biće uskoro dostupna.",
+      "benefits": {
+        "title": "Šta Pro korisnici dobijaju",
+        "description": "Pro korisnici će dobiti pristup premium funkcijama koje olakšavaju korišćenje AI mogućnosti analize i čine ih isplativijim:",
+        "managedApiKeys": "Upravljani API ključevi - Nije potrebno podešavati sopstvene API ključeve sa AI provajderima",
+        "noSetupRequired": "Nije potrebno podešavanje - Počnite koristiti AI funkcije odmah bez konfiguracije",
+        "costEffective": "Isplatljiv pristup - Deljenje korišćenja API-ja znači niže troškove",
+        "reliableAccess": "Pouzdan pristup - Garantovan pristup API-ju bez briga o ograničenjima stope ili kvotama",
+        "quickSettings": "Brzi pristup podešavanjima - Pogodna dugmad za prebacivanje teme i jezika direktno u navigaciji"
+      },
+      "badge": {
+        "title": "Pro korisnički bedž",
+        "description": "Pro korisnici se identifikuju sa ✨ simbolom zvezde pored njihovog imena u navigacionoj traci. Ovaj bedž ukazuje da imate pristup svim Pro korisničkim funkcijama i pogodnostima."
+      },
+      "expressInterest": {
+        "title": "Izrazite svoje interesovanje",
+        "description": "Ako ste zainteresovani da postanete Pro korisnik, javite nam otvaranjem issue-a. Prikupićemo informacije o vašem interesovanju i obavestićemo vas kada Pro korisničke funkcije postanu dostupne.",
+        "button": "Zainteresovan sam za Pro korisnike"
       }
     },
     "about": {

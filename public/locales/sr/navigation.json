@@ -6,6 +6,15 @@
     "aiAnalysis": "AI analiza",
     "settings": "Podešavanja",
     "apiDocs": "API dokumentacija",
-    "logoAltText": "Glooko Insights Logo"
+    "logoAltText": "Glooko Insights Logo",
+    "navigationMenu": "Navigacioni meni",
+    "login": "Prijavite se",
+    "logout": "Odjavite se",
+    "switchToLightMode": "Prebacite se na svetlu temu",
+    "switchToDarkMode": "Prebacite se na tamnu temu",
+    "switchToLanguage": "Prebacite se na {{language}}",
+    "currentLanguage": "Trenutni jezik: {{language}}. Kliknite da promenite.",
+    "settingsLabel": "Podešavanja",
+    "syncingSettings": "Sinhronizacija podešavanja..."
   }
 }

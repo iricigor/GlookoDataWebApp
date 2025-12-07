@@ -40,7 +40,8 @@
         "description": "Vyberte jazyk pro rozhraní aplikace. To ovlivní všechny nabídky, popisky a texty tlačítek v celé aplikaci.",
         "english": "English",
         "german": "Deutsch (German)",
-        "czech": "Čeština (Czech)"
+        "czech": "Čeština (Czech)",
+        "serbian": "Srpski (srbský)"
       },
       "responseLanguage": {
         "title": "Jazyk odpovědí AI",
