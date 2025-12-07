@@ -1,0 +1,15 @@
+{
+  "apiDocs": {
+    "title": "Glooko Insights - API Documentation",
+    "subtitle": "Interactive API explorer with Microsoft authentication",
+    "proUserBadge": "Pro user",
+    "tokenActive": "Token active",
+    "signOut": "Sign Out",
+    "signInPrompt": "Sign in to test authenticated endpoints",
+    "signInButton": "Sign in with Microsoft",
+    "signInMessage": "Sign in with your Microsoft account to test API endpoints. Your authentication token will be automatically added to requests.",
+    "initializingAuth": "Initializing authentication...",
+    "loadingDocs": "Loading API documentation...",
+    "loadError": "Failed to load API documentation"
+  }
+}

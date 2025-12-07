@@ -40,6 +40,7 @@ i18n
       'reports',       // Reports page
       'aiAnalysis',    // AI Analysis page
       'settings',      // Settings page
+      'apiDocs',       // API Documentation page
       'dialogs',       // All dialog components
       'notifications', // Toast and notification messages
     ],
