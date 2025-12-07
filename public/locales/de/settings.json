@@ -40,7 +40,8 @@
         "description": "Wählen Sie die Sprache für die Anwendungsoberfläche. Dies betrifft alle Menüs, Beschriftungen und Schaltflächentexte in der gesamten Anwendung.",
         "english": "English",
         "german": "Deutsch (German)",
-        "czech": "Čeština (Czech)"
+        "czech": "Čeština (Czech)",
+        "serbian": "Srpski (Serbisch)"
       },
       "responseLanguage": {
         "title": "KI-Antwortsprache",
