@@ -16,5 +16,18 @@
   "brandAltText": "Logo Glooko Insights",
   "footer": {
     "version": "Verze {{version}}"
+  },
+  "glucoseThresholds": {
+    "title": "Prahy glykémie",
+    "description": "Nakonfigurujte hodnoty prahů glykémie v {{unit}}. Hodnoty musí být v rostoucím pořadí.",
+    "veryHigh": "Velmi vysoká",
+    "high": "Vysoká",
+    "low": "Nízká",
+    "veryLow": "Velmi nízká",
+    "inRange": "V rozmezí:",
+    "veryHighAriaLabel": "Velmi vysoká prahová hodnota",
+    "highAriaLabel": "Vysoká prahová hodnota",
+    "lowAriaLabel": "Nízká prahová hodnota",
+    "veryLowAriaLabel": "Velmi nízká prahová hodnota"
   }
 }
