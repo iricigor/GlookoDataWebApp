@@ -139,6 +139,11 @@ export const useBGOverviewStyles = makeStyles({
     alignItems: 'center',
     ...shorthands.gap('12px'),
     flexWrap: 'wrap',
+    // On mobile, expand to fill available space and align right margin
+    '@media (max-width: 767px)': {
+      flex: 1,
+      ...shorthands.gap('6px'),
+    },
   },
   tirCard: {
     ...cardBaseStyle,
