@@ -75,7 +75,17 @@ function saveSyncToCookie(sync: boolean): void {
  * Map UI language to AI response language
  */
 export function mapUILanguageToResponseLanguage(uiLanguage: UILanguage): ResponseLanguage {
-  return uiLanguage === 'de' ? 'german' : 'english';
+  switch (uiLanguage) {
+    case 'de':
+      return 'german';
+    case 'cs':
+      return 'czech';
+    case 'sr':
+      return 'serbian';
+    case 'en':
+    default:
+      return 'english';
+  }
 }
 
 /**

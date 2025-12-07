@@ -39,6 +39,28 @@ describe('useUILanguage', () => {
     expect(i18n.changeLanguage).toHaveBeenCalledWith('de');
   });
 
+  it('should update language to cs', () => {
+    const { result } = renderHook(() => useUILanguage());
+    
+    act(() => {
+      result.current.setUILanguage('cs');
+    });
+    
+    expect(result.current.uiLanguage).toBe('cs');
+    expect(i18n.changeLanguage).toHaveBeenCalledWith('cs');
+  });
+
+  it('should update language to sr', () => {
+    const { result } = renderHook(() => useUILanguage());
+    
+    act(() => {
+      result.current.setUILanguage('sr');
+    });
+    
+    expect(result.current.uiLanguage).toBe('sr');
+    expect(i18n.changeLanguage).toHaveBeenCalledWith('sr');
+  });
+
   it('should update language to en', () => {
     const { result } = renderHook(() => useUILanguage());
     
@@ -66,6 +88,14 @@ describe('useUILanguage', () => {
     
     const { result } = renderHook(() => useUILanguage());
     expect(result.current.uiLanguage).toBe('de');
+  });
+
+  it('should read Serbian language from existing localStorage', () => {
+    // Set localStorage before hook initialization
+    localStorage.setItem('glookoUILanguagePreference', 'sr');
+    
+    const { result } = renderHook(() => useUILanguage());
+    expect(result.current.uiLanguage).toBe('sr');
   });
 
   it('should use default if localStorage has invalid value', () => {

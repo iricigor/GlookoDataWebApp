@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useResponseLanguage } from './useResponseLanguage';
+import { useResponseLanguage, mapUILanguageToResponseLanguage } from './useResponseLanguage';
 
 describe('useResponseLanguage', () => {
   beforeEach(() => {
@@ -22,6 +22,18 @@ describe('useResponseLanguage', () => {
   it('should initialize with german when UI is DE and sync enabled', () => {
     const { result } = renderHook(() => useResponseLanguage('de'));
     expect(result.current.responseLanguage).toBe('german');
+    expect(result.current.syncWithUILanguage).toBe(true);
+  });
+
+  it('should initialize with czech when UI is CS and sync enabled', () => {
+    const { result } = renderHook(() => useResponseLanguage('cs'));
+    expect(result.current.responseLanguage).toBe('czech');
+    expect(result.current.syncWithUILanguage).toBe(true);
+  });
+
+  it('should initialize with serbian when UI is SR and sync enabled', () => {
+    const { result } = renderHook(() => useResponseLanguage('sr'));
+    expect(result.current.responseLanguage).toBe('serbian');
     expect(result.current.syncWithUILanguage).toBe(true);
   });
 
@@ -149,5 +161,23 @@ describe('useResponseLanguage', () => {
     });
     
     expect(result.current.responseLanguage).toBe('german');
+  });
+});
+
+describe('mapUILanguageToResponseLanguage', () => {
+  it('should map en to english', () => {
+    expect(mapUILanguageToResponseLanguage('en')).toBe('english');
+  });
+
+  it('should map de to german', () => {
+    expect(mapUILanguageToResponseLanguage('de')).toBe('german');
+  });
+
+  it('should map cs to czech', () => {
+    expect(mapUILanguageToResponseLanguage('cs')).toBe('czech');
+  });
+
+  it('should map sr to serbian', () => {
+    expect(mapUILanguageToResponseLanguage('sr')).toBe('serbian');
   });
 });
