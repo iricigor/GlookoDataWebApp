@@ -84,6 +84,7 @@ export interface UploadedFile {
   uploadTime: Date;
   file: File;
   zipMetadata?: ZipMetadata;
+  isPermanentlyCached?: boolean; // Whether file is saved in permanent browser cache
 }
 
 /**

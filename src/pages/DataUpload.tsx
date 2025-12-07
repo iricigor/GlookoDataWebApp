@@ -46,13 +46,14 @@ interface DataUploadProps {
   onAddFiles: (files: UploadedFile[]) => void;
   onRemoveFile: (id: string) => void;
   onClearAll: () => void;
+  onUpdateFile: (file: UploadedFile) => void;
   selectedFileId: string | null;
   onSelectFile: (id: string | null) => void;
   exportFormat: ExportFormat;
   isLoadingDemoData?: boolean;
 }
 
-export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll, selectedFileId, onSelectFile, exportFormat, isLoadingDemoData }: DataUploadProps) {
+export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll, onUpdateFile, selectedFileId, onSelectFile, exportFormat, isLoadingDemoData }: DataUploadProps) {
   const styles = useStyles();
   const { t } = useTranslation('dataUpload');
 
@@ -95,6 +96,7 @@ export function DataUpload({ uploadedFiles, onAddFiles, onRemoveFile, onClearAll
         onRemoveFile={onRemoveFile}
         onClearAll={onClearAll}
         onAddFiles={onAddFiles}
+        onUpdateFile={onUpdateFile}
         selectedFileId={selectedFileId}
         onSelectFile={onSelectFile}
         exportFormat={exportFormat}

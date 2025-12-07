@@ -39,6 +39,7 @@ import type { UploadedFile, AIAnalysisResult, CloudUserSettings } from './types'
 import type { AIProvider } from './utils/api'
 import { getProviderDisplayName } from './utils/api'
 import { extractZipMetadata } from './features/dataUpload/utils'
+import { loadCachedFiles } from './utils/fileCache'
 
 // Page navigation order for swipe gestures
 const PAGE_ORDER = ['home', 'upload', 'reports', 'ai', 'settings'] as const
@@ -238,14 +239,28 @@ function App() {
     setThemeMode(isDarkTheme(themeMode) ? 'light' : 'dark')
   }, [themeMode, setThemeMode])
 
-  // Load demo data on app startup (Larry dataset)
+  // Load demo data and cached files on app startup
   useEffect(() => {
-    const loadDemoData = async () => {
+    const loadInitialData = async () => {
       try {
+        const allFiles: UploadedFile[] = []
+        
+        // Load cached files first
+        try {
+          const cachedFiles = await loadCachedFiles()
+          allFiles.push(...cachedFiles)
+        } catch (error) {
+          console.error('Failed to load cached files:', error)
+        }
+        
         // Fetch Larry's demo data file from public folder
         const response = await fetch('/demo-data/larry-demo-data.zip')
         if (!response.ok) {
           console.warn('Demo data file not found, skipping auto-load')
+          if (allFiles.length > 0) {
+            setUploadedFiles(allFiles)
+            setSelectedFileId(allFiles[0].id)
+          }
           setIsLoadingDemoData(false)
           return
         }
@@ -265,17 +280,18 @@ function App() {
           zipMetadata,
         }
 
-        setUploadedFiles([demoFile])
+        allFiles.push(demoFile)
+        setUploadedFiles(allFiles)
         setSelectedFileId(demoFile.id)
         setIsLoadingDemoData(false)
       } catch (error) {
         // Silently handle errors - app should work without demo data
-        console.error('Failed to load demo data:', error)
+        console.error('Failed to load initial data:', error)
         setIsLoadingDemoData(false)
       }
     }
 
-    loadDemoData()
+    loadInitialData()
   }, [])
 
   // Handle hash-based routing
@@ -373,6 +389,12 @@ function App() {
     setSelectedFileId(id)
   }
 
+  const handleUpdateFile = (updatedFile: UploadedFile) => {
+    setUploadedFiles((prev) => 
+      prev.map((file) => file.id === updatedFile.id ? updatedFile : file)
+    )
+  }
+
   // Find the selected file object
   const selectedFile = selectedFileId 
     ? uploadedFiles.find(file => file.id === selectedFileId) 
@@ -392,6 +414,7 @@ function App() {
             onAddFiles={handleAddFiles}
             onRemoveFile={handleRemoveFile}
             onClearAll={handleClearAll}
+            onUpdateFile={handleUpdateFile}
             selectedFileId={selectedFileId}
             onSelectFile={handleSelectFile}
             exportFormat={exportFormat}
