@@ -94,10 +94,11 @@ export const useBGOverviewStyles = makeStyles({
     alignItems: 'center',
     ...shorthands.gap('16px'),
     flexWrap: 'wrap',
-    // On mobile, keep label and controls on same row (no wrapping)
+    // On mobile, keep label and controls on same row (no wrapping) and ensure full width
     '@media (max-width: 767px)': {
       flexWrap: 'nowrap',
       ...shorthands.gap('8px'),
+      width: '100%',
     },
   },
   controlLabel: {
@@ -107,14 +108,20 @@ export const useBGOverviewStyles = makeStyles({
     minWidth: '120px',
     // Reduce label width on mobile to allow more space for controls
     '@media (max-width: 767px)': {
-      minWidth: '90px',
+      minWidth: '70px',
       flexShrink: 0,
+      fontSize: tokens.fontSizeBase200,
     },
   },
   pillGroup: {
     display: 'flex',
     ...shorthands.gap('8px'),
     flexWrap: 'wrap',
+    // On mobile, expand to fill available space
+    '@media (max-width: 767px)': {
+      flex: 1,
+      ...shorthands.gap('6px'),
+    },
   },
   pillButton: {
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
@@ -122,6 +129,9 @@ export const useBGOverviewStyles = makeStyles({
     // On mobile, extend buttons to use available space
     '@media (max-width: 767px)': {
       flex: 1,
+      minWidth: 'auto',
+      fontSize: tokens.fontSizeBase200,
+      ...shorthands.padding('4px', '8px'),
     },
   },
   datePickerGroup: {
@@ -129,6 +139,18 @@ export const useBGOverviewStyles = makeStyles({
     alignItems: 'center',
     ...shorthands.gap('12px'),
     flexWrap: 'wrap',
+    // On mobile, expand to fill available space and align right margin
+    '@media (max-width: 767px)': {
+      flex: 1,
+      ...shorthands.gap('6px'),
+    },
+  },
+  dropdownControl: {
+    // On mobile, expand to fill available space and align right margin
+    '@media (max-width: 767px)': {
+      flex: 1,
+      minWidth: 'auto',
+    },
   },
   tirCard: {
     ...cardBaseStyle,

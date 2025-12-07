@@ -9,6 +9,7 @@ import {
   tokens,
   shorthands,
 } from '@fluentui/react-components';
+import { useState, useEffect } from 'react';
 import {
   AreaChart,
   Area,
@@ -80,6 +81,30 @@ interface AGPGraphProps {
 export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
   const styles = useStyles();
 
+  // Detect mobile viewport for responsive margins (using 768px to match other components)
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    
+    // Debounced resize handler to avoid excessive re-renders
+    let timeoutId: NodeJS.Timeout;
+    const debouncedResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkMobile, 150);
+    };
+    
+    window.addEventListener('resize', debouncedResize);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', debouncedResize);
+    };
+  }, []);
+
   // Filter data to only include slots with readings
   const filteredData = data.filter(slot => slot.count > 0);
 
@@ -127,6 +152,11 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
   const yAxisMax = glucoseUnit === 'mg/dL' ? 360 : 20;
   const unitLabel = getUnitLabel(glucoseUnit);
 
+  // Responsive margins - minimal on mobile (2px right, -15px left to extend graph while keeping label visible)
+  const chartMargin = isMobile 
+    ? { top: 10, right: 2, left: -15, bottom: 0 }
+    : { top: 10, right: 30, left: 0, bottom: 0 };
+
   // Custom tooltip
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { time: string; median: number; p25_p75_min: number; p25_p75_max: number; p10_p90_min: number; p10_p90_max: number } }> }) => {
     if (active && payload && payload.length) {
@@ -166,7 +196,7 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
     <div className={styles.container}>
       <div className={styles.chartContainer}>
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <AreaChart data={chartData} margin={chartMargin}>
             <defs>
               <linearGradient id="color10_90" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#90CAF9" stopOpacity={0.3}/>
@@ -189,7 +219,7 @@ export function AGPGraph({ data, glucoseUnit }: AGPGraphProps) {
             
             <YAxis 
               domain={[0, yAxisMax]}
-              label={{ value: `Glucose (${unitLabel})`, angle: -90, position: 'insideLeft', dx: 10, style: { fontSize: tokens.fontSizeBase200 } }}
+              label={{ value: `Glucose (${unitLabel})`, angle: -90, position: 'insideLeft', dx: isMobile ? 15 : 10, style: { fontSize: tokens.fontSizeBase200 } }}
               stroke={tokens.colorNeutralForeground2}
               style={{ fontSize: tokens.fontSizeBase200 }}
             />
