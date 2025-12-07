@@ -22,6 +22,7 @@ import './APIDocs.css'
 import { useAuth } from '../hooks/useAuth'
 import { useProUserCheck } from '../hooks/useProUserCheck'
 import { useProUserBadgeStyles } from '../styles/proUserBadge'
+import { useTranslation } from 'react-i18next'
 
 const useStyles = makeStyles({
   container: {
@@ -111,6 +112,7 @@ const useStyles = makeStyles({
 })
 
 export function APIDocs() {
+  const { t } = useTranslation('apiDocs')
   const styles = useStyles()
   const proBadgeStyles = useProUserBadgeStyles()
   const { isLoggedIn, userName, userEmail, idToken, isInitialized, login, logout } = useAuth()
@@ -132,7 +134,7 @@ export function APIDocs() {
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') return
         console.error('Failed to load OpenAPI spec:', error)
-        setSpecError(error instanceof Error ? error.message : 'Failed to load API documentation')
+        setSpecError(error instanceof Error ? error.message : t('apiDocs.loadError'))
       }
     }
     loadSpec()
@@ -157,7 +159,7 @@ export function APIDocs() {
       <div className={styles.container}>
         <div className={styles.loadingContainer}>
           <Spinner size="medium" />
-          <Text>Initializing authentication...</Text>
+          <Text>{t('apiDocs.initializingAuth')}</Text>
         </div>
       </div>
     )
@@ -167,9 +169,9 @@ export function APIDocs() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <Text className={styles.title}>Glooko Insights - API Documentation</Text>
+          <Text className={styles.title}>{t('apiDocs.title')}</Text>
           <Text className={styles.subtitle}>
-            Interactive API explorer with Microsoft authentication
+            {t('apiDocs.subtitle')}
           </Text>
         </div>
         
@@ -180,15 +182,15 @@ export function APIDocs() {
                 <div className={proBadgeStyles.userNameContainer}>
                   <Text className={styles.userName}>{userName}</Text>
                   {isProUser && (
-                    <Tooltip content="Pro user" relationship="label">
-                      <span className={proBadgeStyles.proUserBadge} aria-label="Pro user">✨</span>
+                    <Tooltip content={t('apiDocs.proUserBadge')} relationship="label">
+                      <span className={proBadgeStyles.proUserBadge} aria-label={t('apiDocs.proUserBadge')}>✨</span>
                     </Tooltip>
                   )}
                 </div>
                 {userEmail && <Text className={styles.userEmail}>{userEmail}</Text>}
                 <div className={styles.tokenStatus}>
                   <CheckmarkCircleRegular className={styles.tokenStatusIcon} fontSize={14} />
-                  <Text className={styles.tokenStatusText}>Token active</Text>
+                  <Text className={styles.tokenStatusText}>{t('apiDocs.tokenActive')}</Text>
                 </div>
               </div>
               <Button
@@ -196,18 +198,18 @@ export function APIDocs() {
                 icon={<SignOutRegular />}
                 onClick={logout}
               >
-                Sign Out
+                {t('apiDocs.signOut')}
               </Button>
             </>
           ) : (
             <>
-              <Text>Sign in to test authenticated endpoints</Text>
+              <Text>{t('apiDocs.signInPrompt')}</Text>
               <Button
                 appearance="primary"
                 icon={<PersonRegular />}
                 onClick={login}
               >
-                Sign in with Microsoft
+                {t('apiDocs.signInButton')}
               </Button>
             </>
           )}
@@ -219,8 +221,7 @@ export function APIDocs() {
           <div className={styles.messageBar}>
             <MessageBar intent="warning">
               <MessageBarBody>
-                Sign in with your Microsoft account to test API endpoints. 
-                Your authentication token will be automatically added to requests.
+                {t('apiDocs.signInMessage')}
               </MessageBarBody>
             </MessageBar>
           </div>
@@ -252,7 +253,7 @@ export function APIDocs() {
         ) : !specError && (
           <div className={styles.loadingContainer}>
             <Spinner size="medium" />
-            <Text>Loading API documentation...</Text>
+            <Text>{t('apiDocs.loadingDocs')}</Text>
           </div>
         )}
       </div>
