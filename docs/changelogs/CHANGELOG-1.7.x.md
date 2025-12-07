@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>739 Fix Serbian language support: translation placeholders, missing Pro Users section, and language switcher</summary>
+
+[#739](../../pull/739) Fix Serbian language support: translation placeholders, missing Pro Users section, and language switcher
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>736 Add Pro Users settings tab with feature preview and interest collection</summary>
 
 [#736](../../pull/736) Add Pro Users settings tab with feature preview and interest collection
