@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of Contents
 
 - [Unreleased](#unreleased---partial-rollback-of-cloud-features)
-- [Current Development - 1.6.x](#16x---current-development)
+- [Current Development - 1.7.x](#17x---current-development)
+- [Version 1.6.x](#16x---released)
 - [Version 1.5.x](#15x---released)
 - [Version 1.4.x](#14x---released)
 - [Version 1.3.x](#13x---released)
@@ -51,7 +52,21 @@ All data processing continues to happen client-side in the browser. Settings are
 
 ---
 
-## [1.6.x] - Current Development
+## [1.7.x] - Current Development
+
+> **📖 Full Details:** [View complete 1.7.x changelog](docs/changelogs/CHANGELOG-1.7.x.md)
+
+### Summary
+
+Version 1.7 focuses on maintenance updates and bug fixes.
+
+### Planned Features
+
+*(To be added as development progresses)*
+
+---
+
+## [1.6.x] - Released
 
 > **📖 Full Details:** [View complete 1.6.x changelog](docs/changelogs/CHANGELOG-1.6.x.md)
 
