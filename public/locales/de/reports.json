@@ -1,0 +1,12 @@
+{
+  "reports": {
+    "title": "Umfassende Berichte",
+    "description": "Sehen Sie detaillierte Analysen einschließlich Zeit im Zielbereich, Muster und Trends",
+    "tabs": {
+      "fileInfo": "Datei-Info",
+      "bgOverview": "BG-Übersicht",
+      "dailyBG": "Täglicher BG",
+      "hypos": "Hypos"
+    }
+  }
+}

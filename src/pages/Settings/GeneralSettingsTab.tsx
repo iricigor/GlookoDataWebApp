@@ -11,6 +11,7 @@ import {
   Title3,
   Switch,
 } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
 import type { ThemeMode } from '../../hooks/useTheme';
 import type { ExportFormat } from '../../hooks/useExportFormat';
 import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
@@ -48,70 +49,72 @@ export function GeneralSettingsTab({
   syncWithUILanguage,
   onSyncWithUILanguageChange,
 }: GeneralSettingsTabProps) {
+  const { t } = useTranslation('settings');
+  
   return (
     <>
       <div className={styles.settingSection}>
-        <Title3 className={styles.sectionTitle}>Theme</Title3>
+        <Title3 className={styles.sectionTitle}>{t('settings.general.theme.title')}</Title3>
         <Divider className={styles.divider} />
         <Text className={styles.settingDescription}>
-          Choose your preferred color theme. System option follows your operating system settings.
+          {t('settings.general.theme.description')}
         </Text>
         <RadioGroup
           value={themeMode}
           onChange={(_, data) => onThemeChange(data.value as ThemeMode)}
         >
-          <Radio value="light" label="Light" />
-          <Radio value="dark" label="Dark" />
-          <Radio value="system" label="System (recommended)" />
+          <Radio value="light" label={t('settings.general.theme.light')} />
+          <Radio value="dark" label={t('settings.general.theme.dark')} />
+          <Radio value="system" label={t('settings.general.theme.system')} />
         </RadioGroup>
       </div>
 
       <div className={styles.settingSection}>
-        <Title3 className={styles.sectionTitle}>Day/Night Shading</Title3>
+        <Title3 className={styles.sectionTitle}>{t('settings.general.dayNightShading.title')}</Title3>
         <Divider className={styles.divider} />
         <Text className={styles.settingDescription}>
-          Show day/night background shading on 24-hour glucose graphs.
+          {t('settings.general.dayNightShading.description')}
         </Text>
         <Switch
           checked={showDayNightShading}
           onChange={(_, data) => onShowDayNightShadingChange(data.checked)}
-          label={showDayNightShading ? 'Day/night shading enabled' : 'Day/night shading disabled'}
+          label={showDayNightShading ? t('settings.general.dayNightShading.enabled') : t('settings.general.dayNightShading.disabled')}
         />
       </div>
 
       <div className={styles.settingSection}>
-        <Title3 className={styles.sectionTitle}>Export Format</Title3>
+        <Title3 className={styles.sectionTitle}>{t('settings.general.exportFormat.title')}</Title3>
         <Divider className={styles.divider} />
         <Text className={styles.settingDescription}>
-          Choose the format for exporting table data to clipboard (CSV or TSV).
+          {t('settings.general.exportFormat.description')}
         </Text>
         <RadioGroup
           value={exportFormat}
           onChange={(_, data) => onExportFormatChange(data.value as ExportFormat)}
         >
-          <Radio value="csv" label="CSV (Comma-Separated Values)" />
-          <Radio value="tsv" label="TSV (Tab-Separated Values)" />
+          <Radio value="csv" label={t('settings.general.exportFormat.csv')} />
+          <Radio value="tsv" label={t('settings.general.exportFormat.tsv')} />
         </RadioGroup>
       </div>
 
       <div className={styles.settingSection}>
-        <Title3 className={styles.sectionTitle}>UI Language</Title3>
+        <Title3 className={styles.sectionTitle}>{t('settings.general.uiLanguage.title')}</Title3>
         <Divider className={styles.divider} />
         <Text className={styles.settingDescription}>
-          Choose the language for the application interface. This affects all menus, labels, and button text throughout the application.
+          {t('settings.general.uiLanguage.description')}
         </Text>
         <RadioGroup
           value={uiLanguage}
           onChange={(_, data) => onUILanguageChange(data.value as UILanguage)}
         >
-          <Radio value="en" label="English" />
-          <Radio value="de" label="Deutsch (German)" />
-          <Radio value="cs" label="Čeština (Czech)" />
+          <Radio value="en" label={t('settings.general.uiLanguage.english')} />
+          <Radio value="de" label={t('settings.general.uiLanguage.german')} />
+          <Radio value="cs" label={t('settings.general.uiLanguage.czech')} />
         </RadioGroup>
       </div>
 
       <div className={styles.settingSection}>
-        <Title3 className={styles.sectionTitle}>AI Response Language</Title3>
+        <Title3 className={styles.sectionTitle}>{t('settings.general.responseLanguage.title')}</Title3>
         <Divider className={styles.divider} />
         
         {/* Sync toggle */}
@@ -119,26 +122,26 @@ export function GeneralSettingsTab({
           <Switch
             checked={syncWithUILanguage}
             onChange={(_, data) => onSyncWithUILanguageChange(data.checked)}
-            label="Automatically sync with UI language"
+            label={t('settings.general.responseLanguage.syncLabel')}
           />
           <Text className={styles.settingDescription} style={{ marginTop: '8px' }}>
-            When enabled, the AI response language will automatically match your UI language. When disabled, you can select a specific language below.
+            {t('settings.general.responseLanguage.syncDescription')}
           </Text>
         </div>
 
         {/* Language selector - disabled when sync is enabled */}
         <Text className={styles.settingDescription} style={{ marginTop: '16px' }}>
-          Choose the language for AI analysis responses. This affects all AI-generated insights and recommendations.
+          {t('settings.general.responseLanguage.description')}
         </Text>
         <RadioGroup
           value={responseLanguage}
           onChange={(_, data) => onResponseLanguageChange(data.value as ResponseLanguage)}
           disabled={syncWithUILanguage}
         >
-          <Radio value="english" label="English" />
-          <Radio value="czech" label="Czech (Čeština)" />
-          <Radio value="german" label="German (Deutsch)" />
-          <Radio value="serbian" label="Serbian (Srpski - latinica)" />
+          <Radio value="english" label={t('settings.general.responseLanguage.english')} />
+          <Radio value="czech" label={t('settings.general.responseLanguage.czech')} />
+          <Radio value="german" label={t('settings.general.responseLanguage.german')} />
+          <Radio value="serbian" label={t('settings.general.responseLanguage.serbian')} />
         </RadioGroup>
       </div>
     </>

@@ -31,6 +31,9 @@ describe('i18n configuration', () => {
       'navigation',
       'home',
       'dataUpload',
+      'reports',
+      'aiAnalysis',
+      'settings',
       'dialogs',
       'notifications',
     ];

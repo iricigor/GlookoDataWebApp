@@ -19,6 +19,7 @@ import {
   Spinner,
   Tooltip,
 } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
 import { 
   InfoRegular, 
   CheckmarkRegular, 
@@ -55,6 +56,7 @@ export function AISettingsTab({
   onSelectedProviderChange,
   onProviderAutoSwitch,
 }: AISettingsTabProps) {
+  const { t } = useTranslation('settings');
   const [editingField, setEditingField] = useState<string | null>(null);
   
   // Verification state for each API key
@@ -245,7 +247,7 @@ export function AISettingsTab({
           disabled
           className={`${styles.statusButton} ${styles.statusButtonUnavailable}`}
         >
-          Unavailable
+          {t('settings.ai.unavailable')}
         </Button>
       );
     }
@@ -258,7 +260,7 @@ export function AISettingsTab({
           icon={<CheckmarkRegular />}
           className={`${styles.statusButton} ${styles.statusButtonSelected}`}
         >
-          Selected
+          {t('settings.ai.selected')}
         </Button>
       );
     }
@@ -270,7 +272,7 @@ export function AISettingsTab({
         onClick={() => onSelectedProviderChange(provider)}
         className={styles.statusButton}
       >
-        Select
+        {t('settings.ai.select')}
       </Button>
     );
   };
@@ -285,13 +287,13 @@ export function AISettingsTab({
     const getTooltipText = () => {
       switch (status) {
         case 'verifying':
-          return 'Verifying API key...';
+          return t('settings.ai.verify.verifying');
         case 'valid':
-          return 'API key is valid';
+          return t('settings.ai.verify.valid');
         case 'invalid':
-          return 'API key is invalid';
+          return t('settings.ai.verify.invalid');
         default:
-          return hasKey ? 'Click to verify API key' : 'No API key to verify';
+          return hasKey ? t('settings.ai.verify.clickToVerify') : t('settings.ai.verify.noKey');
       }
     };
     
@@ -331,7 +333,7 @@ export function AISettingsTab({
         target="_blank"
         rel="noopener noreferrer"
         className={styles.privacyInfoButton}
-        title="Privacy Policy"
+        title={t('settings.ai.privacyPolicy')}
       >
         <InfoRegular />
       </Link>
@@ -364,7 +366,7 @@ export function AISettingsTab({
             onChange={(_, data) => onApiKeyChange(data.value)}
             onFocus={() => setEditingField(inputId)}
             onBlur={() => setEditingField(null)}
-            placeholder="Enter your API key"
+            placeholder={t('settings.ai.apiKeyPlaceholder')}
             appearance="underline"
             className={styles.apiKeyInputBorderless}
             readOnly={isReadOnly}
@@ -380,10 +382,10 @@ export function AISettingsTab({
   return (
     <>
       <div className={styles.settingSection}>
-        <Title3 className={styles.sectionTitle}>AI Configuration</Title3>
+        <Title3 className={styles.sectionTitle}>{t('settings.ai.title')}</Title3>
         <Divider className={styles.divider} />
         <Text className={styles.settingDescription}>
-          Configure your AI settings for intelligent analysis. Click "Select" next to any configured API key to switch providers.
+          {t('settings.ai.description')}
         </Text>
         
         <div className={styles.apiKeyContainer}>

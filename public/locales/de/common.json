@@ -9,7 +9,20 @@
     "english": "Englisch",
     "german": "Deutsch",
     "czech": "Tschechisch",
-    "loading": "Laden..."
+    "loading": "Laden...",
+    "glucoseThresholds": {
+      "title": "Blutzucker-Schwellenwerte",
+      "description": "Konfigurieren Sie Ihre Blutzucker-Schwellenwerte in {{unit}}. Die Werte müssen in aufsteigender Reihenfolge sein.",
+      "veryHigh": "Sehr hoch",
+      "high": "Hoch",
+      "low": "Niedrig",
+      "veryLow": "Sehr niedrig",
+      "inRange": "Im Bereich:",
+      "veryHighAriaLabel": "Sehr hoher Schwellenwert",
+      "highAriaLabel": "Hoher Schwellenwert",
+      "lowAriaLabel": "Niedriger Schwellenwert",
+      "veryLowAriaLabel": "Sehr niedriger Schwellenwert"
+    }
   },
   "appTitle": "Glooko Daten Web App",
   "brandName": "Glooko Insights",

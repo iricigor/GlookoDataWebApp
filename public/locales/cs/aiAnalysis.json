@@ -1,0 +1,20 @@
+{
+  "aiAnalysis": {
+    "title": "AI analýza",
+    "description": "Získejte inteligentní poznatky a doporučení pomocí pokročilých AI algoritmů",
+    "placeholders": {
+      "noFile": "Vyberte datový soubor ze stránky Nahrání dat pro zahájení AI analýzy",
+      "noApiKey": "Chcete-li používat AI analýzu, musíte nakonfigurovat klíč API (Perplexity nebo Google Gemini).",
+      "addApiKey": "Přidejte svůj klíč API na",
+      "settingsLink": "stránce Nastavení"
+    },
+    "tabs": {
+      "fileInfo": "Info o souboru",
+      "timeInRange": "Čas v rozmezí",
+      "glucoseInsulin": "Glukóza a inzulín",
+      "mealTiming": "Časování jídel",
+      "pumpSettings": "Nastavení pumpy",
+      "hypos": "Hypoglykémie"
+    }
+  }
+}

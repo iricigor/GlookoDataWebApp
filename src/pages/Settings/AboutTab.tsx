@@ -10,6 +10,7 @@ import {
   Link,
   Button,
 } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
 import { BugRegular, LightbulbRegular, CodeRegular, DocumentBulletListRegular } from '@fluentui/react-icons';
 import { getVersionInfo, formatBuildDate } from '../../utils/version';
 import type { SettingsTabProps } from './types';
@@ -23,15 +24,16 @@ import type { SettingsTabProps } from './types';
  * @returns The About tab React element
  */
 export function AboutTab({ styles }: SettingsTabProps) {
+  const { t } = useTranslation('settings');
   const versionInfo = getVersionInfo();
 
   return (
     <>
       <div className={styles.settingSection}>
-        <Title3 className={styles.sectionTitle}>Support</Title3>
+        <Title3 className={styles.sectionTitle}>{t('settings.about.support.title')}</Title3>
         <Divider className={styles.divider} />
         <Text className={styles.settingDescription}>
-          Help us improve the app by reporting bugs or suggesting new features.
+          {t('settings.about.support.description')}
         </Text>
         <div className={styles.supportButtons}>
           <Link 
@@ -43,7 +45,7 @@ export function AboutTab({ styles }: SettingsTabProps) {
               appearance="secondary" 
               icon={<BugRegular />}
             >
-              Report a Bug
+              {t('settings.about.support.reportBug')}
             </Button>
           </Link>
           <Link 
@@ -55,7 +57,7 @@ export function AboutTab({ styles }: SettingsTabProps) {
               appearance="secondary" 
               icon={<LightbulbRegular />}
             >
-              Request a Feature
+              {t('settings.about.support.requestFeature')}
             </Button>
           </Link>
           <Link 
@@ -67,7 +69,7 @@ export function AboutTab({ styles }: SettingsTabProps) {
               appearance="secondary" 
               icon={<CodeRegular />}
             >
-              View on GitHub
+              {t('settings.about.support.viewGitHub')}
             </Button>
           </Link>
           <Link 
@@ -77,17 +79,17 @@ export function AboutTab({ styles }: SettingsTabProps) {
               appearance="secondary" 
               icon={<DocumentBulletListRegular />}
             >
-              API Documentation
+              {t('settings.about.support.apiDocs')}
             </Button>
           </Link>
         </div>
       </div>
 
       <div className={styles.settingSection}>
-        <Title3 className={styles.sectionTitle}>Version Information</Title3>
+        <Title3 className={styles.sectionTitle}>{t('settings.about.version.title')}</Title3>
         <Divider className={styles.divider} />
         <div className={styles.versionItem}>
-          <Text className={styles.versionLabel}>Version:</Text>
+          <Text className={styles.versionLabel}>{t('settings.about.version.version')}</Text>
           {versionInfo.releaseUrl ? (
             <Link 
               href={versionInfo.releaseUrl}
@@ -102,15 +104,15 @@ export function AboutTab({ styles }: SettingsTabProps) {
           )}
         </div>
         <div className={styles.versionItem}>
-          <Text className={styles.versionLabel}>Build ID:</Text>
+          <Text className={styles.versionLabel}>{t('settings.about.version.buildId')}</Text>
           <Text className={styles.versionValue}>{versionInfo.buildId}</Text>
         </div>
         <div className={styles.versionItem}>
-          <Text className={styles.versionLabel}>Build Date:</Text>
+          <Text className={styles.versionLabel}>{t('settings.about.version.buildDate')}</Text>
           <Text className={styles.versionValue}>{formatBuildDate(versionInfo.buildDate)}</Text>
         </div>
         <div className={styles.versionItem}>
-          <Text className={styles.versionLabel}>Full Version:</Text>
+          <Text className={styles.versionLabel}>{t('settings.about.version.fullVersion')}</Text>
           {versionInfo.releaseUrl ? (
             <Link 
               href={versionInfo.releaseUrl}
@@ -127,16 +129,13 @@ export function AboutTab({ styles }: SettingsTabProps) {
       </div>
 
       <div className={styles.settingSection}>
-        <Title3 className={styles.sectionTitle}>Demo Data Attribution</Title3>
+        <Title3 className={styles.sectionTitle}>{t('settings.about.demoData.title')}</Title3>
         <Divider className={styles.divider} />
         <Text className={styles.settingDescription}>
-          The demo datasets included in this application are inspired by real-world Type 1 Diabetes data patterns 
-          from the <strong>AZT1D dataset</strong> (Khamesian et al., 2025), which is available under the Creative 
-          Commons Attribution 4.0 (CC BY 4.0) license.
+          {t('settings.about.demoData.description')} <strong>{t('settings.about.demoData.dataset')}</strong> {t('settings.about.demoData.authors')}
         </Text>
         <Text className={styles.settingDescription} style={{ marginTop: '12px' }}>
-          <strong>Citation:</strong> Khamesian, S., Arefeen, A., Thompson, B. M., Grando, M. A., & Ghasemzadeh, H. (2025). 
-          AZT1D: A Real-World Dataset for Type 1 Diabetes. arXiv:2506.14789. DOI:{' '}
+          <strong>{t('settings.about.demoData.citation')}</strong> {t('settings.about.demoData.citationText')}{' '}
           <Link 
             href="https://doi.org/10.17632/gk9m674wcx.1"
             target="_blank"
@@ -146,7 +145,7 @@ export function AboutTab({ styles }: SettingsTabProps) {
           </Link>
         </Text>
         <Text className={styles.settingDescription} style={{ marginTop: '12px' }}>
-          For more information about the original dataset, visit:{' '}
+          {t('settings.about.demoData.moreInfo')}{' '}
           <Link 
             href="https://arxiv.org/abs/2506.14789"
             target="_blank"

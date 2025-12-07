@@ -1,0 +1,20 @@
+{
+  "aiAnalysis": {
+    "title": "AI Analysis",
+    "description": "Get intelligent insights and recommendations using advanced AI algorithms",
+    "placeholders": {
+      "noFile": "Please select a data file from the Data Upload page to begin AI analysis",
+      "noApiKey": "To use AI-powered analysis, you need to configure an API key (Perplexity or Google Gemini).",
+      "addApiKey": "Please add your API key in the",
+      "settingsLink": "Settings page"
+    },
+    "tabs": {
+      "fileInfo": "File Info",
+      "timeInRange": "Time in Range",
+      "glucoseInsulin": "Glucose & Insulin",
+      "mealTiming": "Meal Timing",
+      "pumpSettings": "Pump Settings",
+      "hypos": "Hypos"
+    }
+  }
+}

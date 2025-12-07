@@ -1,0 +1,12 @@
+{
+  "reports": {
+    "title": "Komplexní zprávy",
+    "description": "Zobrazit podrobné analýzy včetně času v rozmezí, vzorů a trendů",
+    "tabs": {
+      "fileInfo": "Info o souboru",
+      "bgOverview": "Přehled glykémie",
+      "dailyBG": "Denní glykémie",
+      "hypos": "Hypoglykémie"
+    }
+  }
+}

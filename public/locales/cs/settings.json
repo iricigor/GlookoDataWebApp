@@ -1,0 +1,170 @@
+{
+  "settings": {
+    "title": "Nastavení",
+    "description": "Nakonfigurujte své preference aplikace",
+    "tabs": {
+      "general": "Obecné",
+      "glucose": "Data glukózy",
+      "ai": "Nastavení AI",
+      "about": "O aplikaci"
+    },
+    "general": {
+      "theme": {
+        "title": "Vzhled",
+        "description": "Vyberte si preferovaný barevný vzhled. Možnost Systém sleduje nastavení vašeho operačního systému.",
+        "light": "Světlý",
+        "dark": "Tmavý",
+        "system": "Systém (doporučeno)"
+      },
+      "dayNightShading": {
+        "title": "Stínování den/noc",
+        "description": "Zobrazit stínování pozadí den/noc na 24hodinových grafech glukózy.",
+        "enabled": "Stínování den/noc povoleno",
+        "disabled": "Stínování den/noc zakázáno"
+      },
+      "exportFormat": {
+        "title": "Formát exportu",
+        "description": "Vyberte formát pro export tabulkových dat do schránky (CSV nebo TSV).",
+        "csv": "CSV (Comma-Separated Values)",
+        "tsv": "TSV (Tab-Separated Values)"
+      },
+      "uiLanguage": {
+        "title": "Jazyk uživatelského rozhraní",
+        "description": "Vyberte jazyk pro rozhraní aplikace. To ovlivní všechny nabídky, popisky a texty tlačítek v celé aplikaci.",
+        "english": "English",
+        "german": "Deutsch (German)",
+        "czech": "Čeština (Czech)"
+      },
+      "responseLanguage": {
+        "title": "Jazyk odpovědí AI",
+        "syncLabel": "Automaticky synchronizovat s jazykem uživatelského rozhraní",
+        "syncDescription": "Pokud je povoleno, jazyk odpovědí AI se automaticky shoduje s jazykem vašeho uživatelského rozhraní. Pokud je zakázáno, můžete níže vybrat konkrétní jazyk.",
+        "description": "Vyberte jazyk pro odpovědi AI analýzy. To ovlivní všechny poznatky a doporučení generované AI.",
+        "english": "English",
+        "czech": "Czech (Čeština)",
+        "german": "German (Deutsch)",
+        "serbian": "Serbian (Srpski - latinica)"
+      }
+    },
+    "glucose": {
+      "unit": {
+        "title": "Jednotka glukózy",
+        "description": "Vyberte si preferovanou jednotku pro zobrazení hodnot glykémie. Toto nastavení ovlivňuje všechny hodnoty glukózy, grafy a prahy v celé aplikaci.",
+        "mmol": "mmol/L (milimoly na litr)",
+        "mgdl": "mg/dL (miligramy na decilitr)"
+      },
+      "insulinDuration": {
+        "title": "Doba působení inzulínu",
+        "description": "Nastavte dobu působení inzulínu v hodinách pro výpočty IOB (Insulin On Board). To ovlivňuje, jak dlouho je inzulín považován za aktivní ve vašem systému. Typické hodnoty se pohybují od 3 do 6 hodin.",
+        "label": "Doba trvání (hodiny)"
+      }
+    },
+    "ai": {
+      "title": "Konfigurace AI",
+      "description": "Nakonfigurujte nastavení AI pro inteligentní analýzu. Klikněte na \"Vybrat\" vedle jakéhokoli nakonfigurovaného klíče API pro přepnutí poskytovatelů.",
+      "apiKeyPlaceholder": "Zadejte svůj klíč API",
+      "unavailable": "Nedostupný",
+      "selected": "Vybrán",
+      "select": "Vybrat",
+      "verify": {
+        "verifying": "Ověřování klíče API...",
+        "valid": "Klíč API je platný",
+        "invalid": "Klíč API je neplatný",
+        "clickToVerify": "Klikněte pro ověření klíče API",
+        "noKey": "Žádný klíč API k ověření"
+      },
+      "privacyPolicy": "Zásady ochrany osobních údajů",
+      "accordion": {
+        "freeApi": {
+          "title": "🎁 Dostupnost bezplatných klíčů API",
+          "summary": "Informace o možnostech bezplatného tarifu pro každého poskytovatele AI.",
+          "gemini": "✅ Nabízí bezplatný tarif s měsíčním kvótou pro volání API.",
+          "deepseek": "✅ Nabízí omezený bezplatný cloudový tarif API s měsíčními požadavky.",
+          "perplexity": "⚠️ API je primárně placené s omezeným bezplatným tarifem.",
+          "grok": "❌ Žádný bezplatný přístup k API. Vyžaduje předplatné X Premium+ ($30/měsíc).",
+          "getFreeKey": "Získejte svůj bezplatný klíč API",
+          "checkPricing": "Zkontrolujte ceny",
+          "learnMore": "Zjistit více"
+        },
+        "dataHandling": {
+          "title": "⚠️ Důležité: Zpracování dat a vaše odpovědnost",
+          "summary": "Vaše zdravotní data jsou odesílána poskytovatelům AI při použití funkcí analýzy.",
+          "description1": "Když používáte funkce AI analýzy, vaše citlivá zdravotní data budou odeslána vybranému poskytovateli AI. Data jsou odesílána",
+          "withoutPII": "bez osobních údajů",
+          "description2": "(jako je vaše jméno nebo e-mail), ale poskytovatel AI může být schopen přiřadit váš klíč API ke zdravotním datům, která odesíláte.",
+          "responsibility": "Vaše odpovědnost:",
+          "responsibilityText": "Jste odpovědní za bezpečnost těchto informací a jejich používání v souladu se všemi platnými pravidly a předpisy o ochraně údajů. Před použitím těchto funkcí si přečtěte zásady ochrany osobních údajů zvoleného poskytovatele AI.",
+          "bestPractices": "Osvědčené postupy:",
+          "bestPracticesText": "Pravidelně sledujte používání klíče API prostřednictvím řídicího panelu vašeho poskytovatele, při vytváření klíčů API používejte oprávnění s nejnižšími privilegii a nastavte denní limity výdajů, abyste zabránili neočekávaným poplatkům a neoprávněnému použití."
+        },
+        "storage": {
+          "title": "Úložiště klíčů API:",
+          "summary": "Vaše klíče API jsou uloženy lokálně ve vašem prohlížeči a nikdy nejsou odesílány na naše servery.",
+          "description": "Vaše klíče API jsou uloženy lokálně v místním úložišti vašeho prohlížeče (ne v cookies) a zůstávají zachovány, dokud je ručně neodstraníte nebo nevymažete data prohlížeče. Klíče nikdy nejsou přenášeny na naše servery ani třetím stranám.",
+          "technicalDetails": "Technické podrobnosti:",
+          "technicalDetailsText": "Používáme rozhraní API místního úložiště prohlížeče, které poskytuje trvalé úložiště, které zůstává dostupné napříč relacemi prohlížeče. Tato data jsou uložena pouze na vašem zařízení a jsou přístupná pouze této webové aplikaci ze stejné domény."
+        },
+        "communication": {
+          "title": "Komunikace s AI:",
+          "summary": "Veškerá AI analýza probíhá přímo mezi vaším prohlížečem a poskytovatelem AI—žádné zprostředkující servery.",
+          "description": "Když požádáte o AI analýzu, váš prohlížeč odešle požadavek přímo na API vybraného poskytovatele AI. Naše aplikace nefunguje jako zprostředkovatel—komunikace probíhá přímo z vašeho prohlížeče k poskytovateli AI.",
+          "priority": "Priorita poskytovatele:",
+          "priorityText": "Pokud je nakonfigurováno více klíčů API, jsou použity v tomto pořadí: Perplexity → Grok AI → DeepSeek → Google Gemini. Chcete-li použít jiného poskytovatele, odstraňte klíče API s vyšší prioritou."
+        },
+        "bestPractices": {
+          "title": "Osvědčené postupy zabezpečení:",
+          "summary": "Postupujte podle těchto doporučení, abyste zabezpečili své klíče API a data.",
+          "createSecure": "Vytvořte zabezpečené klíče API:",
+          "createSecureText": "Při vytváření klíčů API používejte minimální oprávnění na:",
+          "perplexitySettings": "Nastavení Perplexity",
+          "xaiConsole": "Konzola xAI",
+          "grokNote": "(pro Grok AI)",
+          "deepseekPlatform": "Platforma DeepSeek",
+          "googleAIStudio": "Google AI Studio",
+          "protectKeys": "Chraňte své klíče:",
+          "protectKeysText": "Vyberte klíče určené pro aplikace na straně klienta a nastavte limity výdajů, abyste zabránili neočekávaným poplatkům. Pravidelně sledujte používání klíče API prostřednictvím řídicího panelu vašeho poskytovatele.",
+          "riskMitigation": "Zmírnění rizika:",
+          "riskMitigationText": "Pokud někdo získá přístup k relaci vašeho prohlížeče nebo počítači, mohl by mít přístup k vašemu uloženému klíči API. Pro snížení tohoto rizika:",
+          "riskItem1": "Odhlaste se ze sdílených počítačů",
+          "riskItem2": "Používejte funkce ochrany soukromí prohlížeče (soukromý/inkognito režim, je-li to vhodné)",
+          "riskItem3": "Pravidelně měňte své klíče API",
+          "riskItem4": "Sledujte používání API na řídicím panelu vašeho poskytovatele",
+          "riskItem5": "Mažte data prohlížeče při používání veřejných počítačů"
+        },
+        "dataStorage": {
+          "title": "Úložiště dat:",
+          "summary": "Vaše data jsou uložena lokálně s konfigurovatelnou možností trvalosti.",
+          "description1": "Vaše data jsou uložena lokálně s konfigurovatelnou možností trvalosti. Veškeré zpracování probíhá ve vašem prohlížeči. Tato aplikace je plně open source—můžete",
+          "reviewCode": "zkontrolovat kód na GitHubu",
+          "description2": "nebo nasadit vlastní instanci pro úplnou kontrolu."
+        }
+      }
+    },
+    "about": {
+      "support": {
+        "title": "Podpora",
+        "description": "Pomozte nám vylepšit aplikaci hlášením chyb nebo navrhováním nových funkcí.",
+        "reportBug": "Nahlásit chybu",
+        "requestFeature": "Požádat o funkci",
+        "viewGitHub": "Zobrazit na GitHubu",
+        "apiDocs": "Dokumentace API"
+      },
+      "version": {
+        "title": "Informace o verzi",
+        "version": "Verze:",
+        "buildId": "ID sestavení:",
+        "buildDate": "Datum sestavení:",
+        "fullVersion": "Úplná verze:"
+      },
+      "demoData": {
+        "title": "Přiřazení demo dat",
+        "description": "Demo datové sady obsažené v této aplikaci jsou inspirovány reálnými vzory dat diabetu 1. typu z",
+        "dataset": "datové sady AZT1D",
+        "authors": "(Khamesian et al., 2025), která je dostupná pod licencí Creative Commons Attribution 4.0 (CC BY 4.0).",
+        "citation": "Citace:",
+        "citationText": "Khamesian, S., Arefeen, A., Thompson, B. M., Grando, M. A., & Ghasemzadeh, H. (2025). AZT1D: A Real-World Dataset for Type 1 Diabetes. arXiv:2506.14789. DOI:",
+        "moreInfo": "Další informace o původní datové sadě naleznete na:"
+      }
+    }
+  }
+}
