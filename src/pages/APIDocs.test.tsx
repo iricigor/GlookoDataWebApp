@@ -14,17 +14,17 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
-        'title': 'Glooko Insights - API Documentation',
-        'subtitle': 'Interactive API explorer with Microsoft authentication',
-        'proUserBadge': 'Pro user',
-        'tokenActive': 'Token active',
-        'signOut': 'Sign Out',
-        'signInPrompt': 'Sign in to test authenticated endpoints',
-        'signInButton': 'Sign in with Microsoft',
-        'signInMessage': 'Sign in with your Microsoft account to test API endpoints. Your authentication token will be automatically added to requests.',
-        'initializingAuth': 'Initializing authentication...',
-        'loadingDocs': 'Loading API documentation...',
-        'loadError': 'Failed to load API documentation',
+        'apiDocs.title': 'Glooko Insights - API Documentation',
+        'apiDocs.subtitle': 'Interactive API explorer with Microsoft authentication',
+        'apiDocs.proUserBadge': 'Pro user',
+        'apiDocs.tokenActive': 'Token active',
+        'apiDocs.signOut': 'Sign Out',
+        'apiDocs.signInPrompt': 'Sign in to test authenticated endpoints',
+        'apiDocs.signInButton': 'Sign in with Microsoft',
+        'apiDocs.signInMessage': 'Sign in with your Microsoft account to test API endpoints. Your authentication token will be automatically added to requests.',
+        'apiDocs.initializingAuth': 'Initializing authentication...',
+        'apiDocs.loadingDocs': 'Loading API documentation...',
+        'apiDocs.loadError': 'Failed to load API documentation',
       };
       return translations[key] || key;
     },
@@ -133,22 +133,22 @@ describe('APIDocs - Czech translations', () => {
   it('should support Czech translations for the namespace', () => {
     // This test verifies that the Czech translation file exists and has all required keys
     const csTranslations = {
-      'title': 'Glooko Insights - API dokumentace',
-      'subtitle': 'Interaktivní API průzkumník s autentizací Microsoft',
-      'proUserBadge': 'Pro uživatel',
-      'tokenActive': 'Token aktivní',
-      'signOut': 'Odhlásit se',
-      'signInPrompt': 'Přihlaste se pro testování autentizovaných endpointů',
-      'signInButton': 'Přihlásit se pomocí Microsoftu',
-      'signInMessage': 'Přihlaste se pomocí svého účtu Microsoft pro testování API endpointů. Váš autentizační token bude automaticky přidán k požadavkům.',
-      'initializingAuth': 'Inicializace autentizace...',
-      'loadingDocs': 'Načítání API dokumentace...',
-      'loadError': 'Nepodařilo se načíst API dokumentaci',
+      'apiDocs.title': 'Glooko Insights - API dokumentace',
+      'apiDocs.subtitle': 'Interaktivní API průzkumník s autentizací Microsoft',
+      'apiDocs.proUserBadge': 'Pro uživatel',
+      'apiDocs.tokenActive': 'Token aktivní',
+      'apiDocs.signOut': 'Odhlásit se',
+      'apiDocs.signInPrompt': 'Přihlaste se pro testování autentizovaných endpointů',
+      'apiDocs.signInButton': 'Přihlásit se pomocí Microsoftu',
+      'apiDocs.signInMessage': 'Přihlaste se pomocí svého účtu Microsoft pro testování API endpointů. Váš autentizační token bude automaticky přidán k požadavkům.',
+      'apiDocs.initializingAuth': 'Inicializace autentizace...',
+      'apiDocs.loadingDocs': 'Načítání API dokumentace...',
+      'apiDocs.loadError': 'Nepodařilo se načíst API dokumentaci',
     };
 
     // Verify all required keys are present
     expect(Object.keys(csTranslations)).toHaveLength(11);
-    expect(csTranslations.title).toContain('API dokumentace');
-    expect(csTranslations.signInButton).toContain('Microsoftu');
+    expect(csTranslations['apiDocs.title']).toContain('API dokumentace');
+    expect(csTranslations['apiDocs.signInButton']).toContain('Microsoftu');
   });
 });

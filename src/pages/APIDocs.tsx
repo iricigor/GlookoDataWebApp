@@ -134,7 +134,7 @@ export function APIDocs() {
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') return
         console.error('Failed to load OpenAPI spec:', error)
-        setSpecError(error instanceof Error ? error.message : t('loadError'))
+        setSpecError(error instanceof Error ? error.message : t('apiDocs.loadError'))
       }
     }
     loadSpec()
@@ -159,7 +159,7 @@ export function APIDocs() {
       <div className={styles.container}>
         <div className={styles.loadingContainer}>
           <Spinner size="medium" />
-          <Text>{t('initializingAuth')}</Text>
+          <Text>{t('apiDocs.initializingAuth')}</Text>
         </div>
       </div>
     )
@@ -169,9 +169,9 @@ export function APIDocs() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <Text className={styles.title}>{t('title')}</Text>
+          <Text className={styles.title}>{t('apiDocs.title')}</Text>
           <Text className={styles.subtitle}>
-            {t('subtitle')}
+            {t('apiDocs.subtitle')}
           </Text>
         </div>
         
@@ -182,15 +182,15 @@ export function APIDocs() {
                 <div className={proBadgeStyles.userNameContainer}>
                   <Text className={styles.userName}>{userName}</Text>
                   {isProUser && (
-                    <Tooltip content={t('proUserBadge')} relationship="label">
-                      <span className={proBadgeStyles.proUserBadge} aria-label={t('proUserBadge')}>✨</span>
+                    <Tooltip content={t('apiDocs.proUserBadge')} relationship="label">
+                      <span className={proBadgeStyles.proUserBadge} aria-label={t('apiDocs.proUserBadge')}>✨</span>
                     </Tooltip>
                   )}
                 </div>
                 {userEmail && <Text className={styles.userEmail}>{userEmail}</Text>}
                 <div className={styles.tokenStatus}>
                   <CheckmarkCircleRegular className={styles.tokenStatusIcon} fontSize={14} />
-                  <Text className={styles.tokenStatusText}>{t('tokenActive')}</Text>
+                  <Text className={styles.tokenStatusText}>{t('apiDocs.tokenActive')}</Text>
                 </div>
               </div>
               <Button
@@ -198,18 +198,18 @@ export function APIDocs() {
                 icon={<SignOutRegular />}
                 onClick={logout}
               >
-                {t('signOut')}
+                {t('apiDocs.signOut')}
               </Button>
             </>
           ) : (
             <>
-              <Text>{t('signInPrompt')}</Text>
+              <Text>{t('apiDocs.signInPrompt')}</Text>
               <Button
                 appearance="primary"
                 icon={<PersonRegular />}
                 onClick={login}
               >
-                {t('signInButton')}
+                {t('apiDocs.signInButton')}
               </Button>
             </>
           )}
@@ -221,7 +221,7 @@ export function APIDocs() {
           <div className={styles.messageBar}>
             <MessageBar intent="warning">
               <MessageBarBody>
-                {t('signInMessage')}
+                {t('apiDocs.signInMessage')}
               </MessageBarBody>
             </MessageBar>
           </div>
@@ -253,7 +253,7 @@ export function APIDocs() {
         ) : !specError && (
           <div className={styles.loadingContainer}>
             <Spinner size="medium" />
-            <Text>{t('loadingDocs')}</Text>
+            <Text>{t('apiDocs.loadingDocs')}</Text>
           </div>
         )}
       </div>
