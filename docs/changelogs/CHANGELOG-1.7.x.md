@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>741 Add persistent file caching with IndexedDB and remove obsolete AI settings section</summary>
+
+[#741](../../pull/741) Add persistent file caching with IndexedDB and remove obsolete AI settings section
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>739 Fix Serbian language support: translation placeholders, missing Pro Users section, and language switcher</summary>
 
 [#739](../../pull/739) Fix Serbian language support: translation placeholders, missing Pro Users section, and language switcher
