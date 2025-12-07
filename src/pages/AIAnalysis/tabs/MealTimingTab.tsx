@@ -226,29 +226,32 @@ export function MealTimingTab({
       <RetryNotification info={retryInfo} />
 
       {/* Accordion to show prompt text */}
-      <Accordion collapsible style={{ marginTop: '16px' }}>
-        <AccordionItem value="promptText">
-          <AccordionHeader>View AI Prompt</AccordionHeader>
-          <AccordionPanel>
-            <div className={styles.promptTextContainer}>
-              {(() => {
-                const cgmCsv = convertGlucoseReadingsToCSV(cgmReadings);
-                const bolusCsv = convertBolusReadingsToCSV(bolusReadings);
-                const basalCsv = convertBasalReadingsToCSV(basalReadings);
-                const base64CgmData = base64Encode(cgmCsv);
-                const base64BolusData = base64Encode(bolusCsv);
-                const base64BasalData = base64Encode(basalCsv);
-                return generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, activeProvider || undefined);
-              })()}
-            </div>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
+      {showGeekStats && (
+        <Accordion collapsible style={{ marginTop: '16px' }}>
+          <AccordionItem value="promptText">
+            <AccordionHeader>View AI Prompt</AccordionHeader>
+            <AccordionPanel>
+              <div className={styles.promptTextContainer}>
+                {(() => {
+                  const cgmCsv = convertGlucoseReadingsToCSV(cgmReadings);
+                  const bolusCsv = convertBolusReadingsToCSV(bolusReadings);
+                  const basalCsv = convertBasalReadingsToCSV(basalReadings);
+                  const base64CgmData = base64Encode(cgmCsv);
+                  const base64BolusData = base64Encode(bolusCsv);
+                  const base64BasalData = base64Encode(basalCsv);
+                  return generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, activeProvider || undefined);
+                })()}
+              </div>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+      )}
 
       {/* Accordion for dataset summaries */}
-      <Accordion collapsible style={{ marginTop: '16px' }}>
-        <AccordionItem value="datasetSummary">
-          <AccordionHeader>Dataset Summary</AccordionHeader>
+      {showGeekStats && (
+        <Accordion collapsible style={{ marginTop: '16px' }}>
+          <AccordionItem value="datasetSummary">
+            <AccordionHeader>Dataset Summary</AccordionHeader>
           <AccordionPanel>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <Text>
@@ -271,6 +274,7 @@ export function MealTimingTab({
           </AccordionPanel>
         </AccordionItem>
       </Accordion>
+      )}
 
       <AnalysisLoading visible={analyzing} />
       <AnalysisError error={error} />

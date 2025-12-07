@@ -34,6 +34,7 @@ import { useCookieConsent } from './hooks/useCookieConsent'
 import { useAuth } from './hooks/useAuth'
 import { useUserSettings } from './hooks/useUserSettings'
 import { useDayNightShading } from './hooks/useDayNightShading'
+import { useGeekStats } from './hooks/useGeekStats'
 import type { UploadedFile, AIAnalysisResult, CloudUserSettings } from './types'
 import type { AIProvider } from './utils/api'
 import { getProviderDisplayName } from './utils/api'
@@ -79,6 +80,7 @@ function App() {
   const { insulinDuration, setInsulinDuration } = useInsulinDuration()
   const { thresholds: glucoseThresholds, setThresholds: setGlucoseThresholds } = useGlucoseThresholds()
   const { showDayNightShading, setShowDayNightShading } = useDayNightShading()
+  const { showGeekStats, setShowGeekStats } = useGeekStats()
   
   // Cookie consent management
   const { hasConsented, acknowledgeConsent } = useCookieConsent()
@@ -404,6 +406,7 @@ function App() {
             glucoseUnit={glucoseUnit}
             insulinDuration={insulinDuration}
             showDayNightShading={showDayNightShading}
+            showGeekStats={showGeekStats}
             perplexityApiKey={perplexityApiKey}
             geminiApiKey={geminiApiKey}
             grokApiKey={grokApiKey}
@@ -423,16 +426,19 @@ function App() {
             selectedProvider={selectedProvider}
             responseLanguage={responseLanguage}
             glucoseUnit={glucoseUnit}
+            showGeekStats={showGeekStats}
             existingAnalysis={currentAIAnalysis}
             onAnalysisComplete={handleAIAnalysisComplete}
           />
         )
       case 'settings':
-        return <Settings 
+        return <Settings
           themeMode={themeMode}
           onThemeChange={setThemeMode}
           showDayNightShading={showDayNightShading}
           onShowDayNightShadingChange={setShowDayNightShading}
+          showGeekStats={showGeekStats}
+          onShowGeekStatsChange={setShowGeekStats}
           exportFormat={exportFormat}
           onExportFormatChange={setExportFormat}
           uiLanguage={uiLanguage}

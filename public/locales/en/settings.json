@@ -22,6 +22,12 @@
         "enabled": "Day/night shading enabled",
         "disabled": "Day/night shading disabled"
       },
+      "geekStats": {
+        "title": "Geek Stats",
+        "description": "Show technical details like AI prompts and detailed data tables. These are helpful for advanced users who want to see the underlying data and prompts.",
+        "enabled": "Geek stats enabled",
+        "disabled": "Geek stats disabled"
+      },
       "exportFormat": {
         "title": "Export Format",
         "description": "Choose the format for exporting table data to clipboard (CSV or TSV).",

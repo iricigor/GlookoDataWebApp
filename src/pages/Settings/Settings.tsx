@@ -39,6 +39,10 @@ interface SettingsProps {
   showDayNightShading: boolean;
   /** Callback invoked when day/night shading preference changes */
   onShowDayNightShadingChange: (show: boolean) => void;
+  /** Whether to show geek stats (technical details) */
+  showGeekStats: boolean;
+  /** Callback invoked when geek stats preference changes */
+  onShowGeekStatsChange: (show: boolean) => void;
   /** Current export format for table data (CSV or TSV) */
   exportFormat: ExportFormat;
   /** Callback invoked when export format changes */
@@ -103,6 +107,8 @@ export function Settings({
   onThemeChange, 
   showDayNightShading,
   onShowDayNightShadingChange,
+  showGeekStats,
+  onShowGeekStatsChange,
   exportFormat, 
   onExportFormatChange,
   uiLanguage,
@@ -174,6 +180,8 @@ export function Settings({
             onThemeChange={onThemeChange}
             showDayNightShading={showDayNightShading}
             onShowDayNightShadingChange={onShowDayNightShadingChange}
+            showGeekStats={showGeekStats}
+            onShowGeekStatsChange={onShowGeekStatsChange}
             exportFormat={exportFormat}
             onExportFormatChange={onExportFormatChange}
             uiLanguage={uiLanguage}

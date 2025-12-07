@@ -22,6 +22,12 @@
         "enabled": "Tag-/Nacht-Schattierung aktiviert",
         "disabled": "Tag-/Nacht-Schattierung deaktiviert"
       },
+      "geekStats": {
+        "title": "Geek-Statistiken",
+        "description": "Technische Details wie KI-Prompts und detaillierte Datentabellen anzeigen. Diese sind hilfreich für fortgeschrittene Benutzer, die die zugrunde liegenden Daten und Prompts sehen möchten.",
+        "enabled": "Geek-Statistiken aktiviert",
+        "disabled": "Geek-Statistiken deaktiviert"
+      },
       "exportFormat": {
         "title": "Export-Format",
         "description": "Wählen Sie das Format für den Export von Tabellendaten in die Zwischenablage (CSV oder TSV).",

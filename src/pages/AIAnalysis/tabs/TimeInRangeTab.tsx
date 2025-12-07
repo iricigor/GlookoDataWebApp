@@ -171,16 +171,18 @@ export function TimeInRangeTab({
       </div>
 
       {/* Accordion to show prompt text */}
-      <Accordion collapsible style={{ marginTop: '16px' }}>
-        <AccordionItem value="promptText">
-          <AccordionHeader>View AI Prompt</AccordionHeader>
-          <AccordionPanel>
-            <div className={styles.promptTextContainer}>
-              {glucoseStats && generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, activeProvider || undefined)}
-            </div>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
+      {showGeekStats && (
+        <Accordion collapsible style={{ marginTop: '16px' }}>
+          <AccordionItem value="promptText">
+            <AccordionHeader>View AI Prompt</AccordionHeader>
+            <AccordionPanel>
+              <div className={styles.promptTextContainer}>
+                {glucoseStats && generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, activeProvider || undefined)}
+              </div>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+      )}
 
       <Text className={styles.statementText} style={{ marginTop: '16px' }}>
         Your glucose is {inRangePercentage}% of time in range.
