@@ -65,7 +65,8 @@ The application provides full internationalization:
 
 **Translation Quality:**
 - Automated nightly checks ensure translation completeness
-- Contributors welcome - English translations sufficient for PRs
+- Contributors welcome - Hardcoded text or English translations both acceptable
+- Maintainers handle i18n conversion and translations
 - See [Translation Checks Documentation](docs/translation-checks.md)
 
 See the [Data Upload Guide](docs/DATA_UPLOAD.md) for details.

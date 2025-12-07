@@ -111,9 +111,13 @@ npm run i18n:check-hardcoded
 
 **You are NOT required to provide translations for all languages!**
 
-When adding new user-facing text:
+**You can even leave hardcoded text in your contributions!**
 
-1. **Add English translation** (required)
+When adding new user-facing text, you have flexibility:
+
+**Option 1: Use i18next (Preferred)**
+
+1. **Add English translation**
    ```json
    // public/locales/en/navigation.json
    {
@@ -143,7 +147,19 @@ When adding new user-facing text:
    }
    ```
 
-**Maintainers will complete the translations before merging.**
+**Option 2: Leave Hardcoded Text (Acceptable)**
+
+Simply write your code with hardcoded strings:
+
+```tsx
+export function MyComponent() {
+  return <Button>My New Feature</Button>;
+}
+```
+
+The automated check will flag hardcoded strings for maintainers to convert to i18next.
+
+**Maintainers will complete the translations and convert hardcoded text before merging.**
 
 ### Using Placeholder Markers
 
@@ -256,11 +272,11 @@ The nightly workflow provides ongoing monitoring:
 
 ### For All Contributors
 
-1. ✅ **Use `t()` function** for all user-facing text
-2. ✅ **Add English translations** at minimum
-3. ✅ **Use placeholders** if you can't translate
+1. ✅ **Prefer `t()` function** for user-facing text (but hardcoded text is acceptable)
+2. ✅ **Add English translations** if using i18n
+3. ✅ **Use placeholders** if you can't translate other languages
 4. ✅ **Test in multiple languages** when possible
-5. ❌ **Never hardcode** user-facing strings
+5. ℹ️ **Hardcoded strings are acceptable** - Maintainers will convert them to i18n
 
 ### For Translators
 

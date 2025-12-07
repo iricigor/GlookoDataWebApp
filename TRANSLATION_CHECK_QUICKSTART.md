@@ -2,14 +2,20 @@
 
 ## For Contributors
 
-### ✨ Good News: You Only Need English Translations!
+### ✨ Good News: Minimal Translation Requirements!
 
-When adding new user-facing text, you only need to provide English translations. Use placeholders for other languages, and maintainers will complete them.
+When adding new user-facing text, you have flexibility:
 
-### Quick Example
+- **Preferred:** Use i18next with English translation only
+- **Acceptable:** Leave hardcoded text in your code
+- **Optional:** Add placeholder markers for other languages
+
+Maintainers will handle translations and convert hardcoded text before merging.
+
+### Quick Example - Option 1: Using i18next (Preferred)
 
 ```typescript
-// 1. Add English translation (REQUIRED)
+// 1. Add English translation
 // public/locales/en/myFeature.json
 {
   "myButton": "Click Here"
@@ -21,11 +27,6 @@ When adding new user-facing text, you only need to provide English translations.
   "myButton": "[DE] Click Here"
 }
 
-// public/locales/cs/myFeature.json
-{
-  "myButton": "[CS] Click Here"
-}
-
 // 3. Use in your component
 import { useTranslation } from 'react-i18next';
 
@@ -33,6 +34,17 @@ export function MyComponent() {
   const { t } = useTranslation('myFeature');
   return <Button>{t('myButton')}</Button>;
 }
+```
+
+### Quick Example - Option 2: Hardcoded Text (Acceptable)
+
+```typescript
+// Just write your code with hardcoded text
+export function MyComponent() {
+  return <Button>Click Here</Button>;
+}
+
+// Maintainers will convert this to i18next before merging
 ```
 
 ### Running Checks Locally
