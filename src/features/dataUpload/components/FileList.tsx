@@ -275,7 +275,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
       });
     } catch (error) {
       console.error('Failed to toggle cache:', error);
-      alert(`Failed to ${checked ? 'save' : 'remove'} file ${checked ? 'to' : 'from'} cache: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Error is logged but user continues to work - the checkbox state will revert
     }
   };
 

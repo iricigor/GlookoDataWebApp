@@ -57,7 +57,7 @@ export async function saveFileToCache(file: UploadedFile): Promise<void> {
     // Convert File to ArrayBuffer for storage
     const arrayBuffer = await file.file.arrayBuffer();
     
-    // Store file data in IndexedDB
+    // Store file data in IndexedDB first
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
     
@@ -73,7 +73,7 @@ export async function saveFileToCache(file: UploadedFile): Promise<void> {
       request.onerror = () => reject(request.error);
     });
     
-    // Store metadata in localStorage
+    // Only store metadata after successful IndexedDB storage
     const metadata: SerializableFileMetadata = {
       id: file.id,
       name: file.name,
@@ -91,6 +91,12 @@ export async function saveFileToCache(file: UploadedFile): Promise<void> {
     db.close();
   } catch (error) {
     console.error('Failed to save file to cache:', error);
+    // Attempt to clean up on failure
+    try {
+      localStorage.removeItem(`${METADATA_KEY_PREFIX}${file.id}`);
+    } catch {
+      // Ignore cleanup errors
+    }
     throw error;
   }
 }
@@ -135,24 +141,34 @@ export async function loadCachedFiles(): Promise<UploadedFile[]> {
       key.startsWith(METADATA_KEY_PREFIX)
     );
     
+    // Use a single transaction for all reads
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    
     for (const key of metadataKeys) {
       try {
         const metadataStr = localStorage.getItem(key);
         if (!metadataStr) continue;
         
-        const metadata: SerializableFileMetadata = JSON.parse(metadataStr);
+        // Safe JSON parsing with error handling
+        let metadata: SerializableFileMetadata;
+        try {
+          metadata = JSON.parse(metadataStr);
+        } catch (parseError) {
+          console.error('Failed to parse metadata JSON:', parseError);
+          // Clean up corrupted metadata
+          localStorage.removeItem(key);
+          continue;
+        }
         
         // Retrieve file data from IndexedDB
-        const transaction = db.transaction([STORE_NAME], 'readonly');
-        const store = transaction.objectStore(STORE_NAME);
-        
-        const fileData = await new Promise<{ id: string; data: ArrayBuffer; type: string; name: string }>((resolve, reject) => {
+        const fileData = await new Promise<{ id: string; data: ArrayBuffer; type: string; name: string } | undefined>((resolve, reject) => {
           const request = store.get(metadata.id);
           request.onsuccess = () => resolve(request.result);
           request.onerror = () => reject(request.error);
         });
         
-        if (fileData) {
+        if (fileData && fileData.data) {
           // Reconstruct File object from stored data
           const blob = new Blob([fileData.data], { type: fileData.type });
           const file = new File([blob], fileData.name, { type: fileData.type });
@@ -166,6 +182,10 @@ export async function loadCachedFiles(): Promise<UploadedFile[]> {
             zipMetadata: metadata.zipMetadata,
             isPermanentlyCached: true,
           });
+        } else {
+          // Clean up orphaned metadata (file data missing from IndexedDB)
+          console.warn(`Orphaned metadata found for file ${metadata.id}, cleaning up`);
+          localStorage.removeItem(key);
         }
       } catch (error) {
         console.error('Failed to load cached file:', error);
