@@ -39,6 +39,7 @@ export function MealTimingTab({
   loading,
   hasApiKey,
   activeProvider,
+  showGeekStats,
   mealTimingDatasets,
   responseLanguage,
   glucoseUnit,

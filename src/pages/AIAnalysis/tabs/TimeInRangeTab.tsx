@@ -29,6 +29,7 @@ export function TimeInRangeTab({
   loading,
   hasApiKey,
   activeProvider,
+  showGeekStats,
   inRangePercentage,
   glucoseStats,
   responseLanguage,

@@ -111,6 +111,7 @@ export function Reports({
   glucoseUnit, 
   insulinDuration,
   showDayNightShading,
+  showGeekStats,
   perplexityApiKey,
   geminiApiKey,
   grokApiKey,

@@ -72,6 +72,7 @@ export function GlucoseInsulinTab({
   loading,
   hasApiKey,
   activeProvider,
+  showGeekStats,
   combinedDataset,
   responseLanguage,
   glucoseUnit,

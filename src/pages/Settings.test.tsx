@@ -44,6 +44,8 @@ describe('Settings', () => {
     onThemeChange: vi.fn(),
     showDayNightShading: true,
     onShowDayNightShadingChange: vi.fn(),
+    showGeekStats: false,
+    onShowGeekStatsChange: vi.fn(),
     exportFormat: 'csv' as const,
     onExportFormatChange: vi.fn(),
     uiLanguage: 'en' as const,
