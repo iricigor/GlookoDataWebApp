@@ -8,7 +8,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { APIDocs } from './APIDocs';
-import * as i18next from 'i18next';
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
