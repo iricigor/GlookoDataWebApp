@@ -1,0 +1,170 @@
+{
+  "settings": {
+    "title": "Einstellungen",
+    "description": "Konfigurieren Sie Ihre Anwendungseinstellungen",
+    "tabs": {
+      "general": "Allgemein",
+      "glucose": "Glukose-Daten",
+      "ai": "KI-Einstellungen",
+      "about": "Über"
+    },
+    "general": {
+      "theme": {
+        "title": "Design",
+        "description": "Wählen Sie Ihr bevorzugtes Farbdesign. Die Systemoption folgt den Einstellungen Ihres Betriebssystems.",
+        "light": "Hell",
+        "dark": "Dunkel",
+        "system": "System (empfohlen)"
+      },
+      "dayNightShading": {
+        "title": "Tag-/Nacht-Schattierung",
+        "description": "Tag-/Nacht-Hintergrundschattierung in 24-Stunden-Glukose-Diagrammen anzeigen.",
+        "enabled": "Tag-/Nacht-Schattierung aktiviert",
+        "disabled": "Tag-/Nacht-Schattierung deaktiviert"
+      },
+      "exportFormat": {
+        "title": "Export-Format",
+        "description": "Wählen Sie das Format für den Export von Tabellendaten in die Zwischenablage (CSV oder TSV).",
+        "csv": "CSV (Comma-Separated Values)",
+        "tsv": "TSV (Tab-Separated Values)"
+      },
+      "uiLanguage": {
+        "title": "Benutzeroberflächensprache",
+        "description": "Wählen Sie die Sprache für die Anwendungsoberfläche. Dies betrifft alle Menüs, Beschriftungen und Schaltflächentexte in der gesamten Anwendung.",
+        "english": "English",
+        "german": "Deutsch (German)",
+        "czech": "Čeština (Czech)"
+      },
+      "responseLanguage": {
+        "title": "KI-Antwortsprache",
+        "syncLabel": "Automatisch mit Benutzeroberflächensprache synchronisieren",
+        "syncDescription": "Wenn aktiviert, wird die KI-Antwortsprache automatisch Ihrer Benutzeroberflächensprache entsprechen. Wenn deaktiviert, können Sie unten eine bestimmte Sprache auswählen.",
+        "description": "Wählen Sie die Sprache für KI-Analyseantworten. Dies betrifft alle von der KI generierten Einblicke und Empfehlungen.",
+        "english": "English",
+        "czech": "Czech (Čeština)",
+        "german": "German (Deutsch)",
+        "serbian": "Serbian (Srpski - latinica)"
+      }
+    },
+    "glucose": {
+      "unit": {
+        "title": "Glukose-Einheit",
+        "description": "Wählen Sie Ihre bevorzugte Einheit für die Anzeige von Blutzuckerwerten. Diese Einstellung betrifft alle Glukose-Messwerte, Diagramme und Schwellenwerte in der gesamten App.",
+        "mmol": "mmol/L (Millimol pro Liter)",
+        "mgdl": "mg/dL (Milligramm pro Deziliter)"
+      },
+      "insulinDuration": {
+        "title": "Insulindauer",
+        "description": "Stellen Sie die Wirkungsdauer des Insulins in Stunden für IOB-Berechnungen (Insulin On Board) ein. Dies beeinflusst, wie lange Insulin in Ihrem System als aktiv betrachtet wird. Typische Werte liegen zwischen 3 und 6 Stunden.",
+        "label": "Dauer (Stunden)"
+      }
+    },
+    "ai": {
+      "title": "KI-Konfiguration",
+      "description": "Konfigurieren Sie Ihre KI-Einstellungen für intelligente Analysen. Klicken Sie auf \"Auswählen\" neben einem konfigurierten API-Schlüssel, um den Anbieter zu wechseln.",
+      "apiKeyPlaceholder": "Geben Sie Ihren API-Schlüssel ein",
+      "unavailable": "Nicht verfügbar",
+      "selected": "Ausgewählt",
+      "select": "Auswählen",
+      "verify": {
+        "verifying": "API-Schlüssel wird überprüft...",
+        "valid": "API-Schlüssel ist gültig",
+        "invalid": "API-Schlüssel ist ungültig",
+        "clickToVerify": "Klicken Sie hier, um den API-Schlüssel zu überprüfen",
+        "noKey": "Kein API-Schlüssel zum Überprüfen"
+      },
+      "privacyPolicy": "Datenschutzrichtlinie",
+      "accordion": {
+        "freeApi": {
+          "title": "🎁 Verfügbarkeit kostenloser API-Schlüssel",
+          "summary": "Informationen über kostenlose Tarife für jeden KI-Anbieter.",
+          "gemini": "✅ Bietet einen kostenlosen Tarif mit monatlichem Kontingent für API-Aufrufe.",
+          "deepseek": "✅ Bietet einen begrenzten kostenlosen Cloud-API-Tarif mit monatlichen Anfragen.",
+          "perplexity": "⚠️ API ist hauptsächlich kostenpflichtig mit begrenztem kostenlosen Tarif.",
+          "grok": "❌ Kein kostenloser API-Zugang. Erfordert X Premium+ Abonnement ($30/Monat).",
+          "getFreeKey": "Holen Sie sich Ihren kostenlosen API-Schlüssel",
+          "checkPricing": "Preise prüfen",
+          "learnMore": "Mehr erfahren"
+        },
+        "dataHandling": {
+          "title": "⚠️ Wichtig: Datenverarbeitung und Ihre Verantwortung",
+          "summary": "Ihre Gesundheitsdaten werden an KI-Anbieter gesendet, wenn Sie Analysefunktionen verwenden.",
+          "description1": "Wenn Sie KI-Analysefunktionen verwenden, werden Ihre sensiblen Gesundheitsdaten an den ausgewählten KI-Anbieter gesendet. Die Daten werden",
+          "withoutPII": "ohne personenbezogene Informationen",
+          "description2": "(wie Ihren Namen oder Ihre E-Mail-Adresse) gesendet, aber der KI-Anbieter kann möglicherweise Ihren API-Schlüssel mit den von Ihnen gesendeten Gesundheitsdaten verknüpfen.",
+          "responsibility": "Ihre Verantwortung:",
+          "responsibilityText": "Sie sind verantwortlich für die Sicherheit dieser Informationen und deren Verwendung in Übereinstimmung mit allen geltenden Datenschutzbestimmungen und -vorschriften. Überprüfen Sie die Datenschutzrichtlinien Ihres gewählten KI-Anbieters, bevor Sie diese Funktionen verwenden.",
+          "bestPractices": "Best Practices:",
+          "bestPracticesText": "Überwachen Sie die Nutzung Ihres API-Schlüssels regelmäßig über das Dashboard Ihres Anbieters, wenden Sie Zugriffsberechtigungen mit minimalem Privileg an, wenn Sie API-Schlüssel erstellen, und setzen Sie tägliche Ausgabenlimits, um unerwartete Gebühren und unbefugte Nutzung zu verhindern."
+        },
+        "storage": {
+          "title": "API-Schlüssel-Speicherung:",
+          "summary": "Ihre API-Schlüssel werden lokal in Ihrem Browser gespeichert und niemals an unsere Server gesendet.",
+          "description": "Ihre API-Schlüssel werden lokal im lokalen Speicher Ihres Browsers (keine Cookies) gespeichert und bleiben bestehen, bis Sie sie manuell löschen oder Ihre Browserdaten löschen. Die Schlüssel werden niemals an unsere Server oder Dritte übertragen.",
+          "technicalDetails": "Technische Details:",
+          "technicalDetailsText": "Wir verwenden die lokale Speicher-API des Browsers, die persistenten Speicher bereitstellt, der über Browsersitzungen hinweg verfügbar bleibt. Diese Daten werden nur auf Ihrem Gerät gespeichert und sind nur für diese Webanwendung von derselben Domain zugänglich."
+        },
+        "communication": {
+          "title": "KI-Kommunikation:",
+          "summary": "Alle KI-Analysen erfolgen direkt zwischen Ihrem Browser und dem KI-Anbieter—keine zwischengeschalteten Server.",
+          "description": "Wenn Sie eine KI-Analyse anfordern, sendet Ihr Browser die Anfrage direkt an die API des ausgewählten KI-Anbieters. Unsere Anwendung fungiert nicht als Vermittler—die Kommunikation erfolgt direkt von Ihrem Browser zum KI-Anbieter.",
+          "priority": "Anbieter-Priorität:",
+          "priorityText": "Wenn mehrere API-Schlüssel konfiguriert sind, werden sie in dieser Reihenfolge verwendet: Perplexity → Grok AI → DeepSeek → Google Gemini. Um einen anderen Anbieter zu verwenden, entfernen Sie die API-Schlüssel mit höherer Priorität."
+        },
+        "bestPractices": {
+          "title": "Sicherheits-Best-Practices:",
+          "summary": "Befolgen Sie diese Empfehlungen, um Ihre API-Schlüssel und Daten zu schützen.",
+          "createSecure": "Sichere API-Schlüssel erstellen:",
+          "createSecureText": "Verwenden Sie minimale Berechtigungen beim Erstellen von API-Schlüsseln unter:",
+          "perplexitySettings": "Perplexity-Einstellungen",
+          "xaiConsole": "xAI-Konsole",
+          "grokNote": "(für Grok AI)",
+          "deepseekPlatform": "DeepSeek-Plattform",
+          "googleAIStudio": "Google AI Studio",
+          "protectKeys": "Schützen Sie Ihre Schlüssel:",
+          "protectKeysText": "Wählen Sie Schlüssel, die für clientseitige Anwendungen vorgesehen sind, und setzen Sie Ausgabenlimits, um unerwartete Gebühren zu vermeiden. Überwachen Sie die Nutzung Ihres API-Schlüssels regelmäßig über das Dashboard Ihres Anbieters.",
+          "riskMitigation": "Risikominderung:",
+          "riskMitigationText": "Wenn jemand Zugriff auf Ihre Browsersitzung oder Ihren Computer erhält, könnte er möglicherweise auf Ihren gespeicherten API-Schlüssel zugreifen. Um dieses Risiko zu verringern:",
+          "riskItem1": "Melden Sie sich von gemeinsam genutzten Computern ab",
+          "riskItem2": "Verwenden Sie Browser-Datenschutzfunktionen (privater/Inkognito-Modus, wenn angemessen)",
+          "riskItem3": "Wechseln Sie Ihre API-Schlüssel regelmäßig",
+          "riskItem4": "Überwachen Sie Ihre API-Nutzung im Dashboard Ihres Anbieters",
+          "riskItem5": "Löschen Sie Browserdaten, wenn Sie öffentliche Computer verwenden"
+        },
+        "dataStorage": {
+          "title": "Datenspeicherung:",
+          "summary": "Ihre Daten werden lokal mit konfigurierbaren Persistenzoptionen gespeichert.",
+          "description1": "Ihre Daten werden lokal mit konfigurierbaren Persistenzoptionen gespeichert. Die gesamte Verarbeitung erfolgt in Ihrem Browser. Diese Anwendung ist vollständig Open Source—Sie können",
+          "reviewCode": "den Code auf GitHub überprüfen",
+          "description2": "oder Ihre eigene Instanz bereitstellen, um die vollständige Kontrolle zu haben."
+        }
+      }
+    },
+    "about": {
+      "support": {
+        "title": "Support",
+        "description": "Helfen Sie uns, die App zu verbessern, indem Sie Fehler melden oder neue Funktionen vorschlagen.",
+        "reportBug": "Fehler melden",
+        "requestFeature": "Funktion anfordern",
+        "viewGitHub": "Auf GitHub anzeigen",
+        "apiDocs": "API-Dokumentation"
+      },
+      "version": {
+        "title": "Versionsinformationen",
+        "version": "Version:",
+        "buildId": "Build-ID:",
+        "buildDate": "Build-Datum:",
+        "fullVersion": "Vollständige Version:"
+      },
+      "demoData": {
+        "title": "Demo-Daten-Attribution",
+        "description": "Die in dieser Anwendung enthaltenen Demo-Datensätze basieren auf realen Typ-1-Diabetes-Datenmustern aus dem",
+        "dataset": "AZT1D-Datensatz",
+        "authors": "(Khamesian et al., 2025), der unter der Creative Commons Attribution 4.0 (CC BY 4.0) Lizenz verfügbar ist.",
+        "citation": "Zitat:",
+        "citationText": "Khamesian, S., Arefeen, A., Thompson, B. M., Grando, M. A., & Ghasemzadeh, H. (2025). AZT1D: A Real-World Dataset for Type 1 Diabetes. arXiv:2506.14789. DOI:",
+        "moreInfo": "Weitere Informationen zum Originaldatensatz finden Sie unter:"
+      }
+    }
+  }
+}

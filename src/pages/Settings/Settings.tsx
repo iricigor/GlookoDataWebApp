@@ -9,6 +9,7 @@ import {
   TabList,
   Tab,
 } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
 import type { ThemeMode } from '../../hooks/useTheme';
 import type { ExportFormat } from '../../hooks/useExportFormat';
 import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
@@ -129,6 +130,7 @@ export function Settings({
   onProviderAutoSwitch,
 }: SettingsProps) {
   const styles = useStyles();
+  const { t } = useTranslation('settings');
   const [selectedTab, setSelectedTab] = useState<string>(() => {
     // Check URL hash for deep linking first (e.g., #settings/ai)
     const hash = window.location.hash.slice(1);
@@ -225,9 +227,9 @@ export function Settings({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Text className={styles.title}>Settings</Text>
+        <Text className={styles.title}>{t('settings.title')}</Text>
         <Text className={styles.description}>
-          Configure your application preferences
+          {t('settings.description')}
         </Text>
       </div>
 
@@ -239,10 +241,10 @@ export function Settings({
           className={styles.tabList}
           appearance="subtle"
         >
-          <Tab value="general">General</Tab>
-          <Tab value="glucose">Glucose Data</Tab>
-          <Tab value="ai">AI Settings</Tab>
-          <Tab value="about">About</Tab>
+          <Tab value="general">{t('settings.tabs.general')}</Tab>
+          <Tab value="glucose">{t('settings.tabs.glucose')}</Tab>
+          <Tab value="ai">{t('settings.tabs.ai')}</Tab>
+          <Tab value="about">{t('settings.tabs.about')}</Tab>
         </TabList>
 
         <div className={styles.contentArea}>

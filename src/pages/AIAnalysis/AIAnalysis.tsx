@@ -10,6 +10,7 @@ import {
   TabList,
   Tab,
 } from '@fluentui/react-components';
+import { useTranslation } from 'react-i18next';
 import { BrainCircuitRegular } from '@fluentui/react-icons';
 import type { DailyReport, GlucoseRangeStats, InsulinReading } from '../../types';
 import { extractGlucoseReadings, extractDailyInsulinSummaries, extractInsulinReadings, extractHypoAnalysisDatasets } from '../../utils/data';
@@ -41,6 +42,7 @@ export function AIAnalysis({
   onAnalysisComplete 
 }: AIAnalysisProps) {
   const styles = useAIAnalysisStyles();
+  const { t } = useTranslation('aiAnalysis');
   const { thresholds } = useGlucoseThresholds();
   const [selectedTab, setSelectedTab] = useState<string>('fileInfo');
   
@@ -261,9 +263,9 @@ export function AIAnalysis({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Text className={styles.title}>AI Analysis</Text>
+        <Text className={styles.title}>{t('aiAnalysis.title')}</Text>
         <Text className={styles.description}>
-          Get intelligent insights and recommendations using advanced AI algorithms
+          {t('aiAnalysis.description')}
         </Text>
       </div>
 
@@ -273,7 +275,7 @@ export function AIAnalysis({
             <BrainCircuitRegular />
           </div>
           <Text className={styles.placeholderText}>
-            Please select a data file from the Data Upload page to begin AI analysis
+            {t('aiAnalysis.placeholders.noFile')}
           </Text>
         </div>
       ) : !hasApiKey ? (
@@ -282,11 +284,11 @@ export function AIAnalysis({
             <BrainCircuitRegular />
           </div>
           <Text className={styles.placeholderText}>
-            To use AI-powered analysis, you need to configure an API key (Perplexity or Google Gemini).
+            {t('aiAnalysis.placeholders.noApiKey')}
           </Text>
           <Text className={styles.warningText}>
-            Please add your API key in the{' '}
-            <Link href="#settings">Settings page</Link>.
+            {t('aiAnalysis.placeholders.addApiKey')}{' '}
+            <Link href="#settings">{t('aiAnalysis.placeholders.settingsLink')}</Link>.
           </Text>
         </div>
       ) : (
@@ -299,12 +301,12 @@ export function AIAnalysis({
             appearance="subtle"
             size="large"
           >
-            <Tab value="fileInfo">File Info</Tab>
-            <Tab value="timeInRange">Time in Range</Tab>
-            <Tab value="glucoseInsulin">Glucose & Insulin</Tab>
-            <Tab value="mealTiming">Meal Timing</Tab>
-            <Tab value="pumpSettings">Pump Settings</Tab>
-            <Tab value="hypos">Hypos</Tab>
+            <Tab value="fileInfo">{t('aiAnalysis.tabs.fileInfo')}</Tab>
+            <Tab value="timeInRange">{t('aiAnalysis.tabs.timeInRange')}</Tab>
+            <Tab value="glucoseInsulin">{t('aiAnalysis.tabs.glucoseInsulin')}</Tab>
+            <Tab value="mealTiming">{t('aiAnalysis.tabs.mealTiming')}</Tab>
+            <Tab value="pumpSettings">{t('aiAnalysis.tabs.pumpSettings')}</Tab>
+            <Tab value="hypos">{t('aiAnalysis.tabs.hypos')}</Tab>
           </TabList>
 
           <div className={styles.contentWrapper}>
@@ -316,12 +318,12 @@ export function AIAnalysis({
               className={styles.tabListVertical}
               appearance="subtle"
             >
-              <Tab value="fileInfo">File Info</Tab>
-              <Tab value="timeInRange">Time in Range</Tab>
-              <Tab value="glucoseInsulin">Glucose & Insulin</Tab>
-              <Tab value="mealTiming">Meal Timing</Tab>
-              <Tab value="pumpSettings">Pump Settings</Tab>
-              <Tab value="hypos">Hypos</Tab>
+              <Tab value="fileInfo">{t('aiAnalysis.tabs.fileInfo')}</Tab>
+              <Tab value="timeInRange">{t('aiAnalysis.tabs.timeInRange')}</Tab>
+              <Tab value="glucoseInsulin">{t('aiAnalysis.tabs.glucoseInsulin')}</Tab>
+              <Tab value="mealTiming">{t('aiAnalysis.tabs.mealTiming')}</Tab>
+              <Tab value="pumpSettings">{t('aiAnalysis.tabs.pumpSettings')}</Tab>
+              <Tab value="hypos">{t('aiAnalysis.tabs.hypos')}</Tab>
             </TabList>
 
             <div className={styles.contentArea}>

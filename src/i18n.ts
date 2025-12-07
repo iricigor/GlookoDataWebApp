@@ -37,6 +37,9 @@ i18n
       'navigation',    // Navigation menu
       'home',          // Home page
       'dataUpload',    // Data upload page and features
+      'reports',       // Reports page
+      'aiAnalysis',    // AI Analysis page
+      'settings',      // Settings page
       'dialogs',       // All dialog components
       'notifications', // Toast and notification messages
     ],

@@ -1,0 +1,20 @@
+{
+  "aiAnalysis": {
+    "title": "KI-Analyse",
+    "description": "Erhalten Sie intelligente Einblicke und Empfehlungen durch fortschrittliche KI-Algorithmen",
+    "placeholders": {
+      "noFile": "Bitte wählen Sie eine Datendatei von der Daten-Upload-Seite aus, um mit der KI-Analyse zu beginnen",
+      "noApiKey": "Um KI-gestützte Analysen zu verwenden, müssen Sie einen API-Schlüssel konfigurieren (Perplexity oder Google Gemini).",
+      "addApiKey": "Bitte fügen Sie Ihren API-Schlüssel auf der",
+      "settingsLink": "Einstellungsseite hinzu"
+    },
+    "tabs": {
+      "fileInfo": "Datei-Info",
+      "timeInRange": "Zeit im Bereich",
+      "glucoseInsulin": "Glukose & Insulin",
+      "mealTiming": "Mahlzeiten-Timing",
+      "pumpSettings": "Pumpen-Einstellungen",
+      "hypos": "Hypos"
+    }
+  }
+}

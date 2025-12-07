@@ -1,0 +1,170 @@
+{
+  "settings": {
+    "title": "Settings",
+    "description": "Configure your application preferences",
+    "tabs": {
+      "general": "General",
+      "glucose": "Glucose Data",
+      "ai": "AI Settings",
+      "about": "About"
+    },
+    "general": {
+      "theme": {
+        "title": "Theme",
+        "description": "Choose your preferred color theme. System option follows your operating system settings.",
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System (recommended)"
+      },
+      "dayNightShading": {
+        "title": "Day/Night Shading",
+        "description": "Show day/night background shading on 24-hour glucose graphs.",
+        "enabled": "Day/night shading enabled",
+        "disabled": "Day/night shading disabled"
+      },
+      "exportFormat": {
+        "title": "Export Format",
+        "description": "Choose the format for exporting table data to clipboard (CSV or TSV).",
+        "csv": "CSV (Comma-Separated Values)",
+        "tsv": "TSV (Tab-Separated Values)"
+      },
+      "uiLanguage": {
+        "title": "UI Language",
+        "description": "Choose the language for the application interface. This affects all menus, labels, and button text throughout the application.",
+        "english": "English",
+        "german": "Deutsch (German)",
+        "czech": "Čeština (Czech)"
+      },
+      "responseLanguage": {
+        "title": "AI Response Language",
+        "syncLabel": "Automatically sync with UI language",
+        "syncDescription": "When enabled, the AI response language will automatically match your UI language. When disabled, you can select a specific language below.",
+        "description": "Choose the language for AI analysis responses. This affects all AI-generated insights and recommendations.",
+        "english": "English",
+        "czech": "Czech (Čeština)",
+        "german": "German (Deutsch)",
+        "serbian": "Serbian (Srpski - latinica)"
+      }
+    },
+    "glucose": {
+      "unit": {
+        "title": "Glucose Unit",
+        "description": "Choose your preferred unit for displaying blood glucose values. This setting affects all glucose readings, charts, and thresholds throughout the app.",
+        "mmol": "mmol/L (millimoles per liter)",
+        "mgdl": "mg/dL (milligrams per deciliter)"
+      },
+      "insulinDuration": {
+        "title": "Insulin Duration",
+        "description": "Set the duration of insulin action in hours for IOB (Insulin On Board) calculations. This affects how long insulin is considered active in your system. Typical values range from 3 to 6 hours.",
+        "label": "Duration (hours)"
+      }
+    },
+    "ai": {
+      "title": "AI Configuration",
+      "description": "Configure your AI settings for intelligent analysis. Click \"Select\" next to any configured API key to switch providers.",
+      "apiKeyPlaceholder": "Enter your API key",
+      "unavailable": "Unavailable",
+      "selected": "Selected",
+      "select": "Select",
+      "verify": {
+        "verifying": "Verifying API key...",
+        "valid": "API key is valid",
+        "invalid": "API key is invalid",
+        "clickToVerify": "Click to verify API key",
+        "noKey": "No API key to verify"
+      },
+      "privacyPolicy": "Privacy Policy",
+      "accordion": {
+        "freeApi": {
+          "title": "🎁 Free API Key Availability",
+          "summary": "Information about free tier options for each AI provider.",
+          "gemini": "✅ Offers a free tier with monthly quota for API calls.",
+          "deepseek": "✅ Offers limited free cloud API tier with monthly requests.",
+          "perplexity": "⚠️ API is primarily paid with limited free tier.",
+          "grok": "❌ No free API access. Requires X Premium+ subscription ($30/month).",
+          "getFreeKey": "Get your free API key",
+          "checkPricing": "Check pricing",
+          "learnMore": "Learn more"
+        },
+        "dataHandling": {
+          "title": "⚠️ Important: Data Handling & Your Responsibility",
+          "summary": "Your health data is sent to AI providers when using analysis features.",
+          "description1": "When you use AI analysis features, your sensitive health data will be sent to the selected AI provider. The data is sent",
+          "withoutPII": "without personally identifiable information",
+          "description2": "(such as your name or email), but the AI provider may be able to associate your API key with the health data you send.",
+          "responsibility": "Your Responsibility:",
+          "responsibilityText": "You are responsible for the security of this information and its use in accordance with all applicable data protection rules and regulations. Review the privacy policies of your chosen AI provider before using these features.",
+          "bestPractices": "Best Practices:",
+          "bestPracticesText": "Monitor your API key usage regularly through your provider's dashboard, apply least privilege access permissions when creating API keys, and set daily spending limits to prevent unexpected charges and unauthorized usage."
+        },
+        "storage": {
+          "title": "API Key Storage:",
+          "summary": "Your API keys are stored locally in your browser and never sent to our servers.",
+          "description": "Your API keys are stored locally in your browser's local storage (not cookies) and persist until you manually clear them or clear your browser data. The keys are never transmitted to our servers or any third party.",
+          "technicalDetails": "Technical Details:",
+          "technicalDetailsText": "We use browser local storage API, which provides persistent storage that remains available across browser sessions. This data is stored only on your device and is accessible only by this web application from the same domain."
+        },
+        "communication": {
+          "title": "AI Communication:",
+          "summary": "All AI analysis happens directly between your browser and the AI provider—no intermediary servers.",
+          "description": "When you request AI analysis, your browser sends the request directly to the selected AI provider's API. Our application does not act as an intermediary—the communication goes straight from your browser to the AI provider.",
+          "priority": "Provider Priority:",
+          "priorityText": "If multiple API keys are configured, they are used in this order: Perplexity → Grok AI → DeepSeek → Google Gemini. To use a different provider, remove the API keys with higher priority."
+        },
+        "bestPractices": {
+          "title": "Security Best Practices:",
+          "summary": "Follow these recommendations to keep your API keys and data secure.",
+          "createSecure": "Create Secure API Keys:",
+          "createSecureText": "Use minimal permissions when creating API keys at:",
+          "perplexitySettings": "Perplexity Settings",
+          "xaiConsole": "xAI Console",
+          "grokNote": "(for Grok AI)",
+          "deepseekPlatform": "DeepSeek Platform",
+          "googleAIStudio": "Google AI Studio",
+          "protectKeys": "Protect Your Keys:",
+          "protectKeysText": "Choose keys designated for client-side applications and set spending limits to prevent unexpected charges. Monitor your API key usage regularly through your provider's dashboard.",
+          "riskMitigation": "Risk Mitigation:",
+          "riskMitigationText": "If someone gains access to your browser session or computer, they could potentially access your stored API key. To reduce this risk:",
+          "riskItem1": "Log out from shared computers",
+          "riskItem2": "Use browser privacy features (private/incognito mode when appropriate)",
+          "riskItem3": "Regularly rotate your API keys",
+          "riskItem4": "Monitor your API usage in your provider's dashboard",
+          "riskItem5": "Clear browser data when using public computers"
+        },
+        "dataStorage": {
+          "title": "Data Storage:",
+          "summary": "Your data is stored locally with configurable persistence options.",
+          "description1": "Your data is stored locally with configurable persistence options. All processing happens in your browser. This application is fully open source—you can",
+          "reviewCode": "review the code on GitHub",
+          "description2": "or deploy your own instance for complete control."
+        }
+      }
+    },
+    "about": {
+      "support": {
+        "title": "Support",
+        "description": "Help us improve the app by reporting bugs or suggesting new features.",
+        "reportBug": "Report a Bug",
+        "requestFeature": "Request a Feature",
+        "viewGitHub": "View on GitHub",
+        "apiDocs": "API Documentation"
+      },
+      "version": {
+        "title": "Version Information",
+        "version": "Version:",
+        "buildId": "Build ID:",
+        "buildDate": "Build Date:",
+        "fullVersion": "Full Version:"
+      },
+      "demoData": {
+        "title": "Demo Data Attribution",
+        "description": "The demo datasets included in this application are inspired by real-world Type 1 Diabetes data patterns from the",
+        "dataset": "AZT1D dataset",
+        "authors": "(Khamesian et al., 2025), which is available under the Creative Commons Attribution 4.0 (CC BY 4.0) license.",
+        "citation": "Citation:",
+        "citationText": "Khamesian, S., Arefeen, A., Thompson, B. M., Grando, M. A., & Ghasemzadeh, H. (2025). AZT1D: A Real-World Dataset for Type 1 Diabetes. arXiv:2506.14789. DOI:",
+        "moreInfo": "For more information about the original dataset, visit:"
+      }
+    }
+  }
+}

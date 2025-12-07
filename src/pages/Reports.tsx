@@ -7,6 +7,7 @@ import {
   Tab,
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
 import { BGOverviewReport } from '../components/BGOverviewReport';
 import { DailyBGReport } from '../components/DailyBGReport';
@@ -117,6 +118,7 @@ export function Reports({
   responseLanguage,
 }: ReportsProps) {
   const styles = useStyles();
+  const { t } = useTranslation('reports');
   const [selectedTab, setSelectedTab] = useState<string>(() => {
     // Check URL hash for deep linking first (e.g., #reports/bgOverview)
     const hash = window.location.hash.slice(1);
@@ -190,9 +192,9 @@ export function Reports({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Text className={styles.title}>Comprehensive Reports</Text>
+        <Text className={styles.title}>{t('reports.title')}</Text>
         <Text className={styles.description}>
-          View detailed analytics including time-in-range, patterns, and trends
+          {t('reports.description')}
         </Text>
       </div>
 
@@ -204,10 +206,10 @@ export function Reports({
         appearance="subtle"
         size="large"
       >
-        <Tab value="fileInfo">File Info</Tab>
-        <Tab value="bgOverview">BG Overview</Tab>
-        <Tab value="dailyBG">Daily BG</Tab>
-        <Tab value="hypos">Hypos</Tab>
+        <Tab value="fileInfo">{t('reports.tabs.fileInfo')}</Tab>
+        <Tab value="bgOverview">{t('reports.tabs.bgOverview')}</Tab>
+        <Tab value="dailyBG">{t('reports.tabs.dailyBG')}</Tab>
+        <Tab value="hypos">{t('reports.tabs.hypos')}</Tab>
       </TabList>
 
       <div className={styles.contentWrapper}>
@@ -219,10 +221,10 @@ export function Reports({
           className={styles.tabListVertical}
           appearance="subtle"
         >
-          <Tab value="fileInfo">File Info</Tab>
-          <Tab value="bgOverview">BG Overview</Tab>
-          <Tab value="dailyBG">Daily BG</Tab>
-          <Tab value="hypos">Hypos</Tab>
+          <Tab value="fileInfo">{t('reports.tabs.fileInfo')}</Tab>
+          <Tab value="bgOverview">{t('reports.tabs.bgOverview')}</Tab>
+          <Tab value="dailyBG">{t('reports.tabs.dailyBG')}</Tab>
+          <Tab value="hypos">{t('reports.tabs.hypos')}</Tab>
         </TabList>
 
         <div className={styles.contentArea}>

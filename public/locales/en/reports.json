@@ -1,0 +1,12 @@
+{
+  "reports": {
+    "title": "Comprehensive Reports",
+    "description": "View detailed analytics including time-in-range, patterns, and trends",
+    "tabs": {
+      "fileInfo": "File Info",
+      "bgOverview": "BG Overview",
+      "dailyBG": "Daily BG",
+      "hypos": "Hypos"
+    }
+  }
+}
