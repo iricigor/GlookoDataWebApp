@@ -51,11 +51,23 @@ AI analysis covers time in range, glucose & insulin correlation, meal timing, an
 
 ### 🌐 Multi-Language Support
 
-Automatic detection for Glooko export files:
+The application provides full internationalization:
 
-- 🇬🇧 **English** - Standard Glooko exports
-- 🇩🇪 **German** - Auto-detected from column headers
-- 🔄 **Zero configuration** - Just upload and go
+**UI Languages:**
+- 🇬🇧 **English** - Complete interface
+- 🇩🇪 **German** - Vollständige Übersetzung
+- 🇨🇿 **Czech** - Kompletní překlad
+
+**Data Import:**
+- Automatic detection for Glooko export files
+- 🇬🇧 English and 🇩🇪 German formats supported
+- 🔄 Zero configuration - Just upload and go
+
+**Translation Quality:**
+- Automated nightly checks ensure translation completeness
+- Contributors welcome - Hardcoded text or English translations both acceptable
+- Maintainers handle i18n conversion and translations
+- See [Translation Checks Documentation](docs/translation-checks.md)
 
 See the [Data Upload Guide](docs/DATA_UPLOAD.md) for details.
 

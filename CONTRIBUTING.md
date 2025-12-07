@@ -292,35 +292,42 @@ public/locales/
 
 ### Adding New Translations
 
-1. **Choose the appropriate namespace** based on your feature
-2. **Add the translation key** to all language files in that namespace
-3. **Use the translation** in your component with the correct namespace
+**For Contributors:** You can submit PRs without providing translations for all languages! 
+
+When adding new user-facing text, you have flexibility:
+
+1. **Preferred:** Add English translation and use `t()` function in your code
+2. **Acceptable:** Leave hardcoded text in your code - maintainers will convert to i18n
+3. **Optional:** Add placeholder markers for other languages
+
+Maintainers will complete translations and convert any hardcoded text before merging. This allows you to focus on functionality!
 
 **Example: Adding a new button to the navigation**
 
 ```tsx
-// 1. Add to public/locales/en/navigation.json
+// 1. Add to public/locales/en/navigation.json (REQUIRED)
 {
   "navigation": {
     "myNewButton": "My New Feature"
   }
 }
 
-// 2. Add to public/locales/de/navigation.json
+// 2. Add placeholders to other languages (OPTIONAL - maintainers will complete)
+// public/locales/de/navigation.json
 {
   "navigation": {
-    "myNewButton": "Meine neue Funktion"
+    "myNewButton": "[DE] My New Feature"  // Placeholder - will be translated
   }
 }
 
-// 3. Add to public/locales/cs/navigation.json
+// public/locales/cs/navigation.json
 {
   "navigation": {
-    "myNewButton": "Moje nová funkce"
+    "myNewButton": "[CS] My New Feature"  // Placeholder - will be translated
   }
 }
 
-// 4. Use in your component
+// 3. Use in your component
 import { useTranslation } from 'react-i18next';
 
 export function MyComponent() {
@@ -329,13 +336,18 @@ export function MyComponent() {
 }
 ```
 
+**Note:** A nightly automated check will detect incomplete translations and notify maintainers.
+
 ### Best Practices
 
-1. **NEVER hardcode user-facing text** - Always use `t()` function
-2. **Add translations to ALL languages** - Don't leave any language incomplete
+1. **Prefer i18n over hardcoded text** - Use `t()` function when possible (but hardcoded text is acceptable)
+2. **Add English translation** - At minimum, provide the English (en) text if using i18n
 3. **Use the correct namespace** - Choose the namespace that matches your feature area
 4. **Test translations** - Switch languages in the UI to verify your translations work
 5. **Keep keys organized** - Use nested structures within namespaces for clarity
+6. **Use placeholders for incomplete translations** - Mark with `[LANG]` prefix (e.g., `[DE] English text`)
+
+**Note for Contributors:** Hardcoded strings are acceptable in your PRs. The automated check will flag them for maintainers to address.
 
 ### Loading Multiple Namespaces
 
@@ -378,9 +390,9 @@ Before submitting your PR, ensure:
 - [ ] Fluent UI components are used appropriately
 - [ ] Code is well-commented where necessary
 - [ ] No console errors or warnings
-- [ ] **All user-facing text is localized** using i18next (no hardcoded strings)
-- [ ] **Translations added to ALL supported languages** (en, de, cs)
-- [ ] **Correct namespace used** for translations
+- [ ] **User-facing text is localized OR hardcoded** - Using i18next is preferred but not required
+- [ ] **English translations added** (if using i18n) - other languages optional, can use placeholders
+- [ ] **Correct namespace used** for translations (if using i18n)
 - [ ] Responsive design works on different screen sizes
 
 ## 📦 Commit Guidelines
