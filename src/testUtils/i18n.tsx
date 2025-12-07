@@ -2,8 +2,9 @@
  * Test utilities for i18n
  */
 
-import { render as rtlRender, RenderOptions } from '@testing-library/react';
-import { ReactElement } from 'react';
+import { render as rtlRender } from '@testing-library/react';
+import type { RenderOptions } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import i18n from '../i18n';
 
 /**
