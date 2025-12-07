@@ -102,16 +102,10 @@ export const useStyles = makeStyles({
     display: 'flex',
     ...shorthands.gap('16px'),
     marginTop: '16px',
-    '@media (max-width: 767px)': {
-      ...shorthands.gap('8px'),
-    },
   },
   chartWrapper: {
     flex: 1,
     height: '400px',
-    '@media (max-width: 767px)': {
-      height: '350px',
-    },
   },
   summaryBarContainer: {
     display: 'flex',
@@ -119,10 +113,6 @@ export const useStyles = makeStyles({
     width: '60px',
     height: '400px',
     ...shorthands.gap('4px'),
-    '@media (max-width: 767px)': {
-      width: '40px',
-      height: '350px',
-    },
   },
   summaryBarSegment: {
     display: 'flex',
@@ -144,52 +134,19 @@ export const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: '16px',
-    '@media (max-width: 767px)': {
-      flexWrap: 'wrap',
-      ...shorthands.gap('8px'),
-    },
   },
   maxValueContainer: {
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('12px'),
-    '@media (max-width: 767px)': {
-      ...shorthands.gap('8px'),
-    },
   },
   colorSchemeContainer: {
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('12px'),
-    '@media (max-width: 767px)': {
-      ...shorthands.gap('8px'),
-      flex: '1 1 auto',
-      minWidth: '0',
-    },
   },
   colorSchemeDropdown: {
     minWidth: '200px',
-    '@media (max-width: 767px)': {
-      minWidth: '100px',
-      flex: '1 1 auto',
-    },
-  },
-  colorSchemeLabel: {
-    fontSize: tokens.fontSizeBase300,
-    fontFamily: tokens.fontFamilyBase,
-    color: tokens.colorNeutralForeground2,
-    whiteSpace: 'nowrap',
-  },
-  colorSchemeLabelLong: {
-    '@media (max-width: 767px)': {
-      display: 'none',
-    },
-  },
-  colorSchemeLabelShort: {
-    display: 'none',
-    '@media (max-width: 767px)': {
-      display: 'inline',
-    },
   },
   statValueBelow: {
     color: tokens.colorPaletteRedForeground1,
@@ -217,30 +174,14 @@ export const useStyles = makeStyles({
   iobChartContainer: {
     height: '300px',
     width: '100%',
-    '@media (max-width: 767px)': {
-      height: '250px',
-    },
   },
   // Stats cards with icons (RoC and Hypo style)
   statsRow: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
     ...shorthands.gap('12px'),
-    '@media (max-width: 767px)': {
-      gridTemplateColumns: 'repeat(4, 1fr)',
-      ...shorthands.gap('8px'),
-    },
-    '@media (max-width: 400px)': {
+    '@media (max-width: 600px)': {
       gridTemplateColumns: 'repeat(2, 1fr)',
-    },
-  },
-  statsRowThreeCards: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-    ...shorthands.gap('12px'),
-    '@media (max-width: 767px)': {
-      gridTemplateColumns: 'repeat(3, 1fr)',
-      ...shorthands.gap('8px'),
     },
     '@media (max-width: 400px)': {
       gridTemplateColumns: '1fr',
@@ -375,9 +316,6 @@ export const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground3,
     flex: 1,
-    '@media (max-width: 767px)': {
-      display: 'none',
-    },
   },
   rocChartContainer: {
     height: '300px',

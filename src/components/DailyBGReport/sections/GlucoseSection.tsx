@@ -40,7 +40,6 @@ import {
 } from '../../../utils/data';
 import { isDynamicColorScheme, COLOR_SCHEME_DESCRIPTORS } from '../../../utils/formatting';
 import type { BGColorScheme } from '../../../hooks/useBGColorScheme';
-import { useIsMobile } from '../../../hooks/useIsMobile';
 import { GlucoseTooltip } from '../tooltips';
 import { formatXAxis } from '../constants';
 import type { useStyles } from '../styles';
@@ -101,13 +100,6 @@ export function GlucoseSection({
   glucoseChartData,
   showDayNightShading,
 }: GlucoseSectionProps) {
-  const isMobile = useIsMobile();
-  
-  // Adjust chart margins for mobile - minimal margins with negative left to reduce space
-  const chartMargin = isMobile 
-    ? { top: 10, right: 1, left: -20, bottom: 0 }
-    : { top: 10, right: 30, left: 0, bottom: 0 };
-  
   // Custom dot renderer for colored glucose values
   const renderColoredDot = (props: { cx?: number; cy?: number; payload?: { color: string } }): React.ReactElement | null => {
     if (props.cx === undefined || props.cy === undefined || !props.payload) return null;
@@ -186,9 +178,12 @@ export function GlucoseSection({
       <div className={styles.chartCardInnerContent}>
         <div className={styles.controlsRow}>
           <div className={styles.colorSchemeContainer}>
-            <Text className={styles.colorSchemeLabel}>
-              <span className={styles.colorSchemeLabelLong}>Color Scheme:</span>
-              <span className={styles.colorSchemeLabelShort}>Color:</span>
+            <Text style={{ 
+              fontSize: tokens.fontSizeBase300,
+              fontFamily: tokens.fontFamilyBase,
+              color: tokens.colorNeutralForeground2,
+            }}>
+              Color Scheme:
             </Text>
             <Dropdown
               value={COLOR_SCHEME_DESCRIPTORS[colorScheme].name}
@@ -239,7 +234,7 @@ export function GlucoseSection({
         <div className={styles.chartWithBarContainer}>
           <div className={styles.chartWrapper}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={glucoseChartData} margin={chartMargin}>
+              <LineChart data={glucoseChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 {/* Day/night shading gradients */}
                 {showDayNightShading && (
                   <defs>
@@ -310,36 +305,6 @@ export function GlucoseSection({
                 />
                 
                 <RechartsTooltip content={<GlucoseTooltip glucoseUnit={glucoseUnit} maxGlucose={maxGlucose} />} />
-                
-                {/* Vertical time reference lines (6AM, noon, 6PM, midnight) */}
-                <ReferenceLine 
-                  x={0} 
-                  stroke={tokens.colorNeutralStroke2}
-                  strokeDasharray="3 3" 
-                  strokeWidth={1}
-                  strokeOpacity={0.5}
-                />
-                <ReferenceLine 
-                  x={6} 
-                  stroke={tokens.colorNeutralStroke2}
-                  strokeDasharray="3 3" 
-                  strokeWidth={1}
-                  strokeOpacity={0.5}
-                />
-                <ReferenceLine 
-                  x={12} 
-                  stroke={tokens.colorNeutralStroke2}
-                  strokeDasharray="3 3" 
-                  strokeWidth={1}
-                  strokeOpacity={0.5}
-                />
-                <ReferenceLine 
-                  x={18} 
-                  stroke={tokens.colorNeutralStroke2}
-                  strokeDasharray="3 3" 
-                  strokeWidth={1}
-                  strokeOpacity={0.5}
-                />
                 
                 {/* Target range reference lines */}
                 <ReferenceLine 
