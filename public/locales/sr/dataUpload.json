@@ -1,0 +1,95 @@
+{
+  "dataUpload": {
+    "title": "Dodavanje podataka",
+    "description": "Dodajte i upravljajte Vašim Glooko izvoznim fajlovima sa podrškom za prevlačenje",
+    "uploadZone": {
+      "dropFilesPrompt": "Prevucite ZIP fajlove ovde ili kliknite da biste pretražili",
+      "uploadDescription": "Dodajte jedan ili više ZIP fajlova iz Glooko izvoza",
+      "selectFilesButton": "Izaberite fajlove"
+    },
+    "guide": {
+      "title": "Vodič za početak",
+      "show": "Prikaži",
+      "hide": "Sakrij",
+      "showAriaLabel": "Prikaži vodič za početak",
+      "hideAriaLabel": "Sakrij vodič",
+      "demoData": {
+        "title": "Isprobajte demo podatke",
+        "newHere": "Novi ste ovde?",
+        "description1": "Počnite tako što ćete istražiti aplikaciju sa našim demo skupovima podataka. Prethodno učitan demo fajl već je dostupan u listi fajlova ispod.",
+        "description2": "Takođe možete učitati dodatne demo skupove podataka klikom na",
+        "loadDemoDataButton": "Učitaj demo podatke",
+        "description3": "dugme u zaglavlju liste fajlova. Ovi skupovi podataka su inspirisani stvarnim obrascima podataka tipa 1 dijabetesa.",
+        "description4": "Za atribuciju i više informacija o izvoru demo podataka, posetite",
+        "settingsAboutLink": "Podešavanja → O aplikaciji",
+        "description5": "stranicu."
+      },
+      "privacy": {
+        "title": "Vaša privatnost je zaštićena",
+        "dataStaysLocal": "Vaši podaci nikada ne napuštaju Vaš uređaj.",
+        "description1": "Sva obrada grafova i analiza se dešava u potpunosti u Vašem pretraživaču. Ne šaljemo Vaše fajlove ni na jedan server.",
+        "description2": "Fajlovi se čuvaju samo u memoriji Vašeg pretraživača dok koristite aplikaciju. Kada zatvorite tab pretraživača, Vaši podaci se brišu—osim ako ih eksplicitno ne sačuvate.",
+        "description3": "Za AI-powered analizu, rukovanje podacima je drugačije. Pogledajte",
+        "aiAnalysisSection": "AI analiza",
+        "description4": "sekciju ispod za detalje."
+      },
+      "upload": {
+        "title": "Dodajte Vaše podatke",
+        "dragAndDrop": "Prevucite i pustite",
+        "description1": "Vaše Glooko izvozne ZIP fajlove u zonu za dodavanje iznad, ili kliknite da biste pretražili i izabrali fajlove sa Vašeg računara.",
+        "description2": "Nakon dodavanja, izaberite fajl sa liste da biste ga videli na",
+        "comprehensiveReports": "Sveobuhvatni izveštaji",
+        "description3": "stranici—uključujući BG pregled, dnevne BG grafikone i analizu hipoglikemije.",
+        "description4": "Takođe možete izvesti Vaše podatke u Excel format (XLSX) koristeći dugme za preuzimanje pored svakog fajla."
+      },
+      "aiAnalysis": {
+        "title": "AI analiza (podaci napuštaju Vaš uređaj)",
+        "important": "Važno:",
+        "description1": "Kada koristite AI-powered funkcije analize, Vaši zdravstveni podaci se šalju izabranom AI provajderu (Perplexity, Grok, DeepSeek ili Google Gemini).",
+        "description2": "Podaci se šalju",
+        "withoutPII": "bez lično identifikujućih informacija",
+        "description3": "(kao što su Vaše ime ili email), ali AI provajder može povezati Vaš API ključ sa zdravstvenim podacima koje šaljete.",
+        "description4": "Za detaljne informacije o rukovanju AI podacima, najboljim praksama sigurnosti i politikama privatnosti, posetite",
+        "settingsAILink": "Podešavanja → AI podešavanja",
+        "description5": "stranicu."
+      }
+    },
+    "fileList": {
+      "title": "Dodati fajlovi",
+      "titleWithCount": "Dodati fajlovi ({{count}})",
+      "loadingDemoData": "Učitavanje demo podataka...",
+      "noFiles": "Još nema dodatih fajlova. Dodajte ZIP fajlove da biste počeli.",
+      "loadDemoDataButton": "Učitaj demo podatke",
+      "loadingButton": "Učitavanje...",
+      "clearAllButton": "Obriši sve",
+      "table": {
+        "selectColumn": "Izaberi",
+        "fileNameColumn": "Naziv fajla",
+        "uploadTimeColumn": "Vreme dodavanja",
+        "fileSizeColumn": "Veličina fajla",
+        "actionsColumn": "Akcije",
+        "selectFileAriaLabel": "Izaberite {{fileName}}",
+        "collapseDetailsAriaLabel": "Smanji detalje",
+        "expandDetailsAriaLabel": "Proširi detalje",
+        "validBadge": "Validan",
+        "invalidBadge": "Nevalidan",
+        "exportToXlsxAriaLabel": "Izvezite {{fileName}} u XLSX",
+        "exportToXlsxTitle": "Izvezi u XLSX",
+        "removeFileAriaLabel": "Uklonite {{fileName}}"
+      },
+      "details": {
+        "metadataHeader": "Metapodaci",
+        "dataSetsHeader": "Skupovi podataka ({{count}})",
+        "mergedFromFiles": "spojeno iz {{count}} fajlova",
+        "row": "red",
+        "rows": "redova",
+        "errorPrefix": "Greška: {{error}}",
+        "invalidZipFile": "Nevažeći ZIP fajl"
+      },
+      "export": {
+        "copyAriaLabel": "Kopiraj tabelu dodatih fajlova kao {{format}}",
+        "downloadAriaLabel": "Preuzmi tabelu dodatih fajlova kao {{format}}"
+      }
+    }
+  }
+}

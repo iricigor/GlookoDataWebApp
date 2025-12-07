@@ -1,0 +1,33 @@
+{
+  "common": {
+    "cancel": "Otkaži",
+    "ok": "U redu",
+    "save": "Sačuvaj",
+    "delete": "Obriši",
+    "edit": "Izmeni",
+    "close": "Zatvori",
+    "english": "Engleski",
+    "german": "Nemački",
+    "czech": "Češki",
+    "loading": "Učitavanje...",
+    "glucoseThresholds": {
+      "title": "Pragovi glukoze u krvi",
+      "description": "Konfigurišite vrednosti praga glukoze u krvi u {{unit}}. Vrednosti moraju biti u rastućem redosledu.",
+      "veryHigh": "Veoma visok",
+      "high": "Visok",
+      "low": "Nizak",
+      "veryLow": "Veoma nizak",
+      "inRange": "U opsegu:",
+      "veryHighAriaLabel": "Veoma visok prag",
+      "highAriaLabel": "Visok prag",
+      "lowAriaLabel": "Nizak prag",
+      "veryLowAriaLabel": "Veoma nizak prag"
+    }
+  },
+  "appTitle": "Glooko Web Aplikacija za Podatke",
+  "brandName": "Glooko Insights",
+  "brandAltText": "Glooko Insights Logo",
+  "footer": {
+    "version": "Verzija {{version}}"
+  }
+}

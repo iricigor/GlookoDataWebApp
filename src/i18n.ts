@@ -6,7 +6,7 @@ import HttpBackend from 'i18next-http-backend';
 function getStoredUILanguage(): string {
   try {
     const stored = localStorage.getItem('glookoUILanguagePreference');
-    if (stored === 'en' || stored === 'de' || stored === 'cs') {
+    if (stored === 'en' || stored === 'de' || stored === 'cs' || stored === 'sr') {
       return stored;
     }
   } catch (error) {

@@ -1,0 +1,20 @@
+{
+  "aiAnalysis": {
+    "title": "AI analiza",
+    "description": "Dobijte inteligentne uvide i preporuke koristeći napredne AI algoritme",
+    "placeholders": {
+      "noFile": "Molimo izaberite fajl sa podacima sa stranice Dodavanje podataka da biste započeli AI analizu",
+      "noApiKey": "Da biste koristili AI-powered analizu, potrebno je da konfigurišete API ključ (Perplexity ili Google Gemini).",
+      "addApiKey": "Molimo dodajte Vaš API ključ na",
+      "settingsLink": "stranici Podešavanja"
+    },
+    "tabs": {
+      "fileInfo": "Informacije o fajlu",
+      "timeInRange": "Vreme u opsegu",
+      "glucoseInsulin": "Glukoza i insulin",
+      "mealTiming": "Vreme obroka",
+      "pumpSettings": "Podešavanja pumpe",
+      "hypos": "Hipo"
+    }
+  }
+}
