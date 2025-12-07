@@ -102,6 +102,7 @@ export function HyposTab({
   loading,
   hasApiKey,
   activeProvider,
+  showGeekStats,
   hypoDatasets,
   responseLanguage,
   glucoseUnit,
@@ -337,27 +338,30 @@ export function HyposTab({
       <RetryNotification info={retryInfo} />
 
       {/* Accordion to show prompt text */}
-      <Accordion collapsible style={{ marginTop: '16px' }}>
-        <AccordionItem value="promptText">
-          <AccordionHeader>View AI Prompt</AccordionHeader>
-          <AccordionPanel>
-            <div className={styles.promptTextContainer}>
-              {(() => {
-                const hypoEventsCSV = convertHypoEventsToCSV(hypoDatasets!.hypoEvents);
-                const hypoSummariesCSV = convertHypoSummariesToCSV(hypoDatasets!.dailySummaries);
-                const base64EventsData = base64Encode(hypoEventsCSV);
-                const base64SummariesData = base64Encode(hypoSummariesCSV);
-                return generateHyposPrompt(base64EventsData, base64SummariesData, responseLanguage, glucoseUnit, activeProvider || undefined);
-              })()}
-            </div>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
+      {showGeekStats && (
+        <Accordion collapsible style={{ marginTop: '16px' }}>
+          <AccordionItem value="promptText">
+            <AccordionHeader>View AI Prompt</AccordionHeader>
+            <AccordionPanel>
+              <div className={styles.promptTextContainer}>
+                {(() => {
+                  const hypoEventsCSV = convertHypoEventsToCSV(hypoDatasets!.hypoEvents);
+                  const hypoSummariesCSV = convertHypoSummariesToCSV(hypoDatasets!.dailySummaries);
+                  const base64EventsData = base64Encode(hypoEventsCSV);
+                  const base64SummariesData = base64Encode(hypoSummariesCSV);
+                  return generateHyposPrompt(base64EventsData, base64SummariesData, responseLanguage, glucoseUnit, activeProvider || undefined);
+                })()}
+              </div>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+      )}
 
       {/* Accordion for daily summaries table */}
-      <Accordion collapsible style={{ marginTop: '16px' }}>
-        <AccordionItem value="dailySummaries">
-          <AccordionHeader>Daily Hypo Summaries ({hypoDatasets!.dailySummaries.length} days)</AccordionHeader>
+      {showGeekStats && (
+        <Accordion collapsible style={{ marginTop: '16px' }}>
+          <AccordionItem value="dailySummaries">
+            <AccordionHeader>Daily Hypo Summaries ({hypoDatasets!.dailySummaries.length} days)</AccordionHeader>
           <AccordionPanel>
             <TableContainer
               data={convertSummariesToArray(hypoDatasets!.dailySummaries)}
@@ -403,9 +407,10 @@ export function HyposTab({
           </AccordionPanel>
         </AccordionItem>
       </Accordion>
+      )}
 
       {/* Accordion for hypo events table */}
-      {hasHypoEvents && (
+      {hasHypoEvents && showGeekStats && (
         <Accordion collapsible style={{ marginTop: '16px' }}>
           <AccordionItem value="hypoEvents">
             <AccordionHeader>Hypo Events ({hypoDatasets!.hypoEvents.length} events)</AccordionHeader>

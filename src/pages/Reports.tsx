@@ -77,6 +77,7 @@ interface ReportsProps {
   glucoseUnit: GlucoseUnit;
   insulinDuration?: number;
   showDayNightShading: boolean;
+  showGeekStats: boolean;
   // AI configuration props for HyposReport
   perplexityApiKey?: string;
   geminiApiKey?: string;
@@ -110,6 +111,7 @@ export function Reports({
   glucoseUnit, 
   insulinDuration,
   showDayNightShading,
+  showGeekStats,
   perplexityApiKey,
   geminiApiKey,
   grokApiKey,
@@ -168,7 +170,7 @@ export function Reports({
           </div>
         );
       case 'bgOverview':
-        return <BGOverviewReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} />;
+        return <BGOverviewReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} showGeekStats={showGeekStats} />;
       case 'dailyBG':
         return <DailyBGReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} showDayNightShading={showDayNightShading} />;
       case 'hypos':

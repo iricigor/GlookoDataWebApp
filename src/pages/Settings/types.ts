@@ -52,6 +52,10 @@ export interface GeneralSettingsTabProps extends SettingsTabProps {
   showDayNightShading: boolean;
   /** Callback invoked when day/night shading preference changes */
   onShowDayNightShadingChange: (show: boolean) => void;
+  /** Whether to show geek stats (technical details like AI prompts and data tables) */
+  showGeekStats: boolean;
+  /** Callback invoked when geek stats preference changes */
+  onShowGeekStatsChange: (show: boolean) => void;
   /** Current export format for table data (CSV or TSV) */
   exportFormat: import('../../hooks/useExportFormat').ExportFormat;
   /** Callback invoked when export format changes */

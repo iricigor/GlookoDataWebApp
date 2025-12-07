@@ -25,6 +25,7 @@ export interface AIAnalysisProps {
   selectedProvider: AIProvider | null;
   responseLanguage: ResponseLanguage;
   glucoseUnit: GlucoseUnit;
+  showGeekStats: boolean;
   existingAnalysis?: AIAnalysisResult;
   onAnalysisComplete: (fileId: string, response: string, inRangePercentage: number) => void;
 }
@@ -63,6 +64,7 @@ export interface TabContentProps {
   loading: boolean;
   hasApiKey: boolean;
   activeProvider: AIProvider | null;
+  showGeekStats: boolean;
 }
 
 /** Props for Time in Range tab */

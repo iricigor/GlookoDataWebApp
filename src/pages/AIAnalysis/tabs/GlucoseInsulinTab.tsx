@@ -72,6 +72,7 @@ export function GlucoseInsulinTab({
   loading,
   hasApiKey,
   activeProvider,
+  showGeekStats,
   combinedDataset,
   responseLanguage,
   glucoseUnit,
@@ -199,25 +200,28 @@ export function GlucoseInsulinTab({
       </div>
 
       {/* Accordion to show prompt text */}
-      <Accordion collapsible style={{ marginTop: '16px' }}>
-        <AccordionItem value="promptText">
-          <AccordionHeader>View AI Prompt</AccordionHeader>
-          <AccordionPanel>
-            <div className={styles.promptTextContainer}>
-              {(() => {
-                const csvData = convertDailyReportsToCSV(combinedDataset);
-                const base64CsvData = base64Encode(csvData);
-                return generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, activeProvider || undefined);
-              })()}
-            </div>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
+      {showGeekStats && (
+        <Accordion collapsible style={{ marginTop: '16px' }}>
+          <AccordionItem value="promptText">
+            <AccordionHeader>View AI Prompt</AccordionHeader>
+            <AccordionPanel>
+              <div className={styles.promptTextContainer}>
+                {(() => {
+                  const csvData = convertDailyReportsToCSV(combinedDataset);
+                  const base64CsvData = base64Encode(csvData);
+                  return generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, activeProvider || undefined);
+                })()}
+              </div>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+      )}
 
       {/* Accordion for dataset table */}
-      <Accordion collapsible style={{ marginTop: '16px' }}>
-        <AccordionItem value="datasetTable">
-          <AccordionHeader>Dataset showing glucose ranges and insulin doses by date</AccordionHeader>
+      {showGeekStats && (
+        <Accordion collapsible style={{ marginTop: '16px' }}>
+          <AccordionItem value="datasetTable">
+            <AccordionHeader>Dataset showing glucose ranges and insulin doses by date</AccordionHeader>
           <AccordionPanel>
             <TableContainer
               data={convertDatasetToArray(combinedDataset)}
@@ -265,6 +269,7 @@ export function GlucoseInsulinTab({
           </AccordionPanel>
         </AccordionItem>
       </Accordion>
+      )}
 
       <AnalysisLoading visible={analyzing} />
       <AnalysisError error={error} />

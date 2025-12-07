@@ -109,6 +109,7 @@ describe('AIAnalysis', () => {
         selectedProvider={null}
         responseLanguage="english"
         glucoseUnit="mmol/L"
+        showGeekStats={false}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -127,6 +128,7 @@ describe('AIAnalysis', () => {
         selectedProvider={null}
         responseLanguage="english"
         glucoseUnit="mmol/L"
+        showGeekStats={false}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -153,6 +155,7 @@ describe('AIAnalysis', () => {
         selectedProvider={null}
         responseLanguage="english"
         glucoseUnit="mmol/L"
+        showGeekStats={false}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -181,6 +184,7 @@ describe('AIAnalysis', () => {
         selectedProvider={null}
         responseLanguage="english"
         glucoseUnit="mmol/L"
+        showGeekStats={false}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );
@@ -202,6 +206,7 @@ describe('AIAnalysis', () => {
         selectedProvider="grok"
         responseLanguage="english"
         glucoseUnit="mmol/L"
+        showGeekStats={false}
         onAnalysisComplete={mockAnalysisComplete}
       />
     );

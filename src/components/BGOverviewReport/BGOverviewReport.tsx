@@ -61,9 +61,10 @@ import type { TIRStats, HbA1cStats, RiskStats } from './types';
 interface BGOverviewReportProps {
   selectedFile?: UploadedFile;
   glucoseUnit: GlucoseUnit;
+  showGeekStats: boolean;
 }
 
-export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReportProps) {
+export function BGOverviewReport({ selectedFile, glucoseUnit, showGeekStats }: BGOverviewReportProps) {
   const styles = useBGOverviewStyles();
   const { thresholds } = useGlucoseThresholds();
 
@@ -422,7 +423,7 @@ export function BGOverviewReport({ selectedFile, glucoseUnit }: BGOverviewReport
       )}
 
       {/* Detailed Breakdown Accordion */}
-      {!loading && !error && tirStats.total > 0 && (
+      {!loading && !error && tirStats.total > 0 && showGeekStats && (
         <DetailedBreakdownAccordion
           categoryMode={categoryMode}
           glucoseUnit={glucoseUnit}

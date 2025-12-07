@@ -19,13 +19,15 @@ import type { UILanguage } from '../../hooks/useUILanguage';
 import type { GeneralSettingsTabProps } from './types';
 
 /**
- * Renders the General settings tab with controls for theme, day/night shading, export format, UI language, and AI response language.
+ * Renders the General settings tab with controls for theme, day/night shading, geek stats, export format, UI language, and AI response language.
  *
  * @param styles - CSS module classes used to style each settings section and controls.
  * @param themeMode - Currently selected theme mode (`"light" | "dark" | "system"`).
  * @param onThemeChange - Callback invoked with the new `ThemeMode` when the theme selection changes.
  * @param showDayNightShading - Whether day/night background shading is enabled on 24-hour graphs.
  * @param onShowDayNightShadingChange - Callback invoked with the new checked state when the shading switch changes.
+ * @param showGeekStats - Whether geek stats (technical details) are enabled.
+ * @param onShowGeekStatsChange - Callback invoked with the new checked state when the geek stats switch changes.
  * @param exportFormat - Currently selected export format (`"csv" | "tsv"`).
  * @param onExportFormatChange - Callback invoked with the new `ExportFormat` when the export format selection changes.
  * @param uiLanguage - Currently selected UI language (`"en" | "de"`).
@@ -40,6 +42,8 @@ export function GeneralSettingsTab({
   onThemeChange,
   showDayNightShading,
   onShowDayNightShadingChange,
+  showGeekStats,
+  onShowGeekStatsChange,
   exportFormat,
   onExportFormatChange,
   uiLanguage,
@@ -79,6 +83,19 @@ export function GeneralSettingsTab({
           checked={showDayNightShading}
           onChange={(_, data) => onShowDayNightShadingChange(data.checked)}
           label={showDayNightShading ? t('settings.general.dayNightShading.enabled') : t('settings.general.dayNightShading.disabled')}
+        />
+      </div>
+
+      <div className={styles.settingSection}>
+        <Title3 className={styles.sectionTitle}>{t('settings.general.geekStats.title')}</Title3>
+        <Divider className={styles.divider} />
+        <Text className={styles.settingDescription}>
+          {t('settings.general.geekStats.description')}
+        </Text>
+        <Switch
+          checked={showGeekStats}
+          onChange={(_, data) => onShowGeekStatsChange(data.checked)}
+          label={showGeekStats ? t('settings.general.geekStats.enabled') : t('settings.general.geekStats.disabled')}
         />
       </div>
 

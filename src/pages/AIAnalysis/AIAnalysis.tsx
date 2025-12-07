@@ -38,6 +38,7 @@ export function AIAnalysis({
   selectedProvider,
   responseLanguage,
   glucoseUnit,
+  showGeekStats,
   existingAnalysis, 
   onAnalysisComplete 
 }: AIAnalysisProps) {
@@ -180,6 +181,7 @@ export function AIAnalysis({
             loading={loading}
             hasApiKey={hasApiKey}
             activeProvider={activeProvider}
+            showGeekStats={showGeekStats}
             inRangePercentage={inRangePercentage}
             glucoseStats={glucoseStats}
             responseLanguage={responseLanguage}
@@ -199,6 +201,7 @@ export function AIAnalysis({
             loading={loading}
             hasApiKey={hasApiKey}
             activeProvider={activeProvider}
+            showGeekStats={showGeekStats}
             combinedDataset={combinedDataset}
             responseLanguage={responseLanguage}
             glucoseUnit={glucoseUnit}
@@ -214,6 +217,7 @@ export function AIAnalysis({
             loading={loading}
             hasApiKey={hasApiKey}
             activeProvider={activeProvider}
+            showGeekStats={showGeekStats}
             mealTimingDatasets={mealTimingDatasets}
             responseLanguage={responseLanguage}
             glucoseUnit={glucoseUnit}
@@ -229,6 +233,7 @@ export function AIAnalysis({
             loading={loading}
             hasApiKey={hasApiKey}
             activeProvider={activeProvider}
+            showGeekStats={showGeekStats}
             mealTimingDatasets={mealTimingDatasets}
             responseLanguage={responseLanguage}
             glucoseUnit={glucoseUnit}
@@ -245,6 +250,7 @@ export function AIAnalysis({
             loading={loading}
             hasApiKey={hasApiKey}
             activeProvider={activeProvider}
+            showGeekStats={showGeekStats}
             hypoDatasets={hypoDatasets}
             responseLanguage={responseLanguage}
             glucoseUnit={glucoseUnit}
