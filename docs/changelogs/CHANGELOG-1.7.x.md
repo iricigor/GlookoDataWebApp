@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>734 Add Serbian translation support with Latin script</summary>
+
+[#734](../../pull/734) Add Serbian translation support with Latin script
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>733 Add Czech language to navigation bar language switcher</summary>
 
 [#733](../../pull/733) Add Czech language to navigation bar language switcher
