@@ -40,11 +40,13 @@ jobs:
       - name: Check for untranslated placeholders
         id: check-placeholders
         run: npm run i18n:check-placeholders
+        # Allow workflow to continue to generate full report before failing
         continue-on-error: true
 
       - name: Check for hardcoded strings
         id: check-hardcoded
         run: npm run i18n:check-hardcoded
+        # This check is informational only (exits 0), but capture outcome for reporting
         continue-on-error: true
 
       - name: Generate summary report

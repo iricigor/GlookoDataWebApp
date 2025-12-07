@@ -14,9 +14,12 @@
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
+// Supported language codes for placeholder detection
+const SUPPORTED_LANGUAGES = ['DE', 'CS', 'EN'];
+
 // Placeholder pattern: [XX] where XX is a language code
-// Currently supporting: DE (German), CS (Czech), EN (English)
-const PLACEHOLDER_PATTERN = /\[(DE|CS|EN)\]/gi;
+// Dynamically generated from SUPPORTED_LANGUAGES
+const PLACEHOLDER_PATTERN = new RegExp(`\\[(${SUPPORTED_LANGUAGES.join('|')})\\]`, 'gi');
 
 interface TranslationIssue {
   file: string;

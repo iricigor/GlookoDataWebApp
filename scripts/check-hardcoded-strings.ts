@@ -146,8 +146,13 @@ function checkFile(filePath: string): HardcodedStringIssue[] {
         }
       }
       
-      // Check for JSX text content (basic pattern)
-      // This is a simple heuristic - looks for text between > and <
+      // Check for JSX text content (basic heuristic)
+      // Note: This is a simple pattern that looks for text between > and <
+      // Limitations: May produce false positives for:
+      // - Multiline JSX content
+      // - JSX with embedded expressions
+      // - Comments within JSX
+      // This is acceptable as the check is informational/warning only
       const jsxTextPattern = />([^<>{}]+)</g;
       let match;
       

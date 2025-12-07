@@ -22,7 +22,7 @@
     "test:e2e:headed": "playwright test --headed",
     "i18n:check-placeholders": "tsx scripts/check-translation-placeholders.ts",
     "i18n:check-hardcoded": "tsx scripts/check-hardcoded-strings.ts",
-    "i18n:check-all": "npm run i18n:check-placeholders && npm run i18n:check-hardcoded"
+    "i18n:check-all": "tsx scripts/check-translation-placeholders.ts; tsx scripts/check-hardcoded-strings.ts"
   },
   "dependencies": {
     "@azure/msal-browser": "^4.26.1",
