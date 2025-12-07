@@ -1,0 +1,18 @@
+{
+  "navigation": {
+    "home": "Domů",
+    "dataUpload": "Nahrání dat",
+    "reports": "Zprávy",
+    "aiAnalysis": "AI analýza",
+    "settings": "Nastavení",
+    "navigationMenu": "Navigační menu",
+    "login": "Přihlásit se",
+    "logout": "Odhlásit se",
+    "switchToLightMode": "Přepnout na světlý režim",
+    "switchToDarkMode": "Přepnout na tmavý režim",
+    "switchToLanguage": "Přepnout na {{language}}",
+    "currentLanguage": "Aktuální jazyk: {{language}}. Kliknutím přepnete.",
+    "settingsLabel": "Nastavení",
+    "syncingSettings": "Synchronizace nastavení..."
+  }
+}

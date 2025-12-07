@@ -84,7 +84,7 @@ interface CookieConsentProps {
  */
 export function CookieConsent({ onAccept }: CookieConsentProps) {
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t } = useTranslation('dialogs');
 
   return (
     <div className={styles.banner}>

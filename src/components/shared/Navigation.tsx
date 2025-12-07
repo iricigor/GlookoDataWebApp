@@ -151,7 +151,7 @@ export function Navigation({
   syncStatus = 'idle',
 }: NavigationProps) {
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t } = useTranslation(['navigation', 'dialogs']);
   const { 
     isLoggedIn, 
     userName, 

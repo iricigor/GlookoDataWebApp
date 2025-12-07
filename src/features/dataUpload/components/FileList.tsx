@@ -199,7 +199,7 @@ function getDataSetColor(rowCount: number): string {
 
 export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selectedFileId, onSelectFile, exportFormat, isLoadingDemoData }: FileListProps) {
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t } = useTranslation('dataUpload');
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
   const [exportingFiles, setExportingFiles] = useState<Set<string>>(new Set());
   const [loadingDemo, setLoadingDemo] = useState(false);

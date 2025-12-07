@@ -1,0 +1,95 @@
+{
+  "dataUpload": {
+    "title": "Nahrání dat",
+    "description": "Nahrajte a spravujte své exportní soubory Glooko s podporou přetažení",
+    "uploadZone": {
+      "dropFilesPrompt": "Přetáhněte ZIP soubory sem nebo klikněte pro procházení",
+      "uploadDescription": "Nahrajte jeden nebo více ZIP souborů z exportu Glooko",
+      "selectFilesButton": "Vybrat soubory"
+    },
+    "guide": {
+      "title": "Průvodce prvními kroky",
+      "show": "Zobrazit",
+      "hide": "Skrýt",
+      "showAriaLabel": "Zobrazit průvodce prvními kroky",
+      "hideAriaLabel": "Skrýt průvodce",
+      "demoData": {
+        "title": "Vyzkoušejte demo data",
+        "newHere": "Jste tu poprvé?",
+        "description1": "Začněte prozkoumáním aplikace s našimi demo datovými sadami. Předem načtený demo soubor je již k dispozici v seznamu souborů níže.",
+        "description2": "Můžete také načíst další demo datové sady kliknutím na tlačítko",
+        "loadDemoDataButton": "Načíst demo data",
+        "description3": "v záhlaví seznamu souborů. Tyto datové sady jsou inspirovány skutečnými vzory dat diabetu 1. typu.",
+        "description4": "Pro uvedení zdroje a další informace o zdroji demo dat navštivte stránku",
+        "settingsAboutLink": "Nastavení → O aplikaci",
+        "description5": "."
+      },
+      "privacy": {
+        "title": "Vaše soukromí je chráněno",
+        "dataStaysLocal": "Vaše data nikdy neopustí vaše zařízení.",
+        "description1": "Veškeré zpracování a analýza grafů probíhá zcela ve vašem prohlížeči. Vaše soubory nenahrávame na žádný server.",
+        "description2": "Soubory jsou udržovány pouze v paměti vašeho prohlížeče, když aplikaci používáte. Když zavřete záložku prohlížeče, vaše data zmizí—pokud je explicitně neuložíte.",
+        "description3": "Pro analýzu s podporou AI je zpracování dat odlišné. Podrobnosti viz část",
+        "aiAnalysisSection": "AI analýza",
+        "description4": "níže."
+      },
+      "upload": {
+        "title": "Nahrajte svá data",
+        "dragAndDrop": "Přetáhněte",
+        "description1": "své ZIP soubory exportu Glooko do nahrávací zóny výše nebo klikněte pro procházení a výběr souborů z vašeho počítače.",
+        "description2": "Po nahrání vyberte soubor ze seznamu pro zobrazení na stránce",
+        "comprehensiveReports": "Komplexní zprávy",
+        "description3": "—včetně přehledu BG, denních grafů BG a analýzy hypoglykémie.",
+        "description4": "Můžete také exportovat svá data do formátu Excel (XLSX) pomocí tlačítka stažení vedle každého souboru."
+      },
+      "aiAnalysis": {
+        "title": "AI analýza (data opouštějí vaše zařízení)",
+        "important": "Důležité:",
+        "description1": "Když použijete funkce analýzy s podporou AI, vaše zdravotní data jsou odeslána vybranému poskytovateli AI (Perplexity, Grok, DeepSeek nebo Google Gemini).",
+        "description2": "Data jsou odeslána",
+        "withoutPII": "bez osobně identifikovatelných informací",
+        "description3": "(jako je vaše jméno nebo e-mail), ale poskytovatel AI může přiřadit váš API klíč k zdravotním datům, která odesíláte.",
+        "description4": "Pro podrobné informace o zpracování dat AI, osvědčených postupech zabezpečení a zásadách ochrany osobních údajů navštivte stránku",
+        "settingsAILink": "Nastavení → Nastavení AI",
+        "description5": "."
+      }
+    },
+    "fileList": {
+      "title": "Nahrané soubory",
+      "titleWithCount": "Nahrané soubory ({{count}})",
+      "loadingDemoData": "Načítání demo dat...",
+      "noFiles": "Zatím nebyly nahrány žádné soubory. Nahrajte ZIP soubory pro začátek.",
+      "loadDemoDataButton": "Načíst demo data",
+      "loadingButton": "Načítání...",
+      "clearAllButton": "Vymazat vše",
+      "table": {
+        "selectColumn": "Vybrat",
+        "fileNameColumn": "Název souboru",
+        "uploadTimeColumn": "Čas nahrání",
+        "fileSizeColumn": "Velikost souboru",
+        "actionsColumn": "Akce",
+        "selectFileAriaLabel": "Vybrat {{fileName}}",
+        "collapseDetailsAriaLabel": "Sbalit podrobnosti",
+        "expandDetailsAriaLabel": "Rozbalit podrobnosti",
+        "validBadge": "Platný",
+        "invalidBadge": "Neplatný",
+        "exportToXlsxAriaLabel": "Exportovat {{fileName}} do XLSX",
+        "exportToXlsxTitle": "Exportovat do XLSX",
+        "removeFileAriaLabel": "Odebrat {{fileName}}"
+      },
+      "details": {
+        "metadataHeader": "Metadata",
+        "dataSetsHeader": "Datové sady ({{count}})",
+        "mergedFromFiles": "sloučeno z {{count}} souborů",
+        "row": "řádek",
+        "rows": "řádky",
+        "errorPrefix": "Chyba: {{error}}",
+        "invalidZipFile": "Neplatný ZIP soubor"
+      },
+      "export": {
+        "copyAriaLabel": "Zkopírovat tabulku nahraných souborů jako {{format}}",
+        "downloadAriaLabel": "Stáhnout tabulku nahraných souborů jako {{format}}"
+      }
+    }
+  }
+}

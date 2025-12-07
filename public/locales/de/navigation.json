@@ -1,0 +1,18 @@
+{
+  "navigation": {
+    "home": "Startseite",
+    "dataUpload": "Daten hochladen",
+    "reports": "Berichte",
+    "aiAnalysis": "KI-Analyse",
+    "settings": "Einstellungen",
+    "navigationMenu": "Navigationsmenü",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "switchToLightMode": "Zum hellen Modus wechseln",
+    "switchToDarkMode": "Zum dunklen Modus wechseln",
+    "switchToLanguage": "Zu {{language}} wechseln",
+    "currentLanguage": "Aktuelle Sprache: {{language}}. Klicken Sie zum Wechseln.",
+    "settingsLabel": "Einstellungen",
+    "syncingSettings": "Synchronisiere Einstellungen..."
+  }
+}

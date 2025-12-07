@@ -1,0 +1,50 @@
+{
+  "cookieConsent": {
+    "message": "Tato aplikace používá <strong>pouze funkční cookies</strong> k uložení vašich předvoleb (motiv, nastavení, výběr data). <strong>Neshromažďujeme osobní údaje prostřednictvím cookies</strong>, nepoužíváme sledovací cookies a neodesíláme data cookies na externí servery. Veškeré zpracování dat probíhá lokálně ve vašem prohlížeči.",
+    "learnMore": "Další informace o ochraně osobních údajů",
+    "gotIt": "Rozumím"
+  },
+  "loginDialog": {
+    "title": "Přihlášení pomocí Microsoftu",
+    "description": "Přihlaste se pomocí svého osobního účtu Microsoft a získejte přístup ke všem funkcím.",
+    "signInButton": "Přihlásit se pomocí Microsoftu",
+    "signingIn": "Přihlašování...",
+    "cancel": "Zrušit",
+    "errorMessage": "Přihlášení se nezdařilo. Zkuste to prosím znovu."
+  },
+  "logoutDialog": {
+    "title": "Odhlášení",
+    "confirmMessage": "Opravdu se chcete odhlásit?",
+    "loggingOut": "Odhlašování...",
+    "cancel": "Zrušit",
+    "proUser": "Pro uživatel",
+    "keyVaultSecret": "Key Vault Secret:",
+    "loadingSecret": "Načítání tajemství...",
+    "secretNotAvailable": "Není k dispozici"
+  },
+  "welcomeDialog": {
+    "title": "Vítejte!",
+    "greeting": "Vítejte, {{userName}}!",
+    "greetingDefault": "Vítejte v naší aplikaci!",
+    "thankYou": "Děkujeme, že jste se k nám připojili! Těšíme se, že vám pomůžeme spravovat a analyzovat vaše diabetická data.",
+    "cloudSettingsSync": "Synchronizace nastavení v cloudu:",
+    "cloudSettingsSyncDescription": "Vaše předvolby aplikace (motiv, jednotka glukózy, prahové hodnoty atd.) budou uloženy do cloudu, takže se synchronizují na všech vašich zařízeních.",
+    "privacyFirst": "Ochrana soukromí na prvním místě:",
+    "privacyFirstDescription": "Ukládáme pouze vaši e-mailovou adresu pro identifikaci účtu a vaše předvolby aplikace. Žádná osobní zdravotní data, hodnoty glukózy ani lékařské informace nejsou nikdy uloženy v našem cloudu.",
+    "privacyNote": "Pokud nechcete ukládat nastavení do cloudu, klikněte na \"Zrušit\" a odhlaste se. Aplikaci můžete stále používat bez přihlášení.",
+    "saveSettings": "Uložit nastavení",
+    "cancel": "Zrušit"
+  },
+  "infrastructureErrorDialog": {
+    "defaultTitle": "Něco se pokazilo",
+    "defaultDescription": "Při připojování k našim službám došlo k chybě.",
+    "serviceUnavailableTitle": "Služba není k dispozici",
+    "serviceUnavailableDescription": "Naše služby jsou momentálně nedostupné. To může znamenat, že se infrastruktura nastavuje nebo existují dočasné problémy s přístupem.",
+    "networkErrorTitle": "Chyba sítě",
+    "networkErrorDescription": "Nelze se připojit k našim službám. Zkontrolujte prosím připojení k internetu a zkuste to znovu.",
+    "accessDeniedTitle": "Přístup odepřen",
+    "accessDeniedDescription": "Vaše relace mohla vypršet. Zkuste se prosím přihlásit znovu.",
+    "errorWithCode": "Chyba {{statusCode}}: {{message}}",
+    "ok": "OK"
+  }
+}

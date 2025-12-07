@@ -1,0 +1,8 @@
+{
+  "toast": {
+    "fileLoadedSuccessTitle": "Datei erfolgreich geladen",
+    "fileLoadedSuccessBody": "{{fileName}} wurde zur Analyse ausgewählt",
+    "aiProviderSwitchedTitle": "KI-Anbieter gewechselt",
+    "aiProviderSwitchedBody": "{{fromProvider}}-Schlüsselüberprüfung fehlgeschlagen. Zu {{toProvider}} gewechselt."
+  }
+}

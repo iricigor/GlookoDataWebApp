@@ -116,7 +116,7 @@ interface WelcomeDialogProps {
  */
 export function WelcomeDialog({ open, onAccept, onCancel, userName }: WelcomeDialogProps) {
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t } = useTranslation('dialogs');
 
   const greeting = userName 
     ? t('welcomeDialog.greeting', { userName }) 

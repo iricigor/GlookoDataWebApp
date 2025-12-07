@@ -1,0 +1,8 @@
+{
+  "toast": {
+    "fileLoadedSuccessTitle": "Soubor byl úspěšně načten",
+    "fileLoadedSuccessBody": "{{fileName}} byl vybrán pro analýzu",
+    "aiProviderSwitchedTitle": "Poskytovatel AI byl přepnut",
+    "aiProviderSwitchedBody": "Ověření klíče {{fromProvider}} selhalo. Přepnuto na {{toProvider}}."
+  }
+}

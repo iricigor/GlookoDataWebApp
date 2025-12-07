@@ -21,8 +21,20 @@ describe('i18n configuration', () => {
     expect(i18n.options.interpolation?.escapeValue).toBe(false);
   });
 
-  it('should use translation as the default namespace', () => {
-    expect(i18n.options.defaultNS).toBe('translation');
+  it('should use common as the default namespace', () => {
+    expect(i18n.options.defaultNS).toBe('common');
+  });
+
+  it('should load all required namespaces', () => {
+    const expectedNamespaces = [
+      'common',
+      'navigation',
+      'home',
+      'dataUpload',
+      'dialogs',
+      'notifications',
+    ];
+    expect(i18n.options.ns).toEqual(expectedNamespaces);
   });
 
   it('should have the http backend configured with correct load path', () => {

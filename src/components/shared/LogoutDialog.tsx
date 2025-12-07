@@ -117,7 +117,7 @@ export function LogoutDialog({
 }: LogoutDialogProps) {
   const styles = useStyles();
   const proBadgeStyles = useProUserBadgeStyles();
-  const { t } = useTranslation();
+  const { t } = useTranslation(['dialogs', 'navigation']);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -200,7 +200,7 @@ export function LogoutDialog({
               onClick={handleLogout}
               disabled={loading}
             >
-              {loading ? t('logoutDialog.loggingOut') : t('navigation.logout')}
+              {loading ? t('logoutDialog.loggingOut') : t('navigation:navigation.logout')}
             </Button>
           </DialogActions>
         </DialogBody>

@@ -100,7 +100,7 @@ export function InfrastructureErrorDialog({
   statusCode
 }: InfrastructureErrorDialogProps) {
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t } = useTranslation('dialogs');
 
   // Determine the title and description based on error type
   let title = t('infrastructureErrorDialog.defaultTitle');

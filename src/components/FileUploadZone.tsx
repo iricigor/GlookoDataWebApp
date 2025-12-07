@@ -60,7 +60,7 @@ interface FileUploadZoneProps {
 
 export function FileUploadZone({ onFilesSelected }: FileUploadZoneProps) {
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t } = useTranslation('dataUpload');
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
