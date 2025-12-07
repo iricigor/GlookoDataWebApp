@@ -310,4 +310,11 @@ export const useStyles = makeStyles({
     marginBottom: '0',
     display: 'block',
   },
+  benefitsList: {
+    marginTop: '12px',
+    paddingLeft: '20px',
+  },
+  expressInterestButton: {
+    marginTop: '16px',
+  },
 });

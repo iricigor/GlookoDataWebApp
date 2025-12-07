@@ -152,10 +152,10 @@
       "notEnabledMessage": "Funkce Pro uživatelů ještě nejsou povoleny. Tato funkce je v současné době ve vývoji a bude brzy k dispozici.",
       "benefits": {
         "title": "Co získají Pro uživatelé",
-        "description": "Pro uživatelé získají přístup k prémiové funkci, které usnadňují použití funkcí AI analýzy a jsou nákladově efektivnější:",
+        "description": "Pro uživatelé získají přístup k prémiové funkce, které usnadňují použití funkcí AI analýzy a jsou nákladově efektivnější:",
         "managedApiKeys": "Spravované API klíče - Není třeba nastavovat vlastní API klíče s poskytovateli AI",
         "noSetupRequired": "Není potřeba nastavení - Okamžité používání AI funkcí bez konfigurace",
-        "costEffective": "Nákladově efektivní přístup - Sdílené použití API znamená nižší náklady (přibližně $2/měsíc)",
+        "costEffective": "Nákladově efektivní přístup - Sdílené použití API znamená nižší náklady",
         "reliableAccess": "Spolehlivý přístup - Zaručený přístup k API bez obav z limitů nebo kvót"
       },
       "expressInterest": {

@@ -41,7 +41,7 @@ export function ProUsersTab({ styles }: SettingsTabProps) {
         <Text className={styles.settingDescription}>
           {t('settings.proUsers.benefits.description')}
         </Text>
-        <ul className={styles.settingDescription} style={{ marginTop: '12px', paddingLeft: '20px' }}>
+        <ul className={styles.benefitsList}>
           <li>{t('settings.proUsers.benefits.managedApiKeys')}</li>
           <li>{t('settings.proUsers.benefits.noSetupRequired')}</li>
           <li>{t('settings.proUsers.benefits.costEffective')}</li>
@@ -55,7 +55,7 @@ export function ProUsersTab({ styles }: SettingsTabProps) {
         <Text className={styles.settingDescription}>
           {t('settings.proUsers.expressInterest.description')}
         </Text>
-        <div style={{ marginTop: '16px' }}>
+        <div className={styles.expressInterestButton}>
           <Link 
             href="https://github.com/iricigor/GlookoDataWebApp/issues/new?template=pro_user_interest.yml"
             target="_blank"

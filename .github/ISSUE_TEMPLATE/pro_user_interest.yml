@@ -31,11 +31,11 @@ body:
   - type: dropdown
     id: payment-willingness
     attributes:
-      label: Would you be willing to pay approximately $2/month for Pro User access?
+      label: Would you be willing to pay a small monthly fee for Pro User access?
       description: This helps cover the API costs for providing managed keys
       options:
-        - "Yes, I would pay $2/month"
-        - "Maybe, depending on features"
+        - "Yes, I would pay a small monthly fee"
+        - "Maybe, depending on the price and features"
         - "No, I prefer the free tier only"
     validations:
       required: true

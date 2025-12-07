@@ -155,7 +155,7 @@
         "description": "Pro Users will get access to premium features that make using the AI analysis capabilities easier and more cost-effective:",
         "managedApiKeys": "Managed API Keys - No need to set up your own API keys with AI providers",
         "noSetupRequired": "No Setup Required - Start using AI features immediately without configuration",
-        "costEffective": "Cost-Effective Access - Shared API usage means lower costs (approximately $2/month)",
+        "costEffective": "Cost-Effective Access - Shared API usage means lower costs",
         "reliableAccess": "Reliable Access - Guaranteed API access without worrying about rate limits or quotas"
       },
       "expressInterest": {

@@ -155,7 +155,7 @@
         "description": "Pro-Benutzer erhalten Zugriff auf Premium-Funktionen, die die Nutzung der KI-Analysefunktionen einfacher und kostengünstiger machen:",
         "managedApiKeys": "Verwaltete API-Schlüssel - Keine Notwendigkeit, eigene API-Schlüssel mit KI-Anbietern einzurichten",
         "noSetupRequired": "Keine Einrichtung erforderlich - Sofortige Nutzung von KI-Funktionen ohne Konfiguration",
-        "costEffective": "Kosteneffektiver Zugang - Gemeinsame API-Nutzung bedeutet niedrigere Kosten (ca. $2/Monat)",
+        "costEffective": "Kosteneffektiver Zugang - Gemeinsame API-Nutzung bedeutet niedrigere Kosten",
         "reliableAccess": "Zuverlässiger Zugang - Garantierter API-Zugang ohne Sorgen um Ratenbegrenzungen oder Kontingente"
       },
       "expressInterest": {
