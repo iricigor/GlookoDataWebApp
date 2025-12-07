@@ -7,7 +7,7 @@ import '@testing-library/jest-dom';
 import { beforeAll } from 'vitest';
 import i18n from '../i18n';
 
-// Initialize i18n before tests and load all namespaces
+// Initialize i18n before tests and load all namespaces with extended timeout
 beforeAll(async () => {
   if (!i18n.isInitialized) {
     await i18n.init();
@@ -18,7 +18,7 @@ beforeAll(async () => {
   await Promise.all(
     namespaces.map(ns => i18n.loadNamespaces(ns))
   );
-});
+}, 30000); // Increase timeout to 30 seconds
 
 // Mock ResizeObserver for tests
 global.ResizeObserver = class ResizeObserver {

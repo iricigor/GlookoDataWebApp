@@ -14,6 +14,9 @@ const namespaces = [
   'navigation',
   'home',
   'dataUpload',
+  'reports',
+  'aiAnalysis',
+  'settings',
   'dialogs',
   'notifications',
 ];
