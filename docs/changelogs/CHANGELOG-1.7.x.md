@@ -28,6 +28,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 
 ### Other
 
+<details>
+<summary>731 Bump version to 1.7.1</summary>
+
+[#731](../../pull/731) Bump version to 1.7.1
+  - [Auto-generated entry from PR merge]
+</details>
+
 *(To be added as development progresses)*
 
 ---
