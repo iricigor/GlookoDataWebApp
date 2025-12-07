@@ -29,9 +29,10 @@
         "dataStaysLocal": "Your data never leaves your device.",
         "description1": "All graph processing and analysis happens entirely in your browser. We do not upload your files to any server.",
         "description2": "Files are maintained only in your browser's memory while you use the app. When you close the browser tab, your data is gone—unless you explicitly save it.",
-        "description3": "For AI-powered analysis, data handling is different. See the",
+        "description3": "You can choose to save files permanently in your browser's cache by checking the \"Remember\" checkbox in the file list. This will keep the file available across browser sessions, stored locally on your device using IndexedDB. You can remove cached files at any time by unchecking the box or clearing your browser data.",
+        "description4": "For AI-powered analysis, data handling is different. See the",
         "aiAnalysisSection": "AI Analysis",
-        "description4": "section below for details."
+        "description5": "section below for details."
       },
       "upload": {
         "title": "Upload Your Data",
@@ -67,6 +68,7 @@
         "fileNameColumn": "File Name",
         "uploadTimeColumn": "Upload Time",
         "fileSizeColumn": "File Size",
+        "cacheColumn": "Remember",
         "actionsColumn": "Actions",
         "selectFileAriaLabel": "Select {{fileName}}",
         "collapseDetailsAriaLabel": "Collapse details",
@@ -75,7 +77,10 @@
         "invalidBadge": "Invalid",
         "exportToXlsxAriaLabel": "Export {{fileName}} to XLSX",
         "exportToXlsxTitle": "Export to XLSX",
-        "removeFileAriaLabel": "Remove {{fileName}}"
+        "removeFileAriaLabel": "Remove {{fileName}}",
+        "cacheAriaLabel": "Remember {{fileName}} in browser cache",
+        "cacheTooltip": "Save this file in permanent browser cache so it persists across sessions",
+        "cacheDisabledForDemo": "Demo files cannot be saved to cache"
       },
       "details": {
         "metadataHeader": "Metadata",

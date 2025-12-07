@@ -576,26 +576,6 @@ export function AISettingsTab({
                 </div>
               </AccordionPanel>
             </AccordionItem>
-
-            {/* Data Storage */}
-            <AccordionItem value="datastorage">
-              <AccordionHeader>
-                <Text className={styles.accordionSummary}>
-                  <strong>Data Storage:</strong> Your data is stored locally with configurable persistence options.
-                </Text>
-              </AccordionHeader>
-              <AccordionPanel>
-                <div className={styles.accordionContent}>
-                  <p>
-                    Your data is stored locally with configurable persistence options. All processing happens in your browser. This application is fully open source—you can{' '}
-                    <Link href="https://github.com/iricigor/GlookoDataWebApp" target="_blank" rel="noopener noreferrer">
-                      review the code on GitHub
-                    </Link>{' '}
-                    or deploy your own instance for complete control.
-                  </p>
-                </div>
-              </AccordionPanel>
-            </AccordionItem>
           </Accordion>
         </div>
       </div>

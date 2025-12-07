@@ -29,9 +29,10 @@
         "dataStaysLocal": "Vaši podaci nikada ne napuštaju Vaš uređaj.",
         "description1": "Sva obrada grafova i analiza se dešava u potpunosti u Vašem pretraživaču. Ne šaljemo Vaše fajlove ni na jedan server.",
         "description2": "Fajlovi se čuvaju samo u memoriji Vašeg pretraživača dok koristite aplikaciju. Kada zatvorite tab pretraživača, Vaši podaci se brišu—osim ako ih eksplicitno ne sačuvate.",
-        "description3": "Za AI-powered analizu, rukovanje podacima je drugačije. Pogledajte",
+        "description3": "Možete izabrati da sačuvate fajlove trajno u keš memoriji pretraživača tako što ćete označiti polje \"Zapamti\" u listi fajlova. To će zadržati fajl dostupnim između sesija pretraživača, sačuvan lokalno na Vašem uređaju koristeći IndexedDB. Možete ukloniti keširane fajlove u bilo kom trenutku tako što ćete poništiti oznaku ili obrisati podatke pretraživača.",
+        "description4": "Za AI-powered analizu, rukovanje podacima je drugačije. Pogledajte",
         "aiAnalysisSection": "AI analiza",
-        "description4": "sekciju ispod za detalje."
+        "description5": "sekciju ispod za detalje."
       },
       "upload": {
         "title": "Dodajte Vaše podatke",
@@ -67,6 +68,7 @@
         "fileNameColumn": "Naziv fajla",
         "uploadTimeColumn": "Vreme dodavanja",
         "fileSizeColumn": "Veličina fajla",
+        "cacheColumn": "Zapamti",
         "actionsColumn": "Akcije",
         "selectFileAriaLabel": "Izaberite {{fileName}}",
         "collapseDetailsAriaLabel": "Smanji detalje",
@@ -75,7 +77,10 @@
         "invalidBadge": "Nevalidan",
         "exportToXlsxAriaLabel": "Izvezite {{fileName}} u XLSX",
         "exportToXlsxTitle": "Izvezi u XLSX",
-        "removeFileAriaLabel": "Uklonite {{fileName}}"
+        "removeFileAriaLabel": "Uklonite {{fileName}}",
+        "cacheAriaLabel": "Zapamti {{fileName}} u keš memoriji pretraživača",
+        "cacheTooltip": "Sačuvaj ovaj fajl u trajnu keš memoriju pretraživača tako da ostane dostupan između sesija",
+        "cacheDisabledForDemo": "Demo fajlovi ne mogu biti sačuvani u keš memoriju"
       },
       "details": {
         "metadataHeader": "Metapodaci",

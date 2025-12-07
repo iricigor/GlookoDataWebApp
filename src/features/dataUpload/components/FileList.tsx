@@ -18,6 +18,7 @@ import {
   TableBody,
   TableCell,
   Radio,
+  Checkbox,
 } from '@fluentui/react-components';
 import { useTranslation } from 'react-i18next';
 import { DeleteRegular, ChevronRightRegular, ChevronDownRegular, ArrowDownloadRegular, DatabaseRegular } from '@fluentui/react-icons';
@@ -26,6 +27,7 @@ import type { ExportFormat } from '../../../hooks/useExportFormat';
 import { convertZipToXlsx, downloadXlsx } from '../../export/utils';
 import { TableContainer } from '../../../components/TableContainer';
 import { DEMO_DATASETS, loadDemoDataset, getDemoDataAttribution } from '../../../utils/demoData';
+import { saveFileToCache, removeFileFromCache } from '../../../utils/fileCache';
 
 const useStyles = makeStyles({
   container: {
@@ -175,6 +177,7 @@ interface FileListProps {
   onAddFiles: (files: UploadedFile[]) => void;
   selectedFileId?: string | null;
   onSelectFile?: (id: string | null) => void;
+  onUpdateFile: (file: UploadedFile) => void;
   exportFormat: ExportFormat;
   isLoadingDemoData?: boolean;
 }
@@ -197,7 +200,7 @@ function getDataSetColor(rowCount: number): string {
   }
 }
 
-export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selectedFileId, onSelectFile, exportFormat, isLoadingDemoData }: FileListProps) {
+export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selectedFileId, onSelectFile, onUpdateFile, exportFormat, isLoadingDemoData }: FileListProps) {
   const styles = useStyles();
   const { t } = useTranslation('dataUpload');
   const [expandedFiles, setExpandedFiles] = useState<Set<string>>(new Set());
@@ -254,6 +257,25 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
         newSet.delete(file.id);
         return newSet;
       });
+    }
+  };
+
+  const handleCacheToggle = async (file: UploadedFile, checked: boolean) => {
+    try {
+      if (checked) {
+        await saveFileToCache(file);
+      } else {
+        await removeFileFromCache(file.id);
+      }
+      
+      // Update file state
+      onUpdateFile({
+        ...file,
+        isPermanentlyCached: checked,
+      });
+    } catch (error) {
+      console.error('Failed to toggle cache:', error);
+      // Error is logged but user continues to work - the checkbox state will revert
     }
   };
 
@@ -383,6 +405,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
             <TableHeaderCell>{t('dataUpload.fileList.table.fileNameColumn')}</TableHeaderCell>
             <TableHeaderCell className={styles.hideOnMobile}>{t('dataUpload.fileList.table.uploadTimeColumn')}</TableHeaderCell>
             <TableHeaderCell className={styles.hideOnMobile}>{t('dataUpload.fileList.table.fileSizeColumn')}</TableHeaderCell>
+            <TableHeaderCell className={styles.hideOnMobile}>{t('dataUpload.fileList.table.cacheColumn')}</TableHeaderCell>
             <TableHeaderCell>{t('dataUpload.fileList.table.actionsColumn')}</TableHeaderCell>
           </TableRow>
         </TableHeader>
@@ -427,6 +450,19 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
                   </TableCell>
                   <TableCell className={styles.hideOnMobile}>{formatTime(file.uploadTime)}</TableCell>
                   <TableCell className={styles.hideOnMobile}>{formatFileSize(file.size)}</TableCell>
+                  <TableCell className={styles.hideOnMobile}>
+                    <Tooltip
+                      content={file.id.startsWith('demo-') ? t('dataUpload.fileList.table.cacheDisabledForDemo') : t('dataUpload.fileList.table.cacheTooltip')}
+                      relationship="label"
+                    >
+                      <Checkbox
+                        checked={file.isPermanentlyCached || false}
+                        onChange={(_, data) => handleCacheToggle(file, data.checked as boolean)}
+                        disabled={file.id.startsWith('demo-')}
+                        aria-label={t('dataUpload.fileList.table.cacheAriaLabel', { fileName: file.name })}
+                      />
+                    </Tooltip>
+                  </TableCell>
                   <TableCell>
                     {file.zipMetadata?.isValid && (
                       <Button
@@ -450,7 +486,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onAddFiles, selected
                 </TableRow>
                 {isExpanded && file.zipMetadata && (
                   <TableRow key={`${file.id}-details`} className={styles.detailsRow}>
-                    <TableCell colSpan={onSelectFile ? 5 : 4} className={styles.detailsCell}>
+                    <TableCell colSpan={onSelectFile ? 6 : 5} className={styles.detailsCell}>
                       <div className={styles.metadataContainer}>
                         {file.zipMetadata.isValid ? (
                           <>

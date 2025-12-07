@@ -280,7 +280,10 @@ export function DataUploadGuide() {
                   {t('dataUpload.guide.privacy.description2')}
                 </p>
                 <p>
-                  {t('dataUpload.guide.privacy.description3')} <strong>{t('dataUpload.guide.privacy.aiAnalysisSection')}</strong> {t('dataUpload.guide.privacy.description4')}
+                  {t('dataUpload.guide.privacy.description3')}
+                </p>
+                <p>
+                  {t('dataUpload.guide.privacy.description4')} <strong>{t('dataUpload.guide.privacy.aiAnalysisSection')}</strong> {t('dataUpload.guide.privacy.description5')}
                 </p>
               </div>
             </AccordionPanel>

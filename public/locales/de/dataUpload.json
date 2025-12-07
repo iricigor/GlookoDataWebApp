@@ -29,9 +29,10 @@
         "dataStaysLocal": "Ihre Daten verlassen niemals Ihr Gerät.",
         "description1": "Die gesamte Graphenverarbeitung und -analyse erfolgt vollständig in Ihrem Browser. Wir laden Ihre Dateien nicht auf einen Server hoch.",
         "description2": "Dateien werden nur im Speicher Ihres Browsers aufbewahrt, während Sie die App verwenden. Wenn Sie den Browser-Tab schließen, sind Ihre Daten weg—es sei denn, Sie speichern sie ausdrücklich.",
-        "description3": "Für KI-gestützte Analysen ist die Datenverarbeitung anders. Siehe Abschnitt",
+        "description3": "Sie können Dateien dauerhaft im Cache Ihres Browsers speichern, indem Sie das Kontrollkästchen \"Merken\" in der Dateiliste aktivieren. Dadurch bleibt die Datei über Browser-Sitzungen hinweg verfügbar und wird lokal auf Ihrem Gerät mit IndexedDB gespeichert. Sie können zwischengespeicherte Dateien jederzeit entfernen, indem Sie das Kontrollkästchen deaktivieren oder Ihre Browser-Daten löschen.",
+        "description4": "Für KI-gestützte Analysen ist die Datenverarbeitung anders. Siehe Abschnitt",
         "aiAnalysisSection": "KI-Analyse",
-        "description4": "unten für Details."
+        "description5": "unten für Details."
       },
       "upload": {
         "title": "Ihre Daten hochladen",
@@ -67,6 +68,7 @@
         "fileNameColumn": "Dateiname",
         "uploadTimeColumn": "Upload-Zeit",
         "fileSizeColumn": "Dateigröße",
+        "cacheColumn": "Merken",
         "actionsColumn": "Aktionen",
         "selectFileAriaLabel": "{{fileName}} auswählen",
         "collapseDetailsAriaLabel": "Details einklappen",
@@ -75,7 +77,10 @@
         "invalidBadge": "Ungültig",
         "exportToXlsxAriaLabel": "{{fileName}} nach XLSX exportieren",
         "exportToXlsxTitle": "Nach XLSX exportieren",
-        "removeFileAriaLabel": "{{fileName}} entfernen"
+        "removeFileAriaLabel": "{{fileName}} entfernen",
+        "cacheAriaLabel": "{{fileName}} im Browser-Cache merken",
+        "cacheTooltip": "Diese Datei im permanenten Browser-Cache speichern, damit sie über Sitzungen hinweg erhalten bleibt",
+        "cacheDisabledForDemo": "Demo-Dateien können nicht im Cache gespeichert werden"
       },
       "details": {
         "metadataHeader": "Metadaten",

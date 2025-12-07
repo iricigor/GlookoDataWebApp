@@ -29,9 +29,10 @@
         "dataStaysLocal": "Vaše data nikdy neopustí vaše zařízení.",
         "description1": "Veškeré zpracování a analýza grafů probíhá zcela ve vašem prohlížeči. Vaše soubory nenahrávame na žádný server.",
         "description2": "Soubory jsou udržovány pouze v paměti vašeho prohlížeče, když aplikaci používáte. Když zavřete záložku prohlížeče, vaše data zmizí—pokud je explicitně neuložíte.",
-        "description3": "Pro analýzu s podporou AI je zpracování dat odlišné. Podrobnosti viz část",
+        "description3": "Můžete si vybrat uložení souborů trvale do mezipaměti prohlížeče zaškrtnutím políčka \"Zapamatovat\" v seznamu souborů. Díky tomu zůstane soubor dostupný napříč relacemi prohlížeče, uložený lokálně na vašem zařízení pomocí IndexedDB. Soubory uložené v mezipaměti můžete kdykoli odstranit zrušením zaškrtnutí políčka nebo vymazáním dat prohlížeče.",
+        "description4": "Pro analýzu s podporou AI je zpracování dat odlišné. Podrobnosti viz část",
         "aiAnalysisSection": "AI analýza",
-        "description4": "níže."
+        "description5": "níže."
       },
       "upload": {
         "title": "Nahrajte svá data",
@@ -67,6 +68,7 @@
         "fileNameColumn": "Název souboru",
         "uploadTimeColumn": "Čas nahrání",
         "fileSizeColumn": "Velikost souboru",
+        "cacheColumn": "Zapamatovat",
         "actionsColumn": "Akce",
         "selectFileAriaLabel": "Vybrat {{fileName}}",
         "collapseDetailsAriaLabel": "Sbalit podrobnosti",
@@ -75,7 +77,10 @@
         "invalidBadge": "Neplatný",
         "exportToXlsxAriaLabel": "Exportovat {{fileName}} do XLSX",
         "exportToXlsxTitle": "Exportovat do XLSX",
-        "removeFileAriaLabel": "Odebrat {{fileName}}"
+        "removeFileAriaLabel": "Odebrat {{fileName}}",
+        "cacheAriaLabel": "Zapamatovat {{fileName}} v mezipaměti prohlížeče",
+        "cacheTooltip": "Uložit tento soubor do trvalé mezipaměti prohlížeče, aby zůstal zachován mezi relacemi",
+        "cacheDisabledForDemo": "Ukázkové soubory nelze uložit do mezipaměti"
       },
       "details": {
         "metadataHeader": "Metadata",
