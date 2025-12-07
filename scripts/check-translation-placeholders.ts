@@ -15,7 +15,7 @@ import { readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
 // Supported language codes for placeholder detection
-const SUPPORTED_LANGUAGES = ['DE', 'CS', 'EN'];
+const SUPPORTED_LANGUAGES = ['DE', 'CS', 'EN', 'SR'];
 
 // Placeholder pattern: [XX] where XX is a language code
 // Dynamically generated from SUPPORTED_LANGUAGES
