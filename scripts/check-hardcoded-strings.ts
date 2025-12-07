@@ -43,7 +43,7 @@ const EXCLUDE_PATTERNS = [
   /^\d+$/, // Pure numbers
   /^[0-9.]+$/, // Numbers with decimals
   /^[%$€£¥]+$/, // Currency/percentage symbols only
-  /^[\s\-_:;,\.!?(){}[\]]+$/, // Punctuation only
+  /^[\s\-_:;,.!?(){}[\]]+$/, // Punctuation only
   /^[a-z]+[A-Z]/, // camelCase identifiers
   /^[A-Z][a-z]+[A-Z]/, // PascalCase identifiers
   /className|style|onClick|onChange|onSubmit|onBlur|onFocus/, // React props
