@@ -24,7 +24,7 @@
       },
       "geekStats": {
         "title": "Geekovské statistiky",
-        "description": "Zobrazit technické detaily jako AI promptů a podrobné tabulky dat. Tyto jsou užitečné pro pokročilé uživatele, kteří chtějí vidět podkladová data a prompty.",
+        "description": "Zobrazit technické detaily jako AI prompty a podrobné tabulky dat. Tyto jsou užitečné pro pokročilé uživatele, kteří chtějí vidět podkladová data a prompty.",
         "enabled": "Geekovské statistiky povoleny",
         "disabled": "Geekovské statistiky zakázány"
       },
