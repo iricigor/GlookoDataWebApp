@@ -292,35 +292,42 @@ public/locales/
 
 ### Adding New Translations
 
-1. **Choose the appropriate namespace** based on your feature
-2. **Add the translation key** to all language files in that namespace
+**For Contributors:** You can submit PRs without providing translations for all languages! 
+
+When adding new user-facing text:
+
+1. **Add English translation only** (required)
+2. **Use placeholder markers** for other languages (optional)
 3. **Use the translation** in your component with the correct namespace
+
+Maintainers will complete translations before merging. This allows you to focus on functionality!
 
 **Example: Adding a new button to the navigation**
 
 ```tsx
-// 1. Add to public/locales/en/navigation.json
+// 1. Add to public/locales/en/navigation.json (REQUIRED)
 {
   "navigation": {
     "myNewButton": "My New Feature"
   }
 }
 
-// 2. Add to public/locales/de/navigation.json
+// 2. Add placeholders to other languages (OPTIONAL - maintainers will complete)
+// public/locales/de/navigation.json
 {
   "navigation": {
-    "myNewButton": "Meine neue Funktion"
+    "myNewButton": "[DE] My New Feature"  // Placeholder - will be translated
   }
 }
 
-// 3. Add to public/locales/cs/navigation.json
+// public/locales/cs/navigation.json
 {
   "navigation": {
-    "myNewButton": "Moje nová funkce"
+    "myNewButton": "[CS] My New Feature"  // Placeholder - will be translated
   }
 }
 
-// 4. Use in your component
+// 3. Use in your component
 import { useTranslation } from 'react-i18next';
 
 export function MyComponent() {
@@ -329,13 +336,16 @@ export function MyComponent() {
 }
 ```
 
+**Note:** A nightly automated check will detect incomplete translations and notify maintainers.
+
 ### Best Practices
 
 1. **NEVER hardcode user-facing text** - Always use `t()` function
-2. **Add translations to ALL languages** - Don't leave any language incomplete
+2. **Add English translation** - At minimum, provide the English (en) text
 3. **Use the correct namespace** - Choose the namespace that matches your feature area
 4. **Test translations** - Switch languages in the UI to verify your translations work
 5. **Keep keys organized** - Use nested structures within namespaces for clarity
+6. **Use placeholders for incomplete translations** - Mark with `[LANG]` prefix (e.g., `[DE] English text`)
 
 ### Loading Multiple Namespaces
 
@@ -379,7 +389,7 @@ Before submitting your PR, ensure:
 - [ ] Code is well-commented where necessary
 - [ ] No console errors or warnings
 - [ ] **All user-facing text is localized** using i18next (no hardcoded strings)
-- [ ] **Translations added to ALL supported languages** (en, de, cs)
+- [ ] **English translations added** (en) - other languages optional, can use placeholders
 - [ ] **Correct namespace used** for translations
 - [ ] Responsive design works on different screen sizes
 

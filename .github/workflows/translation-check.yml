@@ -1,0 +1,92 @@
+name: 🌍 Nightly Translation Check
+
+on:
+  schedule:
+    # Run every night at 02:30 UTC (after E2E tests)
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'public/locales/**'
+      - 'src/**/*.tsx'
+      - 'src/**/*.ts'
+      - 'scripts/check-*.ts'
+      - '.github/workflows/translation-check.yml'
+
+jobs:
+  translation-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run translation completeness tests
+        run: npm test -- src/i18n-completeness.test.ts
+        continue-on-error: false
+
+      - name: Check for untranslated placeholders
+        id: check-placeholders
+        run: npm run i18n:check-placeholders
+        continue-on-error: true
+
+      - name: Check for hardcoded strings
+        id: check-hardcoded
+        run: npm run i18n:check-hardcoded
+        continue-on-error: true
+
+      - name: Generate summary report
+        if: always()
+        run: |
+          echo "# 🌍 Translation Check Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.check-placeholders.outcome }}" == "success" ]; then
+            echo "✅ **Placeholder Check:** All translations complete" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Placeholder Check:** Found untranslated placeholders" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "ℹ️ **Hardcoded String Check:** See logs for details" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## About Translation Checks" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow helps maintain translation quality by:" >> $GITHUB_STEP_SUMMARY
+          echo "- Verifying all translation keys exist across all languages" >> $GITHUB_STEP_SUMMARY
+          echo "- Detecting placeholder markers like [DE], [CS] in translations" >> $GITHUB_STEP_SUMMARY
+          echo "- Warning about potential hardcoded user-facing strings" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** Contributors can submit PRs without complete translations." >> $GITHUB_STEP_SUMMARY
+          echo "Maintainers will complete translations before merging." >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if placeholders found
+        if: steps.check-placeholders.outcome == 'failure'
+        run: |
+          echo "::error::Translation placeholders detected. Please complete translations before merging."
+          exit 1
+
+      - name: Upload translation check results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: translation-check-results
+          path: |
+            ${{ github.workspace }}/.github/workflows/translation-check.yml
+          retention-days: 30
