@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>733 Add Czech language to navigation bar language switcher</summary>
+
+[#733](../../pull/733) Add Czech language to navigation bar language switcher
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>731 Bump version to 1.7.1</summary>
 
 [#731](../../pull/731) Bump version to 1.7.1
