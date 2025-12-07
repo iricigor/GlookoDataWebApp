@@ -93,13 +93,13 @@ function isUserFacingText(text: string): boolean {
     return false;
   }
   
-  // Should contain at least one space or be a complete word (for UI labels)
-  // Examples: "Save Changes", "Upload File", "Cancel"
-  if (trimmed.length > 2 && !/\s/.test(trimmed) && /^[A-Z]/.test(trimmed)) {
-    return true; // Capitalized words without spaces (likely UI labels)
-  }
+  // Detect user-facing text:
+  // 1. Single capitalized words > 2 chars (UI labels): "Save", "Cancel", "Upload"
+  // 2. Multi-word text > 5 chars with spaces: "Save Changes", "Upload File"
+  const isSingleCapitalizedWord = trimmed.length > 2 && !/\s/.test(trimmed) && /^[A-Z]/.test(trimmed);
+  const isMultiWordText = /\s/.test(trimmed) && trimmed.length > 5;
   
-  return /\s/.test(trimmed) && trimmed.length > 5; // Multi-word text
+  return isSingleCapitalizedWord || isMultiWordText;
 }
 
 /**
@@ -248,9 +248,8 @@ function main() {
   console.log('⚠️  Note: This is a heuristic check and may have false positives.');
   console.log('   Please review each case manually.\n');
   
-  // Don't fail the build for this check, just warn
-  // Uncomment the next line to make it fail the build:
-  // process.exit(1);
+  // Exit with success (0) to avoid blocking the build
+  // This check is informational only
   process.exit(0);
 }
 

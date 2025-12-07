@@ -82,11 +82,4 @@ jobs:
           echo "::error::Translation placeholders detected. Please complete translations before merging."
           exit 1
 
-      - name: Upload translation check results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: translation-check-results
-          path: |
-            ${{ github.workspace }}/.github/workflows/translation-check.yml
-          retention-days: 30
+

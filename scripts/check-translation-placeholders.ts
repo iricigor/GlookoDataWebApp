@@ -15,7 +15,8 @@ import { readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
 // Placeholder pattern: [XX] where XX is a language code
-const PLACEHOLDER_PATTERN = /\[(DE|CS|EN|FR|ES|IT)\]/gi;
+// Currently supporting: DE (German), CS (Czech), EN (English)
+const PLACEHOLDER_PATTERN = /\[(DE|CS|EN)\]/gi;
 
 interface TranslationIssue {
   file: string;
