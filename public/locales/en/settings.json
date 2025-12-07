@@ -156,7 +156,12 @@
         "managedApiKeys": "Managed API Keys - No need to set up your own API keys with AI providers",
         "noSetupRequired": "No Setup Required - Start using AI features immediately without configuration",
         "costEffective": "Cost-Effective Access - Shared API usage means lower costs",
-        "reliableAccess": "Reliable Access - Guaranteed API access without worrying about rate limits or quotas"
+        "reliableAccess": "Reliable Access - Guaranteed API access without worrying about rate limits or quotas",
+        "quickSettings": "Quick Settings Access - Convenient buttons for switching theme and language directly in navigation"
+      },
+      "badge": {
+        "title": "Pro User Badge",
+        "description": "Pro Users are identified with a ✨ sparkle symbol next to their name in the navigation bar. This badge indicates that you have access to all Pro User features and benefits."
       },
       "expressInterest": {
         "title": "Express Your Interest",

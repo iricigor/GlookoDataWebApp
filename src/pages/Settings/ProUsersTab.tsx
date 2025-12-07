@@ -46,7 +46,16 @@ export function ProUsersTab({ styles }: SettingsTabProps) {
           <li>{t('settings.proUsers.benefits.noSetupRequired')}</li>
           <li>{t('settings.proUsers.benefits.costEffective')}</li>
           <li>{t('settings.proUsers.benefits.reliableAccess')}</li>
+          <li>{t('settings.proUsers.benefits.quickSettings')}</li>
         </ul>
+      </div>
+
+      <div className={styles.settingSection}>
+        <Title3 className={styles.sectionTitle}>{t('settings.proUsers.badge.title')}</Title3>
+        <Divider className={styles.divider} />
+        <Text className={styles.settingDescription}>
+          {t('settings.proUsers.badge.description')}
+        </Text>
       </div>
 
       <div className={styles.settingSection}>

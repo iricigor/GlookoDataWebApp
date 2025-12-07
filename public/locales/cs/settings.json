@@ -156,7 +156,12 @@
         "managedApiKeys": "Spravované API klíče - Není třeba nastavovat vlastní API klíče s poskytovateli AI",
         "noSetupRequired": "Není potřeba nastavení - Okamžité používání AI funkcí bez konfigurace",
         "costEffective": "Nákladově efektivní přístup - Sdílené použití API znamená nižší náklady",
-        "reliableAccess": "Spolehlivý přístup - Zaručený přístup k API bez obav z limitů nebo kvót"
+        "reliableAccess": "Spolehlivý přístup - Zaručený přístup k API bez obav z limitů nebo kvót",
+        "quickSettings": "Rychlý přístup k nastavením - Pohodlná tlačítka pro přepínání motivu a jazyka přímo v navigaci"
+      },
+      "badge": {
+        "title": "Odznak Pro uživatele",
+        "description": "Pro uživatelé jsou identifikováni symbolem ✨ třpytky vedle svého jména v navigační liště. Tento odznak označuje, že máte přístup ke všem funkcím a výhodám Pro uživatele."
       },
       "expressInterest": {
         "title": "Vyjádřete svůj zájem",

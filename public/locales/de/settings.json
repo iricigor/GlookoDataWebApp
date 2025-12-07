@@ -156,7 +156,12 @@
         "managedApiKeys": "Verwaltete API-Schlüssel - Keine Notwendigkeit, eigene API-Schlüssel mit KI-Anbietern einzurichten",
         "noSetupRequired": "Keine Einrichtung erforderlich - Sofortige Nutzung von KI-Funktionen ohne Konfiguration",
         "costEffective": "Kosteneffektiver Zugang - Gemeinsame API-Nutzung bedeutet niedrigere Kosten",
-        "reliableAccess": "Zuverlässiger Zugang - Garantierter API-Zugang ohne Sorgen um Ratenbegrenzungen oder Kontingente"
+        "reliableAccess": "Zuverlässiger Zugang - Garantierter API-Zugang ohne Sorgen um Ratenbegrenzungen oder Kontingente",
+        "quickSettings": "Schneller Zugriff auf Einstellungen - Praktische Schaltflächen zum Umschalten von Design und Sprache direkt in der Navigation"
+      },
+      "badge": {
+        "title": "Pro-Benutzer-Abzeichen",
+        "description": "Pro-Benutzer werden mit einem ✨ Funkeln-Symbol neben ihrem Namen in der Navigationsleiste gekennzeichnet. Dieses Abzeichen zeigt an, dass Sie Zugriff auf alle Pro-Benutzer-Funktionen und -Vorteile haben."
       },
       "expressInterest": {
         "title": "Bekunden Sie Ihr Interesse",
