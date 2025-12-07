@@ -10,9 +10,19 @@ import { useIsDarkMode } from '../../hooks/useIsDarkMode';
 
 const useStyles = makeStyles({
   pickerContainer: {
+    display: 'flex',
+    width: '100%',
     '& .rs-picker-toggle': {
       minWidth: '280px',
       borderRadius: tokens.borderRadiusMedium,
+      flex: 1,
+    },
+    // On mobile, expand to fill available space
+    '@media (max-width: 767px)': {
+      '& .rs-picker-toggle': {
+        minWidth: 'auto',
+        width: '100%',
+      },
     },
   },
 });

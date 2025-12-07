@@ -145,6 +145,13 @@ export const useBGOverviewStyles = makeStyles({
       ...shorthands.gap('6px'),
     },
   },
+  dropdownControl: {
+    // On mobile, expand to fill available space and align right margin
+    '@media (max-width: 767px)': {
+      flex: 1,
+      minWidth: 'auto',
+    },
+  },
   tirCard: {
     ...cardBaseStyle,
   },

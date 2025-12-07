@@ -105,6 +105,7 @@ export function ControlBar({
               maxDate={maxDate}
               onStartDateChange={onStartDateChange}
               onEndDateChange={onEndDateChange}
+              className={styles.dropdownControl}
             />
           </div>
         )}
@@ -117,6 +118,7 @@ export function ControlBar({
             selectedOptions={[dayFilter]}
             onOptionSelect={(_, data) => setDayFilter(data.optionValue as AGPDayOfWeekFilter)}
             appearance="outline"
+            className={styles.dropdownControl}
           >
             <Option text="Common Views" disabled>Common Views</Option>
             <Option value="All Days" text="All Days">
