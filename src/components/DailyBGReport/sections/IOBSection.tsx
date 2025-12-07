@@ -43,9 +43,9 @@ export function IOBSection({
 }: IOBSectionProps) {
   const isMobile = useIsMobile();
   
-  // Adjust chart margins for mobile - minimal margins
+  // Adjust chart margins for mobile - minimal margins with negative left
   const chartMargin = isMobile 
-    ? { top: 10, right: 1, left: 0, bottom: 0 }
+    ? { top: 10, right: 1, left: -20, bottom: 0 }
     : { top: 10, right: 30, left: 0, bottom: 0 };
   
   return (

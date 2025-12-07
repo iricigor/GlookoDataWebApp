@@ -170,8 +170,8 @@ export const useStyles = makeStyles({
   colorSchemeDropdown: {
     minWidth: '200px',
     '@media (max-width: 767px)': {
-      minWidth: '120px',
-      maxWidth: '150px',
+      minWidth: '100px',
+      flex: '1 1 auto',
     },
   },
   colorSchemeLabel: {
@@ -223,6 +223,18 @@ export const useStyles = makeStyles({
   },
   // Stats cards with icons (RoC and Hypo style)
   statsRow: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+    ...shorthands.gap('12px'),
+    '@media (max-width: 767px)': {
+      gridTemplateColumns: 'repeat(4, 1fr)',
+      ...shorthands.gap('8px'),
+    },
+    '@media (max-width: 400px)': {
+      gridTemplateColumns: 'repeat(2, 1fr)',
+    },
+  },
+  statsRowThreeCards: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
     ...shorthands.gap('12px'),

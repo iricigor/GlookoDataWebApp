@@ -105,9 +105,9 @@ export function RoCSection({
   const medicalStandards = getRoCMedicalStandards(glucoseUnit);
   const currentInterval = ROC_INTERVAL_OPTIONS[rocIntervalIndex];
   
-  // Adjust chart margins for mobile - minimal margins
+  // Adjust chart margins for mobile - minimal margins with negative left
   const chartMargin = isMobile 
-    ? { top: 10, right: 1, left: 1, bottom: 0 }
+    ? { top: 10, right: 1, left: -15, bottom: 0 }
     : { top: 10, right: 50, left: 10, bottom: 0 };
   
   // Calculate thresholds in the display unit
@@ -119,7 +119,7 @@ export function RoCSection({
       <Text className={styles.sectionTitle}>Rate of Change Analysis</Text>
       
       {/* RoC Stats Cards */}
-      <div className={styles.statsRow}>
+      <div className={styles.statsRowThreeCards}>
         <FluentTooltip content="Longest continuous period with stable glucose (slow rate of change)" relationship="description">
           <Card className={mergeClasses(styles.statCard, styles.statCardSuccess)}>
             <TimerRegular className={mergeClasses(styles.statIcon, styles.statIconSuccess)} />
