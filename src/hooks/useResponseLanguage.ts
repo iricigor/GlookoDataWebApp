@@ -1,5 +1,5 @@
 /**
- * Custom hook for managing AI response language preferences (English/Czech)
+ * Custom hook for managing AI response language preferences
  * 
  * This hook manages response language state with cookie persistence.
  * Supports automatic syncing with UI language.

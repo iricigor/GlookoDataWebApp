@@ -1,5 +1,5 @@
 /**
- * Custom hook for managing UI language preferences (English/German)
+ * Custom hook for managing UI language preferences
  * 
  * This hook manages UI language state with LocalStorage persistence.
  * It is separate from AI response language which controls content localization.
