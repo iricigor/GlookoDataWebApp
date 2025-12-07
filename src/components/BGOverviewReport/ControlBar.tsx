@@ -105,7 +105,6 @@ export function ControlBar({
               maxDate={maxDate}
               onStartDateChange={onStartDateChange}
               onEndDateChange={onEndDateChange}
-              className={styles.dropdownControl}
             />
           </div>
         )}
