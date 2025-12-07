@@ -105,9 +105,9 @@ export function RoCSection({
   const medicalStandards = getRoCMedicalStandards(glucoseUnit);
   const currentInterval = ROC_INTERVAL_OPTIONS[rocIntervalIndex];
   
-  // Adjust chart margins for mobile
+  // Adjust chart margins for mobile - minimal margins
   const chartMargin = isMobile 
-    ? { top: 10, right: 20, left: 5, bottom: 0 }
+    ? { top: 10, right: 1, left: 1, bottom: 0 }
     : { top: 10, right: 50, left: 10, bottom: 0 };
   
   // Calculate thresholds in the display unit
@@ -470,24 +470,30 @@ export function RoCSection({
         
         {/* Medical Standards Legend */}
         <div className={styles.rocStandardsContainer}>
-          <div className={styles.rocStandardRow}>
-            <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.good }} />
-            <Text className={styles.rocStandardLabel}>Stable</Text>
-            <Text className={styles.rocStandardThreshold}>{medicalStandards.good.threshold}</Text>
-            <Text className={styles.rocStandardDescription}>{medicalStandards.good.description}</Text>
-          </div>
-          <div className={styles.rocStandardRow}>
-            <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.medium }} />
-            <Text className={styles.rocStandardLabel}>Moderate</Text>
-            <Text className={styles.rocStandardThreshold}>{medicalStandards.medium.threshold}</Text>
-            <Text className={styles.rocStandardDescription}>{medicalStandards.medium.description}</Text>
-          </div>
-          <div className={styles.rocStandardRow}>
-            <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.bad }} />
-            <Text className={styles.rocStandardLabel}>Rapid</Text>
-            <Text className={styles.rocStandardThreshold}>{medicalStandards.bad.threshold}</Text>
-            <Text className={styles.rocStandardDescription}>{medicalStandards.bad.description}</Text>
-          </div>
+          <FluentTooltip content={medicalStandards.good.description} relationship="description">
+            <div className={styles.rocStandardRow}>
+              <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.good }} />
+              <Text className={styles.rocStandardLabel}>Stable</Text>
+              <Text className={styles.rocStandardThreshold}>{medicalStandards.good.threshold}</Text>
+              <Text className={styles.rocStandardDescription}>{medicalStandards.good.description}</Text>
+            </div>
+          </FluentTooltip>
+          <FluentTooltip content={medicalStandards.medium.description} relationship="description">
+            <div className={styles.rocStandardRow}>
+              <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.medium }} />
+              <Text className={styles.rocStandardLabel}>Moderate</Text>
+              <Text className={styles.rocStandardThreshold}>{medicalStandards.medium.threshold}</Text>
+              <Text className={styles.rocStandardDescription}>{medicalStandards.medium.description}</Text>
+            </div>
+          </FluentTooltip>
+          <FluentTooltip content={medicalStandards.bad.description} relationship="description">
+            <div className={styles.rocStandardRow}>
+              <div className={styles.rocStandardDot} style={{ backgroundColor: ROC_COLORS.bad }} />
+              <Text className={styles.rocStandardLabel}>Rapid</Text>
+              <Text className={styles.rocStandardThreshold}>{medicalStandards.bad.threshold}</Text>
+              <Text className={styles.rocStandardDescription}>{medicalStandards.bad.description}</Text>
+            </div>
+          </FluentTooltip>
         </div>
       </div>
     </div>

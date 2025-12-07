@@ -145,9 +145,8 @@ export const useStyles = makeStyles({
     justifyContent: 'space-between',
     marginBottom: '16px',
     '@media (max-width: 767px)': {
-      flexDirection: 'column',
-      alignItems: 'stretch',
-      ...shorthands.gap('12px'),
+      flexWrap: 'wrap',
+      ...shorthands.gap('8px'),
     },
   },
   maxValueContainer: {
@@ -155,7 +154,7 @@ export const useStyles = makeStyles({
     alignItems: 'center',
     ...shorthands.gap('12px'),
     '@media (max-width: 767px)': {
-      justifyContent: 'center',
+      ...shorthands.gap('8px'),
     },
   },
   colorSchemeContainer: {
@@ -163,15 +162,16 @@ export const useStyles = makeStyles({
     alignItems: 'center',
     ...shorthands.gap('12px'),
     '@media (max-width: 767px)': {
-      width: '100%',
       ...shorthands.gap('8px'),
+      flex: '1 1 auto',
+      minWidth: '0',
     },
   },
   colorSchemeDropdown: {
     minWidth: '200px',
     '@media (max-width: 767px)': {
-      minWidth: 'auto',
-      flex: 1,
+      minWidth: '120px',
+      maxWidth: '150px',
     },
   },
   colorSchemeLabel: {
@@ -226,8 +226,9 @@ export const useStyles = makeStyles({
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
     ...shorthands.gap('12px'),
-    '@media (max-width: 600px)': {
-      gridTemplateColumns: 'repeat(2, 1fr)',
+    '@media (max-width: 767px)': {
+      gridTemplateColumns: 'repeat(3, 1fr)',
+      ...shorthands.gap('8px'),
     },
     '@media (max-width: 400px)': {
       gridTemplateColumns: '1fr',
@@ -362,6 +363,9 @@ export const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground3,
     flex: 1,
+    '@media (max-width: 767px)': {
+      display: 'none',
+    },
   },
   rocChartContainer: {
     height: '300px',
