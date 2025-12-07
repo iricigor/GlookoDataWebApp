@@ -59,7 +59,7 @@ interface LoginDialogProps {
  */
 export function LoginDialog({ onLogin }: LoginDialogProps) {
   const styles = useStyles();
-  const { t } = useTranslation('dialogs');
+  const { t } = useTranslation(['dialogs', 'navigation', 'common']);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +83,7 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
     <Dialog open={open} onOpenChange={(_, data) => setOpen(data.open)}>
       <DialogTrigger disableButtonEnhancement>
         <Button appearance="primary" icon={<PersonRegular />}>
-          <span className={styles.loginButtonText}>{t('navigation.login')}</span>
+          <span className={styles.loginButtonText}>{t('navigation:navigation.login')}</span>
         </Button>
       </DialogTrigger>
       <DialogSurface>

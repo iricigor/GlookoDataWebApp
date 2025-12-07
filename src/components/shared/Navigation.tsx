@@ -151,7 +151,7 @@ export function Navigation({
   syncStatus = 'idle',
 }: NavigationProps) {
   const styles = useStyles();
-  const { t } = useTranslation(['navigation', 'dialogs']);
+  const { t } = useTranslation(['navigation', 'dialogs', 'common']);
   const { 
     isLoggedIn, 
     userName, 
@@ -275,10 +275,10 @@ export function Navigation({
         <div className={styles.brand}>
           <img 
             src="/favicon/favicon.svg" 
-            alt={t('brandAltText')}
+            alt={t('common:brandAltText')}
             className={styles.brandIcon}
           />
-          <Text className={styles.brandText}>{t('brandName')}</Text>
+          <Text className={styles.brandText}>{t('common:brandName')}</Text>
         </div>
         
         <div className={styles.centerSection}>
@@ -341,14 +341,14 @@ export function Navigation({
                 </Tooltip>
               )}
               <Tooltip 
-                content={t('navigation.switchToLanguage', { language: uiLanguage === 'en' ? t('common.german') : t('common.english') })} 
+                content={t('navigation.switchToLanguage', { language: uiLanguage === 'en' ? t('common:common.german') : t('common:common.english') })} 
                 relationship="label"
               >
                 <Button
                   appearance="subtle"
                   icon={<LocalLanguageRegular />}
                   onClick={handleLanguageToggle}
-                  aria-label={t('navigation.currentLanguage', { language: uiLanguage === 'en' ? t('common.english') : t('common.german') })}
+                  aria-label={t('navigation.currentLanguage', { language: uiLanguage === 'en' ? t('common:common.english') : t('common:common.german') })}
                 >
                   {uiLanguage.toUpperCase()}
                 </Button>
