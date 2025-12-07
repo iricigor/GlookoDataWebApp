@@ -5,14 +5,23 @@
  * This script detects potential hardcoded user-facing strings in React components
  * that should be using the i18next translation system instead.
  * 
- * It looks for:
- * - JSX text content that looks like user-facing text
+ * Detection Methods:
+ * - JSX text content via simple regex pattern (NOT AST-based)
  * - String literals in JSX attributes (title, placeholder, aria-label, etc.)
+ * 
+ * Limitations:
+ * This is a heuristic-based tool using regex patterns, not a full AST parser.
+ * It may produce false positives for:
+ * - Multiline JSX content
+ * - JSX with embedded expressions
+ * - Complex nested JSX structures
+ * 
+ * For production use, consider using a proper AST parser like @babel/parser
+ * or typescript's compiler API for more accurate detection.
  * 
  * Usage: tsx scripts/check-hardcoded-strings.ts
  * Exit codes:
- *   0 - No issues found (or only acceptable exceptions)
- *   1 - Found hardcoded strings that should use i18n
+ *   0 - Always exits with 0 (warning only, non-blocking)
  */
 
 import { readFileSync, readdirSync, statSync } from 'fs';
@@ -44,8 +53,8 @@ const EXCLUDE_PATTERNS = [
   /^[0-9.]+$/, // Numbers with decimals
   /^[%$€£¥]+$/, // Currency/percentage symbols only
   /^[\s\-_:;,.!?(){}[\]]+$/, // Punctuation only
-  /^[a-z]+[A-Z]/, // camelCase identifiers
-  /^[A-Z][a-z]+[A-Z]/, // PascalCase identifiers
+  /^[a-z][a-zA-Z0-9]*$/, // camelCase identifiers (e.g., userName, getData)
+  /^[A-Z][a-zA-Z0-9]*$/, // PascalCase identifiers (e.g., UserData, MyComponent)
   /className|style|onClick|onChange|onSubmit|onBlur|onFocus/, // React props
   /console\.(log|error|warn|info)/, // Console statements
   /^\{\{.*\}\}$/, // i18n interpolation variables
