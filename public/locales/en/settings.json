@@ -6,6 +6,7 @@
       "general": "General",
       "glucose": "Glucose Data",
       "ai": "AI Settings",
+      "pro": "Pro Users",
       "about": "About"
     },
     "general": {
@@ -144,6 +145,28 @@
           "reviewCode": "review the code on GitHub",
           "description2": "or deploy your own instance for complete control."
         }
+      }
+    },
+    "proUsers": {
+      "title": "Pro Users",
+      "notEnabledMessage": "Pro Users features are not yet enabled. This feature is currently in development and will be available soon.",
+      "benefits": {
+        "title": "What Pro Users Get",
+        "description": "Pro Users will get access to premium features that make using the AI analysis capabilities easier and more cost-effective:",
+        "managedApiKeys": "Managed API Keys - No need to set up your own API keys with AI providers",
+        "noSetupRequired": "No Setup Required - Start using AI features immediately without configuration",
+        "costEffective": "Cost-Effective Access - Shared API usage means lower costs",
+        "reliableAccess": "Reliable Access - Guaranteed API access without worrying about rate limits or quotas",
+        "quickSettings": "Quick Settings Access - Convenient buttons for switching theme and language directly in navigation"
+      },
+      "badge": {
+        "title": "Pro User Badge",
+        "description": "Pro Users are identified with a ✨ sparkle symbol next to their name in the navigation bar. This badge indicates that you have access to all Pro User features and benefits."
+      },
+      "expressInterest": {
+        "title": "Express Your Interest",
+        "description": "If you're interested in becoming a Pro User, please let us know by opening an issue. We'll collect information about your interest and notify you when Pro Users features become available.",
+        "button": "I'm Interested in Pro Users"
       }
     },
     "about": {

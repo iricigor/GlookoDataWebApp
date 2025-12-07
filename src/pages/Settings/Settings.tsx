@@ -22,10 +22,11 @@ import { useStyles } from './styles';
 import { GeneralSettingsTab } from './GeneralSettingsTab';
 import { GlucoseSettingsTab } from './GlucoseSettingsTab';
 import { AISettingsTab } from './AISettingsTab';
+import { ProUsersTab } from './ProUsersTab';
 import { AboutTab } from './AboutTab';
 
 // Valid tab values for deep linking
-const VALID_TABS = ['general', 'glucose', 'ai', 'about'];
+const VALID_TABS = ['general', 'glucose', 'ai', 'pro', 'about'];
 
 /**
  * Props for the Settings component
@@ -224,6 +225,9 @@ export function Settings({
           />
         );
       
+      case 'pro':
+        return <ProUsersTab styles={styles} />;
+      
       case 'about':
         return <AboutTab styles={styles} />;
       
@@ -252,6 +256,7 @@ export function Settings({
           <Tab value="general">{t('settings.tabs.general')}</Tab>
           <Tab value="glucose">{t('settings.tabs.glucose')}</Tab>
           <Tab value="ai">{t('settings.tabs.ai')}</Tab>
+          <Tab value="pro">{t('settings.tabs.pro')}</Tab>
           <Tab value="about">{t('settings.tabs.about')}</Tab>
         </TabList>
 

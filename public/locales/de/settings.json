@@ -6,6 +6,7 @@
       "general": "Allgemein",
       "glucose": "Glukose-Daten",
       "ai": "KI-Einstellungen",
+      "pro": "Pro-Benutzer",
       "about": "Über"
     },
     "general": {
@@ -144,6 +145,28 @@
           "reviewCode": "den Code auf GitHub überprüfen",
           "description2": "oder Ihre eigene Instanz bereitstellen, um die vollständige Kontrolle zu haben."
         }
+      }
+    },
+    "proUsers": {
+      "title": "Pro-Benutzer",
+      "notEnabledMessage": "Pro-Benutzer-Funktionen sind noch nicht aktiviert. Diese Funktion befindet sich derzeit in der Entwicklung und wird bald verfügbar sein.",
+      "benefits": {
+        "title": "Was Pro-Benutzer erhalten",
+        "description": "Pro-Benutzer erhalten Zugriff auf Premium-Funktionen, die die Nutzung der KI-Analysefunktionen einfacher und kostengünstiger machen:",
+        "managedApiKeys": "Verwaltete API-Schlüssel - Keine Notwendigkeit, eigene API-Schlüssel mit KI-Anbietern einzurichten",
+        "noSetupRequired": "Keine Einrichtung erforderlich - Sofortige Nutzung von KI-Funktionen ohne Konfiguration",
+        "costEffective": "Kosteneffektiver Zugang - Gemeinsame API-Nutzung bedeutet niedrigere Kosten",
+        "reliableAccess": "Zuverlässiger Zugang - Garantierter API-Zugang ohne Sorgen um Ratenbegrenzungen oder Kontingente",
+        "quickSettings": "Schneller Zugriff auf Einstellungen - Praktische Schaltflächen zum Umschalten von Design und Sprache direkt in der Navigation"
+      },
+      "badge": {
+        "title": "Pro-Benutzer-Abzeichen",
+        "description": "Pro-Benutzer werden mit einem ✨ Funkeln-Symbol neben ihrem Namen in der Navigationsleiste gekennzeichnet. Dieses Abzeichen zeigt an, dass Sie Zugriff auf alle Pro-Benutzer-Funktionen und -Vorteile haben."
+      },
+      "expressInterest": {
+        "title": "Bekunden Sie Ihr Interesse",
+        "description": "Wenn Sie daran interessiert sind, Pro-Benutzer zu werden, teilen Sie uns dies bitte mit, indem Sie ein Issue öffnen. Wir sammeln Informationen über Ihr Interesse und benachrichtigen Sie, wenn Pro-Benutzer-Funktionen verfügbar werden.",
+        "button": "Ich bin an Pro-Benutzern interessiert"
       }
     },
     "about": {
