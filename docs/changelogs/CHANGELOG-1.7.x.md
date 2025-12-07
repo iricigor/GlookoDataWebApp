@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>736 Add Pro Users settings tab with feature preview and interest collection</summary>
+
+[#736](../../pull/736) Add Pro Users settings tab with feature preview and interest collection
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>734 Add Serbian translation support with Latin script</summary>
 
 [#734](../../pull/734) Add Serbian translation support with Latin script
