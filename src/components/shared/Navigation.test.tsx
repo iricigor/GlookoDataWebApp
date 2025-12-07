@@ -82,6 +82,10 @@ describe('Navigation', () => {
       isProUser: false,
       secretValue: null,
       isChecking: false,
+      hasChecked: false,
+      hasError: false,
+      errorMessage: null,
+      performCheck: vi.fn(),
       resetState: vi.fn(),
     });
   });
