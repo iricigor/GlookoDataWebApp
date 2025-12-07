@@ -248,9 +248,24 @@ export function Navigation({
   // Determine if we're in dark mode (either explicitly dark or system-dark)
   const isDarkMode = themeMode ? isDarkTheme(themeMode) : false;
 
-  // Toggle UI language between English and German
+  // Get the next language in the cycle
+  const getNextLanguage = (current: string): string => {
+    if (current === 'en') return 'de';
+    if (current === 'de') return 'cs';
+    return 'en';
+  };
+
+  // Get the language name for display
+  const getLanguageName = (lang: string): string => {
+    if (lang === 'en') return t('common:common.english');
+    if (lang === 'de') return t('common:common.german');
+    return t('common:common.czech');
+  };
+
+  // Toggle UI language between English, German, and Czech
   const handleLanguageToggle = () => {
-    setUILanguage(uiLanguage === 'en' ? 'de' : 'en');
+    const nextLang = getNextLanguage(uiLanguage);
+    setUILanguage(nextLang as 'en' | 'de' | 'cs');
   };
 
   // Compute theme button label and icon class based on sync status and theme mode
@@ -341,14 +356,14 @@ export function Navigation({
                 </Tooltip>
               )}
               <Tooltip 
-                content={t('navigation.switchToLanguage', { language: uiLanguage === 'en' ? t('common:common.german') : t('common:common.english') })} 
+                content={t('navigation.switchToLanguage', { language: getLanguageName(getNextLanguage(uiLanguage)) })} 
                 relationship="label"
               >
                 <Button
                   appearance="subtle"
                   icon={<LocalLanguageRegular />}
                   onClick={handleLanguageToggle}
-                  aria-label={t('navigation.currentLanguage', { language: uiLanguage === 'en' ? t('common:common.english') : t('common:common.german') })}
+                  aria-label={t('navigation.currentLanguage', { language: getLanguageName(uiLanguage) })}
                 >
                   {uiLanguage.toUpperCase()}
                 </Button>
