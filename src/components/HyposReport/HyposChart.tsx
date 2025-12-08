@@ -136,14 +136,6 @@ export function HyposChart({
   return (
     <Card className={styles.chartCard}>
       <div className={styles.controlsRow}>
-        <Text style={{ 
-          fontSize: tokens.fontSizeBase500, 
-          fontWeight: tokens.fontWeightSemibold,
-          fontFamily: tokens.fontFamilyBase,
-          color: tokens.colorNeutralForeground1,
-        }}>
-          Glucose Values Throughout the Day
-        </Text>
         <div className={styles.maxValueContainer}>
           <Text style={{ 
             fontSize: tokens.fontSizeBase300,
