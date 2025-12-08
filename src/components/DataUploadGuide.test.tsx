@@ -33,7 +33,7 @@ vi.mock('@fluentui/react-components', async () => {
   return {
     ...actual,
     makeStyles: () => () => ({}),
-    Accordion: ({ children, openItems, onToggle }: any) => (
+    Accordion: ({ children, openItems }: any) => (
       <div data-testid="accordion" data-open-items={JSON.stringify(openItems)}>
         {children}
       </div>

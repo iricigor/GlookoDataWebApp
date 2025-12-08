@@ -195,7 +195,11 @@ export function DataUploadGuide() {
   };
 
   const handleAccordionToggle = (_event: AccordionToggleEvent, data: AccordionToggleData) => {
-    setOpenItems(data.openItems as string[]);
+    // Ensure openItems is an array of strings before setting state
+    const items = Array.isArray(data.openItems) 
+      ? data.openItems.filter((item): item is string => typeof item === 'string')
+      : [];
+    setOpenItems(items);
   };
 
   const handleNavigateToAI = () => {
