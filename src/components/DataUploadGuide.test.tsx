@@ -33,22 +33,22 @@ vi.mock('@fluentui/react-components', async () => {
   return {
     ...actual,
     makeStyles: () => () => ({}),
-    Accordion: ({ children, openItems }: any) => (
+    Accordion: ({ children, openItems }: { children: React.ReactNode; openItems: string[] }) => (
       <div data-testid="accordion" data-open-items={JSON.stringify(openItems)}>
         {children}
       </div>
     ),
-    AccordionItem: ({ children, value }: any) => (
+    AccordionItem: ({ children, value }: { children: React.ReactNode; value: string }) => (
       <div data-testid="accordion-item" data-value={value}>
         {children}
       </div>
     ),
-    AccordionHeader: ({ children, onClick }: any) => (
+    AccordionHeader: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
       <button data-testid="accordion-header" onClick={onClick}>
         {children}
       </button>
     ),
-    AccordionPanel: ({ children }: any) => <div data-testid="accordion-panel">{children}</div>,
+    AccordionPanel: ({ children }: { children: React.ReactNode }) => <div data-testid="accordion-panel">{children}</div>,
   };
 });
 
