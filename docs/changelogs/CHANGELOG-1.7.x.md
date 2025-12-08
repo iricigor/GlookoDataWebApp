@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>743 Persist Getting Started Guide accordion state across sessions</summary>
+
+[#743](../../pull/743) Persist Getting Started Guide accordion state across sessions
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>741 Add persistent file caching with IndexedDB and remove obsolete AI settings section</summary>
 
 [#741](../../pull/741) Add persistent file caching with IndexedDB and remove obsolete AI settings section
