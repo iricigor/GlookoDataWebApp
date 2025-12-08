@@ -86,8 +86,13 @@ const useStyles = makeStyles({
   },
   buttonContainer: {
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     ...shorthands.gap('12px'),
+    ...shorthands.padding('24px'),
+    ...shorthands.borderRadius('12px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
   helperText: {
     fontSize: tokens.fontSizeBase200,
@@ -97,26 +102,33 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('8px'),
-    ...shorthands.padding('12px', '16px'),
-    backgroundColor: tokens.colorStatusSuccessBackground1,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    color: tokens.colorStatusSuccessForeground1,
+    ...shorthands.padding('16px', '20px'),
+    ...shorthands.borderRadius('12px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorPaletteGreenBorder1),
+    color: tokens.colorPaletteGreenForeground1,
   },
   noHyposIcon: {
     fontSize: '20px',
   },
   loadingContainer: {
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     ...shorthands.gap('12px'),
-    ...shorthands.padding('16px'),
-    backgroundColor: tokens.colorNeutralBackground3,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.padding('24px'),
+    ...shorthands.borderRadius('12px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
   analysisContainer: {
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('12px'),
+    ...shorthands.padding('16px'),
+    ...shorthands.borderRadius('12px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
   eventCard: {
     ...shorthands.padding('16px'),
@@ -661,14 +673,6 @@ export function HyposAISection({
           <SparkleRegular className={styles.headerIcon} />
           <Text className={styles.title}>AI Analysis</Text>
         </div>
-        
-        {/* Show message about no hypos today but overall status is still "ready to analyze" */}
-        {!hasHyposToday && (
-          <div className={styles.noHyposMessage}>
-            <CheckmarkCircleRegular className={styles.noHyposIcon} />
-            <Text>No hypoglycemic events detected on this day - great glucose control!</Text>
-          </div>
-        )}
         
         {/* Analysis Button - shows count of ALL events */}
         {loadingAllEvents ? (
