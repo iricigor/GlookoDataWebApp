@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>746 Align Hypos report UI with Daily BG tab design patterns</summary>
+
+[#746](../../pull/746) Align Hypos report UI with Daily BG tab design patterns
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>743 Persist Getting Started Guide accordion state across sessions</summary>
 
 [#743](../../pull/743) Persist Getting Started Guide accordion state across sessions
