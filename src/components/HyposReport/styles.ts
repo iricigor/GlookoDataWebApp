@@ -14,6 +14,21 @@ export const useHyposStyles = makeStyles({
     flexDirection: 'column',
     ...shorthands.gap('24px'),
   },
+  stickyDatePickerWrapper: {
+    position: 'sticky',
+    top: '0',
+    zIndex: 100,
+    marginLeft: '-24px',
+    marginRight: '-24px',
+    ...shorthands.padding('12px', '24px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    boxShadow: tokens.shadow8,
+    '@media (max-width: 767px)': {
+      marginLeft: '-16px',
+      marginRight: '-16px',
+      ...shorthands.padding('8px', '16px'),
+    },
+  },
   header: {
     display: 'flex',
     flexDirection: 'column',
@@ -105,12 +120,42 @@ export const useHyposStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground3,
   },
-  chartCard: {
+  sectionCard: {
     ...shorthands.padding('24px'),
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderRadius(tokens.borderRadiusLarge),
+    ...shorthands.borderRadius('14px'),
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    backgroundColor: tokens.colorNeutralBackground2,
     boxShadow: tokens.shadow4,
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('16px'),
+    transitionProperty: 'transform, box-shadow',
+    transitionDuration: tokens.durationNormal,
+    transitionTimingFunction: tokens.curveEasyEase,
+    '@media (hover: hover)': {
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: tokens.shadow16,
+      },
+    },
+    '@media (max-width: 767px)': {
+      ...shorthands.padding('16px'),
+      ...shorthands.borderRadius('12px'),
+    },
+  },
+  sectionTitle: {
+    fontSize: tokens.fontSizeBase500,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    fontFamily: tokens.fontFamilyBase,
+    marginBottom: '0',
+    marginTop: '0',
+  },
+  chartCard: {
+    ...shorthands.padding('16px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.borderRadius('12px'),
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
   chartContainer: {
     width: '100%',

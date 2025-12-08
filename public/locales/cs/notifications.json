@@ -3,6 +3,8 @@
     "fileLoadedSuccessTitle": "Soubor byl úspěšně načten",
     "fileLoadedSuccessBody": "{{fileName}} byl vybrán pro analýzu",
     "aiProviderSwitchedTitle": "Poskytovatel AI byl přepnut",
-    "aiProviderSwitchedBody": "Ověření klíče {{fromProvider}} selhalo. Přepnuto na {{toProvider}}."
+    "aiProviderSwitchedBody": "Ověření klíče {{fromProvider}} selhalo. Přepnuto na {{toProvider}}.",
+    "aiAnalysisCompleteTitle": "Analýza dokončena!",
+    "aiAnalysisCompleteBody": "Procházejte data a prohlížejte poznatky pro různé dny."
   }
 }

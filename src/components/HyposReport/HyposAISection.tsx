@@ -24,8 +24,14 @@ import {
   makeStyles,
   tokens,
   shorthands,
+  useToastController,
+  useId,
+  Toast,
+  ToastTitle,
+  ToastBody,
 } from '@fluentui/react-components';
 import { SparkleRegular, CheckmarkCircleRegular, ErrorCircleRegular, InfoRegular } from '@fluentui/react-icons';
+import { useTranslation } from 'react-i18next';
 import { MarkdownRenderer } from '../shared/MarkdownRenderer';
 import type { GlucoseReading, GlucoseUnit, GlucoseThresholds, InsulinReading } from '../../types';
 import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
@@ -46,11 +52,24 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('16px'),
-    ...shorthands.padding('20px'),
-    backgroundColor: tokens.colorNeutralBackground1,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.padding('24px'),
+    ...shorthands.borderRadius('14px'),
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
+    backgroundColor: tokens.colorNeutralBackground2,
     boxShadow: tokens.shadow4,
+    transitionProperty: 'transform, box-shadow',
+    transitionDuration: tokens.durationNormal,
+    transitionTimingFunction: tokens.curveEasyEase,
+    '@media (hover: hover)': {
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: tokens.shadow16,
+      },
+    },
+    '@media (max-width: 767px)': {
+      ...shorthands.padding('16px'),
+      ...shorthands.borderRadius('12px'),
+    },
   },
   header: {
     display: 'flex',
@@ -68,8 +87,13 @@ const useStyles = makeStyles({
   },
   buttonContainer: {
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     ...shorthands.gap('12px'),
+    ...shorthands.padding('24px'),
+    ...shorthands.borderRadius('12px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
   helperText: {
     fontSize: tokens.fontSizeBase200,
@@ -79,26 +103,33 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('8px'),
-    ...shorthands.padding('12px', '16px'),
-    backgroundColor: tokens.colorStatusSuccessBackground1,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    color: tokens.colorStatusSuccessForeground1,
+    ...shorthands.padding('16px', '20px'),
+    ...shorthands.borderRadius('12px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorPaletteGreenBorder1),
+    color: tokens.colorPaletteGreenForeground1,
   },
   noHyposIcon: {
     fontSize: '20px',
   },
   loadingContainer: {
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     ...shorthands.gap('12px'),
-    ...shorthands.padding('16px'),
-    backgroundColor: tokens.colorNeutralBackground3,
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    ...shorthands.padding('24px'),
+    ...shorthands.borderRadius('12px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
   analysisContainer: {
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('12px'),
+    ...shorthands.padding('16px'),
+    ...shorthands.borderRadius('12px'),
+    backgroundColor: tokens.colorNeutralBackground1,
+    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke1),
   },
   eventCard: {
     ...shorthands.padding('16px'),
@@ -216,6 +247,8 @@ interface HyposAISectionProps {
   responseLanguage: ResponseLanguage;
   // File ID for tracking file changes and persisting state
   fileId?: string;
+  // Geek stats control
+  showGeekStats?: boolean;
 }
 
 // Cache structure for storing AI responses by eventId
@@ -257,8 +290,13 @@ export function HyposAISection({
   selectedProvider,
   responseLanguage,
   fileId,
+  showGeekStats = false,
 }: HyposAISectionProps) {
   const styles = useStyles();
+  const { t } = useTranslation('notifications');
+  // Use the same toaster ID as App.tsx for consistent toast notifications
+  const toasterId = useId('toaster');
+  const { dispatchToast } = useToastController(toasterId);
   
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -458,6 +496,15 @@ export function HyposAISection({
         setResponseCache(newCache);
         setFullAIResponse(result.content);
         setHasCompletedAnalysis(true);
+        
+        // Show toast notification
+        dispatchToast(
+          <Toast>
+            <ToastTitle>{t('toast.aiAnalysisCompleteTitle')}</ToastTitle>
+            <ToastBody>{t('toast.aiAnalysisCompleteBody')}</ToastBody>
+          </Toast>,
+          { intent: 'success' }
+        );
       } else {
         setError(result.error || 'Failed to get AI response');
       }
@@ -481,6 +528,8 @@ export function HyposAISection({
     geminiApiKey,
     grokApiKey,
     deepseekApiKey,
+    dispatchToast,
+    t,
   ]);
   
   // Generate the AI prompt for display in accordion
@@ -628,14 +677,6 @@ export function HyposAISection({
           <Text className={styles.title}>AI Analysis</Text>
         </div>
         
-        {/* Show message about no hypos today but overall status is still "ready to analyze" */}
-        {!hasHyposToday && (
-          <div className={styles.noHyposMessage}>
-            <CheckmarkCircleRegular className={styles.noHyposIcon} />
-            <Text>No hypoglycemic events detected on this day - great glucose control!</Text>
-          </div>
-        )}
-        
         {/* Analysis Button - shows count of ALL events */}
         {loadingAllEvents ? (
           <div className={styles.loadingContainer}>
@@ -692,8 +733,8 @@ export function HyposAISection({
           </div>
         )}
         
-        {/* Accordions for AI prompt and data */}
-        {renderDataAccordions()}
+        {/* Accordions for AI prompt and data - only show if geek stats enabled */}
+        {showGeekStats && renderDataAccordions()}
       </div>
     );
   }
@@ -704,18 +745,6 @@ export function HyposAISection({
       <div className={styles.header}>
         <SparkleRegular className={styles.headerIcon} />
         <Text className={styles.title}>AI Analysis</Text>
-        <Text className={styles.cachedIndicator}>
-          (analysis complete - navigate dates to see per-day insights)
-        </Text>
-      </div>
-      
-      {/* Analysis Complete Status */}
-      <div className={styles.completedMessage}>
-        <CheckmarkCircleRegular className={styles.completedIcon} />
-        <Text>
-          Analysis complete! Showing results for {currentDate}. 
-          Use the date filter above to view insights for other days.
-        </Text>
       </div>
       
       {/* Show message if no hypos on current date */}
@@ -758,69 +787,71 @@ export function HyposAISection({
         </div>
       )}
       
-      {/* Accordions - data, prompt, and full response */}
-      <Accordion collapsible>
-        {/* Full AI Response Accordion */}
-        {fullAIResponse && (
-          <AccordionItem value="fullResponse">
-            <AccordionHeader>View Full AI Response</AccordionHeader>
+      {/* Accordions - data, prompt, and full response - only show if geek stats enabled */}
+      {showGeekStats && (
+        <Accordion collapsible>
+          {/* Full AI Response Accordion */}
+          {fullAIResponse && (
+            <AccordionItem value="fullResponse">
+              <AccordionHeader>View Full AI Response</AccordionHeader>
+              <AccordionPanel>
+                <div className={styles.responseContainer}>
+                  <MarkdownRenderer content={fullAIResponse} />
+                </div>
+              </AccordionPanel>
+            </AccordionItem>
+          )}
+          
+          {/* AI Prompt Accordion */}
+          <AccordionItem value="aiPrompt">
+            <AccordionHeader>View AI Prompt</AccordionHeader>
             <AccordionPanel>
-              <div className={styles.responseContainer}>
-                <MarkdownRenderer content={fullAIResponse} />
+              <div className={styles.promptTextContainer}>
+                {currentPrompt ?? <Text className={styles.helperText}>No prompt available</Text>}
               </div>
             </AccordionPanel>
           </AccordionItem>
-        )}
-        
-        {/* AI Prompt Accordion */}
-        <AccordionItem value="aiPrompt">
-          <AccordionHeader>View AI Prompt</AccordionHeader>
-          <AccordionPanel>
-            <div className={styles.promptTextContainer}>
-              {currentPrompt ?? <Text className={styles.helperText}>No prompt available</Text>}
-            </div>
-          </AccordionPanel>
-        </AccordionItem>
-        
-        {/* Pre-prepared Data Accordion */}
-        <AccordionItem value="hypoData">
-          <AccordionHeader>View Hypo Data ({allEvents.length} events)</AccordionHeader>
-          <AccordionPanel>
-            <div className={styles.dataTableContainer}>
-              {allEvents.length > 0 ? (
-                <Table size="small" style={{ minWidth: '800px' }}>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHeaderCell>Event ID</TableHeaderCell>
-                      <TableHeaderCell>Start Time</TableHeaderCell>
-                      <TableHeaderCell>Nadir (mg/dL)</TableHeaderCell>
-                      <TableHeaderCell>Duration (min)</TableHeaderCell>
-                      <TableHeaderCell>Time of Day</TableHeaderCell>
-                      <TableHeaderCell>Last Bolus</TableHeaderCell>
-                      <TableHeaderCell>Bolus Prior (min)</TableHeaderCell>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {allEvents.map(event => (
-                      <TableRow key={event.eventId}>
-                        <TableCell>{event.eventId}</TableCell>
-                        <TableCell>{event.startTime.toLocaleString()}</TableCell>
-                        <TableCell>{event.nadirValueMgdl}</TableCell>
-                        <TableCell>{event.durationMins}</TableCell>
-                        <TableCell>{event.timeOfDayCode}:00</TableCell>
-                        <TableCell>{event.lastBolusUnits ?? 'N/A'}</TableCell>
-                        <TableCell>{event.lastBolusMinsPrior ?? 'N/A'}</TableCell>
+          
+          {/* Pre-prepared Data Accordion */}
+          <AccordionItem value="hypoData">
+            <AccordionHeader>View Hypo Data ({allEvents.length} events)</AccordionHeader>
+            <AccordionPanel>
+              <div className={styles.dataTableContainer}>
+                {allEvents.length > 0 ? (
+                  <Table size="small" style={{ minWidth: '800px' }}>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHeaderCell>Event ID</TableHeaderCell>
+                        <TableHeaderCell>Start Time</TableHeaderCell>
+                        <TableHeaderCell>Nadir (mg/dL)</TableHeaderCell>
+                        <TableHeaderCell>Duration (min)</TableHeaderCell>
+                        <TableHeaderCell>Time of Day</TableHeaderCell>
+                        <TableHeaderCell>Last Bolus</TableHeaderCell>
+                        <TableHeaderCell>Bolus Prior (min)</TableHeaderCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <Text className={styles.helperText}>No hypo events found in the dataset</Text>
-              )}
-            </div>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
+                    </TableHeader>
+                    <TableBody>
+                      {allEvents.map(event => (
+                        <TableRow key={event.eventId}>
+                          <TableCell>{event.eventId}</TableCell>
+                          <TableCell>{event.startTime.toLocaleString()}</TableCell>
+                          <TableCell>{event.nadirValueMgdl}</TableCell>
+                          <TableCell>{event.durationMins}</TableCell>
+                          <TableCell>{event.timeOfDayCode}:00</TableCell>
+                          <TableCell>{event.lastBolusUnits ?? 'N/A'}</TableCell>
+                          <TableCell>{event.lastBolusMinsPrior ?? 'N/A'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <Text className={styles.helperText}>No hypo events found in the dataset</Text>
+                )}
+              </div>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+      )}
     </div>
   );
 }

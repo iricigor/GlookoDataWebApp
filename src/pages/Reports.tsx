@@ -184,6 +184,7 @@ export function Reports({
             deepseekApiKey={deepseekApiKey}
             selectedProvider={selectedProvider}
             responseLanguage={responseLanguage}
+            showGeekStats={showGeekStats}
           />
         );
       default:
