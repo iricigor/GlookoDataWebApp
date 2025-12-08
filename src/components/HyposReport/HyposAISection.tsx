@@ -25,6 +25,7 @@ import {
   tokens,
   shorthands,
   useToastController,
+  useId,
   Toast,
   ToastTitle,
   ToastBody,
@@ -293,7 +294,9 @@ export function HyposAISection({
 }: HyposAISectionProps) {
   const styles = useStyles();
   const { t } = useTranslation('notifications');
-  const { dispatchToast } = useToastController('toaster');
+  // Use the same toaster ID as App.tsx for consistent toast notifications
+  const toasterId = useId('toaster');
+  const { dispatchToast } = useToastController(toasterId);
   
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
