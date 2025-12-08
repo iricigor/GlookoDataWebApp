@@ -20,6 +20,8 @@ import {
   AccordionPanel,
   Button,
   Link,
+  type AccordionToggleData,
+  type AccordionToggleEvent,
 } from '@fluentui/react-components';
 import { useTranslation } from 'react-i18next';
 import {
@@ -32,6 +34,7 @@ import {
 } from '@fluentui/react-icons';
 
 const STORAGE_KEY = 'dataUpload-guide-visible';
+const ACCORDION_STATE_KEY = 'dataUpload-guide-accordion-state';
 
 const useStyles = makeStyles({
   container: {
@@ -163,13 +166,36 @@ export function DataUploadGuide() {
     return saved === null ? true : saved === 'true';
   });
 
+  // Initialize accordion open items from localStorage
+  const [openItems, setOpenItems] = useState<string[]>(() => {
+    const saved = localStorage.getItem(ACCORDION_STATE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
+
   // Persist visibility to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, String(isVisible));
   }, [isVisible]);
 
+  // Persist accordion state to localStorage
+  useEffect(() => {
+    localStorage.setItem(ACCORDION_STATE_KEY, JSON.stringify(openItems));
+  }, [openItems]);
+
   const handleToggle = () => {
     setIsVisible(!isVisible);
+  };
+
+  const handleAccordionToggle = (_event: AccordionToggleEvent, data: AccordionToggleData) => {
+    setOpenItems(data.openItems as string[]);
   };
 
   const handleNavigateToAI = () => {
@@ -233,7 +259,12 @@ export function DataUploadGuide() {
           </Button>
         </div>
 
-        <Accordion collapsible multiple>
+        <Accordion 
+          collapsible 
+          multiple 
+          openItems={openItems}
+          onToggle={handleAccordionToggle}
+        >
           {/* 1. Demo Data */}
           <AccordionItem value="demo-data">
             <AccordionHeader>
