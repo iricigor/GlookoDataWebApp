@@ -3,6 +3,8 @@
     "fileLoadedSuccessTitle": "Fajl uspešno učitan",
     "fileLoadedSuccessBody": "{{fileName}} je izabran za analizu",
     "aiProviderSwitchedTitle": "AI provajder promenjen",
-    "aiProviderSwitchedBody": "{{fromProvider}} verifikacija ključa neuspešna. Prebačeno na {{toProvider}}."
+    "aiProviderSwitchedBody": "{{fromProvider}} verifikacija ključa neuspešna. Prebačeno na {{toProvider}}.",
+    "aiAnalysisCompleteTitle": "Analiza završena!",
+    "aiAnalysisCompleteBody": "Pregledajte datume da vidite uvide za različite dane."
   }
 }
