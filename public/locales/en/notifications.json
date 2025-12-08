@@ -3,6 +3,8 @@
     "fileLoadedSuccessTitle": "File loaded successfully",
     "fileLoadedSuccessBody": "{{fileName}} has been selected for analysis",
     "aiProviderSwitchedTitle": "AI provider switched",
-    "aiProviderSwitchedBody": "{{fromProvider}} key verification failed. Switched to {{toProvider}}."
+    "aiProviderSwitchedBody": "{{fromProvider}} key verification failed. Switched to {{toProvider}}.",
+    "aiAnalysisCompleteTitle": "Analysis complete!",
+    "aiAnalysisCompleteBody": "Navigate dates to view insights for different days."
   }
 }

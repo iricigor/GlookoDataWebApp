@@ -44,6 +44,7 @@ export function HyposReport({
   deepseekApiKey = '',
   selectedProvider = null,
   responseLanguage = 'english',
+  showGeekStats = false,
 }: HyposReportProps) {
   const styles = useHyposStyles();
   const { thresholds } = useGlucoseThresholds();
@@ -372,38 +373,47 @@ export function HyposReport({
         </Text>
       </div>
 
-      {/* Date Navigation */}
-      <DayNavigator
-        currentDate={currentDate}
-        onPreviousDay={handlePreviousDate}
-        onNextDay={handleNextDate}
-        canGoPrevious={currentDateIndex > 0}
-        canGoNext={currentDateIndex < availableDates.length - 1}
-        loading={dateChanging}
-        onDateSelect={handleDateSelect}
-        minDate={minDate}
-        maxDate={maxDate}
-      />
+      {/* Date Navigation - Sticky */}
+      <div className={styles.stickyDatePickerWrapper}>
+        <DayNavigator
+          currentDate={currentDate}
+          onPreviousDay={handlePreviousDate}
+          onNextDay={handleNextDate}
+          canGoPrevious={currentDateIndex > 0}
+          canGoNext={currentDateIndex < availableDates.length - 1}
+          loading={dateChanging}
+          onDateSelect={handleDateSelect}
+          minDate={minDate}
+          maxDate={maxDate}
+        />
+      </div>
 
-      {/* Stats Cards */}
-      <HyposStatsCards 
-        hypoStats={hypoStats}
-        thresholds={thresholds}
-        glucoseUnit={glucoseUnit}
-        lbgi={lbgi}
-      />
+      {/* Chart Section - title outside, stats and chart inside */}
+      <div className={styles.sectionCard}>
+        <Text className={styles.sectionTitle}>Hypoglycemia Events</Text>
+        
+        {/* Stats Cards */}
+        <HyposStatsCards 
+          hypoStats={hypoStats}
+          thresholds={thresholds}
+          glucoseUnit={glucoseUnit}
+          lbgi={lbgi}
+        />
 
-      {/* Chart */}
-      <HyposChart
-        chartData={chartData}
-        nadirPoints={nadirPoints}
-        gradientStops={gradientStops}
-        maxGlucose={maxGlucose}
-        setMaxGlucose={setMaxGlucose}
-        glucoseUnit={glucoseUnit}
-        thresholds={thresholds}
-        windowWidth={windowWidth}
-      />
+        {/* Chart */}
+        <div className={styles.chartCard}>
+          <HyposChart
+            chartData={chartData}
+            nadirPoints={nadirPoints}
+            gradientStops={gradientStops}
+            maxGlucose={maxGlucose}
+            setMaxGlucose={setMaxGlucose}
+            glucoseUnit={glucoseUnit}
+            thresholds={thresholds}
+            windowWidth={windowWidth}
+          />
+        </div>
+      </div>
       
       {/* AI Analysis Section */}
       <HyposAISection
@@ -420,6 +430,7 @@ export function HyposReport({
         selectedProvider={selectedProvider}
         responseLanguage={responseLanguage}
         fileId={selectedFile?.id}
+        showGeekStats={showGeekStats}
       />
     </div>
   );
