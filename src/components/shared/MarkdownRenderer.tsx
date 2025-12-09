@@ -13,11 +13,10 @@ const useStyles = makeStyles({
     right: 0,
     display: 'flex',
     justifyContent: 'flex-end',
-    zIndex: 10,
+    zIndex: 100,
     // Always visible, no opacity transitions or hover effects to prevent screen blinking
   },
   markdown: {
-    fontSize: tokens.fontSizeBase400,
     color: tokens.colorNeutralForeground1,
     lineHeight: '1.6',
     fontFamily: 'Segoe UI, sans-serif',

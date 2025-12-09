@@ -226,14 +226,74 @@ export const useBGOverviewStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
     marginTop: '2px',
   },
-  targetInfo: {
+  targetInfoContainer: {
     ...shorthands.padding('12px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorBrandBackground2,
     marginTop: '8px',
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('8px'),
+  },
+  targetInfo: {
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+    position: 'relative',
+  },
+  targetInfoText: {
+    flex: 1,
     textAlign: 'center',
+  },
+  aiAnalysisContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    ...shorthands.gap('8px'),
+    alignItems: 'center',
+  },
+  aiAnalysisButton: {
+    minWidth: '140px',
+  },
+  aiResponseArea: {
+    width: '100%',
+    ...shorthands.padding('0'),
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground2,
+  },
+  aiResponseHeader: {
+    display: 'none',
+  },
+  aiResponseContent: {
+    fontSize: tokens.fontSizeBase200,
+    lineHeight: '1.5',
+    color: tokens.colorNeutralForeground2,
+    marginTop: '8px',
+  },
+  collapseIcon: {
+    fontSize: '16px',
+    transition: 'transform 0.2s ease',
+  },
+  collapseIconExpanded: {
+    transform: 'rotate(180deg)',
+  },
+  analyzingSpinner: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    ...shorthands.gap('8px'),
+  },
+  aiAccordion: {
+    marginTop: '8px',
+  },
+  promptTextContainer: {
+    ...shorthands.padding('12px'),
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+    backgroundColor: tokens.colorNeutralBackground3,
+    fontSize: tokens.fontSizeBase200,
+    fontFamily: 'monospace',
+    maxHeight: '400px',
+    overflowY: 'auto',
   },
   hba1cCard: {
     ...cardBaseStyle,

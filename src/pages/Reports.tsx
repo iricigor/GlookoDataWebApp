@@ -170,7 +170,19 @@ export function Reports({
           </div>
         );
       case 'bgOverview':
-        return <BGOverviewReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} showGeekStats={showGeekStats} />;
+        return (
+          <BGOverviewReport 
+            selectedFile={selectedFile} 
+            glucoseUnit={glucoseUnit} 
+            showGeekStats={showGeekStats}
+            perplexityApiKey={perplexityApiKey}
+            geminiApiKey={geminiApiKey}
+            grokApiKey={grokApiKey}
+            deepseekApiKey={deepseekApiKey}
+            selectedProvider={selectedProvider}
+            responseLanguage={responseLanguage}
+          />
+        );
       case 'dailyBG':
         return <DailyBGReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} showDayNightShading={showDayNightShading} />;
       case 'hypos':

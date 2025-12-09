@@ -7,6 +7,20 @@
       "bgOverview": "BG-Übersicht",
       "dailyBG": "Täglicher BG",
       "hypos": "Hypos"
+    },
+    "bgOverview": {
+      "tir": {
+        "analyzeButton": "Mit KI analysieren",
+        "analyzingButton": "Analysiere...",
+        "reanalyzeButton": "Erneut analysieren",
+        "collapseButton": "KI-Analyse einklappen",
+        "expandButton": "KI-Analyse ausklappen",
+        "helperText": "Erhalten Sie KI-gestützte Einblicke in Ihre Zeit im Zielbereich",
+        "accordionTitle": "KI-Prompt anzeigen",
+        "waitMessage": "Bitte warten Sie {seconds} Sekunde(n), bevor Sie eine neue Analyse anfordern...",
+        "errorPrefix": "Fehler:",
+        "successMessage": "KI-Analyse erfolgreich abgeschlossen"
+      }
     }
   }
 }
