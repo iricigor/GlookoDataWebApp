@@ -7,6 +7,20 @@
       "bgOverview": "BG Overview",
       "dailyBG": "Daily BG",
       "hypos": "Hypos"
+    },
+    "bgOverview": {
+      "tir": {
+        "analyzeButton": "Analyze with AI",
+        "analyzingButton": "Analyzing...",
+        "reanalyzeButton": "Re-analyze",
+        "collapseButton": "Collapse AI Analysis",
+        "expandButton": "Expand AI Analysis",
+        "helperText": "Get AI-powered insights on your Time in Range statistics",
+        "accordionTitle": "View AI Prompt",
+        "waitMessage": "Please wait {seconds} second(s) before requesting new analysis...",
+        "errorPrefix": "Error:",
+        "successMessage": "AI analysis completed successfully"
+      }
     }
   }
 }

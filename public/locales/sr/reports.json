@@ -7,6 +7,20 @@
       "bgOverview": "BG pregled",
       "dailyBG": "Dnevni BG",
       "hypos": "Hipo"
+    },
+    "bgOverview": {
+      "tir": {
+        "analyzeButton": "Analizirajte sa AI",
+        "analyzingButton": "Analiziram...",
+        "reanalyzeButton": "Ponovo analiziraj",
+        "collapseButton": "Sklopi AI analizu",
+        "expandButton": "Proširi AI analizu",
+        "helperText": "Dobijte uvide podržane AI o Vašem vremenu u ciljnom opsegu",
+        "accordionTitle": "Prikaži AI upit",
+        "waitMessage": "Molimo sačekajte {seconds} sekundi pre nego što zatražite novu analizu...",
+        "errorPrefix": "Greška:",
+        "successMessage": "AI analiza uspešno završena"
+      }
     }
   }
 }

@@ -22,6 +22,8 @@ import type {
   TimePeriodTIRStats,
   HourlyTIRStats,
 } from '../../types';
+import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
+import type { AIProvider } from '../../utils/api';
 import {
   extractGlucoseReadings,
   groupByWeek,
@@ -44,6 +46,7 @@ import {
   calculateBedtimeAverage,
 } from '../../utils/data';
 import { calculateAGPStats, filterReadingsByDayOfWeek } from '../../utils/visualization';
+import { getActiveProvider } from '../../utils/api';
 import { useGlucoseThresholds } from '../../hooks/useGlucoseThresholds';
 import { useDateRange } from '../../hooks/useDateRange';
 import { AGPGraph } from '../AGPGraph';
@@ -62,11 +65,37 @@ interface BGOverviewReportProps {
   selectedFile?: UploadedFile;
   glucoseUnit: GlucoseUnit;
   showGeekStats: boolean;
+  // AI configuration props
+  perplexityApiKey?: string;
+  geminiApiKey?: string;
+  grokApiKey?: string;
+  deepseekApiKey?: string;
+  selectedProvider?: AIProvider | null;
+  responseLanguage?: ResponseLanguage;
 }
 
-export function BGOverviewReport({ selectedFile, glucoseUnit, showGeekStats }: BGOverviewReportProps) {
+export function BGOverviewReport({ 
+  selectedFile, 
+  glucoseUnit, 
+  showGeekStats,
+  perplexityApiKey = '',
+  geminiApiKey = '',
+  grokApiKey = '',
+  deepseekApiKey = '',
+  selectedProvider = null,
+  responseLanguage = 'english',
+}: BGOverviewReportProps) {
   const styles = useBGOverviewStyles();
   const { thresholds } = useGlucoseThresholds();
+
+  // Determine which AI provider to use
+  const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
+  const hasApiKey = activeProvider !== null;
+  
+  // Get the appropriate API key for the active provider
+  const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
+                  activeProvider === 'grok' ? grokApiKey :
+                  activeProvider === 'deepseek' ? deepseekApiKey : geminiApiKey;
 
   // State for filters
   const [dataSource, setDataSource] = useState<GlucoseDataSource>('cgm');
@@ -364,7 +393,17 @@ export function BGOverviewReport({ selectedFile, glucoseUnit, showGeekStats }: B
 
       {/* Time In Range Card */}
       {!loading && !error && tirStats.total > 0 && (
-        <TimeInRangeCard tirStats={tirStats} categoryMode={categoryMode} />
+        <TimeInRangeCard 
+          tirStats={tirStats} 
+          categoryMode={categoryMode}
+          glucoseUnit={glucoseUnit}
+          thresholds={thresholds}
+          showGeekStats={showGeekStats}
+          hasApiKey={hasApiKey}
+          activeProvider={activeProvider}
+          apiKey={apiKey}
+          responseLanguage={responseLanguage}
+        />
       )}
 
       {/* Time in Range by Period Section */}

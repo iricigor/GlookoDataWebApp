@@ -4,4 +4,5 @@ export * from './mealTimingPrompt';
 export * from './pumpSettingsPrompt';
 export * from './hyposPrompt';
 export * from './hyposReportPrompt';
+export * from './bgOverviewTIRPrompt';
 export * from './promptUtils';

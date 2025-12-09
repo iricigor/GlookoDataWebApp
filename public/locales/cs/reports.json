@@ -7,6 +7,20 @@
       "bgOverview": "Přehled glykémie",
       "dailyBG": "Denní glykémie",
       "hypos": "Hypoglykémie"
+    },
+    "bgOverview": {
+      "tir": {
+        "analyzeButton": "Analyzovat s AI",
+        "analyzingButton": "Analyzuji...",
+        "reanalyzeButton": "Znovu analyzovat",
+        "collapseButton": "Sbalit AI analýzu",
+        "expandButton": "Rozbalit AI analýzu",
+        "helperText": "Získejte přehledy podporované AI o Vašem čase v cílovém rozmezí",
+        "accordionTitle": "Zobrazit AI prompt",
+        "waitMessage": "Počkejte prosím {seconds} sekund, než požádáte o novou analýzu...",
+        "errorPrefix": "Chyba:",
+        "successMessage": "AI analýza úspěšně dokončena"
+      }
     }
   }
 }
