@@ -226,11 +226,16 @@ export const useBGOverviewStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
     marginTop: '2px',
   },
-  targetInfo: {
+  targetInfoContainer: {
     ...shorthands.padding('12px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorBrandBackground2,
     marginTop: '8px',
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('8px'),
+  },
+  targetInfo: {
     fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
     display: 'flex',
@@ -256,7 +261,6 @@ export const useBGOverviewStyles = makeStyles({
     ...shorthands.padding('12px'),
     ...shorthands.borderRadius(tokens.borderRadiusMedium),
     backgroundColor: tokens.colorNeutralBackground3,
-    marginTop: '8px',
     fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground1,
     ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),

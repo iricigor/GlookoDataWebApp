@@ -77,6 +77,36 @@ describe('generateBGOverviewTIRPrompt', () => {
     expect(prompt).toContain('mg/dL (not mmol/L)');
   });
 
+  it('should include day filter context when not "All Days"', () => {
+    const prompt = generateBGOverviewTIRPrompt(
+      mockTIRStats3Category,
+      mockThresholds,
+      3,
+      'english',
+      'mmol/L',
+      undefined,
+      'Monday'
+    );
+
+    expect(prompt).toContain('This data is filtered to show only Monday');
+    expect(prompt).toContain('Acknowledge this in your analysis');
+  });
+
+  it('should not include day filter context for "All Days"', () => {
+    const prompt = generateBGOverviewTIRPrompt(
+      mockTIRStats3Category,
+      mockThresholds,
+      3,
+      'english',
+      'mmol/L',
+      undefined,
+      'All Days'
+    );
+
+    expect(prompt).not.toContain('This data is filtered');
+    expect(prompt).not.toContain('Acknowledge this in your analysis');
+  });
+
   it('should include language instruction for English', () => {
     const prompt = generateBGOverviewTIRPrompt(
       mockTIRStats3Category,

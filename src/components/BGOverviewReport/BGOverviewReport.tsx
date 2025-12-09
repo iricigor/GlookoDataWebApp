@@ -399,6 +399,7 @@ export function BGOverviewReport({
           glucoseUnit={glucoseUnit}
           thresholds={thresholds}
           showGeekStats={showGeekStats}
+          dayFilter={dayFilter}
           hasApiKey={hasApiKey}
           activeProvider={activeProvider}
           apiKey={apiKey}

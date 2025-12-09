@@ -29,6 +29,7 @@ const MMOL_TO_MGDL_FACTOR = 18;
  * @param language - Response language (english, czech, german, or serbian)
  * @param unit - Glucose unit (mmol/L or mg/dL)
  * @param provider - AI provider being used (optional)
+ * @param dayFilter - Day of week filter applied to the data (optional)
  * @returns Formatted prompt for AI analysis
  */
 export function generateBGOverviewTIRPrompt(
@@ -37,7 +38,8 @@ export function generateBGOverviewTIRPrompt(
   categoryMode: RangeCategoryMode,
   language: ResponseLanguage = 'english',
   unit: GlucoseUnit = 'mmol/L',
-  provider?: AIProvider
+  provider?: AIProvider,
+  dayFilter: string = 'All Days'
 ): string {
   const languageInstruction = getLanguageInstruction(language);
   const disclaimerInstruction = getDisclaimerInstruction(provider, language);
@@ -81,10 +83,15 @@ Time High: ${highPercentage.toFixed(1)}%
 Time Very High (>${veryHighThresholdStr}): ${veryHighPercentage.toFixed(1)}%`;
   }
 
+  // Add day filter context if not "All Days"
+  const dayFilterContext = dayFilter !== 'All Days' 
+    ? `\n\nIMPORTANT: This data is filtered to show only ${dayFilter}. Acknowledge this in your analysis and ensure your recommendations consider this specific day/period context.`
+    : '';
+
   return `This analysis examines your continuous glucose monitoring (CGM) data time in range statistics to provide quick, actionable insights for improving glucose management.
 
 My glucose time distribution:
-${statsText}
+${statsText}${dayFilterContext}
 
 Based on these statistics, provide:
 1. ONE brief sentence summarizing the overall glucose control pattern

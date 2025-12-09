@@ -23,7 +23,7 @@ import {
   ErrorCircleRegular,
 } from '@fluentui/react-icons';
 import { useTranslation } from 'react-i18next';
-import type { RangeCategoryMode, GlucoseUnit, GlucoseThresholds } from '../../types';
+import type { RangeCategoryMode, GlucoseUnit, GlucoseThresholds, AGPDayOfWeekFilter } from '../../types';
 import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
 import type { AIProvider } from '../../utils/api';
 import { calculatePercentage, GLUCOSE_RANGE_COLORS } from '../../utils/data';
@@ -40,6 +40,7 @@ interface TimeInRangeCardProps {
   glucoseUnit: GlucoseUnit;
   thresholds: GlucoseThresholds;
   showGeekStats: boolean;
+  dayFilter: AGPDayOfWeekFilter;
   // AI Configuration
   hasApiKey: boolean;
   activeProvider: AIProvider | null;
@@ -65,6 +66,7 @@ export function TimeInRangeCard({
   glucoseUnit, 
   thresholds,
   showGeekStats,
+  dayFilter,
   hasApiKey,
   activeProvider,
   apiKey,
@@ -122,7 +124,8 @@ export function TimeInRangeCard({
         categoryMode,
         responseLanguage,
         glucoseUnit,
-        activeProvider
+        activeProvider,
+        dayFilter
       );
 
       // Call the AI API
@@ -278,63 +281,65 @@ export function TimeInRangeCard({
         )}
       </div>
 
-      <div className={styles.targetInfo}>
-        <Text className={styles.targetInfoText}>
-          <strong>Target:</strong> 70% Time in Range (TIR) is generally considered a good target for glucose management
-        </Text>
-        
-        {hasApiKey && activeProvider && (
-          <div className={styles.aiAnalysisContainer}>
-            <Button
-              appearance="primary"
-              disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
-              onClick={handleAnalyzeClick}
-              className={styles.aiAnalysisButton}
-              icon={analyzing ? <Spinner size="tiny" /> : undefined}
-            >
-              {getButtonText()}
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Cooldown indicator */}
-      {cooldownActive && cooldownSeconds > 0 && (
-        <MessageBar intent="info">
-          <MessageBarBody>
-            {t('reports.bgOverview.tir.waitMessage', { seconds: cooldownSeconds })}
-          </MessageBarBody>
-        </MessageBar>
-      )}
-
-      {/* Error message */}
-      {error && (
-        <MessageBar intent="error" icon={<ErrorCircleRegular />}>
-          <MessageBarBody>
-            <strong>{t('reports.bgOverview.tir.errorPrefix')}</strong> {error}
-          </MessageBarBody>
-        </MessageBar>
-      )}
-
-      {/* AI Response */}
-      {response && !analyzing && (
-        <div className={styles.aiResponseArea}>
-          <div 
-            className={styles.aiResponseHeader}
-            onClick={() => setIsResponseExpanded(!isResponseExpanded)}
-          >
-            <Text weight="semibold">{t('reports.bgOverview.tir.successMessage')}</Text>
-            <ChevronDownRegular 
-              className={`${styles.collapseIcon} ${isResponseExpanded ? styles.collapseIconExpanded : ''}`}
-            />
-          </div>
-          {isResponseExpanded && (
-            <div className={styles.aiResponseContent}>
-              <MarkdownRenderer content={response} />
+      <div className={styles.targetInfoContainer}>
+        <div className={styles.targetInfo}>
+          <Text className={styles.targetInfoText}>
+            <strong>Target:</strong> 70% Time in Range (TIR) is generally considered a good target for glucose management
+          </Text>
+          
+          {hasApiKey && activeProvider && (
+            <div className={styles.aiAnalysisContainer}>
+              <Button
+                appearance="primary"
+                disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
+                onClick={handleAnalyzeClick}
+                className={styles.aiAnalysisButton}
+                icon={analyzing ? <Spinner size="tiny" /> : undefined}
+              >
+                {getButtonText()}
+              </Button>
             </div>
           )}
         </div>
-      )}
+
+        {/* Cooldown indicator */}
+        {cooldownActive && cooldownSeconds > 0 && (
+          <MessageBar intent="info">
+            <MessageBarBody>
+              {t('reports.bgOverview.tir.waitMessage', { seconds: cooldownSeconds })}
+            </MessageBarBody>
+          </MessageBar>
+        )}
+
+        {/* Error message */}
+        {error && (
+          <MessageBar intent="error" icon={<ErrorCircleRegular />}>
+            <MessageBarBody>
+              <strong>{t('reports.bgOverview.tir.errorPrefix')}</strong> {error}
+            </MessageBarBody>
+          </MessageBar>
+        )}
+
+        {/* AI Response */}
+        {response && !analyzing && (
+          <div className={styles.aiResponseArea}>
+            <div 
+              className={styles.aiResponseHeader}
+              onClick={() => setIsResponseExpanded(!isResponseExpanded)}
+            >
+              <Text weight="semibold">{t('reports.bgOverview.tir.successMessage')}</Text>
+              <ChevronDownRegular 
+                className={`${styles.collapseIcon} ${isResponseExpanded ? styles.collapseIconExpanded : ''}`}
+              />
+            </div>
+            {isResponseExpanded && (
+              <div className={styles.aiResponseContent}>
+                <MarkdownRenderer content={response} />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Prompt accordion for geek stats */}
       {showGeekStats && hasApiKey && activeProvider && (
@@ -350,7 +355,8 @@ export function TimeInRangeCard({
                     categoryMode,
                     responseLanguage,
                     glucoseUnit,
-                    activeProvider
+                    activeProvider,
+                    dayFilter
                   )}
                 </pre>
               </div>
