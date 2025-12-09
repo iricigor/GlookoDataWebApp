@@ -259,14 +259,14 @@ export const useBGOverviewStyles = makeStyles({
   aiResponseArea: {
     width: '100%',
     ...shorthands.padding('0'),
-    fontSize: tokens.fontSizeBase300,
+    fontSize: tokens.fontSizeBase200,
     color: tokens.colorNeutralForeground2,
   },
   aiResponseHeader: {
     display: 'none',
   },
   aiResponseContent: {
-    fontSize: tokens.fontSizeBase300,
+    fontSize: tokens.fontSizeBase200,
     lineHeight: '1.5',
     color: tokens.colorNeutralForeground2,
     marginTop: '8px',
