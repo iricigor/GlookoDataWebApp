@@ -5,7 +5,7 @@
  */
 
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
-import type { GlucoseUnit, GlucoseThresholds, RangeCategoryMode } from '../../../types';
+import type { GlucoseUnit, GlucoseThresholds, RangeCategoryMode, AGPDayOfWeekFilter } from '../../../types';
 import type { AIProvider } from '../../../utils/api/aiApi';
 import type { TIRStats } from '../../../components/BGOverviewReport/types';
 import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils';
@@ -39,7 +39,7 @@ export function generateBGOverviewTIRPrompt(
   language: ResponseLanguage = 'english',
   unit: GlucoseUnit = 'mmol/L',
   provider?: AIProvider,
-  dayFilter: string = 'All Days'
+  dayFilter: AGPDayOfWeekFilter = 'All Days'
 ): string {
   const languageInstruction = getLanguageInstruction(language);
   const disclaimerInstruction = getDisclaimerInstruction(provider, language);
