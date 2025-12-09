@@ -13,6 +13,7 @@ import { calculatePercentage } from '../../../utils/data';
 
 /**
  * Conversion factor from mmol/L to mg/dL
+ * Standard glucose conversion: 1 mmol/L = 18 mg/dL
  */
 const MMOL_TO_MGDL_FACTOR = 18;
 

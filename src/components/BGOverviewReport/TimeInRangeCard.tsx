@@ -100,8 +100,8 @@ export function TimeInRangeCard({
       return;
     }
 
-    // If there's already a response, start cooldown before allowing new analysis
-    if (response && !cooldownActive && !ready) {
+    // If there's already a response and cooldown hasn't been triggered yet, start cooldown
+    if (response && !analyzing && !cooldownActive) {
       triggerCooldown();
       return;
     }
@@ -148,7 +148,7 @@ export function TimeInRangeCard({
     if (analyzing) {
       return t('reports.bgOverview.tir.analyzingButton');
     }
-    if (response && !ready) {
+    if (response && !analyzing && ready) {
       return t('reports.bgOverview.tir.reanalyzeButton');
     }
     return t('reports.bgOverview.tir.analyzeButton');
