@@ -249,31 +249,27 @@ export const useBGOverviewStyles = makeStyles({
   },
   aiAnalysisContainer: {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     ...shorthands.gap('8px'),
-    alignItems: 'flex-end',
+    alignItems: 'center',
   },
   aiAnalysisButton: {
     minWidth: '140px',
   },
   aiResponseArea: {
     width: '100%',
-    ...shorthands.padding('12px', '0'),
-    fontSize: tokens.fontSizeBase200,
+    ...shorthands.padding('0'),
+    fontSize: tokens.fontSizeBase300,
     color: tokens.colorNeutralForeground2,
   },
   aiResponseHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    marginBottom: '8px',
-    cursor: 'pointer',
-    userSelect: 'none',
+    display: 'none',
   },
   aiResponseContent: {
-    fontSize: tokens.fontSizeBase200,
+    fontSize: tokens.fontSizeBase300,
     lineHeight: '1.5',
     color: tokens.colorNeutralForeground2,
+    marginTop: '8px',
   },
   collapseIcon: {
     fontSize: '16px',

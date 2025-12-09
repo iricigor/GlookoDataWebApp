@@ -298,6 +298,13 @@ export function TimeInRangeCard({
               >
                 {getButtonText()}
               </Button>
+              {response && !analyzing && (
+                <ChevronDownRegular 
+                  className={`${styles.collapseIcon} ${isResponseExpanded ? styles.collapseIconExpanded : ''}`}
+                  onClick={() => setIsResponseExpanded(!isResponseExpanded)}
+                  style={{ cursor: 'pointer', fontSize: '20px' }}
+                />
+              )}
             </div>
           )}
         </div>
@@ -321,21 +328,11 @@ export function TimeInRangeCard({
         )}
 
         {/* AI Response */}
-        {response && !analyzing && (
+        {response && !analyzing && isResponseExpanded && (
           <div className={styles.aiResponseArea}>
-            <div 
-              className={styles.aiResponseHeader}
-              onClick={() => setIsResponseExpanded(!isResponseExpanded)}
-            >
-              <ChevronDownRegular 
-                className={`${styles.collapseIcon} ${isResponseExpanded ? styles.collapseIconExpanded : ''}`}
-              />
+            <div className={styles.aiResponseContent}>
+              <MarkdownRenderer content={response} />
             </div>
-            {isResponseExpanded && (
-              <div className={styles.aiResponseContent}>
-                <MarkdownRenderer content={response} />
-              </div>
-            )}
           </div>
         )}
       </div>
