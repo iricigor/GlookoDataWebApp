@@ -258,17 +258,14 @@ export const useBGOverviewStyles = makeStyles({
   },
   aiResponseArea: {
     width: '100%',
-    ...shorthands.padding('12px'),
-    ...shorthands.borderRadius(tokens.borderRadiusMedium),
-    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.padding('12px', '0'),
     fontSize: tokens.fontSizeBase200,
-    color: tokens.colorNeutralForeground1,
-    ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
+    color: tokens.colorNeutralForeground2,
   },
   aiResponseHeader: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     marginBottom: '8px',
     cursor: 'pointer',
     userSelect: 'none',
@@ -276,6 +273,7 @@ export const useBGOverviewStyles = makeStyles({
   aiResponseContent: {
     fontSize: tokens.fontSizeBase200,
     lineHeight: '1.5',
+    color: tokens.colorNeutralForeground2,
   },
   collapseIcon: {
     fontSize: '16px',

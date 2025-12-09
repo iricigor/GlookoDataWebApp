@@ -327,7 +327,6 @@ export function TimeInRangeCard({
               className={styles.aiResponseHeader}
               onClick={() => setIsResponseExpanded(!isResponseExpanded)}
             >
-              <Text weight="semibold">{t('reports.bgOverview.tir.successMessage')}</Text>
               <ChevronDownRegular 
                 className={`${styles.collapseIcon} ${isResponseExpanded ? styles.collapseIconExpanded : ''}`}
               />
