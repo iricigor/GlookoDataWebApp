@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>748 Add inline AI analysis to Time in Range card in BG Overview</summary>
+
+[#748](../../pull/748) Add inline AI analysis to Time in Range card in BG Overview
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>746 Align Hypos report UI with Daily BG tab design patterns</summary>
 
 [#746](../../pull/746) Align Hypos report UI with Daily BG tab design patterns
