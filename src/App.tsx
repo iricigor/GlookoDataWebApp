@@ -28,7 +28,6 @@ import { useGeminiApiKey } from './hooks/useGeminiApiKey'
 import { useGrokApiKey } from './hooks/useGrokApiKey'
 import { useDeepSeekApiKey } from './hooks/useDeepSeekApiKey'
 import { useActiveAIProvider } from './hooks/useActiveAIProvider'
-import { useSwipeGesture } from './hooks/useSwipeGesture'
 import { useInsulinDuration } from './hooks/useInsulinDuration'
 import { useCookieConsent } from './hooks/useCookieConsent'
 import { useAuth } from './hooks/useAuth'
@@ -40,9 +39,6 @@ import type { AIProvider } from './utils/api'
 import { getProviderDisplayName } from './utils/api'
 import { extractZipMetadata } from './features/dataUpload/utils'
 import { loadCachedFiles } from './utils/fileCache'
-
-// Page navigation order for swipe gestures
-const PAGE_ORDER = ['home', 'upload', 'reports', 'ai', 'settings'] as const
 
 /**
  * Main application component that renders the app shell and manages global state, routing, and user settings.
@@ -64,12 +60,16 @@ function App() {
   const { theme, themeMode, setThemeMode } = useTheme()
   const isDark = isDarkTheme(themeMode)
   
-  // Sync theme with body class for RSuite popup theming
+  // Sync theme with html and body class for RSuite popup theming and dark mode background
   useEffect(() => {
     if (isDark) {
+      document.documentElement.classList.add('dark-theme');
+      document.documentElement.classList.remove('light-theme');
       document.body.classList.add('dark-theme');
       document.body.classList.remove('light-theme');
     } else {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
       document.body.classList.add('light-theme');
       document.body.classList.remove('dark-theme');
     }
@@ -312,38 +312,6 @@ function App() {
     window.location.hash = page
   }
 
-  // Navigate to the next or previous page based on swipe direction
-  const navigateToPage = useCallback((direction: 'next' | 'prev') => {
-    const currentIndex = PAGE_ORDER.indexOf(currentPage as typeof PAGE_ORDER[number])
-    if (currentIndex === -1) return
-
-    let newIndex: number
-    if (direction === 'next') {
-      newIndex = (currentIndex + 1) % PAGE_ORDER.length
-    } else {
-      newIndex = currentIndex - 1
-      if (newIndex < 0) newIndex = PAGE_ORDER.length - 1
-    }
-
-    handleNavigate(PAGE_ORDER[newIndex])
-  }, [currentPage])
-
-  // Ref for the main content container
-  const mainContentRef = useRef<HTMLDivElement>(null)
-
-  // Setup swipe gesture detection (mobile only)
-  useSwipeGesture(
-    mainContentRef.current,
-    {
-      onSwipeLeft: () => navigateToPage('next'),
-      onSwipeRight: () => navigateToPage('prev'),
-    },
-    {
-      minSwipeDistance: 50,
-      maxVerticalMovement: 100,
-    }
-  )
-
   const handleAddFiles = (newFiles: UploadedFile[]) => {
     setUploadedFiles((prev) => [...prev, ...newFiles])
     
@@ -514,7 +482,7 @@ function App() {
           syncStatus={syncStatus}
         />
       )}
-      <main ref={mainContentRef} className="main-content">
+      <main className="main-content">
         {renderPage()}
       </main>
       {!isApiDocsPage && <Footer />}
