@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>750 Add day-specific activity context to TIR AI prompt</summary>
+
+[#750](../../pull/750) Add day-specific activity context to TIR AI prompt
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>748 Add inline AI analysis to Time in Range card in BG Overview</summary>
 
 [#748](../../pull/748) Add inline AI analysis to Time in Range card in BG Overview
