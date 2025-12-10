@@ -2,12 +2,31 @@
   box-sizing: border-box;
 }
 
+html {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   overflow-x: hidden;
+}
+
+/* Apply theme colors to html and body to prevent white background in dark mode */
+html.light-theme,
+body.light-theme {
+  background-color: #ffffff;
+}
+
+html.dark-theme,
+body.dark-theme {
+  background-color: #1f1f1f;
+  color: #ffffff;
 }
 
 #root {

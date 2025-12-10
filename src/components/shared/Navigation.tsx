@@ -50,6 +50,11 @@ const useStyles = makeStyles({
       ...shorthands.padding('12px', '16px'),
     },
   },
+  leftSection: {
+    display: 'flex',
+    alignItems: 'center',
+    ...shorthands.gap('12px'),
+  },
   brand: {
     display: 'flex',
     alignItems: 'center',
@@ -95,6 +100,11 @@ const useStyles = makeStyles({
     '@media (max-width: 768px)': {
       display: 'flex',
     },
+  },
+  hamburgerButton: {
+    minWidth: '40px',
+    minHeight: '40px',
+    fontSize: '20px',
   },
   pulsingIcon: {
     animationName: {
@@ -287,38 +297,16 @@ export function Navigation({
   return (
     <>
       <nav className={styles.nav}>
-        <div className={styles.brand}>
-          <img 
-            src="/favicon/favicon.svg" 
-            alt={t('common:brandAltText')}
-            className={styles.brandIcon}
-          />
-          <Text className={styles.brandText}>{t('common:brandName')}</Text>
-        </div>
-        
-        <div className={styles.centerSection}>
-          {/* Desktop Navigation */}
-          <div className={styles.navItems}>
-            {navItems.map((item) => (
-              <Button
-                key={item.page}
-                appearance={currentPage === item.page ? 'primary' : 'subtle'}
-                icon={item.icon}
-                onClick={() => onNavigate(item.page)}
-              >
-                {item.label}
-              </Button>
-            ))}
-          </div>
-
-          {/* Mobile Hamburger Menu */}
+        <div className={styles.leftSection}>
+          {/* Mobile Hamburger Menu - Left side on mobile */}
           <div className={styles.hamburgerMenu}>
             <Menu inline>
               <MenuTrigger disableButtonEnhancement>
                 <Button 
-                  appearance="subtle" 
+                  appearance="primary"
                   icon={<NavigationRegular />}
                   aria-label={t('navigation.navigationMenu')}
+                  className={styles.hamburgerButton}
                 />
               </MenuTrigger>
               <MenuPopover>
@@ -335,6 +323,31 @@ export function Navigation({
                 </MenuList>
               </MenuPopover>
             </Menu>
+          </div>
+          
+          <div className={styles.brand}>
+            <img 
+              src="/favicon/favicon.svg" 
+              alt={t('common:brandAltText')}
+              className={styles.brandIcon}
+            />
+            <Text className={styles.brandText}>{t('common:brandName')}</Text>
+          </div>
+        </div>
+        
+        <div className={styles.centerSection}>
+          {/* Desktop Navigation */}
+          <div className={styles.navItems}>
+            {navItems.map((item) => (
+              <Button
+                key={item.page}
+                appearance={currentPage === item.page ? 'primary' : 'subtle'}
+                icon={item.icon}
+                onClick={() => onNavigate(item.page)}
+              >
+                {item.label}
+              </Button>
+            ))}
           </div>
         </div>
 
