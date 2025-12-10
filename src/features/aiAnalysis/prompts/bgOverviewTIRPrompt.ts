@@ -18,6 +18,36 @@ import { calculatePercentage } from '../../../utils/data';
 const MMOL_TO_MGDL_FACTOR = 18;
 
 /**
+ * Get day-specific activity context for working persons
+ * Provides typical activities and context for each day of the week
+ * 
+ * @param dayFilter - The day of week filter applied
+ * @returns Activity context string, or empty string if not applicable
+ */
+function getDayActivityContext(dayFilter: AGPDayOfWeekFilter): string {
+  switch (dayFilter) {
+    case 'Monday':
+      return 'Consider that Monday typically marks the start of the working week, with morning routines resuming after the weekend, potential stress from work transitions, and establishing new weekly patterns.';
+    case 'Tuesday':
+    case 'Wednesday':
+    case 'Thursday':
+      return `Consider that ${dayFilter} is a mid-week day, typically involving established work routines, regular meal timing, and consistent daily patterns for most working individuals.`;
+    case 'Friday':
+      return 'Consider that Friday typically marks the end of the working week, with anticipation of weekend leisure, possible social activities or celebrations, and transitions in routine as the weekend approaches.';
+    case 'Saturday':
+      return 'Consider that Saturday is typically a leisure day with more flexible schedules, potential variations in meal timing, possible increased physical activity or social events, and different routines compared to weekdays.';
+    case 'Sunday':
+      return 'Consider that Sunday is typically a leisure day, often involving family time, relaxation, meal preparation for the week ahead, and mental/physical preparation for the upcoming work week.';
+    case 'Workday':
+      return 'Consider that this data represents typical workdays (Monday-Friday), characterized by structured routines, regular meal timing, work-related stress, and consistent daily schedules.';
+    case 'Weekend':
+      return 'Consider that this data represents weekend days (Saturday-Sunday), typically featuring more flexible schedules, varied meal timing, leisure activities, and different patterns compared to workdays.';
+    default:
+      return '';
+  }
+}
+
+/**
  * Generate AI prompt for BG Overview Time in Range analysis
  * 
  * This prompt is designed for quick, actionable insights displayed inline in the TIR card.
@@ -84,8 +114,9 @@ Time Very High (>${veryHighThresholdStr}): ${veryHighPercentage.toFixed(1)}%`;
   }
 
   // Add day filter context if not "All Days"
+  const dayActivityContext = getDayActivityContext(dayFilter);
   const dayFilterContext = dayFilter !== 'All Days' 
-    ? `\n\nIMPORTANT: This data is filtered to show only ${dayFilter}. Acknowledge this in your analysis and ensure your recommendations consider this specific day/period context.`
+    ? `\n\nIMPORTANT: This data is filtered to show only ${dayFilter}. ${dayActivityContext} Acknowledge this day-specific context in your analysis and ensure your recommendations consider typical activities and patterns for this day/period.`
     : '';
 
   return `This analysis examines your continuous glucose monitoring (CGM) data time in range statistics to provide quick, actionable insights for improving glucose management.
