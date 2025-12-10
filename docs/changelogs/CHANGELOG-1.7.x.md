@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>752 Mobile UI improvements: Fix dark mode background, remove swipe navigation, reposition hamburger menu</summary>
+
+[#752](../../pull/752) Mobile UI improvements: Fix dark mode background, remove swipe navigation, reposition hamburger menu
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>750 Add day-specific activity context to TIR AI prompt</summary>
 
 [#750](../../pull/750) Add day-specific activity context to TIR AI prompt
