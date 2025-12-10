@@ -89,7 +89,139 @@ describe('generateBGOverviewTIRPrompt', () => {
     );
 
     expect(prompt).toContain('This data is filtered to show only Monday');
-    expect(prompt).toContain('Acknowledge this in your analysis');
+    expect(prompt).toContain('Acknowledge this');
+    expect(prompt).toContain('start of the working week');
+  });
+
+  it('should include day-specific activity context for Monday', () => {
+    const prompt = generateBGOverviewTIRPrompt(
+      mockTIRStats3Category,
+      mockThresholds,
+      3,
+      'english',
+      'mmol/L',
+      undefined,
+      'Monday'
+    );
+
+    expect(prompt).toContain('start of the working week');
+    expect(prompt).toContain('morning routines resuming after the weekend');
+  });
+
+  it('should include day-specific activity context for Friday', () => {
+    const prompt = generateBGOverviewTIRPrompt(
+      mockTIRStats3Category,
+      mockThresholds,
+      3,
+      'english',
+      'mmol/L',
+      undefined,
+      'Friday'
+    );
+
+    expect(prompt).toContain('end of the working week');
+    expect(prompt).toContain('anticipation of weekend leisure');
+  });
+
+  it('should include day-specific activity context for Saturday', () => {
+    const prompt = generateBGOverviewTIRPrompt(
+      mockTIRStats3Category,
+      mockThresholds,
+      3,
+      'english',
+      'mmol/L',
+      undefined,
+      'Saturday'
+    );
+
+    expect(prompt).toContain('leisure day');
+    expect(prompt).toContain('flexible schedules');
+  });
+
+  it('should include day-specific activity context for Sunday', () => {
+    const prompt = generateBGOverviewTIRPrompt(
+      mockTIRStats3Category,
+      mockThresholds,
+      3,
+      'english',
+      'mmol/L',
+      undefined,
+      'Sunday'
+    );
+
+    expect(prompt).toContain('leisure day');
+    expect(prompt).toContain('preparation for the upcoming work week');
+  });
+
+  it('should include day-specific activity context for mid-week days', () => {
+    const tuesdayPrompt = generateBGOverviewTIRPrompt(
+      mockTIRStats3Category,
+      mockThresholds,
+      3,
+      'english',
+      'mmol/L',
+      undefined,
+      'Tuesday'
+    );
+
+    expect(tuesdayPrompt).toContain('mid-week day');
+    expect(tuesdayPrompt).toContain('established work routines');
+
+    const wednesdayPrompt = generateBGOverviewTIRPrompt(
+      mockTIRStats3Category,
+      mockThresholds,
+      3,
+      'english',
+      'mmol/L',
+      undefined,
+      'Wednesday'
+    );
+
+    expect(wednesdayPrompt).toContain('mid-week day');
+
+    const thursdayPrompt = generateBGOverviewTIRPrompt(
+      mockTIRStats3Category,
+      mockThresholds,
+      3,
+      'english',
+      'mmol/L',
+      undefined,
+      'Thursday'
+    );
+
+    expect(thursdayPrompt).toContain('mid-week day');
+  });
+
+  it('should include day-specific activity context for Workday filter', () => {
+    const prompt = generateBGOverviewTIRPrompt(
+      mockTIRStats3Category,
+      mockThresholds,
+      3,
+      'english',
+      'mmol/L',
+      undefined,
+      'Workday'
+    );
+
+    expect(prompt).toContain('represents typical workdays');
+    expect(prompt).toContain('Monday-Friday');
+    expect(prompt).toContain('structured routines');
+  });
+
+  it('should include day-specific activity context for Weekend filter', () => {
+    const prompt = generateBGOverviewTIRPrompt(
+      mockTIRStats3Category,
+      mockThresholds,
+      3,
+      'english',
+      'mmol/L',
+      undefined,
+      'Weekend'
+    );
+
+    expect(prompt).toContain('weekend days');
+    expect(prompt).toContain('Saturday-Sunday');
+    expect(prompt).toContain('flexible schedules');
   });
 
   it('should not include day filter context for "All Days"', () => {
