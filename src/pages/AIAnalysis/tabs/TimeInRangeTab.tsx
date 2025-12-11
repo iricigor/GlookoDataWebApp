@@ -25,6 +25,27 @@ import {
 } from '../AnalysisComponents';
 import type { TimeInRangeTabProps } from '../types';
 
+/**
+ * Render the Time in Range analysis tab with controls to run AI-based analysis, show cooldown/status, and display results.
+ *
+ * @param loading - Whether glucose data is still loading
+ * @param hasApiKey - Whether a non-Pro API key is available for AI providers
+ * @param activeProvider - Selected AI provider identifier (e.g., "perplexity", "grok", "gemini")
+ * @param showGeekStats - Whether to show the collapsible prompt text ("geek" view)
+ * @param inRangePercentage - Percentage of time the user's glucose is in range
+ * @param glucoseStats - Aggregated glucose statistics used to generate the AI prompt and analysis
+ * @param responseLanguage - Language to request the AI response in
+ * @param glucoseUnit - Unit used for glucose values (e.g., "mg/dL" or "mmol/L")
+ * @param perplexityApiKey - API key for the Perplexity provider (used for non-Pro users)
+ * @param geminiApiKey - API key for the Gemini provider (used for non-Pro users)
+ * @param grokApiKey - API key for the Grok provider (used for non-Pro users)
+ * @param selectedFile - Currently selected CGM data file (used to associate and save analysis results)
+ * @param onAnalysisComplete - Callback invoked when an analysis is successfully saved; receives (fileId, response, inRangePercentage)
+ * @param existingAnalysis - Previously saved analysis for the selected file; if present it will be loaded into the UI
+ * @param isProUser - Whether the current user is a Pro user (routes AI requests through backend instead of client-side API keys)
+ * @param idToken - Authentication token forwarded for Pro-user routing of AI requests
+ * @returns The JSX element for the Time in Range tab UI including analyze controls, status, prompt viewer, and result display
+ */
 export function TimeInRangeTab({
   loading,
   hasApiKey,

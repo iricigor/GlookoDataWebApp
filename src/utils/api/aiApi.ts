@@ -205,27 +205,11 @@ export function getAvailableProviders(
 }
 
 /**
- * Verify if an API key is valid for the specified provider.
- * 
- * This function routes verification to the appropriate provider-specific
- * verification function. Each provider uses the most lightweight verification
- * method available:
- * - Gemini, Grok, DeepSeek: GET request to list models endpoint (no cost)
- * - Perplexity: Minimal chat completion with max_tokens=1 (minimal cost)
- * 
- * @param provider - The AI provider to verify the key for ('perplexity', 'gemini', 'grok', or 'deepseek')
+ * Verify an API key for the specified AI provider.
+ *
+ * @param provider - The AI provider to verify (`'perplexity'`, `'gemini'`, `'grok'`, or `'deepseek'`)
  * @param apiKey - The API key to verify
- * @returns Promise with the verification result containing valid status and optional error
- * 
- * @example
- * ```typescript
- * const result = await verifyApiKey('gemini', 'AIzaSy...');
- * if (result.valid) {
- *   console.log('API key is valid');
- * } else {
- *   console.error('Invalid key:', result.error);
- * }
- * ```
+ * @returns The verification result with `valid` set to `true` if the key is valid, otherwise `valid` is `false` and `error` may contain a message
  */
 export async function verifyApiKey(
   provider: AIProvider,
@@ -246,30 +230,18 @@ export async function verifyApiKey(
 }
 
 /**
- * Call AI API with automatic routing between backend (Pro users) and client-side (regular users)
- * 
- * For Pro users with an ID token, this function routes the request through the backend
- * where API keys are securely managed in Azure Key Vault. For regular users, it uses
- * the client-side API call with their personal API key.
- * 
+ * Route a prompt to either the backend (for Pro users) or the client-side provider API.
+ *
+ * When `isProUser` is true and an `idToken` is provided, the request is forwarded to the backend
+ * where provider keys are managed; otherwise the call is performed client-side using the supplied `apiKey`.
+ *
  * @param provider - The AI provider to use ('perplexity', 'gemini', 'grok', or 'deepseek')
  * @param prompt - The prompt to send to the AI
- * @param options - Call options including API key, ID token, and Pro user status
- * @returns Promise with the result containing success status and content or error
- * 
- * @example
- * ```typescript
- * // Pro user call (backend)
- * const result = await callAIWithRouting('gemini', prompt, {
- *   isProUser: true,
- *   idToken: 'eyJ0...',
- * });
- * 
- * // Regular user call (client-side)
- * const result = await callAIWithRouting('gemini', prompt, {
- *   apiKey: 'AIza...',
- * });
- * ```
+ * @param options - Call options
+ * @param options.apiKey - User's client-side API key (required for non‑Pro calls)
+ * @param options.idToken - ID token used to authenticate backend (Pro) requests
+ * @param options.isProUser - Set to true to route through the backend when `idToken` is provided
+ * @returns An AIResult object containing `success`, `content` on success, and `error` with `errorType` on failure
  */
 export async function callAIWithRouting(
   provider: AIProvider,
@@ -331,4 +303,3 @@ export async function callAIWithRouting(
   
   return callAIApi(provider, apiKey, prompt);
 }
-

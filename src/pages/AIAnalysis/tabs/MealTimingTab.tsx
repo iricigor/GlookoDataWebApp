@@ -35,6 +35,26 @@ import {
 import type { MealTimingTabProps } from '../types';
 import type { GlucoseReading, InsulinReading } from '../../../types';
 
+/**
+ * Render the Meal Timing analysis tab and manage the AI-driven analysis workflow for meal timing.
+ *
+ * Displays loading and no-data states, provides an Analyze button that triggers AI analysis
+ * (with automatic dataset-size retries and cooldown management), and shows results, errors,
+ * and optional developer-facing details (AI prompt and dataset summary).
+ *
+ * @param loading - Whether source data is still loading
+ * @param hasApiKey - Whether the current (non-Pro) user has provided an API key required for direct provider calls
+ * @param activeProvider - Selected AI provider identifier (e.g., 'perplexity', 'grok', 'gemini'); required to perform analysis
+ * @param showGeekStats - When true, show the raw AI prompt and dataset summary for debugging/inspection
+ * @param mealTimingDatasets - The input datasets used for analysis; must include `cgmReadings`, `bolusReadings`, and `basalReadings`
+ * @param responseLanguage - Language to request the AI response in
+ * @param glucoseUnit - Unit used for glucose values (e.g., 'mg/dL' or 'mmol/L')
+ * @param perplexityApiKey - API key for the Perplexity provider (used for non-Pro users)
+ * @param geminiApiKey - API key for the Gemini provider (used for non-Pro users)
+ * @param grokApiKey - API key for the Grok provider (used for non-Pro users)
+ * @param isProUser - When true, route AI requests through the backend (no client-side API key is sent)
+ * @param idToken - Optional identity token forwarded to backend routing for authenticated Pro users
+ */
 export function MealTimingTab({
   loading,
   hasApiKey,

@@ -103,9 +103,10 @@ const DIABETES_KEYWORDS = [
 const MIN_DIABETES_KEYWORDS_REQUIRED = 2;
 
 /**
- * Validate that the prompt is related to diabetes
- * This is a security measure to prevent abuse of the API for non-diabetes purposes
- * Requires at least MIN_DIABETES_KEYWORDS_REQUIRED diabetes keywords to be present
+ * Determines whether a prompt contains enough diabetes-related keywords.
+ *
+ * @param prompt - The text to analyze for diabetes-related keywords
+ * @returns `true` if the prompt contains at least MIN_DIABETES_KEYWORDS_REQUIRED diabetes-related keywords, `false` otherwise
  */
 function validateDiabetesPrompt(prompt: string): boolean {
   const lowerPrompt = prompt.toLowerCase();
@@ -114,14 +115,23 @@ function validateDiabetesPrompt(prompt: string): boolean {
 }
 
 /**
- * URL-encode a string for use as RowKey
+ * Encode a string so it is safe to use as an Azure Table Storage RowKey.
+ *
+ * @param str - The raw string to encode
+ * @returns The URL-encoded representation of `str`
  */
 function urlEncode(str: string): string {
   return encodeURIComponent(str);
 }
 
 /**
- * Check if user exists in ProUsers table
+ * Determine whether a Pro user with the given email exists in the ProUsers table.
+ *
+ * The email comparison is case-insensitive.
+ *
+ * @param email - The user's email address (treated case-insensitively)
+ * @returns `true` if a matching ProUsers entry exists, `false` otherwise.
+ * @throws Re-throws unexpected errors from the table client operations.
  */
 async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>, email: string): Promise<boolean> {
   try {
@@ -137,7 +147,9 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
 }
 
 /**
- * Get the current date key for rate limiting (YYYY-MM-DD-HH format)
+ * Generate the current UTC time window key used for rate limiting.
+ *
+ * @returns The time window key in `YYYY-MM-DD-HH` (UTC) format.
  */
 function getCurrentWindowKey(): string {
   const now = new Date();
@@ -145,8 +157,11 @@ function getCurrentWindowKey(): string {
 }
 
 /**
- * Check and update rate limit for a user
- * Returns true if the request should be allowed, false if rate limit exceeded
+ * Determine whether a user's request is allowed under the current hourly rate limit and update the stored counters.
+ *
+ * If an entry for the user's current hourly window exists, the function increments its request count and returns `false` when the count has reached or exceeded the configured limit. If no entry exists, it creates one for the current window with a count of 1 and allows the request. On unexpected errors reading or writing storage, the function logs the error and allows the request (fails open).
+ *
+ * @returns `true` if the request is allowed, `false` if the rate limit has been exceeded for the current window
  */
 async function checkRateLimit(
   tableClient: ReturnType<typeof getTableClient>,
@@ -195,7 +210,15 @@ async function checkRateLimit(
 }
 
 /**
- * Get AI provider configuration from environment variables and Key Vault
+ * Determines which AI provider to use and retrieves its API key from Key Vault.
+ *
+ * If `requestedProvider` is provided it will be used; otherwise the `AI_PROVIDER`
+ * environment variable or the default `perplexity` is used. The function validates
+ * the provider against the supported set and reads the API key from a Key Vault
+ * secret named by `AI_API_KEY_SECRET` (default `AI-API-Key`).
+ *
+ * @param requestedProvider - Optional provider override; one of `perplexity`, `gemini`, `grok`, or `deepseek`
+ * @returns An `AIProviderConfig` containing `provider` and `apiKey`, or `null` if the provider is invalid or the API key could not be retrieved
  */
 async function getAIProviderConfig(
   requestedProvider: string | undefined,
@@ -232,7 +255,11 @@ async function getAIProviderConfig(
 }
 
 /**
- * Call AI provider API
+ * Send the prompt to a configured AI provider and return the provider's generated text.
+ *
+ * @param config - AI provider selection and API key used for the request (`provider` is one of 'perplexity' | 'gemini' | 'grok' | 'deepseek'; `apiKey` is the secret used for authentication)
+ * @param prompt - The user prompt to send to the AI provider
+ * @returns An object with `success: true` and `content` containing the provider's response on success; on failure `success: false` with `error` describing the failure and `errorType` categorizing the failure as one of: `configuration`, `provider`, `request`, or `network`
  */
 async function callAIProvider(
   config: AIProviderConfig,
@@ -407,7 +434,12 @@ async function callAIProvider(
 }
 
 /**
- * HTTP handler for POST /api/ai/query
+ * Handle POST /api/ai/query by authenticating a Pro user, validating a diabetes-related prompt,
+ * enforcing per-user rate limits, invoking the configured AI provider, and returning the generated content.
+ *
+ * @param request - Incoming HTTP request; body must be JSON with a `prompt` string and optional `provider`
+ * @param context - Azure Functions invocation context used for logging and telemetry
+ * @returns An HTTP response object containing `{ success: true, content, provider }` on success, or an error status and message on failure
  */
 async function aiQuery(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   const requestLogger = createRequestLogger(request, context);

@@ -29,6 +29,28 @@ import {
   HyposTab,
 } from './tabs';
 
+/**
+ * Render AI-driven analysis UI for a selected glucose/insulin data file.
+ *
+ * Presents tabs for File Info, Time In Range, Glucose & Insulin, Meal Timing, Pump Settings, and Hypos;
+ * computes in-range percentage and related datasets from the selected file and forwards data and API keys
+ * to the tab components for provider-driven analysis.
+ *
+ * @param selectedFile - The file to analyze; when null no analysis UI is shown
+ * @param perplexityApiKey - API key for Perplexity (optional)
+ * @param geminiApiKey - API key for Gemini (optional)
+ * @param grokApiKey - API key for Grok (optional)
+ * @param deepseekApiKey - API key for Deepseek (optional)
+ * @param selectedProvider - Provider to prefer when multiple API keys are available
+ * @param responseLanguage - Language code to request AI responses in
+ * @param glucoseUnit - Display unit for glucose values (e.g., "mg/dL" or "mmol/L")
+ * @param showGeekStats - If true, show advanced/statistical output in tabs
+ * @param existingAnalysis - Previously computed analysis for the selected file (if any)
+ * @param onAnalysisComplete - Callback invoked when an analysis finishes for the selected file
+ * @param isProUser - Whether the current user has pro-level privileges (affects some tab features)
+ * @param idToken - Optional identity token used for authenticated provider requests
+ * @returns The component's rendered React element
+ */
 export function AIAnalysis({ 
   selectedFile, 
   perplexityApiKey, 
