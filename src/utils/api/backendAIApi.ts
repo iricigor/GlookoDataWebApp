@@ -63,36 +63,15 @@ export interface BackendAIResult {
 }
 
 /**
- * Call the backend AI query endpoint for Pro users
- * 
- * This function sends the AI prompt to the backend, which handles:
- * - Pro user verification
- * - Rate limiting
- * - Prompt validation (diabetes-related)
- * - AI provider API key management
- * - Making the actual AI API call
- * 
- * @param idToken - The ID token from MSAL authentication
- * @param prompt - The prompt to send to the AI
- * @param provider - Optional AI provider selection ('perplexity', 'gemini', 'grok', 'deepseek').
- *                   If not specified, the backend will use its default provider (typically 'perplexity').
- * @param config - Optional API configuration (defaults to /api)
- * @returns Promise with the result containing success status and content or error
- * 
- * @example
- * ```typescript
- * // With explicit provider
- * const result = await callBackendAI(idToken, 'Analyze glucose trends...', 'gemini');
- * 
- * // Using default provider
- * const result = await callBackendAI(idToken, 'Analyze glucose trends...');
- * 
- * if (result.success) {
- *   console.log('AI response:', result.content);
- * } else {
- *   console.error('Error:', result.error);
- * }
- * ```
+ * Send a prompt to the backend AI query endpoint and return a structured result.
+ *
+ * If `provider` is omitted, the backend will use its configured default provider.
+ *
+ * @param idToken - MSAL ID token used for Authorization header
+ * @param prompt - The AI prompt to send to the backend
+ * @param provider - Optional provider identifier (e.g., 'perplexity', 'gemini', 'grok', 'deepseek'); when omitted the backend chooses the default
+ * @param config - Optional API configuration; defaults to the module's default (baseUrl '/api')
+ * @returns A `BackendAIResult` containing `success` and, on success, `content` and `provider`; on failure, `error`, `errorType`, and optionally `statusCode`
  */
 export async function callBackendAI(
   idToken: string,

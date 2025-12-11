@@ -68,6 +68,11 @@ function convertDatasetToArray(reports: DailyReport[]): (string | number)[][] {
   return [headers, ...rows];
 }
 
+/**
+ * Renders the GlucoseInsulinTab UI for performing AI-driven correlation analysis between glucose ranges and insulin doses, including controls, status, optional prompt and dataset views, and analysis results.
+ *
+ * @returns A JSX element containing analysis controls (Analyze button, helper text, cooldown indicator), optional "View AI Prompt" and dataset accordions, and components showing analysis loading, errors, and results.
+ */
 export function GlucoseInsulinTab({
   loading,
   hasApiKey,

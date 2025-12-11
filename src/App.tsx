@@ -42,10 +42,9 @@ import { extractZipMetadata } from './features/dataUpload/utils'
 import { loadCachedFiles } from './utils/fileCache'
 
 /**
- * Main application component that renders the app shell and manages global state, routing, and user settings.
+ * Application root component that renders the app shell and manages global state, routing, and user settings.
  *
- * Responsible for page navigation and rendering, theme and UI settings, file upload and selection state, AI analysis results,
- * toast notifications, cookie consent, demo data loading, and cloud settings sync for authenticated users.
+ * Manages theme, file uploads and selection, AI analysis results, toast notifications, cookie consent, demo data loading, and cloud settings synchronization for authenticated users.
  *
  * @returns The root React element for the application UI.
  */

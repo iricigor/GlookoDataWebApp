@@ -35,6 +35,26 @@ import {
 import type { PumpSettingsTabProps } from '../types';
 import type { GlucoseReading, InsulinReading } from '../../../types';
 
+/**
+ * Renders the Pump Settings analysis tab UI and coordinates AI-driven verification of pump settings from provided datasets.
+ *
+ * Displays UI controls to start analysis, handles dataset size fallbacks (full → 28 days → 7 days), routes requests differently for Pro users, and shows analysis status, errors, and results.
+ *
+ * @param loading - Whether underlying data is still loading
+ * @param hasApiKey - Whether a valid local API key is available for non-Pro flows
+ * @param activeProvider - Selected AI provider identifier (e.g., 'perplexity', 'grok', 'deepseek', or provider for Gemini)
+ * @param showGeekStats - When true, shows developer-facing debug accordions (prompt and dataset summary)
+ * @param mealTimingDatasets - Object containing input datasets: `cgmReadings`, `bolusReadings`, and `basalReadings`
+ * @param responseLanguage - Target language for the AI response
+ * @param glucoseUnit - Glucose unit used for formatting and prompt (e.g., 'mg/dL' or 'mmol/L')
+ * @param perplexityApiKey - API key for the Perplexity provider (used for non-Pro users)
+ * @param geminiApiKey - API key for Gemini provider (used for non-Pro users)
+ * @param grokApiKey - API key for the Grok provider (used for non-Pro users)
+ * @param deepseekApiKey - API key for the Deepseek provider (used for non-Pro users)
+ * @param isProUser - When true, routes AI requests through the backend and omits a per-call API key
+ * @param idToken - Optional identity token forwarded for backend-routed (Pro) requests
+ * @returns The rendered Pump Settings tab React element
+ */
 export function PumpSettingsTab({
   loading,
   hasApiKey,
