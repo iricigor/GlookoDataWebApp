@@ -18,7 +18,7 @@ import {
 } from '@fluentui/react-components';
 import { TableContainer } from '../../../components/TableContainer';
 import { generateGlucoseInsulinPrompt } from '../../../features/aiAnalysis/prompts';
-import { callAIApi } from '../../../utils/api';
+import { callAIWithRouting } from '../../../utils/api';
 import { convertDailyReportsToCSV, calculatePercentage } from '../../../utils/data';
 import { base64Encode } from '../../../utils/formatting';
 import { useAIAnalysisStyles } from '../styles';
@@ -79,6 +79,8 @@ export function GlucoseInsulinTab({
   perplexityApiKey,
   geminiApiKey,
   grokApiKey,
+  isProUser,
+  idToken,
 }: GlucoseInsulinTabProps) {
   const styles = useAIAnalysisStyles();
   
@@ -104,7 +106,12 @@ export function GlucoseInsulinTab({
   }, [combinedDataset.length, reset]);
 
   const handleAnalyzeClick = async () => {
-    if (!activeProvider || !hasApiKey || combinedDataset.length === 0) {
+    if (!activeProvider || combinedDataset.length === 0) {
+      return;
+    }
+
+    // Pro users don't need API keys since they use backend
+    if (!isProUser && !hasApiKey) {
       return;
     }
 
@@ -132,12 +139,16 @@ export function GlucoseInsulinTab({
       // Generate the prompt with the base64 CSV data
       const prompt = generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, activeProvider);
 
-      // Get the appropriate API key for the active provider
+      // Get the appropriate API key for the active provider (only needed for non-Pro users)
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
                       activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
-      // Call the AI API using the selected provider
-      const result = await callAIApi(activeProvider, apiKey, prompt);
+      // Call the AI API - it will automatically route to backend for Pro users
+      const result = await callAIWithRouting(activeProvider, prompt, {
+        apiKey: isProUser ? undefined : apiKey,
+        idToken: idToken || undefined,
+        isProUser,
+      });
 
       if (result.success && result.content) {
         completeAnalysis(result.content);

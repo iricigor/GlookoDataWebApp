@@ -11,7 +11,7 @@ import {
   AccordionPanel,
 } from '@fluentui/react-components';
 import { generateMealTimingPrompt } from '../../../features/aiAnalysis/prompts';
-import { callAIApi, isRequestTooLargeError } from '../../../utils/api';
+import { callAIWithRouting, isRequestTooLargeError } from '../../../utils/api';
 import { 
   convertGlucoseReadingsToCSV, 
   convertBolusReadingsToCSV, 
@@ -46,6 +46,8 @@ export function MealTimingTab({
   perplexityApiKey,
   geminiApiKey,
   grokApiKey,
+  isProUser,
+  idToken,
 }: MealTimingTabProps) {
   const styles = useAIAnalysisStyles();
   const { cgmReadings, bolusReadings, basalReadings } = mealTimingDatasets;
@@ -93,16 +95,25 @@ export function MealTimingTab({
     // Generate the prompt with the base64 CSV data
     const prompt = generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, activeProvider!);
 
-    // Get the appropriate API key for the active provider
+    // Get the appropriate API key for the active provider (only needed for non-Pro users)
     const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
                     activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
-    // Call the AI API using the selected provider
-    return await callAIApi(activeProvider!, apiKey, prompt);
+    // Call the AI API - it will automatically route to backend for Pro users
+    return await callAIWithRouting(activeProvider!, prompt, {
+      apiKey: isProUser ? undefined : apiKey,
+      idToken: idToken || undefined,
+      isProUser,
+    });
   };
 
   const handleAnalyzeClick = async () => {
-    if (!activeProvider || !hasApiKey || !hasData) {
+    if (!activeProvider || !hasData) {
+      return;
+    }
+
+    // Pro users don't need API keys since they use backend
+    if (!isProUser && !hasApiKey) {
       return;
     }
 

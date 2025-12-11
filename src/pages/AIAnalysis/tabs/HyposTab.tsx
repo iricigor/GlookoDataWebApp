@@ -21,7 +21,7 @@ import {
 import { InfoRegular } from '@fluentui/react-icons';
 import { TableContainer } from '../../../components/TableContainer';
 import { generateHyposPrompt } from '../../../features/aiAnalysis/prompts';
-import { callAIApi, isRequestTooLargeError } from '../../../utils/api';
+import { callAIWithRouting, isRequestTooLargeError } from '../../../utils/api';
 import { convertHypoEventsToCSV, convertHypoSummariesToCSV, convertHypoEventSummaryToCSV } from '../../../utils/data';
 import { base64Encode } from '../../../utils/formatting';
 import { formatDateTime, formatTime, formatGlucoseNumber, formatNumber } from '../../../utils/formatting/formatters';
@@ -110,6 +110,8 @@ export function HyposTab({
   geminiApiKey,
   grokApiKey,
   deepseekApiKey,
+  isProUser,
+  idToken,
 }: HyposTabProps) {
   const styles = useAIAnalysisStyles();
   const hasData = hypoDatasets !== null && hypoDatasets.dailySummaries.length > 0;
@@ -165,12 +167,21 @@ export function HyposTab({
       activeProvider === 'deepseek' ? deepseekApiKey :
       geminiApiKey;
 
-    // Call the AI API using the selected provider
-    return await callAIApi(activeProvider!, apiKey, prompt);
+    // Call the AI API - it will automatically route to backend for Pro users
+    return await callAIWithRouting(activeProvider!, prompt, {
+      apiKey: isProUser ? undefined : apiKey,
+      idToken: idToken || undefined,
+      isProUser,
+    });
   };
 
   const handleAnalyzeClick = async () => {
-    if (!activeProvider || !hasApiKey || !hasData || !hypoDatasets) {
+    if (!activeProvider || !hasData || !hypoDatasets) {
+      return;
+    }
+
+    // Pro users don't need API keys since they use backend
+    if (!isProUser && !hasApiKey) {
       return;
     }
 
