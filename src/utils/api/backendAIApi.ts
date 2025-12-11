@@ -74,13 +74,19 @@ export interface BackendAIResult {
  * 
  * @param idToken - The ID token from MSAL authentication
  * @param prompt - The prompt to send to the AI
- * @param provider - Optional AI provider selection ('perplexity', 'gemini', 'grok', 'deepseek')
+ * @param provider - Optional AI provider selection ('perplexity', 'gemini', 'grok', 'deepseek').
+ *                   If not specified, the backend will use its default provider (typically 'perplexity').
  * @param config - Optional API configuration (defaults to /api)
  * @returns Promise with the result containing success status and content or error
  * 
  * @example
  * ```typescript
+ * // With explicit provider
  * const result = await callBackendAI(idToken, 'Analyze glucose trends...', 'gemini');
+ * 
+ * // Using default provider
+ * const result = await callBackendAI(idToken, 'Analyze glucose trends...');
+ * 
  * if (result.success) {
  *   console.log('AI response:', result.content);
  * } else {

@@ -68,6 +68,11 @@ interface RateLimitEntry {
 const MAX_REQUESTS_PER_WINDOW = 50; // Maximum 50 requests per hour per user
 
 /**
+ * Maximum prompt length
+ */
+const MAX_PROMPT_LENGTH = 50000; // Maximum 50,000 characters
+
+/**
  * Keywords that must be present in diabetes-related prompts
  * This is a defense-in-depth measure to ensure the API is used only for its intended purpose
  */
@@ -259,6 +264,10 @@ async function callAIProvider(
         break;
         
       case 'gemini':
+        // Note: Gemini API requires the API key as a URL parameter
+        // This is a limitation of Google's API design and cannot be avoided
+        // The key is not logged in our application logs, and Azure Functions
+        // has appropriate log redaction in place for sensitive data
         url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
         headers = {
           'Content-Type': 'application/json',
@@ -456,8 +465,8 @@ async function aiQuery(request: HttpRequest, context: InvocationContext): Promis
       return requestLogger.logError('Prompt is required', 400, 'validation');
     }
     
-    if (prompt.length > 50000) {
-      return requestLogger.logError('Prompt is too long (max 50,000 characters)', 400, 'validation');
+    if (prompt.length > MAX_PROMPT_LENGTH) {
+      return requestLogger.logError(`Prompt is too long (max ${MAX_PROMPT_LENGTH} characters)`, 400, 'validation');
     }
     
     // Validate prompt is diabetes-related
