@@ -159,8 +159,9 @@ Example error response:
 
 ## Prompt Validation
 
-All prompts must contain at least one diabetes-related keyword to prevent abuse:
+All prompts must contain at least **2 diabetes-related keywords** to prevent abuse:
 
+**Valid keywords:**
 - glucose, blood sugar, bg
 - insulin, diabetes, diabetic
 - cgm, pump
@@ -168,6 +169,16 @@ All prompts must contain at least one diabetes-related keyword to prevent abuse:
 - hypo, hyper, glycemia
 - a1c, hba1c
 - carb, carbohydrate
+
+**Example valid prompts:**
+- "Analyze glucose trends with insulin doses" ✅ (2 keywords: glucose, insulin)
+- "CGM data shows high BG levels" ✅ (2 keywords: cgm, bg)
+- "Review basal and bolus insulin settings" ✅ (3 keywords: basal, bolus, insulin)
+
+**Example invalid prompts:**
+- "Analyze this data" ❌ (0 keywords)
+- "Check glucose levels" ❌ (1 keyword, needs at least 2)
+- "What's the weather like?" ❌ (0 keywords)
 
 ## Security Features
 

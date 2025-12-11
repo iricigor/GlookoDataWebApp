@@ -97,12 +97,20 @@ const DIABETES_KEYWORDS = [
 ];
 
 /**
+ * Minimum number of diabetes keywords required in a prompt
+ * This provides stricter validation to ensure prompts are genuinely diabetes-related
+ */
+const MIN_DIABETES_KEYWORDS_REQUIRED = 2;
+
+/**
  * Validate that the prompt is related to diabetes
  * This is a security measure to prevent abuse of the API for non-diabetes purposes
+ * Requires at least MIN_DIABETES_KEYWORDS_REQUIRED diabetes keywords to be present
  */
 function validateDiabetesPrompt(prompt: string): boolean {
   const lowerPrompt = prompt.toLowerCase();
-  return DIABETES_KEYWORDS.some(keyword => lowerPrompt.includes(keyword));
+  const matchCount = DIABETES_KEYWORDS.filter(keyword => lowerPrompt.includes(keyword)).length;
+  return matchCount >= MIN_DIABETES_KEYWORDS_REQUIRED;
 }
 
 /**
@@ -264,13 +272,12 @@ async function callAIProvider(
         break;
         
       case 'gemini':
-        // Note: Gemini API requires the API key as a URL parameter
-        // This is a limitation of Google's API design and cannot be avoided
-        // The key is not logged in our application logs, and Azure Functions
-        // has appropriate log redaction in place for sensitive data
-        url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
+        // Gemini API supports authentication via x-goog-api-key header
+        // This is more secure than URL parameters as it prevents key exposure in logs
+        url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`;
         headers = {
           'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey,
         };
         requestBody = {
           contents: [
@@ -473,7 +480,7 @@ async function aiQuery(request: HttpRequest, context: InvocationContext): Promis
     if (!validateDiabetesPrompt(prompt)) {
       requestLogger.logInfo('Non-diabetes prompt rejected', { userId });
       return requestLogger.logError(
-        'This endpoint is only for diabetes-related queries. Please ensure your prompt contains relevant medical terms.',
+        `This endpoint is only for diabetes-related queries. Please ensure your prompt contains at least ${MIN_DIABETES_KEYWORDS_REQUIRED} relevant medical terms.`,
         400,
         'validation'
       );
