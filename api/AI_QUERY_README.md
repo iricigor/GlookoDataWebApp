@@ -152,7 +152,7 @@ Example error response:
 
 ## Rate Limiting
 
-- **Window**: 1 hour (sliding window based on YYYY-MM-DD-HH format)
+- **Window**: 1 hour (fixed window based on YYYY-MM-DD-HH format)
 - **Limit**: 50 requests per user per window
 - **Storage**: Azure Table Storage (AIQueryLogs table)
 - **Enforcement**: Per user (based on userId from token)
