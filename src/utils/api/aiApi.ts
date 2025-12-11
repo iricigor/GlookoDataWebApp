@@ -244,3 +244,91 @@ export async function verifyApiKey(
       return { valid: false, error: `Unknown provider: ${provider}` };
   }
 }
+
+/**
+ * Call AI API with automatic routing between backend (Pro users) and client-side (regular users)
+ * 
+ * For Pro users with an ID token, this function routes the request through the backend
+ * where API keys are securely managed in Azure Key Vault. For regular users, it uses
+ * the client-side API call with their personal API key.
+ * 
+ * @param provider - The AI provider to use ('perplexity', 'gemini', 'grok', or 'deepseek')
+ * @param prompt - The prompt to send to the AI
+ * @param options - Call options including API key, ID token, and Pro user status
+ * @returns Promise with the result containing success status and content or error
+ * 
+ * @example
+ * ```typescript
+ * // Pro user call (backend)
+ * const result = await callAIWithRouting('gemini', prompt, {
+ *   isProUser: true,
+ *   idToken: 'eyJ0...',
+ * });
+ * 
+ * // Regular user call (client-side)
+ * const result = await callAIWithRouting('gemini', prompt, {
+ *   apiKey: 'AIza...',
+ * });
+ * ```
+ */
+export async function callAIWithRouting(
+  provider: AIProvider,
+  prompt: string,
+  options: {
+    apiKey?: string;
+    idToken?: string;
+    isProUser?: boolean;
+  }
+): Promise<AIResult> {
+  const { apiKey, idToken, isProUser } = options;
+  
+  // If user is a Pro user with an ID token, use backend API
+  if (isProUser && idToken) {
+    // Dynamic import to avoid circular dependencies
+    const { callBackendAI } = await import('./backendAIApi');
+    
+    const result = await callBackendAI(idToken, prompt, provider);
+    
+    // Convert backend result to AIResult format
+    // Map backend error types to standard AI error types
+    let mappedErrorType: 'unauthorized' | 'network' | 'api' | 'unknown' = 'unknown';
+    if (result.errorType) {
+      switch (result.errorType) {
+        case 'unauthorized':
+          mappedErrorType = 'unauthorized';
+          break;
+        case 'network':
+          mappedErrorType = 'network';
+          break;
+        case 'forbidden':
+        case 'rate_limit':
+        case 'validation':
+        case 'provider':
+        case 'infrastructure':
+          mappedErrorType = 'api';
+          break;
+        default:
+          mappedErrorType = 'unknown';
+      }
+    }
+    
+    return {
+      success: result.success,
+      content: result.content,
+      error: result.error,
+      errorType: mappedErrorType,
+    };
+  }
+  
+  // Otherwise, use client-side API call with user's API key
+  if (!apiKey) {
+    return {
+      success: false,
+      error: 'API key is required for non-Pro users',
+      errorType: 'api',
+    };
+  }
+  
+  return callAIApi(provider, apiKey, prompt);
+}
+

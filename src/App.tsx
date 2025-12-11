@@ -31,6 +31,7 @@ import { useActiveAIProvider } from './hooks/useActiveAIProvider'
 import { useInsulinDuration } from './hooks/useInsulinDuration'
 import { useCookieConsent } from './hooks/useCookieConsent'
 import { useAuth } from './hooks/useAuth'
+import { useProUserCheck } from './hooks/useProUserCheck'
 import { useUserSettings } from './hooks/useUserSettings'
 import { useDayNightShading } from './hooks/useDayNightShading'
 import { useGeekStats } from './hooks/useGeekStats'
@@ -55,6 +56,9 @@ function App() {
   
   // Authentication state
   const { isLoggedIn, idToken, userEmail } = useAuth()
+  
+  // Pro user check
+  const { isProUser } = useProUserCheck(isLoggedIn ? idToken : null)
   
   // Settings (stored locally in browser cookies)
   const { theme, themeMode, setThemeMode } = useTheme()
@@ -420,6 +424,8 @@ function App() {
             showGeekStats={showGeekStats}
             existingAnalysis={currentAIAnalysis}
             onAnalysisComplete={handleAIAnalysisComplete}
+            isProUser={isProUser}
+            idToken={idToken}
           />
         )
       case 'settings':

@@ -40,7 +40,9 @@ export function AIAnalysis({
   glucoseUnit,
   showGeekStats,
   existingAnalysis, 
-  onAnalysisComplete 
+  onAnalysisComplete,
+  isProUser,
+  idToken,
 }: AIAnalysisProps) {
   const styles = useAIAnalysisStyles();
   const { t } = useTranslation('aiAnalysis');
@@ -192,6 +194,8 @@ export function AIAnalysis({
             selectedFile={selectedFile}
             onAnalysisComplete={onAnalysisComplete}
             existingAnalysis={existingAnalysis}
+            isProUser={isProUser}
+            idToken={idToken}
           />
         );
       
@@ -208,6 +212,8 @@ export function AIAnalysis({
             perplexityApiKey={perplexityApiKey}
             geminiApiKey={geminiApiKey}
             grokApiKey={grokApiKey}
+            isProUser={isProUser}
+            idToken={idToken}
           />
         );
       
@@ -224,6 +230,8 @@ export function AIAnalysis({
             perplexityApiKey={perplexityApiKey}
             geminiApiKey={geminiApiKey}
             grokApiKey={grokApiKey}
+            isProUser={isProUser}
+            idToken={idToken}
           />
         );
       
@@ -241,6 +249,8 @@ export function AIAnalysis({
             geminiApiKey={geminiApiKey}
             grokApiKey={grokApiKey}
             deepseekApiKey={deepseekApiKey}
+            isProUser={isProUser}
+            idToken={idToken}
           />
         );
       
@@ -258,6 +268,8 @@ export function AIAnalysis({
             geminiApiKey={geminiApiKey}
             grokApiKey={grokApiKey}
             deepseekApiKey={deepseekApiKey}
+            isProUser={isProUser}
+            idToken={idToken}
           />
         );
       

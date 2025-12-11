@@ -11,7 +11,7 @@ import {
   AccordionPanel,
 } from '@fluentui/react-components';
 import { generateTimeInRangePrompt } from '../../../features/aiAnalysis/prompts';
-import { callAIApi } from '../../../utils/api';
+import { callAIWithRouting } from '../../../utils/api';
 import { useGlucoseThresholds } from '../../../hooks/useGlucoseThresholds';
 import { useAIAnalysisStyles } from '../styles';
 import { useAnalysisState } from '../useAnalysisState';
@@ -40,6 +40,8 @@ export function TimeInRangeTab({
   selectedFile,
   onAnalysisComplete,
   existingAnalysis,
+  isProUser,
+  idToken,
 }: TimeInRangeTabProps) {
   const styles = useAIAnalysisStyles();
   const { thresholds } = useGlucoseThresholds();
@@ -78,7 +80,12 @@ export function TimeInRangeTab({
   }, [selectedFile, reset]);
 
   const handleAnalyzeClick = async () => {
-    if (!activeProvider || !hasApiKey || inRangePercentage === null || !glucoseStats) {
+    if (!activeProvider || inRangePercentage === null || !glucoseStats) {
+      return;
+    }
+
+    // Pro users don't need API keys since they use backend
+    if (!isProUser && !hasApiKey) {
       return;
     }
 
@@ -100,12 +107,16 @@ export function TimeInRangeTab({
       // Generate the prompt with the glucose stats and thresholds
       const prompt = generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, activeProvider);
 
-      // Get the appropriate API key for the active provider
+      // Get the appropriate API key for the active provider (only needed for non-Pro users)
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
                       activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
-      // Call the AI API using the selected provider
-      const result = await callAIApi(activeProvider, apiKey, prompt);
+      // Call the AI API - it will automatically route to backend for Pro users
+      const result = await callAIWithRouting(activeProvider, prompt, {
+        apiKey: isProUser ? undefined : apiKey,
+        idToken: idToken || undefined,
+        isProUser,
+      });
 
       if (result.success && result.content) {
         completeAnalysis(result.content);
