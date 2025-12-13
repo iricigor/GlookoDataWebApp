@@ -49,7 +49,7 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
     // 404 means user is not a pro user
     if (isNotFoundError(error)) {
       // Distinguish entity-level (EntityNotFound) from table-level (TableNotFound) 404s
-      const code = (error && typeof error === 'object' && 'code' in error) ? String((error as any).code) : undefined;
+      const code = (error && typeof error === 'object' && 'code' in error) ? String((error as { code: unknown }).code) : undefined;
       if (code === 'TableNotFound') {
         throw error; // let handler map to 503
       }
@@ -91,6 +91,7 @@ async function countLoggedInUsers(
   // Count all entities
   // For large datasets, consider implementing a maximum count limit
   // or using a separate counter table for better performance
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   for await (const _entity of entities) {
     count++;
     
