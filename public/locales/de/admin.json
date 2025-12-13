@@ -14,7 +14,6 @@
       "proUsers": "Pro-Benutzer",
       "apiCalls": "API-Aufrufe",
       "apiErrors": "API-Fehler",
-      "websiteVisits": "Website-Besuche",
       "placeholderNote": "Statistiken werden verfügbar sein, sobald die API-Integration abgeschlossen ist"
     }
   }

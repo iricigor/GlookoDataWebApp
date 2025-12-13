@@ -188,7 +188,6 @@ const enTranslations = {
         "proUsers": "Pro Users",
         "apiCalls": "API Calls",
         "apiErrors": "API Errors",
-        "websiteVisits": "Website Visits",
         "placeholderNote": "Statistics will be available once API integration is complete"
       }
     },
