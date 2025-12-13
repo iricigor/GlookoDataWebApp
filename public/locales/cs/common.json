@@ -28,6 +28,10 @@
   "appTitle": "Glooko Data Web App",
   "brandName": "Glooko Insights",
   "brandAltText": "Logo Glooko Insights",
+  "environment": {
+    "dev": "dev",
+    "staging": "stage"
+  },
   "footer": {
     "version": "Verze {{version}}"
   }

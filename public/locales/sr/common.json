@@ -28,6 +28,10 @@
   "appTitle": "Glooko Web Aplikacija za Podatke",
   "brandName": "Glooko Insights",
   "brandAltText": "Glooko Insights Logo",
+  "environment": {
+    "dev": "dev",
+    "staging": "stage"
+  },
   "footer": {
     "version": "Verzija {{version}}"
   }
