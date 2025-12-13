@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>767 Add AIQueryLogs table to deployment scripts</summary>
+
+[#767](../../pull/767) Add AIQueryLogs table to deployment scripts
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>757 Add blank Admin page accessible only via direct URL</summary>
 
 [#757](../../pull/757) Add blank Admin page accessible only via direct URL
