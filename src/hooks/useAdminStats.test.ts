@@ -140,8 +140,8 @@ describe('useAdminStats', () => {
     });
 
     const { result, rerender } = renderHook(
-      ({ token }) => useAdminStats(token, true),
-      { initialProps: { token: 'test-token' } }
+      ({ token }: { token: string | null }) => useAdminStats(token, true),
+      { initialProps: { token: 'test-token' as string | null } }
     );
     
     await waitFor(() => {
@@ -163,8 +163,8 @@ describe('useAdminStats', () => {
       .mockResolvedValueOnce({ success: true, count: 100 });
 
     const { result, rerender } = renderHook(
-      ({ token }) => useAdminStats(token, true),
-      { initialProps: { token: 'token1' } }
+      ({ token }: { token: string | null }) => useAdminStats(token, true),
+      { initialProps: { token: 'token1' as string | null } }
     );
     
     await waitFor(() => {
@@ -188,8 +188,8 @@ describe('useAdminStats', () => {
     });
 
     const { result, rerender } = renderHook(
-      ({ token }) => useAdminStats(token, true),
-      { initialProps: { token: 'test-token' } }
+      ({ token }: { token: string | null }) => useAdminStats(token, true),
+      { initialProps: { token: 'test-token' as string | null } }
     );
     
     await waitFor(() => {
