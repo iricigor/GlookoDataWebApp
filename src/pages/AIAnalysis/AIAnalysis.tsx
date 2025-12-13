@@ -318,7 +318,8 @@ export function AIAnalysis({
             {t('aiAnalysis.placeholders.noFile')}
           </Text>
         </div>
-      ) : !hasApiKey ? (
+      ) : !(hasApiKey || isProUser) ? (
+        // Show message if no API key and not a Pro user
         <div className={styles.placeholderContainer}>
           <div className={styles.icon}>
             <BrainCircuitRegular />

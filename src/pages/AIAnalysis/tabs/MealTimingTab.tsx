@@ -235,7 +235,7 @@ export function MealTimingTab({
       {/* Button container */}
       <div className={styles.buttonContainer}>
         <AnalysisButton
-          disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
+          disabled={!(hasApiKey || isProUser) || analyzing || (cooldownActive && cooldownSeconds > 0)}
           analyzing={analyzing}
           hasResponse={!!response}
           ready={ready}

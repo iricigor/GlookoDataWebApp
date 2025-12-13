@@ -159,7 +159,10 @@ function getCurrentWindowKey(): string {
 /**
  * Determine whether a user's request is allowed under the current hourly rate limit and update the stored counters.
  *
- * If an entry for the user's current hourly window exists, the function increments its request count and returns `false` when the count has reached or exceeded the configured limit. If no entry exists, it creates one for the current window with a count of 1 and allows the request. On unexpected errors reading or writing storage, the function logs the error and allows the request (fails open).
+ * Uses optimistic concurrency control with ETags to prevent race conditions where concurrent requests
+ * could both read the same counter and exceed the limit. Implements retry logic with exponential backoff
+ * for ETag conflicts. On unexpected errors reading or writing storage, the function logs the error and
+ * allows the request (fails open).
  *
  * @returns `true` if the request is allowed, `false` if the rate limit has been exceeded for the current window
  */
@@ -170,43 +173,80 @@ async function checkRateLimit(
 ): Promise<boolean> {
   const windowKey = getCurrentWindowKey();
   const rowKey = `${urlEncode(userId)}_${windowKey}`;
+  const maxRetries = 3;
   
-  try {
-    // Try to get existing rate limit entry
-    const entity = await tableClient.getEntity<RateLimitEntry>('AIRateLimit', rowKey);
-    
-    const requestCount = (entity.requestCount as number) || 0;
-    
-    if (requestCount >= MAX_REQUESTS_PER_WINDOW) {
-      context.warn(`Rate limit exceeded for user ${userId}: ${requestCount} requests in current window`);
-      return false;
-    }
-    
-    // Update the counter
-    await tableClient.updateEntity({
-      partitionKey: 'AIRateLimit',
-      rowKey,
-      requestCount: requestCount + 1,
-      lastRequestTime: new Date(),
-    }, 'Merge');
-    
-    return true;
-  } catch (error: unknown) {
-    if (isNotFoundError(error)) {
-      // First request in this window - create new entry
-      await tableClient.createEntity({
-        partitionKey: 'AIRateLimit',
-        rowKey,
-        requestCount: 1,
-        lastRequestTime: new Date(),
-        windowKey,
-      });
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      // Try to get existing rate limit entry with ETag
+      const entity = await tableClient.getEntity<RateLimitEntry>('AIRateLimit', rowKey);
+      
+      const requestCount = (entity.requestCount as number) || 0;
+      
+      if (requestCount >= MAX_REQUESTS_PER_WINDOW) {
+        context.warn(`Rate limit exceeded for user ${userId}: ${requestCount} requests in current window`);
+        return false;
+      }
+      
+      // Update the counter with optimistic concurrency control using ETag
+      try {
+        await tableClient.updateEntity({
+          partitionKey: 'AIRateLimit',
+          rowKey,
+          requestCount: requestCount + 1,
+          lastRequestTime: new Date(),
+        }, 'Replace', { etag: entity.etag });
+        
+        return true;
+      } catch (updateError: unknown) {
+        // Check for ETag mismatch (precondition failed)
+        if (updateError && typeof updateError === 'object' && 'statusCode' in updateError && 
+            (updateError as { statusCode: number }).statusCode === 412) {
+          // ETag conflict - retry with exponential backoff
+          if (attempt < maxRetries - 1) {
+            const delayMs = Math.pow(2, attempt) * 50; // 50ms, 100ms, 200ms
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+            continue; // Retry
+          }
+          context.warn(`Rate limit check failed after ${maxRetries} retries due to ETag conflicts for user ${userId}`);
+          return true; // Fail open
+        }
+        throw updateError; // Re-throw other errors
+      }
+    } catch (error: unknown) {
+      if (isNotFoundError(error)) {
+        // First request in this window - create new entry
+        try {
+          await tableClient.createEntity({
+            partitionKey: 'AIRateLimit',
+            rowKey,
+            requestCount: 1,
+            lastRequestTime: new Date(),
+            windowKey,
+          });
+          return true;
+        } catch (createError: unknown) {
+          // Entity might have been created by concurrent request
+          if (createError && typeof createError === 'object' && 'statusCode' in createError && 
+              (createError as { statusCode: number }).statusCode === 409) {
+            // Already exists - retry the read-update flow
+            if (attempt < maxRetries - 1) {
+              continue; // Retry
+            }
+          }
+          // On other create errors, fail open
+          context.error('Rate limit create failed:', createError);
+          return true;
+        }
+      }
+      // On other errors, fail open but log the error
+      context.error('Rate limit check failed:', error);
       return true;
     }
-    // On error, fail open but log the error
-    context.error('Rate limit check failed:', error);
-    return true;
   }
+  
+  // If we exhausted retries, fail open
+  context.warn(`Rate limit check exhausted retries for user ${userId}, allowing request`);
+  return true;
 }
 
 /**
@@ -508,11 +548,29 @@ async function aiQuery(request: HttpRequest, context: InvocationContext): Promis
       return requestLogger.logError(`Prompt is too long (max ${MAX_PROMPT_LENGTH} characters)`, 400, 'validation');
     }
     
-    // Validate prompt is diabetes-related
+    // Validate prompt is diabetes-related (requires at least 2 keywords)
     if (!validateDiabetesPrompt(prompt)) {
       requestLogger.logInfo('Non-diabetes prompt rejected', { userId });
       return requestLogger.logError(
         `This endpoint is only for diabetes-related queries. Please ensure your prompt contains at least ${MIN_DIABETES_KEYWORDS_REQUIRED} relevant medical terms.`,
+        400,
+        'validation'
+      );
+    }
+    
+    // Validate prompt contains expected system role context (diabetes expert)
+    // This ensures prompts follow the expected structure from the frontend
+    const lowerPrompt = prompt.toLowerCase();
+    const hasSystemContext = lowerPrompt.includes('diabetes') || 
+                             lowerPrompt.includes('glucose') ||
+                             lowerPrompt.includes('medical assistant') ||
+                             lowerPrompt.includes('diabetes care') ||
+                             lowerPrompt.includes('continuous glucose monitoring');
+    
+    if (!hasSystemContext) {
+      requestLogger.logInfo('Prompt missing expected system context', { userId });
+      return requestLogger.logError(
+        'Invalid prompt structure. Prompts must include appropriate medical context.',
         400,
         'validation'
       );

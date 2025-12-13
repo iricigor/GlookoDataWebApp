@@ -105,8 +105,9 @@ export function TimeInRangeTab({
       return;
     }
 
-    // Pro users don't need API keys since they use backend
-    if (!isProUser && !hasApiKey) {
+    // Pro users don't need API keys since they use backend, OR they have their own keys
+    const hasRequiredAuth = isProUser || hasApiKey;
+    if (!hasRequiredAuth) {
       return;
     }
 
@@ -184,7 +185,7 @@ export function TimeInRangeTab({
       {/* Button container */}
       <div className={styles.buttonContainer}>
         <AnalysisButton
-          disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
+          disabled={!(hasApiKey || isProUser) || analyzing || (cooldownActive && cooldownSeconds > 0)}
           analyzing={analyzing}
           hasResponse={!!response}
           ready={ready}

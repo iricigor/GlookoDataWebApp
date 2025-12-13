@@ -315,6 +315,8 @@ export interface CloudUserSettings {
   insulinDuration: number;
   /** Glucose thresholds */
   glucoseThresholds: GlucoseThresholds;
+  /** Pro user preference: use backend keys (true) or own keys (false). Default: true */
+  useProKeys?: boolean;
 }
 
 /**
