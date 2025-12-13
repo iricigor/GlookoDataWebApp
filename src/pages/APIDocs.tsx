@@ -109,6 +109,9 @@ const useStyles = makeStyles({
     ...shorthands.padding('48px'),
     ...shorthands.gap('12px'),
   },
+  link: {
+    color: tokens.colorBrandForeground1,
+  },
 })
 
 export function APIDocs() {
@@ -171,7 +174,7 @@ export function APIDocs() {
         <div className={styles.headerLeft}>
           <Text className={styles.title}>{t('apiDocs.title')}</Text>
           <Text className={styles.subtitle}>
-            {t('apiDocs.subtitle')} | <a href="#admin" style={{ color: tokens.colorBrandForeground1 }}>{t('apiDocs.adminPageLink')}</a>
+            {t('apiDocs.subtitle')} | <a href="#admin" className={styles.link}>{t('apiDocs.adminPageLink')}</a>
           </Text>
         </div>
         

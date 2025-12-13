@@ -122,6 +122,9 @@ const useStyles = makeStyles({
     fontStyle: 'italic',
     fontFamily: 'Segoe UI, sans-serif',
   },
+  link: {
+    color: tokens.colorBrandForeground1,
+  },
 });
 
 /**
@@ -298,7 +301,7 @@ export function Admin() {
       <div className={styles.header}>
         <Text className={styles.title}>{t('admin.title')}</Text>
         <Text className={styles.subtitle}>
-          {t('admin.subtitle')} | <a href="#api-docs" style={{ color: tokens.colorBrandForeground1 }}>{t('admin.apiDocsPageLink')}</a>
+          {t('admin.subtitle')} | <a href="#api-docs" className={styles.link}>{t('admin.apiDocsPageLink')}</a>
         </Text>
       </div>
 
