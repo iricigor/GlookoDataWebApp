@@ -36,6 +36,7 @@ import { useProUserCheck } from './hooks/useProUserCheck'
 import { useUserSettings } from './hooks/useUserSettings'
 import { useDayNightShading } from './hooks/useDayNightShading'
 import { useGeekStats } from './hooks/useGeekStats'
+import { useProKeys } from './hooks/useProKeys'
 import type { UploadedFile, AIAnalysisResult, CloudUserSettings } from './types'
 import type { AIProvider } from './utils/api'
 import { getProviderDisplayName } from './utils/api'
@@ -86,6 +87,9 @@ function App() {
   const { thresholds: glucoseThresholds, setThresholds: setGlucoseThresholds } = useGlucoseThresholds()
   const { showDayNightShading, setShowDayNightShading } = useDayNightShading()
   const { showGeekStats, setShowGeekStats } = useGeekStats()
+  
+  // Pro user API key preference (for Pro users only)
+  const [proKeysEnabled, setProKeysEnabled] = useProKeys()
   
   // Cookie consent management
   const { hasConsented, acknowledgeConsent } = useCookieConsent()
@@ -461,6 +465,9 @@ function App() {
           selectedProvider={selectedProvider}
           onSelectedProviderChange={setSelectedProvider}
           onProviderAutoSwitch={handleProviderAutoSwitch}
+          useProKeys={proKeysEnabled}
+          onUseProKeysChange={setProKeysEnabled}
+          isProUser={isProUser}
         />
       case 'api-docs':
         return <APIDocs />

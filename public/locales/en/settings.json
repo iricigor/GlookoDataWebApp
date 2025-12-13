@@ -151,6 +151,13 @@
     "proUsers": {
       "title": "Pro Users",
       "notEnabledMessage": "Pro Users features are not yet enabled. This feature is currently in development and will be available soon.",
+      "apiKeys": {
+        "title": "Pro AI Keys",
+        "description": "As a Pro User, you can choose to use our managed AI keys or continue using your own API keys.",
+        "switchLabel": "Use Pro AI Keys",
+        "usingProKeys": "Currently using Pro managed AI keys. You don't need to configure your own API keys in the AI Settings tab.",
+        "usingOwnKeys": "Currently using your own API keys. Configure them in the AI Settings tab."
+      },
       "benefits": {
         "title": "What Pro Users Get",
         "description": "Pro Users will get access to premium features that make using the AI analysis capabilities easier and more cost-effective:",
