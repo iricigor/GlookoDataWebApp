@@ -18,6 +18,7 @@ import {
   AccordionPanel,
   Spinner,
   Tooltip,
+  Switch,
 } from '@fluentui/react-components';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -55,6 +56,9 @@ export function AISettingsTab({
   selectedProvider,
   onSelectedProviderChange,
   onProviderAutoSwitch,
+  useProKeys,
+  onUseProKeysChange,
+  isProUser,
 }: AISettingsTabProps) {
   const { t } = useTranslation('settings');
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -381,6 +385,33 @@ export function AISettingsTab({
 
   return (
     <>
+      {/* Pro Keys Switch - Only visible for Pro users */}
+      {isProUser && (
+        <div className={styles.settingSection}>
+          <Title3 className={styles.sectionTitle}>{t('settings.proUsers.apiKeys.title')}</Title3>
+          <Divider className={styles.divider} />
+          <Text className={styles.settingDescription}>
+            {t('settings.proUsers.apiKeys.description')}
+          </Text>
+          <div className={styles.switchContainer}>
+            <Switch
+              checked={useProKeys}
+              onChange={(_, data) => onUseProKeysChange(data.checked)}
+              label={
+                <Label>
+                  {t('settings.proUsers.apiKeys.switchLabel')}
+                </Label>
+              }
+            />
+          </div>
+          <Text className={styles.settingDescription}>
+            {useProKeys
+              ? t('settings.proUsers.apiKeys.usingProKeys')
+              : t('settings.proUsers.apiKeys.usingOwnKeys')}
+          </Text>
+        </div>
+      )}
+
       <div className={styles.settingSection}>
         <Title3 className={styles.sectionTitle}>{t('settings.ai.title')}</Title3>
         <Divider className={styles.divider} />

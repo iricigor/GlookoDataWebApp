@@ -9,8 +9,6 @@ import {
   Title3,
   Link,
   Button,
-  Switch,
-  Label,
 } from '@fluentui/react-components';
 import { useTranslation } from 'react-i18next';
 import { PersonStarRegular } from '@fluentui/react-icons';
@@ -40,33 +38,6 @@ export function ProUsersTab({ styles, useProKeys, onUseProKeysChange, isProUser 
           {t('settings.proUsers.notEnabledMessage')}
         </Text>
       </div>
-
-      {/* Show Pro AI Key setting only for Pro users */}
-      {isProUser && (
-        <div className={styles.settingSection}>
-          <Title3 className={styles.sectionTitle}>{t('settings.proUsers.apiKeys.title')}</Title3>
-          <Divider className={styles.divider} />
-          <Text className={styles.settingDescription}>
-            {t('settings.proUsers.apiKeys.description')}
-          </Text>
-          <div className={styles.switchContainer}>
-            <Switch
-              checked={useProKeys}
-              onChange={(_, data) => onUseProKeysChange(data.checked)}
-              label={
-                <Label>
-                  {t('settings.proUsers.apiKeys.switchLabel')}
-                </Label>
-              }
-            />
-          </div>
-          <Text className={styles.settingDescription}>
-            {useProKeys
-              ? t('settings.proUsers.apiKeys.usingProKeys')
-              : t('settings.proUsers.apiKeys.usingOwnKeys')}
-          </Text>
-        </div>
-      )}
 
       <div className={styles.settingSection}>
         <Title3 className={styles.sectionTitle}>{t('settings.proUsers.benefits.title')}</Title3>

@@ -130,4 +130,10 @@ export interface AISettingsTabProps extends SettingsTabProps {
   onSelectedProviderChange: (provider: AIProvider | null) => void;
   /** Callback invoked when provider is auto-switched due to failed key verification */
   onProviderAutoSwitch?: (fromProvider: AIProvider, toProvider: AIProvider) => void;
+  /** Whether to use Pro backend keys (for Pro users only) */
+  useProKeys: boolean;
+  /** Callback invoked when useProKeys preference changes */
+  onUseProKeysChange: (value: boolean) => void;
+  /** Whether the current user is a Pro user */
+  isProUser: boolean;
 }

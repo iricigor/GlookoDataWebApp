@@ -234,6 +234,9 @@ export function Settings({
             selectedProvider={selectedProvider}
             onSelectedProviderChange={onSelectedProviderChange}
             onProviderAutoSwitch={onProviderAutoSwitch}
+            useProKeys={useProKeys}
+            onUseProKeysChange={onUseProKeysChange}
+            isProUser={isProUser}
           />
         );
       
