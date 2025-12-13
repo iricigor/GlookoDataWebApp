@@ -31,7 +31,7 @@ export function detectEnvironment(): Environment {
 
   // Staging: Azure Static Web Apps staging URLs
   // Pattern: something-something-###-###.region.#.azurestaticapps.net
-  if (hostname.includes('.azurestaticapps.net')) {
+  if (hostname.endsWith('.azurestaticapps.net')) {
     return 'staging';
   }
 
