@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>785 Make PR preview deployment non-blocking for merges</summary>
+
+[#785](../../pull/785) Make PR preview deployment non-blocking for merges
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>779 Add Pro user confirmation marker (✨) to AI responses</summary>
 
 [#779](../../pull/779) Add Pro user confirmation marker (✨) to AI responses
