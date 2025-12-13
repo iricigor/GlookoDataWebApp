@@ -177,7 +177,23 @@ const enTranslations = {
       "title": "Admin",
       "subtitle": "Administrative access area",
       "loginPrompt": "Please login to access administrative features",
-      "loginButton": "Login with Microsoft"
+      "loginButton": "Login with Microsoft",
+      "proRequired": "Pro User Access Required",
+      "proRequiredMessage": "This page is only accessible to Pro users. Please apply for Pro access to view administrative statistics and features.",
+      "applyForProButton": "Apply for Pro Access",
+      "applyForProLink": "https://github.com/iricigor/GlookoDataWebApp/issues/new?labels=pro-access-request&template=pro-access-request.md",
+      "statistics": {
+        "title": "System Statistics",
+        "loggedInUsers": "Logged In Users",
+        "proUsers": "Pro Users",
+        "apiCalls": "API Calls",
+        "apiErrors": "API Errors",
+        "websiteVisits": "Website Visits",
+        "placeholderNote": "Statistics will be available once API integration is complete"
+      }
+    },
+    "common": {
+      "loading": "Loading..."
     }
   }
 };
