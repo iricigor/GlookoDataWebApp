@@ -103,26 +103,24 @@ function convertSummariesToArray(summaries: DailyHypoSummary[]): (string | numbe
 }
 
 /**
- * Render the Hypos Tab UI for AI-powered hypoglycemia analysis, dataset overview, and interactive controls.
+ * Render the Hypos Tab UI for hypoglycemia analysis, data overview, AI analysis controls, and optional detailed tables.
  *
- * Renders overview statistics, LBGI explanation, tables of daily summaries and hypo events (when available),
- * and controls to trigger AI analysis. The component uses provided API keys or backend routing (when `isProUser` is true)
- * to call the AI service and handles dataset-size retries, cooldowns, and result state.
+ * Displays summary statistics and LBGI explanation, provides a control to trigger AI-powered analysis (using either
+ * supplied provider API keys or backend routing for Pro users), and optionally shows the generated AI prompt plus
+ * raw daily summaries and individual hypo events when `showGeekStats` is enabled.
  *
- * @param loading - Whether data is still loading
- * @param hasApiKey - Whether a client-side API key is available for the selected provider
+ * The analysis flow will retry with only daily summaries if the full dataset is too large, and will surface a warning
+ * toast if a backend Pro routing fallback to client keys occurs.
+ *
  * @param activeProvider - Selected AI provider identifier (e.g., 'perplexity', 'grok', 'deepseek', 'gemini')
- * @param showGeekStats - Whether to show raw prompt text and detailed data tables
- * @param hypoDatasets - Hypoglycemia datasets (daily summaries, events, overall stats) used for display and analysis
+ * @param showGeekStats - When true, reveals the AI prompt text panel and detailed CSV-exportable tables
+ * @param hypoDatasets - Hypoglycemia datasets used for display and analysis (daily summaries, events, overall stats)
  * @param responseLanguage - Language code used when generating the AI prompt
  * @param glucoseUnit - Glucose display unit used for prompts and formatting
- * @param perplexityApiKey - API key for Perplexity provider (when used)
- * @param geminiApiKey - API key for Gemini provider (when used)
- * @param grokApiKey - API key for Grok provider (when used)
- * @param deepseekApiKey - API key for DeepSeek provider (when used)
- * @param isProUser - When true, analysis requests are routed via the backend and do not require a client API key
+ * @param isProUser - When true, requests may be routed via the backend so a client API key is not required
  * @param idToken - Optional identity token forwarded to backend routing for Pro users
- * @returns The React element rendering the Hypos tab, including analysis controls, tables, and AI results
+ * @param useProKeys - When true for Pro users, backend routing is used without passing client API keys
+ * @returns The React element rendering the Hypos tab UI
  */
 export function HyposTab({
   loading,
