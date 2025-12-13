@@ -28,6 +28,10 @@ export interface AIAnalysisProps {
   showGeekStats: boolean;
   existingAnalysis?: AIAnalysisResult;
   onAnalysisComplete: (fileId: string, response: string, inRangePercentage: number) => void;
+  /** Whether the current user is a Pro user (for backend AI access) */
+  isProUser?: boolean;
+  /** ID token for Pro user backend API authentication */
+  idToken?: string | null;
 }
 
 /** State for a single AI analysis prompt */
@@ -79,6 +83,10 @@ export interface TimeInRangeTabProps extends TabContentProps {
   selectedFile?: UploadedFile;
   onAnalysisComplete: (fileId: string, response: string, inRangePercentage: number) => void;
   existingAnalysis?: AIAnalysisResult;
+  /** Whether the current user is a Pro user */
+  isProUser?: boolean;
+  /** ID token for Pro user backend API authentication */
+  idToken?: string | null;
 }
 
 /** Props for Glucose & Insulin tab */
@@ -89,6 +97,10 @@ export interface GlucoseInsulinTabProps extends TabContentProps {
   perplexityApiKey: string;
   geminiApiKey: string;
   grokApiKey: string;
+  /** Whether the current user is a Pro user */
+  isProUser?: boolean;
+  /** ID token for Pro user backend API authentication */
+  idToken?: string | null;
 }
 
 /** Props for Meal Timing tab */
@@ -99,6 +111,10 @@ export interface MealTimingTabProps extends TabContentProps {
   perplexityApiKey: string;
   geminiApiKey: string;
   grokApiKey: string;
+  /** Whether the current user is a Pro user */
+  isProUser?: boolean;
+  /** ID token for Pro user backend API authentication */
+  idToken?: string | null;
 }
 
 /** Props for Pump Settings tab */
@@ -110,6 +126,10 @@ export interface PumpSettingsTabProps extends TabContentProps {
   geminiApiKey: string;
   grokApiKey: string;
   deepseekApiKey: string;
+  /** Whether the current user is a Pro user */
+  isProUser?: boolean;
+  /** ID token for Pro user backend API authentication */
+  idToken?: string | null;
 }
 
 /** Props for Hypos tab */
@@ -121,4 +141,8 @@ export interface HyposTabProps extends TabContentProps {
   geminiApiKey: string;
   grokApiKey: string;
   deepseekApiKey: string;
+  /** Whether the current user is a Pro user */
+  isProUser?: boolean;
+  /** ID token for Pro user backend API authentication */
+  idToken?: string | null;
 }

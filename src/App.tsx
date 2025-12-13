@@ -31,6 +31,7 @@ import { useActiveAIProvider } from './hooks/useActiveAIProvider'
 import { useInsulinDuration } from './hooks/useInsulinDuration'
 import { useCookieConsent } from './hooks/useCookieConsent'
 import { useAuth } from './hooks/useAuth'
+import { useProUserCheck } from './hooks/useProUserCheck'
 import { useUserSettings } from './hooks/useUserSettings'
 import { useDayNightShading } from './hooks/useDayNightShading'
 import { useGeekStats } from './hooks/useGeekStats'
@@ -41,10 +42,9 @@ import { extractZipMetadata } from './features/dataUpload/utils'
 import { loadCachedFiles } from './utils/fileCache'
 
 /**
- * Main application component that renders the app shell and manages global state, routing, and user settings.
+ * Application root component that renders the app shell and manages global state, routing, and user settings.
  *
- * Responsible for page navigation and rendering, theme and UI settings, file upload and selection state, AI analysis results,
- * toast notifications, cookie consent, demo data loading, and cloud settings sync for authenticated users.
+ * Manages theme, file uploads and selection, AI analysis results, toast notifications, cookie consent, demo data loading, and cloud settings synchronization for authenticated users.
  *
  * @returns The root React element for the application UI.
  */
@@ -55,6 +55,9 @@ function App() {
   
   // Authentication state
   const { isLoggedIn, idToken, userEmail } = useAuth()
+  
+  // Pro user check
+  const { isProUser } = useProUserCheck(isLoggedIn ? idToken : null)
   
   // Settings (stored locally in browser cookies)
   const { theme, themeMode, setThemeMode } = useTheme()
@@ -420,6 +423,8 @@ function App() {
             showGeekStats={showGeekStats}
             existingAnalysis={currentAIAnalysis}
             onAnalysisComplete={handleAIAnalysisComplete}
+            isProUser={isProUser}
+            idToken={idToken}
           />
         )
       case 'settings':

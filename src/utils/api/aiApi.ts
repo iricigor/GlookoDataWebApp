@@ -205,27 +205,11 @@ export function getAvailableProviders(
 }
 
 /**
- * Verify if an API key is valid for the specified provider.
- * 
- * This function routes verification to the appropriate provider-specific
- * verification function. Each provider uses the most lightweight verification
- * method available:
- * - Gemini, Grok, DeepSeek: GET request to list models endpoint (no cost)
- * - Perplexity: Minimal chat completion with max_tokens=1 (minimal cost)
- * 
- * @param provider - The AI provider to verify the key for ('perplexity', 'gemini', 'grok', or 'deepseek')
+ * Verify an API key for the specified AI provider.
+ *
+ * @param provider - The AI provider to verify (`'perplexity'`, `'gemini'`, `'grok'`, or `'deepseek'`)
  * @param apiKey - The API key to verify
- * @returns Promise with the verification result containing valid status and optional error
- * 
- * @example
- * ```typescript
- * const result = await verifyApiKey('gemini', 'AIzaSy...');
- * if (result.valid) {
- *   console.log('API key is valid');
- * } else {
- *   console.error('Invalid key:', result.error);
- * }
- * ```
+ * @returns The verification result with `valid` set to `true` if the key is valid, otherwise `valid` is `false` and `error` may contain a message
  */
 export async function verifyApiKey(
   provider: AIProvider,
@@ -243,4 +227,79 @@ export async function verifyApiKey(
     default:
       return { valid: false, error: `Unknown provider: ${provider}` };
   }
+}
+
+/**
+ * Route a prompt to either the backend (for Pro users) or the client-side provider API.
+ *
+ * When `isProUser` is true and an `idToken` is provided, the request is forwarded to the backend
+ * where provider keys are managed; otherwise the call is performed client-side using the supplied `apiKey`.
+ *
+ * @param provider - The AI provider to use ('perplexity', 'gemini', 'grok', or 'deepseek')
+ * @param prompt - The prompt to send to the AI
+ * @param options - Call options
+ * @param options.apiKey - User's client-side API key (required for non‑Pro calls)
+ * @param options.idToken - ID token used to authenticate backend (Pro) requests
+ * @param options.isProUser - Set to true to route through the backend when `idToken` is provided
+ * @returns An AIResult object containing `success`, `content` on success, and `error` with `errorType` on failure
+ */
+export async function callAIWithRouting(
+  provider: AIProvider,
+  prompt: string,
+  options: {
+    apiKey?: string;
+    idToken?: string;
+    isProUser?: boolean;
+  }
+): Promise<AIResult> {
+  const { apiKey, idToken, isProUser } = options;
+  
+  // If user is a Pro user with an ID token, use backend API
+  if (isProUser && idToken) {
+    // Dynamic import to avoid circular dependencies
+    const { callBackendAI } = await import('./backendAIApi');
+    
+    const result = await callBackendAI(idToken, prompt, provider);
+    
+    // Convert backend result to AIResult format
+    // Map backend error types to standard AI error types
+    let mappedErrorType: 'unauthorized' | 'network' | 'api' | 'unknown' = 'unknown';
+    if (result.errorType) {
+      switch (result.errorType) {
+        case 'unauthorized':
+          mappedErrorType = 'unauthorized';
+          break;
+        case 'network':
+          mappedErrorType = 'network';
+          break;
+        case 'forbidden':
+        case 'rate_limit':
+        case 'validation':
+        case 'provider':
+        case 'infrastructure':
+          mappedErrorType = 'api';
+          break;
+        default:
+          mappedErrorType = 'unknown';
+      }
+    }
+    
+    return {
+      success: result.success,
+      content: result.content,
+      error: result.error,
+      errorType: mappedErrorType,
+    };
+  }
+  
+  // Otherwise, use client-side API call with user's API key
+  if (!apiKey) {
+    return {
+      success: false,
+      error: 'API key is required for non-Pro users',
+      errorType: 'api',
+    };
+  }
+  
+  return callAIApi(provider, apiKey, prompt);
 }

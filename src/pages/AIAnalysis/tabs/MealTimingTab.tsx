@@ -11,7 +11,7 @@ import {
   AccordionPanel,
 } from '@fluentui/react-components';
 import { generateMealTimingPrompt } from '../../../features/aiAnalysis/prompts';
-import { callAIApi, isRequestTooLargeError } from '../../../utils/api';
+import { callAIWithRouting, isRequestTooLargeError } from '../../../utils/api';
 import { 
   convertGlucoseReadingsToCSV, 
   convertBolusReadingsToCSV, 
@@ -35,6 +35,26 @@ import {
 import type { MealTimingTabProps } from '../types';
 import type { GlucoseReading, InsulinReading } from '../../../types';
 
+/**
+ * Render the Meal Timing analysis tab and manage the AI-driven analysis workflow for meal timing.
+ *
+ * Displays loading and no-data states, provides an Analyze button that triggers AI analysis
+ * (with automatic dataset-size retries and cooldown management), and shows results, errors,
+ * and optional developer-facing details (AI prompt and dataset summary).
+ *
+ * @param loading - Whether source data is still loading
+ * @param hasApiKey - Whether the current (non-Pro) user has provided an API key required for direct provider calls
+ * @param activeProvider - Selected AI provider identifier (e.g., 'perplexity', 'grok', 'gemini'); required to perform analysis
+ * @param showGeekStats - When true, show the raw AI prompt and dataset summary for debugging/inspection
+ * @param mealTimingDatasets - The input datasets used for analysis; must include `cgmReadings`, `bolusReadings`, and `basalReadings`
+ * @param responseLanguage - Language to request the AI response in
+ * @param glucoseUnit - Unit used for glucose values (e.g., 'mg/dL' or 'mmol/L')
+ * @param perplexityApiKey - API key for the Perplexity provider (used for non-Pro users)
+ * @param geminiApiKey - API key for the Gemini provider (used for non-Pro users)
+ * @param grokApiKey - API key for the Grok provider (used for non-Pro users)
+ * @param isProUser - When true, route AI requests through the backend (no client-side API key is sent)
+ * @param idToken - Optional identity token forwarded to backend routing for authenticated Pro users
+ */
 export function MealTimingTab({
   loading,
   hasApiKey,
@@ -46,6 +66,8 @@ export function MealTimingTab({
   perplexityApiKey,
   geminiApiKey,
   grokApiKey,
+  isProUser,
+  idToken,
 }: MealTimingTabProps) {
   const styles = useAIAnalysisStyles();
   const { cgmReadings, bolusReadings, basalReadings } = mealTimingDatasets;
@@ -93,16 +115,25 @@ export function MealTimingTab({
     // Generate the prompt with the base64 CSV data
     const prompt = generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, activeProvider!);
 
-    // Get the appropriate API key for the active provider
+    // Get the appropriate API key for the active provider (only needed for non-Pro users)
     const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
                     activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
-    // Call the AI API using the selected provider
-    return await callAIApi(activeProvider!, apiKey, prompt);
+    // Call the AI API - it will automatically route to backend for Pro users
+    return await callAIWithRouting(activeProvider!, prompt, {
+      apiKey: isProUser ? undefined : apiKey,
+      idToken: idToken || undefined,
+      isProUser,
+    });
   };
 
   const handleAnalyzeClick = async () => {
-    if (!activeProvider || !hasApiKey || !hasData) {
+    if (!activeProvider || !hasData) {
+      return;
+    }
+
+    // Pro users don't need API keys since they use backend
+    if (!isProUser && !hasApiKey) {
       return;
     }
 
@@ -204,7 +235,7 @@ export function MealTimingTab({
       {/* Button container */}
       <div className={styles.buttonContainer}>
         <AnalysisButton
-          disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
+          disabled={!(hasApiKey || isProUser) || analyzing || (cooldownActive && cooldownSeconds > 0)}
           analyzing={analyzing}
           hasResponse={!!response}
           ready={ready}

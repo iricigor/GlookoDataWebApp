@@ -11,7 +11,7 @@ import {
   AccordionPanel,
 } from '@fluentui/react-components';
 import { generateTimeInRangePrompt } from '../../../features/aiAnalysis/prompts';
-import { callAIApi } from '../../../utils/api';
+import { callAIWithRouting } from '../../../utils/api';
 import { useGlucoseThresholds } from '../../../hooks/useGlucoseThresholds';
 import { useAIAnalysisStyles } from '../styles';
 import { useAnalysisState } from '../useAnalysisState';
@@ -25,6 +25,27 @@ import {
 } from '../AnalysisComponents';
 import type { TimeInRangeTabProps } from '../types';
 
+/**
+ * Render the Time in Range analysis tab with controls to run AI-based analysis, show cooldown/status, and display results.
+ *
+ * @param loading - Whether glucose data is still loading
+ * @param hasApiKey - Whether a non-Pro API key is available for AI providers
+ * @param activeProvider - Selected AI provider identifier (e.g., "perplexity", "grok", "gemini")
+ * @param showGeekStats - Whether to show the collapsible prompt text ("geek" view)
+ * @param inRangePercentage - Percentage of time the user's glucose is in range
+ * @param glucoseStats - Aggregated glucose statistics used to generate the AI prompt and analysis
+ * @param responseLanguage - Language to request the AI response in
+ * @param glucoseUnit - Unit used for glucose values (e.g., "mg/dL" or "mmol/L")
+ * @param perplexityApiKey - API key for the Perplexity provider (used for non-Pro users)
+ * @param geminiApiKey - API key for the Gemini provider (used for non-Pro users)
+ * @param grokApiKey - API key for the Grok provider (used for non-Pro users)
+ * @param selectedFile - Currently selected CGM data file (used to associate and save analysis results)
+ * @param onAnalysisComplete - Callback invoked when an analysis is successfully saved; receives (fileId, response, inRangePercentage)
+ * @param existingAnalysis - Previously saved analysis for the selected file; if present it will be loaded into the UI
+ * @param isProUser - Whether the current user is a Pro user (routes AI requests through backend instead of client-side API keys)
+ * @param idToken - Authentication token forwarded for Pro-user routing of AI requests
+ * @returns The JSX element for the Time in Range tab UI including analyze controls, status, prompt viewer, and result display
+ */
 export function TimeInRangeTab({
   loading,
   hasApiKey,
@@ -40,6 +61,8 @@ export function TimeInRangeTab({
   selectedFile,
   onAnalysisComplete,
   existingAnalysis,
+  isProUser,
+  idToken,
 }: TimeInRangeTabProps) {
   const styles = useAIAnalysisStyles();
   const { thresholds } = useGlucoseThresholds();
@@ -78,7 +101,13 @@ export function TimeInRangeTab({
   }, [selectedFile, reset]);
 
   const handleAnalyzeClick = async () => {
-    if (!activeProvider || !hasApiKey || inRangePercentage === null || !glucoseStats) {
+    if (!activeProvider || inRangePercentage === null || !glucoseStats) {
+      return;
+    }
+
+    // Pro users don't need API keys since they use backend, OR they have their own keys
+    const hasRequiredAuth = isProUser || hasApiKey;
+    if (!hasRequiredAuth) {
       return;
     }
 
@@ -100,12 +129,16 @@ export function TimeInRangeTab({
       // Generate the prompt with the glucose stats and thresholds
       const prompt = generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, activeProvider);
 
-      // Get the appropriate API key for the active provider
+      // Get the appropriate API key for the active provider (only needed for non-Pro users)
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
                       activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
-      // Call the AI API using the selected provider
-      const result = await callAIApi(activeProvider, apiKey, prompt);
+      // Call the AI API - it will automatically route to backend for Pro users
+      const result = await callAIWithRouting(activeProvider, prompt, {
+        apiKey: isProUser ? undefined : apiKey,
+        idToken: idToken || undefined,
+        isProUser,
+      });
 
       if (result.success && result.content) {
         completeAnalysis(result.content);
@@ -152,7 +185,7 @@ export function TimeInRangeTab({
       {/* Button container */}
       <div className={styles.buttonContainer}>
         <AnalysisButton
-          disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
+          disabled={!(hasApiKey || isProUser) || analyzing || (cooldownActive && cooldownSeconds > 0)}
           analyzing={analyzing}
           hasResponse={!!response}
           ready={ready}

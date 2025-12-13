@@ -11,7 +11,7 @@ import {
   AccordionPanel,
 } from '@fluentui/react-components';
 import { generatePumpSettingsPrompt } from '../../../features/aiAnalysis/prompts';
-import { callAIApi, isRequestTooLargeError } from '../../../utils/api';
+import { callAIWithRouting, isRequestTooLargeError } from '../../../utils/api';
 import { 
   convertGlucoseReadingsToCSV, 
   convertBolusReadingsToCSV, 
@@ -35,6 +35,26 @@ import {
 import type { PumpSettingsTabProps } from '../types';
 import type { GlucoseReading, InsulinReading } from '../../../types';
 
+/**
+ * Renders the Pump Settings analysis tab UI and coordinates AI-driven verification of pump settings from provided datasets.
+ *
+ * Displays UI controls to start analysis, handles dataset size fallbacks (full → 28 days → 7 days), routes requests differently for Pro users, and shows analysis status, errors, and results.
+ *
+ * @param loading - Whether underlying data is still loading
+ * @param hasApiKey - Whether a valid local API key is available for non-Pro flows
+ * @param activeProvider - Selected AI provider identifier (e.g., 'perplexity', 'grok', 'deepseek', or provider for Gemini)
+ * @param showGeekStats - When true, shows developer-facing debug accordions (prompt and dataset summary)
+ * @param mealTimingDatasets - Object containing input datasets: `cgmReadings`, `bolusReadings`, and `basalReadings`
+ * @param responseLanguage - Target language for the AI response
+ * @param glucoseUnit - Glucose unit used for formatting and prompt (e.g., 'mg/dL' or 'mmol/L')
+ * @param perplexityApiKey - API key for the Perplexity provider (used for non-Pro users)
+ * @param geminiApiKey - API key for Gemini provider (used for non-Pro users)
+ * @param grokApiKey - API key for the Grok provider (used for non-Pro users)
+ * @param deepseekApiKey - API key for the Deepseek provider (used for non-Pro users)
+ * @param isProUser - When true, routes AI requests through the backend and omits a per-call API key
+ * @param idToken - Optional identity token forwarded for backend-routed (Pro) requests
+ * @returns The rendered Pump Settings tab React element
+ */
 export function PumpSettingsTab({
   loading,
   hasApiKey,
@@ -47,6 +67,8 @@ export function PumpSettingsTab({
   geminiApiKey,
   grokApiKey,
   deepseekApiKey,
+  isProUser,
+  idToken,
 }: PumpSettingsTabProps) {
   const styles = useAIAnalysisStyles();
   const { cgmReadings, bolusReadings, basalReadings } = mealTimingDatasets;
@@ -94,18 +116,27 @@ export function PumpSettingsTab({
     // Generate the prompt with the base64 CSV data
     const prompt = generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, activeProvider!);
 
-    // Get the appropriate API key for the active provider
+    // Get the appropriate API key for the active provider (only needed for non-Pro users)
     const apiKey = activeProvider === 'perplexity' ? perplexityApiKey
                   : activeProvider === 'grok' ? grokApiKey
                   : activeProvider === 'deepseek' ? deepseekApiKey
                   : geminiApiKey;
 
-    // Call the AI API using the selected provider
-    return await callAIApi(activeProvider!, apiKey, prompt);
+    // Call the AI API - it will automatically route to backend for Pro users
+    return await callAIWithRouting(activeProvider!, prompt, {
+      apiKey: isProUser ? undefined : apiKey,
+      idToken: idToken || undefined,
+      isProUser,
+    });
   };
 
   const handleAnalyzeClick = async () => {
-    if (!activeProvider || !hasApiKey || !hasData) {
+    if (!activeProvider || !hasData) {
+      return;
+    }
+
+    // Pro users don't need API keys since they use backend
+    if (!isProUser && !hasApiKey) {
       return;
     }
 
@@ -207,7 +238,7 @@ export function PumpSettingsTab({
       {/* Button container */}
       <div className={styles.buttonContainer}>
         <AnalysisButton
-          disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
+          disabled={!(hasApiKey || isProUser) || analyzing || (cooldownActive && cooldownSeconds > 0)}
           analyzing={analyzing}
           hasResponse={!!response}
           ready={ready}

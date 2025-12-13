@@ -21,7 +21,7 @@ import {
 import { InfoRegular } from '@fluentui/react-icons';
 import { TableContainer } from '../../../components/TableContainer';
 import { generateHyposPrompt } from '../../../features/aiAnalysis/prompts';
-import { callAIApi, isRequestTooLargeError } from '../../../utils/api';
+import { callAIWithRouting, isRequestTooLargeError } from '../../../utils/api';
 import { convertHypoEventsToCSV, convertHypoSummariesToCSV, convertHypoEventSummaryToCSV } from '../../../utils/data';
 import { base64Encode } from '../../../utils/formatting';
 import { formatDateTime, formatTime, formatGlucoseNumber, formatNumber } from '../../../utils/formatting/formatters';
@@ -98,6 +98,28 @@ function convertSummariesToArray(summaries: DailyHypoSummary[]): (string | numbe
   return [headers, ...rows];
 }
 
+/**
+ * Render the Hypos Tab UI for AI-powered hypoglycemia analysis, dataset overview, and interactive controls.
+ *
+ * Renders overview statistics, LBGI explanation, tables of daily summaries and hypo events (when available),
+ * and controls to trigger AI analysis. The component uses provided API keys or backend routing (when `isProUser` is true)
+ * to call the AI service and handles dataset-size retries, cooldowns, and result state.
+ *
+ * @param loading - Whether data is still loading
+ * @param hasApiKey - Whether a client-side API key is available for the selected provider
+ * @param activeProvider - Selected AI provider identifier (e.g., 'perplexity', 'grok', 'deepseek', 'gemini')
+ * @param showGeekStats - Whether to show raw prompt text and detailed data tables
+ * @param hypoDatasets - Hypoglycemia datasets (daily summaries, events, overall stats) used for display and analysis
+ * @param responseLanguage - Language code used when generating the AI prompt
+ * @param glucoseUnit - Glucose display unit used for prompts and formatting
+ * @param perplexityApiKey - API key for Perplexity provider (when used)
+ * @param geminiApiKey - API key for Gemini provider (when used)
+ * @param grokApiKey - API key for Grok provider (when used)
+ * @param deepseekApiKey - API key for DeepSeek provider (when used)
+ * @param isProUser - When true, analysis requests are routed via the backend and do not require a client API key
+ * @param idToken - Optional identity token forwarded to backend routing for Pro users
+ * @returns The React element rendering the Hypos tab, including analysis controls, tables, and AI results
+ */
 export function HyposTab({
   loading,
   hasApiKey,
@@ -110,6 +132,8 @@ export function HyposTab({
   geminiApiKey,
   grokApiKey,
   deepseekApiKey,
+  isProUser,
+  idToken,
 }: HyposTabProps) {
   const styles = useAIAnalysisStyles();
   const hasData = hypoDatasets !== null && hypoDatasets.dailySummaries.length > 0;
@@ -165,12 +189,21 @@ export function HyposTab({
       activeProvider === 'deepseek' ? deepseekApiKey :
       geminiApiKey;
 
-    // Call the AI API using the selected provider
-    return await callAIApi(activeProvider!, apiKey, prompt);
+    // Call the AI API - it will automatically route to backend for Pro users
+    return await callAIWithRouting(activeProvider!, prompt, {
+      apiKey: isProUser ? undefined : apiKey,
+      idToken: idToken || undefined,
+      isProUser,
+    });
   };
 
   const handleAnalyzeClick = async () => {
-    if (!activeProvider || !hasApiKey || !hasData || !hypoDatasets) {
+    if (!activeProvider || !hasData || !hypoDatasets) {
+      return;
+    }
+
+    // Pro users don't need API keys since they use backend
+    if (!isProUser && !hasApiKey) {
       return;
     }
 
@@ -315,7 +348,7 @@ export function HyposTab({
       {/* Button container */}
       <div className={styles.buttonContainer}>
         <AnalysisButton
-          disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
+          disabled={!(hasApiKey || isProUser) || analyzing || (cooldownActive && cooldownSeconds > 0)}
           analyzing={analyzing}
           hasResponse={!!response}
           ready={ready}

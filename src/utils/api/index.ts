@@ -6,3 +6,4 @@ export * from './deepseekApi';
 export * from './aiApi';
 export * from './aiPrompts';
 export * from './userSettingsApi';
+export * from './backendAIApi';
