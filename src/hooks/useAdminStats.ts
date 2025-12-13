@@ -165,6 +165,14 @@ export function useAdminStats(idToken?: string | null, shouldFetch: boolean = tr
     if (!idToken && hasLoadedRef.current) {
       resetState();
     }
+    
+    // Refetch if token changes (different user logged in)
+    if (shouldFetch && idToken && hasLoadedRef.current && currentTokenRef.current !== idToken) {
+      // Token changed, reset and fetch with new token
+      hasLoadedRef.current = false;
+      isLoadingRef.current = false;
+      fetchStats(idToken);
+    }
   }, [idToken, shouldFetch, fetchStats, resetState]);
 
   return {

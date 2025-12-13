@@ -95,7 +95,15 @@ export async function getLoggedInUsersCount(
     }
 
     // Error handling
-    const errorData = await response.json().catch(() => ({})) as { error?: string; errorType?: string };
+    let errorData: { error?: string; errorType?: string } = {};
+    try {
+      errorData = await response.json();
+    } catch (jsonError) {
+      // JSON parsing failed - likely not a JSON response
+      // Use generic error message based on status code
+      console.warn('Failed to parse error response as JSON:', jsonError);
+    }
+    
     const errorType = errorData.errorType as LoggedInUsersCountResult['errorType'] || 'unknown';
     const errorMessage = errorData.error || `Request failed with status ${statusCode}`;
 

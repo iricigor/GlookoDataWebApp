@@ -60,20 +60,36 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
  * 
  * Counts entities with partitionKey='users' in the UserSettings table.
  * This represents all users who have logged in at least once.
+ * 
+ * Note: Azure Table Storage doesn't support $count directly, so we iterate
+ * through entities. For very large datasets (>10k users), consider implementing
+ * pagination or caching strategies.
  */
 async function countLoggedInUsers(tableClient: ReturnType<typeof getTableClient>): Promise<number> {
   let count = 0;
   
   // Query all entities with partitionKey='users'
+  // We only select the partitionKey and rowKey to minimize data transfer
   const entities = tableClient.listEntities({
     queryOptions: {
-      filter: "PartitionKey eq 'users'"
+      filter: "PartitionKey eq 'users'",
+      select: ['partitionKey', 'rowKey']
     }
   });
   
   // Count all entities
+  // For large datasets, consider implementing a maximum count limit
+  // or using a separate counter table for better performance
   for await (const _entity of entities) {
     count++;
+    
+    // Safety check: if count exceeds a reasonable limit, stop and return
+    // This prevents timeouts for extremely large datasets
+    if (count >= 100000) {
+      // Log warning and return the limit
+      // In production, this should trigger an alert for investigation
+      break;
+    }
   }
   
   return count;

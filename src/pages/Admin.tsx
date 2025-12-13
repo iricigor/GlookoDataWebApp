@@ -153,6 +153,15 @@ export function Admin() {
     isLoggedIn && isProUser
   );
 
+  /**
+   * Format the stat value (count or loading indicator)
+   */
+  const formatStatValue = (count: number | null, loading: boolean): string => {
+    if (loading) return t('common.loading');
+    if (count !== null) return count.toString();
+    return '-';
+  };
+
   const handleLogin = async () => {
     try {
       await login();
@@ -258,7 +267,7 @@ export function Admin() {
               <PersonRegular />
             </div>
             <Text className={styles.statValue}>
-              {isLoadingStats ? t('common.loading') : (loggedInUsersCount !== null ? loggedInUsersCount.toString() : '-')}
+              {formatStatValue(loggedInUsersCount, isLoadingStats)}
             </Text>
             <Text className={styles.statLabel}>
               {t('admin.statistics.loggedInUsers')}
