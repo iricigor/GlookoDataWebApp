@@ -151,6 +151,13 @@
     "proUsers": {
       "title": "Pro korisnici",
       "notEnabledMessage": "Pro korisničke funkcije još nisu omogućene. Ova funkcija je trenutno u razvoju i biće uskoro dostupna.",
+      "apiKeys": {
+        "title": "Pro AI ključevi",
+        "description": "Kao Pro korisnik, možete izabrati da koristite naše upravljane AI ključeve ili nastavite da koristite sopstvene API ključeve.",
+        "switchLabel": "Koristi Pro AI ključeve",
+        "usingProKeys": "Trenutno koristite upravljane Pro AI ključeve. Ne morate konfigurisati sopstvene API ključeve na kartici Podešavanja AI.",
+        "usingOwnKeys": "Trenutno koristite sopstvene API ključeve. Konfigurirajte ih na kartici Podešavanja AI."
+      },
       "benefits": {
         "title": "Šta Pro korisnici dobijaju",
         "description": "Pro korisnici će dobiti pristup premium funkcijama koje olakšavaju korišćenje AI mogućnosti analize i čine ih isplativijim:",

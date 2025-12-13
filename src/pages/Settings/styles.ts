@@ -317,4 +317,8 @@ export const useStyles = makeStyles({
   expressInterestButton: {
     marginTop: '16px',
   },
+  switchContainer: {
+    marginTop: '16px',
+    marginBottom: '16px',
+  },
 });

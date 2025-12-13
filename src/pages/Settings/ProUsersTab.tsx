@@ -9,20 +9,26 @@ import {
   Title3,
   Link,
   Button,
+  Switch,
+  Label,
 } from '@fluentui/react-components';
 import { useTranslation } from 'react-i18next';
 import { PersonStarRegular } from '@fluentui/react-icons';
-import type { SettingsTabProps } from './types';
+import type { ProUsersTabProps } from './types';
 
 /**
  * Render the Pro Users tab UI that provides information about Pro Users features and a link to express interest.
  *
  * Displays a message that Pro Users features are not yet enabled, describes the benefits of becoming a Pro User, and provides a link to open an issue to express interest.
+ * For Pro users, displays a switch to toggle between using Pro backend keys and own API keys.
  *
  * @param styles - Styles applied to sections and elements of the Pro Users tab
+ * @param useProKeys - Whether to use Pro backend keys (for Pro users only)
+ * @param onUseProKeysChange - Callback invoked when useProKeys preference changes
+ * @param isProUser - Whether the current user is a Pro user
  * @returns The Pro Users tab React element
  */
-export function ProUsersTab({ styles }: SettingsTabProps) {
+export function ProUsersTab({ styles, useProKeys, onUseProKeysChange, isProUser }: ProUsersTabProps) {
   const { t } = useTranslation('settings');
 
   return (
@@ -34,6 +40,33 @@ export function ProUsersTab({ styles }: SettingsTabProps) {
           {t('settings.proUsers.notEnabledMessage')}
         </Text>
       </div>
+
+      {/* Show Pro AI Key setting only for Pro users */}
+      {isProUser && (
+        <div className={styles.settingSection}>
+          <Title3 className={styles.sectionTitle}>{t('settings.proUsers.apiKeys.title')}</Title3>
+          <Divider className={styles.divider} />
+          <Text className={styles.settingDescription}>
+            {t('settings.proUsers.apiKeys.description')}
+          </Text>
+          <div className={styles.switchContainer}>
+            <Switch
+              checked={useProKeys}
+              onChange={(_, data) => onUseProKeysChange(data.checked)}
+              label={
+                <Label>
+                  {t('settings.proUsers.apiKeys.switchLabel')}
+                </Label>
+              }
+            />
+          </div>
+          <Text className={styles.settingDescription}>
+            {useProKeys
+              ? t('settings.proUsers.apiKeys.usingProKeys')
+              : t('settings.proUsers.apiKeys.usingOwnKeys')}
+          </Text>
+        </div>
+      )}
 
       <div className={styles.settingSection}>
         <Title3 className={styles.sectionTitle}>{t('settings.proUsers.benefits.title')}</Title3>

@@ -76,6 +76,9 @@ describe('Settings', () => {
     selectedProvider: 'perplexity' as const,
     onSelectedProviderChange: vi.fn(),
     onProviderAutoSwitch: vi.fn(),
+    useProKeys: true,
+    onUseProKeysChange: vi.fn(),
+    isProUser: false,
   };
 
   beforeEach(() => {

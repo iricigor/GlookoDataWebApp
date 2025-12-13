@@ -151,6 +151,13 @@
     "proUsers": {
       "title": "Pro-Benutzer",
       "notEnabledMessage": "Pro-Benutzer-Funktionen sind noch nicht aktiviert. Diese Funktion befindet sich derzeit in der Entwicklung und wird bald verfügbar sein.",
+      "apiKeys": {
+        "title": "Pro-KI-Schlüssel",
+        "description": "Als Pro-Benutzer können Sie wählen, ob Sie unsere verwalteten KI-Schlüssel verwenden oder weiterhin Ihre eigenen API-Schlüssel nutzen möchten.",
+        "switchLabel": "Pro-KI-Schlüssel verwenden",
+        "usingProKeys": "Derzeit werden verwaltete Pro-KI-Schlüssel verwendet. Sie müssen keine eigenen API-Schlüssel auf der Registerkarte KI-Einstellungen konfigurieren.",
+        "usingOwnKeys": "Derzeit werden Ihre eigenen API-Schlüssel verwendet. Konfigurieren Sie diese auf der Registerkarte KI-Einstellungen."
+      },
       "benefits": {
         "title": "Was Pro-Benutzer erhalten",
         "description": "Pro-Benutzer erhalten Zugriff auf Premium-Funktionen, die die Nutzung der KI-Analysefunktionen einfacher und kostengünstiger machen:",

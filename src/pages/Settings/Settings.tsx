@@ -94,6 +94,12 @@ interface SettingsProps {
   onSelectedProviderChange: (provider: AIProvider | null) => void;
   /** Callback invoked when provider is auto-switched due to failed key verification */
   onProviderAutoSwitch?: (fromProvider: AIProvider, toProvider: AIProvider) => void;
+  /** Whether to use Pro backend keys (for Pro users only) */
+  useProKeys: boolean;
+  /** Callback invoked when useProKeys preference changes */
+  onUseProKeysChange: (value: boolean) => void;
+  /** Whether the current user is a Pro user */
+  isProUser: boolean;
 }
 
 /**
@@ -101,6 +107,9 @@ interface SettingsProps {
  *
  * @param selectedProvider - The currently selected AI provider, or `null` to allow automatic provider selection
  * @param onProviderAutoSwitch - Optional callback invoked when the app automatically switches AI providers; called with `(fromProvider, toProvider)`
+ * @param useProKeys - Whether to use Pro backend keys (for Pro users only)
+ * @param onUseProKeysChange - Callback invoked when useProKeys preference changes
+ * @param isProUser - Whether the current user is a Pro user
  * @returns The Settings page element
  */
 export function Settings({ 
@@ -135,6 +144,9 @@ export function Settings({
   selectedProvider,
   onSelectedProviderChange,
   onProviderAutoSwitch,
+  useProKeys,
+  onUseProKeysChange,
+  isProUser,
 }: SettingsProps) {
   const styles = useStyles();
   const { t } = useTranslation('settings');
@@ -226,7 +238,12 @@ export function Settings({
         );
       
       case 'pro':
-        return <ProUsersTab styles={styles} />;
+        return <ProUsersTab 
+          styles={styles}
+          useProKeys={useProKeys}
+          onUseProKeysChange={onUseProKeysChange}
+          isProUser={isProUser}
+        />;
       
       case 'about':
         return <AboutTab styles={styles} />;

@@ -151,6 +151,13 @@
     "proUsers": {
       "title": "Pro uživatelé",
       "notEnabledMessage": "Funkce Pro uživatelů ještě nejsou povoleny. Tato funkce je v současné době ve vývoji a bude brzy k dispozici.",
+      "apiKeys": {
+        "title": "Pro AI klíče",
+        "description": "Jako Pro uživatel můžete zvolit použití našich spravovaných AI klíčů nebo pokračovat v používání vlastních API klíčů.",
+        "switchLabel": "Použít Pro AI klíče",
+        "usingProKeys": "Momentálně používáte spravované Pro AI klíče. Nemusíte konfigurovat vlastní API klíče na kartě Nastavení AI.",
+        "usingOwnKeys": "Momentálně používáte vlastní API klíče. Nakonfigurujte je na kartě Nastavení AI."
+      },
       "benefits": {
         "title": "Co získají Pro uživatelé",
         "description": "Pro uživatelé získají přístup k prémiových funkcím, které usnadňují použití funkcí AI analýzy a jsou nákladově efektivnější:",
