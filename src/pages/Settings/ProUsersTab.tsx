@@ -26,7 +26,7 @@ import type { ProUsersTabProps } from './types';
  * @param isProUser - Whether the current user is a Pro user
  * @returns The Pro Users tab React element
  */
-export function ProUsersTab({ styles, useProKeys, onUseProKeysChange, isProUser }: ProUsersTabProps) {
+export function ProUsersTab({ styles }: ProUsersTabProps) {
   const { t } = useTranslation('settings');
 
   return (

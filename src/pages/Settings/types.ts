@@ -44,12 +44,7 @@ export interface SettingsTabProps {
  * Props for the Pro Users Tab
  */
 export interface ProUsersTabProps extends SettingsTabProps {
-  /** Whether to use Pro backend keys (for Pro users only) */
-  useProKeys: boolean;
-  /** Callback invoked when useProKeys preference changes */
-  onUseProKeysChange: (value: boolean) => void;
-  /** Whether the current user is a Pro user */
-  isProUser: boolean;
+  // No additional props needed - the Pro Keys switch has been moved to AI Settings tab
 }
 
 /**

@@ -243,9 +243,6 @@ export function Settings({
       case 'pro':
         return <ProUsersTab 
           styles={styles}
-          useProKeys={useProKeys}
-          onUseProKeysChange={onUseProKeysChange}
-          isProUser={isProUser}
         />;
       
       case 'about':
