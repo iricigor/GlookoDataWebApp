@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>777 Add environment indicator to navigation header</summary>
+
+[#777](../../pull/777) Add environment indicator to navigation header
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>775 Add Pro AI key toggle UI in Settings</summary>
 
 [#775](../../pull/775) Add Pro AI key toggle UI in Settings
