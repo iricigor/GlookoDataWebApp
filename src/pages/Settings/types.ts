@@ -42,10 +42,9 @@ export interface SettingsTabProps {
 
 /**
  * Props for the Pro Users Tab
+ * No additional props needed - the Pro Keys switch has been moved to AI Settings tab
  */
-export interface ProUsersTabProps extends SettingsTabProps {
-  // No additional props needed - the Pro Keys switch has been moved to AI Settings tab
-}
+export type ProUsersTabProps = SettingsTabProps;
 
 /**
  * Props for the General Settings Tab
