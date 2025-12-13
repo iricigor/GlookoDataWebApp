@@ -20,7 +20,7 @@ describe('ProUsersTab', () => {
       switchContainer: 'mockSwitchContainer',
       benefitsList: 'mockBenefitsList',
       expressInterestButton: 'mockExpressInterestButton',
-    } as any;
+    } as ReturnType<typeof import('./styles').useStyles>;
 
     return render(
       <ProUsersTab
