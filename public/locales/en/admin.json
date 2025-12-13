@@ -1,0 +1,8 @@
+{
+  "admin": {
+    "title": "Admin",
+    "subtitle": "Administrative access area",
+    "loginPrompt": "Please login to access administrative features",
+    "loginButton": "Login with Microsoft"
+  }
+}

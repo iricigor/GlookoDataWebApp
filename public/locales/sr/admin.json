@@ -1,0 +1,8 @@
+{
+  "admin": {
+    "title": "Admin",
+    "subtitle": "Administrativna oblast pristupa",
+    "loginPrompt": "Molimo prijavite se da pristupite administrativnim funkcijama",
+    "loginButton": "Prijavite se sa Microsoft"
+  }
+}
