@@ -17,7 +17,6 @@ jobs:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     name: Build and Deploy Preview
-    continue-on-error: true  # Don't block PR merges if preview deployment fails
     permissions:
       contents: read
       pull-requests: write  # Required for PR comments with preview URL
@@ -45,6 +44,7 @@ jobs:
       # will use the production API or may not be fully testable.
       - name: Build and Deploy Preview
         id: builddeploy
+        continue-on-error: true  # Don't fail the job if preview deployment fails
         uses: Azure/static-web-apps-deploy@v1
         env:
           NODE_VERSION: '20.19.5'
@@ -58,6 +58,17 @@ jobs:
           output_location: "dist"     # Built app content directory (Vite output)
           # Build command is handled automatically by SWA deploy action
           # It runs npm ci and npm run build by default
+
+      # Report deployment status - this step always succeeds to ensure job passes
+      - name: Report Deployment Status
+        if: always()
+        run: |
+          if [ "${{ steps.builddeploy.outcome }}" == "success" ]; then
+            echo "✅ Preview deployment succeeded"
+          else
+            echo "⚠️ Preview deployment failed, but this is optional and won't block PR merges"
+            echo "::warning::Preview deployment failed. The PR can still be merged."
+          fi
 
   # Close/cleanup the preview environment when the PR is closed or merged
   close_pull_request:
