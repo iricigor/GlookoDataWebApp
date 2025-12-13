@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>775 Add Pro AI key toggle UI in Settings</summary>
+
+[#775](../../pull/775) Add Pro AI key toggle UI in Settings
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>773 Add cross-navigation links between admin and API docs pages</summary>
 
 [#773](../../pull/773) Add cross-navigation links between admin and API docs pages
