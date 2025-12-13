@@ -295,6 +295,31 @@ async function getAIProviderConfig(
 }
 
 /**
+ * Add Pro user confirmation marker (✨) to AI response content.
+ *
+ * This function programmatically adds the ✨ emoji to confirm the response is from
+ * the Pro user backend. It attempts to insert it just before the "--- CONCLUSIO DATAE ---"
+ * marker if present, otherwise prepends it to the beginning of the response.
+ *
+ * @param content - The AI response content to modify
+ * @returns The modified content with the ✨ emoji added
+ */
+function addProUserMarker(content: string): string {
+  const marker = '--- CONCLUSIO DATAE ---';
+  const proEmoji = '✨';
+  
+  // Try to find the CONCLUSIO DATAE marker and add emoji before it
+  const markerIndex = content.indexOf(marker);
+  if (markerIndex !== -1) {
+    // Insert emoji on a new line before the marker
+    return content.substring(0, markerIndex) + `\n${proEmoji}\n` + content.substring(markerIndex);
+  }
+  
+  // Fallback: prepend emoji at the beginning
+  return `${proEmoji}\n${content}`;
+}
+
+/**
  * Send the prompt to a configured AI provider and return the provider's generated text.
  *
  * @param config - AI provider selection and API key used for the request (`provider` is one of 'perplexity' | 'gemini' | 'grok' | 'deepseek'; `apiKey` is the secret used for authentication)
@@ -606,18 +631,21 @@ async function aiQuery(request: HttpRequest, context: InvocationContext): Promis
       );
     }
     
+    // Add Pro user confirmation marker (✨) to the response
+    const markedContent = aiResult.content ? addProUserMarker(aiResult.content) : aiResult.content;
+    
     requestLogger.logInfo('AI query completed successfully', {
       userId,
       provider: aiConfig.provider,
       promptLength: prompt.length,
-      responseLength: aiResult.content?.length || 0,
+      responseLength: markedContent?.length || 0,
     });
     
     return requestLogger.logSuccess({
       status: 200,
       jsonBody: {
         success: true,
-        content: aiResult.content,
+        content: markedContent,
         provider: aiConfig.provider,
       },
     });
