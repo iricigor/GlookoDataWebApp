@@ -17,6 +17,7 @@ jobs:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     name: Build and Deploy Preview
+    continue-on-error: true  # Don't block PR merges if preview deployment fails
     permissions:
       contents: read
       pull-requests: write  # Required for PR comments with preview URL
