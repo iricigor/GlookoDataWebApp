@@ -30,6 +30,6 @@ export default defineConfig({
     }
   },
   build: {
-    chunkSizeWarningLimit: 1000 // Increase chunk size warning limit to 1000 kB
+    chunkSizeWarningLimit: 5000 // Increase chunk size warning limit to 5000 kB (main bundle is ~4.7 MB)
   }
 })
