@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>771 Fix temp build warnings and make PR preview non-blocking</summary>
+
+[#771](../../pull/771) Fix temp build warnings and make PR preview non-blocking
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>768 Add access control and placeholder statistics to Admin page</summary>
 
 [#768](../../pull/768) Add access control and placeholder statistics to Admin page
