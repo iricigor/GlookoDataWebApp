@@ -12,6 +12,7 @@
     By default, creates the following tables:
     - UserSettings: Stores user preferences and settings
     - ProUsers: Stores professional user information
+    - AIQueryLogs: Stores AI query rate limiting data
     
     This script uses native Azure PowerShell cmdlets (Az module) for:
     1. Native PowerShell experience in Azure Cloud Shell PowerShell flavor
@@ -26,7 +27,7 @@
     The Azure resource group name. If not provided, uses value from configuration.
 
 .PARAMETER TableNames
-    Array of table names to create. Default: @('UserSettings', 'ProUsers')
+    Array of table names to create. Default: @('UserSettings', 'ProUsers', 'AIQueryLogs')
 
 .PARAMETER AssignIdentity
     If specified, assigns Storage Table Data Contributor role to the managed identity
@@ -34,7 +35,7 @@
 
 .EXAMPLE
     Set-GlookoTableStorage
-    Creates default tables (UserSettings, ProUsers) in the configured storage account.
+    Creates default tables (UserSettings, ProUsers, AIQueryLogs) in the configured storage account.
 
 .EXAMPLE
     Set-GlookoTableStorage -StorageAccountName "mystorageacct"
@@ -70,7 +71,7 @@ function Set-GlookoTableStorage {
         [string]$ResourceGroup,
 
         [Parameter()]
-        [string[]]$TableNames = @('UserSettings', 'ProUsers'),
+        [string[]]$TableNames = @('UserSettings', 'ProUsers', 'AIQueryLogs'),
 
         [Parameter()]
         [switch]$AssignIdentity
