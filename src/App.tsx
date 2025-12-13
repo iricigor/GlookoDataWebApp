@@ -3,7 +3,6 @@ import {
   FluentProvider, 
   Toaster, 
   useToastController, 
-  useId, 
   Toast, 
   ToastTitle, 
   ToastBody 
@@ -118,7 +117,7 @@ function App() {
   const [aiAnalysisResults, setAiAnalysisResults] = useState<Record<string, AIAnalysisResult>>({})
 
   // Toast notifications
-  const toasterId = useId('toaster')
+  const toasterId = 'app-toaster'
   const { dispatchToast } = useToastController(toasterId)
 
   // Handle AI provider auto-switch notification

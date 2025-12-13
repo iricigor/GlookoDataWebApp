@@ -16,7 +16,6 @@ import {
   TableBody,
   TableCell,
   useToastController,
-  useId,
   Toast,
   ToastTitle,
   ToastBody,
@@ -94,7 +93,7 @@ export function GlucoseInsulinTab({
   useProKeys,
 }: GlucoseInsulinTabProps) {
   const styles = useAIAnalysisStyles();
-  const toasterId = useId('toaster');
+  const toasterId = 'app-toaster';
   const { dispatchToast } = useToastController(toasterId);
   
   const {

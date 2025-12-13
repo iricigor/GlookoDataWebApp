@@ -18,7 +18,6 @@ import {
   TableCell,
   Tooltip,
   useToastController,
-  useId,
   Toast,
   ToastTitle,
   ToastBody,
@@ -143,7 +142,7 @@ export function HyposTab({
 }: HyposTabProps) {
   const styles = useAIAnalysisStyles();
   const hasData = hypoDatasets !== null && hypoDatasets.dailySummaries.length > 0;
-  const toasterId = useId('toaster');
+  const toasterId = 'app-toaster';
   const { dispatchToast } = useToastController(toasterId);
   
   const {

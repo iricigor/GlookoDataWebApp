@@ -10,7 +10,6 @@ import {
   AccordionHeader,
   AccordionPanel,
   useToastController,
-  useId,
   Toast,
   ToastTitle,
   ToastBody,
@@ -79,7 +78,7 @@ export function PumpSettingsTab({
   const styles = useAIAnalysisStyles();
   const { cgmReadings, bolusReadings, basalReadings } = mealTimingDatasets;
   const hasData = cgmReadings.length > 0 && bolusReadings.length > 0;
-  const toasterId = useId('toaster');
+  const toasterId = 'app-toaster';
   const { dispatchToast } = useToastController(toasterId);
   
   const {

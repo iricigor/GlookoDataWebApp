@@ -10,7 +10,6 @@ import {
   AccordionHeader,
   AccordionPanel,
   useToastController,
-  useId,
   Toast,
   ToastTitle,
   ToastBody,
@@ -72,7 +71,7 @@ export function TimeInRangeTab({
 }: TimeInRangeTabProps) {
   const styles = useAIAnalysisStyles();
   const { thresholds } = useGlucoseThresholds();
-  const toasterId = useId('toaster');
+  const toasterId = 'app-toaster';
   const { dispatchToast } = useToastController(toasterId);
   
   const {
