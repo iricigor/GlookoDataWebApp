@@ -269,8 +269,6 @@ export async function callAIWithRouting(
     
     // If backend call failed and user has their own API key, try fallback
     if (!result.success && apiKey && apiKey.trim() !== '') {
-      console.log('Pro API failed, falling back to user API key:', result.error);
-      
       // Try with user's own API key as fallback
       const fallbackResult = await callAIApi(provider, apiKey, prompt);
       

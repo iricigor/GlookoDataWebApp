@@ -246,7 +246,7 @@ export function HyposTab({
           <Toast>
             <ToastTitle>Pro API Failed - Using Your Keys</ToastTitle>
             <ToastBody>
-              Pro backend API encountered an error: {result.backendError}. 
+              Pro backend API is temporarily unavailable. 
               Successfully fell back to using your own API keys.
             </ToastBody>
           </Toast>,
