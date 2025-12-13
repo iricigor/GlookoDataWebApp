@@ -232,7 +232,7 @@ export async function verifyApiKey(
 /**
  * Route a prompt to either the backend (for Pro users) or the client-side provider API.
  *
- * When `isProUser` is true and an `idToken` is provided, the request is forwarded to the backend
+ * When `isProUser` is true, `useProKeys` is true, and an `idToken` is provided, the request is forwarded to the backend
  * where provider keys are managed; otherwise the call is performed client-side using the supplied `apiKey`.
  *
  * @param provider - The AI provider to use ('perplexity', 'gemini', 'grok', or 'deepseek')
@@ -240,7 +240,8 @@ export async function verifyApiKey(
  * @param options - Call options
  * @param options.apiKey - User's client-side API key (required for non‑Pro calls)
  * @param options.idToken - ID token used to authenticate backend (Pro) requests
- * @param options.isProUser - Set to true to route through the backend when `idToken` is provided
+ * @param options.isProUser - Set to true to enable Pro routing when `idToken` and `useProKeys` are provided
+ * @param options.useProKeys - Set to true to use Pro backend keys (only applies to Pro users)
  * @returns An AIResult object containing `success`, `content` on success, and `error` with `errorType` on failure
  */
 export async function callAIWithRouting(
@@ -250,12 +251,13 @@ export async function callAIWithRouting(
     apiKey?: string;
     idToken?: string;
     isProUser?: boolean;
+    useProKeys?: boolean;
   }
 ): Promise<AIResult> {
-  const { apiKey, idToken, isProUser } = options;
+  const { apiKey, idToken, isProUser, useProKeys = true } = options;
   
-  // If user is a Pro user with an ID token, use backend API
-  if (isProUser && idToken) {
+  // If user is a Pro user with an ID token and has opted to use Pro keys, use backend API
+  if (isProUser && useProKeys && idToken) {
     // Dynamic import to avoid circular dependencies
     const { callBackendAI } = await import('./backendAIApi');
     

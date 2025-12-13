@@ -63,6 +63,7 @@ export function TimeInRangeTab({
   existingAnalysis,
   isProUser,
   idToken,
+  useProKeys,
 }: TimeInRangeTabProps) {
   const styles = useAIAnalysisStyles();
   const { thresholds } = useGlucoseThresholds();
@@ -133,11 +134,12 @@ export function TimeInRangeTab({
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
                       activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
-      // Call the AI API - it will automatically route to backend for Pro users
+      // Call the AI API - it will automatically route to backend for Pro users with Pro keys enabled
       const result = await callAIWithRouting(activeProvider, prompt, {
-        apiKey: isProUser ? undefined : apiKey,
+        apiKey: (isProUser && useProKeys) ? undefined : apiKey,
         idToken: idToken || undefined,
         isProUser,
+        useProKeys,
       });
 
       if (result.success && result.content) {

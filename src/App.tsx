@@ -430,6 +430,7 @@ function App() {
             onAnalysisComplete={handleAIAnalysisComplete}
             isProUser={isProUser}
             idToken={idToken}
+            useProKeys={proKeysEnabled}
           />
         )
       case 'settings':

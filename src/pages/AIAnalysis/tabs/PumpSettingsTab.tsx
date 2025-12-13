@@ -69,6 +69,7 @@ export function PumpSettingsTab({
   deepseekApiKey,
   isProUser,
   idToken,
+  useProKeys,
 }: PumpSettingsTabProps) {
   const styles = useAIAnalysisStyles();
   const { cgmReadings, bolusReadings, basalReadings } = mealTimingDatasets;
@@ -122,11 +123,12 @@ export function PumpSettingsTab({
                   : activeProvider === 'deepseek' ? deepseekApiKey
                   : geminiApiKey;
 
-    // Call the AI API - it will automatically route to backend for Pro users
+    // Call the AI API - it will automatically route to backend for Pro users with Pro keys enabled
     return await callAIWithRouting(activeProvider!, prompt, {
-      apiKey: isProUser ? undefined : apiKey,
+      apiKey: (isProUser && useProKeys) ? undefined : apiKey,
       idToken: idToken || undefined,
       isProUser,
+      useProKeys,
     });
   };
 

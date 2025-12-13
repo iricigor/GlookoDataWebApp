@@ -32,6 +32,8 @@ export interface AIAnalysisProps {
   isProUser?: boolean;
   /** ID token for Pro user backend API authentication */
   idToken?: string | null;
+  /** Whether to use Pro backend keys (only applies to Pro users) */
+  useProKeys?: boolean;
 }
 
 /** State for a single AI analysis prompt */
@@ -87,6 +89,8 @@ export interface TimeInRangeTabProps extends TabContentProps {
   isProUser?: boolean;
   /** ID token for Pro user backend API authentication */
   idToken?: string | null;
+  /** Whether to use Pro backend keys (only applies to Pro users) */
+  useProKeys?: boolean;
 }
 
 /** Props for Glucose & Insulin tab */
@@ -101,6 +105,8 @@ export interface GlucoseInsulinTabProps extends TabContentProps {
   isProUser?: boolean;
   /** ID token for Pro user backend API authentication */
   idToken?: string | null;
+  /** Whether to use Pro backend keys (only applies to Pro users) */
+  useProKeys?: boolean;
 }
 
 /** Props for Meal Timing tab */
@@ -115,6 +121,8 @@ export interface MealTimingTabProps extends TabContentProps {
   isProUser?: boolean;
   /** ID token for Pro user backend API authentication */
   idToken?: string | null;
+  /** Whether to use Pro backend keys (only applies to Pro users) */
+  useProKeys?: boolean;
 }
 
 /** Props for Pump Settings tab */
@@ -130,6 +138,8 @@ export interface PumpSettingsTabProps extends TabContentProps {
   isProUser?: boolean;
   /** ID token for Pro user backend API authentication */
   idToken?: string | null;
+  /** Whether to use Pro backend keys (only applies to Pro users) */
+  useProKeys?: boolean;
 }
 
 /** Props for Hypos tab */
@@ -145,4 +155,6 @@ export interface HyposTabProps extends TabContentProps {
   isProUser?: boolean;
   /** ID token for Pro user backend API authentication */
   idToken?: string | null;
+  /** Whether to use Pro backend keys (only applies to Pro users) */
+  useProKeys?: boolean;
 }
