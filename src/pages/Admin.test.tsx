@@ -22,10 +22,16 @@ describe('Admin', () => {
   it('renders the admin page title and subtitle', () => {
     vi.mocked(useAuth).mockReturnValue({
       isLoggedIn: false,
+      userName: null,
+      userEmail: null,
+      userPhoto: null,
+      accessToken: null,
+      idToken: null,
+      isInitialized: true,
+      justLoggedIn: false,
       login: vi.fn(),
       logout: vi.fn(),
-      idToken: null,
-      userEmail: null,
+      acknowledgeLogin: vi.fn(),
     });
 
     renderWithProviders(<Admin />);
@@ -37,10 +43,16 @@ describe('Admin', () => {
   it('shows login prompt when user is not logged in', () => {
     vi.mocked(useAuth).mockReturnValue({
       isLoggedIn: false,
+      userName: null,
+      userEmail: null,
+      userPhoto: null,
+      accessToken: null,
+      idToken: null,
+      isInitialized: true,
+      justLoggedIn: false,
       login: vi.fn(),
       logout: vi.fn(),
-      idToken: null,
-      userEmail: null,
+      acknowledgeLogin: vi.fn(),
     });
 
     renderWithProviders(<Admin />);
@@ -52,10 +64,16 @@ describe('Admin', () => {
   it('shows loading state when user is logged in', () => {
     vi.mocked(useAuth).mockReturnValue({
       isLoggedIn: true,
+      userName: 'Test User',
+      userEmail: 'test@example.com',
+      userPhoto: null,
+      accessToken: 'test-access-token',
+      idToken: 'test-token',
+      isInitialized: true,
+      justLoggedIn: false,
       login: vi.fn(),
       logout: vi.fn(),
-      idToken: 'test-token',
-      userEmail: 'test@example.com',
+      acknowledgeLogin: vi.fn(),
     });
 
     renderWithProviders(<Admin />);
@@ -70,10 +88,16 @@ describe('Admin', () => {
     
     vi.mocked(useAuth).mockReturnValue({
       isLoggedIn: false,
+      userName: null,
+      userEmail: null,
+      userPhoto: null,
+      accessToken: null,
+      idToken: null,
+      isInitialized: true,
+      justLoggedIn: false,
       login: mockLogin,
       logout: vi.fn(),
-      idToken: null,
-      userEmail: null,
+      acknowledgeLogin: vi.fn(),
     });
 
     renderWithProviders(<Admin />);
