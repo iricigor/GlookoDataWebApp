@@ -23,6 +23,10 @@
     {
       "name": "User",
       "description": "User management operations"
+    },
+    {
+      "name": "AI",
+      "description": "AI analysis operations for Pro users"
     }
   ],
   "security": [
@@ -408,6 +412,190 @@
           }
         }
       }
+    },
+    "/ai/query": {
+      "post": {
+        "tags": ["AI"],
+        "summary": "Query AI providers with diabetes-related prompts",
+        "description": "Allows Pro users to query AI providers (Perplexity, Gemini, Grok, or DeepSeek) through the backend, keeping API keys secure in Azure Key Vault. The function validates the user's authentication token, verifies Pro user status, validates that the prompt is diabetes-related, and makes the AI API call on behalf of the user. Implements rate limiting (50 requests per hour per user) and abuse detection.",
+        "operationId": "aiQuery",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AIQueryRequest"
+              },
+              "examples": {
+                "perplexity": {
+                  "summary": "Query with Perplexity provider",
+                  "value": {
+                    "prompt": "Analyze this blood glucose data: 120, 130, 145, 160, 140 mg/dL over the past 5 hours. What patterns do you see?",
+                    "provider": "perplexity"
+                  }
+                },
+                "autoSelect": {
+                  "summary": "Auto-select provider",
+                  "value": {
+                    "prompt": "What are the signs of hypoglycemia and how should I respond?"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI query successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIQueryResponse"
+                },
+                "example": {
+                  "success": true,
+                  "content": "Based on the glucose readings you provided, I can see a gradual upward trend from 120 to 160 mg/dL over 5 hours...",
+                  "provider": "perplexity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid request (missing prompt, prompt too long, or non-diabetes prompt)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "missingPrompt": {
+                    "summary": "Missing prompt",
+                    "value": {
+                      "error": "Prompt is required",
+                      "errorType": "validation",
+                      "code": "MISSING_PROMPT"
+                    }
+                  },
+                  "promptTooLong": {
+                    "summary": "Prompt exceeds maximum length",
+                    "value": {
+                      "error": "Prompt exceeds maximum length of 50000 characters",
+                      "errorType": "validation",
+                      "code": "PROMPT_TOO_LONG"
+                    }
+                  },
+                  "nonDiabetesPrompt": {
+                    "summary": "Prompt is not diabetes-related",
+                    "value": {
+                      "error": "Prompt must be diabetes-related",
+                      "errorType": "validation",
+                      "code": "NON_DIABETES_PROMPT"
+                    }
+                  },
+                  "invalidProvider": {
+                    "summary": "Invalid provider specified",
+                    "value": {
+                      "error": "Invalid provider. Supported providers: perplexity, gemini, grok, deepseek",
+                      "errorType": "validation",
+                      "code": "INVALID_PROVIDER"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized access. Please log in again.",
+                  "errorType": "unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Not a Pro user or rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "notProUser": {
+                    "summary": "User is not a Pro user",
+                    "value": {
+                      "error": "This endpoint is only available to Pro users",
+                      "errorType": "forbidden",
+                      "code": "NOT_PRO_USER"
+                    }
+                  },
+                  "rateLimitExceeded": {
+                    "summary": "Rate limit exceeded",
+                    "value": {
+                      "error": "Rate limit exceeded. Maximum 50 requests per hour.",
+                      "errorType": "rate_limit",
+                      "code": "RATE_LIMIT_EXCEEDED"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error - Infrastructure error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "keyVaultError": {
+                    "summary": "Failed to retrieve API key from Key Vault",
+                    "value": {
+                      "error": "Failed to retrieve API key from Key Vault",
+                      "errorType": "infrastructure",
+                      "code": "KEY_VAULT_ERROR"
+                    }
+                  },
+                  "storageError": {
+                    "summary": "Storage access error",
+                    "value": {
+                      "error": "Failed to access rate limit storage",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_ERROR"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable - AI provider unavailable or error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "AI provider is currently unavailable. Please try again later.",
+                  "errorType": "provider",
+                  "code": "PROVIDER_UNAVAILABLE"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -552,6 +740,45 @@
           "code": {
             "type": "string",
             "description": "Optional error code for specific errors"
+          }
+        }
+      },
+      "AIQueryRequest": {
+        "type": "object",
+        "required": ["prompt"],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "The AI prompt text (must be diabetes-related, max 50,000 characters)",
+            "maxLength": 50000,
+            "example": "Analyze this blood glucose data: 120, 130, 145 mg/dL. What patterns do you see?"
+          },
+          "provider": {
+            "type": "string",
+            "enum": ["perplexity", "gemini", "grok", "deepseek"],
+            "description": "AI provider to use (optional, defaults to backend's configured provider)",
+            "example": "perplexity"
+          }
+        }
+      },
+      "AIQueryResponse": {
+        "type": "object",
+        "required": ["success", "content", "provider"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the query was successful",
+            "example": true
+          },
+          "content": {
+            "type": "string",
+            "description": "The AI-generated response content",
+            "example": "Based on the glucose readings you provided, I can see a gradual upward trend..."
+          },
+          "provider": {
+            "type": "string",
+            "description": "The AI provider that was used to generate the response",
+            "example": "perplexity"
           }
         }
       }
