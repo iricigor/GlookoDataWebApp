@@ -2,6 +2,7 @@
   "apiDocs": {
     "title": "Glooko Insights - API dokumentacija",
     "subtitle": "Interaktivni API istraživač sa Microsoft autentifikacijom",
+    "adminPageLink": "Admin stranica",
     "proUserBadge": "Pro korisnik",
     "tokenActive": "Token aktivan",
     "signOut": "Odjavi se",

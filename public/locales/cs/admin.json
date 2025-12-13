@@ -2,7 +2,20 @@
   "admin": {
     "title": "Admin",
     "subtitle": "Administrativní přístupová oblast",
+    "apiDocsPageLink": "API dokumentace",
     "loginPrompt": "Pro přístup k administrativním funkcím se prosím přihlaste",
-    "loginButton": "Přihlásit se pomocí Microsoft"
+    "loginButton": "Přihlásit se pomocí Microsoft",
+    "proRequired": "Vyžadován přístup Pro uživatele",
+    "proRequiredMessage": "Tato stránka je přístupná pouze Pro uživatelům. Pro zobrazení administrativních statistik a funkcí prosím požádejte o přístup Pro.",
+    "applyForProButton": "Požádat o přístup Pro",
+    "applyForProLink": "https://github.com/iricigor/GlookoDataWebApp/issues/new?labels=pro-access-request&template=pro-access-request.md",
+    "statistics": {
+      "title": "Systémové statistiky",
+      "loggedInUsers": "Přihlášení uživatelé",
+      "proUsers": "Pro uživatelé",
+      "apiCalls": "API volání",
+      "apiErrors": "API chyby",
+      "placeholderNote": "Statistiky budou dostupné po dokončení integrace API"
+    }
   }
 }
