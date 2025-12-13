@@ -69,9 +69,15 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
  * Note: Azure Table Storage doesn't support $count directly, so we iterate
  * through entities. For very large datasets (>10k users), consider implementing
  * pagination or caching strategies.
+ * 
+ * @returns Object with count and capped flag
  */
-async function countLoggedInUsers(tableClient: ReturnType<typeof getTableClient>): Promise<number> {
+async function countLoggedInUsers(
+  tableClient: ReturnType<typeof getTableClient>,
+  context: InvocationContext
+): Promise<{ count: number; capped: boolean }> {
   let count = 0;
+  let capped = false;
   
   // Query all entities with partitionKey='users'
   // We only select the partitionKey and rowKey to minimize data transfer
@@ -91,13 +97,13 @@ async function countLoggedInUsers(tableClient: ReturnType<typeof getTableClient>
     // Safety check: if count exceeds a reasonable limit, stop and return
     // This prevents timeouts for extremely large datasets
     if (count >= 100000) {
-      // Log warning and return the limit
-      // In production, this should trigger an alert for investigation
+      capped = true;
+      context.warn(`User count exceeded 100,000 limit - count capped at ${count}. This may indicate the need for a separate counter table.`);
       break;
     }
   }
   
-  return count;
+  return { count, capped };
 }
 
 /**
@@ -142,14 +148,18 @@ async function getLoggedInUsersCount(request: HttpRequest, context: InvocationCo
 
     // Count logged-in users
     const userSettingsTableClient = getTableClient('UserSettings');
-    const count = await countLoggedInUsers(userSettingsTableClient);
+    const { count, capped } = await countLoggedInUsers(userSettingsTableClient, context);
     
-    requestLogger.logStorage('countLoggedInUsers', true, { count });
-    requestLogger.logInfo('Logged-in users count retrieved', { count });
+    if (capped) {
+      requestLogger.logWarn('User count was capped at limit', { count, capped });
+    }
+    
+    requestLogger.logStorage('countLoggedInUsers', true, { count, capped });
+    requestLogger.logInfo('Logged-in users count retrieved', { count, capped });
     
     return requestLogger.logSuccess({
       status: 200,
-      jsonBody: { count },
+      jsonBody: { count, capped },
     });
 
   } catch (error: unknown) {
@@ -169,8 +179,27 @@ async function getLoggedInUsersCount(request: HttpRequest, context: InvocationCo
       return requestLogger.logError('Service unavailable - storage access denied', 503, 'infrastructure', { code: 'STORAGE_ACCESS_DENIED' });
     }
 
-    requestLogger.logStorage('tableOperation', false, { error: error instanceof Error ? error.message : 'Unknown error' });
-    return requestLogger.logError(error, 500, 'infrastructure');
+    // Log the full error server-side for debugging
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    requestLogger.logStorage('tableOperation', false, { 
+      error: errorMessage,
+      errorStack,
+      errorType: error instanceof Error ? error.constructor.name : typeof error
+    });
+    
+    // Return a generic error message to the client with correlation ID
+    return {
+      status: 500,
+      jsonBody: {
+        error: 'Internal server error',
+        errorType: 'infrastructure',
+        correlationId: requestLogger.correlationId,
+      },
+      headers: {
+        'x-correlation-id': requestLogger.correlationId,
+      },
+    };
   }
 }
 

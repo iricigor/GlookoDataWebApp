@@ -72,6 +72,7 @@ export function useAdminStats(idToken?: string | null, shouldFetch: boolean = tr
   const isLoadingRef = useRef(false);
   const hasLoadedRef = useRef(false);
   const currentTokenRef = useRef<string | null>(null);
+  const pendingTokenRef = useRef<string | null>(null);
 
   /**
    * Perform the statistics fetch
@@ -128,6 +129,17 @@ export function useAdminStats(idToken?: string | null, shouldFetch: boolean = tr
           errorType: result.errorType ?? 'unknown',
         }));
       }
+      
+      // Check if a new token arrived while we were fetching
+      if (pendingTokenRef.current && pendingTokenRef.current !== currentTokenRef.current) {
+        const pendingToken = pendingTokenRef.current;
+        pendingTokenRef.current = null;
+        // Reset loaded state to allow the new fetch
+        hasLoadedRef.current = false;
+        isLoadingRef.current = false;
+        // Fetch with the new token
+        fetchStats(pendingToken);
+      }
     } catch (error) {
       hasLoadedRef.current = true;
       isLoadingRef.current = false;
@@ -141,6 +153,17 @@ export function useAdminStats(idToken?: string | null, shouldFetch: boolean = tr
         errorMessage: error instanceof Error ? error.message : 'Unexpected error occurred',
         errorType: 'unknown',
       }));
+      
+      // Check if a new token arrived while we were fetching
+      if (pendingTokenRef.current && pendingTokenRef.current !== currentTokenRef.current) {
+        const pendingToken = pendingTokenRef.current;
+        pendingTokenRef.current = null;
+        // Reset loaded state to allow the new fetch
+        hasLoadedRef.current = false;
+        isLoadingRef.current = false;
+        // Fetch with the new token
+        fetchStats(pendingToken);
+      }
     }
   }, []);
 
@@ -152,6 +175,7 @@ export function useAdminStats(idToken?: string | null, shouldFetch: boolean = tr
     isLoadingRef.current = false;
     hasLoadedRef.current = false;
     currentTokenRef.current = null;
+    pendingTokenRef.current = null;
     setState(() => ({ ...initialState }));
   }, []);
 
@@ -166,12 +190,17 @@ export function useAdminStats(idToken?: string | null, shouldFetch: boolean = tr
       resetState();
     }
     
-    // Refetch if token changes (different user logged in)
-    if (shouldFetch && idToken && hasLoadedRef.current && currentTokenRef.current !== idToken) {
-      // Token changed, reset and fetch with new token
-      hasLoadedRef.current = false;
-      isLoadingRef.current = false;
-      fetchStats(idToken);
+    // Handle token changes
+    if (shouldFetch && idToken && currentTokenRef.current !== idToken) {
+      if (isLoadingRef.current) {
+        // If currently loading, queue the new token for later
+        pendingTokenRef.current = idToken;
+      } else if (hasLoadedRef.current) {
+        // If already loaded with a different token, reset and fetch with new token
+        hasLoadedRef.current = false;
+        isLoadingRef.current = false;
+        fetchStats(idToken);
+      }
     }
   }, [idToken, shouldFetch, fetchStats, resetState]);
 

@@ -13,6 +13,7 @@ import { createApiLogger } from '../logger';
 export interface LoggedInUsersCountResult {
   success: boolean;
   count?: number;
+  capped?: boolean;
   error?: string;
   errorType?: 'unauthorized' | 'authorization' | 'infrastructure' | 'network' | 'unknown';
   /** HTTP status code when available */
@@ -24,6 +25,7 @@ export interface LoggedInUsersCountResult {
  */
 interface LoggedInUsersCountApiResponse {
   count: number;
+  capped?: boolean;
 }
 
 /**
@@ -86,10 +88,11 @@ export async function getLoggedInUsersCount(
     // Success case
     if (response.ok) {
       const data = await response.json() as LoggedInUsersCountApiResponse;
-      apiLogger.logSuccess(statusCode, { count: data.count });
+      apiLogger.logSuccess(statusCode, { count: data.count, capped: data.capped });
       return {
         success: true,
         count: data.count,
+        capped: data.capped,
         statusCode,
       };
     }
