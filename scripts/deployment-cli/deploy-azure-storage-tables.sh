@@ -52,7 +52,7 @@ fi
 ################################################################################
 
 # Default tables to create
-DEFAULT_TABLES=("UserSettings" "ProUsers")
+DEFAULT_TABLES=("UserSettings" "ProUsers" "AIQueryLogs")
 TABLES_TO_CREATE=()
 ASSIGN_IDENTITY=false
 
@@ -81,6 +81,7 @@ Options:
 Tables Created (default):
   - UserSettings: Stores user preferences and settings
   - ProUsers: Stores professional user information
+  - AIQueryLogs: Stores AI query rate limiting data
 
 Examples:
   ./deploy-azure-storage-tables.sh

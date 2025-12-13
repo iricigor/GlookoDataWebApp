@@ -86,6 +86,8 @@ The endpoint requires the following tables:
    - lastRequestTime: Timestamp of last request
    - windowKey: Time window identifier (YYYY-MM-DD-HH)
 
+**Important**: The `AIQueryLogs` table must be created during deployment. Both deployment scripts (Bash and PowerShell) include this table in their default configuration.
+
 ### Managed Identity Permissions
 
 The Function App's managed identity needs the following permissions:

@@ -167,7 +167,7 @@ Creates and configures an Azure Storage Account for the GlookoDataWebApp applica
 Creates Azure Storage Tables inside an existing Storage Account. Optionally assigns RBAC roles to a managed identity if one uniquely exists in the resource group.
 
 **Features:**
-- Creates UserSettings and ProUsers tables by default
+- Creates UserSettings, ProUsers, and AIQueryLogs tables by default
 - Supports custom table names via `--table` option
 - Assigns Storage Table Data Contributor role to managed identity
 - Automatically detects unique managed identity in resource group
@@ -187,7 +187,7 @@ Creates Azure Storage Tables inside an existing Storage Account. Optionally assi
 
 **Examples:**
 ```bash
-# Deploy with defaults (creates UserSettings and ProUsers tables)
+# Deploy with defaults (creates UserSettings, ProUsers, and AIQueryLogs tables)
 ./deploy-azure-storage-tables.sh
 
 # Deploy with custom storage account
