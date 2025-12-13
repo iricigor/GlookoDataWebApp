@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>779 Add Pro user confirmation marker (✨) to AI responses</summary>
+
+[#779](../../pull/779) Add Pro user confirmation marker (✨) to AI responses
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>777 Add environment indicator to navigation header</summary>
 
 [#777](../../pull/777) Add environment indicator to navigation header
