@@ -375,14 +375,20 @@ export function Navigation({
               />
               <Text className={styles.brandText}>{t('common:brandName')}</Text>
             </div>
-            {environment !== 'prod' && (
-              <div className={styles.environmentIndicator}>
-                <div className={`${styles.environmentLine} ${environment === 'dev' ? styles.environmentLineDev : styles.environmentLineStaging}`} />
-                <Text className={`${styles.environmentText} ${environment === 'dev' ? styles.environmentTextDev : styles.environmentTextStaging}`}>
-                  {t(`common:environment.${environment}`)}
-                </Text>
-              </div>
-            )}
+            {environment !== 'prod' && (() => {
+              const isDev = environment === 'dev';
+              const lineClass = isDev ? styles.environmentLineDev : styles.environmentLineStaging;
+              const textClass = isDev ? styles.environmentTextDev : styles.environmentTextStaging;
+              
+              return (
+                <div className={styles.environmentIndicator}>
+                  <div className={`${styles.environmentLine} ${lineClass}`} />
+                  <Text className={`${styles.environmentText} ${textClass}`}>
+                    {t(`common:environment.${environment}`)}
+                  </Text>
+                </div>
+              );
+            })()}
           </div>
         </div>
         
