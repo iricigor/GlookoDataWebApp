@@ -7,6 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { APIDocs } from './APIDocs';
 
 // Mock react-i18next
@@ -16,6 +17,7 @@ vi.mock('react-i18next', () => ({
       const translations: Record<string, string> = {
         'apiDocs.title': 'Glooko Insights - API Documentation',
         'apiDocs.subtitle': 'Interactive API explorer with Microsoft authentication',
+        'apiDocs.adminPageLink': 'Admin page',
         'apiDocs.proUserBadge': 'Pro user',
         'apiDocs.tokenActive': 'Token active',
         'apiDocs.signOut': 'Sign Out',
@@ -76,7 +78,11 @@ describe('APIDocs', () => {
   });
 
   it('should render the component with translations', () => {
-    const { container } = render(<APIDocs />);
+    const { container } = render(
+      <FluentProvider theme={webLightTheme}>
+        <APIDocs />
+      </FluentProvider>
+    );
     // Verify the component renders successfully
     // The presence of text content confirms translations are working
     expect(container).toBeInTheDocument();
@@ -84,10 +90,25 @@ describe('APIDocs', () => {
   });
 
   it('should display sign-in button when not authenticated', () => {
-    render(<APIDocs />);
+    render(
+      <FluentProvider theme={webLightTheme}>
+        <APIDocs />
+      </FluentProvider>
+    );
     // Check for button by role
     const buttons = screen.getAllByRole('button');
     expect(buttons.length).toBeGreaterThan(0);
+  });
+
+  it('should render link to admin page', () => {
+    render(
+      <FluentProvider theme={webLightTheme}>
+        <APIDocs />
+      </FluentProvider>
+    );
+    const link = screen.getByRole('link');
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', '#admin');
   });
 });
 

@@ -54,7 +54,40 @@ describe('Admin', () => {
     renderWithProviders(<Admin />);
 
     expect(screen.getByText('Admin')).toBeInTheDocument();
-    expect(screen.getByText('Administrative access area')).toBeInTheDocument();
+    expect(screen.getByText(/Administrative access area/)).toBeInTheDocument();
+  });
+
+  it('renders link to API documentation', () => {
+    vi.mocked(useAuth).mockReturnValue({
+      isLoggedIn: false,
+      userName: null,
+      userEmail: null,
+      userPhoto: null,
+      accessToken: null,
+      idToken: null,
+      isInitialized: true,
+      justLoggedIn: false,
+      login: vi.fn(),
+      logout: vi.fn(),
+      acknowledgeLogin: vi.fn(),
+    });
+
+    vi.mocked(useProUserCheck).mockReturnValue({
+      isChecking: false,
+      hasChecked: false,
+      isProUser: false,
+      secretValue: null,
+      hasError: false,
+      errorMessage: null,
+      performCheck: vi.fn(),
+      resetState: vi.fn(),
+    });
+
+    renderWithProviders(<Admin />);
+
+    const link = screen.getByRole('link');
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', '#api-docs');
   });
 
   it('shows login prompt when user is not logged in', () => {

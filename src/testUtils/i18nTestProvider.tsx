@@ -176,6 +176,7 @@ const enTranslations = {
     "admin": {
       "title": "Admin",
       "subtitle": "Administrative access area",
+      "apiDocsPageLink": "API Documentation",
       "loginPrompt": "Please login to access administrative features",
       "loginButton": "Login with Microsoft",
       "proRequired": "Pro User Access Required",
@@ -194,6 +195,22 @@ const enTranslations = {
     "common": {
       "loading": "Loading..."
     }
+  },
+  apiDocs: {
+    "apiDocs": {
+      "title": "Glooko Insights - API Documentation",
+      "subtitle": "Interactive API explorer with Microsoft authentication",
+      "adminPageLink": "Admin page",
+      "proUserBadge": "Pro user",
+      "tokenActive": "Token active",
+      "signOut": "Sign Out",
+      "signInPrompt": "Sign in to test authenticated endpoints",
+      "signInButton": "Sign in with Microsoft",
+      "signInMessage": "Sign in with your Microsoft account to test API endpoints. Your authentication token will be automatically added to requests.",
+      "initializingAuth": "Initializing authentication...",
+      "loadingDocs": "Loading API documentation...",
+      "loadError": "Failed to load API documentation"
+    }
   }
 };
 
@@ -204,7 +221,7 @@ i18n
     lng: 'en',
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'navigation', 'home', 'dataUpload', 'dialogs', 'notifications', 'admin'],
+    ns: ['common', 'navigation', 'home', 'dataUpload', 'dialogs', 'notifications', 'admin', 'apiDocs'],
     resources: {
       en: enTranslations
     },
