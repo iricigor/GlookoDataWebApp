@@ -123,15 +123,15 @@ export function PumpSettingsTab({
     // Generate the prompt with the base64 CSV data
     const prompt = generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, activeProvider!);
 
-    // Get the appropriate API key for the active provider (only needed for non-Pro users)
+    // Get the appropriate API key for the active provider
     const apiKey = activeProvider === 'perplexity' ? perplexityApiKey
                   : activeProvider === 'grok' ? grokApiKey
                   : activeProvider === 'deepseek' ? deepseekApiKey
                   : geminiApiKey;
 
-    // Call the AI API - it will automatically route to backend for Pro users with Pro keys enabled
+    // Call the AI API - only use backend if Pro user with Pro keys enabled AND has idToken
     return await callAIWithRouting(activeProvider!, prompt, {
-      apiKey: (isProUser && useProKeys) ? undefined : apiKey,
+      apiKey: (isProUser && useProKeys && idToken) ? undefined : apiKey,
       idToken: idToken || undefined,
       isProUser,
       useProKeys,

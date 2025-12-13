@@ -320,7 +320,7 @@ export async function callAIWithRouting(
   if (!apiKey) {
     return {
       success: false,
-      error: 'API key is required for non-Pro users',
+      error: 'API key is required when not using Pro backend keys',
       errorType: 'api',
     };
   }

@@ -151,13 +151,13 @@ export function GlucoseInsulinTab({
       // Generate the prompt with the base64 CSV data
       const prompt = generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, activeProvider);
 
-      // Get the appropriate API key for the active provider (only needed for non-Pro users)
+      // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
                       activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
-      // Call the AI API - it will automatically route to backend for Pro users with Pro keys enabled
+      // Call the AI API - only use backend if Pro user with Pro keys enabled AND has idToken
       const result = await callAIWithRouting(activeProvider, prompt, {
-        apiKey: (isProUser && useProKeys) ? undefined : apiKey,
+        apiKey: (isProUser && useProKeys && idToken) ? undefined : apiKey,
         idToken: idToken || undefined,
         isProUser,
         useProKeys,

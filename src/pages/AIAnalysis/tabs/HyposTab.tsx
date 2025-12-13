@@ -194,9 +194,9 @@ export function HyposTab({
       activeProvider === 'deepseek' ? deepseekApiKey :
       geminiApiKey;
 
-    // Call the AI API - it will automatically route to backend for Pro users with Pro keys enabled
+    // Call the AI API - only use backend if Pro user with Pro keys enabled AND has idToken
     return await callAIWithRouting(activeProvider!, prompt, {
-      apiKey: (isProUser && useProKeys) ? undefined : apiKey,
+      apiKey: (isProUser && useProKeys && idToken) ? undefined : apiKey,
       idToken: idToken || undefined,
       isProUser,
       useProKeys,
