@@ -48,6 +48,11 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
   } catch (error: unknown) {
     // 404 means user is not a pro user
     if (isNotFoundError(error)) {
+      // Distinguish entity-level (EntityNotFound) from table-level (TableNotFound) 404s
+      const code = (error && typeof error === 'object' && 'code' in error) ? String((error as any).code) : undefined;
+      if (code === 'TableNotFound') {
+        throw error; // let handler map to 503
+      }
       return false;
     }
     // Re-throw other errors
