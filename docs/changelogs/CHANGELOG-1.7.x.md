@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>768 Add access control and placeholder statistics to Admin page</summary>
+
+[#768](../../pull/768) Add access control and placeholder statistics to Admin page
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>767 Add AIQueryLogs table to deployment scripts</summary>
 
 [#767](../../pull/767) Add AIQueryLogs table to deployment scripts
