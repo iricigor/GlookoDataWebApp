@@ -1,0 +1,8 @@
+{
+  "admin": {
+    "title": "Admin",
+    "subtitle": "Administrativní přístupová oblast",
+    "loginPrompt": "Pro přístup k administrativním funkcím se prosím přihlaste",
+    "loginButton": "Přihlásit se pomocí Microsoft"
+  }
+}

@@ -17,6 +17,7 @@ import { Reports } from './pages/Reports'
 import { AIAnalysis } from './pages/AIAnalysis'
 import { Settings } from './pages/Settings'
 import { APIDocs } from './pages/APIDocs'
+import { Admin } from './pages/Admin'
 import { useTheme, isDarkTheme } from './hooks/useTheme'
 import { useExportFormat } from './hooks/useExportFormat'
 import { useResponseLanguage } from './hooks/useResponseLanguage'
@@ -463,6 +464,8 @@ function App() {
         />
       case 'api-docs':
         return <APIDocs />
+      case 'admin':
+        return <Admin />
       default:
         return <Home onNavigate={handleNavigate} />
     }

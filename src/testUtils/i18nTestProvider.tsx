@@ -15,7 +15,14 @@ const enTranslations = {
   common: {
     "common": {
       "english": "English",
-      "german": "German"
+      "german": "German",
+      "cancel": "Cancel",
+      "ok": "OK",
+      "save": "Save",
+      "delete": "Delete",
+      "edit": "Edit",
+      "close": "Close",
+      "loading": "Loading..."
     },
     "appTitle": "Glooko Data Web App",
     "brandName": "Glooko Insights",
@@ -164,6 +171,14 @@ const enTranslations = {
       "fileLoadedSuccessTitle": "File loaded successfully",
       "fileLoadedSuccessBody": "{{fileName}} has been selected for analysis"
     }
+  },
+  admin: {
+    "admin": {
+      "title": "Admin",
+      "subtitle": "Administrative access area",
+      "loginPrompt": "Please login to access administrative features",
+      "loginButton": "Login with Microsoft"
+    }
   }
 };
 
@@ -174,7 +189,7 @@ i18n
     lng: 'en',
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'navigation', 'home', 'dataUpload', 'dialogs', 'notifications'],
+    ns: ['common', 'navigation', 'home', 'dataUpload', 'dialogs', 'notifications', 'admin'],
     resources: {
       en: enTranslations
     },
