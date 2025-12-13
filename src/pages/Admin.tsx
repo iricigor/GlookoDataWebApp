@@ -5,10 +5,12 @@ import {
   tokens,
   shorthands,
   Button,
+  Link,
 } from '@fluentui/react-components';
-import { PersonRegular } from '@fluentui/react-icons';
+import { PersonRegular, ShieldCheckmarkRegular, DataUsageRegular } from '@fluentui/react-icons';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
+import { useProUserCheck } from '../hooks/useProUserCheck';
 
 const useStyles = makeStyles({
   container: {
@@ -74,21 +76,72 @@ const useStyles = makeStyles({
     alignItems: 'center',
     ...shorthands.gap('8px'),
   },
+  statsContainer: {
+    width: '100%',
+    maxWidth: '900px',
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('24px'),
+  },
+  statsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    ...shorthands.gap('16px'),
+    width: '100%',
+  },
+  statCard: {
+    ...shorthands.padding('24px'),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+    ...shorthands.gap('12px'),
+  },
+  statIcon: {
+    fontSize: '48px',
+    color: tokens.colorBrandForeground1,
+  },
+  statValue: {
+    fontSize: tokens.fontSizeHero900,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    fontFamily: 'Segoe UI, sans-serif',
+  },
+  statLabel: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    fontFamily: 'Segoe UI, sans-serif',
+  },
+  noteCard: {
+    ...shorthands.padding('16px', '24px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+  },
+  noteText: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    fontStyle: 'italic',
+    fontFamily: 'Segoe UI, sans-serif',
+  },
 });
 
 /**
  * Renders the Admin page with app branding and login option.
  *
  * This page is intentionally not linked from other pages and can only be accessed
- * by typing the URL directly (/admin) or via bookmarks. It displays the app name,
- * icon, login option, and footer.
+ * by typing the URL directly (/admin) or via bookmarks. 
+ * 
+ * Access control:
+ * - Not logged in users: see login prompt
+ * - Logged in non-Pro users: see message about Pro access requirement with link to apply
+ * - Pro users: see administrative statistics (placeholder data for now)
  *
  * @returns The rendered admin page element
  */
 export function Admin() {
   const styles = useStyles();
   const { t } = useTranslation(['admin', 'common']);
-  const { isLoggedIn, login } = useAuth();
+  const { isLoggedIn, login, idToken } = useAuth();
+  const { isProUser, hasChecked } = useProUserCheck(isLoggedIn ? idToken : null);
 
   const handleLogin = async () => {
     try {
@@ -96,6 +149,148 @@ export function Admin() {
     } catch (error) {
       console.error('Login failed:', error);
     }
+  };
+
+  // Show loading state while checking Pro status
+  const isCheckingProStatus = isLoggedIn && !hasChecked;
+
+  // Render content based on auth and Pro status
+  const renderContent = () => {
+    // Not logged in - show login prompt
+    if (!isLoggedIn) {
+      return (
+        <Card className={styles.card}>
+          <div className={styles.cardContent}>
+            <div className={styles.iconContainer}>
+              <PersonRegular />
+            </div>
+            <Text className={styles.loginText}>
+              {t('admin.loginPrompt')}
+            </Text>
+            <Button 
+              appearance="primary" 
+              size="large"
+              onClick={handleLogin}
+              className={styles.loginButton}
+            >
+              {t('admin.loginButton')}
+            </Button>
+          </div>
+        </Card>
+      );
+    }
+
+    // Checking Pro status - show loading
+    if (isCheckingProStatus) {
+      return (
+        <Card className={styles.card}>
+          <div className={styles.cardContent}>
+            <Text className={styles.loginText}>
+              {t('common.loading')}
+            </Text>
+          </div>
+        </Card>
+      );
+    }
+
+    // Logged in but not Pro - show Pro requirement message
+    if (!isProUser) {
+      return (
+        <Card className={styles.card}>
+          <div className={styles.cardContent}>
+            <div className={styles.iconContainer}>
+              <ShieldCheckmarkRegular />
+            </div>
+            <Text as="h2" style={{ 
+              fontSize: tokens.fontSizeHero800,
+              fontWeight: tokens.fontWeightSemibold,
+              marginBottom: '8px',
+              fontFamily: 'Segoe UI, sans-serif',
+            }}>
+              {t('admin.proRequired')}
+            </Text>
+            <Text className={styles.loginText}>
+              {t('admin.proRequiredMessage')}
+            </Text>
+            <Link
+              href={t('admin.applyForProLink')}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button 
+                appearance="primary" 
+                size="large"
+                className={styles.loginButton}
+              >
+                {t('admin.applyForProButton')}
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      );
+    }
+
+    // Pro user - show statistics
+    return (
+      <div className={styles.statsContainer}>
+        <Text as="h2" style={{ 
+          fontSize: tokens.fontSizeHero800,
+          fontWeight: tokens.fontWeightSemibold,
+          textAlign: 'center',
+          fontFamily: 'Segoe UI, sans-serif',
+        }}>
+          {t('admin.statistics.title')}
+        </Text>
+
+        <div className={styles.statsGrid}>
+          <Card className={styles.statCard}>
+            <div className={styles.statIcon}>
+              <PersonRegular />
+            </div>
+            <Text className={styles.statValue}>-</Text>
+            <Text className={styles.statLabel}>
+              {t('admin.statistics.loggedInUsers')}
+            </Text>
+          </Card>
+
+          <Card className={styles.statCard}>
+            <div className={styles.statIcon}>
+              <ShieldCheckmarkRegular />
+            </div>
+            <Text className={styles.statValue}>-</Text>
+            <Text className={styles.statLabel}>
+              {t('admin.statistics.proUsers')}
+            </Text>
+          </Card>
+
+          <Card className={styles.statCard}>
+            <div className={styles.statIcon}>
+              <DataUsageRegular />
+            </div>
+            <Text className={styles.statValue}>-</Text>
+            <Text className={styles.statLabel}>
+              {t('admin.statistics.apiCalls')}
+            </Text>
+          </Card>
+
+          <Card className={styles.statCard}>
+            <div className={styles.statIcon}>
+              <DataUsageRegular />
+            </div>
+            <Text className={styles.statValue}>-</Text>
+            <Text className={styles.statLabel}>
+              {t('admin.statistics.apiErrors')}
+            </Text>
+          </Card>
+        </div>
+
+        <Card className={styles.noteCard}>
+          <Text className={styles.noteText}>
+            {t('admin.statistics.placeholderNote')}
+          </Text>
+        </Card>
+      </div>
+    );
   };
 
   return (
@@ -107,32 +302,7 @@ export function Admin() {
         </Text>
       </div>
 
-      <Card className={styles.card}>
-        <div className={styles.cardContent}>
-          <div className={styles.iconContainer}>
-            <PersonRegular />
-          </div>
-          {!isLoggedIn ? (
-            <>
-              <Text className={styles.loginText}>
-                {t('admin.loginPrompt')}
-              </Text>
-              <Button 
-                appearance="primary" 
-                size="large"
-                onClick={handleLogin}
-                className={styles.loginButton}
-              >
-                {t('admin.loginButton')}
-              </Button>
-            </>
-          ) : (
-            <Text className={styles.loginText}>
-              {t('common.loading')}
-            </Text>
-          )}
-        </div>
-      </Card>
+      {renderContent()}
     </div>
   );
 }

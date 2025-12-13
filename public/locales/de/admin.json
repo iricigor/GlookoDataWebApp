@@ -3,6 +3,18 @@
     "title": "Admin",
     "subtitle": "Administrativer Zugriffsbereich",
     "loginPrompt": "Bitte melden Sie sich an, um auf administrative Funktionen zuzugreifen",
-    "loginButton": "Mit Microsoft anmelden"
+    "loginButton": "Mit Microsoft anmelden",
+    "proRequired": "Pro-Benutzerzugriff erforderlich",
+    "proRequiredMessage": "Diese Seite ist nur für Pro-Benutzer zugänglich. Bitte beantragen Sie Pro-Zugriff, um administrative Statistiken und Funktionen anzuzeigen.",
+    "applyForProButton": "Pro-Zugriff beantragen",
+    "applyForProLink": "https://github.com/iricigor/GlookoDataWebApp/issues/new?labels=pro-access-request&template=pro-access-request.md",
+    "statistics": {
+      "title": "Systemstatistiken",
+      "loggedInUsers": "Angemeldete Benutzer",
+      "proUsers": "Pro-Benutzer",
+      "apiCalls": "API-Aufrufe",
+      "apiErrors": "API-Fehler",
+      "placeholderNote": "Statistiken werden verfügbar sein, sobald die API-Integration abgeschlossen ist"
+    }
   }
 }
