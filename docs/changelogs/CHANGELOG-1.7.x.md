@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>773 Add cross-navigation links between admin and API docs pages</summary>
+
+[#773](../../pull/773) Add cross-navigation links between admin and API docs pages
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>771 Fix temp build warnings and make PR preview non-blocking</summary>
 
 [#771](../../pull/771) Fix temp build warnings and make PR preview non-blocking
