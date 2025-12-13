@@ -11,6 +11,7 @@ import { PersonRegular, ShieldCheckmarkRegular, DataUsageRegular } from '@fluent
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useProUserCheck } from '../hooks/useProUserCheck';
+import { useAdminStats } from '../hooks/useAdminStats';
 
 const useStyles = makeStyles({
   container: {
@@ -145,6 +146,12 @@ export function Admin() {
   const { t } = useTranslation(['admin', 'common']);
   const { isLoggedIn, login, idToken } = useAuth();
   const { isProUser, hasChecked } = useProUserCheck(isLoggedIn ? idToken : null);
+  
+  // Fetch admin statistics only if user is a Pro user
+  const { loggedInUsersCount, isLoading: isLoadingStats } = useAdminStats(
+    isLoggedIn && isProUser ? idToken : null,
+    isLoggedIn && isProUser
+  );
 
   const handleLogin = async () => {
     try {
@@ -250,7 +257,9 @@ export function Admin() {
             <div className={styles.statIcon}>
               <PersonRegular />
             </div>
-            <Text className={styles.statValue}>-</Text>
+            <Text className={styles.statValue}>
+              {isLoadingStats ? t('common.loading') : (loggedInUsersCount !== null ? loggedInUsersCount.toString() : '-')}
+            </Text>
             <Text className={styles.statLabel}>
               {t('admin.statistics.loggedInUsers')}
             </Text>
