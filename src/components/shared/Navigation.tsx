@@ -34,6 +34,7 @@ import { WelcomeDialog } from './WelcomeDialog';
 import { InfrastructureErrorDialog } from './InfrastructureErrorDialog';
 import { type ThemeMode, isDarkTheme } from '../../hooks/useTheme';
 import type { SyncStatus } from '../../hooks/useUserSettings';
+import { detectEnvironment } from '../../utils/environment';
 
 const useStyles = makeStyles({
   nav: {
@@ -57,6 +58,11 @@ const useStyles = makeStyles({
   },
   brand: {
     display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('0px'),
+  },
+  brandTop: {
+    display: 'flex',
     alignItems: 'center',
     ...shorthands.gap('8px'),
   },
@@ -76,6 +82,38 @@ const useStyles = makeStyles({
     '@media (max-width: 768px)': {
       fontSize: tokens.fontSizeBase400,
     },
+  },
+  environmentIndicator: {
+    display: 'flex',
+    flexDirection: 'column',
+    ...shorthands.gap('1px'),
+    marginLeft: '36px', // Align with text, account for icon width + gap
+    '@media (max-width: 768px)': {
+      marginLeft: '32px',
+    },
+  },
+  environmentLine: {
+    height: '2px',
+    width: '100%',
+  },
+  environmentLineDev: {
+    backgroundColor: '#e81123', // Red color for dev
+  },
+  environmentLineStaging: {
+    backgroundColor: '#107c10', // Green color for staging
+  },
+  environmentText: {
+    fontSize: '9px',
+    lineHeight: '10px',
+    fontWeight: tokens.fontWeightSemibold,
+    fontFamily: 'Consolas, "Courier New", monospace',
+    letterSpacing: '0.5px',
+  },
+  environmentTextDev: {
+    color: '#e81123', // Red color for dev
+  },
+  environmentTextStaging: {
+    color: '#107c10', // Green color for staging
   },
   centerSection: {
     display: 'flex',
@@ -286,6 +324,9 @@ export function Navigation({
       : t('navigation.switchToDarkMode');
   const themeIconClass = syncStatus === 'syncing' ? styles.pulsingIcon : undefined;
 
+  // Detect environment
+  const environment = detectEnvironment();
+
   const navItems = [
     { page: 'home', label: t('navigation.home'), icon: <HomeRegular /> },
     { page: 'upload', label: t('navigation.dataUpload'), icon: <CloudArrowUpRegular /> },
@@ -326,12 +367,22 @@ export function Navigation({
           </div>
           
           <div className={styles.brand}>
-            <img 
-              src="/favicon/favicon.svg" 
-              alt={t('common:brandAltText')}
-              className={styles.brandIcon}
-            />
-            <Text className={styles.brandText}>{t('common:brandName')}</Text>
+            <div className={styles.brandTop}>
+              <img 
+                src="/favicon/favicon.svg" 
+                alt={t('common:brandAltText')}
+                className={styles.brandIcon}
+              />
+              <Text className={styles.brandText}>{t('common:brandName')}</Text>
+            </div>
+            {environment !== 'prod' && (
+              <div className={styles.environmentIndicator}>
+                <div className={`${styles.environmentLine} ${environment === 'dev' ? styles.environmentLineDev : styles.environmentLineStaging}`} />
+                <Text className={`${styles.environmentText} ${environment === 'dev' ? styles.environmentTextDev : styles.environmentTextStaging}`}>
+                  {t(`common:environment.${environment}`)}
+                </Text>
+              </div>
+            )}
           </div>
         </div>
         
