@@ -171,7 +171,7 @@ export function APIDocs() {
         <div className={styles.headerLeft}>
           <Text className={styles.title}>{t('apiDocs.title')}</Text>
           <Text className={styles.subtitle}>
-            {t('apiDocs.subtitle')}
+            {t('apiDocs.subtitle')} | <a href="#admin" style={{ color: tokens.colorBrandForeground1 }}>{t('apiDocs.adminPageLink')}</a>
           </Text>
         </div>
         

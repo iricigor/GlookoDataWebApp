@@ -2,7 +2,20 @@
   "admin": {
     "title": "Admin",
     "subtitle": "Administrativna oblast pristupa",
+    "apiDocsPageLink": "API dokumentacija",
     "loginPrompt": "Molimo prijavite se da pristupite administrativnim funkcijama",
-    "loginButton": "Prijavite se sa Microsoft"
+    "loginButton": "Prijavite se sa Microsoft",
+    "proRequired": "Potreban je Pro korisnički pristup",
+    "proRequiredMessage": "Ova stranica je dostupna samo Pro korisnicima. Molimo prijavite se za Pro pristup da biste videli administrativne statistike i funkcije.",
+    "applyForProButton": "Prijavite se za Pro pristup",
+    "applyForProLink": "https://github.com/iricigor/GlookoDataWebApp/issues/new?labels=pro-access-request&template=pro-access-request.md",
+    "statistics": {
+      "title": "Sistemske statistike",
+      "loggedInUsers": "Prijavljeni korisnici",
+      "proUsers": "Pro korisnici",
+      "apiCalls": "API pozivi",
+      "apiErrors": "API greške",
+      "placeholderNote": "Statistike će biti dostupne nakon završetka integracije API-ja"
+    }
   }
 }

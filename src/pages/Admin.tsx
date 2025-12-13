@@ -298,7 +298,7 @@ export function Admin() {
       <div className={styles.header}>
         <Text className={styles.title}>{t('admin.title')}</Text>
         <Text className={styles.subtitle}>
-          {t('admin.subtitle')}
+          {t('admin.subtitle')} | <a href="#api-docs" style={{ color: tokens.colorBrandForeground1 }}>{t('admin.apiDocsPageLink')}</a>
         </Text>
       </div>
 

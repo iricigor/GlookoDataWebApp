@@ -2,6 +2,7 @@
   "apiDocs": {
     "title": "Glooko Insights - API Documentation",
     "subtitle": "Interactive API explorer with Microsoft authentication",
+    "adminPageLink": "Admin page",
     "proUserBadge": "Pro user",
     "tokenActive": "Token active",
     "signOut": "Sign Out",

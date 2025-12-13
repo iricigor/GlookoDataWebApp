@@ -2,6 +2,7 @@
   "admin": {
     "title": "Admin",
     "subtitle": "Administrativer Zugriffsbereich",
+    "apiDocsPageLink": "API-Dokumentation",
     "loginPrompt": "Bitte melden Sie sich an, um auf administrative Funktionen zuzugreifen",
     "loginButton": "Mit Microsoft anmelden",
     "proRequired": "Pro-Benutzerzugriff erforderlich",
