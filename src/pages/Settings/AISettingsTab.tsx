@@ -32,15 +32,11 @@ import { getProviderDisplayName, getActiveProvider, getAvailableProviders, verif
 import type { AISettingsTabProps, VerificationState } from './types';
 
 /**
- * Renders the AI Configuration settings UI for managing per-provider API keys, verification, and provider selection.
+ * Render the AI settings UI for configuring per-provider API keys, key verification, provider selection, and informational guidance.
  *
- * The component shows masked API key inputs with inline editing, per-provider verification controls (idle/verifying/valid/invalid),
- * automatic provider selection when keys are added or removed, and an informational accordion about privacy, storage, and best practices.
+ * The component displays masked API key inputs with inline editing, per-provider verification controls, automatic provider selection when keys are added or removed, a Pro-keys toggle for eligible users, and an informational accordion about privacy, storage, and security best practices.
  *
- * @param styles - Styling object for layout and element classes.
- * @param selectedProvider - Currently selected AI provider or `null` when none is selected.
- * @param onSelectedProviderChange - Callback invoked with the new provider (or `null`) when the selected provider changes.
- * @param onProviderAutoSwitch - Optional callback invoked when the component automatically switches providers after a verification failure; receives `(failedProvider, newProvider)`.
+ * @param onProviderAutoSwitch - Optional callback invoked when the component automatically switches providers after a verification failure; called with `(failedProvider, newProvider)`.
  * @returns The AI configuration settings UI as a React element.
  */
 export function AISettingsTab({

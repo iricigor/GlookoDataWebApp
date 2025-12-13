@@ -15,16 +15,10 @@ import { PersonStarRegular } from '@fluentui/react-icons';
 import type { ProUsersTabProps } from './types';
 
 /**
- * Render the Pro Users tab UI that provides information about Pro Users features and a link to express interest.
+ * Render the Pro Users settings tab displaying information about Pro features, benefits, badge details, and a button to express interest.
  *
- * Displays a message that Pro Users features are not yet enabled, describes the benefits of becoming a Pro User, and provides a link to open an issue to express interest.
- * For Pro users, displays a switch to toggle between using Pro backend keys and own API keys.
- *
- * @param styles - Styles applied to sections and elements of the Pro Users tab
- * @param useProKeys - Whether to use Pro backend keys (for Pro users only)
- * @param onUseProKeysChange - Callback invoked when useProKeys preference changes
- * @param isProUser - Whether the current user is a Pro user
- * @returns The Pro Users tab React element
+ * @param styles - CSS class names used to style the sections and elements of the tab
+ * @returns The React element for the Pro Users settings tab
  */
 export function ProUsersTab({ styles }: ProUsersTabProps) {
   const { t } = useTranslation('settings');
