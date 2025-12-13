@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>757 Add blank Admin page accessible only via direct URL</summary>
+
+[#757](../../pull/757) Add blank Admin page accessible only via direct URL
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>753 Add secure backend AI endpoint for Pro users with race-safe rate limiting and enhanced validation</summary>
 
 [#753](../../pull/753) Add secure backend AI endpoint for Pro users with race-safe rate limiting and enhanced validation
