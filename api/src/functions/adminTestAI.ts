@@ -315,26 +315,47 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorStack = error instanceof Error ? error.stack : undefined;
 
+    // Get Key Vault configuration from environment (to return even on error)
+    const keyVaultName = process.env.KEY_VAULT_NAME || 'Not configured';
+    const aiApiKeySecret = process.env.AI_API_KEY_SECRET || DEFAULT_AI_API_KEY_SECRET;
+    const provider = process.env.AI_PROVIDER || 'perplexity';
+
     // Check for Key Vault errors
     if (errorMessage.includes('Key Vault') || errorMessage.includes('API key not configured')) {
       requestLogger.logWarn('Key Vault error', { error: errorMessage });
-      return requestLogger.logError(
-        'Failed to retrieve API key configuration',
-        500,
-        'infrastructure',
-        { code: 'KEY_VAULT_ERROR' }
-      );
+      return {
+        status: 500,
+        jsonBody: {
+          error: 'Failed to retrieve API key configuration',
+          errorType: 'infrastructure',
+          code: 'KEY_VAULT_ERROR',
+          provider,
+          keyVaultName,
+          aiApiKeySecret,
+        },
+        headers: {
+          'x-correlation-id': requestLogger.correlationId,
+        },
+      };
     }
 
     // Check for AI provider errors
     if (errorMessage.includes('API error')) {
       requestLogger.logWarn('AI provider error', { error: errorMessage });
-      return requestLogger.logError(
-        `AI provider test failed: ${errorMessage}`,
-        503,
-        'provider',
-        { code: 'PROVIDER_ERROR' }
-      );
+      return {
+        status: 503,
+        jsonBody: {
+          error: `AI provider test failed: ${errorMessage}`,
+          errorType: 'provider',
+          code: 'PROVIDER_ERROR',
+          provider,
+          keyVaultName,
+          aiApiKeySecret,
+        },
+        headers: {
+          'x-correlation-id': requestLogger.correlationId,
+        },
+      };
     }
 
     // Generic error
@@ -344,7 +365,20 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
       errorType: error instanceof Error ? error.constructor.name : typeof error
     });
 
-    return requestLogger.logError(error, 500, 'infrastructure');
+    return {
+      status: 500,
+      jsonBody: {
+        error: 'Internal server error',
+        errorType: 'infrastructure',
+        provider,
+        keyVaultName,
+        aiApiKeySecret,
+        correlationId: requestLogger.correlationId,
+      },
+      headers: {
+        'x-correlation-id': requestLogger.correlationId,
+      },
+    };
   }
 }
 

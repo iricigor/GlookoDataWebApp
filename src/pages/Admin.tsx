@@ -226,6 +226,9 @@ export function Admin() {
       } else {
         setTestResult({
           success: false,
+          provider: result.provider,
+          keyVaultName: result.keyVaultName,
+          aiApiKeySecret: result.aiApiKeySecret,
           message: t('admin.aiTest.testError', { error: result.error || 'Unknown error' })
         });
       }
@@ -388,8 +391,8 @@ export function Admin() {
               {t('admin.aiTest.description')}
             </Text>
             
-            {/* Display Key Vault Configuration */}
-            {testResult && testResult.success && (
+            {/* Display Key Vault Configuration - always show if we have test result data */}
+            {testResult && (testResult.provider || testResult.keyVaultName || testResult.aiApiKeySecret) && (
               <div style={{ 
                 marginBottom: '16px', 
                 padding: '12px', 
