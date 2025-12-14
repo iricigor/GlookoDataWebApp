@@ -4,7 +4,7 @@
  * This function allows Pro users with admin access to test the Pro AI key configuration
  * by sending a simple test query to the configured AI provider.
  * 
- * POST /api/admin/test-ai
+ * POST /api/glookoAdmin/test-ai
  * 
  * Headers:
  *   - Authorization: Bearer <id_token> (required)
@@ -385,7 +385,7 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
 // Register the function with Azure Functions v4
 app.http('adminTestAI', {
   methods: ['POST'],
-  route: 'admin/test-ai',
+  route: 'glookoAdmin/test-ai',
   authLevel: 'anonymous',
   handler: testAI,
 });

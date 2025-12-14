@@ -50,7 +50,7 @@ The API will be available at `http://localhost:7071/api/`
 | `/api/user/check-first-login` | GET | Check if user is logging in for the first time |
 | `/api/user/settings` | GET, PUT | Load and save user settings |
 | `/api/user/check-pro-status` | GET | Check if user is a Pro user |
-| `/api/admin/stats/logged-in-users` | GET | Get count of logged-in users (Pro users only) |
+| `/api/glookoAdmin/stats/logged-in-users` | GET | Get count of logged-in users (Pro users only) |
 
 ## Deployment
 
