@@ -21,3 +21,4 @@ import './functions/checkProStatus';
 import './functions/userSettings';
 import './functions/aiQuery';
 import './functions/adminStats';
+import './functions/adminTestAI';

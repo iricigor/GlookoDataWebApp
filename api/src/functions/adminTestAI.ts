@@ -28,13 +28,6 @@ import { extractUserInfoFromToken, getTableClient, isNotFoundError, getSecretFro
 import { createRequestLogger } from "../utils/logger";
 
 /**
- * Request body interface
- */
-interface AdminTestAIRequest {
-  provider?: string;
-}
-
-/**
  * URL-encode a string for use as RowKey
  */
 function urlEncode(str: string): string {
