@@ -156,7 +156,8 @@
         "description": "Jako Pro uživatel můžete zvolit použití našich spravovaných AI klíčů nebo pokračovat v používání vlastních API klíčů.",
         "switchLabel": "Použít Pro AI klíče",
         "usingProKeys": "Momentálně používáte spravované Pro AI klíče. Nemusíte konfigurovat vlastní API klíče na kartě Nastavení AI.",
-        "usingOwnKeys": "Momentálně používáte vlastní API klíče. Nakonfigurujte je na kartě Nastavení AI."
+        "usingOwnKeys": "Momentálně používáte vlastní API klíče. Nakonfigurujte je na kartě Nastavení AI.",
+        "requiresProAccess": "Pro přístup k Pro uživatelům je vyžadován pro použití spravovaných AI klíčů. Požádejte o přístup Pro pro aktivaci této funkce."
       },
       "benefits": {
         "title": "Co získají Pro uživatelé",

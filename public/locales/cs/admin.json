@@ -15,6 +15,15 @@
       "apiCalls": "API volání",
       "apiErrors": "API chyby",
       "placeholderNote": "Statistiky budou dostupné po dokončení integrace API"
+    },
+    "aiTest": {
+      "title": "Test konfigurace AI",
+      "description": "Otestujte konfiguraci Pro AI klíče a ověřte, že funguje správně",
+      "testButton": "Testovat AI klíč",
+      "testing": "Testování...",
+      "selectProvider": "Vybrat poskytovatele AI",
+      "testSuccess": "✅ Test úspěšný! Poskytovatel: {provider}",
+      "testError": "❌ Test se nezdařil: {error}"
     }
   }
 }

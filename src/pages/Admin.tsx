@@ -6,12 +6,18 @@ import {
   shorthands,
   Button,
   Link,
+  Dropdown,
+  Option,
+  MessageBar,
+  MessageBarBody,
 } from '@fluentui/react-components';
-import { PersonRegular, ShieldCheckmarkRegular, DataUsageRegular } from '@fluentui/react-icons';
+import { PersonRegular, ShieldCheckmarkRegular, DataUsageRegular, PlayRegular } from '@fluentui/react-icons';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useProUserCheck } from '../hooks/useProUserCheck';
 import { useAdminStats } from '../hooks/useAdminStats';
+import { testProAIKey } from '../utils/api/adminTestAIApi';
 
 const useStyles = makeStyles({
   container: {
@@ -121,6 +127,42 @@ const useStyles = makeStyles({
   link: {
     color: tokens.colorBrandForeground1,
   },
+  aiTestSection: {
+    width: '100%',
+    maxWidth: '900px',
+    marginTop: '24px',
+  },
+  aiTestCard: {
+    ...shorthands.padding('24px'),
+  },
+  aiTestTitle: {
+    fontSize: tokens.fontSizeHero800,
+    fontWeight: tokens.fontWeightSemibold,
+    marginBottom: '12px',
+    fontFamily: 'Segoe UI, sans-serif',
+  },
+  aiTestDescription: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    marginBottom: '16px',
+    fontFamily: 'Segoe UI, sans-serif',
+  },
+  aiTestControls: {
+    display: 'flex',
+    ...shorthands.gap('12px'),
+    alignItems: 'center',
+    marginBottom: '16px',
+    '@media (max-width: 768px)': {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+    },
+  },
+  aiTestDropdown: {
+    minWidth: '200px',
+    '@media (max-width: 768px)': {
+      width: '100%',
+    },
+  },
 });
 
 /**
@@ -147,6 +189,44 @@ export function Admin() {
     isLoggedIn && isProUser ? idToken : null,
     isLoggedIn && isProUser
   );
+
+  // AI test state
+  const [selectedProvider, setSelectedProvider] = useState<string>('perplexity');
+  const [isTestingAI, setIsTestingAI] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  /**
+   * Handle AI test button click
+   */
+  const handleTestAI = async () => {
+    if (!idToken) return;
+    
+    setIsTestingAI(true);
+    setTestResult(null);
+    
+    try {
+      const result = await testProAIKey(idToken, selectedProvider);
+      
+      if (result.success) {
+        setTestResult({
+          success: true,
+          message: t('admin.aiTest.testSuccess', { provider: result.provider || selectedProvider })
+        });
+      } else {
+        setTestResult({
+          success: false,
+          message: t('admin.aiTest.testError', { error: result.error || 'Unknown error' })
+        });
+      }
+    } catch (error) {
+      setTestResult({
+        success: false,
+        message: t('admin.aiTest.testError', { error: error instanceof Error ? error.message : 'Unknown error' })
+      });
+    } finally {
+      setIsTestingAI(false);
+    }
+  };
 
   /**
    * Format the stat value (count or loading indicator)
@@ -288,6 +368,48 @@ export function Admin() {
             {t('admin.statistics.placeholderNote')}
           </Text>
         </Card>
+
+        {/* AI Test Section */}
+        <div className={styles.aiTestSection}>
+          <Card className={styles.aiTestCard}>
+            <Text className={styles.aiTestTitle}>{t('admin.aiTest.title')}</Text>
+            <Text className={styles.aiTestDescription}>
+              {t('admin.aiTest.description')}
+            </Text>
+            
+            <div className={styles.aiTestControls}>
+              <Dropdown
+                className={styles.aiTestDropdown}
+                placeholder={t('admin.aiTest.selectProvider')}
+                value={selectedProvider}
+                selectedOptions={[selectedProvider]}
+                onOptionSelect={(_, data) => setSelectedProvider(data.optionValue as string)}
+              >
+                <Option value="perplexity">Perplexity</Option>
+                <Option value="gemini">Google Gemini</Option>
+                <Option value="grok">Grok AI</Option>
+                <Option value="deepseek">DeepSeek</Option>
+              </Dropdown>
+              
+              <Button
+                appearance="primary"
+                icon={<PlayRegular />}
+                onClick={handleTestAI}
+                disabled={isTestingAI}
+              >
+                {isTestingAI ? t('admin.aiTest.testing') : t('admin.aiTest.testButton')}
+              </Button>
+            </div>
+
+            {testResult && (
+              <MessageBar intent={testResult.success ? 'success' : 'error'}>
+                <MessageBarBody>
+                  {testResult.message}
+                </MessageBarBody>
+              </MessageBar>
+            )}
+          </Card>
+        </div>
       </div>
     );
   };
