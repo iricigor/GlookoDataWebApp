@@ -68,6 +68,18 @@
       }
     },
     "ai": {
+      "keysConfiguration": {
+        "title": "AI Keys Configuration",
+        "useProKeys": {
+          "label": "Use Pro AI Keys",
+          "usingProKeys": "Currently using Pro managed AI keys. No need to configure your own API keys below.",
+          "usingOwnKeys": "Currently using your own API keys configured below.",
+          "requiresProAccess": "Pro User access required. Apply for Pro access to use managed AI keys."
+        }
+      },
+      "informationSection": {
+        "title": "Important Information"
+      },
       "title": "AI Configuration",
       "description": "Configure your AI settings for intelligent analysis. Click \"Select\" next to any configured API key to switch providers.",
       "apiKeyPlaceholder": "Enter your API key",
