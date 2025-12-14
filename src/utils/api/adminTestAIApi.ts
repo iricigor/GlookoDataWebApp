@@ -51,7 +51,7 @@ export async function testProAIKey(
   idToken: string,
   config: AdminTestAIConfig = defaultConfig
 ): Promise<TestAIResult> {
-  const endpoint = `${config.baseUrl}/admin/test-ai`;
+  const endpoint = `${config.baseUrl}/glookoAdmin/test-ai`;
   const apiLogger = createApiLogger(endpoint);
   
   // Validate ID token
