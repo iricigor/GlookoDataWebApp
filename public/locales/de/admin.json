@@ -15,7 +15,7 @@
       "proUsers": "Pro-Benutzer",
       "apiCalls": "API-Aufrufe",
       "apiErrors": "API-Fehler",
-      "placeholderNote": "Statistiken werden verfügbar sein, sobald die API-Integration abgeschlossen ist"
+      "placeholderNote": "Statistiken, die mit '-' markiert sind, werden verfügbar sein, sobald die API-Integration abgeschlossen ist"
     }
   }
 }
