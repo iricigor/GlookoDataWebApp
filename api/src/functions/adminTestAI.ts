@@ -265,6 +265,7 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
       } catch {
         return requestLogger.logError('Invalid JSON in request body', 400, 'validation');
       }
+    }
 
     // Default to perplexity if no provider specified
     const provider = requestData.provider || 'perplexity';
