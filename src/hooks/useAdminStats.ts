@@ -18,6 +18,8 @@ export interface AdminStatsState {
   hasLoaded: boolean;
   /** Count of logged-in users */
   loggedInUsersCount: number | null;
+  /** Count of Pro users */
+  proUsersCount: number | null;
   /** Whether there was an error during the fetch */
   hasError: boolean;
   /** Error message if the fetch failed */
@@ -43,6 +45,7 @@ const initialState: AdminStatsState = {
   isLoading: false,
   hasLoaded: false,
   loggedInUsersCount: null,
+  proUsersCount: null,
   hasError: false,
   errorMessage: null,
   errorType: null,
@@ -59,6 +62,7 @@ const initialState: AdminStatsState = {
  *  - `isLoading`: whether a fetch is currently in progress
  *  - `hasLoaded`: whether a fetch has completed at least once
  *  - `loggedInUsersCount`: count of logged-in users, or `null`
+ *  - `proUsersCount`: count of Pro users, or `null`
  *  - `hasError`: whether the last fetch resulted in an error
  *  - `errorMessage`: error message from the last fetch, or `null`
  *  - `errorType`: error type from the last fetch, or `null`
@@ -114,6 +118,7 @@ export function useAdminStats(idToken?: string | null, shouldFetch: boolean = tr
           isLoading: false,
           hasLoaded: true,
           loggedInUsersCount: result.count ?? null,
+          proUsersCount: result.proUsersCount ?? null,
           hasError: false,
           errorMessage: null,
           errorType: null,

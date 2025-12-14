@@ -3,13 +3,13 @@
  * 
  * These functions provide administrative statistics for Pro users.
  * 
- * GET /api/glookoAdmin/stats/logged-in-users - Get count of logged-in users
+ * GET /api/glookoAdmin/stats/logged-in-users - Get count of logged-in users and Pro users
  * 
  * Headers:
  *   - Authorization: Bearer <id_token> (required)
  * 
  * Response:
- *   - 200 OK: { count: number }
+ *   - 200 OK: { count: number, proUsersCount: number, capped?: boolean, proUsersCapped?: boolean }
  *   - 401 Unauthorized: Invalid or missing token, or missing email
  *   - 403 Forbidden: User is not a Pro user
  *   - 500 Internal Server Error: Infrastructure error
@@ -108,10 +108,57 @@ async function countLoggedInUsers(
 }
 
 /**
- * GET handler - Get count of logged-in users
+ * Count all Pro users in the ProUsers table
+ * 
+ * Counts entities with partitionKey='ProUser' in the ProUsers table.
+ * This represents all users with Pro access.
+ * 
+ * Note: Azure Table Storage doesn't support $count directly, so we iterate
+ * through entities. For very large datasets (>10k users), consider implementing
+ * pagination or caching strategies.
+ * 
+ * @returns Object with count and capped flag
+ */
+async function countProUsers(
+  tableClient: ReturnType<typeof getTableClient>,
+  context: InvocationContext
+): Promise<{ count: number; capped: boolean }> {
+  let count = 0;
+  let capped = false;
+  
+  // Query all entities with partitionKey='ProUser'
+  // We only select the partitionKey and rowKey to minimize data transfer
+  const entities = tableClient.listEntities({
+    queryOptions: {
+      filter: "PartitionKey eq 'ProUser'",
+      select: ['partitionKey', 'rowKey']
+    }
+  });
+  
+  // Count all entities
+  // For large datasets, consider implementing a maximum count limit
+  // or using a separate counter table for better performance
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  for await (const _entity of entities) {
+    count++;
+    
+    // Safety check: if count exceeds a reasonable limit, stop and return
+    // This prevents timeouts for extremely large datasets
+    if (count >= 100000) {
+      capped = true;
+      context.warn(`Pro user count exceeded 100,000 limit - count capped at ${count}. This may indicate the need for a separate counter table.`);
+      break;
+    }
+  }
+  
+  return { count, capped };
+}
+
+/**
+ * GET handler - Get count of logged-in users and Pro users
  * 
  * This endpoint is only accessible to Pro users.
- * Returns the total count of users in the UserSettings table.
+ * Returns the total count of users in the UserSettings table and the count of Pro users.
  */
 async function getLoggedInUsersCount(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   const requestLogger = createRequestLogger(request, context);
@@ -158,9 +205,33 @@ async function getLoggedInUsersCount(request: HttpRequest, context: InvocationCo
     requestLogger.logStorage('countLoggedInUsers', true, { count, capped });
     requestLogger.logInfo('Logged-in users count retrieved', { count, capped });
     
+    // Count Pro users
+    const { count: proUsersCount, capped: proUsersCapped } = await countProUsers(proUsersTableClient, context);
+    
+    if (proUsersCapped) {
+      requestLogger.logWarn('Pro user count was capped at limit', { proUsersCount, proUsersCapped });
+    }
+    
+    requestLogger.logStorage('countProUsers', true, { proUsersCount, proUsersCapped });
+    requestLogger.logInfo('Pro users count retrieved', { proUsersCount, proUsersCapped });
+    
+    // Build response object with both counts
+    const responseBody: { count: number; proUsersCount: number; capped?: boolean; proUsersCapped?: boolean } = {
+      count,
+      proUsersCount,
+    };
+    
+    // Only include capped flags if they're true
+    if (capped) {
+      responseBody.capped = capped;
+    }
+    if (proUsersCapped) {
+      responseBody.proUsersCapped = proUsersCapped;
+    }
+    
     return requestLogger.logSuccess({
       status: 200,
-      jsonBody: { count, capped },
+      jsonBody: responseBody,
     });
 
   } catch (error: unknown) {

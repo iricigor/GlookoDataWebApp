@@ -188,7 +188,7 @@ export function Admin() {
   const { isProUser, hasChecked } = useProUserCheck(isLoggedIn ? idToken : null);
   
   // Fetch admin statistics only if user is a Pro user
-  const { loggedInUsersCount, isLoading: isLoadingStats } = useAdminStats(
+  const { loggedInUsersCount, proUsersCount, isLoading: isLoadingStats } = useAdminStats(
     isLoggedIn && isProUser ? idToken : null,
     isLoggedIn && isProUser
   );
@@ -350,7 +350,9 @@ export function Admin() {
             <div className={styles.statIcon}>
               <ShieldCheckmarkRegular />
             </div>
-            <Text className={styles.statValue}>-</Text>
+            <Text className={styles.statValue}>
+              {formatStatValue(proUsersCount, isLoadingStats)}
+            </Text>
             <Text className={styles.statLabel}>
               {t('admin.statistics.proUsers')}
             </Text>
