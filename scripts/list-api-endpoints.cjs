@@ -7,7 +7,7 @@
  * It parses the function files to find app.http() calls and displays
  * the routes and HTTP methods for each endpoint.
  * 
- * Usage: node scripts/list-api-endpoints.js
+ * Usage: node scripts/list-api-endpoints.cjs
  */
 
 const fs = require('fs');
@@ -25,8 +25,8 @@ function extractEndpointInfo(filePath) {
   try {
     const content = fs.readFileSync(filePath, 'utf8');
     
-    // Find app.http() call
-    const appHttpMatch = content.match(/app\.http\s*\(\s*['"]([^'"]+)['"]\s*,\s*\{([^}]+)\}/s);
+    // Find app.http() call - match from opening to closing brace including nested content
+    const appHttpMatch = content.match(/app\.http\s*\(\s*['"]([^'"]+)['"]\s*,\s*\{([\s\S]*?)\}\s*\)/);
     if (!appHttpMatch) {
       return null;
     }
@@ -34,11 +34,15 @@ function extractEndpointInfo(filePath) {
     const functionName = appHttpMatch[1];
     const config = appHttpMatch[2];
     
-    // Extract methods
+    // Extract methods - handle quoted strings properly
     const methodsMatch = config.match(/methods\s*:\s*\[([^\]]+)\]/);
-    const methods = methodsMatch 
-      ? methodsMatch[1].split(',').map(m => m.trim().replace(/['"]/g, ''))
-      : ['GET'];
+    let methods = ['GET']; // Default to GET if not specified
+    if (methodsMatch) {
+      methods = methodsMatch[1]
+        .split(',')
+        .map(m => m.trim().replace(/['"]/g, ''))
+        .filter(m => m.length > 0);
+    }
     
     // Extract route
     const routeMatch = config.match(/route\s*:\s*['"]([^'"]+)['"]/);
