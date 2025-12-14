@@ -321,4 +321,18 @@ export const useStyles = makeStyles({
     marginTop: '16px',
     marginBottom: '16px',
   },
+  proKeysRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    ...shorthands.gap('16px'),
+    marginBottom: '16px',
+    flexWrap: 'wrap',
+  },
+  proKeysExplanation: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    flex: 1,
+    minWidth: '200px',
+  },
 });

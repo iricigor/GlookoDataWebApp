@@ -108,7 +108,7 @@ describe('Settings', () => {
     fireEvent.click(aiTab);
     
     await waitFor(() => {
-      expect(screen.getByText('AI Configuration')).toBeInTheDocument();
+      expect(screen.getByText('AI Keys Configuration')).toBeInTheDocument();
     });
   });
 
@@ -125,7 +125,7 @@ describe('Settings', () => {
       
       // Wait for the tab to render
       await waitFor(() => {
-        expect(screen.getByText('AI Configuration')).toBeInTheDocument();
+        expect(screen.getByText('AI Keys Configuration')).toBeInTheDocument();
       });
       
       // Find and click the verify button for Perplexity
@@ -156,7 +156,7 @@ describe('Settings', () => {
       fireEvent.click(aiTab);
       
       await waitFor(() => {
-        expect(screen.getByText('AI Configuration')).toBeInTheDocument();
+        expect(screen.getByText('AI Keys Configuration')).toBeInTheDocument();
       });
       
       // Find and click the verify button
@@ -190,7 +190,7 @@ describe('Settings', () => {
       fireEvent.click(aiTab);
       
       await waitFor(() => {
-        expect(screen.getByText('AI Configuration')).toBeInTheDocument();
+        expect(screen.getByText('AI Keys Configuration')).toBeInTheDocument();
       });
       
       // Find and click the verify button for Perplexity (not the active provider)

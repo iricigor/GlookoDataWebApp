@@ -68,6 +68,18 @@
       }
     },
     "ai": {
+      "keysConfiguration": {
+        "title": "KI-Schlüssel-Konfiguration",
+        "useProKeys": {
+          "label": "Pro-KI-Schlüssel verwenden",
+          "usingProKeys": "Derzeit werden Pro-verwaltete KI-Schlüssel verwendet. Sie müssen keine eigenen API-Schlüssel unten konfigurieren.",
+          "usingOwnKeys": "Derzeit werden Ihre eigenen unten konfigurierten API-Schlüssel verwendet.",
+          "requiresProAccess": "Pro-Benutzerzugriff erforderlich. Beantragen Sie Pro-Zugriff, um verwaltete KI-Schlüssel zu verwenden."
+        }
+      },
+      "informationSection": {
+        "title": "Wichtige Informationen"
+      },
       "title": "KI-Konfiguration",
       "description": "Konfigurieren Sie Ihre KI-Einstellungen für intelligente Analysen. Klicken Sie auf \"Auswählen\" neben einem konfigurierten API-Schlüssel, um den Anbieter zu wechseln.",
       "apiKeyPlaceholder": "Geben Sie Ihren API-Schlüssel ein",

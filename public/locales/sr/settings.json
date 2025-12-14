@@ -68,6 +68,18 @@
       }
     },
     "ai": {
+      "keysConfiguration": {
+        "title": "Konfiguracija AI ključeva",
+        "useProKeys": {
+          "label": "Koristi Pro AI ključeve",
+          "usingProKeys": "Trenutno koristite Pro upravljane AI ključeve. Nije potrebno konfigurisati vlastite API ključeve ispod.",
+          "usingOwnKeys": "Trenutno koristite vlastite API ključeve konfigurisane ispod.",
+          "requiresProAccess": "Potreban je Pro korisnički pristup. Prijavite se za Pro pristup da biste koristili upravljane AI ključeve."
+        }
+      },
+      "informationSection": {
+        "title": "Važne informacije"
+      },
       "title": "AI konfiguracija",
       "description": "Konfigurišite Vaša AI podešavanja za inteligentnu analizu. Kliknite \"Izaberi\" pored bilo kog konfiguriranog API ključa da biste promenili provajdere.",
       "apiKeyPlaceholder": "Unesite Vaš API ključ",

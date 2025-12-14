@@ -28,6 +28,9 @@ import { AboutTab } from './AboutTab';
 // Valid tab values for deep linking
 const VALID_TABS = ['general', 'glucose', 'ai', 'pro', 'about'];
 
+// Storage key for remembering the last active tab
+const LAST_TAB_STORAGE_KEY = 'glooko-settings-last-tab';
+
 /**
  * Props for the Settings component
  */
@@ -160,15 +163,33 @@ export function Settings({
     if (parts.length > 1 && parts[0] === 'settings' && VALID_TABS.includes(parts[1])) {
       return parts[1];
     }
+    
+    // If no hash, try to restore from localStorage
+    try {
+      const lastTab = localStorage.getItem(LAST_TAB_STORAGE_KEY);
+      if (lastTab && VALID_TABS.includes(lastTab)) {
+        return lastTab;
+      }
+    } catch (error) {
+      console.error('Failed to read last tab from localStorage:', error);
+    }
+    
     return 'general';
   });
 
-  // Sync URL hash with selected tab (update URL when tab changes)
+  // Sync URL hash with selected tab and persist to localStorage
   useEffect(() => {
     const currentHash = window.location.hash.slice(1);
     const expectedHash = `settings/${selectedTab}`;
     if (currentHash !== expectedHash) {
       window.history.replaceState(null, '', `#${expectedHash}`);
+    }
+    
+    // Persist the selected tab to localStorage
+    try {
+      localStorage.setItem(LAST_TAB_STORAGE_KEY, selectedTab);
+    } catch (error) {
+      console.error('Failed to save last tab to localStorage:', error);
     }
   }, [selectedTab]);
 
