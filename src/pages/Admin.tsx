@@ -228,6 +228,16 @@ export function Admin() {
       const result = await testProAIKey(idToken, testType);
       
       if (result.success) {
+        const successMessage = result.testType === 'infra' 
+          ? t('admin.aiTest.infraSuccess', { 
+              provider: result.provider,
+              keyVaultName: result.keyVaultName,
+              secretName: result.secretName
+            })
+          : t('admin.aiTest.fullSuccess', { 
+              provider: result.provider
+            });
+        
         setTestResult({
           success: true,
           testType: result.testType,
@@ -235,13 +245,13 @@ export function Admin() {
           keyVaultName: result.keyVaultName,
           secretName: result.secretName,
           secretExists: result.secretExists,
-          message: result.message || t(`admin.aiTest.${testType}Success`, { 
-            provider: result.provider,
-            keyVaultName: result.keyVaultName,
-            secretName: result.secretName
-          })
+          message: result.message || successMessage
         });
       } else {
+        const errorMessage = result.testType === 'infra'
+          ? t('admin.aiTest.infraError', { error: result.error || 'Unknown error' })
+          : t('admin.aiTest.fullError', { error: result.error || 'Unknown error' });
+        
         setTestResult({
           success: false,
           testType: result.testType,
@@ -249,7 +259,7 @@ export function Admin() {
           keyVaultName: result.keyVaultName,
           secretName: result.secretName,
           secretExists: result.secretExists,
-          message: t(`admin.aiTest.${testType}Error`, { error: result.error || 'Unknown error' })
+          message: errorMessage
         });
       }
     } catch (error) {

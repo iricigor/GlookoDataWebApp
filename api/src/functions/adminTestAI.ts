@@ -34,6 +34,16 @@ import { createRequestLogger } from "../utils/logger";
 const DEFAULT_AI_API_KEY_SECRET = 'AI-API-Key';
 
 /**
+ * Map of AI provider names to Key Vault secret names
+ */
+const PROVIDER_SECRET_NAMES: Record<string, string> = {
+  'perplexity': 'PERPLEXITY-API-KEY',
+  'gemini': 'GEMINI-API-KEY',
+  'grok': 'GROK-API-KEY',
+  'deepseek': 'DEEPSEEK-API-KEY',
+};
+
+/**
  * URL-encode a string for use as RowKey
  */
 function urlEncode(str: string): string {
@@ -64,15 +74,7 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
  * Get AI provider secret name from provider
  */
 function getSecretNameForProvider(provider: string): string {
-  // Map provider names to Key Vault secret names
-  const secretNames: Record<string, string> = {
-    'perplexity': 'PERPLEXITY-API-KEY',
-    'gemini': 'GEMINI-API-KEY',
-    'grok': 'GROK-API-KEY',
-    'deepseek': 'DEEPSEEK-API-KEY',
-  };
-
-  const secretName = secretNames[provider];
+  const secretName = PROVIDER_SECRET_NAMES[provider];
   if (!secretName) {
     throw new Error(`Unsupported AI provider: ${provider}`);
   }
@@ -308,13 +310,13 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
 
     // Infrastructure test - verify Key Vault access
     let secretExists = false;
-    let config: { apiKey: string; secretName: string } | null = null;
+    let aiProviderConfig: { apiKey: string; secretName: string } | null = null;
 
     try {
       // Get AI provider configuration (this tests Key Vault access)
-      config = await getAIProviderConfig(provider);
+      aiProviderConfig = await getAIProviderConfig(provider);
       secretExists = true;
-      requestLogger.logInfo('Retrieved AI configuration', { provider, secretName: config.secretName });
+      requestLogger.logInfo('Retrieved AI configuration', { provider, secretName: aiProviderConfig.secretName });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       requestLogger.logWarn('Failed to retrieve AI configuration', { error: errorMessage });
@@ -356,7 +358,7 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
     }
 
     // Full test - test the AI provider
-    const testResult = await testAIProvider(provider, config!.apiKey);
+    const testResult = await testAIProvider(provider, aiProviderConfig!.apiKey);
     
     requestLogger.logInfo('AI test successful', { 
       provider, 
