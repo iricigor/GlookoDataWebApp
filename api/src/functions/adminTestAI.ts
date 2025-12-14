@@ -262,10 +262,9 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
     if (body) {
       try {
         requestData = JSON.parse(body) as AdminTestAIRequest;
-      } catch (parseError) {
+      } catch {
         return requestLogger.logError('Invalid JSON in request body', 400, 'validation');
       }
-    }
 
     // Default to perplexity if no provider specified
     const provider = requestData.provider || 'perplexity';
