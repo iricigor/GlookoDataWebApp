@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>796 Fix Pro Keys routing, admin endpoint 404s, and remove API key fallback</summary>
+
+[#796](../../pull/796) Fix Pro Keys routing, admin endpoint 404s, and remove API key fallback
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>794 Add admin stats/test endpoints to API docs, make Pro Keys always visible</summary>
 
 [#794](../../pull/794) Add admin stats/test endpoints to API docs, make Pro Keys always visible
