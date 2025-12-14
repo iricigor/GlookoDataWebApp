@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>797 Fix Pro user AI routing and admin configuration display</summary>
+
+[#797](../../pull/797) Fix Pro user AI routing and admin configuration display
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>796 Fix Pro Keys routing, admin endpoint 404s, and remove API key fallback</summary>
 
 [#796](../../pull/796) Fix Pro Keys routing, admin endpoint 404s, and remove API key fallback
