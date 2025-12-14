@@ -13,6 +13,8 @@ import { createApiLogger } from '../logger';
 export interface TestAIResult {
   success: boolean;
   provider?: string;
+  keyVaultName?: string;
+  aiApiKeySecret?: string;
   message?: string;
   error?: string;
   errorType?: 'unauthorized' | 'authorization' | 'validation' | 'infrastructure' | 'provider' | 'network' | 'unknown';
@@ -38,16 +40,15 @@ const defaultConfig: AdminTestAIConfig = {
  * Test Pro AI key configuration
  * 
  * This function calls the Azure Function to test the Pro AI key by sending
- * a simple test query. Requires the caller to be authenticated as a Pro user.
+ * a simple test query. The provider is determined by the backend's AI_PROVIDER
+ * environment variable. Requires the caller to be authenticated as a Pro user.
  * 
  * @param idToken - The ID token from MSAL authentication
- * @param provider - Optional AI provider to test (defaults to perplexity)
  * @param config - Optional API configuration (defaults to /api)
- * @returns Promise with the result containing success status and message or error
+ * @returns Promise with the result containing success status, provider, Key Vault config, and message or error
  */
 export async function testProAIKey(
   idToken: string,
-  provider?: string,
   config: AdminTestAIConfig = defaultConfig
 ): Promise<TestAIResult> {
   const endpoint = `${config.baseUrl}/admin/test-ai`;
@@ -66,8 +67,7 @@ export async function testProAIKey(
   apiLogger.logStart('POST');
 
   try {
-    const requestBody = provider ? { provider } : {};
-    
+    // Send empty body - provider is determined by backend environment configuration
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -75,18 +75,30 @@ export async function testProAIKey(
         'Content-Type': 'application/json',
         'x-correlation-id': apiLogger.correlationId,
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({}),
     });
 
     const statusCode = response.status;
 
     // Success case
     if (response.ok) {
-      const data = await response.json() as { success: boolean; provider: string; message: string };
-      apiLogger.logSuccess(statusCode, { provider: data.provider });
+      const data = await response.json() as { 
+        success: boolean; 
+        provider: string; 
+        keyVaultName?: string;
+        aiApiKeySecret?: string;
+        message: string;
+      };
+      apiLogger.logSuccess(statusCode, { 
+        provider: data.provider,
+        keyVaultName: data.keyVaultName,
+        aiApiKeySecret: data.aiApiKeySecret
+      });
       return {
         success: true,
         provider: data.provider,
+        keyVaultName: data.keyVaultName,
+        aiApiKeySecret: data.aiApiKeySecret,
         message: data.message,
         statusCode,
       };

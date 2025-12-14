@@ -235,18 +235,14 @@ export async function verifyApiKey(
  * When `isProUser` is true, `useProKeys` is true, and an `idToken` is provided, the request is forwarded to the backend
  * where provider keys are managed; otherwise the call is performed client-side using the supplied `apiKey`.
  *
- * If the backend call fails and the user has their own API key configured, the function will automatically
- * fall back to using the client-side API with the user's key. The result will include `usedFallback: true`
- * to indicate this happened, allowing the caller to show an appropriate notification.
- *
  * @param provider - The AI provider to use ('perplexity', 'gemini', 'grok', or 'deepseek')
  * @param prompt - The prompt to send to the AI
  * @param options - Call options
- * @param options.apiKey - User's client-side API key (required for non‑Pro calls, optional for fallback)
+ * @param options.apiKey - User's client-side API key (required for non‑Pro calls)
  * @param options.idToken - ID token used to authenticate backend (Pro) requests
  * @param options.isProUser - Set to true to enable Pro routing when `idToken` and `useProKeys` are provided
  * @param options.useProKeys - Set to true to use Pro backend keys (only applies to Pro users)
- * @returns An AIResult object containing `success`, `content` on success, `error` with `errorType` on failure, and `usedFallback` if fallback was used
+ * @returns An AIResult object containing `success`, `content` on success, `error` with `errorType` on failure
  */
 export async function callAIWithRouting(
   provider: AIProvider,
@@ -257,7 +253,7 @@ export async function callAIWithRouting(
     isProUser?: boolean;
     useProKeys?: boolean;
   }
-): Promise<AIResult & { usedFallback?: boolean; backendError?: string }> {
+): Promise<AIResult> {
   const { apiKey, idToken, isProUser, useProKeys = true } = options;
   
   // If user is a Pro user with an ID token and has opted to use Pro keys, use backend API
@@ -266,24 +262,6 @@ export async function callAIWithRouting(
     const { callBackendAI } = await import('./backendAIApi');
     
     const result = await callBackendAI(idToken, prompt, provider);
-    
-    // If backend call failed and user has their own API key, try fallback
-    if (!result.success && apiKey && apiKey.trim() !== '') {
-      // Try with user's own API key as fallback
-      const fallbackResult = await callAIApi(provider, apiKey, prompt);
-      
-      if (fallbackResult.success) {
-        // Fallback succeeded - return success with fallback flag
-        return {
-          ...fallbackResult,
-          usedFallback: true,
-          backendError: result.error,
-        };
-      }
-      
-      // Both backend and fallback failed - return the backend error
-      // (it's more relevant to the user since they opted to use Pro keys)
-    }
     
     // Convert backend result to AIResult format
     // Map backend error types to standard AI error types

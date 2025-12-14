@@ -6,8 +6,6 @@ import {
   shorthands,
   Button,
   Link,
-  Dropdown,
-  Option,
   MessageBar,
   MessageBarBody,
 } from '@fluentui/react-components';
@@ -18,6 +16,11 @@ import { useAuth } from '../hooks/useAuth';
 import { useProUserCheck } from '../hooks/useProUserCheck';
 import { useAdminStats } from '../hooks/useAdminStats';
 import { testProAIKey } from '../utils/api/adminTestAIApi';
+
+/**
+ * Default AI API Key secret name in Key Vault
+ */
+const DEFAULT_AI_API_KEY_SECRET = 'AI-API-Key';
 
 const useStyles = makeStyles({
   container: {
@@ -191,9 +194,14 @@ export function Admin() {
   );
 
   // AI test state
-  const [selectedProvider, setSelectedProvider] = useState<string>('perplexity');
   const [isTestingAI, setIsTestingAI] = useState(false);
-  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [testResult, setTestResult] = useState<{ 
+    success: boolean; 
+    message: string;
+    provider?: string;
+    keyVaultName?: string;
+    aiApiKeySecret?: string;
+  } | null>(null);
 
   /**
    * Handle AI test button click
@@ -205,12 +213,15 @@ export function Admin() {
     setTestResult(null);
     
     try {
-      const result = await testProAIKey(idToken, selectedProvider);
+      const result = await testProAIKey(idToken);
       
       if (result.success) {
         setTestResult({
           success: true,
-          message: t('admin.aiTest.testSuccess', { provider: result.provider || selectedProvider })
+          provider: result.provider,
+          keyVaultName: result.keyVaultName,
+          aiApiKeySecret: result.aiApiKeySecret,
+          message: result.message || t('admin.aiTest.testSuccess', { provider: result.provider })
         });
       } else {
         setTestResult({
@@ -377,20 +388,48 @@ export function Admin() {
               {t('admin.aiTest.description')}
             </Text>
             
+            {/* Display Key Vault Configuration */}
+            {testResult && testResult.success && (
+              <div style={{ 
+                marginBottom: '16px', 
+                padding: '12px', 
+                backgroundColor: tokens.colorNeutralBackground3,
+                borderRadius: '4px'
+              }}>
+                <Text style={{ 
+                  fontSize: tokens.fontSizeBase300,
+                  color: tokens.colorNeutralForeground2,
+                  display: 'block',
+                  marginBottom: '8px',
+                  fontWeight: tokens.fontWeightSemibold
+                }}>
+                  Configuration:
+                </Text>
+                <Text style={{ 
+                  fontSize: tokens.fontSizeBase200,
+                  color: tokens.colorNeutralForeground2,
+                  display: 'block'
+                }}>
+                  <strong>Provider:</strong> {testResult.provider || 'Not available'}
+                </Text>
+                <Text style={{ 
+                  fontSize: tokens.fontSizeBase200,
+                  color: tokens.colorNeutralForeground2,
+                  display: 'block'
+                }}>
+                  <strong>Key Vault Name:</strong> {testResult.keyVaultName || 'Not configured'}
+                </Text>
+                <Text style={{ 
+                  fontSize: tokens.fontSizeBase200,
+                  color: tokens.colorNeutralForeground2,
+                  display: 'block'
+                }}>
+                  <strong>AI API Key Secret:</strong> {testResult.aiApiKeySecret || DEFAULT_AI_API_KEY_SECRET}
+                </Text>
+              </div>
+            )}
+            
             <div className={styles.aiTestControls}>
-              <Dropdown
-                className={styles.aiTestDropdown}
-                placeholder={t('admin.aiTest.selectProvider')}
-                value={selectedProvider}
-                selectedOptions={[selectedProvider]}
-                onOptionSelect={(_, data) => setSelectedProvider(data.optionValue as string)}
-              >
-                <Option value="perplexity">Perplexity</Option>
-                <Option value="gemini">Google Gemini</Option>
-                <Option value="grok">Grok AI</Option>
-                <Option value="deepseek">DeepSeek</Option>
-              </Dropdown>
-              
               <Button
                 appearance="primary"
                 icon={<PlayRegular />}

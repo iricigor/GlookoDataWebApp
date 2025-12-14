@@ -9,10 +9,6 @@ import {
   AccordionItem,
   AccordionHeader,
   AccordionPanel,
-  useToastController,
-  Toast,
-  ToastTitle,
-  ToastBody,
 } from '@fluentui/react-components';
 import { generatePumpSettingsPrompt } from '../../../features/aiAnalysis/prompts';
 import { callAIWithRouting, isRequestTooLargeError } from '../../../utils/api';
@@ -78,8 +74,6 @@ export function PumpSettingsTab({
   const styles = useAIAnalysisStyles();
   const { cgmReadings, bolusReadings, basalReadings } = mealTimingDatasets;
   const hasData = cgmReadings.length > 0 && bolusReadings.length > 0;
-  const toasterId = 'app-toaster';
-  const { dispatchToast } = useToastController(toasterId);
   
   const {
     analyzing,
@@ -166,20 +160,6 @@ export function PumpSettingsTab({
       // First attempt: try with full dataset
       let result = await tryAnalysis(cgmReadings, bolusReadings, basalReadings);
       let datasetInfo = '';
-
-      // Check if fallback was used and show toast notification
-      if (result.usedFallback && result.backendError) {
-        dispatchToast(
-          <Toast>
-            <ToastTitle>Pro API Failed - Using Your Keys</ToastTitle>
-            <ToastBody>
-              Pro backend API is temporarily unavailable. 
-              Successfully fell back to using your own API keys.
-            </ToastBody>
-          </Toast>,
-          { intent: 'warning' }
-        );
-      }
 
       // If request was too large, try with smaller dataset (last 28 days)
       if (!result.success && isRequestTooLargeError(result.error)) {

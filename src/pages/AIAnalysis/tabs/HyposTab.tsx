@@ -17,10 +17,6 @@ import {
   TableBody,
   TableCell,
   Tooltip,
-  useToastController,
-  Toast,
-  ToastTitle,
-  ToastBody,
 } from '@fluentui/react-components';
 import { InfoRegular } from '@fluentui/react-icons';
 import { TableContainer } from '../../../components/TableContainer';
@@ -140,8 +136,6 @@ export function HyposTab({
 }: HyposTabProps) {
   const styles = useAIAnalysisStyles();
   const hasData = hypoDatasets !== null && hypoDatasets.dailySummaries.length > 0;
-  const toasterId = 'app-toaster';
-  const { dispatchToast } = useToastController(toasterId);
   
   const {
     analyzing,
@@ -236,20 +230,6 @@ export function HyposTab({
       // First attempt: try with full dataset
       let result = await tryAnalysis(hypoEventsCSV, hypoSummariesCSV, hypoEventSummaryCSV);
       let datasetInfo = '';
-
-      // Check if fallback was used and show toast notification
-      if (result.usedFallback && result.backendError) {
-        dispatchToast(
-          <Toast>
-            <ToastTitle>Pro API Failed - Using Your Keys</ToastTitle>
-            <ToastBody>
-              Pro backend API is temporarily unavailable. 
-              Successfully fell back to using your own API keys.
-            </ToastBody>
-          </Toast>,
-          { intent: 'warning' }
-        );
-      }
 
       // If request was too large, try with limited data
       if (!result.success && isRequestTooLargeError(result.error)) {
