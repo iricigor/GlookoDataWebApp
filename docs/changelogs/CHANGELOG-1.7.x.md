@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>792 Remove duplicate login button from Admin page</summary>
+
+[#792](../../pull/792) Remove duplicate login button from Admin page
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>791 Fix Pro API fallback by passing user API keys to routing layer</summary>
 
 [#791](../../pull/791) Fix Pro API fallback by passing user API keys to routing layer
