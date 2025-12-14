@@ -17,6 +17,11 @@ import { useProUserCheck } from '../hooks/useProUserCheck';
 import { useAdminStats } from '../hooks/useAdminStats';
 import { testProAIKey } from '../utils/api/adminTestAIApi';
 
+/**
+ * Default AI API Key secret name in Key Vault
+ */
+const DEFAULT_AI_API_KEY_SECRET = 'AI-API-Key';
+
 const useStyles = makeStyles({
   container: {
     display: 'flex',
@@ -419,7 +424,7 @@ export function Admin() {
                   color: tokens.colorNeutralForeground2,
                   display: 'block'
                 }}>
-                  <strong>AI API Key Secret:</strong> {testResult.aiApiKeySecret || 'AI-API-Key'}
+                  <strong>AI API Key Secret:</strong> {testResult.aiApiKeySecret || DEFAULT_AI_API_KEY_SECRET}
                 </Text>
               </div>
             )}

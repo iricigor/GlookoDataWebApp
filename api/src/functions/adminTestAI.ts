@@ -28,6 +28,11 @@ import { extractUserInfoFromToken, getTableClient, isNotFoundError, getSecretFro
 import { createRequestLogger } from "../utils/logger";
 
 /**
+ * Default AI API Key secret name in Key Vault
+ */
+const DEFAULT_AI_API_KEY_SECRET = 'AI-API-Key';
+
+/**
  * URL-encode a string for use as RowKey
  */
 function urlEncode(str: string): string {
@@ -285,7 +290,7 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
     
     // Get Key Vault configuration from environment
     const keyVaultName = process.env.KEY_VAULT_NAME || 'Not configured';
-    const aiApiKeySecret = process.env.AI_API_KEY_SECRET || 'AI-API-Key';
+    const aiApiKeySecret = process.env.AI_API_KEY_SECRET || DEFAULT_AI_API_KEY_SECRET;
     
     requestLogger.logInfo('AI test successful', { 
       provider, 
