@@ -105,6 +105,7 @@ export async function testProAIKey(
         secretName?: string;
         secretExists?: boolean;
         message?: string;
+        error?: string;
       };
       apiLogger.logSuccess(statusCode, { 
         testType: data.testType,
@@ -121,6 +122,7 @@ export async function testProAIKey(
         secretName: data.secretName,
         secretExists: data.secretExists,
         message: data.message,
+        error: data.error,
         statusCode,
       };
     }
