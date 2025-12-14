@@ -126,9 +126,9 @@ export function MealTimingTab({
     const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
                     activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
-    // Call the AI API - only use backend if Pro user with Pro keys enabled AND has idToken
+    // Call the AI API with routing - the routing logic handles Pro vs client-side API calls
     return await callAIWithRouting(activeProvider!, prompt, {
-      apiKey: (isProUser && useProKeys && idToken) ? undefined : apiKey,
+      apiKey: apiKey,
       idToken: idToken || undefined,
       isProUser,
       useProKeys,
