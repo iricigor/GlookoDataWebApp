@@ -74,7 +74,7 @@
           "label": "Pro-KI-Schlüssel verwenden",
           "usingProKeys": "Derzeit werden Pro-verwaltete KI-Schlüssel verwendet. Sie müssen keine eigenen API-Schlüssel unten konfigurieren.",
           "usingOwnKeys": "Derzeit werden Ihre eigenen unten konfigurierten API-Schlüssel verwendet.",
-          "requiresProAccess": "Pro-Benutzerzugriff erforderlich. Bewerben Sie sich für Pro-Zugriff, um verwaltete KI-Schlüssel zu verwenden."
+          "requiresProAccess": "Pro-Benutzerzugriff erforderlich. Beantragen Sie Pro-Zugriff, um verwaltete KI-Schlüssel zu verwenden."
         }
       },
       "informationSection": {
