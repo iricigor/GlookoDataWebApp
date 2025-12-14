@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>782 Add admin API endpoint for logged-in users count</summary>
+
+[#782](../../pull/782) Add admin API endpoint for logged-in users count
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>785 Make PR preview deployment non-blocking for merges</summary>
 
 [#785](../../pull/785) Make PR preview deployment non-blocking for merges
