@@ -334,3 +334,87 @@ body.dark-theme .swagger-ui ::-webkit-scrollbar-thumb {
 body.dark-theme .swagger-ui ::-webkit-scrollbar-thumb:hover {
   background: #5c5c5c;
 }
+
+/* ==========================================================================
+   Server Response vs Example Response Visual Distinction
+   These styles make server responses (after Execute) more prominent and
+   example responses less prominent for better visual hierarchy.
+   ========================================================================== */
+
+/* Light Theme: Server Response Styling (appears after clicking Execute) */
+/* Target the responses-inner section which contains the actual server response */
+.swagger-ui .responses-inner {
+  background-color: #f0f8ff !important;
+  border: 2px solid #0078d4 !important;
+  border-radius: 4px;
+  padding: 12px !important;
+  margin: 16px 0 !important;
+}
+
+.swagger-ui .responses-inner h4,
+.swagger-ui .responses-inner h5 {
+  color: #0078d4 !important;
+  font-weight: 600 !important;
+}
+
+.swagger-ui .responses-inner .response-col_status {
+  font-weight: 600 !important;
+}
+
+/* Light Theme: Example Response Styling */
+/* Make example responses (in the response table) less prominent */
+.swagger-ui .responses-wrapper .response-col_description .renderedMarkdown,
+.swagger-ui .responses-wrapper .response-col_description .markdown,
+.swagger-ui .responses-wrapper .response-col_description pre,
+.swagger-ui .responses-wrapper .response-col_description code {
+  opacity: 0.65 !important;
+}
+
+.swagger-ui .responses-wrapper .response-col_description h5,
+.swagger-ui .responses-wrapper .response-col_description h4 {
+  color: #6b6b6b !important;
+  font-weight: 400 !important;
+}
+
+/* Reduce opacity of example response code blocks */
+.swagger-ui .responses-wrapper table tbody .response-col_description pre {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Dark Theme: Server Response Styling (appears after clicking Execute) */
+body.dark-theme .swagger-ui .responses-inner {
+  background-color: rgba(0, 120, 212, 0.15) !important;
+  border: 2px solid #479ef5 !important;
+  border-radius: 4px;
+  padding: 12px !important;
+  margin: 16px 0 !important;
+}
+
+body.dark-theme .swagger-ui .responses-inner h4,
+body.dark-theme .swagger-ui .responses-inner h5 {
+  color: #479ef5 !important;
+  font-weight: 600 !important;
+}
+
+body.dark-theme .swagger-ui .responses-inner .response-col_status {
+  font-weight: 600 !important;
+}
+
+/* Dark Theme: Example Response Styling */
+body.dark-theme .swagger-ui .responses-wrapper .response-col_description .renderedMarkdown,
+body.dark-theme .swagger-ui .responses-wrapper .response-col_description .markdown,
+body.dark-theme .swagger-ui .responses-wrapper .response-col_description pre,
+body.dark-theme .swagger-ui .responses-wrapper .response-col_description code {
+  opacity: 0.5 !important;
+}
+
+body.dark-theme .swagger-ui .responses-wrapper .response-col_description h5,
+body.dark-theme .swagger-ui .responses-wrapper .response-col_description h4 {
+  color: #9b9b9b !important;
+  font-weight: 400 !important;
+}
+
+/* Reduce opacity of example response code blocks in dark theme */
+body.dark-theme .swagger-ui .responses-wrapper table tbody .response-col_description pre {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
