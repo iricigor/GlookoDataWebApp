@@ -306,7 +306,7 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
 
     // Check for Key Vault errors
     if (errorMessage.includes('Key Vault') || errorMessage.includes('API key not configured')) {
-      requestLogger.logError('Key Vault error', 'infrastructure', undefined, { error: errorMessage });
+      requestLogger.logWarn('Key Vault error', { error: errorMessage });
       return requestLogger.logError(
         'Failed to retrieve API key configuration',
         500,
@@ -317,7 +317,7 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
 
     // Check for AI provider errors
     if (errorMessage.includes('API error')) {
-      requestLogger.logError('AI provider error', 'provider', undefined, { error: errorMessage });
+      requestLogger.logWarn('AI provider error', { error: errorMessage });
       return requestLogger.logError(
         `AI provider test failed: ${errorMessage}`,
         503,
@@ -327,23 +327,17 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
     }
 
     // Generic error
-    requestLogger.logError('Unexpected error during AI test', 'infrastructure', undefined, {
+    requestLogger.logWarn('Unexpected error during AI test', {
       error: errorMessage,
       errorStack,
       errorType: error instanceof Error ? error.constructor.name : typeof error
     });
 
-    return {
-      status: 500,
-      jsonBody: {
-        error: 'Internal server error during AI test',
-        errorType: 'infrastructure',
-        correlationId: requestLogger.correlationId,
-      },
-      headers: {
-        'x-correlation-id': requestLogger.correlationId,
-      },
-    };
+    return requestLogger.logError(
+      'Internal server error during AI test',
+      500,
+      'infrastructure'
+    );
   }
 }
 
