@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>801 Fix admin endpoint 404s by renaming routes to avoid Azure SWA reserved paths</summary>
+
+[#801](../../pull/801) Fix admin endpoint 404s by renaming routes to avoid Azure SWA reserved paths
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>799 Add API endpoint listing to deployment workflow</summary>
 
 [#799](../../pull/799) Add API endpoint listing to deployment workflow
