@@ -61,29 +61,39 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
 }
 
 /**
- * Count all users in the UserSettings table
+ * Maximum count limit for entity counting operations
+ * This prevents timeouts for extremely large datasets
+ */
+const MAX_COUNT_LIMIT = 100000;
+
+/**
+ * Generic function to count entities in a table by partition key
  * 
- * Counts entities with partitionKey='users' in the UserSettings table.
- * This represents all users who have logged in at least once.
- * 
+ * Counts entities matching the specified partitionKey filter.
  * Note: Azure Table Storage doesn't support $count directly, so we iterate
- * through entities. For very large datasets (>10k users), consider implementing
+ * through entities. For very large datasets (>10k entities), consider implementing
  * pagination or caching strategies.
  * 
+ * @param tableClient - The Azure Table Storage client
+ * @param partitionKey - The partition key to filter by
+ * @param entityType - Human-readable entity type for logging (e.g., "User", "Pro user")
+ * @param context - Azure Functions invocation context for logging
  * @returns Object with count and capped flag
  */
-async function countLoggedInUsers(
+async function countEntitiesByPartitionKey(
   tableClient: ReturnType<typeof getTableClient>,
+  partitionKey: string,
+  entityType: string,
   context: InvocationContext
 ): Promise<{ count: number; capped: boolean }> {
   let count = 0;
   let capped = false;
   
-  // Query all entities with partitionKey='users'
+  // Query all entities with the specified partitionKey
   // We only select the partitionKey and rowKey to minimize data transfer
   const entities = tableClient.listEntities({
     queryOptions: {
-      filter: "PartitionKey eq 'users'",
+      filter: `PartitionKey eq '${partitionKey}'`,
       select: ['partitionKey', 'rowKey']
     }
   });
@@ -97,9 +107,9 @@ async function countLoggedInUsers(
     
     // Safety check: if count exceeds a reasonable limit, stop and return
     // This prevents timeouts for extremely large datasets
-    if (count >= 100000) {
+    if (count >= MAX_COUNT_LIMIT) {
       capped = true;
-      context.warn(`User count exceeded 100,000 limit - count capped at ${count}. This may indicate the need for a separate counter table.`);
+      context.warn(`${entityType} count exceeded ${MAX_COUNT_LIMIT} limit - count capped at ${count}. This may indicate the need for a separate counter table.`);
       break;
     }
   }
@@ -108,14 +118,25 @@ async function countLoggedInUsers(
 }
 
 /**
+ * Count all users in the UserSettings table
+ * 
+ * Counts entities with partitionKey='users' in the UserSettings table.
+ * This represents all users who have logged in at least once.
+ * 
+ * @returns Object with count and capped flag
+ */
+async function countLoggedInUsers(
+  tableClient: ReturnType<typeof getTableClient>,
+  context: InvocationContext
+): Promise<{ count: number; capped: boolean }> {
+  return countEntitiesByPartitionKey(tableClient, 'users', 'User', context);
+}
+
+/**
  * Count all Pro users in the ProUsers table
  * 
  * Counts entities with partitionKey='ProUser' in the ProUsers table.
  * This represents all users with Pro access.
- * 
- * Note: Azure Table Storage doesn't support $count directly, so we iterate
- * through entities. For very large datasets (>10k users), consider implementing
- * pagination or caching strategies.
  * 
  * @returns Object with count and capped flag
  */
@@ -123,35 +144,7 @@ async function countProUsers(
   tableClient: ReturnType<typeof getTableClient>,
   context: InvocationContext
 ): Promise<{ count: number; capped: boolean }> {
-  let count = 0;
-  let capped = false;
-  
-  // Query all entities with partitionKey='ProUser'
-  // We only select the partitionKey and rowKey to minimize data transfer
-  const entities = tableClient.listEntities({
-    queryOptions: {
-      filter: "PartitionKey eq 'ProUser'",
-      select: ['partitionKey', 'rowKey']
-    }
-  });
-  
-  // Count all entities
-  // For large datasets, consider implementing a maximum count limit
-  // or using a separate counter table for better performance
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  for await (const _entity of entities) {
-    count++;
-    
-    // Safety check: if count exceeds a reasonable limit, stop and return
-    // This prevents timeouts for extremely large datasets
-    if (count >= 100000) {
-      capped = true;
-      context.warn(`Pro user count exceeded 100,000 limit - count capped at ${count}. This may indicate the need for a separate counter table.`);
-      break;
-    }
-  }
-  
-  return { count, capped };
+  return countEntitiesByPartitionKey(tableClient, 'ProUser', 'Pro user', context);
 }
 
 /**
