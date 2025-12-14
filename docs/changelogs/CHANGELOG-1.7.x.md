@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>799 Add API endpoint listing to deployment workflow</summary>
+
+[#799](../../pull/799) Add API endpoint listing to deployment workflow
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>797 Fix Pro user AI routing and admin configuration display</summary>
 
 [#797](../../pull/797) Fix Pro user AI routing and admin configuration display
