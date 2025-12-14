@@ -18,12 +18,27 @@
     },
     "aiTest": {
       "title": "AI Configuration Test",
-      "description": "Test the Pro AI key configuration to verify it's working correctly",
+      "description": "Test the Pro AI key configuration. Choose infrastructure test to verify Key Vault access only, or full test to verify AI provider response.",
+      "testInfraButton": "Test Infrastructure",
+      "testFullButton": "Test AI Provider",
       "testButton": "Test AI Key",
       "testing": "Testing...",
       "selectProvider": "Select AI Provider",
+      "infraSuccess": "✅ Infrastructure test successful! Key Vault: {keyVaultName}, Secret: {secretName}",
+      "fullSuccess": "✅ Full test successful! Provider: {provider}",
+      "infraError": "❌ Infrastructure test failed: {error}",
+      "fullError": "❌ Full test failed: {error}",
       "testSuccess": "✅ Test successful! Provider: {provider}",
-      "testError": "❌ Test failed: {error}"
+      "testError": "❌ Test failed: {error}",
+      "configurationTitle": "Configuration",
+      "provider": "Provider",
+      "keyVaultName": "Key Vault Name",
+      "secretName": "Secret Name",
+      "secretExists": "Secret Accessible",
+      "yes": "Yes",
+      "no": "No",
+      "notAvailable": "Not available",
+      "notConfigured": "Not configured"
     }
   }
 }

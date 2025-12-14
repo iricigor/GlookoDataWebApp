@@ -2,19 +2,28 @@
  * Admin Test AI API client
  * 
  * This module provides a client for testing Pro AI key configuration
- * from the admin page.
+ * from the admin page. Supports two test modes:
+ * - Infrastructure test: verifies Key Vault access and environment configuration
+ * - Full test: includes infrastructure test plus AI provider response
  */
 
 import { createApiLogger } from '../logger';
+
+/**
+ * Type of AI test to perform
+ */
+export type TestAIType = 'infra' | 'full';
 
 /**
  * Result of testing AI provider
  */
 export interface TestAIResult {
   success: boolean;
+  testType?: TestAIType;
   provider?: string;
   keyVaultName?: string;
-  aiApiKeySecret?: string;
+  secretName?: string;
+  secretExists?: boolean;
   message?: string;
   error?: string;
   errorType?: 'unauthorized' | 'authorization' | 'validation' | 'infrastructure' | 'provider' | 'network' | 'unknown';
@@ -39,19 +48,25 @@ const defaultConfig: AdminTestAIConfig = {
 /**
  * Test Pro AI key configuration
  * 
- * This function calls the Azure Function to test the Pro AI key by sending
- * a simple test query. The provider is determined by the backend's AI_PROVIDER
- * environment variable. Requires the caller to be authenticated as a Pro user.
+ * This function calls the Azure Function to test the Pro AI key configuration.
+ * Supports two test modes:
+ * - 'infra': Tests infrastructure only (Key Vault access, environment variables)
+ * - 'full': Tests infrastructure plus sends a test query to the AI provider
+ * 
+ * The provider is determined by the backend's AI_PROVIDER environment variable.
+ * Requires the caller to be authenticated as a Pro user.
  * 
  * @param idToken - The ID token from MSAL authentication
+ * @param testType - Type of test to perform ('infra' or 'full', defaults to 'full')
  * @param config - Optional API configuration (defaults to /api)
  * @returns Promise with the result containing success status, provider, Key Vault config, and message or error
  */
 export async function testProAIKey(
   idToken: string,
+  testType: TestAIType = 'full',
   config: AdminTestAIConfig = defaultConfig
 ): Promise<TestAIResult> {
-  const endpoint = `${config.baseUrl}/glookoAdmin/test-ai`;
+  const endpoint = `${config.baseUrl}/glookoAdmin/test-ai-key?testType=${testType}`;
   const apiLogger = createApiLogger(endpoint);
   
   // Validate ID token
@@ -83,22 +98,28 @@ export async function testProAIKey(
     // Success case
     if (response.ok) {
       const data = await response.json() as { 
-        success: boolean; 
+        success: boolean;
+        testType: TestAIType;
         provider: string; 
         keyVaultName?: string;
-        aiApiKeySecret?: string;
-        message: string;
+        secretName?: string;
+        secretExists?: boolean;
+        message?: string;
       };
       apiLogger.logSuccess(statusCode, { 
+        testType: data.testType,
         provider: data.provider,
         keyVaultName: data.keyVaultName,
-        aiApiKeySecret: data.aiApiKeySecret
+        secretName: data.secretName,
+        secretExists: data.secretExists
       });
       return {
-        success: true,
+        success: data.success,
+        testType: data.testType,
         provider: data.provider,
         keyVaultName: data.keyVaultName,
-        aiApiKeySecret: data.aiApiKeySecret,
+        secretName: data.secretName,
+        secretExists: data.secretExists,
         message: data.message,
         statusCode,
       };
@@ -108,9 +129,11 @@ export async function testProAIKey(
     let errorData: { 
       error?: string; 
       errorType?: string;
+      testType?: TestAIType;
       provider?: string;
       keyVaultName?: string;
-      aiApiKeySecret?: string;
+      secretName?: string;
+      secretExists?: boolean;
     } = {};
     try {
       errorData = await response.json();
@@ -145,9 +168,11 @@ export async function testProAIKey(
       errorType: mappedErrorType,
       statusCode,
       // Include configuration from error response if available
+      testType: errorData.testType,
       provider: errorData.provider,
       keyVaultName: errorData.keyVaultName,
-      aiApiKeySecret: errorData.aiApiKeySecret,
+      secretName: errorData.secretName,
+      secretExists: errorData.secretExists,
     };
   } catch (error: unknown) {
     // Network or other errors
