@@ -72,11 +72,6 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
     fontFamily: 'Segoe UI, sans-serif',
   },
-  loginButton: {
-    display: 'flex',
-    alignItems: 'center',
-    ...shorthands.gap('8px'),
-  },
   statsContainer: {
     width: '100%',
     maxWidth: '900px',
@@ -144,7 +139,7 @@ const useStyles = makeStyles({
 export function Admin() {
   const styles = useStyles();
   const { t } = useTranslation(['admin', 'common']);
-  const { isLoggedIn, login, idToken } = useAuth();
+  const { isLoggedIn, idToken } = useAuth();
   const { isProUser, hasChecked } = useProUserCheck(isLoggedIn ? idToken : null);
   
   // Fetch admin statistics only if user is a Pro user
@@ -162,20 +157,12 @@ export function Admin() {
     return '-';
   };
 
-  const handleLogin = async () => {
-    try {
-      await login();
-    } catch (error) {
-      console.error('Login failed:', error);
-    }
-  };
-
   // Show loading state while checking Pro status
   const isCheckingProStatus = isLoggedIn && !hasChecked;
 
   // Render content based on auth and Pro status
   const renderContent = () => {
-    // Not logged in - show login prompt
+    // Not logged in - show login prompt (without button - use navigation bar)
     if (!isLoggedIn) {
       return (
         <Card className={styles.card}>
@@ -186,14 +173,6 @@ export function Admin() {
             <Text className={styles.loginText}>
               {t('admin.loginPrompt')}
             </Text>
-            <Button 
-              appearance="primary" 
-              size="large"
-              onClick={handleLogin}
-              className={styles.loginButton}
-            >
-              {t('admin.loginButton')}
-            </Button>
           </div>
         </Card>
       );
@@ -239,7 +218,6 @@ export function Admin() {
               <Button 
                 appearance="primary" 
                 size="large"
-                className={styles.loginButton}
               >
                 {t('admin.applyForProButton')}
               </Button>

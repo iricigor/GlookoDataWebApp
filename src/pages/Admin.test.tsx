@@ -4,7 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '../testUtils/i18nTestProvider';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { Admin } from './Admin';
 
 // Mock the useAuth hook
@@ -118,8 +118,8 @@ describe('Admin', () => {
 
     renderWithProviders(<Admin />);
 
-    expect(screen.getByText('Please login to access administrative features')).toBeInTheDocument();
-    expect(screen.getByText('Login with Microsoft')).toBeInTheDocument();
+    expect(screen.getByText(/Login button in the top right corner/)).toBeInTheDocument();
+    expect(screen.queryByText('Login with Microsoft')).not.toBeInTheDocument();
   });
 
   it('shows loading state when checking Pro status', () => {
@@ -151,8 +151,7 @@ describe('Admin', () => {
     renderWithProviders(<Admin />);
 
     expect(screen.getByText('Loading...')).toBeInTheDocument();
-    expect(screen.queryByText('Login with Microsoft')).not.toBeInTheDocument();
-    expect(screen.queryByText('Please login to access administrative features')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Please use the Login button in the top right corner/)).not.toBeInTheDocument();
   });
 
   it('shows Pro required message for non-Pro users', () => {
@@ -222,41 +221,5 @@ describe('Admin', () => {
     expect(screen.getByText('API Calls')).toBeInTheDocument();
     expect(screen.getByText('API Errors')).toBeInTheDocument();
     expect(screen.getByText(/Statistics will be available/)).toBeInTheDocument();
-  });
-
-  it('calls login function when login button is clicked', async () => {
-    const mockLogin = vi.fn();
-    
-    vi.mocked(useAuth).mockReturnValue({
-      isLoggedIn: false,
-      userName: null,
-      userEmail: null,
-      userPhoto: null,
-      accessToken: null,
-      idToken: null,
-      isInitialized: true,
-      justLoggedIn: false,
-      login: mockLogin,
-      logout: vi.fn(),
-      acknowledgeLogin: vi.fn(),
-    });
-
-    vi.mocked(useProUserCheck).mockReturnValue({
-      isChecking: false,
-      hasChecked: false,
-      isProUser: false,
-      secretValue: null,
-      hasError: false,
-      errorMessage: null,
-      performCheck: vi.fn(),
-      resetState: vi.fn(),
-    });
-
-    renderWithProviders(<Admin />);
-    const loginButton = screen.getByText('Login with Microsoft');
-    
-    fireEvent.click(loginButton);
-
-    expect(mockLogin).toHaveBeenCalledOnce();
   });
 });
