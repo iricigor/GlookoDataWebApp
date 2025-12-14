@@ -9,10 +9,6 @@ import {
   AccordionItem,
   AccordionHeader,
   AccordionPanel,
-  useToastController,
-  Toast,
-  ToastTitle,
-  ToastBody,
 } from '@fluentui/react-components';
 import { generateTimeInRangePrompt } from '../../../features/aiAnalysis/prompts';
 import { callAIWithRouting } from '../../../utils/api';
@@ -71,8 +67,6 @@ export function TimeInRangeTab({
 }: TimeInRangeTabProps) {
   const styles = useAIAnalysisStyles();
   const { thresholds } = useGlucoseThresholds();
-  const toasterId = 'app-toaster';
-  const { dispatchToast } = useToastController(toasterId);
   
   const {
     analyzing,
@@ -147,20 +141,6 @@ export function TimeInRangeTab({
         isProUser,
         useProKeys,
       });
-
-      // Check if fallback was used and show toast notification
-      if (result.usedFallback && result.backendError) {
-        dispatchToast(
-          <Toast>
-            <ToastTitle>Pro API Failed - Using Your Keys</ToastTitle>
-            <ToastBody>
-              Pro backend API is temporarily unavailable. 
-              Successfully fell back to using your own API keys.
-            </ToastBody>
-          </Toast>,
-          { intent: 'warning' }
-        );
-      }
 
       if (result.success && result.content) {
         completeAnalysis(result.content);
