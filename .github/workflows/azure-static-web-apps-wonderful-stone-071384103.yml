@@ -58,6 +58,9 @@ jobs:
         working-directory: ./api
         run: npm run build
       
+      - name: List API Endpoints
+        run: node scripts/list-api-endpoints.cjs
+      
       - name: Deploy API to Azure Function
         uses: Azure/functions-action@v1
         with:
