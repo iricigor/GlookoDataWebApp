@@ -411,6 +411,9 @@ function App() {
             deepseekApiKey={deepseekApiKey}
             selectedProvider={selectedProvider}
             responseLanguage={responseLanguage}
+            isProUser={isProUser}
+            idToken={idToken}
+            useProKeys={proKeysEnabled}
           />
         )
       case 'ai':
