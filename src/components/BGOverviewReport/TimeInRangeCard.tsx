@@ -143,8 +143,8 @@ export function TimeInRangeCard({
 
       // Call the AI API with routing - handles Pro backend or client-side API
       const result = await callAIWithRouting(activeProvider, prompt, {
-        apiKey: apiKey,
-        idToken: idToken || undefined,
+        apiKey,
+        idToken: idToken ?? undefined,
         isProUser,
         useProKeys,
       });
@@ -166,13 +166,15 @@ export function TimeInRangeCard({
   };
 
   const getButtonText = () => {
-    if (analyzing) {
-      return t('reports.bgOverview.tir.analyzingButton');
-    }
-    if (response && !analyzing && ready) {
-      return t('reports.bgOverview.tir.reanalyzeButton');
-    }
-    return t('reports.bgOverview.tir.analyzeButton');
+    const baseText = analyzing
+      ? t('reports.bgOverview.tir.analyzingButton')
+      : response && !analyzing && ready
+      ? t('reports.bgOverview.tir.reanalyzeButton')
+      : t('reports.bgOverview.tir.analyzeButton');
+    
+    // Add sparkles indicator when using Pro backend keys
+    const sparkles = isProUser && useProKeys ? ' ✨' : '';
+    return `${baseText}${sparkles}`;
   };
 
   return (
@@ -314,7 +316,7 @@ export function TimeInRangeCard({
                 className={styles.aiAnalysisButton}
                 icon={analyzing ? <Spinner size="tiny" /> : undefined}
               >
-                {getButtonText()}{isProUser && useProKeys ? ' ✨' : ''}
+                {getButtonText()}
               </Button>
               {response && !analyzing && (
                 <ChevronDownRegular 
