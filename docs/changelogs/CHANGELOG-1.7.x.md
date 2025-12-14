@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>791 Fix Pro API fallback by passing user API keys to routing layer</summary>
+
+[#791](../../pull/791) Fix Pro API fallback by passing user API keys to routing layer
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>789 Fix Azure Functions 404 errors by adding proper entry point</summary>
 
 [#789](../../pull/789) Fix Azure Functions 404 errors by adding proper entry point
