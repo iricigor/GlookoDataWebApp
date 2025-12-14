@@ -103,14 +103,17 @@ interface SettingsProps {
 }
 
 /**
- * Render the Settings page UI for configuring theme, export format, glucose settings, AI providers, and application information.
+ * Render the Settings page and manage tab state synchronized with the URL hash.
  *
- * @param selectedProvider - The currently selected AI provider, or `null` to allow automatic provider selection
+ * Renders UI tabs for general, glucose, AI provider, pro user, and about settings; initializes the active tab from the URL hash and keeps the hash in sync when the tab changes.
+ *
+ * @param selectedProvider - Currently selected AI provider, or `null` to allow automatic provider selection
  * @param onProviderAutoSwitch - Optional callback invoked when the app automatically switches AI providers; called with `(fromProvider, toProvider)`
- * @param useProKeys - Whether to use Pro backend keys (for Pro users only)
- * @param onUseProKeysChange - Callback invoked when useProKeys preference changes
- * @param isProUser - Whether the current user is a Pro user
- * @returns The Settings page element
+ * @param useProKeys - If `true`, use Pro backend API keys where available
+ * @param onUseProKeysChange - Callback invoked when the `useProKeys` preference changes
+ * @param isProUser - Whether the current user has a Pro account
+ *
+ * @returns The rendered Settings page element
  */
 export function Settings({ 
   themeMode, 
@@ -234,15 +237,15 @@ export function Settings({
             selectedProvider={selectedProvider}
             onSelectedProviderChange={onSelectedProviderChange}
             onProviderAutoSwitch={onProviderAutoSwitch}
+            useProKeys={useProKeys}
+            onUseProKeysChange={onUseProKeysChange}
+            isProUser={isProUser}
           />
         );
       
       case 'pro':
         return <ProUsersTab 
           styles={styles}
-          useProKeys={useProKeys}
-          onUseProKeysChange={onUseProKeysChange}
-          isProUser={isProUser}
         />;
       
       case 'about':

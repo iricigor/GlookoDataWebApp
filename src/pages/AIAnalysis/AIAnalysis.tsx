@@ -65,6 +65,7 @@ export function AIAnalysis({
   onAnalysisComplete,
   isProUser,
   idToken,
+  useProKeys,
 }: AIAnalysisProps) {
   const styles = useAIAnalysisStyles();
   const { t } = useTranslation('aiAnalysis');
@@ -218,6 +219,7 @@ export function AIAnalysis({
             existingAnalysis={existingAnalysis}
             isProUser={isProUser}
             idToken={idToken}
+            useProKeys={useProKeys}
           />
         );
       
@@ -236,6 +238,7 @@ export function AIAnalysis({
             grokApiKey={grokApiKey}
             isProUser={isProUser}
             idToken={idToken}
+            useProKeys={useProKeys}
           />
         );
       
@@ -254,6 +257,7 @@ export function AIAnalysis({
             grokApiKey={grokApiKey}
             isProUser={isProUser}
             idToken={idToken}
+            useProKeys={useProKeys}
           />
         );
       
@@ -273,6 +277,7 @@ export function AIAnalysis({
             deepseekApiKey={deepseekApiKey}
             isProUser={isProUser}
             idToken={idToken}
+            useProKeys={useProKeys}
           />
         );
       
@@ -292,6 +297,7 @@ export function AIAnalysis({
             deepseekApiKey={deepseekApiKey}
             isProUser={isProUser}
             idToken={idToken}
+            useProKeys={useProKeys}
           />
         );
       

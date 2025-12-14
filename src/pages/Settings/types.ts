@@ -42,15 +42,9 @@ export interface SettingsTabProps {
 
 /**
  * Props for the Pro Users Tab
+ * No additional props needed - the Pro Keys switch has been moved to AI Settings tab
  */
-export interface ProUsersTabProps extends SettingsTabProps {
-  /** Whether to use Pro backend keys (for Pro users only) */
-  useProKeys: boolean;
-  /** Callback invoked when useProKeys preference changes */
-  onUseProKeysChange: (value: boolean) => void;
-  /** Whether the current user is a Pro user */
-  isProUser: boolean;
-}
+export type ProUsersTabProps = SettingsTabProps;
 
 /**
  * Props for the General Settings Tab
@@ -130,4 +124,10 @@ export interface AISettingsTabProps extends SettingsTabProps {
   onSelectedProviderChange: (provider: AIProvider | null) => void;
   /** Callback invoked when provider is auto-switched due to failed key verification */
   onProviderAutoSwitch?: (fromProvider: AIProvider, toProvider: AIProvider) => void;
+  /** Whether to use Pro backend keys (for Pro users only) */
+  useProKeys: boolean;
+  /** Callback invoked when useProKeys preference changes */
+  onUseProKeysChange: (value: boolean) => void;
+  /** Whether the current user is a Pro user */
+  isProUser: boolean;
 }

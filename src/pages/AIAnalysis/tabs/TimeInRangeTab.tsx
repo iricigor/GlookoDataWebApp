@@ -9,6 +9,10 @@ import {
   AccordionItem,
   AccordionHeader,
   AccordionPanel,
+  useToastController,
+  Toast,
+  ToastTitle,
+  ToastBody,
 } from '@fluentui/react-components';
 import { generateTimeInRangePrompt } from '../../../features/aiAnalysis/prompts';
 import { callAIWithRouting } from '../../../utils/api';
@@ -63,9 +67,12 @@ export function TimeInRangeTab({
   existingAnalysis,
   isProUser,
   idToken,
+  useProKeys,
 }: TimeInRangeTabProps) {
   const styles = useAIAnalysisStyles();
   const { thresholds } = useGlucoseThresholds();
+  const toasterId = 'app-toaster';
+  const { dispatchToast } = useToastController(toasterId);
   
   const {
     analyzing,
@@ -129,16 +136,31 @@ export function TimeInRangeTab({
       // Generate the prompt with the glucose stats and thresholds
       const prompt = generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, activeProvider);
 
-      // Get the appropriate API key for the active provider (only needed for non-Pro users)
+      // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
                       activeProvider === 'grok' ? grokApiKey : geminiApiKey;
 
-      // Call the AI API - it will automatically route to backend for Pro users
+      // Call the AI API - only use backend if Pro user with Pro keys enabled AND has idToken
       const result = await callAIWithRouting(activeProvider, prompt, {
-        apiKey: isProUser ? undefined : apiKey,
+        apiKey: (isProUser && useProKeys && idToken) ? undefined : apiKey,
         idToken: idToken || undefined,
         isProUser,
+        useProKeys,
       });
+
+      // Check if fallback was used and show toast notification
+      if (result.usedFallback && result.backendError) {
+        dispatchToast(
+          <Toast>
+            <ToastTitle>Pro API Failed - Using Your Keys</ToastTitle>
+            <ToastBody>
+              Pro backend API is temporarily unavailable. 
+              Successfully fell back to using your own API keys.
+            </ToastBody>
+          </Toast>,
+          { intent: 'warning' }
+        );
+      }
 
       if (result.success && result.content) {
         completeAnalysis(result.content);

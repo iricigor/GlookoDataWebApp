@@ -3,7 +3,6 @@ import {
   FluentProvider, 
   Toaster, 
   useToastController, 
-  useId, 
   Toast, 
   ToastTitle, 
   ToastBody 
@@ -44,9 +43,9 @@ import { extractZipMetadata } from './features/dataUpload/utils'
 import { loadCachedFiles } from './utils/fileCache'
 
 /**
- * Application root component that renders the app shell and manages global state, routing, and user settings.
+ * Render the application shell and coordinate global state, routing, and user interactions.
  *
- * Manages theme, file uploads and selection, AI analysis results, toast notifications, cookie consent, demo data loading, and cloud settings synchronization for authenticated users.
+ * Manages theme, demo and cached file loading, file upload/selection lifecycle, AI analysis results, toast notifications, cookie consent, and optional cloud-backed user settings synchronization for authenticated users.
  *
  * @returns The root React element for the application UI.
  */
@@ -118,7 +117,7 @@ function App() {
   const [aiAnalysisResults, setAiAnalysisResults] = useState<Record<string, AIAnalysisResult>>({})
 
   // Toast notifications
-  const toasterId = useId('toaster')
+  const toasterId = 'app-toaster'
   const { dispatchToast } = useToastController(toasterId)
 
   // Handle AI provider auto-switch notification
@@ -430,6 +429,7 @@ function App() {
             onAnalysisComplete={handleAIAnalysisComplete}
             isProUser={isProUser}
             idToken={idToken}
+            useProKeys={proKeysEnabled}
           />
         )
       case 'settings':
