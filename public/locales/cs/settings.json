@@ -68,6 +68,18 @@
       }
     },
     "ai": {
+      "keysConfiguration": {
+        "title": "Konfigurace AI klíčů",
+        "useProKeys": {
+          "label": "Použít Pro AI klíče",
+          "usingProKeys": "Aktuálně používáte Pro spravované AI klíče. Není potřeba konfigurovat vlastní API klíče níže.",
+          "usingOwnKeys": "Aktuálně používáte vlastní API klíče nakonfigurované níže.",
+          "requiresProAccess": "Vyžadován přístup Pro uživatele. Požádejte o Pro přístup pro použití spravovaných AI klíčů."
+        }
+      },
+      "informationSection": {
+        "title": "Důležité informace"
+      },
       "title": "Konfigurace AI",
       "description": "Nakonfigurujte nastavení AI pro inteligentní analýzu. Klikněte na \"Vybrat\" vedle jakéhokoli nakonfigurovaného klíče API pro přepnutí poskytovatelů.",
       "apiKeyPlaceholder": "Zadejte svůj klíč API",
