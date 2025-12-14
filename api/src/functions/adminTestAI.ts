@@ -255,28 +255,29 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
 
     requestLogger.logInfo('Pro user verified', { userId });
 
-    // Parse request body
+    // Parse request body (provider is optional and will be ignored - we use environment configuration)
     const body = await request.text();
-    let requestData: AdminTestAIRequest = {};
     
     if (body) {
       try {
-        requestData = JSON.parse(body) as AdminTestAIRequest;
+        // Parse but don't use the provider from request
+        JSON.parse(body);
       } catch {
         return requestLogger.logError('Invalid JSON in request body', 400, 'validation');
       }
     }
 
-    // Default to perplexity if no provider specified
-    const provider = requestData.provider || 'perplexity';
+    // Get provider from environment variable (AI_PROVIDER) or default to perplexity
+    // This ensures consistency with the aiQuery endpoint configuration
+    const provider = process.env.AI_PROVIDER || 'perplexity';
     const validProviders = ['perplexity', 'gemini', 'grok', 'deepseek'];
     
     if (!validProviders.includes(provider)) {
       return requestLogger.logError(
-        `Invalid provider. Supported providers: ${validProviders.join(', ')}`,
-        400,
-        'validation',
-        { code: 'INVALID_PROVIDER' }
+        `Invalid provider configured: ${provider}. Supported providers: ${validProviders.join(', ')}`,
+        500,
+        'infrastructure',
+        { code: 'INVALID_PROVIDER_CONFIG' }
       );
     }
 
@@ -288,13 +289,25 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
 
     // Test the AI provider
     const testResult = await testAIProvider(provider, config.apiKey);
-    requestLogger.logInfo('AI test successful', { provider, resultLength: testResult.length });
+    
+    // Get Key Vault configuration from environment
+    const keyVaultName = process.env.KEY_VAULT_NAME || 'Not configured';
+    const aiApiKeySecret = process.env.AI_API_KEY_SECRET || 'AI-API-Key';
+    
+    requestLogger.logInfo('AI test successful', { 
+      provider, 
+      resultLength: testResult.length,
+      keyVaultName,
+      aiApiKeySecret
+    });
 
     return requestLogger.logSuccess({
       status: 200,
       jsonBody: {
         success: true,
         provider,
+        keyVaultName,
+        aiApiKeySecret,
         message: `AI provider test successful. Response: ${testResult.substring(0, 200)}${testResult.length > 200 ? '...' : ''}`,
       },
     });
