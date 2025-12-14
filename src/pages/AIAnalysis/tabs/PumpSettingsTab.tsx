@@ -129,9 +129,9 @@ export function PumpSettingsTab({
                   : activeProvider === 'deepseek' ? deepseekApiKey
                   : geminiApiKey;
 
-    // Call the AI API - only use backend if Pro user with Pro keys enabled AND has idToken
+    // Call the AI API with routing - the routing logic handles Pro vs client-side API calls
     return await callAIWithRouting(activeProvider!, prompt, {
-      apiKey: (isProUser && useProKeys && idToken) ? undefined : apiKey,
+      apiKey: apiKey,
       idToken: idToken || undefined,
       isProUser,
       useProKeys,
