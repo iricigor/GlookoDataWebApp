@@ -85,6 +85,10 @@ interface ReportsProps {
   deepseekApiKey?: string;
   selectedProvider?: AIProvider | null;
   responseLanguage?: ResponseLanguage;
+  // Pro user props for backend AI routing
+  isProUser?: boolean;
+  idToken?: string | null;
+  useProKeys?: boolean;
 }
 
 const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'hypos'];
@@ -118,6 +122,9 @@ export function Reports({
   deepseekApiKey,
   selectedProvider,
   responseLanguage,
+  isProUser,
+  idToken,
+  useProKeys,
 }: ReportsProps) {
   const styles = useStyles();
   const { t } = useTranslation('reports');
@@ -181,6 +188,9 @@ export function Reports({
             deepseekApiKey={deepseekApiKey}
             selectedProvider={selectedProvider}
             responseLanguage={responseLanguage}
+            isProUser={isProUser}
+            idToken={idToken}
+            useProKeys={useProKeys}
           />
         );
       case 'dailyBG':

@@ -105,7 +105,13 @@ export async function testProAIKey(
     }
 
     // Error handling
-    let errorData: { error?: string; errorType?: string } = {};
+    let errorData: { 
+      error?: string; 
+      errorType?: string;
+      provider?: string;
+      keyVaultName?: string;
+      aiApiKeySecret?: string;
+    } = {};
     try {
       errorData = await response.json();
     } catch (jsonError) {
@@ -138,6 +144,10 @@ export async function testProAIKey(
       error: errorMessage,
       errorType: mappedErrorType,
       statusCode,
+      // Include configuration from error response if available
+      provider: errorData.provider,
+      keyVaultName: errorData.keyVaultName,
+      aiApiKeySecret: errorData.aiApiKeySecret,
     };
   } catch (error: unknown) {
     // Network or other errors

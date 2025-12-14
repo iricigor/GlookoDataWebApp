@@ -27,7 +27,7 @@ import type { RangeCategoryMode, GlucoseUnit, GlucoseThresholds, AGPDayOfWeekFil
 import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
 import type { AIProvider } from '../../utils/api';
 import { calculatePercentage, GLUCOSE_RANGE_COLORS } from '../../utils/data';
-import { callAIApi } from '../../utils/api';
+import { callAIWithRouting } from '../../utils/api';
 import { generateBGOverviewTIRPrompt } from '../../features/aiAnalysis/prompts';
 import { useAnalysisState } from '../../pages/AIAnalysis/useAnalysisState';
 import { MarkdownRenderer } from '../shared';
@@ -46,6 +46,10 @@ interface TimeInRangeCardProps {
   activeProvider: AIProvider | null;
   apiKey: string;
   responseLanguage: ResponseLanguage;
+  // Pro user props for backend AI routing
+  isProUser?: boolean;
+  idToken?: string | null;
+  useProKeys?: boolean;
 }
 
 /** Get color for a glucose range category */
@@ -71,6 +75,9 @@ export function TimeInRangeCard({
   activeProvider,
   apiKey,
   responseLanguage,
+  isProUser = false,
+  idToken = null,
+  useProKeys = false,
 }: TimeInRangeCardProps) {
   const styles = useBGOverviewStyles();
   const { t } = useTranslation('reports');
@@ -98,7 +105,13 @@ export function TimeInRangeCard({
   }, [response, analyzing]);
 
   const handleAnalyzeClick = async () => {
-    if (!activeProvider || !hasApiKey) {
+    if (!activeProvider) {
+      return;
+    }
+
+    // Pro users don't need API keys if they're using Pro keys
+    const hasRequiredAuth = isProUser || hasApiKey;
+    if (!hasRequiredAuth) {
       return;
     }
 
@@ -128,8 +141,13 @@ export function TimeInRangeCard({
         dayFilter
       );
 
-      // Call the AI API
-      const result = await callAIApi(activeProvider, apiKey, prompt);
+      // Call the AI API with routing - handles Pro backend or client-side API
+      const result = await callAIWithRouting(activeProvider, prompt, {
+        apiKey,
+        idToken: idToken ?? undefined,
+        isProUser,
+        useProKeys,
+      });
 
       if (result.success && result.content) {
         completeAnalysis(result.content);
@@ -148,13 +166,15 @@ export function TimeInRangeCard({
   };
 
   const getButtonText = () => {
-    if (analyzing) {
-      return t('reports.bgOverview.tir.analyzingButton');
-    }
-    if (response && !analyzing && ready) {
-      return t('reports.bgOverview.tir.reanalyzeButton');
-    }
-    return t('reports.bgOverview.tir.analyzeButton');
+    const baseText = analyzing
+      ? t('reports.bgOverview.tir.analyzingButton')
+      : response && !analyzing && ready
+      ? t('reports.bgOverview.tir.reanalyzeButton')
+      : t('reports.bgOverview.tir.analyzeButton');
+    
+    // Add sparkles indicator when using Pro backend keys
+    const sparkles = isProUser && useProKeys ? ' ✨' : '';
+    return `${baseText}${sparkles}`;
   };
 
   return (
@@ -287,11 +307,11 @@ export function TimeInRangeCard({
             <strong>Target:</strong> 70% Time in Range (TIR) is generally considered a good target for glucose management
           </Text>
           
-          {hasApiKey && activeProvider && (
+          {(hasApiKey || isProUser) && activeProvider && (
             <div className={styles.aiAnalysisContainer}>
               <Button
                 appearance="primary"
-                disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
+                disabled={!(hasApiKey || isProUser) || analyzing || (cooldownActive && cooldownSeconds > 0)}
                 onClick={handleAnalyzeClick}
                 className={styles.aiAnalysisButton}
                 icon={analyzing ? <Spinner size="tiny" /> : undefined}

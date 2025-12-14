@@ -72,6 +72,10 @@ interface BGOverviewReportProps {
   deepseekApiKey?: string;
   selectedProvider?: AIProvider | null;
   responseLanguage?: ResponseLanguage;
+  // Pro user props for backend AI routing
+  isProUser?: boolean;
+  idToken?: string | null;
+  useProKeys?: boolean;
 }
 
 export function BGOverviewReport({ 
@@ -84,6 +88,9 @@ export function BGOverviewReport({
   deepseekApiKey = '',
   selectedProvider = null,
   responseLanguage = 'english',
+  isProUser = false,
+  idToken = null,
+  useProKeys = false,
 }: BGOverviewReportProps) {
   const styles = useBGOverviewStyles();
   const { thresholds } = useGlucoseThresholds();
@@ -404,6 +411,9 @@ export function BGOverviewReport({
           activeProvider={activeProvider}
           apiKey={apiKey}
           responseLanguage={responseLanguage}
+          isProUser={isProUser}
+          idToken={idToken}
+          useProKeys={useProKeys}
         />
       )}
 
