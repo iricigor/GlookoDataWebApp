@@ -358,7 +358,16 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
     }
 
     // Full test - test the AI provider
-    const testResult = await testAIProvider(provider, aiProviderConfig!.apiKey);
+    if (!aiProviderConfig) {
+      // This should not happen as we would have returned earlier, but add explicit check for safety
+      return requestLogger.logError(
+        'Failed to retrieve AI provider configuration',
+        500,
+        'infrastructure'
+      );
+    }
+    
+    const testResult = await testAIProvider(provider, aiProviderConfig.apiKey);
     
     requestLogger.logInfo('AI test successful', { 
       provider, 
