@@ -327,17 +327,13 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
     }
 
     // Generic error
-    requestLogger.logWarn('Unexpected error during AI test', {
+    requestLogger.logStorage('aiTest', false, { 
       error: errorMessage,
       errorStack,
       errorType: error instanceof Error ? error.constructor.name : typeof error
     });
 
-    return requestLogger.logError(
-      'Internal server error during AI test',
-      500,
-      'infrastructure'
-    );
+    return requestLogger.logError(error, 500, 'infrastructure');
   }
 }
 

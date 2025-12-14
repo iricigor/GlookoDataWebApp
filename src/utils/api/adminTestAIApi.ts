@@ -97,7 +97,8 @@ export async function testProAIKey(
     try {
       errorData = await response.json();
     } catch (jsonError) {
-      // JSON parsing failed
+      // JSON parsing failed - likely not a JSON response
+      // Use generic error message based on status code
       console.warn('Failed to parse error response as JSON:', jsonError);
     }
     
