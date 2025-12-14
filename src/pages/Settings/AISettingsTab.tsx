@@ -381,32 +381,33 @@ export function AISettingsTab({
 
   return (
     <>
-      {/* Pro Keys Switch - Only visible for Pro users */}
-      {isProUser && (
-        <div className={styles.settingSection}>
-          <Title3 className={styles.sectionTitle}>{t('settings.proUsers.apiKeys.title')}</Title3>
-          <Divider className={styles.divider} />
-          <Text className={styles.settingDescription}>
-            {t('settings.proUsers.apiKeys.description')}
-          </Text>
-          <div className={styles.switchContainer}>
-            <Switch
-              checked={useProKeys}
-              onChange={(_, data) => onUseProKeysChange(data.checked)}
-              label={
-                <Label>
-                  {t('settings.proUsers.apiKeys.switchLabel')}
-                </Label>
-              }
-            />
-          </div>
-          <Text className={styles.settingDescription}>
-            {useProKeys
-              ? t('settings.proUsers.apiKeys.usingProKeys')
-              : t('settings.proUsers.apiKeys.usingOwnKeys')}
-          </Text>
+      {/* Pro Keys Switch - Always visible, but disabled for non-Pro users */}
+      <div className={styles.settingSection}>
+        <Title3 className={styles.sectionTitle}>{t('settings.proUsers.apiKeys.title')}</Title3>
+        <Divider className={styles.divider} />
+        <Text className={styles.settingDescription}>
+          {t('settings.proUsers.apiKeys.description')}
+        </Text>
+        <div className={styles.switchContainer}>
+          <Switch
+            checked={useProKeys && isProUser}
+            onChange={(_, data) => onUseProKeysChange(data.checked)}
+            disabled={!isProUser}
+            label={
+              <Label>
+                {t('settings.proUsers.apiKeys.switchLabel')}
+              </Label>
+            }
+          />
         </div>
-      )}
+        <Text className={styles.settingDescription}>
+          {!isProUser
+            ? t('settings.proUsers.apiKeys.requiresProAccess')
+            : useProKeys
+            ? t('settings.proUsers.apiKeys.usingProKeys')
+            : t('settings.proUsers.apiKeys.usingOwnKeys')}
+        </Text>
+      </div>
 
       <div className={styles.settingSection}>
         <Title3 className={styles.sectionTitle}>{t('settings.ai.title')}</Title3>

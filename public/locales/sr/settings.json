@@ -156,7 +156,8 @@
         "description": "Kao Pro korisnik, možete izabrati da koristite naše upravljane AI ključeve ili nastavite da koristite sopstvene API ključeve.",
         "switchLabel": "Koristi Pro AI ključeve",
         "usingProKeys": "Trenutno koristite upravljane Pro AI ključeve. Ne morate konfigurisati sopstvene API ključeve na kartici Podešavanja AI.",
-        "usingOwnKeys": "Trenutno koristite sopstvene API ključeve. Konfigurirajte ih na kartici Podešavanja AI."
+        "usingOwnKeys": "Trenutno koristite sopstvene API ključeve. Konfigurirajte ih na kartici Podešavanja AI.",
+        "requiresProAccess": "Potreban je pristup Pro korisniku za korišćenje upravljanih AI ključeva. Prijavite se za Pro pristup da omogućite ovu funkciju."
       },
       "benefits": {
         "title": "Šta Pro korisnici dobijaju",

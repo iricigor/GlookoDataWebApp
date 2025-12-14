@@ -156,7 +156,8 @@
         "description": "As a Pro User, you can choose to use our managed AI keys or continue using your own API keys.",
         "switchLabel": "Use Pro AI Keys",
         "usingProKeys": "Currently using Pro managed AI keys. You don't need to configure your own API keys in the AI Settings tab.",
-        "usingOwnKeys": "Currently using your own API keys. Configure them in the AI Settings tab."
+        "usingOwnKeys": "Currently using your own API keys. Configure them in the AI Settings tab.",
+        "requiresProAccess": "Pro User access required to use managed AI keys. Apply for Pro access to enable this feature."
       },
       "benefits": {
         "title": "What Pro Users Get",

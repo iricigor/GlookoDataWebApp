@@ -15,6 +15,15 @@
       "apiCalls": "API pozivi",
       "apiErrors": "API greške",
       "placeholderNote": "Statistike će biti dostupne nakon završetka integracije API-ja"
+    },
+    "aiTest": {
+      "title": "Test AI konfiguracije",
+      "description": "Testirajte konfiguraciju Pro AI ključa da proverite da li radi pravilno",
+      "testButton": "Testiraj AI ključ",
+      "testing": "Testiranje...",
+      "selectProvider": "Odaberi AI provajdera",
+      "testSuccess": "✅ Test uspešan! Provajder: {provider}",
+      "testError": "❌ Test neuspešan: {error}"
     }
   }
 }

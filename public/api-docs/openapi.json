@@ -27,6 +27,10 @@
     {
       "name": "AI",
       "description": "AI analysis operations for Pro users"
+    },
+    {
+      "name": "Admin",
+      "description": "Administrative operations for Pro users"
     }
   ],
   "security": [
@@ -596,6 +600,242 @@
           }
         }
       }
+    },
+    "/admin/stats/logged-in-users": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get count of logged-in users",
+        "description": "Returns the total count of users who have logged into the application at least once. This endpoint is only accessible to Pro users and provides administrative statistics. The count is retrieved from the UserSettings table in Azure Table Storage.",
+        "operationId": "getLoggedInUsersCount",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved logged-in users count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoggedInUsersCountResponse"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Successful count retrieval",
+                    "value": {
+                      "count": 1523,
+                      "capped": false
+                    }
+                  },
+                  "capped": {
+                    "summary": "Count capped at limit",
+                    "value": {
+                      "count": 100000,
+                      "capped": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized access. Please log in again.",
+                  "errorType": "unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User is not a Pro user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Access denied. This endpoint requires Pro user access.",
+                  "errorType": "authorization"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Internal server error",
+                  "errorType": "infrastructure"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - Storage not configured or access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "storageNotConfigured": {
+                    "summary": "Storage not configured",
+                    "value": {
+                      "error": "Service unavailable - storage not configured",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_NOT_CONFIGURED"
+                    }
+                  },
+                  "storageAccessDenied": {
+                    "summary": "Storage access denied",
+                    "value": {
+                      "error": "Service unavailable - storage access denied",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_ACCESS_DENIED"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/test-ai": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Test Pro AI key configuration",
+        "description": "Allows Pro users with admin access to test the Pro AI key configuration by sending a simple test query to the configured AI provider. This endpoint verifies that the backend AI keys are properly configured and can successfully communicate with the AI provider.",
+        "operationId": "testProAIKey",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminTestAIRequest"
+              },
+              "examples": {
+                "perplexity": {
+                  "summary": "Test with Perplexity",
+                  "value": {
+                    "provider": "perplexity"
+                  }
+                },
+                "default": {
+                  "summary": "Test with default provider",
+                  "value": {}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI test successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTestAIResponse"
+                },
+                "example": {
+                  "success": true,
+                  "provider": "perplexity",
+                  "message": "AI provider test successful. Response: Hello! I'm working correctly and ready to help..."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid provider",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Invalid provider. Supported providers: perplexity, gemini, grok, deepseek",
+                  "errorType": "validation",
+                  "code": "INVALID_PROVIDER"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized access. Please log in again.",
+                  "errorType": "unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User is not a Pro user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Access denied. This endpoint requires Pro user access.",
+                  "errorType": "authorization"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error - Key Vault or configuration error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Failed to retrieve API key configuration",
+                  "errorType": "infrastructure",
+                  "code": "KEY_VAULT_ERROR"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable - AI provider error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "AI provider test failed: Perplexity API error (401): Invalid API key",
+                  "errorType": "provider",
+                  "code": "PROVIDER_ERROR"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -779,6 +1019,54 @@
             "type": "string",
             "description": "The AI provider that was used to generate the response",
             "example": "perplexity"
+          }
+        }
+      },
+      "LoggedInUsersCountResponse": {
+        "type": "object",
+        "required": ["count"],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "description": "The total number of users who have logged in at least once",
+            "example": 1523
+          },
+          "capped": {
+            "type": "boolean",
+            "description": "Whether the count was capped at the maximum limit (100,000). If true, actual count may be higher.",
+            "example": false
+          }
+        }
+      },
+      "AdminTestAIRequest": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": ["perplexity", "gemini", "grok", "deepseek"],
+            "description": "AI provider to test (optional, defaults to perplexity)",
+            "example": "perplexity"
+          }
+        }
+      },
+      "AdminTestAIResponse": {
+        "type": "object",
+        "required": ["success", "provider", "message"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the test was successful",
+            "example": true
+          },
+          "provider": {
+            "type": "string",
+            "description": "The AI provider that was tested",
+            "example": "perplexity"
+          },
+          "message": {
+            "type": "string",
+            "description": "Test result message including a preview of the AI response",
+            "example": "AI provider test successful. Response: Hello! I'm working correctly..."
           }
         }
       }

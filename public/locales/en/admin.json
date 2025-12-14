@@ -15,6 +15,15 @@
       "apiCalls": "API Calls",
       "apiErrors": "API Errors",
       "placeholderNote": "Statistics marked with '-' will be available once API integration is complete"
+    },
+    "aiTest": {
+      "title": "AI Configuration Test",
+      "description": "Test the Pro AI key configuration to verify it's working correctly",
+      "testButton": "Test AI Key",
+      "testing": "Testing...",
+      "selectProvider": "Select AI Provider",
+      "testSuccess": "✅ Test successful! Provider: {provider}",
+      "testError": "❌ Test failed: {error}"
     }
   }
 }

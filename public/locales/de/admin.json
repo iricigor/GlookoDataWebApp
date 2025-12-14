@@ -15,6 +15,15 @@
       "apiCalls": "API-Aufrufe",
       "apiErrors": "API-Fehler",
       "placeholderNote": "Statistiken, die mit '-' markiert sind, werden verfügbar sein, sobald die API-Integration abgeschlossen ist"
+    },
+    "aiTest": {
+      "title": "KI-Konfigurationstest",
+      "description": "Testen Sie die Pro-KI-Schlüsselkonfiguration, um zu überprüfen, ob sie korrekt funktioniert",
+      "testButton": "KI-Schlüssel testen",
+      "testing": "Testen...",
+      "selectProvider": "KI-Anbieter auswählen",
+      "testSuccess": "✅ Test erfolgreich! Anbieter: {provider}",
+      "testError": "❌ Test fehlgeschlagen: {error}"
     }
   }
 }
