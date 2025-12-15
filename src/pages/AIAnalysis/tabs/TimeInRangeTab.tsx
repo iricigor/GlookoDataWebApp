@@ -129,7 +129,7 @@ export function TimeInRangeTab({
     try {
       // Generate the prompt with the glucose stats and thresholds
       // When using Pro backend keys, don't specify a provider to avoid mismatch
-      const promptProvider = (isProUser && useProKeys) ? undefined : activeProvider;
+      const promptProvider = (isProUser && useProKeys) ? undefined : (activeProvider || undefined);
       const prompt = generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, promptProvider);
 
       // Get the appropriate API key for the active provider

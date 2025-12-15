@@ -173,13 +173,13 @@ export function HyposTab({
 
     // Generate the prompt with the base64 CSV data
     // When using Pro backend keys, don't specify a provider to avoid mismatch
-    const promptProvider = (isProUser && useProKeys) ? undefined : activeProvider;
+    const promptProvider = (isProUser && useProKeys) ? undefined : (activeProvider || undefined);
     const prompt = generateHyposPrompt(
       base64EventsData,
       base64SummariesData,
       responseLanguage,
       glucoseUnit,
-      promptProvider!,
+      promptProvider,
       base64EventSummaryData
     );
 

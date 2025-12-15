@@ -116,8 +116,8 @@ export function PumpSettingsTab({
 
     // Generate the prompt with the base64 CSV data
     // When using Pro backend keys, don't specify a provider to avoid mismatch
-    const promptProvider = (isProUser && useProKeys) ? undefined : activeProvider;
-    const prompt = generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, promptProvider!);
+    const promptProvider = (isProUser && useProKeys) ? undefined : (activeProvider || undefined);
+    const prompt = generatePumpSettingsPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, promptProvider);
 
     // Get the appropriate API key for the active provider
     const apiKey = activeProvider === 'perplexity' ? perplexityApiKey
