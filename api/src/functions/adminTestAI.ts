@@ -61,47 +61,26 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
 }
 
 /**
- * Get AI provider secret name from environment-configured provider
- * 
- * Maps the provider name to its corresponding Key Vault secret name.
- * Since there's only one backend AI provider configured via AI_PROVIDER env var,
- * this function returns the secret name for that specific provider.
- * 
- * @param provider - The AI provider name (e.g., 'perplexity', 'gemini', 'grok', 'deepseek')
- * @returns The Key Vault secret name for the provider
- * @throws Error if provider is unsupported
- */
-function getSecretNameForProvider(provider: string): string {
-  // Map provider to its Key Vault secret name
-  switch (provider.toLowerCase()) {
-    case 'perplexity':
-      return 'PERPLEXITY-API-KEY';
-    case 'gemini':
-      return 'GEMINI-API-KEY';
-    case 'grok':
-      return 'GROK-API-KEY';
-    case 'deepseek':
-      return 'DEEPSEEK-API-KEY';
-    default:
-      throw new Error(`Unsupported AI provider: ${provider}`);
-  }
-}
-
-/**
  * Get AI provider configuration from Key Vault
  * 
- * Retrieves the API key for the configured AI provider from Azure Key Vault.
+ * Retrieves the AI API key from Azure Key Vault using the secret name configured
+ * in the AI_API_KEY_SECRET environment variable (default: 'AI-API-Key').
  * 
- * @param provider - The AI provider name
+ * Note: There is only ONE secret in Key Vault that contains the API key,
+ * regardless of which AI provider is being used. The provider parameter is
+ * returned for informational purposes only.
+ * 
+ * @param provider - The AI provider name (for informational purposes)
  * @returns Object containing the API key and secret name
- * @throws Error if secret cannot be retrieved or provider is unsupported
+ * @throws Error if secret cannot be retrieved
  */
 async function getAIProviderConfig(provider: string): Promise<{ apiKey: string; secretName: string }> {
-  const secretName = getSecretNameForProvider(provider);
+  // Get the secret name from environment variable or use default
+  const secretName = process.env.AI_API_KEY_SECRET || DEFAULT_AI_API_KEY_SECRET;
 
-  const apiKey = await getSecretFromKeyVault(secretName);
+  const apiKey = await getSecretFromKeyVault(undefined, secretName);
   if (!apiKey) {
-    throw new Error(`API key not configured for provider: ${provider}`);
+    throw new Error(`API key not configured in Key Vault secret: ${secretName}`);
   }
 
   return { apiKey, secretName };
@@ -316,15 +295,8 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
     // Get Key Vault configuration from environment
     const keyVaultName = process.env.KEY_VAULT_NAME || 'Not configured';
     
-    // Safely get secret name - compute once to avoid exception in error handler
-    let secretName: string;
-    try {
-      secretName = getSecretNameForProvider(provider);
-    } catch (error) {
-      // If provider is unsupported, this was already caught above
-      // This is a safety fallback
-      secretName = 'unknown-secret';
-    }
+    // Get secret name from environment variable (there's only one secret for all AI providers)
+    const secretName = process.env.AI_API_KEY_SECRET || DEFAULT_AI_API_KEY_SECRET;
 
     requestLogger.logInfo('Testing AI provider', { provider, testType });
 
@@ -336,7 +308,6 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
       // Get AI provider configuration (this tests Key Vault access)
       aiProviderConfig = await getAIProviderConfig(provider);
       secretExists = true;
-      secretName = aiProviderConfig.secretName; // Update with actual secret name
       requestLogger.logInfo('Retrieved AI configuration', { provider, secretName: aiProviderConfig.secretName });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -421,13 +392,8 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
     const provider = process.env.AI_PROVIDER || 'perplexity';
     const testType = request.query.get('testType') || 'full';
     
-    // Safely get secret name without risking exception in error handler
-    let secretName: string;
-    try {
-      secretName = getSecretNameForProvider(provider);
-    } catch {
-      secretName = 'unknown-secret';
-    }
+    // Get secret name from environment variable (same for all providers)
+    const secretName = process.env.AI_API_KEY_SECRET || DEFAULT_AI_API_KEY_SECRET;
 
     // Check for Key Vault errors
     if (errorMessage.includes('Key Vault') || errorMessage.includes('API key not configured')) {
