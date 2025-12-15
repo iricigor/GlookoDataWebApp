@@ -54,5 +54,11 @@ export function getDisclaimerInstruction(provider?: AIProvider, language: Respon
       break;
   }
   
-  return `\n\nIMPORTANT: End your response with a medical disclaimer stating: "${disclaimerText}" Then add the completion marker "--- CONCLUSIO DATAE ---" on its own separate line to confirm your analysis is complete.`;
+  // When provider is not specified (Pro users with backend keys), add explicit instruction
+  // to use the exact text "AI" and not substitute it with any specific provider name
+  const exactTextInstruction = !provider 
+    ? ` Use the exact text "AI" in the disclaimer - do NOT substitute it with any specific provider name like "Grok AI", "Gemini", "Perplexity", etc.`
+    : '';
+  
+  return `\n\nIMPORTANT: End your response with a medical disclaimer stating: "${disclaimerText}"${exactTextInstruction} Then add the completion marker "--- CONCLUSIO DATAE ---" on its own separate line to confirm your analysis is complete.`;
 }

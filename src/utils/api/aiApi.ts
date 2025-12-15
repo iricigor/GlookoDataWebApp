@@ -95,70 +95,6 @@ export function getProviderDisplayName(provider: AIProvider): string {
 }
 
 /**
- * Type guard to check if a string is a valid AIProvider
- * 
- * @param provider - The provider string to check
- * @returns True if the provider is a valid AIProvider
- */
-function isValidAIProvider(provider: string): provider is AIProvider {
-  return ['perplexity', 'gemini', 'grok', 'deepseek'].includes(provider);
-}
-
-/**
- * Replace generic AI provider disclaimer with specific provider name
- * 
- * This function is used when Pro users use backend keys - the prompt includes
- * a generic "Data is provided by AI" disclaimer, but the backend tells us
- * which provider was actually used. We update the response content to include
- * the correct provider name.
- * 
- * @param content - The AI response content that may contain a generic disclaimer
- * @param actualProvider - The actual provider that was used (e.g., 'gemini')
- * @returns The content with the disclaimer updated to include the specific provider name
- */
-export function updateDisclaimerWithProvider(content: string, actualProvider: AIProvider): string {
-  if (!content) {
-    return content;
-  }
-
-  const providerDisplayName = getProviderDisplayName(actualProvider);
-  
-  // Define disclaimer patterns and their replacements for each language
-  // These match the patterns from promptUtils.ts when provider is undefined
-  const disclaimerReplacements = [
-    {
-      // English - full disclaimer
-      pattern: /Data is provided by AI and it might not be correct\. Always consult with your doctor or healthcare provider\./gi,
-      replacement: `Data is provided by ${providerDisplayName} and it might not be correct. Always consult with your doctor or healthcare provider.`,
-    },
-    {
-      // Czech - full disclaimer
-      pattern: /Data poskytuje AI a nemusí být správná\. Vždy se poraďte se svým lékařem nebo poskytovatelem zdravotní péče\./gi,
-      replacement: `Data poskytuje ${providerDisplayName} a nemusí být správná. Vždy se poraďte se svým lékařem nebo poskytovatelem zdravotní péče.`,
-    },
-    {
-      // German - full disclaimer
-      pattern: /Daten werden von AI bereitgestellt und sind möglicherweise nicht korrekt\. Konsultieren Sie immer Ihren Arzt oder Ihre Ärztin\./gi,
-      replacement: `Daten werden von ${providerDisplayName} bereitgestellt und sind möglicherweise nicht korrekt. Konsultieren Sie immer Ihren Arzt oder Ihre Ärztin.`,
-    },
-    {
-      // Serbian - full disclaimer
-      pattern: /Podatke pruža AI i mogu biti netačni\. Uvek se konsultujte sa svojim lekarom ili pružaocem zdravstvene zaštite\./gi,
-      replacement: `Podatke pruža ${providerDisplayName} i mogu biti netačni. Uvek se konsultujte sa svojim lekarom ili pružaocem zdravstvene zaštite.`,
-    },
-  ];
-  
-  let updatedContent = content;
-  
-  // Apply each pattern replacement
-  disclaimerReplacements.forEach(({ pattern, replacement }) => {
-    updatedContent = updatedContent.replace(pattern, replacement);
-  });
-  
-  return updatedContent;
-}
-
-/**
  * Determine which provider should be used based on available API keys
  * Uses automatic priority order: Perplexity > Grok > DeepSeek > Gemini
  * 
@@ -351,16 +287,9 @@ export async function callAIWithRouting(
       }
     }
     
-    // If the backend returns the actual provider used and we have content,
-    // update the disclaimer to use the specific provider name instead of generic "AI"
-    let updatedContent = result.content;
-    if (result.success && result.content && result.provider && isValidAIProvider(result.provider)) {
-      updatedContent = updateDisclaimerWithProvider(result.content, result.provider);
-    }
-    
     return {
       success: result.success,
-      content: updatedContent,
+      content: result.content,
       error: result.error,
       errorType: mappedErrorType,
     };
