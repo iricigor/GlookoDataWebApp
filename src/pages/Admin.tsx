@@ -8,14 +8,18 @@ import {
   Link,
   MessageBar,
   MessageBarBody,
+  Dropdown,
+  Option,
 } from '@fluentui/react-components';
-import { PersonRegular, ShieldCheckmarkRegular, DataUsageRegular, PlayRegular } from '@fluentui/react-icons';
+import { PersonRegular, ShieldCheckmarkRegular, PlayRegular, ErrorCircleRegular, CheckmarkCircleRegular } from '@fluentui/react-icons';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useProUserCheck } from '../hooks/useProUserCheck';
 import { useAdminStats } from '../hooks/useAdminStats';
+import { useAdminApiStats } from '../hooks/useAdminApiStats';
 import { testProAIKey, type TestAIType } from '../utils/api/adminTestAIApi';
+import type { TimePeriod } from '../utils/api/adminApiStatsApi';
 
 /**
  * Default AI API Key secret name in Key Vault
@@ -143,6 +147,26 @@ const useStyles = makeStyles({
   link: {
     color: tokens.colorBrandForeground1,
   },
+  timePeriodControl: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shorthands.gap('12px'),
+    marginBottom: '16px',
+  },
+  timePeriodLabel: {
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground2,
+    fontFamily: 'Segoe UI, sans-serif',
+  },
+  timePeriodDropdown: {
+    minWidth: '180px',
+  },
+  apiStatsSection: {
+    width: '100%',
+    maxWidth: '900px',
+    marginTop: '24px',
+  },
   aiTestSection: {
     width: '100%',
     maxWidth: '900px',
@@ -202,6 +226,20 @@ export function Admin() {
   
   // Fetch admin statistics only if user is a Pro user
   const { loggedInUsersCount, proUsersCount, isLoading: isLoadingStats } = useAdminStats(
+    isLoggedIn && isProUser ? idToken : null,
+    isLoggedIn && isProUser
+  );
+
+  // Fetch API statistics with time period selection
+  const { 
+    webCalls, 
+    webErrors, 
+    apiCalls, 
+    apiErrors, 
+    timePeriod,
+    setTimePeriod,
+    isLoading: isLoadingApiStats 
+  } = useAdminApiStats(
     isLoggedIn && isProUser ? idToken : null,
     isLoggedIn && isProUser
   );
@@ -391,33 +429,87 @@ export function Admin() {
               {t('admin.statistics.proUsers')}
             </Text>
           </Card>
-
-          <Card className={styles.statCard}>
-            <div className={styles.statIcon}>
-              <DataUsageRegular />
-            </div>
-            <Text className={styles.statValue}>-</Text>
-            <Text className={styles.statLabel}>
-              {t('admin.statistics.apiCalls')}
-            </Text>
-          </Card>
-
-          <Card className={styles.statCard}>
-            <div className={styles.statIcon}>
-              <DataUsageRegular />
-            </div>
-            <Text className={styles.statValue}>-</Text>
-            <Text className={styles.statLabel}>
-              {t('admin.statistics.apiErrors')}
-            </Text>
-          </Card>
         </div>
 
-        <Card className={styles.noteCard}>
-          <Text className={styles.noteText}>
-            {t('admin.statistics.placeholderNote')}
+        {/* API & Web Statistics Section */}
+        <div className={styles.apiStatsSection}>
+          <Text as="h2" style={{ 
+            fontSize: tokens.fontSizeHero800,
+            fontWeight: tokens.fontWeightSemibold,
+            textAlign: 'center',
+            fontFamily: 'Segoe UI, sans-serif',
+            marginBottom: '16px',
+          }}>
+            {t('admin.statistics.apiStatsTitle')}
           </Text>
-        </Card>
+
+          <div className={styles.timePeriodControl}>
+            <Text className={styles.timePeriodLabel}>
+              {t('admin.statistics.timePeriodLabel')}:
+            </Text>
+            <Dropdown
+              className={styles.timePeriodDropdown}
+              value={timePeriod === '1hour' ? t('admin.statistics.timePeriod1Hour') : t('admin.statistics.timePeriod1Day')}
+              selectedOptions={[timePeriod]}
+              onOptionSelect={(_event, data) => {
+                setTimePeriod(data.optionValue as TimePeriod);
+              }}
+            >
+              <Option value="1hour">{t('admin.statistics.timePeriod1Hour')}</Option>
+              <Option value="1day">{t('admin.statistics.timePeriod1Day')}</Option>
+            </Dropdown>
+          </div>
+
+          <div className={styles.statsGrid}>
+            <Card className={styles.statCard}>
+              <div className={styles.statIcon}>
+                <CheckmarkCircleRegular />
+              </div>
+              <Text className={styles.statValue}>
+                {formatStatValue(webCalls, isLoadingApiStats)}
+              </Text>
+              <Text className={styles.statLabel}>
+                {t('admin.statistics.webCalls')}
+              </Text>
+            </Card>
+
+            <Card className={styles.statCard}>
+              <div className={styles.statIcon}>
+                <ErrorCircleRegular />
+              </div>
+              <Text className={styles.statValue}>
+                {formatStatValue(webErrors, isLoadingApiStats)}
+              </Text>
+              <Text className={styles.statLabel}>
+                {t('admin.statistics.webErrors')}
+              </Text>
+            </Card>
+
+            <Card className={styles.statCard}>
+              <div className={styles.statIcon}>
+                <CheckmarkCircleRegular />
+              </div>
+              <Text className={styles.statValue}>
+                {formatStatValue(apiCalls, isLoadingApiStats)}
+              </Text>
+              <Text className={styles.statLabel}>
+                {t('admin.statistics.apiCalls')}
+              </Text>
+            </Card>
+
+            <Card className={styles.statCard}>
+              <div className={styles.statIcon}>
+                <ErrorCircleRegular />
+              </div>
+              <Text className={styles.statValue}>
+                {formatStatValue(apiErrors, isLoadingApiStats)}
+              </Text>
+              <Text className={styles.statLabel}>
+                {t('admin.statistics.apiErrors')}
+              </Text>
+            </Card>
+          </div>
+        </div>
 
         {/* AI Test Section */}
         <div className={styles.aiTestSection}>

@@ -12,9 +12,14 @@
       "title": "Systemstatistiken",
       "loggedInUsers": "Angemeldete Benutzer",
       "proUsers": "Pro-Benutzer",
+      "webCalls": "Web-Aufrufe",
+      "webErrors": "Web-Fehler",
       "apiCalls": "API-Aufrufe",
       "apiErrors": "API-Fehler",
-      "placeholderNote": "Statistiken, die mit '-' markiert sind, werden verfügbar sein, sobald die API-Integration abgeschlossen ist"
+      "timePeriodLabel": "Zeitraum",
+      "timePeriod1Hour": "Letzte 1 Stunde",
+      "timePeriod1Day": "Letzter 1 Tag",
+      "apiStatsTitle": "API- und Web-Statistiken"
     },
     "aiTest": {
       "title": "KI-Konfigurationstest",

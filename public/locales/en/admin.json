@@ -12,9 +12,14 @@
       "title": "System Statistics",
       "loggedInUsers": "Logged In Users",
       "proUsers": "Pro Users",
+      "webCalls": "Web Calls",
+      "webErrors": "Web Errors",
       "apiCalls": "API Calls",
       "apiErrors": "API Errors",
-      "placeholderNote": "Statistics marked with '-' will be available once API integration is complete"
+      "timePeriodLabel": "Time Period",
+      "timePeriod1Hour": "Last 1 Hour",
+      "timePeriod1Day": "Last 1 Day",
+      "apiStatsTitle": "API & Web Statistics"
     },
     "aiTest": {
       "title": "AI Configuration Test",

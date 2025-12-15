@@ -15,6 +15,7 @@
     "@azure/functions": "^4.6.0",
     "@azure/identity": "^4.2.1",
     "@azure/keyvault-secrets": "^4.10.0",
+    "@azure/monitor-query-logs": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.2.0"
   },
