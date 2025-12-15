@@ -336,19 +336,58 @@ body.dark-theme .swagger-ui ::-webkit-scrollbar-thumb:hover {
 }
 
 /* ==========================================================================
-   Example Response Visual Distinction
-   These styles make example responses (in the "Responses" section) less
-   prominent so they don't compete with actual server responses that appear
-   after clicking Execute.
+   Server Response vs Example Response Visual Distinction  
+   Differentiates "Server response" (actual API output after Execute) from
+   "Responses" (static OpenAPI examples) using distinct visual styling.
    ========================================================================== */
 
+/* Light Theme: Server Response Section Styling */
+/* Target the actual server response that appears after clicking Execute */
+/* In Swagger UI, the server response appears as a direct child of .opblock-body */
+/* before the .responses-wrapper (example responses) */
+.swagger-ui .opblock-body > .responses-inner,
+.swagger-ui .live-responses-table {
+  background-color: #e6f7ff !important;
+  border: 2px solid #0078d4 !important;
+  border-radius: 6px;
+  padding: 16px !important;
+  margin: 12px 0 !important;
+}
+
+/* Target server response headings */
+.swagger-ui .opblock-body > .responses-inner h4,
+.swagger-ui .opblock-body > .responses-inner h5,
+.swagger-ui .live-responses-table h4,
+.swagger-ui .live-responses-table h5 {
+  color: #0078d4 !important;
+  font-weight: 700 !important;
+}
+
+/* Override for responses-inner INSIDE responses-wrapper (example responses) */
+/* These should NOT have the server response styling */
+.swagger-ui .responses-wrapper .responses-inner {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.swagger-ui .responses-wrapper .responses-inner h4,
+.swagger-ui .responses-wrapper .responses-inner h5 {
+  color: inherit !important;
+  font-weight: inherit !important;
+}
+
 /* Light Theme: Example Response Styling (in responses-wrapper) */
-/* Make the "Responses" section (example responses) less prominent */
+/* Make the "Responses" section (example responses) CLEARLY different from server response */
+/* Use a very light gray background instead of transparent to create clear visual difference */
 .swagger-ui .responses-wrapper {
-  opacity: 0.75 !important;
-  background-color: rgba(0, 0, 0, 0.02) !important;
+  opacity: 1 !important;  /* Changed from 0.75 to ensure text is fully visible */
+  background-color: #f8f8f8 !important;  /* Light gray instead of barely visible */
+  border: 1px solid #e0e0e0 !important;  /* Add subtle border */
   border-radius: 4px;
   padding: 12px !important;
+  margin: 8px 0 !important;
 }
 
 .swagger-ui .responses-wrapper .opblock-section-header h4 {
@@ -378,13 +417,49 @@ body.dark-theme .swagger-ui ::-webkit-scrollbar-thumb:hover {
   color: #666666 !important;
 }
 
+/* Dark Theme: Server Response Section Styling */
+/* Target the actual server response that appears after clicking Execute */
+body.dark-theme .swagger-ui .opblock-body > .responses-inner,
+body.dark-theme .swagger-ui .live-responses-table {
+  background-color: rgba(0, 120, 212, 0.25) !important;
+  border: 2px solid #479ef5 !important;
+  border-radius: 6px;
+  padding: 16px !important;
+  margin: 12px 0 !important;
+}
+
+/* Target server response headings in dark mode */
+body.dark-theme .swagger-ui .opblock-body > .responses-inner h4,
+body.dark-theme .swagger-ui .opblock-body > .responses-inner h5,
+body.dark-theme .swagger-ui .live-responses-table h4,
+body.dark-theme .swagger-ui .live-responses-table h5 {
+  color: #5fb8ff !important;
+  font-weight: 700 !important;
+}
+
+/* Override for responses-inner INSIDE responses-wrapper (example responses) in dark mode */
+body.dark-theme .swagger-ui .responses-wrapper .responses-inner {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+body.dark-theme .swagger-ui .responses-wrapper .responses-inner h4,
+body.dark-theme .swagger-ui .responses-wrapper .responses-inner h5 {
+  color: inherit !important;
+  font-weight: inherit !important;
+}
+
 /* Dark Theme: Example Response Styling (in responses-wrapper) */
-/* Make the "Responses" section (example responses) less prominent in dark mode */
+/* Make the "Responses" section (example responses) CLEARLY different from server response in dark mode */
 body.dark-theme .swagger-ui .responses-wrapper {
-  opacity: 0.6 !important;
-  background-color: rgba(255, 255, 255, 0.03) !important;
+  opacity: 1 !important;  /* Changed from 0.6 to ensure text is fully visible */
+  background-color: #2d2d2d !important;  /* Darker gray for clear differentiation */
+  border: 1px solid #404040 !important;  /* Add subtle border */
   border-radius: 4px;
   padding: 12px !important;
+  margin: 8px 0 !important;
 }
 
 body.dark-theme .swagger-ui .responses-wrapper .opblock-section-header h4 {
