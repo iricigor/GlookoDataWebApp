@@ -117,11 +117,12 @@ export function categorizeGlucose(
  * 
  * @param totalReadings - Total number of readings
  * @param actualReadings - Actual number of readings for the category
- * @returns Time string in "Xh Ym" format (e.g., "6h 0m", "45m")
+ * @returns Time string in "Xh Ym" format (e.g., "6h", "45m", "1h 10m")
  * 
  * @example
- * convertPercentageToTime(288, 72) // "6h 0m" (72/288 = 25% of 24h = 6h)
+ * convertPercentageToTime(288, 72) // "6h" (72/288 = 25% of 24h = 6h)
  * convertPercentageToTime(288, 9) // "45m" (9/288 = 3% of 24h = 43.2m, rounded to 45m)
+ * convertPercentageToTime(288, 14) // "1h 10m" (14/288 ≈ 5% of 24h = 1h 10m)
  */
 export function convertPercentageToTime(
   totalReadings: number,
