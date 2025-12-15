@@ -183,11 +183,11 @@ body.dark-theme .swagger-ui .highlight-code .microlight {
 }
 
 /* Response body */
-body.dark-theme .swagger-ui .responses-wrapper,
 body.dark-theme .swagger-ui .response,
 body.dark-theme .swagger-ui .response .response-col_description__inner {
   background-color: transparent !important;
 }
+/* Note: .responses-wrapper styling is handled separately below for visual distinction */
 
 /* Response code examples */
 body.dark-theme .swagger-ui .response-content-type {
