@@ -1,9 +1,13 @@
-name: 🌍 Nightly Translation Check
+name: 🌍 Translation Check (Optional)
 
 on:
-  schedule:
-    # Run every night at 02:30 UTC (after E2E tests)
-    - cron: '30 2 * * *'
+  pull_request:
+    paths:
+      - 'public/locales/**'
+      - 'src/**/*.tsx'
+      - 'src/**/*.ts'
+      - 'scripts/check-*.ts'
+      - '.github/workflows/translation-check-pr.yml'
   workflow_dispatch:
 
 jobs:
@@ -28,7 +32,7 @@ jobs:
 
       - name: Run translation completeness tests
         run: npm test -- src/i18n-completeness.test.ts
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Check for untranslated placeholders
         id: check-placeholders
@@ -45,7 +49,7 @@ jobs:
       - name: Generate summary report
         if: always()
         run: |
-          echo "# 🌍 Translation Check Report (Nightly)" >> $GITHUB_STEP_SUMMARY
+          echo "# 🌍 Translation Check Report (Optional)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Run Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -68,7 +72,8 @@ jobs:
           echo "- Detecting placeholder markers like [DE], [CS] in translations" >> $GITHUB_STEP_SUMMARY
           echo "- Warning about potential hardcoded user-facing strings" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Note:** Contributors can submit PRs without complete translations." >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** This is an optional check that won't block PR merges." >> $GITHUB_STEP_SUMMARY
+          echo "Contributors can submit PRs without complete translations." >> $GITHUB_STEP_SUMMARY
           echo "Maintainers will complete translations before merging." >> $GITHUB_STEP_SUMMARY
 
       - name: Report final status
@@ -80,3 +85,4 @@ jobs:
           else
             echo "✅ All translation checks passed"
           fi
+          echo "::notice::This is an optional translation check that won't block PR merges"
