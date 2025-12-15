@@ -113,33 +113,37 @@ export function updateDisclaimerWithProvider(content: string, actualProvider: AI
 
   const providerDisplayName = getProviderDisplayName(actualProvider);
   
-  // Patterns to match generic AI disclaimers in different languages
+  // Define disclaimer patterns and their replacements for each language
   // These match the patterns from promptUtils.ts when provider is undefined
-  const patterns = [
-    // English: "Data is provided by AI and it might not be correct"
-    /Data is provided by AI and it might not be correct/gi,
-    // Czech: "Data poskytuje AI a nemusí být správná"
-    /Data poskytuje AI a nemusí být správná/gi,
-    // German: "Daten werden von AI bereitgestellt und sind möglicherweise nicht korrekt"
-    /Daten werden von AI bereitgestellt und sind möglicherweise nicht korrekt/gi,
-    // Serbian: "Podatke pruža AI i mogu biti netačni"
-    /Podatke pruža AI i mogu biti netačni/gi,
-  ];
-  
-  // Replacements with specific provider name for each language
-  const replacements = [
-    `Data is provided by ${providerDisplayName} and it might not be correct`,
-    `Data poskytuje ${providerDisplayName} a nemusí být správná`,
-    `Daten werden von ${providerDisplayName} bereitgestellt und sind möglicherweise nicht korrekt`,
-    `Podatke pruža ${providerDisplayName} i mogu biti netačni`,
+  const disclaimerReplacements = [
+    {
+      // English
+      pattern: /Data is provided by AI and it might not be correct/gi,
+      replacement: `Data is provided by ${providerDisplayName} and it might not be correct`,
+    },
+    {
+      // Czech
+      pattern: /Data poskytuje AI a nemusí být správná/gi,
+      replacement: `Data poskytuje ${providerDisplayName} a nemusí být správná`,
+    },
+    {
+      // German
+      pattern: /Daten werden von AI bereitgestellt und sind möglicherweise nicht korrekt/gi,
+      replacement: `Daten werden von ${providerDisplayName} bereitgestellt und sind möglicherweise nicht korrekt`,
+    },
+    {
+      // Serbian
+      pattern: /Podatke pruža AI i mogu biti netačni/gi,
+      replacement: `Podatke pruža ${providerDisplayName} i mogu biti netačni`,
+    },
   ];
   
   let updatedContent = content;
   
-  // Try each pattern and apply the corresponding replacement
-  for (let i = 0; i < patterns.length; i++) {
-    updatedContent = updatedContent.replace(patterns[i], replacements[i]);
-  }
+  // Apply each pattern replacement
+  disclaimerReplacements.forEach(({ pattern, replacement }) => {
+    updatedContent = updatedContent.replace(pattern, replacement);
+  });
   
   return updatedContent;
 }
