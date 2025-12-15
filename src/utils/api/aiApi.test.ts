@@ -5,7 +5,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { 
   callAIApi, 
-  getProviderDisplayName, 
+  getProviderDisplayName,
+  updateDisclaimerWithProvider,
   determineActiveProvider, 
   getActiveProvider,
   getAvailableProviders,
@@ -99,6 +100,74 @@ describe('aiApi', () => {
 
     it('should return the provider value for unknown providers', () => {
       expect(getProviderDisplayName('unknown' as AIProvider)).toBe('unknown');
+    });
+  });
+
+  describe('updateDisclaimerWithProvider', () => {
+    it('should replace generic English disclaimer with Gemini provider name', () => {
+      const content = 'Your glucose levels look good. Data is provided by AI and it might not be correct. Always consult with your doctor.';
+      const result = updateDisclaimerWithProvider(content, 'gemini');
+      expect(result).toContain('Data is provided by Google Gemini AI and it might not be correct');
+      expect(result).not.toContain('Data is provided by AI and it might not be correct');
+    });
+
+    it('should replace generic English disclaimer with Perplexity provider name', () => {
+      const content = 'Analysis complete. Data is provided by AI and it might not be correct. Consult your healthcare provider.';
+      const result = updateDisclaimerWithProvider(content, 'perplexity');
+      expect(result).toContain('Data is provided by Perplexity AI and it might not be correct');
+    });
+
+    it('should replace generic English disclaimer with Grok provider name', () => {
+      const content = 'Results show improvement. Data is provided by AI and it might not be correct. Always verify with your doctor.';
+      const result = updateDisclaimerWithProvider(content, 'grok');
+      expect(result).toContain('Data is provided by Grok AI and it might not be correct');
+    });
+
+    it('should replace generic English disclaimer with DeepSeek provider name', () => {
+      const content = 'Trends look positive. Data is provided by AI and it might not be correct. Seek medical advice.';
+      const result = updateDisclaimerWithProvider(content, 'deepseek');
+      expect(result).toContain('Data is provided by DeepSeek AI and it might not be correct');
+    });
+
+    it('should replace generic Czech disclaimer with provider name', () => {
+      const content = 'Výsledky jsou dobré. Data poskytuje AI a nemusí být správná. Vždy se poraďte se svým lékařem.';
+      const result = updateDisclaimerWithProvider(content, 'gemini');
+      expect(result).toContain('Data poskytuje Google Gemini AI a nemusí být správná');
+    });
+
+    it('should replace generic German disclaimer with provider name', () => {
+      const content = 'Die Ergebnisse sehen gut aus. Daten werden von AI bereitgestellt und sind möglicherweise nicht korrekt. Konsultieren Sie immer Ihren Arzt.';
+      const result = updateDisclaimerWithProvider(content, 'perplexity');
+      expect(result).toContain('Daten werden von Perplexity AI bereitgestellt und sind möglicherweise nicht korrekt');
+    });
+
+    it('should replace generic Serbian disclaimer with provider name', () => {
+      const content = 'Rezultati izgledaju dobro. Podatke pruža AI i mogu biti netačni. Uvek se konsultujte sa svojim lekarom.';
+      const result = updateDisclaimerWithProvider(content, 'grok');
+      expect(result).toContain('Podatke pruža Grok AI i mogu biti netačni');
+    });
+
+    it('should handle content without generic disclaimer unchanged', () => {
+      const content = 'Your glucose is 5.5 mmol/L. Data is provided by Google Gemini AI and it might not be correct.';
+      const result = updateDisclaimerWithProvider(content, 'gemini');
+      expect(result).toBe(content); // Already has specific provider, no change
+    });
+
+    it('should handle empty content', () => {
+      const result = updateDisclaimerWithProvider('', 'gemini');
+      expect(result).toBe('');
+    });
+
+    it('should handle content without any disclaimer', () => {
+      const content = 'Your glucose levels are within the target range.';
+      const result = updateDisclaimerWithProvider(content, 'perplexity');
+      expect(result).toBe(content); // No disclaimer to replace
+    });
+
+    it('should be case-insensitive when matching disclaimers', () => {
+      const content = 'Analysis results. DATA IS PROVIDED BY AI AND IT MIGHT NOT BE CORRECT. Consult your doctor.';
+      const result = updateDisclaimerWithProvider(content, 'deepseek');
+      expect(result).toContain('Data is provided by DeepSeek AI and it might not be correct');
     });
   });
 

@@ -95,6 +95,56 @@ export function getProviderDisplayName(provider: AIProvider): string {
 }
 
 /**
+ * Replace generic AI provider disclaimer with specific provider name
+ * 
+ * This function is used when Pro users use backend keys - the prompt includes
+ * a generic "Data is provided by AI" disclaimer, but the backend tells us
+ * which provider was actually used. We update the response content to include
+ * the correct provider name.
+ * 
+ * @param content - The AI response content that may contain a generic disclaimer
+ * @param actualProvider - The actual provider that was used (e.g., 'gemini')
+ * @returns The content with the disclaimer updated to include the specific provider name
+ */
+export function updateDisclaimerWithProvider(content: string, actualProvider: AIProvider): string {
+  if (!content) {
+    return content;
+  }
+
+  const providerDisplayName = getProviderDisplayName(actualProvider);
+  
+  // Patterns to match generic AI disclaimers in different languages
+  // These match the patterns from promptUtils.ts when provider is undefined
+  const patterns = [
+    // English: "Data is provided by AI and it might not be correct"
+    /Data is provided by AI and it might not be correct/gi,
+    // Czech: "Data poskytuje AI a nemusí být správná"
+    /Data poskytuje AI a nemusí být správná/gi,
+    // German: "Daten werden von AI bereitgestellt und sind möglicherweise nicht korrekt"
+    /Daten werden von AI bereitgestellt und sind möglicherweise nicht korrekt/gi,
+    // Serbian: "Podatke pruža AI i mogu biti netačni"
+    /Podatke pruža AI i mogu biti netačni/gi,
+  ];
+  
+  // Replacements with specific provider name for each language
+  const replacements = [
+    `Data is provided by ${providerDisplayName} and it might not be correct`,
+    `Data poskytuje ${providerDisplayName} a nemusí být správná`,
+    `Daten werden von ${providerDisplayName} bereitgestellt und sind möglicherweise nicht korrekt`,
+    `Podatke pruža ${providerDisplayName} i mogu biti netačni`,
+  ];
+  
+  let updatedContent = content;
+  
+  // Try each pattern and apply the corresponding replacement
+  for (let i = 0; i < patterns.length; i++) {
+    updatedContent = updatedContent.replace(patterns[i], replacements[i]);
+  }
+  
+  return updatedContent;
+}
+
+/**
  * Determine which provider should be used based on available API keys
  * Uses automatic priority order: Perplexity > Grok > DeepSeek > Gemini
  * 
@@ -287,9 +337,16 @@ export async function callAIWithRouting(
       }
     }
     
+    // If the backend returns the actual provider used and we have content,
+    // update the disclaimer to use the specific provider name instead of generic "AI"
+    let updatedContent = result.content;
+    if (result.success && result.content && result.provider) {
+      updatedContent = updateDisclaimerWithProvider(result.content, result.provider as AIProvider);
+    }
+    
     return {
       success: result.success,
-      content: result.content,
+      content: updatedContent,
       error: result.error,
       errorType: mappedErrorType,
     };
