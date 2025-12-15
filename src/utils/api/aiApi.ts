@@ -117,24 +117,24 @@ export function updateDisclaimerWithProvider(content: string, actualProvider: AI
   // These match the patterns from promptUtils.ts when provider is undefined
   const disclaimerReplacements = [
     {
-      // English
-      pattern: /Data is provided by AI and it might not be correct/gi,
-      replacement: `Data is provided by ${providerDisplayName} and it might not be correct`,
+      // English - full disclaimer
+      pattern: /Data is provided by AI and it might not be correct\. Always consult with your doctor or healthcare provider\./gi,
+      replacement: `Data is provided by ${providerDisplayName} and it might not be correct. Always consult with your doctor or healthcare provider.`,
     },
     {
-      // Czech
-      pattern: /Data poskytuje AI a nemusí být správná/gi,
-      replacement: `Data poskytuje ${providerDisplayName} a nemusí být správná`,
+      // Czech - full disclaimer
+      pattern: /Data poskytuje AI a nemusí být správná\. Vždy se poraďte se svým lékařem nebo poskytovatelem zdravotní péče\./gi,
+      replacement: `Data poskytuje ${providerDisplayName} a nemusí být správná. Vždy se poraďte se svým lékařem nebo poskytovatelem zdravotní péče.`,
     },
     {
-      // German
-      pattern: /Daten werden von AI bereitgestellt und sind möglicherweise nicht korrekt/gi,
-      replacement: `Daten werden von ${providerDisplayName} bereitgestellt und sind möglicherweise nicht korrekt`,
+      // German - full disclaimer
+      pattern: /Daten werden von AI bereitgestellt und sind möglicherweise nicht korrekt\. Konsultieren Sie immer Ihren Arzt oder Ihre Ärztin\./gi,
+      replacement: `Daten werden von ${providerDisplayName} bereitgestellt und sind möglicherweise nicht korrekt. Konsultieren Sie immer Ihren Arzt oder Ihre Ärztin.`,
     },
     {
-      // Serbian
-      pattern: /Podatke pruža AI i mogu biti netačni/gi,
-      replacement: `Podatke pruža ${providerDisplayName} i mogu biti netačni`,
+      // Serbian - full disclaimer
+      pattern: /Podatke pruža AI i mogu biti netačni\. Uvek se konsultujte sa svojim lekarom ili pružaocem zdravstvene zaštite\./gi,
+      replacement: `Podatke pruža ${providerDisplayName} i mogu biti netačni. Uvek se konsultujte sa svojim lekarom ili pružaocem zdravstvene zaštite.`,
     },
   ];
   
