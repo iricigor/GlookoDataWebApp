@@ -55,7 +55,9 @@ export function getDisclaimerInstruction(provider?: AIProvider, language: Respon
   }
   
   // When provider is not specified (Pro users with backend keys), add explicit instruction
-  // to use the exact text "AI" and not substitute it with any specific provider name
+  // to use the exact text "AI" and not substitute it with any specific provider name.
+  // Note: This instruction is for the AI model itself (part of system prompt), not user-facing text.
+  // The AI will still output the disclaimer in the correct language as specified in disclaimerText.
   const exactTextInstruction = !provider 
     ? ` Use the exact text "AI" in the disclaimer - do NOT substitute it with any specific provider name like "Grok AI", "Gemini", "Perplexity", etc.`
     : '';
