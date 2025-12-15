@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>804 Add Pro users count to admin statistics endpoint</summary>
+
+[#804](../../pull/804) Add Pro users count to admin statistics endpoint
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>803 Improve Settings page: add tab persistence and redesign AI Settings layout</summary>
 
 [#803](../../pull/803) Improve Settings page: add tab persistence and redesign AI Settings layout
