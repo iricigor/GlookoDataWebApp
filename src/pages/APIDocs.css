@@ -336,50 +336,11 @@ body.dark-theme .swagger-ui ::-webkit-scrollbar-thumb:hover {
 }
 
 /* ==========================================================================
-   Server Response vs Example Response Visual Distinction
-   These styles differentiate between:
-   1. "Server response" - actual API response after clicking Execute (prominent)
-   2. "Responses" - example responses from OpenAPI spec (subtle)
+   Example Response Visual Distinction
+   These styles make example responses (in the "Responses" section) less
+   prominent so they don't compete with actual server responses that appear
+   after clicking Execute.
    ========================================================================== */
-
-/* Light Theme: Server Response Styling (appears after clicking Execute) */
-/* The server response appears BEFORE the responses-wrapper section */
-.swagger-ui .responses-wrapper ~ div.responses-inner,
-.swagger-ui div.responses-inner:has(+ .responses-wrapper) {
-  background-color: #e6f4ff !important;
-  border: 2px solid #0078d4 !important;
-  border-radius: 6px;
-  padding: 16px !important;
-  margin: 16px 0 !important;
-  box-shadow: 0 2px 8px rgba(0, 120, 212, 0.2) !important;
-}
-
-/* Server response headers - make them blue and bold */
-.swagger-ui .responses-wrapper ~ div.responses-inner h4,
-.swagger-ui .responses-wrapper ~ div.responses-inner h5,
-.swagger-ui div.responses-inner:has(+ .responses-wrapper) h4,
-.swagger-ui div.responses-inner:has(+ .responses-wrapper) h5 {
-  color: #0078d4 !important;
-  font-weight: 700 !important;
-}
-
-/* Server response status code - make it bold */
-.swagger-ui .responses-wrapper ~ div.responses-inner .response-col_status,
-.swagger-ui div.responses-inner:has(+ .responses-wrapper) .response-col_status {
-  font-weight: 700 !important;
-  color: #0078d4 !important;
-}
-
-/* Server response body text - ensure it's visible */
-.swagger-ui .responses-wrapper ~ div.responses-inner .response-col_description,
-.swagger-ui .responses-wrapper ~ div.responses-inner pre,
-.swagger-ui .responses-wrapper ~ div.responses-inner code,
-.swagger-ui div.responses-inner:has(+ .responses-wrapper) .response-col_description,
-.swagger-ui div.responses-inner:has(+ .responses-wrapper) pre,
-.swagger-ui div.responses-inner:has(+ .responses-wrapper) code {
-  color: #1a1a1a !important;
-  opacity: 1 !important;
-}
 
 /* Light Theme: Example Response Styling (in responses-wrapper) */
 /* Make the "Responses" section (example responses) less prominent */
@@ -415,44 +376,6 @@ body.dark-theme .swagger-ui ::-webkit-scrollbar-thumb:hover {
 
 .swagger-ui .responses-wrapper .response-col_status {
   color: #666666 !important;
-}
-
-/* Dark Theme: Server Response Styling (appears after clicking Execute) */
-body.dark-theme .swagger-ui .responses-wrapper ~ div.responses-inner,
-body.dark-theme .swagger-ui div.responses-inner:has(+ .responses-wrapper) {
-  background-color: rgba(0, 120, 212, 0.2) !important;
-  border: 2px solid #479ef5 !important;
-  border-radius: 6px;
-  padding: 16px !important;
-  margin: 16px 0 !important;
-  box-shadow: 0 2px 12px rgba(71, 158, 245, 0.3) !important;
-}
-
-/* Server response headers in dark mode */
-body.dark-theme .swagger-ui .responses-wrapper ~ div.responses-inner h4,
-body.dark-theme .swagger-ui .responses-wrapper ~ div.responses-inner h5,
-body.dark-theme .swagger-ui div.responses-inner:has(+ .responses-wrapper) h4,
-body.dark-theme .swagger-ui div.responses-inner:has(+ .responses-wrapper) h5 {
-  color: #5fb8ff !important;
-  font-weight: 700 !important;
-}
-
-/* Server response status code in dark mode */
-body.dark-theme .swagger-ui .responses-wrapper ~ div.responses-inner .response-col_status,
-body.dark-theme .swagger-ui div.responses-inner:has(+ .responses-wrapper) .response-col_status {
-  font-weight: 700 !important;
-  color: #5fb8ff !important;
-}
-
-/* Server response body text in dark mode - ensure it's visible */
-body.dark-theme .swagger-ui .responses-wrapper ~ div.responses-inner .response-col_description,
-body.dark-theme .swagger-ui .responses-wrapper ~ div.responses-inner pre,
-body.dark-theme .swagger-ui .responses-wrapper ~ div.responses-inner code,
-body.dark-theme .swagger-ui div.responses-inner:has(+ .responses-wrapper) .response-col_description,
-body.dark-theme .swagger-ui div.responses-inner:has(+ .responses-wrapper) pre,
-body.dark-theme .swagger-ui div.responses-inner:has(+ .responses-wrapper) code {
-  color: #e0e0e0 !important;
-  opacity: 1 !important;
 }
 
 /* Dark Theme: Example Response Styling (in responses-wrapper) */
