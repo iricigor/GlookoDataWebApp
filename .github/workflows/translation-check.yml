@@ -78,10 +78,12 @@ jobs:
           echo "**Note:** Contributors can submit PRs without complete translations." >> $GITHUB_STEP_SUMMARY
           echo "Maintainers will complete translations before merging." >> $GITHUB_STEP_SUMMARY
 
-      - name: Fail if placeholders found
-        if: steps.check-placeholders.outcome == 'failure'
+      - name: Report final status
+        if: always()
         run: |
-          echo "::error::Translation placeholders detected. Please complete translations before merging."
-          exit 1
-
-
+          if [ "${{ steps.check-placeholders.outcome }}" == "failure" ]; then
+            echo "::warning::Translation placeholders detected. This is informational and won't block PR merges."
+            echo "Maintainers will complete translations before merging."
+          else
+            echo "✅ All translation checks passed"
+          fi
