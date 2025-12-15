@@ -3,13 +3,13 @@
  * 
  * These functions provide administrative statistics for Pro users.
  * 
- * GET /api/glookoAdmin/stats/logged-in-users - Get count of logged-in users
+ * GET /api/glookoAdmin/stats/logged-in-users - Get count of logged-in users and Pro users
  * 
  * Headers:
  *   - Authorization: Bearer <id_token> (required)
  * 
  * Response:
- *   - 200 OK: { count: number }
+ *   - 200 OK: { count: number, proUsersCount: number, capped?: boolean, proUsersCapped?: boolean }
  *   - 401 Unauthorized: Invalid or missing token, or missing email
  *   - 403 Forbidden: User is not a Pro user
  *   - 500 Internal Server Error: Infrastructure error
@@ -61,29 +61,39 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
 }
 
 /**
- * Count all users in the UserSettings table
+ * Maximum count limit for entity counting operations
+ * This prevents timeouts for extremely large datasets
+ */
+const MAX_COUNT_LIMIT = 100000;
+
+/**
+ * Generic function to count entities in a table by partition key
  * 
- * Counts entities with partitionKey='users' in the UserSettings table.
- * This represents all users who have logged in at least once.
- * 
+ * Counts entities matching the specified partitionKey filter.
  * Note: Azure Table Storage doesn't support $count directly, so we iterate
- * through entities. For very large datasets (>10k users), consider implementing
+ * through entities. For very large datasets (>10k entities), consider implementing
  * pagination or caching strategies.
  * 
+ * @param tableClient - The Azure Table Storage client
+ * @param partitionKey - The partition key to filter by
+ * @param entityType - Human-readable entity type for logging (e.g., "User", "Pro user")
+ * @param context - Azure Functions invocation context for logging
  * @returns Object with count and capped flag
  */
-async function countLoggedInUsers(
+async function countEntitiesByPartitionKey(
   tableClient: ReturnType<typeof getTableClient>,
+  partitionKey: string,
+  entityType: string,
   context: InvocationContext
 ): Promise<{ count: number; capped: boolean }> {
   let count = 0;
   let capped = false;
   
-  // Query all entities with partitionKey='users'
+  // Query all entities with the specified partitionKey
   // We only select the partitionKey and rowKey to minimize data transfer
   const entities = tableClient.listEntities({
     queryOptions: {
-      filter: "PartitionKey eq 'users'",
+      filter: `PartitionKey eq '${partitionKey}'`,
       select: ['partitionKey', 'rowKey']
     }
   });
@@ -97,9 +107,9 @@ async function countLoggedInUsers(
     
     // Safety check: if count exceeds a reasonable limit, stop and return
     // This prevents timeouts for extremely large datasets
-    if (count >= 100000) {
+    if (count >= MAX_COUNT_LIMIT) {
       capped = true;
-      context.warn(`User count exceeded 100,000 limit - count capped at ${count}. This may indicate the need for a separate counter table.`);
+      context.warn(`${entityType} count exceeded ${MAX_COUNT_LIMIT} limit - count capped at ${count}. This may indicate the need for a separate counter table.`);
       break;
     }
   }
@@ -108,10 +118,40 @@ async function countLoggedInUsers(
 }
 
 /**
- * GET handler - Get count of logged-in users
+ * Count all users in the UserSettings table
+ * 
+ * Counts entities with partitionKey='users' in the UserSettings table.
+ * This represents all users who have logged in at least once.
+ * 
+ * @returns Object with count and capped flag
+ */
+async function countLoggedInUsers(
+  tableClient: ReturnType<typeof getTableClient>,
+  context: InvocationContext
+): Promise<{ count: number; capped: boolean }> {
+  return countEntitiesByPartitionKey(tableClient, 'users', 'User', context);
+}
+
+/**
+ * Count all Pro users in the ProUsers table
+ * 
+ * Counts entities with partitionKey='ProUser' in the ProUsers table.
+ * This represents all users with Pro access.
+ * 
+ * @returns Object with count and capped flag
+ */
+async function countProUsers(
+  tableClient: ReturnType<typeof getTableClient>,
+  context: InvocationContext
+): Promise<{ count: number; capped: boolean }> {
+  return countEntitiesByPartitionKey(tableClient, 'ProUser', 'Pro user', context);
+}
+
+/**
+ * GET handler - Get count of logged-in users and Pro users
  * 
  * This endpoint is only accessible to Pro users.
- * Returns the total count of users in the UserSettings table.
+ * Returns the total count of users in the UserSettings table and the count of Pro users.
  */
 async function getLoggedInUsersCount(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   const requestLogger = createRequestLogger(request, context);
@@ -158,9 +198,33 @@ async function getLoggedInUsersCount(request: HttpRequest, context: InvocationCo
     requestLogger.logStorage('countLoggedInUsers', true, { count, capped });
     requestLogger.logInfo('Logged-in users count retrieved', { count, capped });
     
+    // Count Pro users
+    const { count: proUsersCount, capped: proUsersCapped } = await countProUsers(proUsersTableClient, context);
+    
+    if (proUsersCapped) {
+      requestLogger.logWarn('Pro user count was capped at limit', { proUsersCount, proUsersCapped });
+    }
+    
+    requestLogger.logStorage('countProUsers', true, { proUsersCount, proUsersCapped });
+    requestLogger.logInfo('Pro users count retrieved', { proUsersCount, proUsersCapped });
+    
+    // Build response object with both counts
+    const responseBody: { count: number; proUsersCount: number; capped?: boolean; proUsersCapped?: boolean } = {
+      count,
+      proUsersCount,
+    };
+    
+    // Only include capped flags if they're true
+    if (capped) {
+      responseBody.capped = capped;
+    }
+    if (proUsersCapped) {
+      responseBody.proUsersCapped = proUsersCapped;
+    }
+    
     return requestLogger.logSuccess({
       status: 200,
-      jsonBody: { count, capped },
+      jsonBody: responseBody,
     });
 
   } catch (error: unknown) {

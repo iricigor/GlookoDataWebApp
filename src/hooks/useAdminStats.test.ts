@@ -30,6 +30,7 @@ describe('useAdminStats', () => {
     expect(result.current.isLoading).toBe(false);
     expect(result.current.hasLoaded).toBe(false);
     expect(result.current.loggedInUsersCount).toBeNull();
+    expect(result.current.proUsersCount).toBeNull();
     expect(result.current.hasError).toBe(false);
     expect(result.current.errorMessage).toBeNull();
     expect(result.current.errorType).toBeNull();
@@ -39,6 +40,7 @@ describe('useAdminStats', () => {
     mockGetLoggedInUsersCount.mockResolvedValueOnce({
       success: true,
       count: 42,
+      proUsersCount: 5,
     });
 
     const { result } = renderHook(() => useAdminStats('test-token', true));
@@ -46,6 +48,7 @@ describe('useAdminStats', () => {
     await waitFor(() => {
       expect(result.current.hasLoaded).toBe(true);
       expect(result.current.loggedInUsersCount).toBe(42);
+      expect(result.current.proUsersCount).toBe(5);
       expect(result.current.hasError).toBe(false);
     });
     
@@ -137,6 +140,7 @@ describe('useAdminStats', () => {
     mockGetLoggedInUsersCount.mockResolvedValueOnce({
       success: true,
       count: 42,
+      proUsersCount: 5,
     });
 
     const { result, rerender } = renderHook(
@@ -154,13 +158,14 @@ describe('useAdminStats', () => {
     await waitFor(() => {
       expect(result.current.hasLoaded).toBe(false);
       expect(result.current.loggedInUsersCount).toBeNull();
+      expect(result.current.proUsersCount).toBeNull();
     });
   });
 
   it('should refetch when token changes', async () => {
     mockGetLoggedInUsersCount
-      .mockResolvedValueOnce({ success: true, count: 42 })
-      .mockResolvedValueOnce({ success: true, count: 100 });
+      .mockResolvedValueOnce({ success: true, count: 42, proUsersCount: 5 })
+      .mockResolvedValueOnce({ success: true, count: 100, proUsersCount: 10 });
 
     const { result, rerender } = renderHook(
       ({ token }: { token: string | null }) => useAdminStats(token, true),
@@ -169,6 +174,7 @@ describe('useAdminStats', () => {
     
     await waitFor(() => {
       expect(result.current.loggedInUsersCount).toBe(42);
+      expect(result.current.proUsersCount).toBe(5);
     });
 
     // Different user logs in
@@ -176,6 +182,7 @@ describe('useAdminStats', () => {
     
     await waitFor(() => {
       expect(result.current.loggedInUsersCount).toBe(100);
+      expect(result.current.proUsersCount).toBe(10);
     });
 
     expect(mockGetLoggedInUsersCount).toHaveBeenCalledTimes(2);
@@ -185,6 +192,7 @@ describe('useAdminStats', () => {
     mockGetLoggedInUsersCount.mockResolvedValueOnce({
       success: true,
       count: 42,
+      proUsersCount: 5,
     });
 
     const { result, rerender } = renderHook(
@@ -232,6 +240,7 @@ describe('useAdminStats', () => {
     mockGetLoggedInUsersCount.mockResolvedValueOnce({
       success: true,
       count: 50,
+      proUsersCount: 8,
     });
 
     const { result } = renderHook(() => useAdminStats(null, false));

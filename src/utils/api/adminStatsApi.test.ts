@@ -45,7 +45,7 @@ describe('adminStatsApi', () => {
       const mockResponse = {
         ok: true,
         status: 200,
-        json: async () => ({ count: 42 }),
+        json: async () => ({ count: 42, proUsersCount: 5 }),
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
@@ -54,6 +54,7 @@ describe('adminStatsApi', () => {
       expect(result).toEqual({
         success: true,
         count: 42,
+        proUsersCount: 5,
         statusCode: 200,
       });
       expect(mockFetch).toHaveBeenCalledWith(
@@ -194,7 +195,7 @@ describe('adminStatsApi', () => {
       const mockResponse = {
         ok: true,
         status: 200,
-        json: async () => ({ count: 10 }),
+        json: async () => ({ count: 10, proUsersCount: 2 }),
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
@@ -212,7 +213,7 @@ describe('adminStatsApi', () => {
       const mockResponse = {
         ok: true,
         status: 200,
-        json: async () => ({ count: 5 }),
+        json: async () => ({ count: 5, proUsersCount: 1 }),
       };
       mockFetch.mockResolvedValueOnce(mockResponse);
 
