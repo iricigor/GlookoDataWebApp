@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>816 Update API docs for test-ai-key endpoint to reflect PR #807 changes</summary>
+
+[#816](../../pull/816) Update API docs for test-ai-key endpoint to reflect PR #807 changes
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>813 Fix API docs styling: create clear visual distinction between server and example responses</summary>
 
 [#813](../../pull/813) Fix API docs styling: create clear visual distinction between server and example responses
