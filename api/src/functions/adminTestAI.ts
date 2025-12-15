@@ -77,13 +77,14 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
  * 
  * Note: There is only ONE secret in Key Vault that contains the API key,
  * regardless of which AI provider is being used. The provider parameter is
- * returned for informational purposes only.
+ * kept for API consistency but not used internally.
  * 
- * @param provider - The AI provider name (for informational purposes)
+ * @param _provider - The AI provider name (not used, kept for API consistency)
  * @returns Object containing the API key and secret name
  * @throws Error if secret cannot be retrieved
  */
-async function getAIProviderConfig(provider: string): Promise<{ apiKey: string; secretName: string }> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function getAIProviderConfig(_provider: string): Promise<{ apiKey: string; secretName: string }> {
   const secretName = getAISecretName();
 
   const apiKey = await getSecretFromKeyVault(undefined, secretName);
