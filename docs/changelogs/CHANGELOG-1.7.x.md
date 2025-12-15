@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>811 Fix auth state synchronization across components by adding MSAL event listener</summary>
+
+[#811](../../pull/811) Fix auth state synchronization across components by adding MSAL event listener
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>807 Split test-ai endpoint into infrastructure and full AI tests</summary>
 
 [#807](../../pull/807) Split test-ai endpoint into infrastructure and full AI tests
