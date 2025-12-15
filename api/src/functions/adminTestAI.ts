@@ -34,6 +34,15 @@ import { createRequestLogger } from "../utils/logger";
 const DEFAULT_AI_API_KEY_SECRET = 'AI-API-Key';
 
 /**
+ * Get the AI API key secret name from environment variable
+ * 
+ * @returns The secret name configured in AI_API_KEY_SECRET or default
+ */
+function getAISecretName(): string {
+  return process.env.AI_API_KEY_SECRET || DEFAULT_AI_API_KEY_SECRET;
+}
+
+/**
  * URL-encode a string for use as RowKey
  */
 function urlEncode(str: string): string {
@@ -75,8 +84,7 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
  * @throws Error if secret cannot be retrieved
  */
 async function getAIProviderConfig(provider: string): Promise<{ apiKey: string; secretName: string }> {
-  // Get the secret name from environment variable or use default
-  const secretName = process.env.AI_API_KEY_SECRET || DEFAULT_AI_API_KEY_SECRET;
+  const secretName = getAISecretName();
 
   const apiKey = await getSecretFromKeyVault(undefined, secretName);
   if (!apiKey) {
@@ -294,9 +302,7 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
 
     // Get Key Vault configuration from environment
     const keyVaultName = process.env.KEY_VAULT_NAME || 'Not configured';
-    
-    // Get secret name from environment variable (there's only one secret for all AI providers)
-    const secretName = process.env.AI_API_KEY_SECRET || DEFAULT_AI_API_KEY_SECRET;
+    const secretName = getAISecretName();
 
     requestLogger.logInfo('Testing AI provider', { provider, testType });
 
@@ -391,9 +397,7 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
     const keyVaultName = process.env.KEY_VAULT_NAME || 'Not configured';
     const provider = process.env.AI_PROVIDER || 'perplexity';
     const testType = request.query.get('testType') || 'full';
-    
-    // Get secret name from environment variable (same for all providers)
-    const secretName = process.env.AI_API_KEY_SECRET || DEFAULT_AI_API_KEY_SECRET;
+    const secretName = getAISecretName();
 
     // Check for Key Vault errors
     if (errorMessage.includes('Key Vault') || errorMessage.includes('API key not configured')) {
