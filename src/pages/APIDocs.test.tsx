@@ -13,11 +13,12 @@ import { APIDocs } from './APIDocs';
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
+    t: (key: string, options?: { version?: string }) => {
       const translations: Record<string, string> = {
         'apiDocs.title': 'Glooko Insights - API Documentation',
         'apiDocs.subtitle': 'Interactive API explorer with Microsoft authentication',
         'apiDocs.adminPageLink': 'Admin page',
+        'apiDocs.version': `Version: ${options?.version || '1.0.0'}`,
         'apiDocs.proUserBadge': 'Pro user',
         'apiDocs.tokenActive': 'Token active',
         'apiDocs.signOut': 'Sign Out',
@@ -66,6 +67,17 @@ vi.mock('../hooks/useProUserCheck', () => ({
 // Mock swagger-ui-react
 vi.mock('swagger-ui-react', () => ({
   default: () => null,
+}));
+
+// Mock version utility
+vi.mock('../utils/version', () => ({
+  getVersionInfo: () => ({
+    version: '1.0.0',
+    buildId: 'dev',
+    buildDate: '2024-01-01T00:00:00.000Z',
+    fullVersion: '1.0.0-dev',
+    releaseUrl: null,
+  }),
 }));
 
 describe('APIDocs', () => {

@@ -23,6 +23,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useProUserCheck } from '../hooks/useProUserCheck'
 import { useProUserBadgeStyles } from '../styles/proUserBadge'
 import { useTranslation } from 'react-i18next'
+import { getVersionInfo } from '../utils/version'
 
 const useStyles = makeStyles({
   container: {
@@ -122,6 +123,7 @@ export function APIDocs() {
   const { isProUser } = useProUserCheck(isLoggedIn ? idToken : null)
   const [swaggerSpec, setSwaggerSpec] = useState<object | null>(null)
   const [specError, setSpecError] = useState<string | null>(null)
+  const versionInfo = getVersionInfo()
 
   // Load OpenAPI spec
   useEffect(() => {
@@ -142,7 +144,7 @@ export function APIDocs() {
     }
     loadSpec()
     return () => controller.abort()
-  }, [])
+  }, [t])
 
   // Custom request interceptor to add Bearer token
   const requestInterceptor = useCallback((request: Record<string, unknown>) => {
@@ -174,7 +176,7 @@ export function APIDocs() {
         <div className={styles.headerLeft}>
           <Text className={styles.title}>{t('apiDocs.title')}</Text>
           <Text className={styles.subtitle}>
-            {t('apiDocs.subtitle')} | <a href="#admin" className={styles.link}>{t('apiDocs.adminPageLink')}</a>
+            {t('apiDocs.subtitle')} | <a href="#admin" className={styles.link}>{t('apiDocs.adminPageLink')}</a> | {t('apiDocs.version', { version: versionInfo.version })}
           </Text>
         </div>
         
