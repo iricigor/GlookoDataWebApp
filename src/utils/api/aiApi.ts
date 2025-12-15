@@ -95,6 +95,16 @@ export function getProviderDisplayName(provider: AIProvider): string {
 }
 
 /**
+ * Type guard to check if a string is a valid AIProvider
+ * 
+ * @param provider - The provider string to check
+ * @returns True if the provider is a valid AIProvider
+ */
+function isValidAIProvider(provider: string): provider is AIProvider {
+  return ['perplexity', 'gemini', 'grok', 'deepseek'].includes(provider);
+}
+
+/**
  * Replace generic AI provider disclaimer with specific provider name
  * 
  * This function is used when Pro users use backend keys - the prompt includes
@@ -344,8 +354,8 @@ export async function callAIWithRouting(
     // If the backend returns the actual provider used and we have content,
     // update the disclaimer to use the specific provider name instead of generic "AI"
     let updatedContent = result.content;
-    if (result.success && result.content && result.provider) {
-      updatedContent = updateDisclaimerWithProvider(result.content, result.provider as AIProvider);
+    if (result.success && result.content && result.provider && isValidAIProvider(result.provider)) {
+      updatedContent = updateDisclaimerWithProvider(result.content, result.provider);
     }
     
     return {
