@@ -712,33 +712,42 @@
         }
       }
     },
-    "/glookoAdmin/test-ai": {
+    "/glookoAdmin/test-ai-key": {
       "post": {
         "tags": ["Admin"],
         "summary": "Test Pro AI key configuration",
-        "description": "Allows Pro users with admin access to test the Pro AI key configuration by sending a simple test query to the configured AI provider. This endpoint verifies that the backend AI keys are properly configured and can successfully communicate with the AI provider.",
+        "description": "Allows Pro users with admin access to test the Pro AI key configuration. Supports two test modes: **Infrastructure test** (verifies Key Vault access and environment configuration) and **Full test** (includes infrastructure test plus sends a test query to the configured AI provider). The AI provider is determined by the backend's AI_PROVIDER environment variable.",
         "operationId": "testProAIKey",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "testType",
+            "in": "query",
+            "description": "Type of test to perform: 'infra' for infrastructure test only (Key Vault access), or 'full' for infrastructure test plus AI provider response test",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["infra", "full"],
+              "default": "full"
+            }
+          }
+        ],
         "requestBody": {
           "required": false,
+          "description": "Request body is not used by this endpoint. The AI provider is determined by the backend's AI_PROVIDER environment variable. An empty JSON object can be sent for consistency with other POST endpoints.",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AdminTestAIRequest"
+                "type": "object",
+                "properties": {}
               },
               "examples": {
-                "perplexity": {
-                  "summary": "Test with Perplexity",
-                  "value": {
-                    "provider": "perplexity"
-                  }
-                },
-                "default": {
-                  "summary": "Test with default provider",
+                "empty": {
+                  "summary": "Empty request body (recommended)",
                   "value": {}
                 }
               }
@@ -747,31 +756,70 @@
         },
         "responses": {
           "200": {
-            "description": "AI test successful",
+            "description": "Test successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTestAIResponse"
+                },
+                "examples": {
+                  "infraTest": {
+                    "summary": "Infrastructure test successful",
+                    "value": {
+                      "success": true,
+                      "testType": "infra",
+                      "provider": "perplexity",
+                      "keyVaultName": "my-key-vault",
+                      "secretName": "AI-API-Key",
+                      "secretExists": true,
+                      "message": "Infrastructure test successful. Key Vault access confirmed."
+                    }
+                  },
+                  "fullTest": {
+                    "summary": "Full test successful",
+                    "value": {
+                      "success": true,
+                      "testType": "full",
+                      "provider": "perplexity",
+                      "keyVaultName": "my-key-vault",
+                      "secretName": "AI-API-Key",
+                      "secretExists": true,
+                      "message": "AI provider test successful. Response: Hello! I'm working correctly and ready to help..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Partial Content - Infrastructure test completed but secret not found or accessible",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AdminTestAIResponse"
                 },
                 "example": {
-                  "success": true,
+                  "success": false,
+                  "testType": "infra",
                   "provider": "perplexity",
-                  "message": "AI provider test successful. Response: Hello! I'm working correctly and ready to help..."
+                  "keyVaultName": "my-key-vault",
+                  "secretName": "AI-API-Key",
+                  "secretExists": false,
+                  "error": "Failed to retrieve secret: Secret not found in Key Vault"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request - Invalid provider",
+            "description": "Bad Request - Invalid testType parameter",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 },
                 "example": {
-                  "error": "Invalid provider. Supported providers: perplexity, gemini, grok, deepseek",
-                  "errorType": "validation",
-                  "code": "INVALID_PROVIDER"
+                  "error": "Invalid testType parameter: invalid. Supported values: infra, full",
+                  "errorType": "validation"
                 }
               }
             }
@@ -811,10 +859,28 @@
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 },
-                "example": {
-                  "error": "Failed to retrieve API key configuration",
-                  "errorType": "infrastructure",
-                  "code": "KEY_VAULT_ERROR"
+                "examples": {
+                  "keyVaultError": {
+                    "summary": "Key Vault access error",
+                    "value": {
+                      "error": "Failed to retrieve API key configuration",
+                      "errorType": "infrastructure",
+                      "code": "KEY_VAULT_ERROR",
+                      "testType": "full",
+                      "provider": "perplexity",
+                      "keyVaultName": "my-key-vault",
+                      "secretName": "AI-API-Key",
+                      "secretExists": false
+                    }
+                  },
+                  "invalidProviderConfig": {
+                    "summary": "Invalid provider configured in backend",
+                    "value": {
+                      "error": "Invalid provider configured: invalid-provider. Supported providers: perplexity, gemini, grok, deepseek",
+                      "errorType": "infrastructure",
+                      "code": "INVALID_PROVIDER_CONFIG"
+                    }
+                  }
                 }
               }
             }
@@ -829,7 +895,12 @@
                 "example": {
                   "error": "AI provider test failed: Perplexity API error (401): Invalid API key",
                   "errorType": "provider",
-                  "code": "PROVIDER_ERROR"
+                  "code": "PROVIDER_ERROR",
+                  "testType": "full",
+                  "provider": "perplexity",
+                  "keyVaultName": "my-key-vault",
+                  "secretName": "AI-API-Key",
+                  "secretExists": true
                 }
               }
             }
@@ -1040,33 +1111,53 @@
       },
       "AdminTestAIRequest": {
         "type": "object",
-        "properties": {
-          "provider": {
-            "type": "string",
-            "enum": ["perplexity", "gemini", "grok", "deepseek"],
-            "description": "AI provider to test (optional, defaults to perplexity)",
-            "example": "perplexity"
-          }
-        }
+        "description": "Request body for testing AI configuration. Currently not used - provider is determined by backend environment configuration (AI_PROVIDER). The body can be empty.",
+        "properties": {}
       },
       "AdminTestAIResponse": {
         "type": "object",
-        "required": ["success", "provider", "message"],
+        "required": ["success", "testType", "provider"],
         "properties": {
           "success": {
             "type": "boolean",
             "description": "Whether the test was successful",
             "example": true
           },
+          "testType": {
+            "type": "string",
+            "enum": ["infra", "full"],
+            "description": "Type of test that was performed",
+            "example": "full"
+          },
           "provider": {
             "type": "string",
-            "description": "The AI provider that was tested",
+            "description": "The AI provider configured in the backend (from AI_PROVIDER environment variable)",
             "example": "perplexity"
+          },
+          "keyVaultName": {
+            "type": "string",
+            "description": "Name of the Azure Key Vault being used (from KEY_VAULT_NAME environment variable). Present in all responses except validation errors.",
+            "example": "my-key-vault"
+          },
+          "secretName": {
+            "type": "string",
+            "description": "Name of the secret in Key Vault containing the AI API key (from AI_API_KEY_SECRET environment variable). Present in all responses except validation errors.",
+            "example": "AI-API-Key"
+          },
+          "secretExists": {
+            "type": "boolean",
+            "description": "Whether the secret was found and accessible in Key Vault. Present in all responses except validation errors.",
+            "example": true
           },
           "message": {
             "type": "string",
-            "description": "Test result message including a preview of the AI response",
+            "description": "Test result message. For infrastructure tests, confirms Key Vault access. For full tests, includes a preview of the AI provider response. Only present when success is true.",
             "example": "AI provider test successful. Response: Hello! I'm working correctly..."
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if the test failed. Only present when success is false.",
+            "example": "Failed to retrieve secret: Secret not found in Key Vault"
           }
         }
       }
