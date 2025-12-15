@@ -738,7 +738,7 @@
         ],
         "requestBody": {
           "required": false,
-          "description": "Request body is optional and currently not used. Provider is determined by backend environment configuration.",
+          "description": "Request body is not used by this endpoint. The AI provider is determined by the backend's AI_PROVIDER environment variable. An empty JSON object can be sent for consistency with other POST endpoints.",
           "content": {
             "application/json": {
               "schema": {
@@ -747,7 +747,7 @@
               },
               "examples": {
                 "empty": {
-                  "summary": "Empty request body",
+                  "summary": "Empty request body (recommended)",
                   "value": {}
                 }
               }
@@ -1136,27 +1136,27 @@
           },
           "keyVaultName": {
             "type": "string",
-            "description": "Name of the Azure Key Vault being used (from KEY_VAULT_NAME environment variable)",
+            "description": "Name of the Azure Key Vault being used (from KEY_VAULT_NAME environment variable). Present in all responses except validation errors.",
             "example": "my-key-vault"
           },
           "secretName": {
             "type": "string",
-            "description": "Name of the secret in Key Vault containing the AI API key (from AI_API_KEY_SECRET environment variable)",
+            "description": "Name of the secret in Key Vault containing the AI API key (from AI_API_KEY_SECRET environment variable). Present in all responses except validation errors.",
             "example": "AI-API-Key"
           },
           "secretExists": {
             "type": "boolean",
-            "description": "Whether the secret was found and accessible in Key Vault",
+            "description": "Whether the secret was found and accessible in Key Vault. Present in all responses except validation errors.",
             "example": true
           },
           "message": {
             "type": "string",
-            "description": "Test result message. For infrastructure tests, confirms Key Vault access. For full tests, includes a preview of the AI provider response.",
+            "description": "Test result message. For infrastructure tests, confirms Key Vault access. For full tests, includes a preview of the AI provider response. Only present when success is true.",
             "example": "AI provider test successful. Response: Hello! I'm working correctly..."
           },
           "error": {
             "type": "string",
-            "description": "Error message if the test failed (only present when success is false)",
+            "description": "Error message if the test failed. Only present when success is false.",
             "example": "Failed to retrieve secret: Secret not found in Key Vault"
           }
         }
