@@ -172,12 +172,14 @@ export function HyposTab({
     const base64EventSummaryData = hypoEventSummaryCSV ? base64Encode(hypoEventSummaryCSV) : undefined;
 
     // Generate the prompt with the base64 CSV data
+    // When using Pro backend keys, don't specify a provider to avoid mismatch
+    const promptProvider = (isProUser && useProKeys) ? undefined : (activeProvider || undefined);
     const prompt = generateHyposPrompt(
       base64EventsData,
       base64SummariesData,
       responseLanguage,
       glucoseUnit,
-      activeProvider!,
+      promptProvider,
       base64EventSummaryData
     );
 
@@ -382,7 +384,7 @@ export function HyposTab({
                   const hypoSummariesCSV = convertHypoSummariesToCSV(hypoDatasets!.dailySummaries);
                   const base64EventsData = base64Encode(hypoEventsCSV);
                   const base64SummariesData = base64Encode(hypoSummariesCSV);
-                  return generateHyposPrompt(base64EventsData, base64SummariesData, responseLanguage, glucoseUnit, activeProvider || undefined);
+                  return generateHyposPrompt(base64EventsData, base64SummariesData, responseLanguage, glucoseUnit, (isProUser && useProKeys) ? undefined : (activeProvider || undefined));
                 })()}
               </div>
             </AccordionPanel>

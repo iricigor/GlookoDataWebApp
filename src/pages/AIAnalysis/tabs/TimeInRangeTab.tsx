@@ -128,7 +128,9 @@ export function TimeInRangeTab({
 
     try {
       // Generate the prompt with the glucose stats and thresholds
-      const prompt = generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, activeProvider);
+      // When using Pro backend keys, don't specify a provider to avoid mismatch
+      const promptProvider = (isProUser && useProKeys) ? undefined : (activeProvider || undefined);
+      const prompt = generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, promptProvider);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
@@ -213,7 +215,7 @@ export function TimeInRangeTab({
             <AccordionHeader>View AI Prompt</AccordionHeader>
             <AccordionPanel>
               <div className={styles.promptTextContainer}>
-                {glucoseStats && generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, activeProvider || undefined)}
+                {glucoseStats && generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, (isProUser && useProKeys) ? undefined : (activeProvider || undefined))}
               </div>
             </AccordionPanel>
           </AccordionItem>

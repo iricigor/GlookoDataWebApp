@@ -143,7 +143,9 @@ export function GlucoseInsulinTab({
       const base64CsvData = base64Encode(csvData);
 
       // Generate the prompt with the base64 CSV data
-      const prompt = generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, activeProvider);
+      // When using Pro backend keys, don't specify a provider to avoid mismatch
+      const promptProvider = (isProUser && useProKeys) ? undefined : (activeProvider || undefined);
+      const prompt = generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, promptProvider);
 
       // Get the appropriate API key for the active provider
       const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
@@ -227,7 +229,7 @@ export function GlucoseInsulinTab({
                 {(() => {
                   const csvData = convertDailyReportsToCSV(combinedDataset);
                   const base64CsvData = base64Encode(csvData);
-                  return generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, activeProvider || undefined);
+                  return generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, (isProUser && useProKeys) ? undefined : (activeProvider || undefined));
                 })()}
               </div>
             </AccordionPanel>
