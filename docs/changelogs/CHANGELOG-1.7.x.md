@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>819 Add version information to API docs page header</summary>
+
+[#819](../../pull/819) Add version information to API docs page header
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>811 Fix auth state synchronization across components by adding MSAL event listener</summary>
 
 [#811](../../pull/811) Fix auth state synchronization across components by adding MSAL event listener
