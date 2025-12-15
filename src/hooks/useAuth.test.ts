@@ -26,7 +26,15 @@ vi.mock('@azure/msal-browser', () => {
         accessToken: 'test-access-token',
         idToken: 'test-id-token',
       }),
+      addEventCallback: vi.fn().mockReturnValue('callback-id'),
+      removeEventCallback: vi.fn(),
     })),
+    EventType: {
+      LOGIN_SUCCESS: 'msal:loginSuccess',
+      LOGOUT_SUCCESS: 'msal:logoutSuccess',
+      ACCOUNT_ADDED: 'msal:accountAdded',
+      ACCOUNT_REMOVED: 'msal:accountRemoved',
+    },
     LogLevel: {
       Error: 0,
       Warning: 1,

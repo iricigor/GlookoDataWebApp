@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { PublicClientApplication } from '@azure/msal-browser';
-import type { AccountInfo } from '@azure/msal-browser';
+import { PublicClientApplication, EventType } from '@azure/msal-browser';
+import type { AccountInfo, EventMessage, AuthenticationResult } from '@azure/msal-browser';
 import { msalConfig, loginRequest } from '../config/msalConfig';
 import { fetchUserPhoto, getUserDisplayName, getUserEmail } from '../utils/graphUtils';
 
@@ -36,6 +36,44 @@ export function useAuth() {
   });
   const [isInitialized, setIsInitialized] = useState(false);
   const [justLoggedIn, setJustLoggedIn] = useState(false);
+
+  // Update auth state with user information
+  const updateAuthState = useCallback(async (account: AccountInfo, accessToken: string, idToken: string | undefined) => {
+    try {
+      const displayName = getUserDisplayName(account);
+      const email = getUserEmail(account);
+      
+      // Fetch user photo
+      let photoUrl: string | null = null;
+      try {
+        photoUrl = await fetchUserPhoto(accessToken);
+      } catch (error) {
+        console.warn('Failed to fetch user photo:', error);
+      }
+
+      setAuthState({
+        isLoggedIn: true,
+        userName: displayName,
+        userEmail: email,
+        userPhoto: photoUrl,
+        account: account,
+        accessToken: accessToken,
+        idToken: idToken || null,
+      });
+    } catch (error) {
+      console.error('Failed to update auth state:', error);
+      // Still set basic auth state even if photo fetch fails
+      setAuthState({
+        isLoggedIn: true,
+        userName: getUserDisplayName(account),
+        userEmail: getUserEmail(account),
+        userPhoto: null,
+        account: account,
+        accessToken: accessToken,
+        idToken: idToken || null,
+      });
+    }
+  }, []);
 
   // Initialize MSAL and check for existing authentication
   useEffect(() => {
@@ -90,45 +128,71 @@ export function useAuth() {
     };
 
     initializeMsal();
-  }, []);
+  }, [updateAuthState]);
 
-  // Update auth state with user information
-  const updateAuthState = async (account: AccountInfo, accessToken: string, idToken: string) => {
-    try {
-      const displayName = getUserDisplayName(account);
-      const email = getUserEmail(account);
-      
-      // Fetch user photo
-      let photoUrl: string | null = null;
-      try {
-        photoUrl = await fetchUserPhoto(accessToken);
-      } catch (error) {
-        console.warn('Failed to fetch user photo:', error);
+  // Listen for MSAL authentication events to sync state across all hook instances
+  useEffect(() => {
+    const callbackId = msalInstance.addEventCallback((event: EventMessage) => {
+      // Handle successful login events from any source (popup, redirect, silent)
+      if (event.eventType === EventType.LOGIN_SUCCESS && event.payload) {
+        const payload = event.payload as AuthenticationResult;
+        if (payload.account) {
+          updateAuthState(payload.account, payload.accessToken, payload.idToken);
+          setJustLoggedIn(true);
+        }
       }
+      
+      // Handle logout events
+      if (event.eventType === EventType.LOGOUT_SUCCESS) {
+        setAuthState({
+          isLoggedIn: false,
+          userName: null,
+          userEmail: null,
+          userPhoto: null,
+          account: null,
+          accessToken: null,
+          idToken: null,
+        });
+        setJustLoggedIn(false);
+      }
+      
+      // Handle account changes (e.g., switching accounts)
+      if (event.eventType === EventType.ACCOUNT_ADDED || event.eventType === EventType.ACCOUNT_REMOVED) {
+        const accounts = msalInstance.getAllAccounts();
+        if (accounts.length > 0) {
+          const account = accounts[0];
+          // Acquire token silently for the new account
+          msalInstance.acquireTokenSilent({
+            ...loginRequest,
+            account: account,
+          }).then(tokenResponse => {
+            updateAuthState(account, tokenResponse.accessToken, tokenResponse.idToken);
+          }).catch(error => {
+            console.warn('Failed to acquire token after account change:', error);
+          });
+        } else {
+          // No accounts - user logged out
+          setAuthState({
+            isLoggedIn: false,
+            userName: null,
+            userEmail: null,
+            userPhoto: null,
+            account: null,
+            accessToken: null,
+            idToken: null,
+          });
+          setJustLoggedIn(false);
+        }
+      }
+    });
 
-      setAuthState({
-        isLoggedIn: true,
-        userName: displayName,
-        userEmail: email,
-        userPhoto: photoUrl,
-        account: account,
-        accessToken: accessToken,
-        idToken: idToken,
-      });
-    } catch (error) {
-      console.error('Failed to update auth state:', error);
-      // Still set basic auth state even if photo fetch fails
-      setAuthState({
-        isLoggedIn: true,
-        userName: getUserDisplayName(account),
-        userEmail: getUserEmail(account),
-        userPhoto: null,
-        account: account,
-        accessToken: accessToken,
-        idToken: idToken,
-      });
-    }
-  };
+    // Cleanup: remove event callback when component unmounts
+    return () => {
+      if (callbackId) {
+        msalInstance.removeEventCallback(callbackId);
+      }
+    };
+  }, [updateAuthState]); // Include updateAuthState in dependencies
 
   // Login with Microsoft
   const login = useCallback(async () => {
@@ -144,7 +208,7 @@ export function useAuth() {
       console.error('Login failed:', error);
       throw error;
     }
-  }, []);
+  }, [updateAuthState]);
 
   // Logout from Microsoft
   const logout = useCallback(async () => {
