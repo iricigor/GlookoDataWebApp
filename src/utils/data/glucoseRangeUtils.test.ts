@@ -57,15 +57,15 @@ const standardThresholds: GlucoseThresholds = {
 
 describe('glucoseRangeUtils', () => {
   describe('convertPercentageToTime', () => {
-    it('should convert 25% to 6h 0m (for 288 readings)', () => {
+    it('should convert 25% to 6h (for 288 readings)', () => {
       // 288 readings = 24 hours at 5-minute intervals
       const result = convertPercentageToTime(288, 72);
-      expect(result).toBe('6h 0m');
+      expect(result).toBe('6h');
     });
 
-    it('should convert 50% to 12h 0m (for 288 readings)', () => {
+    it('should convert 50% to 12h (for 288 readings)', () => {
       const result = convertPercentageToTime(288, 144);
-      expect(result).toBe('12h 0m');
+      expect(result).toBe('12h');
     });
 
     it('should convert 3% to 45m (for 288 readings)', () => {
@@ -76,7 +76,7 @@ describe('glucoseRangeUtils', () => {
 
     it('should display only hours when minutes are 0', () => {
       const result = convertPercentageToTime(288, 144);
-      expect(result).toBe('12h 0m');
+      expect(result).toBe('12h');
     });
 
     it('should display only minutes when hours are 0', () => {
