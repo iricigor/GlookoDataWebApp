@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>832 Add Application Insights statistics endpoint for admin dashboard</summary>
+
+[#832](../../pull/832) Add Application Insights statistics endpoint for admin dashboard
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>831 Fix incorrect AI provider name in Pro user responses</summary>
 
 [#831](../../pull/831) Fix incorrect AI provider name in Pro user responses
