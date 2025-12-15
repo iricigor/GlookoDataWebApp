@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>833 Add time-based unit display for Time in Range statistics</summary>
+
+[#833](../../pull/833) Add time-based unit display for Time in Range statistics
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>832 Add Application Insights statistics endpoint for admin dashboard</summary>
 
 [#832](../../pull/832) Add Application Insights statistics endpoint for admin dashboard
