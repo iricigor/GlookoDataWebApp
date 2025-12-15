@@ -176,7 +176,7 @@ export function APIDocs() {
         <div className={styles.headerLeft}>
           <Text className={styles.title}>{t('apiDocs.title')}</Text>
           <Text className={styles.subtitle}>
-            {t('apiDocs.subtitle')} | <a href="#admin" className={styles.link}>{t('apiDocs.adminPageLink')}</a> | {t('apiDocs.version', { version: versionInfo.version })}
+            {t('apiDocs.subtitle')} | <a href="#admin" className={styles.link}>{t('apiDocs.adminPageLink')}</a> | {t('apiDocs.version', { version: versionInfo.fullVersion })}
           </Text>
         </div>
         
