@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>825 Fix Gemini model name in admin AI provider test</summary>
+
+[#825](../../pull/825) Fix Gemini model name in admin AI provider test
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>817 Remove provider parameter from AI query endpoint</summary>
 
 [#817](../../pull/817) Remove provider parameter from AI query endpoint
