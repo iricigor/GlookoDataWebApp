@@ -38,6 +38,17 @@ import { createRequestLogger } from "../utils/logger";
 type TimePeriod = '1hour' | '1day';
 
 /**
+ * Timespan constants for Azure Monitor queries
+ */
+const TIMESPAN_1_HOUR = 'PT1H';
+const TIMESPAN_1_DAY = 'P1D';
+
+/**
+ * API path prefix for distinguishing API calls from web requests
+ */
+const API_PATH_PREFIX = '/api/';
+
+/**
  * URL-encode a string for use as RowKey
  */
 function urlEncode(str: string): string {
@@ -87,7 +98,7 @@ async function queryApplicationInsights(
   const logsQueryClient = new LogsQueryClient(credential);
 
   // Determine timespan based on period
-  const timespan = timePeriod === '1hour' ? 'PT1H' : 'P1D';
+  const timespan = timePeriod === '1hour' ? TIMESPAN_1_HOUR : TIMESPAN_1_DAY;
 
   // Query for API calls and errors
   // We'll distinguish between web (client-side) and API (server-side) calls
@@ -96,7 +107,7 @@ async function queryApplicationInsights(
   const query = `
     requests
     | where timestamp > ago(${timePeriod === '1hour' ? '1h' : '1d'})
-    | extend isApiCall = url contains "/api/"
+    | extend isApiCall = url contains "${API_PATH_PREFIX}"
     | summarize 
         TotalCalls = count(),
         Errors = countif(success == false)

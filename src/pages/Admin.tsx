@@ -323,6 +323,15 @@ export function Admin() {
     return '-';
   };
 
+  /**
+   * Get the localized label for the current time period
+   */
+  const getTimePeriodLabel = (period: TimePeriod): string => {
+    return period === '1hour' 
+      ? t('admin.statistics.timePeriod1Hour') 
+      : t('admin.statistics.timePeriod1Day');
+  };
+
   // Show loading state while checking Pro status
   const isCheckingProStatus = isLoggedIn && !hasChecked;
 
@@ -449,7 +458,7 @@ export function Admin() {
             </Text>
             <Dropdown
               className={styles.timePeriodDropdown}
-              value={timePeriod === '1hour' ? t('admin.statistics.timePeriod1Hour') : t('admin.statistics.timePeriod1Day')}
+              value={getTimePeriodLabel(timePeriod)}
               selectedOptions={[timePeriod]}
               onOptionSelect={(_event, data) => {
                 setTimePeriod(data.optionValue as TimePeriod);
