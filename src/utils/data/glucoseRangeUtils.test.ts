@@ -42,6 +42,7 @@ import {
   calculateFlux,
   calculateWakeupAverage,
   calculateBedtimeAverage,
+  convertPercentageToTime,
 } from './glucoseRangeUtils';
 import { MMOL_TO_MGDL } from './glucoseUnitUtils';
 import type { GlucoseReading, GlucoseThresholds } from '../../types';
@@ -55,6 +56,53 @@ const standardThresholds: GlucoseThresholds = {
 };
 
 describe('glucoseRangeUtils', () => {
+  describe('convertPercentageToTime', () => {
+    it('should convert 25% to 6h (for 288 readings)', () => {
+      // 288 readings = 24 hours at 5-minute intervals
+      const result = convertPercentageToTime(288, 72);
+      expect(result).toBe('6h');
+    });
+
+    it('should convert 50% to 12h (for 288 readings)', () => {
+      const result = convertPercentageToTime(288, 144);
+      expect(result).toBe('12h');
+    });
+
+    it('should convert 3% to 45m (for 288 readings)', () => {
+      // 3% of 288 = 8.64 readings = 43.2 minutes, rounds to 45m
+      const result = convertPercentageToTime(288, 9);
+      expect(result).toBe('45m');
+    });
+
+    it('should display only hours when minutes are 0', () => {
+      const result = convertPercentageToTime(288, 144);
+      expect(result).toBe('12h');
+    });
+
+    it('should display only minutes when hours are 0', () => {
+      const result = convertPercentageToTime(288, 5);
+      // 5 readings * 5 min = 25 minutes
+      expect(result).toBe('25m');
+    });
+
+    it('should round to nearest 5-minute interval', () => {
+      // Test rounding
+      const result = convertPercentageToTime(288, 14);
+      // 14 readings * 5 min = 70 minutes = 1h 10m
+      expect(result).toBe('1h 10m');
+    });
+
+    it('should handle 100% correctly', () => {
+      const result = convertPercentageToTime(288, 288);
+      expect(result).toBe('24h');
+    });
+
+    it('should handle 0% correctly', () => {
+      const result = convertPercentageToTime(288, 0);
+      expect(result).toBe('0m');
+    });
+  });
+
   describe('categorizeGlucose', () => {
     it('should categorize glucose in 3-category mode', () => {
       // low < 3.9 mmol/L

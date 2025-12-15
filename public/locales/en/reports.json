@@ -19,7 +19,12 @@
         "accordionTitle": "View AI Prompt",
         "waitMessage": "Please wait {seconds} second(s) before requesting new analysis...",
         "errorPrefix": "Error:",
-        "successMessage": "AI analysis completed successfully"
+        "successMessage": "AI analysis completed successfully",
+        "unitSelector": {
+          "ariaLabel": "Time in Range unit selector",
+          "percentage": "100%",
+          "time": "24h"
+        }
       }
     }
   }

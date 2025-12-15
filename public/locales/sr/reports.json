@@ -19,7 +19,12 @@
         "accordionTitle": "Prikaži AI upit",
         "waitMessage": "Molimo sačekajte {seconds} sekundi pre nego što zatražite novu analizu...",
         "errorPrefix": "Greška:",
-        "successMessage": "AI analiza uspešno završena"
+        "successMessage": "AI analiza uspešno završena",
+        "unitSelector": {
+          "ariaLabel": "Izbor jedinice vremena u opsegu",
+          "percentage": "100%",
+          "time": "24h"
+        }
       }
     }
   }

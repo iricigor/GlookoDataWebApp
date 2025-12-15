@@ -155,6 +155,14 @@ export const useBGOverviewStyles = makeStyles({
   tirCard: {
     ...cardBaseStyle,
   },
+  tirCardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '8px',
+    ...shorthands.gap('16px'),
+    flexWrap: 'wrap',
+  },
   cardTitle: {
     fontSize: tokens.fontSizeBase600,
     fontWeight: tokens.fontWeightBold,

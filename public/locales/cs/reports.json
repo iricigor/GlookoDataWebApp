@@ -19,7 +19,12 @@
         "accordionTitle": "Zobrazit AI prompt",
         "waitMessage": "Počkejte prosím {seconds} sekund, než požádáte o novou analýzu...",
         "errorPrefix": "Chyba:",
-        "successMessage": "AI analýza úspěšně dokončena"
+        "successMessage": "AI analýza úspěšně dokončena",
+        "unitSelector": {
+          "ariaLabel": "Výběr jednotky času v rozmezí",
+          "percentage": "100%",
+          "time": "24h"
+        }
       }
     }
   }
