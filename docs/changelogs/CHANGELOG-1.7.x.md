@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>817 Remove provider parameter from AI query endpoint</summary>
+
+[#817](../../pull/817) Remove provider parameter from AI query endpoint
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>816 Update API docs for test-ai-key endpoint to reflect PR #807 changes</summary>
 
 [#816](../../pull/816) Update API docs for test-ai-key endpoint to reflect PR #807 changes
