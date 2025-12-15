@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>813 Fix API docs styling: create clear visual distinction between server and example responses</summary>
+
+[#813](../../pull/813) Fix API docs styling: create clear visual distinction between server and example responses
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>819 Add version information to API docs page header</summary>
 
 [#819](../../pull/819) Add version information to API docs page header
