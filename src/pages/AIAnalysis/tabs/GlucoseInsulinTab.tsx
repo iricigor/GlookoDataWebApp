@@ -21,6 +21,7 @@ import { generateGlucoseInsulinPrompt } from '../../../features/aiAnalysis/promp
 import { callAIWithRouting } from '../../../utils/api';
 import { convertDailyReportsToCSV, calculatePercentage } from '../../../utils/data';
 import { base64Encode } from '../../../utils/formatting';
+import { usePromptProvider } from '../../../hooks/usePromptProvider';
 import { useAIAnalysisStyles } from '../styles';
 import { useAnalysisState } from '../useAnalysisState';
 import {
@@ -104,6 +105,9 @@ export function GlucoseInsulinTab({
     reset,
   } = useAnalysisState();
 
+  // Determine the provider to use in prompts based on Pro user settings
+  const { promptProvider } = usePromptProvider({ isProUser, useProKeys, activeProvider });
+
   // Reset state when data changes
   useEffect(() => {
     if (combinedDataset.length === 0) {
@@ -143,8 +147,6 @@ export function GlucoseInsulinTab({
       const base64CsvData = base64Encode(csvData);
 
       // Generate the prompt with the base64 CSV data
-      // When using Pro backend keys, don't specify a provider to avoid mismatch
-      const promptProvider = (isProUser && useProKeys) ? undefined : (activeProvider || undefined);
       const prompt = generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, promptProvider);
 
       // Get the appropriate API key for the active provider
@@ -229,7 +231,7 @@ export function GlucoseInsulinTab({
                 {(() => {
                   const csvData = convertDailyReportsToCSV(combinedDataset);
                   const base64CsvData = base64Encode(csvData);
-                  return generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, (isProUser && useProKeys) ? undefined : (activeProvider || undefined));
+                  return generateGlucoseInsulinPrompt(base64CsvData, responseLanguage, glucoseUnit, promptProvider);
                 })()}
               </div>
             </AccordionPanel>

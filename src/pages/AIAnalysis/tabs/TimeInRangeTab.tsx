@@ -13,6 +13,7 @@ import {
 import { generateTimeInRangePrompt } from '../../../features/aiAnalysis/prompts';
 import { callAIWithRouting } from '../../../utils/api';
 import { useGlucoseThresholds } from '../../../hooks/useGlucoseThresholds';
+import { usePromptProvider } from '../../../hooks/usePromptProvider';
 import { useAIAnalysisStyles } from '../styles';
 import { useAnalysisState } from '../useAnalysisState';
 import {
@@ -82,6 +83,9 @@ export function TimeInRangeTab({
     reset,
   } = useAnalysisState();
   
+  // Determine the provider to use in prompts based on Pro user settings
+  const { promptProvider } = usePromptProvider({ isProUser, useProKeys, activeProvider });
+  
   // Track if we've loaded an existing analysis for this session
   const [hasLoadedExisting, setHasLoadedExisting] = useState(false);
   
@@ -128,8 +132,6 @@ export function TimeInRangeTab({
 
     try {
       // Generate the prompt with the glucose stats and thresholds
-      // When using Pro backend keys, don't specify a provider to avoid mismatch
-      const promptProvider = (isProUser && useProKeys) ? undefined : (activeProvider || undefined);
       const prompt = generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, promptProvider);
 
       // Get the appropriate API key for the active provider
@@ -215,7 +217,7 @@ export function TimeInRangeTab({
             <AccordionHeader>View AI Prompt</AccordionHeader>
             <AccordionPanel>
               <div className={styles.promptTextContainer}>
-                {glucoseStats && generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, (isProUser && useProKeys) ? undefined : (activeProvider || undefined))}
+                {glucoseStats && generateTimeInRangePrompt(glucoseStats, thresholds, responseLanguage, glucoseUnit, promptProvider)}
               </div>
             </AccordionPanel>
           </AccordionItem>
