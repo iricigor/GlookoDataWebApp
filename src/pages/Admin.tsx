@@ -15,12 +15,25 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useProUserCheck } from '../hooks/useProUserCheck';
 import { useAdminStats } from '../hooks/useAdminStats';
-import { testProAIKey } from '../utils/api/adminTestAIApi';
+import { testProAIKey, type TestAIType } from '../utils/api/adminTestAIApi';
 
 /**
  * Default AI API Key secret name in Key Vault
  */
 const DEFAULT_AI_API_KEY_SECRET = 'AI-API-Key';
+
+/**
+ * Test result type for display
+ */
+interface TestResultDisplay {
+  success: boolean;
+  message: string;
+  testType?: TestAIType;
+  provider?: string;
+  keyVaultName?: string;
+  secretName?: string;
+  secretExists?: boolean;
+}
 
 const useStyles = makeStyles({
   container: {
@@ -194,42 +207,59 @@ export function Admin() {
   );
 
   // AI test state
-  const [isTestingAI, setIsTestingAI] = useState(false);
-  const [testResult, setTestResult] = useState<{ 
-    success: boolean; 
-    message: string;
-    provider?: string;
-    keyVaultName?: string;
-    aiApiKeySecret?: string;
-  } | null>(null);
+  const [isTestingInfra, setIsTestingInfra] = useState(false);
+  const [isTestingFull, setIsTestingFull] = useState(false);
+  const [testResult, setTestResult] = useState<TestResultDisplay | null>(null);
 
   /**
    * Handle AI test button click
    */
-  const handleTestAI = async () => {
+  const handleTestAI = async (testType: TestAIType) => {
     if (!idToken) return;
     
-    setIsTestingAI(true);
+    if (testType === 'infra') {
+      setIsTestingInfra(true);
+    } else {
+      setIsTestingFull(true);
+    }
     setTestResult(null);
     
     try {
-      const result = await testProAIKey(idToken);
+      const result = await testProAIKey(idToken, testType);
       
       if (result.success) {
+        const successMessage = result.testType === 'infra' 
+          ? t('admin.aiTest.infraSuccess', { 
+              provider: result.provider,
+              keyVaultName: result.keyVaultName,
+              secretName: result.secretName
+            })
+          : t('admin.aiTest.fullSuccess', { 
+              provider: result.provider
+            });
+        
         setTestResult({
           success: true,
+          testType: result.testType,
           provider: result.provider,
           keyVaultName: result.keyVaultName,
-          aiApiKeySecret: result.aiApiKeySecret,
-          message: result.message || t('admin.aiTest.testSuccess', { provider: result.provider })
+          secretName: result.secretName,
+          secretExists: result.secretExists,
+          message: result.message || successMessage
         });
       } else {
+        const errorMessage = result.testType === 'infra'
+          ? t('admin.aiTest.infraError', { error: result.error || 'Unknown error' })
+          : t('admin.aiTest.fullError', { error: result.error || 'Unknown error' });
+        
         setTestResult({
           success: false,
+          testType: result.testType,
           provider: result.provider,
           keyVaultName: result.keyVaultName,
-          aiApiKeySecret: result.aiApiKeySecret,
-          message: t('admin.aiTest.testError', { error: result.error || 'Unknown error' })
+          secretName: result.secretName,
+          secretExists: result.secretExists,
+          message: errorMessage
         });
       }
     } catch (error) {
@@ -238,7 +268,11 @@ export function Admin() {
         message: t('admin.aiTest.testError', { error: error instanceof Error ? error.message : 'Unknown error' })
       });
     } finally {
-      setIsTestingAI(false);
+      if (testType === 'infra') {
+        setIsTestingInfra(false);
+      } else {
+        setIsTestingFull(false);
+      }
     }
   };
 
@@ -394,7 +428,7 @@ export function Admin() {
             </Text>
             
             {/* Display Key Vault Configuration - always show if we have test result data */}
-            {testResult && (testResult.provider || testResult.keyVaultName || testResult.aiApiKeySecret) && (
+            {testResult && (testResult.provider || testResult.keyVaultName || testResult.secretName) && (
               <div style={{ 
                 marginBottom: '16px', 
                 padding: '12px', 
@@ -408,40 +442,57 @@ export function Admin() {
                   marginBottom: '8px',
                   fontWeight: tokens.fontWeightSemibold
                 }}>
-                  Configuration:
+                  {t('admin.aiTest.configurationTitle')}
                 </Text>
                 <Text style={{ 
                   fontSize: tokens.fontSizeBase200,
                   color: tokens.colorNeutralForeground2,
                   display: 'block'
                 }}>
-                  <strong>Provider:</strong> {testResult.provider || 'Not available'}
+                  <strong>{t('admin.aiTest.provider')}:</strong> {testResult.provider || t('admin.aiTest.notAvailable')}
                 </Text>
                 <Text style={{ 
                   fontSize: tokens.fontSizeBase200,
                   color: tokens.colorNeutralForeground2,
                   display: 'block'
                 }}>
-                  <strong>Key Vault Name:</strong> {testResult.keyVaultName || 'Not configured'}
+                  <strong>{t('admin.aiTest.keyVaultName')}:</strong> {testResult.keyVaultName || t('admin.aiTest.notConfigured')}
                 </Text>
                 <Text style={{ 
                   fontSize: tokens.fontSizeBase200,
                   color: tokens.colorNeutralForeground2,
                   display: 'block'
                 }}>
-                  <strong>AI API Key Secret:</strong> {testResult.aiApiKeySecret || DEFAULT_AI_API_KEY_SECRET}
+                  <strong>{t('admin.aiTest.secretName')}:</strong> {testResult.secretName || DEFAULT_AI_API_KEY_SECRET}
                 </Text>
+                {testResult.secretExists !== undefined && (
+                  <Text style={{ 
+                    fontSize: tokens.fontSizeBase200,
+                    color: tokens.colorNeutralForeground2,
+                    display: 'block'
+                  }}>
+                    <strong>{t('admin.aiTest.secretExists')}:</strong> {testResult.secretExists ? t('admin.aiTest.yes') : t('admin.aiTest.no')}
+                  </Text>
+                )}
               </div>
             )}
             
             <div className={styles.aiTestControls}>
               <Button
+                appearance="secondary"
+                icon={<PlayRegular />}
+                onClick={() => handleTestAI('infra')}
+                disabled={isTestingInfra || isTestingFull}
+              >
+                {isTestingInfra ? t('admin.aiTest.testing') : t('admin.aiTest.testInfraButton')}
+              </Button>
+              <Button
                 appearance="primary"
                 icon={<PlayRegular />}
-                onClick={handleTestAI}
-                disabled={isTestingAI}
+                onClick={() => handleTestAI('full')}
+                disabled={isTestingInfra || isTestingFull}
               >
-                {isTestingAI ? t('admin.aiTest.testing') : t('admin.aiTest.testButton')}
+                {isTestingFull ? t('admin.aiTest.testing') : t('admin.aiTest.testFullButton')}
               </Button>
             </div>
 

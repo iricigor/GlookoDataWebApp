@@ -1,22 +1,23 @@
 /**
  * Admin AI Test Azure Function
  * 
- * This function allows Pro users with admin access to test the Pro AI key configuration
- * by sending a simple test query to the configured AI provider.
+ * This function allows Pro users with admin access to test the Pro AI key configuration.
+ * It supports two test modes:
+ * 1. Infrastructure test - verifies Key Vault access and environment configuration
+ * 2. Full test - includes infrastructure test plus sending a test query to the AI provider
  * 
- * POST /api/glookoAdmin/test-ai
+ * POST /api/glookoAdmin/test-ai-key
  * 
  * Headers:
  *   - Authorization: Bearer <id_token> (required)
  *   - Content-Type: application/json
  * 
- * Body:
- *   {
- *     "provider": "perplexity" | "gemini" | "grok" | "deepseek" (optional)
- *   }
+ * Query Parameters:
+ *   - testType: "infra" | "full" (default: "full")
  * 
  * Response:
- *   - 200 OK: { success: true, provider: string, message: string }
+ *   - 200 OK: { success: true, testType: string, provider: string, keyVaultName: string, 
+ *               secretName: string, secretExists: boolean, message?: string }
  *   - 401 Unauthorized: Invalid or missing token
  *   - 403 Forbidden: Not a Pro user
  *   - 500 Internal Server Error: Infrastructure error or AI test failed
@@ -31,6 +32,15 @@ import { createRequestLogger } from "../utils/logger";
  * Default AI API Key secret name in Key Vault
  */
 const DEFAULT_AI_API_KEY_SECRET = 'AI-API-Key';
+
+/**
+ * Get the AI API key secret name from environment variable
+ * 
+ * @returns The secret name configured in AI_API_KEY_SECRET or default
+ */
+function getAISecretName(): string {
+  return process.env.AI_API_KEY_SECRET || DEFAULT_AI_API_KEY_SECRET;
+}
 
 /**
  * URL-encode a string for use as RowKey
@@ -61,27 +71,28 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
 
 /**
  * Get AI provider configuration from Key Vault
+ * 
+ * Retrieves the AI API key from Azure Key Vault using the secret name configured
+ * in the AI_API_KEY_SECRET environment variable (default: 'AI-API-Key').
+ * 
+ * Note: There is only ONE secret in Key Vault that contains the API key,
+ * regardless of which AI provider is being used. The provider parameter is
+ * kept for API consistency but not used internally.
+ * 
+ * @param _provider - The AI provider name (not used, kept for API consistency)
+ * @returns Object containing the API key and secret name
+ * @throws Error if secret cannot be retrieved
  */
-async function getAIProviderConfig(provider: string): Promise<{ apiKey: string }> {
-  // Map provider names to Key Vault secret names
-  const secretNames: Record<string, string> = {
-    'perplexity': 'PERPLEXITY-API-KEY',
-    'gemini': 'GEMINI-API-KEY',
-    'grok': 'GROK-API-KEY',
-    'deepseek': 'DEEPSEEK-API-KEY',
-  };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function getAIProviderConfig(_provider: string): Promise<{ apiKey: string; secretName: string }> {
+  const secretName = getAISecretName();
 
-  const secretName = secretNames[provider];
-  if (!secretName) {
-    throw new Error(`Unsupported AI provider: ${provider}`);
-  }
-
-  const apiKey = await getSecretFromKeyVault(secretName);
+  const apiKey = await getSecretFromKeyVault(undefined, secretName);
   if (!apiKey) {
-    throw new Error(`API key not configured for provider: ${provider}`);
+    throw new Error(`API key not configured in Key Vault secret: ${secretName}`);
   }
 
-  return { apiKey };
+  return { apiKey, secretName };
 }
 
 /**
@@ -253,6 +264,17 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
 
     requestLogger.logInfo('Pro user verified', { userId });
 
+    // Get testType from query parameter (default to "full")
+    const testType = request.query.get('testType') || 'full';
+    
+    if (!['infra', 'full'].includes(testType)) {
+      return requestLogger.logError(
+        `Invalid testType parameter: ${testType}. Supported values: infra, full`,
+        400,
+        'validation'
+      );
+    }
+
     // Parse request body (provider is optional and will be ignored - we use environment configuration)
     const body = await request.text();
     
@@ -279,33 +301,90 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
       );
     }
 
-    requestLogger.logInfo('Testing AI provider', { provider });
-
-    // Get AI provider configuration
-    const config = await getAIProviderConfig(provider);
-    requestLogger.logInfo('Retrieved AI configuration', { provider });
-
-    // Test the AI provider
-    const testResult = await testAIProvider(provider, config.apiKey);
-    
     // Get Key Vault configuration from environment
     const keyVaultName = process.env.KEY_VAULT_NAME || 'Not configured';
-    const aiApiKeySecret = process.env.AI_API_KEY_SECRET || DEFAULT_AI_API_KEY_SECRET;
+    const secretName = getAISecretName();
+
+    requestLogger.logInfo('Testing AI provider', { provider, testType });
+
+    // Infrastructure test - verify Key Vault access
+    let secretExists = false;
+    let aiProviderConfig: { apiKey: string; secretName: string } | null = null;
+
+    try {
+      // Get AI provider configuration (this tests Key Vault access)
+      aiProviderConfig = await getAIProviderConfig(provider);
+      secretExists = true;
+      requestLogger.logInfo('Retrieved AI configuration', { provider, secretName: aiProviderConfig.secretName });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      requestLogger.logWarn('Failed to retrieve AI configuration', { error: errorMessage });
+      
+      // For infra test, return the configuration info even if Key Vault access failed
+      // Using HTTP 206 (Partial Content) to indicate partial success
+      if (testType === 'infra') {
+        return requestLogger.logSuccess({
+          status: 206,
+          jsonBody: {
+            success: false,
+            testType,
+            provider,
+            keyVaultName,
+            secretName,
+            secretExists: false,
+            error: `Failed to retrieve secret: ${errorMessage}`,
+          },
+        });
+      }
+      
+      // For full test, return error
+      throw error;
+    }
+
+    // If testType is 'infra', return infrastructure info only
+    if (testType === 'infra') {
+      return requestLogger.logSuccess({
+        status: 200,
+        jsonBody: {
+          success: true,
+          testType,
+          provider,
+          keyVaultName,
+          secretName,
+          secretExists,
+          message: 'Infrastructure test successful. Key Vault access confirmed.',
+        },
+      });
+    }
+
+    // Full test - test the AI provider
+    if (!aiProviderConfig) {
+      // This should not happen as we would have returned earlier, but add explicit check for safety
+      return requestLogger.logError(
+        'Failed to retrieve AI provider configuration',
+        500,
+        'infrastructure'
+      );
+    }
+    
+    const testResult = await testAIProvider(provider, aiProviderConfig.apiKey);
     
     requestLogger.logInfo('AI test successful', { 
       provider, 
       resultLength: testResult.length,
       keyVaultName,
-      aiApiKeySecret
+      secretName
     });
 
     return requestLogger.logSuccess({
       status: 200,
       jsonBody: {
         success: true,
+        testType,
         provider,
         keyVaultName,
-        aiApiKeySecret,
+        secretName,
+        secretExists,
         message: `AI provider test successful. Response: ${testResult.substring(0, 200)}${testResult.length > 200 ? '...' : ''}`,
       },
     });
@@ -317,8 +396,9 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
 
     // Get Key Vault configuration from environment (to return even on error)
     const keyVaultName = process.env.KEY_VAULT_NAME || 'Not configured';
-    const aiApiKeySecret = process.env.AI_API_KEY_SECRET || DEFAULT_AI_API_KEY_SECRET;
     const provider = process.env.AI_PROVIDER || 'perplexity';
+    const testType = request.query.get('testType') || 'full';
+    const secretName = getAISecretName();
 
     // Check for Key Vault errors
     if (errorMessage.includes('Key Vault') || errorMessage.includes('API key not configured')) {
@@ -329,9 +409,11 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
           error: 'Failed to retrieve API key configuration',
           errorType: 'infrastructure',
           code: 'KEY_VAULT_ERROR',
+          testType,
           provider,
           keyVaultName,
-          aiApiKeySecret,
+          secretName,
+          secretExists: false,
         },
         headers: {
           'x-correlation-id': requestLogger.correlationId,
@@ -348,9 +430,11 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
           error: `AI provider test failed: ${errorMessage}`,
           errorType: 'provider',
           code: 'PROVIDER_ERROR',
+          testType,
           provider,
           keyVaultName,
-          aiApiKeySecret,
+          secretName,
+          secretExists: true,
         },
         headers: {
           'x-correlation-id': requestLogger.correlationId,
@@ -370,9 +454,10 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
       jsonBody: {
         error: 'Internal server error',
         errorType: 'infrastructure',
+        testType,
         provider,
         keyVaultName,
-        aiApiKeySecret,
+        secretName,
         correlationId: requestLogger.correlationId,
       },
       headers: {
@@ -385,7 +470,7 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
 // Register the function with Azure Functions v4
 app.http('adminTestAI', {
   methods: ['POST'],
-  route: 'glookoAdmin/test-ai',
+  route: 'glookoAdmin/test-ai-key',
   authLevel: 'anonymous',
   handler: testAI,
 });

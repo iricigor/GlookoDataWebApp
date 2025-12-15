@@ -18,12 +18,27 @@
     },
     "aiTest": {
       "title": "KI-Konfigurationstest",
-      "description": "Testen Sie die Pro-KI-Schlüsselkonfiguration, um zu überprüfen, ob sie korrekt funktioniert",
+      "description": "Testen Sie die Pro-KI-Schlüsselkonfiguration. Wählen Sie Infrastrukturtest, um nur den Key Vault-Zugriff zu überprüfen, oder Volltest, um die Antwort des KI-Anbieters zu überprüfen.",
+      "testInfraButton": "Infrastruktur testen",
+      "testFullButton": "KI-Anbieter testen",
       "testButton": "KI-Schlüssel testen",
       "testing": "Testen...",
       "selectProvider": "KI-Anbieter auswählen",
+      "infraSuccess": "✅ Infrastrukturtest erfolgreich! Key Vault: {keyVaultName}, Secret: {secretName}",
+      "fullSuccess": "✅ Vollständiger Test erfolgreich! Anbieter: {provider}",
+      "infraError": "❌ Infrastrukturtest fehlgeschlagen: {error}",
+      "fullError": "❌ Vollständiger Test fehlgeschlagen: {error}",
       "testSuccess": "✅ Test erfolgreich! Anbieter: {provider}",
-      "testError": "❌ Test fehlgeschlagen: {error}"
+      "testError": "❌ Test fehlgeschlagen: {error}",
+      "configurationTitle": "Konfiguration",
+      "provider": "Anbieter",
+      "keyVaultName": "Key Vault Name",
+      "secretName": "Secret Name",
+      "secretExists": "Secret zugänglich",
+      "yes": "Ja",
+      "no": "Nein",
+      "notAvailable": "Nicht verfügbar",
+      "notConfigured": "Nicht konfiguriert"
     }
   }
 }
