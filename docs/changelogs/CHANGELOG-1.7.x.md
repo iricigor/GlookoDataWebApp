@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>807 Split test-ai endpoint into infrastructure and full AI tests</summary>
+
+[#807](../../pull/807) Split test-ai endpoint into infrastructure and full AI tests
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>804 Add Pro users count to admin statistics endpoint</summary>
 
 [#804](../../pull/804) Add Pro users count to admin statistics endpoint
