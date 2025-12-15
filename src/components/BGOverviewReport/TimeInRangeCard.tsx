@@ -26,13 +26,15 @@ import { useTranslation } from 'react-i18next';
 import type { RangeCategoryMode, GlucoseUnit, GlucoseThresholds, AGPDayOfWeekFilter } from '../../types';
 import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
 import type { AIProvider } from '../../utils/api';
-import { calculatePercentage, GLUCOSE_RANGE_COLORS } from '../../utils/data';
+import { calculatePercentage, convertPercentageToTime, GLUCOSE_RANGE_COLORS } from '../../utils/data';
 import { callAIWithRouting } from '../../utils/api';
 import { generateBGOverviewTIRPrompt } from '../../features/aiAnalysis/prompts';
 import { useAnalysisState } from '../../pages/AIAnalysis/useAnalysisState';
-import { MarkdownRenderer } from '../shared';
+import { MarkdownRenderer, SegmentedControl } from '../shared';
 import { useBGOverviewStyles } from './styles';
 import type { TIRStats } from './types';
+
+type TIRDisplayUnit = '100%' | '24h';
 
 interface TimeInRangeCardProps {
   tirStats: TIRStats;
@@ -83,6 +85,7 @@ export function TimeInRangeCard({
   const { t } = useTranslation('reports');
   
   const [isResponseExpanded, setIsResponseExpanded] = useState(true);
+  const [displayUnit, setDisplayUnit] = useState<TIRDisplayUnit>('100%');
   
   const {
     analyzing,
@@ -177,12 +180,29 @@ export function TimeInRangeCard({
     return `${baseText}${sparkles}`;
   };
 
+  // Helper function to format display value based on selected unit
+  const formatDisplayValue = (count: number): string => {
+    if (displayUnit === '100%') {
+      return `${calculatePercentage(count, tirStats.total)}%`;
+    } else {
+      return convertPercentageToTime(tirStats.total, count);
+    }
+  };
+
   return (
     <Card className={styles.tirCard}>
-      <Text className={styles.cardTitle}>
-        <CheckmarkCircleRegular className={styles.cardIcon} />
-        Time in Range
-      </Text>
+      <div className={styles.tirCardHeader}>
+        <Text className={styles.cardTitle}>
+          <CheckmarkCircleRegular className={styles.cardIcon} />
+          Time in Range
+        </Text>
+        <SegmentedControl<TIRDisplayUnit>
+          options={['100%', '24h']}
+          value={displayUnit}
+          onChange={setDisplayUnit}
+          ariaLabel={t('reports.bgOverview.tir.unitSelector.ariaLabel')}
+        />
+      </div>
 
       <div className={styles.tirBarContainer}>
         <div className={styles.tirBar}>
@@ -193,10 +213,10 @@ export function TimeInRangeCard({
                 width: `${calculatePercentage(tirStats.veryLow ?? 0, tirStats.total)}%`,
                 backgroundColor: getColorForCategory('veryLow'),
               }}
-              title={`Very Low: ${calculatePercentage(tirStats.veryLow ?? 0, tirStats.total)}%`}
+              title={`Very Low: ${formatDisplayValue(tirStats.veryLow ?? 0)}`}
             >
               {calculatePercentage(tirStats.veryLow ?? 0, tirStats.total) >= 5 && 
-                `${calculatePercentage(tirStats.veryLow ?? 0, tirStats.total)}%`}
+                formatDisplayValue(tirStats.veryLow ?? 0)}
             </div>
           )}
           {tirStats.low > 0 && (
@@ -206,10 +226,10 @@ export function TimeInRangeCard({
                 width: `${calculatePercentage(tirStats.low, tirStats.total)}%`,
                 backgroundColor: getColorForCategory('low'),
               }}
-              title={`Low: ${calculatePercentage(tirStats.low, tirStats.total)}%`}
+              title={`Low: ${formatDisplayValue(tirStats.low)}`}
             >
               {calculatePercentage(tirStats.low, tirStats.total) >= 5 && 
-                `${calculatePercentage(tirStats.low, tirStats.total)}%`}
+                formatDisplayValue(tirStats.low)}
             </div>
           )}
           {tirStats.inRange > 0 && (
@@ -219,10 +239,10 @@ export function TimeInRangeCard({
                 width: `${calculatePercentage(tirStats.inRange, tirStats.total)}%`,
                 backgroundColor: getColorForCategory('inRange'),
               }}
-              title={`In Range: ${calculatePercentage(tirStats.inRange, tirStats.total)}%`}
+              title={`In Range: ${formatDisplayValue(tirStats.inRange)}`}
             >
               {calculatePercentage(tirStats.inRange, tirStats.total) >= 5 && 
-                `${calculatePercentage(tirStats.inRange, tirStats.total)}%`}
+                formatDisplayValue(tirStats.inRange)}
             </div>
           )}
           {tirStats.high > 0 && (
@@ -232,10 +252,10 @@ export function TimeInRangeCard({
                 width: `${calculatePercentage(tirStats.high, tirStats.total)}%`,
                 backgroundColor: getColorForCategory('high'),
               }}
-              title={`High: ${calculatePercentage(tirStats.high, tirStats.total)}%`}
+              title={`High: ${formatDisplayValue(tirStats.high)}`}
             >
               {calculatePercentage(tirStats.high, tirStats.total) >= 5 && 
-                `${calculatePercentage(tirStats.high, tirStats.total)}%`}
+                formatDisplayValue(tirStats.high)}
             </div>
           )}
           {categoryMode === 5 && (tirStats.veryHigh ?? 0) > 0 && (
@@ -245,10 +265,10 @@ export function TimeInRangeCard({
                 width: `${calculatePercentage(tirStats.veryHigh ?? 0, tirStats.total)}%`,
                 backgroundColor: getColorForCategory('veryHigh'),
               }}
-              title={`Very High: ${calculatePercentage(tirStats.veryHigh ?? 0, tirStats.total)}%`}
+              title={`Very High: ${formatDisplayValue(tirStats.veryHigh ?? 0)}`}
             >
               {calculatePercentage(tirStats.veryHigh ?? 0, tirStats.total) >= 5 && 
-                `${calculatePercentage(tirStats.veryHigh ?? 0, tirStats.total)}%`}
+                formatDisplayValue(tirStats.veryHigh ?? 0)}
             </div>
           )}
         </div>
@@ -260,7 +280,7 @@ export function TimeInRangeCard({
             <div className={styles.statCard}>
               <Text className={styles.statLabel}>Very Low</Text>
               <Text className={styles.statValue} style={{ color: getColorForCategory('veryLow') }}>
-                {calculatePercentage(tirStats.veryLow ?? 0, tirStats.total)}%
+                {formatDisplayValue(tirStats.veryLow ?? 0)}
               </Text>
             </div>
           </Tooltip>
@@ -269,7 +289,7 @@ export function TimeInRangeCard({
           <div className={styles.statCard}>
             <Text className={styles.statLabel}>Low</Text>
             <Text className={styles.statValue} style={{ color: getColorForCategory('low') }}>
-              {calculatePercentage(tirStats.low, tirStats.total)}%
+              {formatDisplayValue(tirStats.low)}
             </Text>
           </div>
         </Tooltip>
@@ -277,7 +297,7 @@ export function TimeInRangeCard({
           <div className={styles.statCard}>
             <Text className={styles.statLabel}>In Range</Text>
             <Text className={styles.statValue} style={{ color: getColorForCategory('inRange') }}>
-              {calculatePercentage(tirStats.inRange, tirStats.total)}%
+              {formatDisplayValue(tirStats.inRange)}
             </Text>
           </div>
         </Tooltip>
@@ -285,7 +305,7 @@ export function TimeInRangeCard({
           <div className={styles.statCard}>
             <Text className={styles.statLabel}>High</Text>
             <Text className={styles.statValue} style={{ color: getColorForCategory('high') }}>
-              {calculatePercentage(tirStats.high, tirStats.total)}%
+              {formatDisplayValue(tirStats.high)}
             </Text>
           </div>
         </Tooltip>
@@ -294,7 +314,7 @@ export function TimeInRangeCard({
             <div className={styles.statCard}>
               <Text className={styles.statLabel}>Very High</Text>
               <Text className={styles.statValue} style={{ color: getColorForCategory('veryHigh') }}>
-                {calculatePercentage(tirStats.veryHigh ?? 0, tirStats.total)}%
+                {formatDisplayValue(tirStats.veryHigh ?? 0)}
               </Text>
             </div>
           </Tooltip>

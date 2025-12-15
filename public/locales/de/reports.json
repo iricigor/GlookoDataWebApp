@@ -19,7 +19,12 @@
         "accordionTitle": "KI-Prompt anzeigen",
         "waitMessage": "Bitte warten Sie {seconds} Sekunde(n), bevor Sie eine neue Analyse anfordern...",
         "errorPrefix": "Fehler:",
-        "successMessage": "KI-Analyse erfolgreich abgeschlossen"
+        "successMessage": "KI-Analyse erfolgreich abgeschlossen",
+        "unitSelector": {
+          "ariaLabel": "Zeit im Zielbereich Einheitenwähler",
+          "percentage": "100%",
+          "time": "24h"
+        }
       }
     }
   }

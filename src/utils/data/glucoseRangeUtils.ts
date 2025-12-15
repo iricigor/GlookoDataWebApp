@@ -113,6 +113,38 @@ export function categorizeGlucose(
 }
 
 /**
+ * Convert percentage to time format (hh:mm) rounded to 5-minute intervals
+ * 
+ * @param totalReadings - Total number of readings
+ * @param actualReadings - Actual number of readings for the category
+ * @returns Time string in "Xh Ym" format (e.g., "6h 0m", "45m")
+ * 
+ * @example
+ * convertPercentageToTime(288, 72) // "6h 0m" (72/288 = 25% of 24h = 6h)
+ * convertPercentageToTime(288, 9) // "45m" (9/288 = 3% of 24h = 43.2m, rounded to 45m)
+ */
+export function convertPercentageToTime(
+  totalReadings: number,
+  actualReadings: number
+): string {
+  // Calculate minutes directly from actual readings
+  // Assume CGM readings are 5 minutes apart (288 readings per day)
+  const minutesPerReading = (24 * 60) / totalReadings;
+  const totalMinutes = Math.round((actualReadings * minutesPerReading) / 5) * 5; // Round to nearest 5 minutes
+  
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  
+  if (hours === 0) {
+    return `${minutes}m`;
+  } else if (minutes === 0) {
+    return `${hours}h`;
+  } else {
+    return `${hours}h ${minutes}m`;
+  }
+}
+
+/**
  * Calculate glucose range statistics from readings
  * 
  * @param readings - Array of glucose readings
