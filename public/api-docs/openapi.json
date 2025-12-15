@@ -421,7 +421,7 @@
       "post": {
         "tags": ["AI"],
         "summary": "Query AI providers with diabetes-related prompts",
-        "description": "Allows Pro users to query AI providers (Perplexity, Gemini, Grok, or DeepSeek) through the backend, keeping API keys secure in Azure Key Vault. The function validates the user's authentication token, verifies Pro user status, validates that the prompt is diabetes-related, and makes the AI API call on behalf of the user. Implements rate limiting (50 requests per hour per user) and abuse detection.",
+        "description": "Allows Pro users to query AI providers (Perplexity, Gemini, Grok, or DeepSeek) through the backend, keeping API keys secure in Azure Key Vault. The backend automatically selects the provider based on the AI_PROVIDER environment variable. The function validates the user's authentication token, verifies Pro user status, validates that the prompt is diabetes-related, and makes the AI API call on behalf of the user. Implements rate limiting (50 requests per hour per user) and abuse detection.",
         "operationId": "aiQuery",
         "security": [
           {
@@ -436,17 +436,16 @@
                 "$ref": "#/components/schemas/AIQueryRequest"
               },
               "examples": {
-                "perplexity": {
-                  "summary": "Query with Perplexity provider",
+                "basicQuery": {
+                  "summary": "Diabetes-related query",
                   "value": {
-                    "prompt": "Analyze this blood glucose data: 120, 130, 145, 160, 140 mg/dL over the past 5 hours. What patterns do you see?",
-                    "provider": "perplexity"
+                    "prompt": "You are a diabetes expert. Analyze this blood glucose data: 120, 130, 145, 160, 140 mg/dL over the past 5 hours. What patterns do you see?"
                   }
                 },
-                "autoSelect": {
-                  "summary": "Auto-select provider",
+                "hypoglycemiaQuery": {
+                  "summary": "Query about hypoglycemia",
                   "value": {
-                    "prompt": "What are the signs of hypoglycemia and how should I respond?"
+                    "prompt": "You are a diabetes expert. What are the signs of hypoglycemia and how should I respond?"
                   }
                 }
               }
@@ -499,14 +498,6 @@
                       "error": "Prompt must be diabetes-related",
                       "errorType": "validation",
                       "code": "NON_DIABETES_PROMPT"
-                    }
-                  },
-                  "invalidProvider": {
-                    "summary": "Invalid provider specified",
-                    "value": {
-                      "error": "Invalid provider. Supported providers: perplexity, gemini, grok, deepseek",
-                      "errorType": "validation",
-                      "code": "INVALID_PROVIDER"
                     }
                   }
                 }
@@ -1062,13 +1053,7 @@
             "type": "string",
             "description": "The AI prompt text (must be diabetes-related, max 50,000 characters)",
             "maxLength": 50000,
-            "example": "Analyze this blood glucose data: 120, 130, 145 mg/dL. What patterns do you see?"
-          },
-          "provider": {
-            "type": "string",
-            "enum": ["perplexity", "gemini", "grok", "deepseek"],
-            "description": "AI provider to use (optional, defaults to backend's configured provider)",
-            "example": "perplexity"
+            "example": "You are a diabetes expert. Analyze this blood glucose data: 120, 130, 145 mg/dL. What patterns do you see?"
           }
         }
       },

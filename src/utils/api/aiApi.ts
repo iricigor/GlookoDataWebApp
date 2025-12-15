@@ -233,9 +233,10 @@ export async function verifyApiKey(
  * Route a prompt to either the backend (for Pro users) or the client-side provider API.
  *
  * When `isProUser` is true, `useProKeys` is true, and an `idToken` is provided, the request is forwarded to the backend
- * where provider keys are managed; otherwise the call is performed client-side using the supplied `apiKey`.
+ * where the provider is configured via environment variables; otherwise the call is performed client-side using the supplied
+ * `provider` and `apiKey`.
  *
- * @param provider - The AI provider to use ('perplexity', 'gemini', 'grok', or 'deepseek')
+ * @param provider - The AI provider to use ('perplexity', 'gemini', 'grok', or 'deepseek') for client-side calls
  * @param prompt - The prompt to send to the AI
  * @param options - Call options
  * @param options.apiKey - User's client-side API key (required for non‑Pro calls)
@@ -261,7 +262,7 @@ export async function callAIWithRouting(
     // Dynamic import to avoid circular dependencies
     const { callBackendAI } = await import('./backendAIApi');
     
-    const result = await callBackendAI(idToken, prompt, provider);
+    const result = await callBackendAI(idToken, prompt);
     
     // Convert backend result to AIResult format
     // Map backend error types to standard AI error types

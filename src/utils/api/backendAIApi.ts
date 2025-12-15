@@ -7,7 +7,6 @@
  */
 
 import { createApiLogger } from '../logger';
-import type { AIProvider } from './aiApi';
 
 /**
  * Configuration for the Backend AI Query API
@@ -29,7 +28,6 @@ const defaultConfig: BackendAIApiConfig = {
  */
 interface BackendAIQueryRequest {
   prompt: string;
-  provider?: AIProvider;
 }
 
 /**
@@ -65,18 +63,16 @@ export interface BackendAIResult {
 /**
  * Send a prompt to the backend AI query endpoint and return a structured result.
  *
- * If `provider` is omitted, the backend will use its configured default provider.
+ * The backend will use its configured default provider from environment variables.
  *
  * @param idToken - MSAL ID token used for Authorization header
  * @param prompt - The AI prompt to send to the backend
- * @param provider - Optional provider identifier (e.g., 'perplexity', 'gemini', 'grok', 'deepseek'); when omitted the backend chooses the default
  * @param config - Optional API configuration; defaults to the module's default (baseUrl '/api')
  * @returns A `BackendAIResult` containing `success` and, on success, `content` and `provider`; on failure, `error`, `errorType`, and optionally `statusCode`
  */
 export async function callBackendAI(
   idToken: string,
   prompt: string,
-  provider?: AIProvider,
   config: BackendAIApiConfig = defaultConfig
 ): Promise<BackendAIResult> {
   const endpoint = `${config.baseUrl}/ai/query`;
@@ -107,7 +103,6 @@ export async function callBackendAI(
   try {
     const requestBody: BackendAIQueryRequest = {
       prompt,
-      ...(provider && { provider }),
     };
     
     const response = await fetch(endpoint, {
