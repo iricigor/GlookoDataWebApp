@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>831 Fix incorrect AI provider name in Pro user responses</summary>
+
+[#831](../../pull/831) Fix incorrect AI provider name in Pro user responses
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>823 Fix AI provider mismatch in Pro user disclaimers</summary>
 
 [#823](../../pull/823) Fix AI provider mismatch in Pro user disclaimers
