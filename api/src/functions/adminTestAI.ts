@@ -34,16 +34,6 @@ import { createRequestLogger } from "../utils/logger";
 const DEFAULT_AI_API_KEY_SECRET = 'AI-API-Key';
 
 /**
- * Map of AI provider names to Key Vault secret names
- */
-const PROVIDER_SECRET_NAMES: Record<string, string> = {
-  'perplexity': 'PERPLEXITY-API-KEY',
-  'gemini': 'GEMINI-API-KEY',
-  'grok': 'GROK-API-KEY',
-  'deepseek': 'DEEPSEEK-API-KEY',
-};
-
-/**
  * URL-encode a string for use as RowKey
  */
 function urlEncode(str: string): string {
@@ -71,19 +61,40 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
 }
 
 /**
- * Get AI provider secret name from provider
+ * Get AI provider secret name from environment-configured provider
+ * 
+ * Maps the provider name to its corresponding Key Vault secret name.
+ * Since there's only one backend AI provider configured via AI_PROVIDER env var,
+ * this function returns the secret name for that specific provider.
+ * 
+ * @param provider - The AI provider name (e.g., 'perplexity', 'gemini', 'grok', 'deepseek')
+ * @returns The Key Vault secret name for the provider
+ * @throws Error if provider is unsupported
  */
 function getSecretNameForProvider(provider: string): string {
-  const secretName = PROVIDER_SECRET_NAMES[provider];
-  if (!secretName) {
-    throw new Error(`Unsupported AI provider: ${provider}`);
+  // Map provider to its Key Vault secret name
+  switch (provider.toLowerCase()) {
+    case 'perplexity':
+      return 'PERPLEXITY-API-KEY';
+    case 'gemini':
+      return 'GEMINI-API-KEY';
+    case 'grok':
+      return 'GROK-API-KEY';
+    case 'deepseek':
+      return 'DEEPSEEK-API-KEY';
+    default:
+      throw new Error(`Unsupported AI provider: ${provider}`);
   }
-
-  return secretName;
 }
 
 /**
  * Get AI provider configuration from Key Vault
+ * 
+ * Retrieves the API key for the configured AI provider from Azure Key Vault.
+ * 
+ * @param provider - The AI provider name
+ * @returns Object containing the API key and secret name
+ * @throws Error if secret cannot be retrieved or provider is unsupported
  */
 async function getAIProviderConfig(provider: string): Promise<{ apiKey: string; secretName: string }> {
   const secretName = getSecretNameForProvider(provider);
@@ -304,7 +315,16 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
 
     // Get Key Vault configuration from environment
     const keyVaultName = process.env.KEY_VAULT_NAME || 'Not configured';
-    const secretName = getSecretNameForProvider(provider);
+    
+    // Safely get secret name - compute once to avoid exception in error handler
+    let secretName: string;
+    try {
+      secretName = getSecretNameForProvider(provider);
+    } catch (error) {
+      // If provider is unsupported, this was already caught above
+      // This is a safety fallback
+      secretName = 'unknown-secret';
+    }
 
     requestLogger.logInfo('Testing AI provider', { provider, testType });
 
@@ -316,15 +336,17 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
       // Get AI provider configuration (this tests Key Vault access)
       aiProviderConfig = await getAIProviderConfig(provider);
       secretExists = true;
+      secretName = aiProviderConfig.secretName; // Update with actual secret name
       requestLogger.logInfo('Retrieved AI configuration', { provider, secretName: aiProviderConfig.secretName });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       requestLogger.logWarn('Failed to retrieve AI configuration', { error: errorMessage });
       
       // For infra test, return the configuration info even if Key Vault access failed
+      // Using HTTP 206 (Partial Content) to indicate partial success
       if (testType === 'infra') {
         return requestLogger.logSuccess({
-          status: 200,
+          status: 206,
           jsonBody: {
             success: false,
             testType,
@@ -397,8 +419,15 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
     // Get Key Vault configuration from environment (to return even on error)
     const keyVaultName = process.env.KEY_VAULT_NAME || 'Not configured';
     const provider = process.env.AI_PROVIDER || 'perplexity';
-    const secretName = getSecretNameForProvider(provider);
     const testType = request.query.get('testType') || 'full';
+    
+    // Safely get secret name without risking exception in error handler
+    let secretName: string;
+    try {
+      secretName = getSecretNameForProvider(provider);
+    } catch {
+      secretName = 'unknown-secret';
+    }
 
     // Check for Key Vault errors
     if (errorMessage.includes('Key Vault') || errorMessage.includes('API key not configured')) {
