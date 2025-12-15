@@ -18,8 +18,7 @@
  * 
  * Body:
  *   {
- *     "prompt": "AI prompt text",
- *     "provider": "perplexity" | "gemini" | "grok" | "deepseek" (optional)
+ *     "prompt": "AI prompt text"
  *   }
  * 
  * Response:
@@ -40,7 +39,6 @@ import { createRequestLogger } from "../utils/logger";
  */
 interface AIQueryRequest {
   prompt: string;
-  provider?: string;
 }
 
 /**
@@ -252,21 +250,17 @@ async function checkRateLimit(
 /**
  * Determines which AI provider to use and retrieves its API key from Key Vault.
  *
- * If `requestedProvider` is provided it will be used; otherwise the `AI_PROVIDER`
- * environment variable or the default `perplexity` is used. The function validates
- * the provider against the supported set and reads the API key from a Key Vault
- * secret named by `AI_API_KEY_SECRET` (default `AI-API-Key`).
+ * The `AI_PROVIDER` environment variable or the default `perplexity` is used.
+ * The function validates the provider against the supported set and reads the API key
+ * from a Key Vault secret named by `AI_API_KEY_SECRET` (default `AI-API-Key`).
  *
- * @param requestedProvider - Optional provider override; one of `perplexity`, `gemini`, `grok`, or `deepseek`
  * @returns An `AIProviderConfig` containing `provider` and `apiKey`, or `null` if the provider is invalid or the API key could not be retrieved
  */
 async function getAIProviderConfig(
-  requestedProvider: string | undefined,
   context: InvocationContext
 ): Promise<AIProviderConfig | null> {
-  // Get the provider to use
-  const providerEnvKey = process.env.AI_PROVIDER || 'perplexity';
-  const provider = requestedProvider || providerEnvKey;
+  // Get the provider from environment variable or use default
+  const provider = process.env.AI_PROVIDER || 'perplexity';
   
   // Validate provider
   const validProviders = ['perplexity', 'gemini', 'grok', 'deepseek'];
@@ -562,7 +556,7 @@ async function aiQuery(request: HttpRequest, context: InvocationContext): Promis
       return requestLogger.logError('Invalid JSON in request body', 400, 'validation');
     }
     
-    const { prompt, provider } = requestBody;
+    const { prompt } = requestBody;
     
     // Validate prompt
     if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
@@ -602,7 +596,7 @@ async function aiQuery(request: HttpRequest, context: InvocationContext): Promis
     }
     
     // Get AI provider configuration
-    const aiConfig = await getAIProviderConfig(provider, context);
+    const aiConfig = await getAIProviderConfig(context);
     
     if (!aiConfig) {
       requestLogger.logError('AI provider configuration not available', 503, 'infrastructure');
