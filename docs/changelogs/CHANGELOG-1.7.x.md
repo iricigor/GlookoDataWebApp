@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>823 Fix AI provider mismatch in Pro user disclaimers</summary>
+
+[#823](../../pull/823) Fix AI provider mismatch in Pro user disclaimers
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>825 Fix Gemini model name in admin AI provider test</summary>
 
 [#825](../../pull/825) Fix Gemini model name in admin AI provider test
