@@ -3,6 +3,7 @@
     "title": "Glooko Insights - API-Dokumentation",
     "subtitle": "Interaktiver API-Explorer mit Microsoft-Authentifizierung",
     "adminPageLink": "Admin-Seite",
+    "version": "Version: {{version}}",
     "proUserBadge": "Pro-Benutzer",
     "tokenActive": "Token aktiv",
     "signOut": "Abmelden",

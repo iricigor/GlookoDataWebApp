@@ -3,6 +3,7 @@
     "title": "Glooko Insights - API dokumentace",
     "subtitle": "Interaktivní API průzkumník s autentizací Microsoft",
     "adminPageLink": "Správcovská stránka",
+    "version": "Verze: {{version}}",
     "proUserBadge": "Pro uživatel",
     "tokenActive": "Token aktivní",
     "signOut": "Odhlásit se",
