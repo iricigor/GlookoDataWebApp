@@ -38,7 +38,7 @@ export function useAuth() {
   const [justLoggedIn, setJustLoggedIn] = useState(false);
 
   // Update auth state with user information
-  const updateAuthState = useCallback(async (account: AccountInfo, accessToken: string, idToken: string) => {
+  const updateAuthState = useCallback(async (account: AccountInfo, accessToken: string, idToken: string | undefined) => {
     try {
       const displayName = getUserDisplayName(account);
       const email = getUserEmail(account);
@@ -58,7 +58,7 @@ export function useAuth() {
         userPhoto: photoUrl,
         account: account,
         accessToken: accessToken,
-        idToken: idToken,
+        idToken: idToken || null,
       });
     } catch (error) {
       console.error('Failed to update auth state:', error);
@@ -70,7 +70,7 @@ export function useAuth() {
         userPhoto: null,
         account: account,
         accessToken: accessToken,
-        idToken: idToken,
+        idToken: idToken || null,
       });
     }
   }, []);
@@ -137,7 +137,7 @@ export function useAuth() {
       if (event.eventType === EventType.LOGIN_SUCCESS && event.payload) {
         const payload = event.payload as AuthenticationResult;
         if (payload.account) {
-          updateAuthState(payload.account, payload.accessToken, payload.idToken || '');
+          updateAuthState(payload.account, payload.accessToken, payload.idToken);
           setJustLoggedIn(true);
         }
       }
