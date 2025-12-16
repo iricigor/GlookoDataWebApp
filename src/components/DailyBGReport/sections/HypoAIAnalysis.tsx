@@ -211,7 +211,7 @@ export function HypoAIAnalysis({
         {/* AI Analysis Button - Right aligned, always visible */}
         <Button
           appearance="primary"
-          disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
+          disabled={(!hasApiKey && !isProUser) || analyzing || (cooldownActive && cooldownSeconds > 0)}
           onClick={handleAnalyzeClick}
           icon={analyzing ? <Spinner size="tiny" /> : undefined}
         >
