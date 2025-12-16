@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>835 Extract promptProvider logic to custom hook for improved maintainability</summary>
+
+[#835](../../pull/835) Extract promptProvider logic to custom hook for improved maintainability
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>836 Separate build, translation checks, and PR preview deployment into optional workflows</summary>
 
 [#836](../../pull/836) Separate build, translation checks, and PR preview deployment into optional workflows
