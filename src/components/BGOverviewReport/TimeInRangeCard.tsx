@@ -30,6 +30,7 @@ import { calculatePercentage, convertPercentageToTime, GLUCOSE_RANGE_COLORS } fr
 import { callAIWithRouting } from '../../utils/api';
 import { generateBGOverviewTIRPrompt } from '../../features/aiAnalysis/prompts';
 import { useAnalysisState } from '../../pages/AIAnalysis/useAnalysisState';
+import { usePromptProvider } from '../../hooks/usePromptProvider';
 import { MarkdownRenderer, SegmentedControl } from '../shared';
 import { useBGOverviewStyles } from './styles';
 import type { TIRStats } from './types';
@@ -100,6 +101,9 @@ export function TimeInRangeCard({
     triggerCooldown,
   } = useAnalysisState();
 
+  // Determine the provider to use in prompts based on Pro user settings
+  const { promptProvider } = usePromptProvider({ isProUser, useProKeys, activeProvider });
+
   // Auto-expand response when new analysis completes
   useEffect(() => {
     if (response && !analyzing) {
@@ -140,7 +144,7 @@ export function TimeInRangeCard({
         categoryMode,
         responseLanguage,
         glucoseUnit,
-        activeProvider,
+        promptProvider,
         dayFilter
       );
 
@@ -391,7 +395,7 @@ export function TimeInRangeCard({
                     categoryMode,
                     responseLanguage,
                     glucoseUnit,
-                    activeProvider,
+                    promptProvider,
                     dayFilter
                   )}
                 </pre>

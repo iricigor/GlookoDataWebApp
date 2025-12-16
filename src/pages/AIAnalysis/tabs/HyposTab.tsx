@@ -27,6 +27,7 @@ import { base64Encode } from '../../../utils/formatting';
 import { formatDateTime, formatTime, formatGlucoseNumber, formatNumber } from '../../../utils/formatting/formatters';
 import { useAIAnalysisStyles } from '../styles';
 import { useAnalysisState } from '../useAnalysisState';
+import { usePromptProvider } from '../../../hooks/usePromptProvider';
 import {
   AnalysisButton,
   AnalysisHelperText,
@@ -153,6 +154,9 @@ export function HyposTab({
     setRetryInfo,
   } = useAnalysisState();
 
+  // Determine the provider to use in prompts based on Pro user settings
+  const { promptProvider } = usePromptProvider({ isProUser, useProKeys, activeProvider });
+
   // Reset state when data changes
   useEffect(() => {
     if (!hasData) {
@@ -172,8 +176,6 @@ export function HyposTab({
     const base64EventSummaryData = hypoEventSummaryCSV ? base64Encode(hypoEventSummaryCSV) : undefined;
 
     // Generate the prompt with the base64 CSV data
-    // When using Pro backend keys, don't specify a provider to avoid mismatch
-    const promptProvider = (isProUser && useProKeys) ? undefined : (activeProvider || undefined);
     const prompt = generateHyposPrompt(
       base64EventsData,
       base64SummariesData,
@@ -384,7 +386,7 @@ export function HyposTab({
                   const hypoSummariesCSV = convertHypoSummariesToCSV(hypoDatasets!.dailySummaries);
                   const base64EventsData = base64Encode(hypoEventsCSV);
                   const base64SummariesData = base64Encode(hypoSummariesCSV);
-                  return generateHyposPrompt(base64EventsData, base64SummariesData, responseLanguage, glucoseUnit, (isProUser && useProKeys) ? undefined : (activeProvider || undefined));
+                  return generateHyposPrompt(base64EventsData, base64SummariesData, responseLanguage, glucoseUnit, promptProvider);
                 })()}
               </div>
             </AccordionPanel>

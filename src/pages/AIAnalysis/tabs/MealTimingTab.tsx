@@ -21,6 +21,7 @@ import {
 } from '../../../utils/data';
 import { base64Encode } from '../../../utils/formatting';
 import { formatDate } from '../../../utils/formatting/formatters';
+import { usePromptProvider } from '../../../hooks/usePromptProvider';
 import { useAIAnalysisStyles } from '../styles';
 import { useAnalysisState } from '../useAnalysisState';
 import {
@@ -90,6 +91,9 @@ export function MealTimingTab({
     setRetryInfo,
   } = useAnalysisState();
 
+  // Determine the provider to use in prompts based on Pro user settings
+  const { promptProvider } = usePromptProvider({ isProUser, useProKeys, activeProvider });
+
   // Reset state when data changes
   useEffect(() => {
     if (!hasData) {
@@ -114,8 +118,6 @@ export function MealTimingTab({
     const base64BasalData = base64Encode(basalCsv);
 
     // Generate the prompt with the base64 CSV data
-    // When using Pro backend keys, don't specify a provider to avoid mismatch
-    const promptProvider = (isProUser && useProKeys) ? undefined : (activeProvider || undefined);
     const prompt = generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, promptProvider);
 
     // Get the appropriate API key for the active provider
@@ -275,7 +277,7 @@ export function MealTimingTab({
                   const base64CgmData = base64Encode(cgmCsv);
                   const base64BolusData = base64Encode(bolusCsv);
                   const base64BasalData = base64Encode(basalCsv);
-                  return generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, (isProUser && useProKeys) ? undefined : (activeProvider || undefined));
+                  return generateMealTimingPrompt(base64CgmData, base64BolusData, base64BasalData, responseLanguage, glucoseUnit, promptProvider);
                 })()}
               </div>
             </AccordionPanel>
