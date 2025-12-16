@@ -37,6 +37,7 @@ import {
   calculateHypoStats,
 } from '../../utils/data';
 import type { HypoStats } from '../../utils/data/hypoDataUtils';
+import { getActiveProvider } from '../../utils/api';
 import { useGlucoseThresholds } from '../../hooks/useGlucoseThresholds';
 import { DayNavigator } from '../DayNavigator';
 import { useBGColorScheme } from '../../hooks/useBGColorScheme';
@@ -83,6 +84,15 @@ export function DailyBGReport({
   const { thresholds } = useGlucoseThresholds();
   const { colorScheme, setColorScheme } = useBGColorScheme();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
+  
+  // Determine which AI provider to use and get its API key (same pattern as BGOverviewReport)
+  const activeProvider = getActiveProvider(selectedProvider, perplexityApiKey, geminiApiKey, grokApiKey, deepseekApiKey);
+  const hasApiKey = activeProvider !== null;
+  
+  // Get the appropriate API key for the active provider
+  const apiKey = activeProvider === 'perplexity' ? perplexityApiKey : 
+                  activeProvider === 'grok' ? grokApiKey :
+                  activeProvider === 'deepseek' ? deepseekApiKey : geminiApiKey;
   
   // Glucose state
   const [loading, setLoading] = useState(false);
@@ -583,11 +593,9 @@ export function DailyBGReport({
           showDayNightShading={showDayNightShading}
           currentDate={currentDate}
           currentGlucoseReadings={currentGlucoseReadings}
-          activeProvider={selectedProvider}
-          perplexityApiKey={perplexityApiKey}
-          geminiApiKey={geminiApiKey}
-          grokApiKey={grokApiKey}
-          deepseekApiKey={deepseekApiKey}
+          hasApiKey={hasApiKey}
+          activeProvider={activeProvider}
+          apiKey={apiKey}
           responseLanguage={responseLanguage}
           isProUser={isProUser}
           idToken={idToken}

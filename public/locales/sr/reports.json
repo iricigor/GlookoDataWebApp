@@ -29,45 +29,45 @@
     },
     "dailyBG": {
       "hypoAnalysis": {
-        "title": "[SR] Hypoglycemia Analysis",
+        "title": "Анализа хипогликемије",
         "stats": {
-          "severe": "[SR] Severe",
-          "severeTooltip": "[SR] Severe hypoglycemic events (below very low threshold)",
-          "nonSevere": "[SR] Non-Severe",
-          "nonSevereTooltip": "[SR] Non-severe hypoglycemic events (below low threshold)",
-          "lowest": "[SR] Lowest",
-          "lowestTooltip": "[SR] Lowest glucose value during hypoglycemia",
-          "longest": "[SR] Longest",
-          "longestTooltip": "[SR] Duration of longest hypoglycemic event",
-          "totalTime": "[SR] Total Time",
-          "totalTimeTooltip": "[SR] Total time spent in hypoglycemia",
-          "lbgi": "[SR] LBGI",
-          "lbgiTooltip": "[SR] Low Blood Glucose Index (LBGI) - Predicts hypoglycemia risk. <{low} low, {low}-{moderate} moderate, >{moderate} high"
+          "severe": "Озбиљна",
+          "severeTooltip": "Озбиљни хипогликемијски догађаји (испод веома ниског прага)",
+          "nonSevere": "Не-озбиљна",
+          "nonSevereTooltip": "Неозбиљни хипогликемијски догађаји (испод ниског прага)",
+          "lowest": "Најнижа",
+          "lowestTooltip": "Најнижа вредност глукозе током хипогликемије",
+          "longest": "Најдужа",
+          "longestTooltip": "Трајање најдужег хипогликемијског догађаја",
+          "totalTime": "Укупно време",
+          "totalTimeTooltip": "Укупно време проведено у хипогликемији",
+          "lbgi": "LBGI",
+          "lbgiTooltip": "Индекс ниске глукозе у крви (LBGI) - Предвиђа ризик од хипогликемије. <{low} низак, {low}-{moderate} умерен, >{moderate} висок"
         },
         "maxGlucoseSelector": {
-          "ariaLabel": "[SR] Max glucose display"
+          "ariaLabel": "Максимални приказ глукозе"
         },
         "chart": {
           "legend": {
-            "glucose": "[SR] Glucose",
-            "nadir": "[SR] Nadir (Lowest Point)",
-            "lowThreshold": "[SR] Low Threshold ({value} {unit})",
-            "veryLowThreshold": "[SR] Very Low ({value} {unit})"
+            "glucose": "Глукоза",
+            "nadir": "Надир (најнижа тачка)",
+            "lowThreshold": "Ниски праг ({value} {unit})",
+            "veryLowThreshold": "Веома ниски ({value} {unit})"
           }
         },
         "aiAnalysis": {
-          "noHypos": "[SR] 🎉 Excellent! No hypoglycemic events detected on {date}. Keep up the great glucose management!",
-          "hyposDetected": "[SR] {count} hypoglycemic event(s) detected on {date}{severe}.",
-          "hyposDetectedSevere": "[SR]  ({severeCount} severe)"
+          "noHypos": "🎉 Одлично! Нису откривени хипогликемијски догађаји на {date}. Наставите са одличном контролом глукозе!",
+          "hyposDetected": "{count} хипогликемијски догађај(а) откривено на {date}{severe}.",
+          "hyposDetectedSevere": " ({severeCount} озбиљна)"
         },
-        "analyzeButton": "[SR] Analyze with AI",
-        "analyzingButton": "[SR] Analyzing...",
-        "reanalyzeButton": "[SR] Re-analyze",
-        "waitMessage": "[SR] Please wait {seconds} second(s) before requesting new analysis...",
-        "errorPrefix": "[SR] Error:",
-        "errorFailed": "[SR] Failed to get AI response",
-        "errorUnexpected": "[SR] An unexpected error occurred",
-        "accordionTitle": "[SR] View AI Prompt"
+        "analyzeButton": "Анализирај са AI",
+        "analyzingButton": "Анализирам...",
+        "reanalyzeButton": "Поново анализирај",
+        "waitMessage": "Молимо сачекајте {seconds} секунд(и) пре него што затражите нову анализу...",
+        "errorPrefix": "Грешка:",
+        "errorFailed": "Неуспело добијање AI одговора",
+        "errorUnexpected": "Догодила се неочекивана грешка",
+        "accordionTitle": "Прикажи AI упит"
       }
     }
   }

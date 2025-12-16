@@ -62,7 +62,7 @@ import {
   calculateLBGI,
 } from '../../../utils/data';
 import { formatNumber } from '../../../utils/formatting/formatters';
-import { callAIWithRouting, getActiveProvider } from '../../../utils/api';
+import { callAIWithRouting } from '../../../utils/api';
 import { generateHyposPrompt } from '../../../features/aiAnalysis/prompts';
 import { convertHypoEventsToCSV, convertHypoSummariesToCSV } from '../../../utils/data';
 import { base64Encode } from '../../../utils/formatting';
@@ -114,18 +114,17 @@ interface HypoSectionProps {
   maxGlucose?: number;
   /** Whether to show day/night shading on chart */
   showDayNightShading: boolean;
-  // AI analysis props
+  // AI analysis props (simplified - following TimeInRangeCard pattern)
   /** Current date being displayed (ISO format) */
   currentDate?: string;
   /** Glucose readings for LBGI calculation */
   currentGlucoseReadings?: GlucoseReading[];
+  /** Whether an API key is available */
+  hasApiKey?: boolean;
   /** Selected AI provider */
   activeProvider?: AIProvider | null;
-  /** API keys for different providers */
-  perplexityApiKey?: string;
-  geminiApiKey?: string;
-  grokApiKey?: string;
-  deepseekApiKey?: string;
+  /** API key for the active provider */
+  apiKey?: string;
   /** Language for AI responses */
   responseLanguage?: ResponseLanguage;
   /** Whether user is a Pro user */
@@ -159,11 +158,9 @@ export function HypoSection({
   showDayNightShading,
   currentDate,
   currentGlucoseReadings = [],
+  hasApiKey = false,
   activeProvider = null,
-  perplexityApiKey = '',
-  geminiApiKey = '',
-  grokApiKey = '',
-  deepseekApiKey = '',
+  apiKey = '',
   responseLanguage = 'english',
   isProUser = false,
   idToken = null,
@@ -186,15 +183,6 @@ export function HypoSection({
   const maxGlucose = glucoseUnit === 'mg/dL' 
     ? (maxGlucoseOption === '16' ? 288 : 396)
     : (maxGlucoseOption === '16' ? 16 : 22);
-  
-  // Determine if API key is available using existing utility
-  const hasApiKey = getActiveProvider(
-    activeProvider,
-    perplexityApiKey,
-    geminiApiKey,
-    grokApiKey,
-    deepseekApiKey
-  ) !== null;
   
   // AI analysis state
   const {
@@ -219,21 +207,6 @@ export function HypoSection({
       setIsResponseExpanded(true);
     }
   }, [response, analyzing]);
-  
-  /**
-   * Get API key for the active provider
-   * Reuses provider selection logic
-   */
-  const getApiKeyForProvider = (): string => {
-    if (!activeProvider) return '';
-    switch (activeProvider) {
-      case 'perplexity': return perplexityApiKey;
-      case 'grok': return grokApiKey;
-      case 'deepseek': return deepseekApiKey;
-      case 'gemini': return geminiApiKey;
-      default: return '';
-    }
-  };
   
   /**
    * Get button text based on current state
@@ -297,9 +270,9 @@ export function HypoSection({
         promptProvider
       );
       
-      // Call the AI API with routing (handles Pro vs client-side)
+      // Call the AI API with routing (handles Pro vs client-side) - use apiKey prop directly
       const result = await callAIWithRouting(activeProvider, prompt, {
-        apiKey: getApiKeyForProvider(),
+        apiKey,
         idToken: idToken ?? undefined,
         isProUser,
         useProKeys,
