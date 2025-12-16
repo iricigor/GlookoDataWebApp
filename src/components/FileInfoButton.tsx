@@ -29,6 +29,12 @@ const useStyles = makeStyles({
   buttonIcon: {
     marginLeft: '4px',
   },
+  dialogSurface: {
+    maxWidth: '500px',
+    position: 'fixed',
+    top: '80px',
+    right: '24px',
+  },
 });
 
 interface FileInfoButtonProps {
@@ -61,7 +67,7 @@ export function FileInfoButton({ selectedFile }: FileInfoButtonProps) {
           <ChevronDownRegular className={styles.buttonIcon} />
         </Button>
       </DialogTrigger>
-      <DialogSurface>
+      <DialogSurface className={styles.dialogSurface}>
         <DialogBody>
           <DialogTitle>{t('common:common.fileInfo')}</DialogTitle>
           <DialogContent className={styles.dialogContent}>
