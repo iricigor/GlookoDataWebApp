@@ -58,6 +58,10 @@ const useStyles = makeStyles({
     ...shorthands.gap('8px'),
     flex: '1',
     minWidth: '0',
+    minHeight: '32px',
+    maxHeight: '32px',
+    ...shorthands.padding('4px', '12px'),
+    whiteSpace: 'nowrap',
   },
   googleButton: {
     backgroundColor: '#fff',
