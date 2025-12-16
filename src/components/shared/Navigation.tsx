@@ -60,6 +60,15 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     ...shorthands.gap('0px'),
+    cursor: 'pointer',
+    '@media (min-width: 769px)': {
+      ':hover': {
+        opacity: 0.8,
+      },
+    },
+    '@media (max-width: 768px)': {
+      cursor: 'default',
+    },
   },
   brandTop: {
     display: 'flex',
@@ -125,6 +134,11 @@ const useStyles = makeStyles({
     ...shorthands.gap('8px'),
     alignItems: 'center',
     '@media (max-width: 768px)': {
+      display: 'none',
+    },
+  },
+  desktopHidden: {
+    '@media (min-width: 769px)': {
       display: 'none',
     },
   },
@@ -366,7 +380,25 @@ export function Navigation({
             </Menu>
           </div>
           
-          <div className={styles.brand}>
+          <div 
+            className={styles.brand}
+            onClick={() => {
+              // Only navigate on desktop (non-mobile)
+              if (window.innerWidth > 768) {
+                onNavigate('home');
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              // Only navigate on desktop (non-mobile)
+              if (window.innerWidth > 768 && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                onNavigate('home');
+              }
+            }}
+            aria-label={t('common:brandName')}
+          >
             <div className={styles.brandTop}>
               <img 
                 src="/favicon/favicon.svg" 
@@ -401,6 +433,7 @@ export function Navigation({
                 appearance={currentPage === item.page ? 'primary' : 'subtle'}
                 icon={item.icon}
                 onClick={() => onNavigate(item.page)}
+                className={item.page === 'home' ? styles.desktopHidden : undefined}
               >
                 {item.label}
               </Button>
