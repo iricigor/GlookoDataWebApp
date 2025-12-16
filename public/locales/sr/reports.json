@@ -29,45 +29,45 @@
     },
     "dailyBG": {
       "hypoAnalysis": {
-        "title": "Анализа хипогликемије",
+        "title": "Analiza hipoglikemije",
         "stats": {
-          "severe": "Озбиљна",
-          "severeTooltip": "Озбиљни хипогликемијски догађаји (испод веома ниског прага)",
-          "nonSevere": "Не-озбиљна",
-          "nonSevereTooltip": "Неозбиљни хипогликемијски догађаји (испод ниског прага)",
-          "lowest": "Најнижа",
-          "lowestTooltip": "Најнижа вредност глукозе током хипогликемије",
-          "longest": "Најдужа",
-          "longestTooltip": "Трајање најдужег хипогликемијског догађаја",
-          "totalTime": "Укупно време",
-          "totalTimeTooltip": "Укупно време проведено у хипогликемији",
+          "severe": "Ozbiljna",
+          "severeTooltip": "Ozbiljni hipoglikemijski dogadjaji (ispod veoma niskog praga)",
+          "nonSevere": "Neozbiljna",
+          "nonSevereTooltip": "Neozbiljni hipoglikemijski dogadjaji (ispod niskog praga)",
+          "lowest": "Najniza",
+          "lowestTooltip": "Najniza vrednost glukoze tokom hipoglikemije",
+          "longest": "Najduza",
+          "longestTooltip": "Trajanje najduzeg hipoglikemijskog dogadjaja",
+          "totalTime": "Ukupno vreme",
+          "totalTimeTooltip": "Ukupno vreme provedeno u hipoglikemiji",
           "lbgi": "LBGI",
-          "lbgiTooltip": "Индекс ниске глукозе у крви (LBGI) - Предвиђа ризик од хипогликемије. <{low} низак, {low}-{moderate} умерен, >{moderate} висок"
+          "lbgiTooltip": "Indeks niske glukoze u krvi (LBGI) - Predvidja rizik od hipoglikemije. <{low} nizak, {low}-{moderate} umeren, >{moderate} visok"
         },
         "maxGlucoseSelector": {
-          "ariaLabel": "Максимални приказ глукозе"
+          "ariaLabel": "Maksimalni prikaz glukoze"
         },
         "chart": {
           "legend": {
-            "glucose": "Глукоза",
-            "nadir": "Надир (најнижа тачка)",
-            "lowThreshold": "Ниски праг ({value} {unit})",
-            "veryLowThreshold": "Веома ниски ({value} {unit})"
+            "glucose": "Glukoza",
+            "nadir": "Nadir (najniza tacka)",
+            "lowThreshold": "Niski prag ({value} {unit})",
+            "veryLowThreshold": "Veoma niski ({value} {unit})"
           }
         },
         "aiAnalysis": {
-          "noHypos": "🎉 Одлично! Нису откривени хипогликемијски догађаји на {date}. Наставите са одличном контролом глукозе!",
-          "hyposDetected": "{count} хипогликемијски догађај(а) откривено на {date}{severe}.",
-          "hyposDetectedSevere": " ({severeCount} озбиљна)"
+          "noHypos": "🎉 Odlicno! Nisu otkriveni hipoglikemijski dogadjaji na {date}. Nastavite sa odlicnom kontrolom glukoze!",
+          "hyposDetected": "{count} hipoglikemijski dogadjaj(a) otkriveno na {date}{severe}.",
+          "hyposDetectedSevere": " ({severeCount} ozbiljna)"
         },
-        "analyzeButton": "Анализирај са AI",
-        "analyzingButton": "Анализирам...",
-        "reanalyzeButton": "Поново анализирај",
-        "waitMessage": "Молимо сачекајте {seconds} секунд(и) пре него што затражите нову анализу...",
-        "errorPrefix": "Грешка:",
-        "errorFailed": "Неуспело добијање AI одговора",
-        "errorUnexpected": "Догодила се неочекивана грешка",
-        "accordionTitle": "Прикажи AI упит"
+        "analyzeButton": "Analiziraj sa AI",
+        "analyzingButton": "Analiziram...",
+        "reanalyzeButton": "Ponovo analiziraj",
+        "waitMessage": "Molimo sacekajte {seconds} sekund(i) pre nego sto zatrazite novu analizu...",
+        "errorPrefix": "Greska:",
+        "errorFailed": "Neuspelo dobijanje AI odgovora",
+        "errorUnexpected": "Dogodila se neocekivana greska",
+        "accordionTitle": "Prikazi AI upit"
       }
     }
   }
