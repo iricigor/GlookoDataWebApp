@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>838 Add 50% transparent border to sticky filter sections</summary>
+
+[#838](../../pull/838) Add 50% transparent border to sticky filter sections
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>833 Add time-based unit display for Time in Range statistics</summary>
 
 [#833](../../pull/833) Add time-based unit display for Time in Range statistics
