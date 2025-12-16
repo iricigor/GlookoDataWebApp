@@ -108,13 +108,12 @@ interface HypoSectionProps {
 }
 
 /**
- * Render the hypoglycemia analysis section
- * 
- * Shows summary statistics, chart, and AI analysis capabilities for a single day's
- * hypoglycemia events. Reuses existing utilities and follows DRY principles.
- * 
+ * Renders the hypoglycemia analysis section for a single day.
+ *
+ * Displays summary statistics, an interactive glucose chart (with day/night shading, thresholds, nadir markers, and max-glucose control), and an optional AI analysis panel when enabled.
+ *
  * @param props - Component props (see HypoSectionProps)
- * @returns Rendered hypoglycemia section
+ * @returns The rendered hypoglycemia analysis section
  */
 export function HypoSection({
   styles,

@@ -53,16 +53,23 @@ import { GlucoseSection, RoCSection, HypoSection, IOBSection } from './sections'
 import type { DailyBGReportProps, TimelineDataPoint } from './types';
 
 /**
- * Render the daily blood glucose report view for a selected file and date.
+ * Render a composed daily report combining glucose, rate-of-change, hypoglycemia, insulin delivery, and IOB views for a selected file and date.
  *
- * Renders combined visualizations and summaries for glucose (CGM or BG), rate of change (RoC),
- * hypoglycemia events, insulin delivery (timeline and summary), and hourly IOB.
- *
- * @param selectedFile - The currently selected file containing glucose and insulin data; if undefined, the component prompts to upload/select a file
+ * @param selectedFile - The currently selected file containing glucose and insulin data; if undefined the component prompts the user to upload/select a file
  * @param glucoseUnit - Display unit for glucose values (`'mg/dL'` or `'mmol/L'`)
- * @param insulinDuration - Duration in hours used when computing hourly IOB (defaults to 5)
- * @param showDayNightShading - Whether to display day/night background shading on charts
- * @returns The JSX element containing the composed daily report UI
+ * @param insulinDuration - Hours used when computing hourly IOB
+ * @param showDayNightShading - Whether charts should display day/night background shading
+ * @param showGeekStats - Whether to enable provider-driven "geek" statistics in the Hypo section
+ * @param perplexityApiKey - API key for the Perplexity provider (optional)
+ * @param geminiApiKey - API key for the Gemini provider (optional)
+ * @param grokApiKey - API key for the Grok provider (optional)
+ * @param deepseekApiKey - API key for the Deepseek provider (optional)
+ * @param selectedProvider - Identifier of the chosen AI/provider to use for geek stats (may be null)
+ * @param responseLanguage - Language identifier to request provider responses in
+ * @param isProUser - Whether the current user has pro features enabled (affects provider/key selection)
+ * @param idToken - Optional identity token passed to downstream sections when contacting provider APIs
+ * @param useProKeys - Whether to prefer pro API keys over user-provided keys when resolving an active provider key
+ * @returns The composed daily report UI as a JSX element
  */
 export function DailyBGReport({ 
   selectedFile, 

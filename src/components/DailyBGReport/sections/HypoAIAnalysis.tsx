@@ -48,7 +48,11 @@ interface HypoAIAnalysisProps {
 }
 
 /**
- * Renders AI analysis section for hypoglycemia
+ * Render the AI-driven hypoglycemia analysis UI, including the analysis control, response display, cooldown and error messages, and an optional "geek stats" prompt inspector.
+ *
+ * The component shows a summary of detected hypos for the provided date, a primary button to start or re-run analysis (with Pro-key indicator when applicable), an expandable AI response rendered as Markdown, localized cooldown and error messages, and—when enabled—an accordion containing the generated AI prompt for debugging.
+ *
+ * @returns The component's UI as a React element.
  */
 export function HypoAIAnalysis({
   hypoStats,
