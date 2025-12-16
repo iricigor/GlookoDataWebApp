@@ -194,7 +194,7 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
                 {t('loginDialog.cancel')}
               </Button>
               <Button 
-                appearance="primary" 
+                appearance="secondary" 
                 onClick={handleLogin}
                 disabled={loading}
                 className={styles.baseButton}
