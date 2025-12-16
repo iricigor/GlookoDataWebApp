@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>840 Move Home navigation to app brand, hide from desktop nav bar</summary>
+
+[#840](../../pull/840) Move Home navigation to app brand, hide from desktop nav bar
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>835 Extract promptProvider logic to custom hook for improved maintainability</summary>
 
 [#835](../../pull/835) Extract promptProvider logic to custom hook for improved maintainability
