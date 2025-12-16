@@ -41,15 +41,38 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     gap: '16px',
   },
+  buttonGroup: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '12px',
+    width: '100%',
+    '@media (max-width: 768px)': {
+      flexDirection: 'column',
+    },
+  },
+  actionButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shorthands.gap('8px'),
+    flex: '1',
+    minWidth: '0',
+  },
   microsoftButton: {
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'center',
     ...shorthands.gap('8px'),
+    flex: '1',
+    minWidth: '0',
   },
   googleButton: {
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'center',
     ...shorthands.gap('8px'),
+    flex: '1',
+    minWidth: '0',
     backgroundColor: '#fff',
     color: '#3c4043',
     ...shorthands.border('1px', 'solid', '#dadce0'),
@@ -59,12 +82,6 @@ const useStyles = makeStyles({
     ':active': {
       backgroundColor: '#f1f3f4',
     },
-  },
-  buttonGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    width: '100%',
   },
   loginButtonText: {
     '@media (max-width: 768px)': {
@@ -146,6 +163,16 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
     }, 3000);
   };
 
+  const handleCancel = () => {
+    setOpen(false);
+    setShowGoogleComingSoon(false);
+    setError(null);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={(_, data) => setOpen(data.open)}>
       <DialogTrigger disableButtonEnhancement>
@@ -166,10 +193,15 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
             )}
           </DialogContent>
           <DialogActions>
-            <DialogTrigger disableButtonEnhancement>
-              <Button appearance="secondary" disabled={loading}>{t('loginDialog.cancel')}</Button>
-            </DialogTrigger>
             <div className={styles.buttonGroup}>
+              <Button 
+                appearance="secondary" 
+                disabled={loading}
+                onClick={handleCancel}
+                className={styles.actionButton}
+              >
+                {t('loginDialog.cancel')}
+              </Button>
               <Button 
                 appearance="primary" 
                 onClick={handleLogin}
