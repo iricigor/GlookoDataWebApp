@@ -54,6 +54,8 @@ export const useBGOverviewStyles = makeStyles({
     paddingBottom: '12px',
     backgroundColor: tokens.colorNeutralBackground1,
     boxShadow: tokens.shadow8,
+    // Final border with 50% transparency as per feature request
+    ...shorthands.borderBottom('1px', 'solid', 'rgba(128, 128, 128, 0.5)'),
     '@media (max-width: 767px)': {
       marginLeft: '-16px',
       marginRight: '-16px',
