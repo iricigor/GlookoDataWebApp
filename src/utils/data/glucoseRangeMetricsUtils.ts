@@ -8,7 +8,12 @@ import type {
   GlucoseThresholds,
 } from '../../types';
 import { MMOL_TO_MGDL } from './glucoseUnitUtils';
-import { categorizeGlucose, UNICORN_TOLERANCE_MMOL, UNICORN_TOLERANCE_100_MGDL, UNICORN_100_MGDL_IN_MMOL } from './glucoseRangeCoreUtils';
+import {
+  categorizeGlucose,
+  UNICORN_TOLERANCE_MMOL,
+  UNICORN_TOLERANCE_100_MGDL,
+  UNICORN_100_MGDL_IN_MMOL,
+} from './glucoseRangeCoreUtils';
 import { formatDate } from './glucoseRangeGroupingUtils';
 
 /**

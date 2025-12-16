@@ -1,6 +1,6 @@
 /**
  * Unit tests for glucose range utilities
- * 
+ *
  * This file maintains backward compatibility by re-importing and re-testing from the split modules.
  * The tests have been split into smaller, focused test files:
  * - glucoseRangeCoreUtils.test.ts: Tests for core categorization and stats

@@ -144,7 +144,7 @@ export function convertPercentageToTime(
  * Calculate glucose range statistics from readings
  * 
  * @param readings - Array of glucose readings
- * @param thresholds - Glucose thresholds in mg/dL
+ * @param thresholds - Glucose thresholds in mmol/L
  * @param mode - 3 or 5 category mode
  * @returns Statistics object
  */
