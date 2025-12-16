@@ -2,7 +2,6 @@
  * Tab components for AI Analysis page
  */
 
-export { FileInfoTab } from './FileInfoTab';
 export { TimeInRangeTab } from './TimeInRangeTab';
 export { GlucoseInsulinTab } from './GlucoseInsulinTab';
 export { MealTimingTab } from './MealTimingTab';

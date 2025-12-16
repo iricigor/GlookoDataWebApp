@@ -19,6 +19,13 @@ export const useAIAnalysisStyles = makeStyles({
   },
   header: {
     marginBottom: '24px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    ...shorthands.gap('16px'),
+  },
+  headerContent: {
+    flex: 1,
   },
   title: {
     fontSize: tokens.fontSizeHero800,

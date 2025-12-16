@@ -20,8 +20,8 @@ import { useGlucoseThresholds } from '../../hooks/useGlucoseThresholds';
 import { getActiveProvider } from '../../utils/api';
 import { useAIAnalysisStyles } from './styles';
 import type { AIAnalysisProps, MealTimingDatasets } from './types';
+import { FileInfoButton } from '../../components/FileInfoButton';
 import {
-  FileInfoTab,
   TimeInRangeTab,
   GlucoseInsulinTab,
   MealTimingTab,
@@ -70,7 +70,7 @@ export function AIAnalysis({
   const styles = useAIAnalysisStyles();
   const { t } = useTranslation('aiAnalysis');
   const { thresholds } = useGlucoseThresholds();
-  const [selectedTab, setSelectedTab] = useState<string>('fileInfo');
+  const [selectedTab, setSelectedTab] = useState<string>('timeInRange');
   
   const [inRangePercentage, setInRangePercentage] = useState<number | null>(null);
   const [glucoseStats, setGlucoseStats] = useState<GlucoseRangeStats | null>(null);
@@ -197,9 +197,6 @@ export function AIAnalysis({
 
   const renderTabContent = () => {
     switch (selectedTab) {
-      case 'fileInfo':
-        return <FileInfoTab selectedFile={selectedFile} />;
-      
       case 'timeInRange':
         return (
           <TimeInRangeTab
@@ -309,10 +306,13 @@ export function AIAnalysis({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Text className={styles.title}>{t('aiAnalysis.title')}</Text>
-        <Text className={styles.description}>
-          {t('aiAnalysis.description')}
-        </Text>
+        <div className={styles.headerContent}>
+          <Text className={styles.title}>{t('aiAnalysis.title')}</Text>
+          <Text className={styles.description}>
+            {t('aiAnalysis.description')}
+          </Text>
+        </div>
+        {selectedFile && <FileInfoButton selectedFile={selectedFile} />}
       </div>
 
       {!selectedFile ? (
@@ -348,7 +348,6 @@ export function AIAnalysis({
             appearance="subtle"
             size="large"
           >
-            <Tab value="fileInfo">{t('aiAnalysis.tabs.fileInfo')}</Tab>
             <Tab value="timeInRange">{t('aiAnalysis.tabs.timeInRange')}</Tab>
             <Tab value="glucoseInsulin">{t('aiAnalysis.tabs.glucoseInsulin')}</Tab>
             <Tab value="mealTiming">{t('aiAnalysis.tabs.mealTiming')}</Tab>
@@ -365,7 +364,6 @@ export function AIAnalysis({
               className={styles.tabListVertical}
               appearance="subtle"
             >
-              <Tab value="fileInfo">{t('aiAnalysis.tabs.fileInfo')}</Tab>
               <Tab value="timeInRange">{t('aiAnalysis.tabs.timeInRange')}</Tab>
               <Tab value="glucoseInsulin">{t('aiAnalysis.tabs.glucoseInsulin')}</Tab>
               <Tab value="mealTiming">{t('aiAnalysis.tabs.mealTiming')}</Tab>
