@@ -26,6 +26,49 @@
           "time": "24h"
         }
       }
+    },
+    "dailyBG": {
+      "hypoAnalysis": {
+        "title": "[SR] Hypoglycemia Analysis",
+        "stats": {
+          "severe": "[SR] Severe",
+          "severeTooltip": "[SR] Severe hypoglycemic events (below very low threshold)",
+          "nonSevere": "[SR] Non-Severe",
+          "nonSevereTooltip": "[SR] Non-severe hypoglycemic events (below low threshold)",
+          "lowest": "[SR] Lowest",
+          "lowestTooltip": "[SR] Lowest glucose value during hypoglycemia",
+          "longest": "[SR] Longest",
+          "longestTooltip": "[SR] Duration of longest hypoglycemic event",
+          "totalTime": "[SR] Total Time",
+          "totalTimeTooltip": "[SR] Total time spent in hypoglycemia",
+          "lbgi": "[SR] LBGI",
+          "lbgiTooltip": "[SR] Low Blood Glucose Index (LBGI) - Predicts hypoglycemia risk. <{low} low, {low}-{moderate} moderate, >{moderate} high"
+        },
+        "maxGlucoseSelector": {
+          "ariaLabel": "[SR] Max glucose display"
+        },
+        "chart": {
+          "legend": {
+            "glucose": "[SR] Glucose",
+            "nadir": "[SR] Nadir (Lowest Point)",
+            "lowThreshold": "[SR] Low Threshold ({value} {unit})",
+            "veryLowThreshold": "[SR] Very Low ({value} {unit})"
+          }
+        },
+        "aiAnalysis": {
+          "noHypos": "[SR] 🎉 Excellent! No hypoglycemic events detected on {date}. Keep up the great glucose management!",
+          "hyposDetected": "[SR] {count} hypoglycemic event(s) detected on {date}{severe}.",
+          "hyposDetectedSevere": "[SR]  ({severeCount} severe)"
+        },
+        "analyzeButton": "[SR] Analyze with AI",
+        "analyzingButton": "[SR] Analyzing...",
+        "reanalyzeButton": "[SR] Re-analyze",
+        "waitMessage": "[SR] Please wait {seconds} second(s) before requesting new analysis...",
+        "errorPrefix": "[SR] Error:",
+        "errorFailed": "[SR] Failed to get AI response",
+        "errorUnexpected": "[SR] An unexpected error occurred",
+        "accordionTitle": "[SR] View AI Prompt"
+      }
     }
   }
 }

@@ -26,6 +26,49 @@
           "time": "24h"
         }
       }
+    },
+    "dailyBG": {
+      "hypoAnalysis": {
+        "title": "Hypoglykämie-Analyse",
+        "stats": {
+          "severe": "Schwer",
+          "severeTooltip": "Schwere hypoglykämische Ereignisse (unter sehr niedriger Schwelle)",
+          "nonSevere": "Nicht-schwer",
+          "nonSevereTooltip": "Nicht-schwere hypoglykämische Ereignisse (unter niedriger Schwelle)",
+          "lowest": "Niedrigste",
+          "lowestTooltip": "Niedrigster Glukosewert während Hypoglykämie",
+          "longest": "Längste",
+          "longestTooltip": "Dauer des längsten hypoglykämischen Ereignisses",
+          "totalTime": "Gesamtzeit",
+          "totalTimeTooltip": "Gesamtzeit in Hypoglykämie",
+          "lbgi": "LBGI",
+          "lbgiTooltip": "Low Blood Glucose Index (LBGI) - Sagt Hypoglykämierisiko voraus. <{low} niedrig, {low}-{moderate} mäßig, >{moderate} hoch"
+        },
+        "maxGlucoseSelector": {
+          "ariaLabel": "Maximale Glukoseanzeige"
+        },
+        "chart": {
+          "legend": {
+            "glucose": "Glukose",
+            "nadir": "Nadir (Tiefster Punkt)",
+            "lowThreshold": "Niedrige Schwelle ({value} {unit})",
+            "veryLowThreshold": "Sehr niedrig ({value} {unit})"
+          }
+        },
+        "aiAnalysis": {
+          "noHypos": "🎉 Ausgezeichnet! Keine hypoglykämischen Ereignisse am {date} erkannt. Weiter so mit dem guten Glukosemanagement!",
+          "hyposDetected": "{count} hypoglykämische(s) Ereignis(se) am {date} erkannt{severe}.",
+          "hyposDetectedSevere": " ({severeCount} schwer)"
+        },
+        "analyzeButton": "Mit KI analysieren",
+        "analyzingButton": "Analysiere...",
+        "reanalyzeButton": "Erneut analysieren",
+        "waitMessage": "Bitte warten Sie {seconds} Sekunde(n), bevor Sie eine neue Analyse anfordern...",
+        "errorPrefix": "Fehler:",
+        "errorFailed": "KI-Antwort konnte nicht abgerufen werden",
+        "errorUnexpected": "Ein unerwarteter Fehler ist aufgetreten",
+        "accordionTitle": "KI-Prompt anzeigen"
+      }
     }
   }
 }

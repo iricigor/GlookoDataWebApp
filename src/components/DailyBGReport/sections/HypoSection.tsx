@@ -1,7 +1,15 @@
 /**
  * Hypoglycemia Section component for DailyBGReport
- * Displays hypoglycemia statistics and chart with nadir markers
- * Enhanced with AI analysis capabilities
+ * 
+ * Displays hypoglycemia statistics and chart with nadir markers.
+ * Enhanced with AI analysis capabilities for single-day hypo insights.
+ * 
+ * Features:
+ * - 6 summary stat cards (Severe, Non-Severe, Lowest, Longest, Total Time, LBGI)
+ * - Interactive glucose chart with configurable max range (16/22 mmol/L)
+ * - AI-powered analysis with Pro user support
+ * - Collapsible AI response display
+ * - Geek stats accordion for prompt inspection (when enabled)
  */
 
 import { useState, useEffect } from 'react';
@@ -41,6 +49,7 @@ import {
   ReferenceLine,
   ReferenceArea,
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 import type { GlucoseUnit, GlucoseThresholds, GlucoseReading } from '../../../types';
 import type { HypoStats } from '../../../utils/data/hypoDataUtils';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
@@ -53,7 +62,7 @@ import {
   calculateLBGI,
 } from '../../../utils/data';
 import { formatNumber } from '../../../utils/formatting/formatters';
-import { callAIWithRouting } from '../../../utils/api';
+import { callAIWithRouting, getActiveProvider } from '../../../utils/api';
 import { generateHyposPrompt } from '../../../features/aiAnalysis/prompts';
 import { convertHypoEventsToCSV, convertHypoSummariesToCSV } from '../../../utils/data';
 import { base64Encode } from '../../../utils/formatting';
@@ -62,21 +71,25 @@ import { usePromptProvider } from '../../../hooks/usePromptProvider';
 import { MarkdownRenderer, SegmentedControl } from '../../shared';
 import { HyposTooltip } from '../tooltips';
 import { formatXAxis, HYPO_CHART_COLORS } from '../constants';
+import { LBGI_THRESHOLDS, getLBGIInterpretation } from '../../HyposReport/types';
 import type { useStyles } from '../styles';
-
-// LBGI risk level thresholds
-const LBGI_THRESHOLDS = {
-  low: 2.5,
-  moderate: 5.0,
-} as const;
 
 type MaxGlucoseOption = '16' | '22';
 
+/**
+ * Props for the HypoSection component
+ * Displays hypoglycemia statistics, chart, and optional AI analysis for a single day
+ */
 interface HypoSectionProps {
+  /** Style object from useStyles hook */
   styles: ReturnType<typeof useStyles>;
+  /** Unit for glucose display (mg/dL or mmol/L) */
   glucoseUnit: GlucoseUnit;
+  /** Glucose thresholds for hypo detection */
   thresholds: GlucoseThresholds;
+  /** Hypoglycemia statistics for the current day */
   hypoStats: HypoStats;
+  /** Chart data points for visualization */
   hyposChartData: Array<{
     time: string;
     timeMinutes: number;
@@ -87,7 +100,9 @@ interface HypoSectionProps {
     color: string;
     index: number;
   }>;
+  /** Gradient stops for glucose line coloring */
   hyposGradientStops: Array<{ offset: string; color: string }>;
+  /** Nadir (lowest) points to mark on chart */
   nadirPoints: Array<{
     timeDecimal: number;
     value: number;
@@ -95,26 +110,42 @@ interface HypoSectionProps {
     nadir: number;
     isSevere: boolean;
   }>;
-  maxGlucose?: number; // Optional, not used internally
+  /** Optional max glucose (not used internally) */
+  maxGlucose?: number;
+  /** Whether to show day/night shading on chart */
   showDayNightShading: boolean;
-  // Additional props for AI analysis
+  // AI analysis props
+  /** Current date being displayed (ISO format) */
   currentDate?: string;
+  /** Glucose readings for LBGI calculation */
   currentGlucoseReadings?: GlucoseReading[];
-  hasApiKey?: boolean;
+  /** Selected AI provider */
   activeProvider?: AIProvider | null;
+  /** API keys for different providers */
   perplexityApiKey?: string;
   geminiApiKey?: string;
   grokApiKey?: string;
   deepseekApiKey?: string;
+  /** Language for AI responses */
   responseLanguage?: ResponseLanguage;
+  /** Whether user is a Pro user */
   isProUser?: boolean;
+  /** Pro user ID token */
   idToken?: string | null;
+  /** Whether to use Pro backend keys */
   useProKeys?: boolean;
+  /** Whether to show geek stats accordion */
   showGeekStats?: boolean;
 }
 
 /**
- * Render the hypoglycemia analysis section with summary statistic cards, chart, and AI analysis.
+ * Render the hypoglycemia analysis section
+ * 
+ * Shows summary statistics, chart, and AI analysis capabilities for a single day's
+ * hypoglycemia events. Reuses existing utilities and follows DRY principles.
+ * 
+ * @param props - Component props (see HypoSectionProps)
+ * @returns Rendered hypoglycemia section
  */
 export function HypoSection({
   styles,
@@ -128,7 +159,6 @@ export function HypoSection({
   showDayNightShading,
   currentDate,
   currentGlucoseReadings = [],
-  hasApiKey = false,
   activeProvider = null,
   perplexityApiKey = '',
   geminiApiKey = '',
@@ -140,27 +170,31 @@ export function HypoSection({
   useProKeys = false,
   showGeekStats = false,
 }: HypoSectionProps) {
+  const { t } = useTranslation('reports');
+  
   // State for max glucose control (16 or 22 mmol/L)
   const [maxGlucoseOption, setMaxGlucoseOption] = useState<MaxGlucoseOption>('22');
   const [isResponseExpanded, setIsResponseExpanded] = useState(true);
   
-  // Calculate LBGI for current day's readings
+  // Calculate LBGI for current day's readings using existing utility
   const lbgi = currentGlucoseReadings.length > 0 ? calculateLBGI(currentGlucoseReadings) : null;
   
-  // Determine LBGI risk level
-  const getLBGIRiskLevel = (value: number | null): 'low' | 'moderate' | 'high' => {
-    if (value === null) return 'low';
-    if (value < LBGI_THRESHOLDS.low) return 'low';
-    if (value < LBGI_THRESHOLDS.moderate) return 'moderate';
-    return 'high';
-  };
-  
-  const lbgiRiskLevel = getLBGIRiskLevel(lbgi);
+  // Get LBGI risk interpretation using shared function
+  const lbgiInterpretation = lbgi !== null ? getLBGIInterpretation(lbgi) : null;
   
   // Calculate actual maxGlucose based on selection
   const maxGlucose = glucoseUnit === 'mg/dL' 
     ? (maxGlucoseOption === '16' ? 288 : 396)
     : (maxGlucoseOption === '16' ? 16 : 22);
+  
+  // Determine if API key is available using existing utility
+  const hasApiKey = getActiveProvider(
+    activeProvider,
+    perplexityApiKey,
+    geminiApiKey,
+    grokApiKey,
+    deepseekApiKey
+  ) !== null;
   
   // AI analysis state
   const {
@@ -186,6 +220,41 @@ export function HypoSection({
     }
   }, [response, analyzing]);
   
+  /**
+   * Get API key for the active provider
+   * Reuses provider selection logic
+   */
+  const getApiKeyForProvider = (): string => {
+    if (!activeProvider) return '';
+    switch (activeProvider) {
+      case 'perplexity': return perplexityApiKey;
+      case 'grok': return grokApiKey;
+      case 'deepseek': return deepseekApiKey;
+      case 'gemini': return geminiApiKey;
+      default: return '';
+    }
+  };
+  
+  /**
+   * Get button text based on current state
+   * Adds sparkles (✨) for Pro users using backend keys
+   */
+  const getButtonText = (): string => {
+    const baseText = analyzing
+      ? t('reports.dailyBG.hypoAnalysis.analyzingButton')
+      : response && !analyzing && ready
+      ? t('reports.dailyBG.hypoAnalysis.reanalyzeButton')
+      : t('reports.dailyBG.hypoAnalysis.analyzeButton');
+    
+    // Add sparkles indicator when using Pro backend keys
+    const sparkles = isProUser && useProKeys ? ' ✨' : '';
+    return `${baseText}${sparkles}`;
+  };
+  
+  /**
+   * Handle AI analysis button click
+   * Reuses existing AI infrastructure and data preparation
+   */
   const handleAnalyzeClick = async () => {
     if (!activeProvider || !currentDate) {
       return;
@@ -219,7 +288,7 @@ export function HypoSection({
       const base64EventsData = base64Encode(hypoEventsCSV);
       const base64SummariesData = base64Encode(hypoSummariesCSV);
       
-      // Generate the prompt
+      // Generate the prompt using shared prompt generator
       const prompt = generateHyposPrompt(
         base64EventsData,
         base64SummariesData,
@@ -228,16 +297,9 @@ export function HypoSection({
         promptProvider
       );
       
-      // Get the appropriate API key
-      const apiKey = 
-        activeProvider === 'perplexity' ? perplexityApiKey :
-        activeProvider === 'grok' ? grokApiKey :
-        activeProvider === 'deepseek' ? deepseekApiKey :
-        geminiApiKey;
-      
-      // Call the AI API with routing
+      // Call the AI API with routing (handles Pro vs client-side)
       const result = await callAIWithRouting(activeProvider, prompt, {
-        apiKey,
+        apiKey: getApiKeyForProvider(),
         idToken: idToken ?? undefined,
         isProUser,
         useProKeys,
@@ -246,38 +308,26 @@ export function HypoSection({
       if (result.success && result.content) {
         completeAnalysis(result.content);
       } else {
-        setAnalysisError(result.error || 'Failed to get AI response');
+        setAnalysisError(result.error || t('reports.dailyBG.hypoAnalysis.errorFailed'));
         if (previousResponse) {
           completeAnalysis(previousResponse);
         }
       }
     } catch (err) {
-      setAnalysisError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      setAnalysisError(err instanceof Error ? err.message : t('reports.dailyBG.hypoAnalysis.errorUnexpected'));
       if (previousResponse) {
         completeAnalysis(previousResponse);
       }
     }
   };
   
-  const getButtonText = () => {
-    const baseText = analyzing
-      ? 'Analyzing...'
-      : response && !analyzing && ready
-      ? 'Analyze Again'
-      : 'Analyze with AI';
-    
-    // Add sparkles indicator when using Pro backend keys
-    const sparkles = isProUser && useProKeys ? ' ✨' : '';
-    return `${baseText}${sparkles}`;
-  };
-  
   return (
     <div className={styles.sectionCard}>
-      <Text className={styles.sectionTitle}>Hypoglycemia Analysis</Text>
+      <Text className={styles.sectionTitle}>{t('reports.dailyBG.hypoAnalysis.title')}</Text>
       
-      {/* Hypo Stats Cards - Now 6 cards */}
+      {/* Hypo Stats Cards - 6 cards with localization */}
       <div className={styles.statsRow}>
-        <FluentTooltip content="Severe hypoglycemic events (below very low threshold)" relationship="description">
+        <FluentTooltip content={t('reports.dailyBG.hypoAnalysis.stats.severeTooltip')} relationship="description">
           <Card className={mergeClasses(
             styles.statCard,
             hypoStats.severeCount > 0 ? styles.statCardDanger : styles.statCardSuccess
@@ -287,7 +337,7 @@ export function HypoSection({
               hypoStats.severeCount > 0 ? styles.statIconDanger : styles.statIconSuccess
             )} />
             <div className={styles.statContent}>
-              <Text className={styles.statLabel}>Severe</Text>
+              <Text className={styles.statLabel}>{t('reports.dailyBG.hypoAnalysis.stats.severe')}</Text>
               <div className={styles.statValueRow}>
                 <Text className={styles.statValue}>{hypoStats.severeCount}</Text>
               </div>
@@ -295,7 +345,7 @@ export function HypoSection({
           </Card>
         </FluentTooltip>
         
-        <FluentTooltip content="Non-severe hypoglycemic events (below low threshold)" relationship="description">
+        <FluentTooltip content={t('reports.dailyBG.hypoAnalysis.stats.nonSevereTooltip')} relationship="description">
           <Card className={mergeClasses(
             styles.statCard,
             hypoStats.nonSevereCount > 0 ? styles.statCardWarning : styles.statCardSuccess
@@ -305,7 +355,7 @@ export function HypoSection({
               hypoStats.nonSevereCount > 0 ? styles.statIconWarning : styles.statIconSuccess
             )} />
             <div className={styles.statContent}>
-              <Text className={styles.statLabel}>Non-Severe</Text>
+              <Text className={styles.statLabel}>{t('reports.dailyBG.hypoAnalysis.stats.nonSevere')}</Text>
               <div className={styles.statValueRow}>
                 <Text className={styles.statValue}>{hypoStats.nonSevereCount}</Text>
               </div>
@@ -313,7 +363,7 @@ export function HypoSection({
           </Card>
         </FluentTooltip>
         
-        <FluentTooltip content="Lowest glucose value during hypoglycemia" relationship="description">
+        <FluentTooltip content={t('reports.dailyBG.hypoAnalysis.stats.lowestTooltip')} relationship="description">
           <Card className={mergeClasses(
             styles.statCard,
             hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
@@ -327,7 +377,7 @@ export function HypoSection({
                 : hypoStats.lowestValue !== null ? styles.statIconWarning : styles.statIconSuccess
             )} />
             <div className={styles.statContent}>
-              <Text className={styles.statLabel}>Lowest</Text>
+              <Text className={styles.statLabel}>{t('reports.dailyBG.hypoAnalysis.stats.lowest')}</Text>
               <div className={styles.statValueRow}>
                 <Text className={styles.statValue}>
                   {hypoStats.lowestValue !== null 
@@ -341,8 +391,7 @@ export function HypoSection({
           </Card>
         </FluentTooltip>
         
-        {/* NEW: Longest Duration Card */}
-        <FluentTooltip content="Duration of longest hypoglycemic event" relationship="description">
+        <FluentTooltip content={t('reports.dailyBG.hypoAnalysis.stats.longestTooltip')} relationship="description">
           <Card className={mergeClasses(
             styles.statCard,
             hypoStats.longestDurationMinutes > 0 ? styles.statCardWarning : styles.statCardSuccess
@@ -352,7 +401,7 @@ export function HypoSection({
               hypoStats.longestDurationMinutes > 0 ? styles.statIconWarning : styles.statIconSuccess
             )} />
             <div className={styles.statContent}>
-              <Text className={styles.statLabel}>Longest</Text>
+              <Text className={styles.statLabel}>{t('reports.dailyBG.hypoAnalysis.stats.longest')}</Text>
               <div className={styles.statValueRow}>
                 <Text className={styles.statValue}>
                   {formatHypoDuration(hypoStats.longestDurationMinutes)}
@@ -362,7 +411,7 @@ export function HypoSection({
           </Card>
         </FluentTooltip>
         
-        <FluentTooltip content="Total time spent in hypoglycemia" relationship="description">
+        <FluentTooltip content={t('reports.dailyBG.hypoAnalysis.stats.totalTimeTooltip')} relationship="description">
           <Card className={mergeClasses(
             styles.statCard,
             hypoStats.totalDurationMinutes > 0 ? styles.statCardWarning : styles.statCardSuccess
@@ -372,7 +421,7 @@ export function HypoSection({
               hypoStats.totalDurationMinutes > 0 ? styles.statIconWarning : styles.statIconSuccess
             )} />
             <div className={styles.statContent}>
-              <Text className={styles.statLabel}>Total Time</Text>
+              <Text className={styles.statLabel}>{t('reports.dailyBG.hypoAnalysis.stats.totalTime')}</Text>
               <div className={styles.statValueRow}>
                 <Text className={styles.statValue}>
                   {hypoStats.totalDurationMinutes > 0 ? formatHypoDuration(hypoStats.totalDurationMinutes) : '😊'}
@@ -382,23 +431,25 @@ export function HypoSection({
           </Card>
         </FluentTooltip>
         
-        {/* NEW: LBGI Card */}
         <FluentTooltip 
-          content={`Low Blood Glucose Index (LBGI) - Predicts hypoglycemia risk. <${LBGI_THRESHOLDS.low} low, ${LBGI_THRESHOLDS.low}-${LBGI_THRESHOLDS.moderate} moderate, >${LBGI_THRESHOLDS.moderate} high`}
+          content={t('reports.dailyBG.hypoAnalysis.stats.lbgiTooltip', { 
+            low: LBGI_THRESHOLDS.low, 
+            moderate: LBGI_THRESHOLDS.moderate 
+          })}
           relationship="description"
         >
           <Card className={mergeClasses(
             styles.statCard,
-            lbgiRiskLevel === 'high' ? styles.statCardDanger :
-            lbgiRiskLevel === 'moderate' ? styles.statCardWarning : styles.statCardSuccess
+            lbgiInterpretation?.level === 'high' ? styles.statCardDanger :
+            lbgiInterpretation?.level === 'moderate' ? styles.statCardWarning : styles.statCardSuccess
           )}>
             <ShieldRegular className={mergeClasses(
               styles.statIcon,
-              lbgiRiskLevel === 'high' ? styles.statIconDanger :
-              lbgiRiskLevel === 'moderate' ? styles.statIconWarning : styles.statIconSuccess
+              lbgiInterpretation?.level === 'high' ? styles.statIconDanger :
+              lbgiInterpretation?.level === 'moderate' ? styles.statIconWarning : styles.statIconSuccess
             )} />
             <div className={styles.statContent}>
-              <Text className={styles.statLabel}>LBGI</Text>
+              <Text className={styles.statLabel}>{t('reports.dailyBG.hypoAnalysis.stats.lbgi')}</Text>
               <div className={styles.statValueRow}>
                 <Text className={styles.statValue}>
                   {lbgi !== null ? formatNumber(lbgi, 1) : 'N/A'}
@@ -412,7 +463,7 @@ export function HypoSection({
       {/* Hypos Chart */}
       {hyposChartData.length > 0 && (
         <div className={styles.hyposChartCard}>
-          {/* NEW: Max Glucose Selector */}
+          {/* Max Glucose Selector */}
           <div style={{ 
             display: 'flex', 
             justifyContent: 'flex-end', 
@@ -560,7 +611,7 @@ export function HypoSection({
             </ResponsiveContainer>
           </div>
           
-          {/* Hypos Legend */}
+          {/* Hypos Legend - Localized */}
           <div className={styles.legendContainer}>
             <div className={styles.legendItem}>
               <div 
@@ -569,7 +620,7 @@ export function HypoSection({
                   background: `linear-gradient(to right, ${HYPO_CHART_COLORS.normal}, ${HYPO_CHART_COLORS.low}, ${HYPO_CHART_COLORS.veryLow})` 
                 }} 
               />
-              <Text>Glucose</Text>
+              <Text>{t('reports.dailyBG.hypoAnalysis.chart.legend.glucose')}</Text>
             </div>
             <div className={styles.legendItem}>
               <div 
@@ -581,105 +632,119 @@ export function HypoSection({
                   borderTop: `10px solid ${HYPO_CHART_COLORS.nadirDot}`,
                 }} 
               />
-              <Text>Nadir (Lowest Point)</Text>
+              <Text>{t('reports.dailyBG.hypoAnalysis.chart.legend.nadir')}</Text>
             </div>
             <div className={styles.legendItem}>
               <div className={styles.legendDashedLine} style={{ borderColor: HYPO_CHART_COLORS.low }} />
-              <Text>Low Threshold ({displayGlucoseValue(thresholds.low, glucoseUnit)} {getUnitLabel(glucoseUnit)})</Text>
+              <Text>{t('reports.dailyBG.hypoAnalysis.chart.legend.lowThreshold', { 
+                value: displayGlucoseValue(thresholds.low, glucoseUnit), 
+                unit: getUnitLabel(glucoseUnit) 
+              })}</Text>
             </div>
             <div className={styles.legendItem}>
               <div className={styles.legendDashedLine} style={{ borderColor: HYPO_CHART_COLORS.veryLow }} />
-              <Text>Very Low ({displayGlucoseValue(thresholds.veryLow, glucoseUnit)} {getUnitLabel(glucoseUnit)})</Text>
+              <Text>{t('reports.dailyBG.hypoAnalysis.chart.legend.veryLowThreshold', { 
+                value: displayGlucoseValue(thresholds.veryLow, glucoseUnit), 
+                unit: getUnitLabel(glucoseUnit) 
+              })}</Text>
             </div>
           </div>
           
-          {/* NEW: AI Analysis Section - Below legend */}
-          {(hasApiKey || isProUser) && activeProvider && (
-            <div style={{
-              marginTop: '24px',
-              padding: '20px',
-              backgroundColor: tokens.colorNeutralBackground2,
-              borderRadius: '12px',
-              border: `1px solid ${tokens.colorNeutralStroke1}`,
+          {/* AI Analysis Section - Always visible, below legend (NEW REQUIREMENT) */}
+          <div style={{
+            marginTop: '24px',
+            padding: '20px',
+            backgroundColor: tokens.colorNeutralBackground2,
+            borderRadius: '12px',
+            border: `1px solid ${tokens.colorNeutralStroke1}`,
+          }}>
+            {/* General message and button in same row, button right-aligned */}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              marginBottom: '16px',
+              gap: '16px'
             }}>
-              {/* General message about hypos */}
-              <div style={{ marginBottom: '16px' }}>
-                <Text style={{ 
-                  display: 'block', 
-                  fontSize: tokens.fontSizeBase300,
-                  color: tokens.colorNeutralForeground2,
-                  marginBottom: '8px'
-                }}>
-                  {hypoStats.totalCount === 0 
-                    ? `🎉 Excellent! No hypoglycemic events detected on ${currentDate || 'this day'}. Keep up the great glucose management!`
-                    : `${hypoStats.totalCount} hypoglycemic event${hypoStats.totalCount > 1 ? 's' : ''} detected on ${currentDate || 'this day'}${hypoStats.severeCount > 0 ? ` (${hypoStats.severeCount} severe)` : ''}.`
-                  }
-                </Text>
-              </div>
+              <Text style={{ 
+                flex: 1,
+                fontSize: tokens.fontSizeBase300,
+                color: tokens.colorNeutralForeground2,
+              }}>
+                {hypoStats.totalCount === 0 
+                  ? t('reports.dailyBG.hypoAnalysis.aiAnalysis.noHypos', { date: currentDate || 'this day' })
+                  : t('reports.dailyBG.hypoAnalysis.aiAnalysis.hyposDetected', { 
+                      count: hypoStats.totalCount, 
+                      date: currentDate || 'this day',
+                      severe: hypoStats.severeCount > 0 
+                        ? t('reports.dailyBG.hypoAnalysis.aiAnalysis.hyposDetectedSevere', { severeCount: hypoStats.severeCount })
+                        : ''
+                    })
+                }
+              </Text>
               
-              {/* AI Analysis Button and Response Container */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <Button
-                    appearance="primary"
-                    disabled={!(hasApiKey || isProUser) || analyzing || (cooldownActive && cooldownSeconds > 0)}
-                    onClick={handleAnalyzeClick}
-                    icon={analyzing ? <Spinner size="tiny" /> : undefined}
-                  >
-                    {getButtonText()}
-                  </Button>
-                  
-                  {response && !analyzing && (
-                    <ChevronDownRegular 
-                      style={{ 
-                        cursor: 'pointer', 
-                        fontSize: '20px',
-                        transform: isResponseExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.2s ease',
-                      }}
-                      onClick={() => setIsResponseExpanded(!isResponseExpanded)}
-                    />
-                  )}
-                </div>
-                
-                {/* Cooldown indicator */}
-                {cooldownActive && cooldownSeconds > 0 && (
-                  <MessageBar intent="info">
-                    <MessageBarBody>
-                      Please wait {cooldownSeconds} second{cooldownSeconds !== 1 ? 's' : ''} before requesting new analysis...
-                    </MessageBarBody>
-                  </MessageBar>
-                )}
-                
-                {/* Error message */}
-                {error && (
-                  <MessageBar intent="error" icon={<ErrorCircleRegular />}>
-                    <MessageBarBody>
-                      <strong>Error:</strong> {error}
-                    </MessageBarBody>
-                  </MessageBar>
-                )}
-                
-                {/* AI Response */}
-                {response && !analyzing && isResponseExpanded && (
-                  <div style={{
-                    padding: '16px',
-                    backgroundColor: tokens.colorNeutralBackground3,
-                    borderRadius: tokens.borderRadiusMedium,
-                    marginTop: '8px',
-                  }}>
-                    <MarkdownRenderer content={response} />
-                  </div>
-                )}
-              </div>
+              {/* AI Analysis Button - Right aligned, always visible */}
+              <Button
+                appearance="primary"
+                disabled={!hasApiKey || analyzing || (cooldownActive && cooldownSeconds > 0)}
+                onClick={handleAnalyzeClick}
+                icon={analyzing ? <Spinner size="tiny" /> : undefined}
+              >
+                {getButtonText()}
+              </Button>
             </div>
-          )}
+            
+            {/* Dropdown icon - shown after response is received */}
+            {response && !analyzing && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                <ChevronDownRegular 
+                  style={{ 
+                    cursor: 'pointer', 
+                    fontSize: '20px',
+                    transform: isResponseExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s ease',
+                  }}
+                  onClick={() => setIsResponseExpanded(!isResponseExpanded)}
+                />
+              </div>
+            )}
+            
+            {/* Cooldown indicator - Localized */}
+            {cooldownActive && cooldownSeconds > 0 && (
+              <MessageBar intent="info">
+                <MessageBarBody>
+                  {t('reports.dailyBG.hypoAnalysis.waitMessage', { seconds: cooldownSeconds })}
+                </MessageBarBody>
+              </MessageBar>
+            )}
+            
+            {/* Error message - Localized */}
+            {error && (
+              <MessageBar intent="error" icon={<ErrorCircleRegular />}>
+                <MessageBarBody>
+                  <strong>{t('reports.dailyBG.hypoAnalysis.errorPrefix')}</strong> {error}
+                </MessageBarBody>
+              </MessageBar>
+            )}
+            
+            {/* AI Response */}
+            {response && !analyzing && isResponseExpanded && (
+              <div style={{
+                padding: '16px',
+                backgroundColor: tokens.colorNeutralBackground3,
+                borderRadius: tokens.borderRadiusMedium,
+                marginTop: '12px',
+              }}>
+                <MarkdownRenderer content={response} />
+              </div>
+            )}
+          </div>
           
-          {/* NEW: Geek Stats - AI Prompt Accordion */}
-          {showGeekStats && (hasApiKey || isProUser) && activeProvider && (
+          {/* Geek Stats - AI Prompt Accordion (only when enabled) */}
+          {showGeekStats && activeProvider && (
             <Accordion collapsible style={{ marginTop: '16px' }}>
               <AccordionItem value="aiPrompt">
-                <AccordionHeader>View AI Prompt</AccordionHeader>
+                <AccordionHeader>{t('reports.dailyBG.hypoAnalysis.accordionTitle')}</AccordionHeader>
                 <AccordionPanel>
                   <div style={{
                     padding: '12px',

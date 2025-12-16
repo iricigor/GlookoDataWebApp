@@ -26,6 +26,49 @@
           "time": "24h"
         }
       }
+    },
+    "dailyBG": {
+      "hypoAnalysis": {
+        "title": "[CS] Hypoglycemia Analysis",
+        "stats": {
+          "severe": "[CS] Severe",
+          "severeTooltip": "[CS] Severe hypoglycemic events (below very low threshold)",
+          "nonSevere": "[CS] Non-Severe",
+          "nonSevereTooltip": "[CS] Non-severe hypoglycemic events (below low threshold)",
+          "lowest": "[CS] Lowest",
+          "lowestTooltip": "[CS] Lowest glucose value during hypoglycemia",
+          "longest": "[CS] Longest",
+          "longestTooltip": "[CS] Duration of longest hypoglycemic event",
+          "totalTime": "[CS] Total Time",
+          "totalTimeTooltip": "[CS] Total time spent in hypoglycemia",
+          "lbgi": "[CS] LBGI",
+          "lbgiTooltip": "[CS] Low Blood Glucose Index (LBGI) - Predicts hypoglycemia risk. <{low} low, {low}-{moderate} moderate, >{moderate} high"
+        },
+        "maxGlucoseSelector": {
+          "ariaLabel": "[CS] Max glucose display"
+        },
+        "chart": {
+          "legend": {
+            "glucose": "[CS] Glucose",
+            "nadir": "[CS] Nadir (Lowest Point)",
+            "lowThreshold": "[CS] Low Threshold ({value} {unit})",
+            "veryLowThreshold": "[CS] Very Low ({value} {unit})"
+          }
+        },
+        "aiAnalysis": {
+          "noHypos": "[CS] 🎉 Excellent! No hypoglycemic events detected on {date}. Keep up the great glucose management!",
+          "hyposDetected": "[CS] {count} hypoglycemic event(s) detected on {date}{severe}.",
+          "hyposDetectedSevere": "[CS]  ({severeCount} severe)"
+        },
+        "analyzeButton": "[CS] Analyze with AI",
+        "analyzingButton": "[CS] Analyzing...",
+        "reanalyzeButton": "[CS] Re-analyze",
+        "waitMessage": "[CS] Please wait {seconds} second(s) before requesting new analysis...",
+        "errorPrefix": "[CS] Error:",
+        "errorFailed": "[CS] Failed to get AI response",
+        "errorUnexpected": "[CS] An unexpected error occurred",
+        "accordionTitle": "[CS] View AI Prompt"
+      }
     }
   }
 }

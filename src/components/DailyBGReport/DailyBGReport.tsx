@@ -84,13 +84,6 @@ export function DailyBGReport({
   const { colorScheme, setColorScheme } = useBGColorScheme();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
   
-  // Determine if API key is available
-  const hasApiKey = 
-    (selectedProvider === 'perplexity' && perplexityApiKey !== '') ||
-    (selectedProvider === 'grok' && grokApiKey !== '') ||
-    (selectedProvider === 'deepseek' && deepseekApiKey !== '') ||
-    (selectedProvider === 'gemini' && geminiApiKey !== '');
-  
   // Glucose state
   const [loading, setLoading] = useState(false);
   const [dateChanging, setDateChanging] = useState(false);
@@ -590,7 +583,6 @@ export function DailyBGReport({
           showDayNightShading={showDayNightShading}
           currentDate={currentDate}
           currentGlucoseReadings={currentGlucoseReadings}
-          hasApiKey={hasApiKey}
           activeProvider={selectedProvider}
           perplexityApiKey={perplexityApiKey}
           geminiApiKey={geminiApiKey}
