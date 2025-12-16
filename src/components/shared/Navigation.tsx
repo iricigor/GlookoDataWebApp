@@ -384,7 +384,8 @@ export function Navigation({
             className={styles.brand}
             onClick={() => {
               // Only navigate on desktop (non-mobile)
-              if (window.innerWidth > 768) {
+              // Use matchMedia to match CSS media query breakpoint
+              if (window.matchMedia('(min-width: 769px)').matches) {
                 onNavigate('home');
               }
             }}
@@ -392,7 +393,8 @@ export function Navigation({
             tabIndex={0}
             onKeyDown={(e) => {
               // Only navigate on desktop (non-mobile)
-              if (window.innerWidth > 768 && (e.key === 'Enter' || e.key === ' ')) {
+              // Use matchMedia to match CSS media query breakpoint
+              if (window.matchMedia('(min-width: 769px)').matches && (e.key === 'Enter' || e.key === ' ')) {
                 e.preventDefault();
                 onNavigate('home');
               }
