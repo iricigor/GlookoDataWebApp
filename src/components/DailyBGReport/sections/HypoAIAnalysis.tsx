@@ -48,6 +48,38 @@ interface HypoAIAnalysisProps {
 }
 
 /**
+ * Helper function to build the hypos prompt
+ * Eliminates duplication between handleAnalyzeClick and geek stats accordion
+ * @param responseLanguage - Language for the AI response
+ * @param glucoseUnit - Unit for glucose values (mg/dL or mmol/L)
+ * @param promptProvider - Provider name to use in prompt
+ * @returns Generated prompt string
+ */
+function buildHyposPrompt(
+  responseLanguage: ResponseLanguage,
+  glucoseUnit: GlucoseUnit,
+  promptProvider: AIProvider | undefined
+): string {
+  // For single-day analysis, we currently pass empty arrays
+  // TODO: Pass actual hypo events and summaries when available
+  const hypoEventsCSV = convertHypoEventsToCSV([]);
+  const hypoSummariesCSV = convertHypoSummariesToCSV([]);
+  
+  // Base64 encode the CSV data
+  const base64EventsData = base64Encode(hypoEventsCSV);
+  const base64SummariesData = base64Encode(hypoSummariesCSV);
+  
+  // Generate and return the prompt
+  return generateHyposPrompt(
+    base64EventsData,
+    base64SummariesData,
+    responseLanguage,
+    glucoseUnit,
+    promptProvider ?? 'gemini' // Fallback to gemini if undefined
+  );
+}
+
+/**
  * Render the AI-driven hypoglycemia analysis UI, including the analysis control, response display, cooldown and error messages, and an optional "geek stats" prompt inspector.
  *
  * The component shows a summary of detected hypos for the provided date, a primary button to start or re-run analysis (with Pro-key indicator when applicable), an expandable AI response rendered as Markdown, localized cooldown and error messages, and—when enabled—an accordion containing the generated AI prompt for debugging.
@@ -138,24 +170,10 @@ export function HypoAIAnalysis({
     const previousResponse = response;
     
     try {
-      // For single-day analysis, convert hypo periods to CSV format
-      const hypoEventsCSV = convertHypoEventsToCSV([]);
-      const hypoSummariesCSV = convertHypoSummariesToCSV([]);
+      // Generate the prompt using shared helper
+      const prompt = buildHyposPrompt(responseLanguage, glucoseUnit, promptProvider);
       
-      // Base64 encode the CSV data
-      const base64EventsData = base64Encode(hypoEventsCSV);
-      const base64SummariesData = base64Encode(hypoSummariesCSV);
-      
-      // Generate the prompt using shared prompt generator
-      const prompt = generateHyposPrompt(
-        base64EventsData,
-        base64SummariesData,
-        responseLanguage,
-        glucoseUnit,
-        promptProvider
-      );
-      
-      // Call the AI API with routing (handles Pro vs client-side) - use apiKey prop directly
+      // Call the AI API with routing (handles Pro vs client-side)
       const result = await callAIWithRouting(activeProvider, prompt, {
         apiKey,
         idToken: idToken ?? undefined,
@@ -285,19 +303,7 @@ export function HypoAIAnalysis({
                 maxHeight: '400px',
                 overflowY: 'auto',
               }}>
-                {(() => {
-                  const hypoEventsCSV = convertHypoEventsToCSV([]);
-                  const hypoSummariesCSV = convertHypoSummariesToCSV([]);
-                  const base64EventsData = base64Encode(hypoEventsCSV);
-                  const base64SummariesData = base64Encode(hypoSummariesCSV);
-                  return generateHyposPrompt(
-                    base64EventsData,
-                    base64SummariesData,
-                    responseLanguage,
-                    glucoseUnit,
-                    promptProvider
-                  );
-                })()}
+                {buildHyposPrompt(responseLanguage, glucoseUnit, promptProvider)}
               </div>
             </AccordionPanel>
           </AccordionItem>

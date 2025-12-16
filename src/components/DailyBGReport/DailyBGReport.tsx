@@ -466,7 +466,7 @@ export function DailyBGReport({
         color: getGlucoseColor(reading.value, colorScheme),
       };
     });
-  }, [currentGlucoseReadings, glucoseUnit, maxGlucose, thresholds, colorScheme]);
+  }, [currentGlucoseReadings, glucoseUnit, maxGlucose, colorScheme]);
 
   const handlePreviousDate = () => {
     if (currentDateIndex > 0) {

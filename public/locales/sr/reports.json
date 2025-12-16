@@ -32,17 +32,17 @@
         "title": "Analiza hipoglikemije",
         "stats": {
           "severe": "Ozbiljna",
-          "severeTooltip": "Ozbiljni hipoglikemijski dogadjaji (ispod veoma niskog praga)",
+          "severeTooltip": "Ozbiljni hipoglikemijski događaji (ispod veoma niskog praga)",
           "nonSevere": "Neozbiljna",
-          "nonSevereTooltip": "Neozbiljni hipoglikemijski dogadjaji (ispod niskog praga)",
-          "lowest": "Najniza",
-          "lowestTooltip": "Najniza vrednost glukoze tokom hipoglikemije",
-          "longest": "Najduza",
-          "longestTooltip": "Trajanje najduzeg hipoglikemijskog dogadjaja",
+          "nonSevereTooltip": "Neozbiljni hipoglikemijski događaji (ispod niskog praga)",
+          "lowest": "Najniža",
+          "lowestTooltip": "Najniža vrednost glukoze tokom hipoglikemije",
+          "longest": "Najduža",
+          "longestTooltip": "Trajanje najdužeg hipoglikemijskog događaja",
           "totalTime": "Ukupno vreme",
           "totalTimeTooltip": "Ukupno vreme provedeno u hipoglikemiji",
           "lbgi": "LBGI",
-          "lbgiTooltip": "Indeks niske glukoze u krvi (LBGI) - Predvidja rizik od hipoglikemije. <{low} nizak, {low}-{moderate} umeren, >{moderate} visok"
+          "lbgiTooltip": "Indeks niske glukoze u krvi (LBGI) - Predviđa rizik od hipoglikemije. <{low} nizak, {low}-{moderate} umeren, >{moderate} visok"
         },
         "maxGlucoseSelector": {
           "ariaLabel": "Maksimalni prikaz glukoze"
@@ -50,24 +50,24 @@
         "chart": {
           "legend": {
             "glucose": "Glukoza",
-            "nadir": "Nadir (najniza tacka)",
+            "nadir": "Nadir (najniža tačka)",
             "lowThreshold": "Niski prag ({value} {unit})",
             "veryLowThreshold": "Veoma niski ({value} {unit})"
           }
         },
         "aiAnalysis": {
-          "noHypos": "🎉 Odlicno! Nisu otkriveni hipoglikemijski dogadjaji na {date}. Nastavite sa odlicnom kontrolom glukoze!",
-          "hyposDetected": "{count} hipoglikemijski dogadjaj(a) otkriveno na {date}{severe}.",
+          "noHypos": "🎉 Odlično! Nisu otkriveni hipoglikemijski događaji na {date}. Nastavite sa odličnom kontrolom glukoze!",
+          "hyposDetected": "{count} hipoglikemijski događaj(a) otkriveno na {date}{severe}.",
           "hyposDetectedSevere": " ({severeCount} ozbiljna)"
         },
         "analyzeButton": "Analiziraj sa AI",
         "analyzingButton": "Analiziram...",
         "reanalyzeButton": "Ponovo analiziraj",
-        "waitMessage": "Molimo sacekajte {seconds} sekund(i) pre nego sto zatrazite novu analizu...",
-        "errorPrefix": "Greska:",
+        "waitMessage": "Molimo sačekajte {seconds} sekund(i) pre nego što zatražite novu analizu...",
+        "errorPrefix": "Greška:",
         "errorFailed": "Neuspelo dobijanje AI odgovora",
-        "errorUnexpected": "Dogodila se neocekivana greska",
-        "accordionTitle": "Prikazi AI upit"
+        "errorUnexpected": "Dogodila se neočekivana greška",
+        "accordionTitle": "Prikaži AI upit"
       }
     }
   }
