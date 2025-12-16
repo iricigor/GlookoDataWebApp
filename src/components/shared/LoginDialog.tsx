@@ -12,7 +12,7 @@ import {
   shorthands,
 } from '@fluentui/react-components';
 import { PersonRegular } from '@fluentui/react-icons';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // Microsoft logo SVG component
@@ -88,11 +88,13 @@ interface LoginDialogProps {
 /**
  * Renders a login dialog with a trigger button, handling sign-in flow, loading state, and error display.
  *
- * The dialog presents translated UI text and a Microsoft-branded sign-in action. When the sign-in button
- * is pressed the provided `onLogin` function is invoked; the component shows a loading indicator while
- * the call is pending, closes the dialog on success, and displays a translated error message on failure.
+ * The dialog presents translated UI text with both Microsoft and Google sign-in options. When the Microsoft 
+ * sign-in button is pressed, the provided `onLogin` function is invoked; the component shows a loading 
+ * indicator while the call is pending, closes the dialog on success, and displays a translated error message 
+ * on failure. The Google sign-in button currently shows a "coming soon" message as the functionality is 
+ * under development.
  *
- * @param onLogin - Function invoked to perform the sign-in action; should return a Promise that resolves on successful login or rejects on failure.
+ * @param onLogin - Function invoked to perform the Microsoft sign-in action; should return a Promise that resolves on successful login or rejects on failure.
  * @returns The JSX element for the login dialog and its trigger button.
  */
 export function LoginDialog({ onLogin }: LoginDialogProps) {
@@ -102,6 +104,16 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showGoogleComingSoon, setShowGoogleComingSoon] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -121,9 +133,16 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
   const handleGoogleSignIn = () => {
     setShowGoogleComingSoon(true);
     setError(null);
+    
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
     // Hide message after 3 seconds
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       setShowGoogleComingSoon(false);
+      timeoutRef.current = null;
     }, 3000);
   };
 
