@@ -38,7 +38,14 @@ interface HypoStatsCardsProps {
 }
 
 /**
- * Renders 6 hypoglycemia statistic cards
+ * Renders six hypoglycemia statistic cards with contextual styling and explanatory tooltips.
+ *
+ * @param styles - CSS-in-JS classes produced by the component's useStyles hook
+ * @param glucoseUnit - Current glucose unit used for value formatting
+ * @param thresholds - Glucose threshold values (includes `veryLow`)
+ * @param hypoStats - Hypoglycemia statistics (severeCount, nonSevereCount, lowestValue, longestDurationMinutes, totalDurationMinutes)
+ * @param lbgi - Low Blood Glucose Index value or `null`
+ * @returns A JSX element containing the row of styled statistic cards
  */
 export function HypoStatsCards({
   styles,
