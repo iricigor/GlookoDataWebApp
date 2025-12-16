@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>836 Separate build, translation checks, and PR preview deployment into optional workflows</summary>
+
+[#836](../../pull/836) Separate build, translation checks, and PR preview deployment into optional workflows
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>838 Add 50% transparent border to sticky filter sections</summary>
 
 [#838](../../pull/838) Add 50% transparent border to sticky filter sections
