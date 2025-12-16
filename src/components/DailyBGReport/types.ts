@@ -5,6 +5,8 @@
 import type { GlucoseThresholds, RoCStats, RoCDataPoint, HourlyIOBData, UploadedFile, GlucoseUnit } from '../../types';
 import type { HypoStats } from '../../utils/data/hypoDataUtils';
 import type { BGColorScheme } from '../../hooks/useBGColorScheme';
+import type { ResponseLanguage } from '../../hooks/useResponseLanguage';
+import type { AIProvider } from '../../utils/api';
 import type { useStyles } from './styles';
 
 /**
@@ -15,6 +17,18 @@ export interface DailyBGReportProps {
   glucoseUnit: GlucoseUnit;
   insulinDuration?: number;
   showDayNightShading: boolean;
+  showGeekStats?: boolean;
+  // AI configuration props
+  perplexityApiKey?: string;
+  geminiApiKey?: string;
+  grokApiKey?: string;
+  deepseekApiKey?: string;
+  selectedProvider?: AIProvider | null;
+  responseLanguage?: ResponseLanguage;
+  // Pro user props for backend AI routing
+  isProUser?: boolean;
+  idToken?: string | null;
+  useProKeys?: boolean;
 }
 
 /**

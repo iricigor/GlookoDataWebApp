@@ -63,11 +63,33 @@ import type { DailyBGReportProps, TimelineDataPoint } from './types';
  * @param showDayNightShading - Whether to display day/night background shading on charts
  * @returns The JSX element containing the composed daily report UI
  */
-export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, showDayNightShading }: DailyBGReportProps) {
+export function DailyBGReport({ 
+  selectedFile, 
+  glucoseUnit, 
+  insulinDuration = 5, 
+  showDayNightShading,
+  showGeekStats = false,
+  perplexityApiKey = '',
+  geminiApiKey = '',
+  grokApiKey = '',
+  deepseekApiKey = '',
+  selectedProvider = null,
+  responseLanguage = 'english',
+  isProUser = false,
+  idToken = null,
+  useProKeys = false,
+}: DailyBGReportProps) {
   const styles = useStyles();
   const { thresholds } = useGlucoseThresholds();
   const { colorScheme, setColorScheme } = useBGColorScheme();
   const { selectedDate, setSelectedDate } = useSelectedDate(selectedFile?.id);
+  
+  // Determine if API key is available
+  const hasApiKey = 
+    (selectedProvider === 'perplexity' && perplexityApiKey !== '') ||
+    (selectedProvider === 'grok' && grokApiKey !== '') ||
+    (selectedProvider === 'deepseek' && deepseekApiKey !== '') ||
+    (selectedProvider === 'gemini' && geminiApiKey !== '');
   
   // Glucose state
   const [loading, setLoading] = useState(false);
@@ -566,6 +588,19 @@ export function DailyBGReport({ selectedFile, glucoseUnit, insulinDuration = 5, 
           nadirPoints={nadirPoints}
           maxGlucose={maxGlucose}
           showDayNightShading={showDayNightShading}
+          currentDate={currentDate}
+          currentGlucoseReadings={currentGlucoseReadings}
+          hasApiKey={hasApiKey}
+          activeProvider={selectedProvider}
+          perplexityApiKey={perplexityApiKey}
+          geminiApiKey={geminiApiKey}
+          grokApiKey={grokApiKey}
+          deepseekApiKey={deepseekApiKey}
+          responseLanguage={responseLanguage}
+          isProUser={isProUser}
+          idToken={idToken}
+          useProKeys={useProKeys}
+          showGeekStats={showGeekStats}
         />
       )}
 

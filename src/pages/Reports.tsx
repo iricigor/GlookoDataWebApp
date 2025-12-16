@@ -194,7 +194,24 @@ export function Reports({
           />
         );
       case 'dailyBG':
-        return <DailyBGReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} showDayNightShading={showDayNightShading} />;
+        return (
+          <DailyBGReport 
+            selectedFile={selectedFile} 
+            glucoseUnit={glucoseUnit} 
+            insulinDuration={insulinDuration} 
+            showDayNightShading={showDayNightShading}
+            showGeekStats={showGeekStats}
+            perplexityApiKey={perplexityApiKey}
+            geminiApiKey={geminiApiKey}
+            grokApiKey={grokApiKey}
+            deepseekApiKey={deepseekApiKey}
+            selectedProvider={selectedProvider}
+            responseLanguage={responseLanguage}
+            isProUser={isProUser}
+            idToken={idToken}
+            useProKeys={useProKeys}
+          />
+        );
       case 'hypos':
         return (
           <HyposReport 
