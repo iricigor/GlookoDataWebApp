@@ -10,6 +10,7 @@ import {
   makeStyles,
   Spinner,
   shorthands,
+  mergeClasses,
 } from '@fluentui/react-components';
 import { PersonRegular } from '@fluentui/react-icons';
 import { useState, useEffect, useRef } from 'react';
@@ -50,15 +51,7 @@ const useStyles = makeStyles({
       flexDirection: 'column',
     },
   },
-  actionButton: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shorthands.gap('8px'),
-    flex: '1',
-    minWidth: '0',
-  },
-  microsoftButton: {
+  baseButton: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -67,12 +60,6 @@ const useStyles = makeStyles({
     minWidth: '0',
   },
   googleButton: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shorthands.gap('8px'),
-    flex: '1',
-    minWidth: '0',
     backgroundColor: '#fff',
     color: '#3c4043',
     ...shorthands.border('1px', 'solid', '#dadce0'),
@@ -198,7 +185,7 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
                 appearance="secondary" 
                 disabled={loading}
                 onClick={handleCancel}
-                className={styles.actionButton}
+                className={styles.baseButton}
               >
                 {t('loginDialog.cancel')}
               </Button>
@@ -206,7 +193,7 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
                 appearance="primary" 
                 onClick={handleLogin}
                 disabled={loading}
-                className={styles.microsoftButton}
+                className={styles.baseButton}
               >
                 {loading ? (
                   <>
@@ -224,7 +211,7 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
                 appearance="secondary"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className={styles.googleButton}
+                className={mergeClasses(styles.baseButton, styles.googleButton)}
               >
                 <GoogleLogo />
                 <span>{t('loginDialog.signInWithGoogle')}</span>
