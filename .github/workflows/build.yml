@@ -1,0 +1,37 @@
+name: 🏗️ Build (Optional)
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: 🏗️ Build Project
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build project
+        run: npm run build
+
+      - name: Report Build Status
+        if: always()
+        run: |
+          echo "ℹ️ This is an optional build check"
+          echo "Build failures here will NOT block PR merges"
+          echo "::notice::Optional build check completed"

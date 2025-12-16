@@ -1,78 +1,18 @@
-# Azure Static Web Apps - PR Preview Environments
-# This workflow automatically deploys preview versions of the app for every pull request.
-# Preview environments get unique URLs and are automatically cleaned up when the PR is closed.
+# Azure Static Web Apps - PR Preview Cleanup
+# This workflow cleans up preview environments when the PR is closed.
+# The deployment is handled by pr-preview-deploy.yml (optional workflow).
 
-name: 🔍 PR Preview
+name: 🔍 PR Preview Cleanup
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [closed]
     branches:
       - main
 
 jobs:
-  # Build and deploy a preview environment for the PR
-  build_and_deploy_preview:
-    # Only run for non-closed PRs
-    if: github.event.action != 'closed'
-    runs-on: ubuntu-latest
-    name: Build and Deploy Preview
-    permissions:
-      contents: read
-      pull-requests: write  # Required for PR comments with preview URL
-    steps:
-      # Checkout the PR branch code
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-          lfs: false
-
-      # Setup Node.js with caching for faster builds
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-
-      # Build and deploy the static web app preview
-      # Azure SWA automatically creates a unique preview URL for each PR
-      # Note: Preview environments only deploy the static frontend.
-      # The Azure Function API is NOT deployed to preview environments,
-      # so features requiring backend services (e.g., user settings, authentication)
-      # will use the production API or may not be fully testable.
-      - name: Build and Deploy Preview
-        id: builddeploy
-        continue-on-error: true  # Don't fail the job if preview deployment fails
-        uses: Azure/static-web-apps-deploy@v1
-        env:
-          NODE_VERSION: '20.19.5'
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WONDERFUL_STONE_071384103 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}  # Used for PR comments with preview URL
-          action: "upload"
-          # Repository/Build Configurations
-          app_location: "/"           # App source code path
-          api_location: ""            # API not deployed to preview (uses production API)
-          output_location: "dist"     # Built app content directory (Vite output)
-          # Build command is handled automatically by SWA deploy action
-          # It runs npm ci and npm run build by default
-
-      # Report deployment status - this step always succeeds to ensure job passes
-      - name: Report Deployment Status
-        if: always()
-        run: |
-          if [ "${{ steps.builddeploy.outcome }}" == "success" ]; then
-            echo "✅ Preview deployment succeeded"
-          else
-            echo "⚠️ Preview deployment failed, but this is optional and won't block PR merges"
-            echo "::warning::Preview deployment failed. The PR can still be merged."
-          fi
-
   # Close/cleanup the preview environment when the PR is closed or merged
   close_pull_request:
-    if: github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close Preview Environment
     permissions:

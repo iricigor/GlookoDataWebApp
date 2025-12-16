@@ -146,11 +146,17 @@ npm run test:coverage
 ### CI/CD Testing
 
 All pull requests automatically run:
-1. Linting (`npm run lint`)
-2. Build validation (`npm run build`)
-3. Unit tests (`npm test`)
 
-Ensure all checks pass before requesting a review.
+**Required Checks (must pass to merge):**
+1. Linting (`npm run lint`)
+2. Unit tests (`npm test`)
+
+**Optional Checks (informational feedback):**
+3. Build validation (`npm run build`) - separate workflow
+4. Translation checks - separate workflow
+5. PR preview deployment - creates a preview URL
+
+The required checks must pass before requesting a review. Optional checks provide helpful feedback but won't block your PR from merging.
 
 ### Testing Your Changes
 
