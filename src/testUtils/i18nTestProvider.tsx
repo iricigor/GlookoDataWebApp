@@ -123,9 +123,11 @@ const enTranslations = {
       "title": "Login with Microsoft",
       "description": "Sign in with your personal Microsoft account to access all features.",
       "signInButton": "Sign in with Microsoft",
+      "signInWithGoogle": "Sign in with Google",
       "signingIn": "Signing in...",
       "cancel": "Cancel",
-      "errorMessage": "Failed to login. Please try again."
+      "errorMessage": "Failed to login. Please try again.",
+      "googleComingSoon": "Google Sign-In will be available soon! This feature is currently under development."
     },
     "logoutDialog": {
       "logout": "Logout",

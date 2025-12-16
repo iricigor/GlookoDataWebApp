@@ -8,9 +8,11 @@
     "title": "Mit Microsoft anmelden",
     "description": "Melden Sie sich mit Ihrem persönlichen Microsoft-Konto an, um auf alle Funktionen zuzugreifen.",
     "signInButton": "Mit Microsoft anmelden",
+    "signInWithGoogle": "Mit Google anmelden",
     "signingIn": "Anmeldung läuft...",
     "cancel": "Abbrechen",
-    "errorMessage": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut."
+    "errorMessage": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "googleComingSoon": "Google-Anmeldung wird bald verfügbar sein! Diese Funktion befindet sich derzeit in der Entwicklung."
   },
   "logoutDialog": {
     "title": "Abmelden",

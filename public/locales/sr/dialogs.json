@@ -8,9 +8,11 @@
     "title": "Prijavite se sa Microsoft-om",
     "description": "Prijavite se sa Vašim ličnim Microsoft nalogom da pristupite svim funkcijama.",
     "signInButton": "Prijavite se sa Microsoft-om",
+    "signInWithGoogle": "Prijavite se sa Google-om",
     "signingIn": "Prijavljivanje...",
     "cancel": "Otkaži",
-    "errorMessage": "Neuspešna prijava. Molimo pokušajte ponovo."
+    "errorMessage": "Neuspešna prijava. Molimo pokušajte ponovo.",
+    "googleComingSoon": "Google prijava će uskoro biti dostupna! Ova funkcija je trenutno u razvoju."
   },
   "logoutDialog": {
     "title": "Odjava",
