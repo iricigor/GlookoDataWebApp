@@ -1,39 +1,38 @@
 /**
  * FileInfoButton Component
- * A shared button that displays file information in a dialog overlay
+ * A shared button that displays file information in a popover
  */
 
 import {
   Button,
-  Dialog,
-  DialogTrigger,
-  DialogSurface,
-  DialogTitle,
-  DialogBody,
-  DialogContent,
+  Popover,
+  PopoverTrigger,
+  PopoverSurface,
   makeStyles,
   shorthands,
+  tokens,
+  Text,
 } from '@fluentui/react-components';
 import { ChevronDownRegular, InfoRegular } from '@fluentui/react-icons';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SelectedFileMetadata } from './SelectedFileMetadata';
 import type { UploadedFile } from '../types';
 
 const useStyles = makeStyles({
-  dialogContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    ...shorthands.gap('16px'),
-  },
   buttonIcon: {
     marginLeft: '4px',
   },
-  dialogSurface: {
+  popoverSurface: {
     maxWidth: '500px',
-    position: 'fixed',
-    top: '80px',
-    right: '24px',
+    minWidth: '400px',
+    ...shorthands.padding('16px'),
+  },
+  title: {
+    fontSize: tokens.fontSizeBase500,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorNeutralForeground1,
+    marginBottom: '16px',
+    display: 'block',
   },
 });
 
@@ -42,23 +41,21 @@ interface FileInfoButtonProps {
 }
 
 /**
- * Renders a button that opens a dialog displaying file information.
+ * Renders a button that opens a popover displaying file information.
  * 
  * The button shows "File Info" with a dropdown icon. When clicked, it opens
- * a dialog overlay containing the same file metadata information that was
- * previously shown in a dedicated tab.
+ * a popover below the button containing file metadata information.
  *
  * @param selectedFile - The uploaded file whose metadata will be displayed
- * @returns The FileInfoButton component with dialog
+ * @returns The FileInfoButton component with popover
  */
 export function FileInfoButton({ selectedFile }: FileInfoButtonProps) {
   const styles = useStyles();
   const { t } = useTranslation(['common', 'reports', 'aiAnalysis']);
-  const [open, setOpen] = useState(false);
 
   return (
-    <Dialog open={open} onOpenChange={(_, data) => setOpen(data.open)}>
-      <DialogTrigger disableButtonEnhancement>
+    <Popover positioning={{ align: 'end', position: 'below' }}>
+      <PopoverTrigger disableButtonEnhancement>
         <Button 
           appearance="subtle" 
           icon={<InfoRegular />}
@@ -66,15 +63,11 @@ export function FileInfoButton({ selectedFile }: FileInfoButtonProps) {
           {t('common:common.fileInfo')}
           <ChevronDownRegular className={styles.buttonIcon} />
         </Button>
-      </DialogTrigger>
-      <DialogSurface className={styles.dialogSurface}>
-        <DialogBody>
-          <DialogTitle>{t('common:common.fileInfo')}</DialogTitle>
-          <DialogContent className={styles.dialogContent}>
-            <SelectedFileMetadata selectedFile={selectedFile} />
-          </DialogContent>
-        </DialogBody>
-      </DialogSurface>
-    </Dialog>
+      </PopoverTrigger>
+      <PopoverSurface className={styles.popoverSurface}>
+        <Text className={styles.title}>{t('common:common.fileInfo')}</Text>
+        <SelectedFileMetadata selectedFile={selectedFile} />
+      </PopoverSurface>
+    </Popover>
   );
 }
