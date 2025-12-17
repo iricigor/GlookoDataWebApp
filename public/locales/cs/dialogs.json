@@ -5,12 +5,14 @@
     "gotIt": "Rozumím"
   },
   "loginDialog": {
-    "title": "Přihlášení pomocí Microsoftu",
+    "title": "Přihlášení do Glooko",
     "description": "Přihlaste se pomocí svého osobního účtu Microsoft a získejte přístup ke všem funkcím.",
     "signInButton": "Přihlásit se pomocí Microsoftu",
+    "signInWithGoogle": "Přihlásit se pomocí Google",
     "signingIn": "Přihlašování...",
     "cancel": "Zrušit",
-    "errorMessage": "Přihlášení se nezdařilo. Zkuste to prosím znovu."
+    "errorMessage": "Přihlášení se nezdařilo. Zkuste to prosím znovu.",
+    "googleComingSoon": "Přihlášení pomocí Google bude brzy k dispozici! Tato funkce je momentálně ve vývoji."
   },
   "logoutDialog": {
     "title": "Odhlášení",
