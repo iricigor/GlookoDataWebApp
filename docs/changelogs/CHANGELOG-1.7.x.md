@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>848 Refactor glucoseRangeUtils into focused modules under 700 lines</summary>
+
+[#848](../../pull/848) Refactor glucoseRangeUtils into focused modules under 700 lines
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>846 Move file info from dedicated tab to dropdown popover with button</summary>
 
 [#846](../../pull/846) Move file info from dedicated tab to dropdown popover with button
