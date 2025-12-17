@@ -72,9 +72,8 @@ const useStyles = makeStyles({
     ...shorthands.gap('8px'),
     flex: '1',
     minHeight: '40px',
-    ...shorthands.padding('8px', '12px'),
+    ...shorthands.padding('8px', '16px'),
     whiteSpace: 'nowrap',
-    ...shorthands.overflow('visible'),
   },
   googleButton: {
     backgroundColor: '#fff',
