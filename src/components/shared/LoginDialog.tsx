@@ -71,10 +71,10 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     ...shorthands.gap('8px'),
     flex: '1',
-    minHeight: '32px',
-    maxHeight: '32px',
-    ...shorthands.padding('4px', '12px'),
+    minHeight: '40px',
+    ...shorthands.padding('8px', '12px'),
     whiteSpace: 'nowrap',
+    ...shorthands.overflow('visible'),
   },
   googleButton: {
     backgroundColor: '#fff',
