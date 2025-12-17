@@ -9,7 +9,7 @@ import { base64Decode } from '../../../utils/formatting';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit } from '../../../types';
 import type { AIProvider } from '../../../utils/api/aiApi';
-import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils';
+import { getLanguageInstruction, getDisclaimerInstruction, getSystemPrompt } from './promptUtils';
 
 /**
  * Generate AI prompt for pump settings verification analysis
@@ -33,6 +33,7 @@ export function generatePumpSettingsPrompt(
   const cgmData = base64Decode(base64CgmData);
   const bolusData = base64Decode(base64BolusData);
   const basalData = base64Decode(base64BasalData);
+  const systemPrompt = getSystemPrompt();
   const languageInstruction = getLanguageInstruction(language);
   const disclaimerInstruction = getDisclaimerInstruction(provider, language);
   
@@ -45,7 +46,9 @@ export function generatePumpSettingsPrompt(
   const isfConversionThreshold = unit === 'mg/dL' ? '9' : '0.5';
   const isfMinBG = unit === 'mg/dL' ? '126' : '7.0';
   
-  return `**Data Context**
+  return `${systemPrompt}
+
+**Data Context**
 This analysis examines your CGM readings, bolus insulin records, and basal delivery data to infer your current pump settings (basal rates, ISF, ICR) and evaluate their effectiveness across different time segments, helping optimize your pump configuration for better glucose control.
 
 **IMPORTANT FORMATTING RULES**

@@ -9,7 +9,7 @@ import { base64Decode } from '../../../utils/formatting';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit } from '../../../types';
 import type { AIProvider } from '../../../utils/api/aiApi';
-import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils';
+import { getLanguageInstruction, getDisclaimerInstruction, getSystemPrompt } from './promptUtils';
 
 /**
  * Generate AI prompt for glucose and insulin analysis with tercile-based statistical analysis
@@ -22,6 +22,7 @@ import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils'
  */
 export function generateGlucoseInsulinPrompt(base64CsvData: string, language: ResponseLanguage = 'english', unit: GlucoseUnit = 'mmol/L', provider?: AIProvider): string {
   const csvData = base64Decode(base64CsvData);
+  const systemPrompt = getSystemPrompt();
   const languageInstruction = getLanguageInstruction(language);
   const disclaimerInstruction = getDisclaimerInstruction(provider, language);
   
@@ -29,11 +30,13 @@ export function generateGlucoseInsulinPrompt(base64CsvData: string, language: Re
     ? 'Remember that all glucose values are in mg/dL (not mmol/L).'
     : 'Remember that all glucose values are in mmol/L (not mg/dL).';
   
-  return `**Data Context**
+  return `${systemPrompt}
+
+**Data Context**
 This analysis examines daily blood glucose ranges and insulin dosing patterns from CGM and pump data to identify correlations between insulin delivery and glucose control, helping optimize diabetes management.
 
-**Role and Goal**
-You are an expert Data Analyst and Diabetes Management Specialist. Your goal is to analyze the provided daily blood glucose (BG) and insulin data over the specified period and identify actionable trends and anomalies to help optimize diabetes control. The analysis must be clear, concise, and focus on practical recommendations.
+**Task**
+Your goal is to analyze the provided daily blood glucose (BG) and insulin data over the specified period and identify actionable trends and anomalies to help optimize diabetes control. The analysis must be clear, concise, and focus on practical recommendations.
 
 **IMPORTANT FORMATTING RULES**
 - Do NOT start your response with greetings like "Hello", "Good morning", "Good afternoon", or similar

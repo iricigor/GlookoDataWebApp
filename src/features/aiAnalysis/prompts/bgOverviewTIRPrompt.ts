@@ -8,7 +8,7 @@ import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit, GlucoseThresholds, RangeCategoryMode, AGPDayOfWeekFilter } from '../../../types';
 import type { AIProvider } from '../../../utils/api/aiApi';
 import type { TIRStats } from '../../../components/BGOverviewReport/types';
-import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils';
+import { getLanguageInstruction, getDisclaimerInstruction, getSystemPrompt } from './promptUtils';
 import { calculatePercentage } from '../../../utils/data';
 
 /**
@@ -71,6 +71,7 @@ export function generateBGOverviewTIRPrompt(
   provider?: AIProvider,
   dayFilter: AGPDayOfWeekFilter = 'All Days'
 ): string {
+  const systemPrompt = getSystemPrompt();
   const languageInstruction = getLanguageInstruction(language);
   const disclaimerInstruction = getDisclaimerInstruction(provider, language);
   
@@ -119,7 +120,9 @@ Time Very High (>${veryHighThresholdStr}): ${veryHighPercentage.toFixed(1)}%`;
     ? `\n\nIMPORTANT: This data is filtered to show only ${dayFilter}. ${dayActivityContext} Acknowledge this day-specific context in your analysis and ensure your recommendations consider typical activities and patterns for this day/period.`
     : '';
 
-  return `This analysis examines your continuous glucose monitoring (CGM) data time in range statistics to provide quick, actionable insights for improving glucose management.
+  return `${systemPrompt}
+
+This analysis examines your continuous glucose monitoring (CGM) data time in range statistics to provide quick, actionable insights for improving glucose management.
 
 My glucose time distribution:
 ${statsText}${dayFilterContext}

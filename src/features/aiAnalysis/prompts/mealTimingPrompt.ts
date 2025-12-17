@@ -9,7 +9,7 @@ import { base64Decode } from '../../../utils/formatting';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit } from '../../../types';
 import type { AIProvider } from '../../../utils/api/aiApi';
-import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils';
+import { getLanguageInstruction, getDisclaimerInstruction, getSystemPrompt } from './promptUtils';
 
 /**
  * Generate AI prompt for meal timing analysis
@@ -33,6 +33,7 @@ export function generateMealTimingPrompt(
   const cgmData = base64Decode(base64CgmData);
   const bolusData = base64Decode(base64BolusData);
   const basalData = base64Decode(base64BasalData);
+  const systemPrompt = getSystemPrompt();
   const languageInstruction = getLanguageInstruction(language);
   const disclaimerInstruction = getDisclaimerInstruction(provider, language);
   
@@ -43,11 +44,13 @@ export function generateMealTimingPrompt(
   // This is the minimum rise to consider a sustained glucose increase
   const preBolusRiseThreshold = unit === 'mg/dL' ? '27' : '1.5';
   
-  return `**Data Context**
+  return `${systemPrompt}
+
+**Data Context**
 This analysis examines your CGM glucose readings, bolus insulin timing, and basal insulin patterns to identify meal-specific and day-of-week patterns, helping optimize pre-bolus timing and insulin dosing for better glucose control.
 
-**Role and Goal**
-You are an expert Data Analyst and Diabetes Management Specialist. Analyze the provided time-series data to provide a day-of-the-week specific and meal-specific optimization report. The analysis must identify Basal, Bolus, and Timing issues to offer practical, specific recommendations for improving time-in-range (TIR).
+**Task**
+Analyze the provided time-series data to provide a day-of-the-week specific and meal-specific optimization report. The analysis must identify Basal, Bolus, and Timing issues to offer practical, specific recommendations for improving time-in-range (TIR).
 
 **IMPORTANT FORMATTING RULES**
 - Do NOT start your response with greetings like "Hello", "Good morning", "Good afternoon", or similar

@@ -5,6 +5,21 @@
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { AIProvider } from '../../../utils/api/aiApi';
 import { getProviderDisplayName } from '../../../utils/api/aiApi';
+import { AI_SYSTEM_PROMPT } from '../../../utils/api/aiPrompts';
+
+/**
+ * Get the unified system prompt that defines the AI assistant's role
+ * 
+ * This system prompt is used consistently across all AI queries to ensure:
+ * - Expert-level domain knowledge (endocrinologist specialized in type-1 diabetes)
+ * - Focus on CGM and insulin pump data analysis
+ * - Data-driven analysis without hallucination
+ * 
+ * @returns The unified system prompt string
+ */
+export function getSystemPrompt(): string {
+  return AI_SYSTEM_PROMPT;
+}
 
 /**
  * Get the language instruction for AI prompts based on the selected language
