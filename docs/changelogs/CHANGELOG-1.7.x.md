@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>844 Add Google Sign-In button to login dialog with coming soon message</summary>
+
+[#844](../../pull/844) Add Google Sign-In button to login dialog with coming soon message
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>848 Refactor glucoseRangeUtils into focused modules under 700 lines</summary>
 
 [#848](../../pull/848) Refactor glucoseRangeUtils into focused modules under 700 lines
