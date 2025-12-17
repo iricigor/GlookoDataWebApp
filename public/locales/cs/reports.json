@@ -57,8 +57,8 @@
         },
         "aiAnalysis": {
           "noHypos": "🎉 Výborně! Žádné hypoglykemické události nezjištěny dne {date}. Pokračujte ve skvělé kontrole glykémie!",
-          "hyposDetected": "{count} hypoglykemická(é) událost(i) zjištěno dne {date}{severe}.",
-          "hyposDetectedSevere": " ({severeCount} závažná)"
+          "hyposDetected": "{{count}} hypoglykemická(é) událost(i) zjištěno dne {{date}}{{severe}}.",
+          "hyposDetectedSevere": " ({{severeCount}} závažná)"
         },
         "analyzeButton": "Analyzovat s AI",
         "analyzingButton": "Analyzuji...",

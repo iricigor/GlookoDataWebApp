@@ -57,8 +57,8 @@
         },
         "aiAnalysis": {
           "noHypos": "🎉 Ausgezeichnet! Keine hypoglykämischen Ereignisse am {date} erkannt. Weiter so mit dem guten Glukosemanagement!",
-          "hyposDetected": "{count} hypoglykämische(s) Ereignis(se) am {date} erkannt{severe}.",
-          "hyposDetectedSevere": " ({severeCount} schwer)"
+          "hyposDetected": "{{count}} hypoglykämische(s) Ereignis(se) am {{date}} erkannt{{severe}}.",
+          "hyposDetectedSevere": " ({{severeCount}} schwer)"
         },
         "analyzeButton": "Mit KI analysieren",
         "analyzingButton": "Analysiere...",
