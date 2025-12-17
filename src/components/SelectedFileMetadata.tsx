@@ -10,22 +10,6 @@ const useStyles = makeStyles({
   container: {
     marginBottom: '24px',
   },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    ...shorthands.gap('8px'),
-    marginBottom: '16px',
-  },
-  headerTitle: {
-    fontSize: tokens.fontSizeBase500,
-    fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground1,
-  },
-  headerMetadata: {
-    fontSize: tokens.fontSizeBase300,
-    color: tokens.colorNeutralForeground2,
-    marginLeft: '8px',
-  },
   metadataGrid: {
     display: 'grid',
     gridTemplateColumns: 'auto 1fr',
@@ -88,16 +72,6 @@ export function SelectedFileMetadata({ selectedFile }: SelectedFileMetadataProps
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <Text className={styles.headerTitle}>{selectedFile.name}</Text>
-        <Text className={styles.headerMetadata}>
-          ({formatFileSize(selectedFile.size)}
-          {selectedFile.zipMetadata?.isValid && `, ${selectedFile.zipMetadata.csvFiles.length} datasets`}
-          {selectedFile.zipMetadata?.parsedMetadata?.name && `, ${selectedFile.zipMetadata.parsedMetadata.name}`}
-          {selectedFile.zipMetadata?.parsedMetadata?.dateRange && `, ${selectedFile.zipMetadata.parsedMetadata.dateRange}`})
-        </Text>
-      </div>
-
       <div className={styles.metadataGrid}>
         <Text className={styles.label}>File Name:</Text>
         <Text className={styles.value}>{selectedFile.name}</Text>

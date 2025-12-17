@@ -8,7 +8,7 @@ import {
 } from '@fluentui/react-components';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SelectedFileMetadata } from '../components/SelectedFileMetadata';
+import { FileInfoButton } from '../components/FileInfoButton';
 import { BGOverviewReport } from '../components/BGOverviewReport';
 import { DailyBGReport } from '../components/DailyBGReport';
 import { HyposReport } from '../components/HyposReport';
@@ -28,6 +28,13 @@ const useStyles = makeStyles({
   },
   header: {
     marginBottom: '24px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    ...shorthands.gap('16px'),
+  },
+  headerContent: {
+    flex: 1,
   },
   title: {
     fontSize: tokens.fontSizeHero800,
@@ -91,7 +98,7 @@ interface ReportsProps {
   useProKeys?: boolean;
 }
 
-const VALID_TABS = ['fileInfo', 'bgOverview', 'dailyBG', 'hypos'];
+const VALID_TABS = ['bgOverview', 'dailyBG', 'hypos'];
 
 /**
  * Render the Comprehensive Reports interface with selectable report tabs.
@@ -170,12 +177,6 @@ export function Reports({
 
   const renderTabContent = () => {
     switch (selectedTab) {
-      case 'fileInfo':
-        return (
-          <div>
-            <SelectedFileMetadata selectedFile={selectedFile} />
-          </div>
-        );
       case 'bgOverview':
         return (
           <BGOverviewReport 
@@ -217,10 +218,13 @@ export function Reports({
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Text className={styles.title}>{t('reports.title')}</Text>
-        <Text className={styles.description}>
-          {t('reports.description')}
-        </Text>
+        <div className={styles.headerContent}>
+          <Text className={styles.title}>{t('reports.title')}</Text>
+          <Text className={styles.description}>
+            {t('reports.description')}
+          </Text>
+        </div>
+        <FileInfoButton selectedFile={selectedFile} />
       </div>
 
       {/* Horizontal TabList for desktop */}
@@ -231,7 +235,6 @@ export function Reports({
         appearance="subtle"
         size="large"
       >
-        <Tab value="fileInfo">{t('reports.tabs.fileInfo')}</Tab>
         <Tab value="bgOverview">{t('reports.tabs.bgOverview')}</Tab>
         <Tab value="dailyBG">{t('reports.tabs.dailyBG')}</Tab>
         <Tab value="hypos">{t('reports.tabs.hypos')}</Tab>
@@ -246,7 +249,6 @@ export function Reports({
           className={styles.tabListVertical}
           appearance="subtle"
         >
-          <Tab value="fileInfo">{t('reports.tabs.fileInfo')}</Tab>
           <Tab value="bgOverview">{t('reports.tabs.bgOverview')}</Tab>
           <Tab value="dailyBG">{t('reports.tabs.dailyBG')}</Tab>
           <Tab value="hypos">{t('reports.tabs.hypos')}</Tab>
