@@ -1,21 +1,20 @@
 /**
  * Hypoglycemia Section component for DailyBGReport
- * Displays hypoglycemia statistics and chart with nadir markers
+ * 
+ * Displays hypoglycemia statistics and chart with nadir markers.
+ * Enhanced with AI analysis capabilities for single-day hypo insights.
+ * 
+ * Features:
+ * - 6 summary stat cards (extracted to HypoStatsCards component)
+ * - Interactive glucose chart with configurable max range (16/22 mmol/L)
+ * - AI-powered analysis (extracted to HypoAIAnalysis component)
  */
 
+import { useState } from 'react';
 import {
   Text,
   tokens,
-  Card,
-  Tooltip as FluentTooltip,
-  mergeClasses,
 } from '@fluentui/react-components';
-import {
-  WarningRegular,
-  HeartPulseWarningRegular,
-  ArrowTrendingDownRegular,
-  ClockRegular,
-} from '@fluentui/react-icons';
 import {
   ComposedChart,
   Line,
@@ -27,23 +26,40 @@ import {
   ReferenceLine,
   ReferenceArea,
 } from 'recharts';
-import type { GlucoseUnit, GlucoseThresholds } from '../../../types';
+import { useTranslation } from 'react-i18next';
+import type { GlucoseUnit, GlucoseThresholds, GlucoseReading } from '../../../types';
 import type { HypoStats } from '../../../utils/data/hypoDataUtils';
+import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
+import type { AIProvider } from '../../../utils/api';
 import { 
   displayGlucoseValue, 
   getUnitLabel, 
   convertGlucoseValue,
-  formatHypoDuration,
+  calculateLBGI,
 } from '../../../utils/data';
+import { SegmentedControl } from '../../shared';
 import { HyposTooltip } from '../tooltips';
 import { formatXAxis, HYPO_CHART_COLORS } from '../constants';
+import { HypoStatsCards } from './HypoStatsCards';
+import { HypoAIAnalysis } from './HypoAIAnalysis';
 import type { useStyles } from '../styles';
 
+type MaxGlucoseOption = '16' | '22';
+
+/**
+ * Props for the HypoSection component
+ * Displays hypoglycemia statistics, chart, and optional AI analysis for a single day
+ */
 interface HypoSectionProps {
+  /** Style object from useStyles hook */
   styles: ReturnType<typeof useStyles>;
+  /** Unit for glucose display (mg/dL or mmol/L) */
   glucoseUnit: GlucoseUnit;
+  /** Glucose thresholds for hypo detection */
   thresholds: GlucoseThresholds;
+  /** Hypoglycemia statistics for the current day */
   hypoStats: HypoStats;
+  /** Chart data points for visualization */
   hyposChartData: Array<{
     time: string;
     timeMinutes: number;
@@ -54,7 +70,9 @@ interface HypoSectionProps {
     color: string;
     index: number;
   }>;
+  /** Gradient stops for glucose line coloring */
   hyposGradientStops: Array<{ offset: string; color: string }>;
+  /** Nadir (lowest) points to mark on chart */
   nadirPoints: Array<{
     timeDecimal: number;
     value: number;
@@ -62,23 +80,40 @@ interface HypoSectionProps {
     nadir: number;
     isSevere: boolean;
   }>;
-  maxGlucose: number;
+  /** Optional max glucose (not used internally) */
+  maxGlucose?: number;
+  /** Whether to show day/night shading on chart */
   showDayNightShading: boolean;
+  // AI analysis props (simplified - following TimeInRangeCard pattern)
+  /** Current date being displayed (ISO format) */
+  currentDate?: string;
+  /** Glucose readings for LBGI calculation */
+  currentGlucoseReadings?: GlucoseReading[];
+  /** Whether an API key is available */
+  hasApiKey?: boolean;
+  /** Selected AI provider */
+  activeProvider?: AIProvider | null;
+  /** API key for the active provider */
+  apiKey?: string;
+  /** Language for AI responses */
+  responseLanguage?: ResponseLanguage;
+  /** Whether user is a Pro user */
+  isProUser?: boolean;
+  /** Pro user ID token */
+  idToken?: string | null;
+  /** Whether to use Pro backend keys */
+  useProKeys?: boolean;
+  /** Whether to show geek stats accordion */
+  showGeekStats?: boolean;
 }
 
 /**
- * Render the hypoglycemia analysis section with summary statistic cards and an optional hypoglycemia chart.
+ * Renders the hypoglycemia analysis section for a single day.
  *
- * @param styles - Style object returned from useStyles for layout and visual classes
- * @param glucoseUnit - Unit for glucose values (used for display and axis labels)
- * @param thresholds - Threshold values for `veryLow` and `low` hypoglycemia markers
- * @param hypoStats - Aggregate hypoglycemia statistics (e.g., severeCount, nonSevereCount, lowestValue, totalDuration)
- * @param hyposChartData - Time-series data points used to plot the glucose line on the chart
- * @param hyposGradientStops - Gradient stop definitions used to color the glucose line
- * @param nadirPoints - Points marking nadirs (lowest points) on the chart, including severity flags
- * @param maxGlucose - Maximum glucose value used to set the chart's Y-axis domain
- * @param showDayNightShading - When true, render day/night shaded regions on the chart
- * @returns The section's rendered JSX element
+ * Displays summary statistics, an interactive glucose chart (with day/night shading, thresholds, nadir markers, and max-glucose control), and an optional AI analysis panel when enabled.
+ *
+ * @param props - Component props (see HypoSectionProps)
+ * @returns The rendered hypoglycemia analysis section
  */
 export function HypoSection({
   styles,
@@ -88,103 +123,61 @@ export function HypoSection({
   hyposChartData,
   hyposGradientStops,
   nadirPoints,
-  maxGlucose,
+  // maxGlucose is optional and not used; we calculate our own based on SegmentedControl
   showDayNightShading,
+  currentDate,
+  currentGlucoseReadings = [],
+  hasApiKey = false,
+  activeProvider = null,
+  apiKey = '',
+  responseLanguage = 'english',
+  isProUser = false,
+  idToken = null,
+  useProKeys = false,
+  showGeekStats = false,
 }: HypoSectionProps) {
+  const { t } = useTranslation('reports');
+  
+  // State for max glucose control (16 or 22 mmol/L)
+  const [maxGlucoseOption, setMaxGlucoseOption] = useState<MaxGlucoseOption>('22');
+  
+  // Calculate LBGI for current day's readings
+  const lbgi = currentGlucoseReadings.length > 0 ? calculateLBGI(currentGlucoseReadings) : null;
+  
+  // Calculate actual maxGlucose based on selection
+  const maxGlucose = glucoseUnit === 'mg/dL' 
+    ? (maxGlucoseOption === '16' ? 288 : 396)
+    : (maxGlucoseOption === '16' ? 16 : 22);
+  
   return (
     <div className={styles.sectionCard}>
-      <Text className={styles.sectionTitle}>Hypoglycemia Analysis</Text>
+      <Text className={styles.sectionTitle}>{t('reports.dailyBG.hypoAnalysis.title')}</Text>
       
-      {/* Hypo Stats Cards */}
-      <div className={styles.statsRow}>
-        <FluentTooltip content="Severe hypoglycemic events (below very low threshold)" relationship="description">
-          <Card className={mergeClasses(
-            styles.statCard,
-            hypoStats.severeCount > 0 ? styles.statCardDanger : styles.statCardSuccess
-          )}>
-            <HeartPulseWarningRegular className={mergeClasses(
-              styles.statIcon,
-              hypoStats.severeCount > 0 ? styles.statIconDanger : styles.statIconSuccess
-            )} />
-            <div className={styles.statContent}>
-              <Text className={styles.statLabel}>Severe</Text>
-              <div className={styles.statValueRow}>
-                <Text className={styles.statValue}>{hypoStats.severeCount}</Text>
-              </div>
-            </div>
-          </Card>
-        </FluentTooltip>
-        
-        <FluentTooltip content="Non-severe hypoglycemic events (below low threshold)" relationship="description">
-          <Card className={mergeClasses(
-            styles.statCard,
-            hypoStats.nonSevereCount > 0 ? styles.statCardWarning : styles.statCardSuccess
-          )}>
-            <WarningRegular className={mergeClasses(
-              styles.statIcon,
-              hypoStats.nonSevereCount > 0 ? styles.statIconWarning : styles.statIconSuccess
-            )} />
-            <div className={styles.statContent}>
-              <Text className={styles.statLabel}>Non-Severe</Text>
-              <div className={styles.statValueRow}>
-                <Text className={styles.statValue}>{hypoStats.nonSevereCount}</Text>
-              </div>
-            </div>
-          </Card>
-        </FluentTooltip>
-        
-        <FluentTooltip content="Lowest glucose value during hypoglycemia" relationship="description">
-          <Card className={mergeClasses(
-            styles.statCard,
-            hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
-              ? styles.statCardDanger 
-              : hypoStats.lowestValue !== null ? styles.statCardWarning : styles.statCardSuccess
-          )}>
-            <ArrowTrendingDownRegular className={mergeClasses(
-              styles.statIcon,
-              hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
-                ? styles.statIconDanger 
-                : hypoStats.lowestValue !== null ? styles.statIconWarning : styles.statIconSuccess
-            )} />
-            <div className={styles.statContent}>
-              <Text className={styles.statLabel}>Lowest</Text>
-              <div className={styles.statValueRow}>
-                <Text className={styles.statValue}>
-                  {hypoStats.lowestValue !== null 
-                    ? displayGlucoseValue(hypoStats.lowestValue, glucoseUnit)
-                    : 'N/A'
-                  }
-                </Text>
-                <Text className={styles.statUnit}>{getUnitLabel(glucoseUnit)}</Text>
-              </div>
-            </div>
-          </Card>
-        </FluentTooltip>
-        
-        <FluentTooltip content="Total time spent in hypoglycemia" relationship="description">
-          <Card className={mergeClasses(
-            styles.statCard,
-            hypoStats.totalDurationMinutes > 0 ? styles.statCardWarning : styles.statCardSuccess
-          )}>
-            <ClockRegular className={mergeClasses(
-              styles.statIcon,
-              hypoStats.totalDurationMinutes > 0 ? styles.statIconWarning : styles.statIconSuccess
-            )} />
-            <div className={styles.statContent}>
-              <Text className={styles.statLabel}>Total Duration</Text>
-              <div className={styles.statValueRow}>
-                <Text className={styles.statValue}>
-                  {formatHypoDuration(hypoStats.totalDurationMinutes)}
-                </Text>
-              </div>
-            </div>
-          </Card>
-        </FluentTooltip>
-      </div>
-
+      {/* Hypo Stats Cards - Extracted component */}
+      <HypoStatsCards
+        styles={styles}
+        glucoseUnit={glucoseUnit}
+        thresholds={thresholds}
+        hypoStats={hypoStats}
+        lbgi={lbgi}
+      />
       {/* Hypos Chart */}
       {hyposChartData.length > 0 && (
         <div className={styles.hyposChartCard}>
+          {/* Max Glucose Selector */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'flex-end', 
+            marginBottom: '12px',
+            paddingRight: '30px'
+          }}>
+            <SegmentedControl<MaxGlucoseOption>
+              options={['16', '22']}
+              value={maxGlucoseOption}
+              onChange={setMaxGlucoseOption}
+              ariaLabel={`Max glucose display (${glucoseUnit === 'mg/dL' ? 'mg/dL' : 'mmol/L'})`}
+            />
+          </div>
           <div className={styles.chartCardInner}>
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={hyposChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -319,7 +312,7 @@ export function HypoSection({
             </ResponsiveContainer>
           </div>
           
-          {/* Hypos Legend */}
+          {/* Hypos Legend - Localized */}
           <div className={styles.legendContainer}>
             <div className={styles.legendItem}>
               <div 
@@ -328,7 +321,7 @@ export function HypoSection({
                   background: `linear-gradient(to right, ${HYPO_CHART_COLORS.normal}, ${HYPO_CHART_COLORS.low}, ${HYPO_CHART_COLORS.veryLow})` 
                 }} 
               />
-              <Text>Glucose</Text>
+              <Text>{t('reports.dailyBG.hypoAnalysis.chart.legend.glucose')}</Text>
             </div>
             <div className={styles.legendItem}>
               <div 
@@ -340,17 +333,38 @@ export function HypoSection({
                   borderTop: `10px solid ${HYPO_CHART_COLORS.nadirDot}`,
                 }} 
               />
-              <Text>Nadir (Lowest Point)</Text>
+              <Text>{t('reports.dailyBG.hypoAnalysis.chart.legend.nadir')}</Text>
             </div>
             <div className={styles.legendItem}>
               <div className={styles.legendDashedLine} style={{ borderColor: HYPO_CHART_COLORS.low }} />
-              <Text>Low Threshold ({displayGlucoseValue(thresholds.low, glucoseUnit)} {getUnitLabel(glucoseUnit)})</Text>
+              <Text>{t('reports.dailyBG.hypoAnalysis.chart.legend.lowThreshold', { 
+                value: displayGlucoseValue(thresholds.low, glucoseUnit), 
+                unit: getUnitLabel(glucoseUnit) 
+              })}</Text>
             </div>
             <div className={styles.legendItem}>
               <div className={styles.legendDashedLine} style={{ borderColor: HYPO_CHART_COLORS.veryLow }} />
-              <Text>Very Low ({displayGlucoseValue(thresholds.veryLow, glucoseUnit)} {getUnitLabel(glucoseUnit)})</Text>
+              <Text>{t('reports.dailyBG.hypoAnalysis.chart.legend.veryLowThreshold', { 
+                value: displayGlucoseValue(thresholds.veryLow, glucoseUnit), 
+                unit: getUnitLabel(glucoseUnit) 
+              })}</Text>
             </div>
           </div>
+          
+          {/* AI Analysis Section - Extracted component */}
+          <HypoAIAnalysis
+            hypoStats={hypoStats}
+            currentDate={currentDate}
+            hasApiKey={hasApiKey}
+            activeProvider={activeProvider}
+            apiKey={apiKey}
+            responseLanguage={responseLanguage}
+            isProUser={isProUser}
+            idToken={idToken}
+            useProKeys={useProKeys}
+            showGeekStats={showGeekStats}
+            glucoseUnit={glucoseUnit}
+          />
         </div>
       )}
     </div>

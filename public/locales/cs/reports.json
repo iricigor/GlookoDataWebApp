@@ -26,6 +26,49 @@
           "time": "24h"
         }
       }
+    },
+    "dailyBG": {
+      "hypoAnalysis": {
+        "title": "Analýza hypoglykémie",
+        "stats": {
+          "severe": "Závažná",
+          "severeTooltip": "Závažné hypoglykemické události (pod velmi nízkou hranicí)",
+          "nonSevere": "Nezávažná",
+          "nonSevereTooltip": "Nezávažné hypoglykemické události (pod nízkou hranicí)",
+          "lowest": "Nejnižší",
+          "lowestTooltip": "Nejnižší hodnota glykémie během hypoglykémie",
+          "longest": "Nejdelší",
+          "longestTooltip": "Délka nejdelší hypoglykemické události",
+          "totalTime": "Celková doba",
+          "totalTimeTooltip": "Celková doba strávená v hypoglykémii",
+          "lbgi": "LBGI",
+          "lbgiTooltip": "Index nízké glykémie (LBGI) - Predikuje riziko hypoglykémie. <{low} low, {low}-{moderate} moderate, >{moderate} high"
+        },
+        "maxGlucoseSelector": {
+          "ariaLabel": "Maximální zobrazení glykémie"
+        },
+        "chart": {
+          "legend": {
+            "glucose": "Glykémie",
+            "nadir": "Nadir (nejnižší bod)",
+            "lowThreshold": "Nízká hranice ({value} {unit})",
+            "veryLowThreshold": "Velmi nízká ({value} {unit})"
+          }
+        },
+        "aiAnalysis": {
+          "noHypos": "🎉 Výborně! Žádné hypoglykemické události nezjištěny dne {date}. Pokračujte ve skvělé kontrole glykémie!",
+          "hyposDetected": "{{count}} hypoglykemická(é) událost(i) zjištěno dne {{date}}{{severe}}.",
+          "hyposDetectedSevere": " ({{severeCount}} závažná)"
+        },
+        "analyzeButton": "Analyzovat s AI",
+        "analyzingButton": "Analyzuji...",
+        "reanalyzeButton": "Znovu analyzovat",
+        "waitMessage": "Počkejte prosím {seconds} sekund, než požádáte o novou analýzu...",
+        "errorPrefix": "Chyba:",
+        "errorFailed": "Nepodařilo se získat odpověď AI",
+        "errorUnexpected": "Došlo k neočekávané chybě",
+        "accordionTitle": "Zobrazit AI prompt"
+      }
     }
   }
 }

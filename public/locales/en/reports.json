@@ -26,6 +26,49 @@
           "time": "24h"
         }
       }
+    },
+    "dailyBG": {
+      "hypoAnalysis": {
+        "title": "Hypoglycemia Analysis",
+        "stats": {
+          "severe": "Severe",
+          "severeTooltip": "Severe hypoglycemic events (below very low threshold)",
+          "nonSevere": "Non-Severe",
+          "nonSevereTooltip": "Non-severe hypoglycemic events (below low threshold)",
+          "lowest": "Lowest",
+          "lowestTooltip": "Lowest glucose value during hypoglycemia",
+          "longest": "Longest",
+          "longestTooltip": "Duration of longest hypoglycemic event",
+          "totalTime": "Total Time",
+          "totalTimeTooltip": "Total time spent in hypoglycemia",
+          "lbgi": "LBGI",
+          "lbgiTooltip": "Low Blood Glucose Index (LBGI) - Predicts hypoglycemia risk. <{low} low, {low}-{moderate} moderate, >{moderate} high"
+        },
+        "maxGlucoseSelector": {
+          "ariaLabel": "Max glucose display"
+        },
+        "chart": {
+          "legend": {
+            "glucose": "Glucose",
+            "nadir": "Nadir (Lowest Point)",
+            "lowThreshold": "Low Threshold ({value} {unit})",
+            "veryLowThreshold": "Very Low ({value} {unit})"
+          }
+        },
+        "aiAnalysis": {
+          "noHypos": "🎉 Excellent! No hypoglycemic events detected on {date}. Keep up the great glucose management!",
+          "hyposDetected": "{{count}} hypoglycemic event(s) detected on {{date}}{{severe}}.",
+          "hyposDetectedSevere": " ({{severeCount}} severe)"
+        },
+        "analyzeButton": "Analyze with AI",
+        "analyzingButton": "Analyzing...",
+        "reanalyzeButton": "Re-analyze",
+        "waitMessage": "Please wait {seconds} second(s) before requesting new analysis...",
+        "errorPrefix": "Error:",
+        "errorFailed": "Failed to get AI response",
+        "errorUnexpected": "An unexpected error occurred",
+        "accordionTitle": "View AI Prompt"
+      }
     }
   }
 }

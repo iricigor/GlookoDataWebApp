@@ -26,6 +26,49 @@
           "time": "24h"
         }
       }
+    },
+    "dailyBG": {
+      "hypoAnalysis": {
+        "title": "Analiza hipoglikemije",
+        "stats": {
+          "severe": "Ozbiljna",
+          "severeTooltip": "Ozbiljni hipoglikemijski događaji (ispod veoma niskog praga)",
+          "nonSevere": "Neozbiljna",
+          "nonSevereTooltip": "Neozbiljni hipoglikemijski događaji (ispod niskog praga)",
+          "lowest": "Najniža",
+          "lowestTooltip": "Najniža vrednost glukoze tokom hipoglikemije",
+          "longest": "Najduža",
+          "longestTooltip": "Trajanje najdužeg hipoglikemijskog događaja",
+          "totalTime": "Ukupno vreme",
+          "totalTimeTooltip": "Ukupno vreme provedeno u hipoglikemiji",
+          "lbgi": "LBGI",
+          "lbgiTooltip": "Indeks niske glukoze u krvi (LBGI) - Predviđa rizik od hipoglikemije. <{low} low, {low}-{moderate} moderate, >{moderate} high"
+        },
+        "maxGlucoseSelector": {
+          "ariaLabel": "Maksimalni prikaz glukoze"
+        },
+        "chart": {
+          "legend": {
+            "glucose": "Glukoza",
+            "nadir": "Nadir (najniža tačka)",
+            "lowThreshold": "Niski prag ({value} {unit})",
+            "veryLowThreshold": "Veoma niski ({value} {unit})"
+          }
+        },
+        "aiAnalysis": {
+          "noHypos": "🎉 Odlično! Nisu otkriveni hipoglikemijski događaji na {date}. Nastavite sa odličnom kontrolom glukoze!",
+          "hyposDetected": "{{count}} hipoglikemijski događaj(a) otkriveno na {{date}}{{severe}}.",
+          "hyposDetectedSevere": " ({{severeCount}} ozbiljna)"
+        },
+        "analyzeButton": "Analiziraj sa AI",
+        "analyzingButton": "Analiziram...",
+        "reanalyzeButton": "Ponovo analiziraj",
+        "waitMessage": "Molimo sačekajte {seconds} sekund(i) pre nego što zatražite novu analizu...",
+        "errorPrefix": "Greška:",
+        "errorFailed": "Neuspelo dobijanje AI odgovora",
+        "errorUnexpected": "Dogodila se neočekivana greška",
+        "accordionTitle": "Prikaži AI upit"
+      }
     }
   }
 }

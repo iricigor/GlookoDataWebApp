@@ -101,19 +101,14 @@ interface ReportsProps {
 const VALID_TABS = ['bgOverview', 'dailyBG', 'hypos'];
 
 /**
- * Render the Comprehensive Reports interface with selectable report tabs.
+ * Display a tabbed reports interface for the provided uploaded file.
  *
- * @param selectedFile - Uploaded file whose data will be shown in the reports.
- * @param glucoseUnit - Unit used to display glucose values.
- * @param insulinDuration - Insulin action duration in hours used by daily reports.
- * @param showDayNightShading - When true, daily charts include day/night shading.
- * @param perplexityApiKey - Optional API key for the Perplexity AI provider (used by the Hypos report).
- * @param geminiApiKey - Optional API key for the Gemini AI provider (used by the Hypos report).
- * @param grokApiKey - Optional API key for the Grok AI provider (used by the Hypos report).
- * @param deepseekApiKey - Optional API key for the DeepSeek AI provider (used by the Hypos report).
- * @param selectedProvider - Selected AI provider to use for AI-powered reports.
- * @param responseLanguage - Preferred language for AI-generated responses.
- * @returns The reports UI as a React element.
+ * @param selectedFile - Uploaded file whose data will be shown in the reports
+ * @param insulinDuration - Insulin action duration in hours used by daily reports
+ * @param showDayNightShading - When true, daily charts include day/night shading
+ * @param selectedProvider - Selected AI provider to use for AI-powered reports
+ * @param responseLanguage - Preferred language for AI-generated responses
+ * @returns A React element containing the reports UI
  */
 export function Reports({ 
   selectedFile, 
@@ -195,7 +190,24 @@ export function Reports({
           />
         );
       case 'dailyBG':
-        return <DailyBGReport selectedFile={selectedFile} glucoseUnit={glucoseUnit} insulinDuration={insulinDuration} showDayNightShading={showDayNightShading} />;
+        return (
+          <DailyBGReport 
+            selectedFile={selectedFile} 
+            glucoseUnit={glucoseUnit} 
+            insulinDuration={insulinDuration} 
+            showDayNightShading={showDayNightShading}
+            showGeekStats={showGeekStats}
+            perplexityApiKey={perplexityApiKey}
+            geminiApiKey={geminiApiKey}
+            grokApiKey={grokApiKey}
+            deepseekApiKey={deepseekApiKey}
+            selectedProvider={selectedProvider}
+            responseLanguage={responseLanguage}
+            isProUser={isProUser}
+            idToken={idToken}
+            useProKeys={useProKeys}
+          />
+        );
       case 'hypos':
         return (
           <HyposReport 
