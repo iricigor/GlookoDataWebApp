@@ -5,7 +5,7 @@
     "gotIt": "Got it"
   },
   "loginDialog": {
-    "title": "Login with Microsoft",
+    "title": "Login to Glooko",
     "description": "Sign in with your personal Microsoft account to access all features.",
     "signInButton": "Sign in with Microsoft",
     "signInWithGoogle": "Sign in with Google",

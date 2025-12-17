@@ -51,6 +51,10 @@ const GoogleLogo = () => (
 );
 
 const useStyles = makeStyles({
+  dialogSurface: {
+    maxWidth: '670px',
+    width: '670px',
+  },
   dialogContent: {
     display: 'flex',
     flexDirection: 'column',
@@ -72,19 +76,11 @@ const useStyles = makeStyles({
     ...shorthands.gap('8px'),
     flex: '1',
     minHeight: '40px',
-    ...shorthands.padding('8px', '16px'),
+    ...shorthands.padding('8px', '32px'),
     whiteSpace: 'nowrap',
   },
   googleButton: {
-    backgroundColor: '#fff',
-    color: '#3c4043',
-    ...shorthands.border('1px', 'solid', '#dadce0'),
-    ':hover': {
-      backgroundColor: '#f8f9fa',
-    },
-    ':active': {
-      backgroundColor: '#f1f3f4',
-    },
+    // No custom background - will use the theme's default button color
   },
   loginButtonText: {
     '@media (max-width: 768px)': {
@@ -183,7 +179,7 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
           <span className={styles.loginButtonText}>{t('navigation:navigation.login')}</span>
         </Button>
       </DialogTrigger>
-      <DialogSurface>
+      <DialogSurface className={styles.dialogSurface}>
         <DialogBody>
           <DialogTitle>{t('loginDialog.title')}</DialogTitle>
           <DialogContent className={styles.dialogContent}>

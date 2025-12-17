@@ -5,7 +5,7 @@
     "gotIt": "Rozumím"
   },
   "loginDialog": {
-    "title": "Přihlášení pomocí Microsoftu",
+    "title": "Přihlášení do Glooko",
     "description": "Přihlaste se pomocí svého osobního účtu Microsoft a získejte přístup ke všem funkcím.",
     "signInButton": "Přihlásit se pomocí Microsoftu",
     "signInWithGoogle": "Přihlásit se pomocí Google",
