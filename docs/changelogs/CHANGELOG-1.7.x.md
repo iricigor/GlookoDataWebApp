@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>846 Move file info from dedicated tab to dropdown popover with button</summary>
+
+[#846](../../pull/846) Move file info from dedicated tab to dropdown popover with button
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>840 Move Home navigation to app brand, hide from desktop nav bar</summary>
 
 [#840](../../pull/840) Move Home navigation to app brand, hide from desktop nav bar
