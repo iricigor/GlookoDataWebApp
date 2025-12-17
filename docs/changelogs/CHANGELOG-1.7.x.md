@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>842 Enhance Daily BG Hypoglycemia Analysis with AI capabilities and LBGI stats</summary>
+
+[#842](../../pull/842) Enhance Daily BG Hypoglycemia Analysis with AI capabilities and LBGI stats
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>844 Add Google Sign-In button to login dialog with coming soon message</summary>
 
 [#844](../../pull/844) Add Google Sign-In button to login dialog with coming soon message
