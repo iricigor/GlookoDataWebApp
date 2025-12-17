@@ -61,7 +61,7 @@ export function HypoStatsCards({
   
   return (
     <div className={styles.statsRow}>
-      <FluentTooltip content={t('dailyBG.hypoAnalysis.stats.severeTooltip')} relationship="description">
+      <FluentTooltip content={t('reports.dailyBG.hypoAnalysis.stats.severeTooltip')} relationship="description">
         <Card className={mergeClasses(
           styles.statCard,
           hypoStats.severeCount > 0 ? styles.statCardDanger : styles.statCardSuccess
@@ -71,7 +71,7 @@ export function HypoStatsCards({
             hypoStats.severeCount > 0 ? styles.statIconDanger : styles.statIconSuccess
           )} />
           <div className={styles.statContent}>
-            <Text className={styles.statLabel}>{t('dailyBG.hypoAnalysis.stats.severe')}</Text>
+            <Text className={styles.statLabel}>{t('reports.dailyBG.hypoAnalysis.stats.severe')}</Text>
             <div className={styles.statValueRow}>
               <Text className={styles.statValue}>{hypoStats.severeCount}</Text>
             </div>
@@ -79,7 +79,7 @@ export function HypoStatsCards({
         </Card>
       </FluentTooltip>
       
-      <FluentTooltip content={t('dailyBG.hypoAnalysis.stats.nonSevereTooltip')} relationship="description">
+      <FluentTooltip content={t('reports.dailyBG.hypoAnalysis.stats.nonSevereTooltip')} relationship="description">
         <Card className={mergeClasses(
           styles.statCard,
           hypoStats.nonSevereCount > 0 ? styles.statCardWarning : styles.statCardSuccess
@@ -89,7 +89,7 @@ export function HypoStatsCards({
             hypoStats.nonSevereCount > 0 ? styles.statIconWarning : styles.statIconSuccess
           )} />
           <div className={styles.statContent}>
-            <Text className={styles.statLabel}>{t('dailyBG.hypoAnalysis.stats.nonSevere')}</Text>
+            <Text className={styles.statLabel}>{t('reports.dailyBG.hypoAnalysis.stats.nonSevere')}</Text>
             <div className={styles.statValueRow}>
               <Text className={styles.statValue}>{hypoStats.nonSevereCount}</Text>
             </div>
@@ -97,7 +97,7 @@ export function HypoStatsCards({
         </Card>
       </FluentTooltip>
       
-      <FluentTooltip content={t('dailyBG.hypoAnalysis.stats.lowestTooltip')} relationship="description">
+      <FluentTooltip content={t('reports.dailyBG.hypoAnalysis.stats.lowestTooltip')} relationship="description">
         <Card className={mergeClasses(
           styles.statCard,
           hypoStats.lowestValue !== null && hypoStats.lowestValue < thresholds.veryLow 
@@ -111,7 +111,7 @@ export function HypoStatsCards({
               : hypoStats.lowestValue !== null ? styles.statIconWarning : styles.statIconSuccess
           )} />
           <div className={styles.statContent}>
-            <Text className={styles.statLabel}>{t('dailyBG.hypoAnalysis.stats.lowest')}</Text>
+            <Text className={styles.statLabel}>{t('reports.dailyBG.hypoAnalysis.stats.lowest')}</Text>
             <div className={styles.statValueRow}>
               <Text className={styles.statValue}>
                 {hypoStats.lowestValue !== null 
@@ -125,7 +125,7 @@ export function HypoStatsCards({
         </Card>
       </FluentTooltip>
       
-      <FluentTooltip content={t('dailyBG.hypoAnalysis.stats.longestTooltip')} relationship="description">
+      <FluentTooltip content={t('reports.dailyBG.hypoAnalysis.stats.longestTooltip')} relationship="description">
         <Card className={mergeClasses(
           styles.statCard,
           hypoStats.longestDurationMinutes > 0 ? styles.statCardWarning : styles.statCardSuccess
@@ -135,7 +135,7 @@ export function HypoStatsCards({
             hypoStats.longestDurationMinutes > 0 ? styles.statIconWarning : styles.statIconSuccess
           )} />
           <div className={styles.statContent}>
-            <Text className={styles.statLabel}>{t('dailyBG.hypoAnalysis.stats.longest')}</Text>
+            <Text className={styles.statLabel}>{t('reports.dailyBG.hypoAnalysis.stats.longest')}</Text>
             <div className={styles.statValueRow}>
               <Text className={styles.statValue}>
                 {formatHypoDuration(hypoStats.longestDurationMinutes)}
@@ -145,7 +145,7 @@ export function HypoStatsCards({
         </Card>
       </FluentTooltip>
       
-      <FluentTooltip content={t('dailyBG.hypoAnalysis.stats.totalTimeTooltip')} relationship="description">
+      <FluentTooltip content={t('reports.dailyBG.hypoAnalysis.stats.totalTimeTooltip')} relationship="description">
         <Card className={mergeClasses(
           styles.statCard,
           hypoStats.totalDurationMinutes > 0 ? styles.statCardWarning : styles.statCardSuccess
@@ -155,7 +155,7 @@ export function HypoStatsCards({
             hypoStats.totalDurationMinutes > 0 ? styles.statIconWarning : styles.statIconSuccess
           )} />
           <div className={styles.statContent}>
-            <Text className={styles.statLabel}>{t('dailyBG.hypoAnalysis.stats.totalTime')}</Text>
+            <Text className={styles.statLabel}>{t('reports.dailyBG.hypoAnalysis.stats.totalTime')}</Text>
             <div className={styles.statValueRow}>
               <Text className={styles.statValue}>
                 {hypoStats.totalDurationMinutes > 0 ? formatHypoDuration(hypoStats.totalDurationMinutes) : '😊'}
@@ -166,7 +166,7 @@ export function HypoStatsCards({
       </FluentTooltip>
       
       <FluentTooltip 
-        content={t('dailyBG.hypoAnalysis.stats.lbgiTooltip', { 
+        content={t('reports.dailyBG.hypoAnalysis.stats.lbgiTooltip', { 
           low: LBGI_THRESHOLDS.low, 
           moderate: LBGI_THRESHOLDS.moderate 
         })}
@@ -183,7 +183,7 @@ export function HypoStatsCards({
             lbgiInterpretation?.level === 'moderate' ? styles.statIconWarning : styles.statIconSuccess
           )} />
           <div className={styles.statContent}>
-            <Text className={styles.statLabel}>{t('dailyBG.hypoAnalysis.stats.lbgi')}</Text>
+            <Text className={styles.statLabel}>{t('reports.dailyBG.hypoAnalysis.stats.lbgi')}</Text>
             <div className={styles.statValueRow}>
               <Text className={styles.statValue}>
                 {lbgi !== null ? formatNumber(lbgi, 1) : 'N/A'}
