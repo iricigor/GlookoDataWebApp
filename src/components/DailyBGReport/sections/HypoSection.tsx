@@ -151,7 +151,7 @@ export function HypoSection({
   
   return (
     <div className={styles.sectionCard}>
-      <Text className={styles.sectionTitle}>{t('reports.dailyBG.hypoAnalysis.title')}</Text>
+      <Text className={styles.sectionTitle}>{t('dailyBG.hypoAnalysis.title')}</Text>
       
       {/* Hypo Stats Cards - Extracted component */}
       <HypoStatsCards
@@ -321,7 +321,7 @@ export function HypoSection({
                   background: `linear-gradient(to right, ${HYPO_CHART_COLORS.normal}, ${HYPO_CHART_COLORS.low}, ${HYPO_CHART_COLORS.veryLow})` 
                 }} 
               />
-              <Text>{t('reports.dailyBG.hypoAnalysis.chart.legend.glucose')}</Text>
+              <Text>{t('dailyBG.hypoAnalysis.chart.legend.glucose')}</Text>
             </div>
             <div className={styles.legendItem}>
               <div 
@@ -333,18 +333,18 @@ export function HypoSection({
                   borderTop: `10px solid ${HYPO_CHART_COLORS.nadirDot}`,
                 }} 
               />
-              <Text>{t('reports.dailyBG.hypoAnalysis.chart.legend.nadir')}</Text>
+              <Text>{t('dailyBG.hypoAnalysis.chart.legend.nadir')}</Text>
             </div>
             <div className={styles.legendItem}>
               <div className={styles.legendDashedLine} style={{ borderColor: HYPO_CHART_COLORS.low }} />
-              <Text>{t('reports.dailyBG.hypoAnalysis.chart.legend.lowThreshold', { 
+              <Text>{t('dailyBG.hypoAnalysis.chart.legend.lowThreshold', { 
                 value: displayGlucoseValue(thresholds.low, glucoseUnit), 
                 unit: getUnitLabel(glucoseUnit) 
               })}</Text>
             </div>
             <div className={styles.legendItem}>
               <div className={styles.legendDashedLine} style={{ borderColor: HYPO_CHART_COLORS.veryLow }} />
-              <Text>{t('reports.dailyBG.hypoAnalysis.chart.legend.veryLowThreshold', { 
+              <Text>{t('dailyBG.hypoAnalysis.chart.legend.veryLowThreshold', { 
                 value: displayGlucoseValue(thresholds.veryLow, glucoseUnit), 
                 unit: getUnitLabel(glucoseUnit) 
               })}</Text>

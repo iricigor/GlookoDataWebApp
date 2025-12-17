@@ -132,10 +132,10 @@ export function HypoAIAnalysis({
    */
   const getButtonText = (): string => {
     const baseText = analyzing
-      ? t('reports.dailyBG.hypoAnalysis.analyzingButton')
+      ? t('dailyBG.hypoAnalysis.analyzingButton')
       : response && !analyzing && ready
-      ? t('reports.dailyBG.hypoAnalysis.reanalyzeButton')
-      : t('reports.dailyBG.hypoAnalysis.analyzeButton');
+      ? t('dailyBG.hypoAnalysis.reanalyzeButton')
+      : t('dailyBG.hypoAnalysis.analyzeButton');
     
     // Add sparkles indicator when using Pro backend keys
     const sparkles = isProUser && useProKeys ? ' ✨' : '';
@@ -184,13 +184,13 @@ export function HypoAIAnalysis({
       if (result.success && result.content) {
         completeAnalysis(result.content);
       } else {
-        setAnalysisError(result.error || t('reports.dailyBG.hypoAnalysis.errorFailed'));
+        setAnalysisError(result.error || t('dailyBG.hypoAnalysis.errorFailed'));
         if (previousResponse) {
           completeAnalysis(previousResponse);
         }
       }
     } catch (err) {
-      setAnalysisError(err instanceof Error ? err.message : t('reports.dailyBG.hypoAnalysis.errorUnexpected'));
+      setAnalysisError(err instanceof Error ? err.message : t('dailyBG.hypoAnalysis.errorUnexpected'));
       if (previousResponse) {
         completeAnalysis(previousResponse);
       }
@@ -219,12 +219,12 @@ export function HypoAIAnalysis({
           color: tokens.colorNeutralForeground2,
         }}>
           {hypoStats.totalCount === 0 
-            ? t('reports.dailyBG.hypoAnalysis.aiAnalysis.noHypos', { date: currentDate || 'this day' })
-            : t('reports.dailyBG.hypoAnalysis.aiAnalysis.hyposDetected', { 
+            ? t('dailyBG.hypoAnalysis.aiAnalysis.noHypos', { date: currentDate || 'this day' })
+            : t('dailyBG.hypoAnalysis.aiAnalysis.hyposDetected', { 
                 count: hypoStats.totalCount, 
                 date: currentDate || 'this day',
                 severe: hypoStats.severeCount > 0 
-                  ? t('reports.dailyBG.hypoAnalysis.aiAnalysis.hyposDetectedSevere', { severeCount: hypoStats.severeCount })
+                  ? t('dailyBG.hypoAnalysis.aiAnalysis.hyposDetectedSevere', { severeCount: hypoStats.severeCount })
                   : ''
               })
           }
@@ -260,7 +260,7 @@ export function HypoAIAnalysis({
       {cooldownActive && cooldownSeconds > 0 && (
         <MessageBar intent="info">
           <MessageBarBody>
-            {t('reports.dailyBG.hypoAnalysis.waitMessage', { seconds: cooldownSeconds })}
+            {t('dailyBG.hypoAnalysis.waitMessage', { seconds: cooldownSeconds })}
           </MessageBarBody>
         </MessageBar>
       )}
@@ -269,7 +269,7 @@ export function HypoAIAnalysis({
       {error && (
         <MessageBar intent="error" icon={<ErrorCircleRegular />}>
           <MessageBarBody>
-            <strong>{t('reports.dailyBG.hypoAnalysis.errorPrefix')}</strong> {error}
+            <strong>{t('dailyBG.hypoAnalysis.errorPrefix')}</strong> {error}
           </MessageBarBody>
         </MessageBar>
       )}
@@ -290,7 +290,7 @@ export function HypoAIAnalysis({
       {showGeekStats && activeProvider && (
         <Accordion collapsible style={{ marginTop: '16px' }}>
           <AccordionItem value="aiPrompt">
-            <AccordionHeader>{t('reports.dailyBG.hypoAnalysis.accordionTitle')}</AccordionHeader>
+            <AccordionHeader>{t('dailyBG.hypoAnalysis.accordionTitle')}</AccordionHeader>
             <AccordionPanel>
               <div style={{
                 padding: '12px',
