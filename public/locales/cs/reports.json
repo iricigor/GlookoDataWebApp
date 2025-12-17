@@ -42,7 +42,7 @@
           "totalTime": "Celková doba",
           "totalTimeTooltip": "Celková doba strávená v hypoglykémii",
           "lbgi": "LBGI",
-          "lbgiTooltip": "Index nízké glykémie (LBGI) - Predikuje riziko hypoglykémie. <{low} nízké, {low}-{moderate} střední, >{moderate} vysoké"
+          "lbgiTooltip": "Index nízké glykémie (LBGI) - Predikuje riziko hypoglykémie. <{low} low, {low}-{moderate} moderate, >{moderate} high"
         },
         "maxGlucoseSelector": {
           "ariaLabel": "Maximální zobrazení glykémie"

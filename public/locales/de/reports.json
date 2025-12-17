@@ -42,7 +42,7 @@
           "totalTime": "Gesamtzeit",
           "totalTimeTooltip": "Gesamtzeit in Hypoglykämie",
           "lbgi": "LBGI",
-          "lbgiTooltip": "Low Blood Glucose Index (LBGI) - Sagt Hypoglykämierisiko voraus. <{low} niedrig, {low}-{moderate} mäßig, >{moderate} hoch"
+          "lbgiTooltip": "Low Blood Glucose Index (LBGI) - Sagt Hypoglykämierisiko voraus. <{low} low, {low}-{moderate} moderate, >{moderate} high"
         },
         "maxGlucoseSelector": {
           "ariaLabel": "Maximale Glukoseanzeige"

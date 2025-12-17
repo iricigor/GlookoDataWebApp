@@ -42,7 +42,7 @@
           "totalTime": "Ukupno vreme",
           "totalTimeTooltip": "Ukupno vreme provedeno u hipoglikemiji",
           "lbgi": "LBGI",
-          "lbgiTooltip": "Indeks niske glukoze u krvi (LBGI) - Predviđa rizik od hipoglikemije. <{low} nizak, {low}-{moderate} umeren, >{moderate} visok"
+          "lbgiTooltip": "Indeks niske glukoze u krvi (LBGI) - Predviđa rizik od hipoglikemije. <{low} low, {low}-{moderate} moderate, >{moderate} high"
         },
         "maxGlucoseSelector": {
           "ariaLabel": "Maksimalni prikaz glukoze"
