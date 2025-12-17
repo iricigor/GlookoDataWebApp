@@ -218,16 +218,27 @@ export function HypoAIAnalysis({
           fontSize: tokens.fontSizeBase300,
           color: tokens.colorNeutralForeground2,
         }}>
-          {hypoStats.totalCount === 0 
-            ? t('reports.dailyBG.hypoAnalysis.aiAnalysis.noHypos', { date: currentDate || 'this day' })
-            : t('reports.dailyBG.hypoAnalysis.aiAnalysis.hyposDetected', { 
-                count: hypoStats.totalCount, 
-                date: currentDate || 'this day',
-                severe: hypoStats.severeCount > 0 
-                  ? t('reports.dailyBG.hypoAnalysis.aiAnalysis.hyposDetectedSevere', { severeCount: hypoStats.severeCount })
-                  : ''
-              })
-          }
+          {(() => {
+            if (hypoStats.totalCount === 0) {
+              return t('reports.dailyBG.hypoAnalysis.aiAnalysis.noHypos', { 
+                date: currentDate || 'this day' 
+              });
+            }
+            
+            // Compute the severe text first (so interpolation happens)
+            const severeText = hypoStats.severeCount > 0 
+              ? t('reports.dailyBG.hypoAnalysis.aiAnalysis.hyposDetectedSevere', { 
+                  severeCount: hypoStats.severeCount 
+                })
+              : '';
+            
+            // Then pass it as a simple string to the parent translation
+            return t('reports.dailyBG.hypoAnalysis.aiAnalysis.hyposDetected', { 
+              count: hypoStats.totalCount, 
+              date: currentDate || 'this day',
+              severe: severeText
+            });
+          })()}
         </Text>
         
         {/* AI Analysis Button - Right aligned, always visible */}
