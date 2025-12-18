@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>858 Change login prompt text to be provider-agnostic</summary>
+
+[#858](../../pull/858) Change login prompt text to be provider-agnostic
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>853 Add unified system prompt for all AI queries</summary>
 
 [#853](../../pull/853) Add unified system prompt for all AI queries
