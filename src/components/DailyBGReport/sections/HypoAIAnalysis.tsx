@@ -32,7 +32,6 @@ import { extractDetailedHypoEvents, convertDetailedHypoEventsToCSV, parseHypoAIR
 import { base64Encode } from '../../../utils/formatting';
 import { useAnalysisState } from '../../../pages/AIAnalysis/useAnalysisState';
 import { usePromptProvider } from '../../../hooks/usePromptProvider';
-import { MarkdownRenderer } from '../../shared';
 
 interface HypoAIAnalysisProps {
   hypoStats: HypoStats;
@@ -125,29 +124,6 @@ export function HypoAIAnalysis({
     setAnalysisError,
     triggerCooldown,
   } = useAnalysisState();
-  
-  // Determine the provider to use in prompts
-  const { promptProvider } = usePromptProvider({ isProUser, useProKeys, activeProvider });
-  
-  // Extract detailed hypo events for the current day
-  const detailedEvents = useMemo(() => {
-    if (!currentDate || !thresholds || glucoseReadings.length === 0) {
-      return [];
-    }
-    return extractDetailedHypoEvents(
-      glucoseReadings,
-      thresholds,
-      bolusReadings,
-      basalReadings,
-      currentDate
-    );
-  }, [currentDate, thresholds, glucoseReadings, bolusReadings, basalReadings]);
-  
-  // Parse AI response to extract individual event analyses
-  const parsedEvents = useMemo(() => {
-    if (!response) return new Map<string, EventAnalysis>();
-    return parseHypoAIResponseByEventId(response);
-  }, [response]);
   
   // Determine the provider to use in prompts
   const { promptProvider } = usePromptProvider({ isProUser, useProKeys, activeProvider });
