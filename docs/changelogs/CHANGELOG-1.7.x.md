@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>856 Restructure Daily BG hypoglycemia AI analysis and add per-event parsing</summary>
+
+[#856](../../pull/856) Restructure Daily BG hypoglycemia AI analysis and add per-event parsing
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>858 Change login prompt text to be provider-agnostic</summary>
 
 [#858](../../pull/858) Change login prompt text to be provider-agnostic
