@@ -45,10 +45,13 @@ interface HypoAIAnalysisProps {
   useProKeys?: boolean;
   showGeekStats?: boolean;
   glucoseUnit: GlucoseUnit;
-  // New props for detailed analysis
+  /** Glucose readings for detailed event analysis and extraction */
   glucoseReadings?: GlucoseReading[];
+  /** Glucose thresholds for hypoglycemia detection */
   thresholds?: GlucoseThresholds;
+  /** Bolus insulin readings for event context analysis */
   bolusReadings?: InsulinReading[];
+  /** Basal insulin readings for event context analysis */
   basalReadings?: InsulinReading[];
 }
 
