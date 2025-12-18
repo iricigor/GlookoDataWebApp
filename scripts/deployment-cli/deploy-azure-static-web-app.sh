@@ -258,6 +258,9 @@ configure_google_auth() {
     print_info "Configuring Google authentication for Static Web App..."
     
     # Configure SWA application settings for Google authentication
+    # Note: Secrets are passed via command line due to Azure CLI limitations. In production Azure environments,
+    # process lists are typically restricted. The secrets are stored encrypted in Azure and only briefly
+    # visible during this deployment operation which should run in a secure environment (e.g., Azure Cloud Shell).
     az staticwebapp appsettings set \
         --name "${STATIC_WEB_APP_NAME}" \
         --resource-group "${RESOURCE_GROUP}" \

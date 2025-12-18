@@ -394,7 +394,6 @@ To enable Google authentication for your Static Web App:
 1. **Create Google OAuth Credentials:**
    - Go to [Google Cloud Console](https://console.cloud.google.com/)
    - Create or select a project
-   - Enable Google+ API
    - Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID"
    - Set application type to "Web application"
    - Add authorized redirect URI: `https://<your-swa-url>/.auth/login/google/callback`

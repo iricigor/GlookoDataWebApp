@@ -220,17 +220,10 @@ function Set-GlookoStaticWebApp {
                     if ($googleClientIdSecret -and $googleClientSecretSecret) {
                         Write-InfoMessage "Configuring Google authentication for Static Web App..."
                         
-                        # Configure SWA application settings for Google authentication
-                        # Note: Az.Websites module doesn't have Update-AzStaticWebAppAppSetting, so we use Azure CLI
-                        $appSettings = @{
-                            AUTH_GOOGLE_CLIENT_ID = $googleClientIdSecret
-                            AUTH_GOOGLE_CLIENT_SECRET = $googleClientSecretSecret
-                        }
-                        
-                        # Convert settings to JSON format for Azure CLI
-                        $settingsJson = $appSettings | ConvertTo-Json -Compress
-                        
                         # Use Azure CLI to set application settings (PowerShell Az module doesn't support SWA app settings yet)
+                        # Note: Secrets are passed via command line due to Azure CLI limitations. In production Azure environments,
+                        # process lists are typically restricted. The secrets are stored encrypted in Azure and only briefly
+                        # visible during this deployment operation which should run in a secure environment (e.g., Azure Cloud Shell).
                         $azCliResult = az staticwebapp appsettings set `
                             --name $swaName `
                             --resource-group $rg `
@@ -295,7 +288,7 @@ function Set-GlookoStaticWebApp {
             if ($googleAuthConfigured) {
                 Write-Host "  4. Test Google authentication by visiting $swaUrl/.auth/login/google"
             }
-            elseif (-not $googleAuthConfigured) {
+            else {
                 Write-Host "  4. Add Google auth secrets to Key Vault to enable Google authentication:"
                 Write-Host "     - google-client-id"
                 Write-Host "     - google-client-secret"
