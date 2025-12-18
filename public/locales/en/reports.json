@@ -67,7 +67,8 @@
         "errorPrefix": "Error:",
         "errorFailed": "Failed to get AI response",
         "errorUnexpected": "An unexpected error occurred",
-        "accordionTitle": "View AI Prompt"
+        "accordionPromptTitle": "AI Prompt",
+        "accordionResponseTitle": "Full AI Response"
       }
     }
   }
