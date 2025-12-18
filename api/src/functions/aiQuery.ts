@@ -33,6 +33,7 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { extractUserInfoFromToken, getTableClient, isNotFoundError, getSecretFromKeyVault } from "../utils/azureUtils";
 import { createRequestLogger } from "../utils/logger";
+import { AI_SYSTEM_PROMPT } from "../utils/aiPrompts";
 
 /**
  * Request body interface
@@ -345,7 +346,7 @@ async function callAIProvider(
           messages: [
             {
               role: 'system',
-              content: 'You are a helpful AI assistant specialized in diabetes management and glucose data analysis. Provide accurate, evidence-based information.',
+              content: AI_SYSTEM_PROMPT,
             },
             {
               role: 'user',
@@ -370,7 +371,7 @@ async function callAIProvider(
             {
               parts: [
                 {
-                  text: `You are a helpful AI assistant specialized in diabetes management and glucose data analysis. Provide accurate, evidence-based information.\n\n${prompt}`,
+                  text: `${AI_SYSTEM_PROMPT}\n\n${prompt}`,
                 },
               ],
             },
@@ -395,7 +396,7 @@ async function callAIProvider(
           messages: [
             {
               role: 'system',
-              content: 'You are a helpful AI assistant specialized in diabetes management and glucose data analysis. Provide accurate, evidence-based information.',
+              content: AI_SYSTEM_PROMPT,
             },
             {
               role: 'user',
@@ -418,7 +419,7 @@ async function callAIProvider(
           messages: [
             {
               role: 'system',
-              content: 'You are a helpful AI assistant specialized in diabetes management and glucose data analysis. Provide accurate, evidence-based information.',
+              content: AI_SYSTEM_PROMPT,
             },
             {
               role: 'user',
@@ -579,17 +580,21 @@ async function aiQuery(request: HttpRequest, context: InvocationContext): Promis
     
     // Validate prompt contains expected system role context (diabetes expert)
     // This ensures prompts follow the expected structure from the frontend
+    // The frontend should include the AI_SYSTEM_PROMPT in user prompts
     const lowerPrompt = prompt.toLowerCase();
-    const hasSystemContext = lowerPrompt.includes('diabetes') || 
-                             lowerPrompt.includes('glucose') ||
-                             lowerPrompt.includes('medical assistant') ||
-                             lowerPrompt.includes('diabetes care') ||
-                             lowerPrompt.includes('continuous glucose monitoring');
+    const hasEndocrinologistRole = lowerPrompt.includes('endocrinologist') || 
+                                    lowerPrompt.includes('expert') ||
+                                    lowerPrompt.includes('diabetes care') ||
+                                    lowerPrompt.includes('diabetes management');
+    const hasCGMContext = lowerPrompt.includes('cgm') || 
+                          lowerPrompt.includes('continuous glucose monitoring') ||
+                          lowerPrompt.includes('glucose') ||
+                          lowerPrompt.includes('insulin pump');
     
-    if (!hasSystemContext) {
+    if (!hasEndocrinologistRole || !hasCGMContext) {
       requestLogger.logInfo('Prompt missing expected system context', { userId });
       return requestLogger.logError(
-        'Invalid prompt structure. Prompts must include appropriate medical context.',
+        'Invalid prompt structure. Prompts must include appropriate medical context and role definition.',
         400,
         'validation'
       );

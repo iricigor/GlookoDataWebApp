@@ -10,7 +10,7 @@ import { base64Decode } from '../../../utils/formatting';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit } from '../../../types';
 import type { AIProvider } from '../../../utils/api/aiApi';
-import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils';
+import { getLanguageInstruction, getDisclaimerInstruction, getSystemPrompt } from './promptUtils';
 
 /**
  * Generate AI prompt for daily hypoglycemia event analysis
@@ -33,14 +33,17 @@ export function generateHyposReportPrompt(
   provider?: AIProvider
 ): string {
   const eventsData = base64Decode(base64EventsData);
+  const systemPrompt = getSystemPrompt();
   const languageInstruction = getLanguageInstruction(language);
   const disclaimerInstruction = getDisclaimerInstruction(provider, language);
   
   // User's preferred response unit
   const responseUnit = unit;
   
-  return `**Role and Goal**
-You are an expert Certified Diabetes Care and Education Specialist (CDCES) specializing in data-driven insulin pump and CGM analysis. Your task is to analyze the provided dataset of N=${totalEventCount} hypoglycemic events. This analysis must rely **strictly** on the numerical data provided below; **no external assumptions** about exercise, unrecorded carbs, or detailed sleep are allowed, except through deduction from the \`Time_of_Day_Code\`.
+  return `${systemPrompt}
+
+**Task**
+Your task is to analyze the provided dataset of N=${totalEventCount} hypoglycemic events. This analysis must rely **strictly** on the numerical data provided below; **no external assumptions** about exercise, unrecorded carbs, or detailed sleep are allowed, except through deduction from the \`Time_of_Day_Code\`.
 
 **IMPORTANT FORMATTING RULES**
 - Do NOT start your response with greetings like "Hello", "Good morning", "Good afternoon", or similar

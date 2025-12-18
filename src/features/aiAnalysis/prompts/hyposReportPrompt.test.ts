@@ -28,12 +28,13 @@ E-002,2024-01-15T14:30:00.000Z,58,25,1.5,10,1.2,5.0,180,2.0,300,0.8,0.8,0.8,0.8,
       expect(result).toContain('N=164 hypoglycemic events');
     });
 
-    it('should include role description', () => {
+    it('should include system prompt with endocrinologist role', () => {
       const base64Data = base64Encode(sampleEventsData);
       const result = generateHyposReportPrompt(base64Data, 2);
       
-      expect(result).toContain('Certified Diabetes Care and Education Specialist');
-      expect(result).toContain('CDCES');
+      expect(result).toContain('expert endocrinologist');
+      expect(result).toContain('type-1 diabetes');
+      expect(result).toContain('CGM/insulin pump data analysis');
     });
 
     it('should include primary suspect categories', () => {

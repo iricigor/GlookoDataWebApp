@@ -32,16 +32,17 @@ describe('mealTimingPrompt', () => {
       expect(result).toContain('2024-01-01');
     });
 
-    it('should include role and goal section', () => {
+    it('should include system prompt and task section', () => {
       const base64Cgm = base64Encode(sampleCgmData);
       const base64Bolus = base64Encode(sampleBolusData);
       const base64Basal = base64Encode(sampleBasalData);
       
       const result = generateMealTimingPrompt(base64Cgm, base64Bolus, base64Basal);
       
-      expect(result).toContain('Role and Goal');
-      expect(result).toContain('Data Analyst');
-      expect(result).toContain('Diabetes Management Specialist');
+      expect(result).toContain('expert endocrinologist');
+      expect(result).toContain('type-1 diabetes');
+      expect(result).toContain('CGM/insulin pump data analysis');
+      expect(result).toContain('Task');
     });
 
     it('should include detailed meal analysis requirement', () => {

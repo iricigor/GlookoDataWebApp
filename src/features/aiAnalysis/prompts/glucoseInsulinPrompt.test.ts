@@ -21,13 +21,14 @@ describe('glucoseInsulinPrompt', () => {
       expect(result).toContain('Basal Insulin');
     });
 
-    it('should include role and goal section', () => {
+    it('should include system prompt and task section', () => {
       const base64Data = base64Encode(sampleCsvData);
       const result = generateGlucoseInsulinPrompt(base64Data);
       
-      expect(result).toContain('Role and Goal');
-      expect(result).toContain('Data Analyst');
-      expect(result).toContain('Diabetes Management Specialist');
+      expect(result).toContain('expert endocrinologist');
+      expect(result).toContain('type-1 diabetes');
+      expect(result).toContain('CGM/insulin pump data analysis');
+      expect(result).toContain('Task');
     });
 
     it('should include temporal trends requirement', () => {

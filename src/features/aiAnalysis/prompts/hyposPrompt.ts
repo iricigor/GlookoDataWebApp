@@ -9,7 +9,7 @@ import { base64Decode } from '../../../utils/formatting';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { GlucoseUnit } from '../../../types';
 import type { AIProvider } from '../../../utils/api/aiApi';
-import { getLanguageInstruction, getDisclaimerInstruction } from './promptUtils';
+import { getLanguageInstruction, getDisclaimerInstruction, getSystemPrompt } from './promptUtils';
 
 /**
  * Generate AI prompt for hypoglycemia analysis
@@ -33,6 +33,7 @@ export function generateHyposPrompt(
   const hypoEventsData = base64Decode(base64HypoEventsData);
   const hypoSummaryData = base64Decode(base64HypoSummaryData);
   const hypoEventSummaryData = base64HypoEventSummaryData ? base64Decode(base64HypoEventSummaryData) : '';
+  const systemPrompt = getSystemPrompt();
   const languageInstruction = getLanguageInstruction(language);
   const disclaimerInstruction = getDisclaimerInstruction(provider, language);
   
@@ -65,11 +66,10 @@ This data helps identify the percentage of hypos that may be related to meal bol
 ${hypoEventSummaryData}
 \`\`\`` : '';
   
-  return `**Data Context**
-This analysis examines your hypoglycemia events and patterns to identify root causes, assess risk levels, and provide actionable recommendations for preventing low blood glucose episodes while maintaining good overall glycemic control.
+  return `${systemPrompt}
 
-**Role and Goal**
-You are an expert endocrinologist specialized in type-1 diabetes and CGM/insulin pump data analysis. I am providing aggregated and anonymized data only — never guess or invent missing raw data points.
+**Data Context**
+This analysis examines your hypoglycemia events and patterns to identify root causes, assess risk levels, and provide actionable recommendations for preventing low blood glucose episodes while maintaining good overall glycemic control.
 
 **Task**
 Analyze hypoglycemia risk with focus on patterns, root causes and actionable recommendations.

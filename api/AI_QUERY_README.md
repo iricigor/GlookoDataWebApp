@@ -122,6 +122,23 @@ The Function App's managed identity needs the following permissions:
 }
 ```
 
+**Important Notes:**
+- The backend automatically adds a unified system prompt to all AI queries
+- The system prompt defines the AI assistant's role as an expert endocrinologist
+- Frontend prompts should include appropriate medical context for validation
+
+**System Prompt (automatically added by backend):**
+```
+You are an expert endocrinologist specialized in type-1 diabetes and CGM/insulin pump data analysis. I am providing aggregated and anonymized data only — never guess or invent missing raw data points.
+```
+
+**Example Request:**
+```json
+{
+  "prompt": "You are an expert endocrinologist specialized in type-1 diabetes and CGM/insulin pump data analysis. I am providing aggregated and anonymized data only — never guess or invent missing raw data points.\n\nThis analysis examines your continuous glucose monitoring (CGM) data to evaluate how well your blood glucose stays within the target range, helping identify areas for improvement in diabetes management.\n\nMy percent time-in-range (TIR) from continuous glucose monitoring is 65.4%, based on a target range of 3.9-10.0 mmol/L. My Time Above Range (>10.0 mmol/L) is 28.2%. Provide a brief assessment and 2-3 specific, actionable and behavioral recommendations to improve glucose management."
+}
+```
+
 ### Response
 
 **Success (200 OK)**:
@@ -235,13 +252,12 @@ AzureDiagnostics
 # Get ID token from your frontend application
 ID_TOKEN="your-id-token-here"
 
-# Test Pro user AI query
+# Test Pro user AI query with example prompt including system context
 curl -X POST https://your-app.azurewebsites.net/api/ai/query \
   -H "Authorization: Bearer $ID_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "prompt": "Analyze glucose trends showing average of 120 mg/dL with 70% time in range",
-    "provider": "perplexity"
+    "prompt": "You are an expert endocrinologist specialized in type-1 diabetes and CGM/insulin pump data analysis. I am providing aggregated and anonymized data only — never guess or invent missing raw data points.\n\nAnalyze glucose trends showing average of 120 mg/dL with 70% time in range. Provide brief assessment and recommendations."
   }'
 ```
 

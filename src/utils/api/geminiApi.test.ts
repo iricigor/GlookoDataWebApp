@@ -199,7 +199,9 @@ describe('geminiApi', () => {
       const callArgs = mockFetch.mock.calls[0][1];
       const body = JSON.parse(callArgs.body);
       
-      expect(body.contents[0].parts[0].text).toContain('medical assistant');
+      expect(body.contents[0].parts[0].text).toContain('expert endocrinologist');
+      expect(body.contents[0].parts[0].text).toContain('type-1 diabetes');
+      expect(body.contents[0].parts[0].text).toContain('CGM/insulin pump data analysis');
       expect(body.contents[0].parts[0].text).toContain('test prompt');
     });
 

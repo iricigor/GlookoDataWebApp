@@ -188,9 +188,9 @@ describe('perplexityApi', () => {
       
       expect(body.messages).toHaveLength(2);
       expect(body.messages[0].role).toBe('system');
-      expect(body.messages[0].content).toContain('medical assistant');
-      expect(body.messages[0].content).toContain('mmol/L');
-      expect(body.messages[0].content).toContain('second person');
+      expect(body.messages[0].content).toContain('expert endocrinologist');
+      expect(body.messages[0].content).toContain('type-1 diabetes');
+      expect(body.messages[0].content).toContain('CGM/insulin pump data analysis');
       expect(body.messages[1].role).toBe('user');
       expect(body.messages[1].content).toBe('test prompt');
     });

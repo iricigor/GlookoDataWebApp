@@ -31,16 +31,16 @@ describe('hyposPrompt', () => {
       expect(result).toContain('2024-01-01');
     });
 
-    it('should include role and goal section', () => {
+    it('should include system prompt and task section', () => {
       const base64Events = base64Encode(sampleHypoEventsData);
       const base64Summary = base64Encode(sampleHypoSummaryData);
       
       const result = generateHyposPrompt(base64Events, base64Summary);
       
-      expect(result).toContain('Role and Goal');
       expect(result).toContain('expert endocrinologist');
       expect(result).toContain('type-1 diabetes');
       expect(result).toContain('CGM/insulin pump data analysis');
+      expect(result).toContain('Task');
     });
 
     it('should include hypoglycemia risk assessment section', () => {

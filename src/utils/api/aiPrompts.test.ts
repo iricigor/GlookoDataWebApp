@@ -17,29 +17,24 @@ describe('aiPrompts', () => {
       expect(AI_SYSTEM_PROMPT.length).toBeGreaterThan(0);
     });
 
-    it('should mention diabetes care', () => {
-      expect(AI_SYSTEM_PROMPT).toContain('diabetes care');
+    it('should specify expert endocrinologist role', () => {
+      expect(AI_SYSTEM_PROMPT).toContain('expert endocrinologist');
     });
 
-    it('should mention continuous glucose monitoring', () => {
-      expect(AI_SYSTEM_PROMPT).toContain('continuous glucose monitoring');
+    it('should mention type-1 diabetes specialization', () => {
+      expect(AI_SYSTEM_PROMPT).toContain('type-1 diabetes');
     });
 
-    it('should specify mmol/L units', () => {
-      expect(AI_SYSTEM_PROMPT).toContain('mmol/L');
+    it('should mention CGM and insulin pump data analysis', () => {
+      expect(AI_SYSTEM_PROMPT).toContain('CGM/insulin pump data analysis');
     });
 
-    it('should specify second person communication', () => {
-      expect(AI_SYSTEM_PROMPT).toContain('you/your');
+    it('should instruct not to guess or invent missing data', () => {
+      expect(AI_SYSTEM_PROMPT).toContain('never guess or invent missing raw data points');
     });
 
-    it('should specify not to assume healthcare provider intermediary', () => {
-      expect(AI_SYSTEM_PROMPT).toContain('Do not assume there is a healthcare provider intermediary');
-    });
-
-    it('should include completion marker instruction', () => {
-      expect(AI_SYSTEM_PROMPT).toContain('--- CONCLUSIO DATAE ---');
-      expect(AI_SYSTEM_PROMPT).toContain('end your complete response');
+    it('should specify data is aggregated and anonymized', () => {
+      expect(AI_SYSTEM_PROMPT).toContain('aggregated and anonymized data only');
     });
   });
 });
