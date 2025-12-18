@@ -6,7 +6,7 @@
   },
   "loginDialog": {
     "title": "Přihlášení do Glooko",
-    "description": "Přihlaste se pomocí svého osobního účtu Microsoft a získejte přístup ke všem funkcím.",
+    "description": "Přihlaste se pomocí svého osobního účtu a získejte přístup ke všem funkcím.",
     "signInButton": "Přihlásit se pomocí Microsoftu",
     "signInWithGoogle": "Přihlásit se pomocí Google",
     "signingIn": "Přihlašování...",

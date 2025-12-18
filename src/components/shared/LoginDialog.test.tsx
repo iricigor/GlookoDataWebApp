@@ -19,7 +19,7 @@ describe('LoginDialog', () => {
     const button = screen.getByRole('button', { name: /login/i });
     fireEvent.click(button);
     
-    expect(screen.getByText('Sign in with your personal Microsoft account to access all features.')).toBeInTheDocument();
+    expect(screen.getByText('Sign in with your personal account to access all features.')).toBeInTheDocument();
   });
 
   it('should show both Microsoft and Google sign-in buttons', () => {
