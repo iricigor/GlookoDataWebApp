@@ -296,6 +296,8 @@ display_summary() {
     echo "  2. Expected secrets for GlookoDataWebApp:"
     echo "     - PerplexityApiKey: API key for Perplexity AI"
     echo "     - GeminiApiKey: API key for Google Gemini AI"
+    echo "     - MicrosoftClientId: Microsoft App Registration client ID (for MSAL authentication)"
+    echo "     - GoogleClientId: Google OAuth 2.0 client ID (for future Google authentication)"
     echo ""
     echo "  3. Grant access to Azure Function App (if using managed identity):"
     echo "     - Run deploy-azure-function.sh to auto-configure RBAC"

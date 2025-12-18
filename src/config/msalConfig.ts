@@ -6,10 +6,22 @@
  * 
  * Security: Client ID is safe to expose in client-side code for SPAs.
  * No client secrets are used or required for public client applications.
+ * 
+ * Configuration:
+ * - Client ID can be set via VITE_MICROSOFT_CLIENT_ID environment variable
+ * - Falls back to hardcoded default if not set
+ * - For deployment: Set as build-time environment variable in CI/CD
  */
 
 import { LogLevel } from '@azure/msal-browser';
 import type { Configuration } from '@azure/msal-browser';
+
+// Default client ID (fallback if environment variable not set)
+const DEFAULT_MICROSOFT_CLIENT_ID = '656dc9c9-bae3-4ed0-a550-0c3e8aa3f26c';
+
+// Get client ID from environment variable or use default
+// VITE_ prefix is required for Vite to expose the variable to client-side code
+const MICROSOFT_CLIENT_ID = import.meta.env.VITE_MICROSOFT_CLIENT_ID || DEFAULT_MICROSOFT_CLIENT_ID;
 
 /**
  * Configuration object to be passed to MSAL instance on creation
@@ -17,7 +29,8 @@ import type { Configuration } from '@azure/msal-browser';
 export const msalConfig: Configuration = {
   auth: {
     // Application (client) ID from Azure App Registration
-    clientId: '656dc9c9-bae3-4ed0-a550-0c3e8aa3f26c',
+    // Can be configured via VITE_MICROSOFT_CLIENT_ID environment variable
+    clientId: MICROSOFT_CLIENT_ID,
     
     // Authority URL for personal Microsoft accounts
     // Use 'consumers' tenant for personal accounts (outlook.com, hotmail.com, etc.)

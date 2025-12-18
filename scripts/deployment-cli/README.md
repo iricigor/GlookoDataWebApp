@@ -293,7 +293,19 @@ az keyvault secret set --vault-name <name> --name "PerplexityApiKey" --value "<y
 
 # Add Google Gemini API key
 az keyvault secret set --vault-name <name> --name "GeminiApiKey" --value "<your-api-key>"
+
+# Add Microsoft Client ID for authentication
+az keyvault secret set --vault-name <name> --name "MicrosoftClientId" --value "<your-microsoft-client-id>"
+
+# Add Google Client ID for future authentication (optional)
+az keyvault secret set --vault-name <name> --name "GoogleClientId" --value "<your-google-client-id>"
 ```
+
+**Note on Authentication Secrets:**
+- `MicrosoftClientId`: Azure App Registration client ID used for Microsoft account authentication
+- `GoogleClientId`: Google OAuth 2.0 client ID (for future Google authentication support)
+- These secrets are fetched during CI/CD deployment and injected as build-time environment variables
+- If not set in Key Vault, the app will use hardcoded defaults (Microsoft) or disable the feature (Google)
 
 ### deploy-azure-function.sh
 

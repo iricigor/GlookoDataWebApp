@@ -10,6 +10,7 @@ jobs:
     permissions:
       contents: write  # Changed from read to write for creating releases
       pull-requests: write
+      id-token: write  # Required for Azure login with OIDC
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,11 +28,46 @@ jobs:
         id: version
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
       
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Get Auth Secrets from Key Vault
+        id: get-secrets
+        run: |
+          # Fetch Microsoft Client ID from Key Vault
+          MICROSOFT_CLIENT_ID=$(az keyvault secret show --vault-name glookodatawebapp-kv --name MicrosoftClientId --query value -o tsv 2>/dev/null || echo "")
+          
+          # Fetch Google Client ID from Key Vault
+          GOOGLE_CLIENT_ID=$(az keyvault secret show --vault-name glookodatawebapp-kv --name GoogleClientId --query value -o tsv 2>/dev/null || echo "")
+          
+          # Set as output for next steps (masked for security)
+          echo "::add-mask::$MICROSOFT_CLIENT_ID"
+          echo "::add-mask::$GOOGLE_CLIENT_ID"
+          echo "microsoft-client-id=$MICROSOFT_CLIENT_ID" >> $GITHUB_OUTPUT
+          echo "google-client-id=$GOOGLE_CLIENT_ID" >> $GITHUB_OUTPUT
+          
+          # Log status (without revealing actual values)
+          if [ -n "$MICROSOFT_CLIENT_ID" ]; then
+            echo "✅ Microsoft Client ID retrieved from Key Vault"
+          else
+            echo "⚠️ Microsoft Client ID not found in Key Vault - will use hardcoded default"
+          fi
+          
+          if [ -n "$GOOGLE_CLIENT_ID" ]; then
+            echo "✅ Google Client ID retrieved from Key Vault"
+          else
+            echo "ℹ️ Google Client ID not found in Key Vault - Google auth will be disabled"
+          fi
+      
       - name: Build And Deploy Static Web App
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         env:
           NODE_VERSION: '20.19.5'
+          VITE_MICROSOFT_CLIENT_ID: ${{ steps.get-secrets.outputs.microsoft-client-id }}
+          VITE_GOOGLE_CLIENT_ID: ${{ steps.get-secrets.outputs.google-client-id }}
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WONDERFUL_STONE_071384103 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
