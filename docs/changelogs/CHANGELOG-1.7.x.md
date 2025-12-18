@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>853 Add unified system prompt for all AI queries</summary>
+
+[#853](../../pull/853) Add unified system prompt for all AI queries
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>842 Enhance Daily BG Hypoglycemia Analysis with AI capabilities and LBGI stats</summary>
 
 [#842](../../pull/842) Enhance Daily BG Hypoglycemia Analysis with AI capabilities and LBGI stats
