@@ -1,5 +1,9 @@
 # GlookoDataWebApp API
 
+> **⚠️ DEPRECATED:** The cloud-based API functionality has been removed as part of a partial rollback of cloud features. See [CHANGELOG](../CHANGELOG.md#unreleased---partial-rollback-of-cloud-features) for details.
+> 
+> Settings are now stored locally in browser cookies. Microsoft Authentication is retained for optional personalized experience, but no cloud storage is used.
+
 This directory contains the Azure Functions backend API for the GlookoDataWebApp.
 
 ## Overview
@@ -115,6 +119,6 @@ Deploy these using the scripts in `scripts/deployment-cli/` or `scripts/deployme
 
 ## Related Documentation
 
-- [First Login API](../docs/FIRST_LOGIN_API.md) - Detailed API documentation
+- [First Login API](../docs/FIRST_LOGIN_API.md) - ⚠️ DEPRECATED - Detailed API documentation
 - [Deployment Guide](../docs/DEPLOYMENT.md) - Full deployment instructions
-- [Deployment Scripts](../scripts/README.md) - Azure infrastructure scripts
+- [Deployment Scripts](../scripts/README.md) - ⚠️ DEPRECATED - Azure infrastructure scripts

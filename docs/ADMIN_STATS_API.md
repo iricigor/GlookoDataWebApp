@@ -1,5 +1,7 @@
 # Admin Statistics API
 
+> **⚠️ DEPRECATED:** This API functionality has been removed as part of the cloud features rollback. See [CHANGELOG](../CHANGELOG.md#unreleased---partial-rollback-of-cloud-features) for details. Settings are now stored locally in browser cookies only.
+
 This document describes the administrative statistics API implementation in the GlookoDataWebApp.
 
 ## Overview

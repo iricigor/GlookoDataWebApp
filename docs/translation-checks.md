@@ -341,8 +341,8 @@ Potential improvements to the translation check system:
 ## Related Documentation
 
 - [i18next Namespace Design](i18n-namespace-design.md)
+- [Localization Formatters](LOCALIZATION_FORMATTERS.md) - Date/number formatting
 - [Contributing Guide](../CONTRIBUTING.md) - Localization section
-- [Localization Summary](../LOCALIZATION_SUMMARY.md)
 
 ---
 

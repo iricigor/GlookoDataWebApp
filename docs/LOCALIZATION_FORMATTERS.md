@@ -1,4 +1,6 @@
-# Localization Implementation Summary - PR 4/4
+# Localization Formatters Documentation
+
+> **Note:** This document provides technical details about the date/number formatting localization implementation.
 
 ## 🎯 Objective
 Implement standardized, localized formatting for all dates, times, and numbers displayed in the GlookoDataWebApp, ensuring that chart axes, tooltips, and data tables reflect the user's active UI language preference.
