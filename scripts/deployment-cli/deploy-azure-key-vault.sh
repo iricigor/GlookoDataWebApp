@@ -296,6 +296,8 @@ display_summary() {
     echo "  2. Expected secrets for GlookoDataWebApp:"
     echo "     - PerplexityApiKey: API key for Perplexity AI"
     echo "     - GeminiApiKey: API key for Google Gemini AI"
+    echo "     - google-client-id: Google OAuth 2.0 Client ID (for SWA authentication)"
+    echo "     - google-client-secret: Google OAuth 2.0 Client Secret (for SWA authentication)"
     echo ""
     echo "  3. Grant access to Azure Function App (if using managed identity):"
     echo "     - Run deploy-azure-function.sh to auto-configure RBAC"

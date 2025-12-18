@@ -9,6 +9,11 @@
     This function creates and configures an Azure Static Web App for the
     GlookoDataWebApp application. It is idempotent and safe to run multiple times.
     
+    The script automatically configures Google authentication if the following
+    secrets exist in the configured Key Vault:
+    - google-client-id: Google OAuth 2.0 Client ID
+    - google-client-secret: Google OAuth 2.0 Client Secret
+    
     This script uses native Azure PowerShell cmdlets (Az module) for:
     1. Native PowerShell experience in Azure Cloud Shell PowerShell flavor
     2. Better integration with PowerShell objects and pipeline
@@ -56,6 +61,10 @@
     Prerequisites:
     - Resource group must exist (or will be created)
     - User-Assigned Managed Identity should exist (for identity assignment)
+    - Key Vault with Google auth secrets (optional, for Google authentication):
+      * google-client-id
+      * google-client-secret
+    - Azure CLI must be available in PATH (for setting SWA app settings)
 #>
 function Set-GlookoStaticWebApp {
     [CmdletBinding()]
@@ -193,6 +202,65 @@ function Set-GlookoStaticWebApp {
                 }
             }
 
+            # Configure Google Authentication
+            Write-SectionHeader "Configuring Google Authentication"
+            
+            $keyVaultName = $config.keyVaultName
+            $googleAuthConfigured = $false
+            
+            try {
+                # Check if Key Vault exists
+                if (Test-AzureResource -ResourceType 'keyvault' -Name $keyVaultName -ResourceGroup $rg) {
+                    Write-InfoMessage "Retrieving Google auth secrets from Key Vault '$keyVaultName'..."
+                    
+                    # Retrieve Google Client ID and Secret from Key Vault
+                    $googleClientIdSecret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-id" -AsPlainText -ErrorAction SilentlyContinue
+                    $googleClientSecretSecret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-secret" -AsPlainText -ErrorAction SilentlyContinue
+                    
+                    if ($googleClientIdSecret -and $googleClientSecretSecret) {
+                        Write-InfoMessage "Configuring Google authentication for Static Web App..."
+                        
+                        # Configure SWA application settings for Google authentication
+                        # Note: Az.Websites module doesn't have Update-AzStaticWebAppAppSetting, so we use Azure CLI
+                        $appSettings = @{
+                            AUTH_GOOGLE_CLIENT_ID = $googleClientIdSecret
+                            AUTH_GOOGLE_CLIENT_SECRET = $googleClientSecretSecret
+                        }
+                        
+                        # Convert settings to JSON format for Azure CLI
+                        $settingsJson = $appSettings | ConvertTo-Json -Compress
+                        
+                        # Use Azure CLI to set application settings (PowerShell Az module doesn't support SWA app settings yet)
+                        $azCliResult = az staticwebapp appsettings set `
+                            --name $swaName `
+                            --resource-group $rg `
+                            --setting-names "AUTH_GOOGLE_CLIENT_ID=$googleClientIdSecret" "AUTH_GOOGLE_CLIENT_SECRET=$googleClientSecretSecret" `
+                            2>&1
+                        
+                        if ($LASTEXITCODE -eq 0) {
+                            Write-SuccessMessage "Google authentication configured successfully"
+                            $googleAuthConfigured = $true
+                        }
+                        else {
+                            Write-WarningMessage "Failed to configure Google authentication via Azure CLI: $azCliResult"
+                        }
+                    }
+                    else {
+                        Write-WarningMessage "Google auth secrets not found in Key Vault"
+                        Write-InfoMessage "Expected secrets: 'google-client-id' and 'google-client-secret'"
+                        Write-InfoMessage "Add them to Key Vault '$keyVaultName' to enable Google authentication"
+                    }
+                }
+                else {
+                    Write-WarningMessage "Key Vault '$keyVaultName' not found. Skipping Google authentication configuration."
+                    Write-InfoMessage "Run Set-GlookoKeyVault to create the Key Vault first"
+                }
+            }
+            catch {
+                Write-WarningMessage "Failed to configure Google authentication: $_"
+                Write-InfoMessage "You can configure it manually later"
+            }
+
             # Get Static Web App details
             $swa = Get-AzStaticWebApp -ResourceGroupName $rg -Name $swaName
             $swaUrl = "https://$($swa.DefaultHostname)"
@@ -214,10 +282,24 @@ function Set-GlookoStaticWebApp {
                 Write-Host ""
             }
             
+            if ($googleAuthConfigured) {
+                Write-Host "  Google Authentication: Enabled"
+                Write-Host "  Login URL:             $swaUrl/.auth/login/google"
+                Write-Host ""
+            }
+            
             Write-Host "Next Steps:"
             Write-Host "  1. Deploy your web app code using GitHub Actions or Azure CLI"
             Write-Host "  2. Link a backend using Set-GlookoSwaBackend if needed"
             Write-Host "  3. Configure custom domain if needed"
+            if ($googleAuthConfigured) {
+                Write-Host "  4. Test Google authentication by visiting $swaUrl/.auth/login/google"
+            }
+            elseif (-not $googleAuthConfigured) {
+                Write-Host "  4. Add Google auth secrets to Key Vault to enable Google authentication:"
+                Write-Host "     - google-client-id"
+                Write-Host "     - google-client-secret"
+            }
             Write-Host ""
 
             # Return deployment details
@@ -229,6 +311,7 @@ function Set-GlookoStaticWebApp {
                 DefaultUrl        = $swaUrl
                 Created           = $created
                 ManagedIdentity   = if ($assignMI -and $miExists) { $identityName } else { $null }
+                GoogleAuthEnabled = $googleAuthConfigured
             }
         }
         catch {
