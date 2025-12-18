@@ -3,7 +3,7 @@
  * Displays AI analysis section with button, response, and geek stats accordion
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Text,
   tokens,
@@ -19,19 +19,19 @@ import {
 import {
   ChevronDownRegular,
   ErrorCircleRegular,
+  InfoRegular,
 } from '@fluentui/react-icons';
 import { useTranslation } from 'react-i18next';
-import type { GlucoseUnit } from '../../../types';
+import type { GlucoseUnit, GlucoseReading, InsulinReading, GlucoseThresholds } from '../../../types';
 import type { HypoStats } from '../../../utils/data/hypoDataUtils';
 import type { ResponseLanguage } from '../../../hooks/useResponseLanguage';
 import type { AIProvider } from '../../../utils/api';
 import { callAIWithRouting } from '../../../utils/api';
-import { generateHyposPrompt } from '../../../features/aiAnalysis/prompts';
-import { convertHypoEventsToCSV, convertHypoSummariesToCSV } from '../../../utils/data';
+import { generateHyposReportPrompt } from '../../../features/aiAnalysis/prompts';
+import { extractDetailedHypoEvents, convertDetailedHypoEventsToCSV, parseHypoAIResponseByEventId, type DetailedHypoEvent, type EventAnalysis } from '../../../utils/data/hyposReportAIDataUtils';
 import { base64Encode } from '../../../utils/formatting';
 import { useAnalysisState } from '../../../pages/AIAnalysis/useAnalysisState';
 import { usePromptProvider } from '../../../hooks/usePromptProvider';
-import { MarkdownRenderer } from '../../shared';
 
 interface HypoAIAnalysisProps {
   hypoStats: HypoStats;
@@ -45,34 +45,42 @@ interface HypoAIAnalysisProps {
   useProKeys?: boolean;
   showGeekStats?: boolean;
   glucoseUnit: GlucoseUnit;
+  /** Glucose readings for detailed event analysis and extraction */
+  glucoseReadings?: GlucoseReading[];
+  /** Glucose thresholds for hypoglycemia detection */
+  thresholds?: GlucoseThresholds;
+  /** Bolus insulin readings for event context analysis */
+  bolusReadings?: InsulinReading[];
+  /** Basal insulin readings for event context analysis */
+  basalReadings?: InsulinReading[];
 }
 
 /**
- * Helper function to build the hypos prompt
- * Eliminates duplication between handleAnalyzeClick and geek stats accordion
+ * Helper function to build the hypos prompt for daily analysis
  * @param responseLanguage - Language for the AI response
  * @param glucoseUnit - Unit for glucose values (mg/dL or mmol/L)
  * @param promptProvider - Provider name to use in prompt
+ * @param detailedEvents - Detailed hypo events for the day
  * @returns Generated prompt string
  */
 function buildHyposPrompt(
   responseLanguage: ResponseLanguage,
   glucoseUnit: GlucoseUnit,
-  promptProvider: AIProvider | undefined
+  promptProvider: AIProvider | undefined,
+  detailedEvents: DetailedHypoEvent[]
 ): string {
-  // For single-day analysis, we currently pass empty arrays
-  // TODO: Pass actual hypo events and summaries when available
-  const hypoEventsCSV = convertHypoEventsToCSV([]);
-  const hypoSummariesCSV = convertHypoSummariesToCSV([]);
+  if (detailedEvents.length === 0) {
+    return 'No hypoglycemia events found for this day.';
+  }
   
-  // Base64 encode the CSV data
-  const base64EventsData = base64Encode(hypoEventsCSV);
-  const base64SummariesData = base64Encode(hypoSummariesCSV);
+  // Convert detailed events to CSV
+  const eventsCSV = convertDetailedHypoEventsToCSV(detailedEvents);
+  const base64Data = base64Encode(eventsCSV);
   
-  // Generate and return the prompt
-  return generateHyposPrompt(
-    base64EventsData,
-    base64SummariesData,
+  // Generate and return the prompt using the detailed prompt generator
+  return generateHyposReportPrompt(
+    base64Data,
+    detailedEvents.length,
     responseLanguage,
     glucoseUnit,
     promptProvider ?? 'gemini' // Fallback to gemini if undefined
@@ -98,6 +106,10 @@ export function HypoAIAnalysis({
   useProKeys = false,
   showGeekStats = false,
   glucoseUnit,
+  glucoseReadings = [],
+  thresholds,
+  bolusReadings = [],
+  basalReadings = [],
 }: HypoAIAnalysisProps) {
   const { t } = useTranslation('reports');
   const [isResponseExpanded, setIsResponseExpanded] = useState(true);
@@ -118,6 +130,26 @@ export function HypoAIAnalysis({
   
   // Determine the provider to use in prompts
   const { promptProvider } = usePromptProvider({ isProUser, useProKeys, activeProvider });
+  
+  // Extract detailed hypo events for the current day
+  const detailedEvents = useMemo(() => {
+    if (!currentDate || !thresholds || glucoseReadings.length === 0) {
+      return [];
+    }
+    return extractDetailedHypoEvents(
+      glucoseReadings,
+      thresholds,
+      bolusReadings,
+      basalReadings,
+      currentDate
+    );
+  }, [currentDate, thresholds, glucoseReadings, bolusReadings, basalReadings]);
+  
+  // Parse AI response to extract individual event analyses
+  const parsedEvents = useMemo(() => {
+    if (!response) return new Map<string, EventAnalysis>();
+    return parseHypoAIResponseByEventId(response);
+  }, [response]);
   
   // Auto-expand response when new analysis completes
   useEffect(() => {
@@ -170,8 +202,8 @@ export function HypoAIAnalysis({
     const previousResponse = response;
     
     try {
-      // Generate the prompt using shared helper
-      const prompt = buildHyposPrompt(responseLanguage, glucoseUnit, promptProvider);
+      // Generate the prompt using detailed events
+      const prompt = buildHyposPrompt(responseLanguage, glucoseUnit, promptProvider, detailedEvents);
       
       // Call the AI API with routing (handles Pro vs client-side)
       const result = await callAIWithRouting(activeProvider, prompt, {
@@ -195,6 +227,89 @@ export function HypoAIAnalysis({
         completeAnalysis(previousResponse);
       }
     }
+  };
+  
+  /**
+   * Render individual event analysis card
+   */
+  const renderEventCard = (analysis: EventAnalysis, event: DetailedHypoEvent | undefined, index: number) => {
+    const eventTime = event ? event.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : analysis.eventTime || 'Unknown';
+    
+    // Format nadir value with correct unit
+    const nadirValue = event 
+      ? `${glucoseUnit === 'mg/dL' ? event.nadirValueMgdl : (event.nadirValueMgdl / 18).toFixed(1)} ${glucoseUnit}`
+      : analysis.nadirValue || 'Unknown';
+    
+    return (
+      <div key={index} style={{
+        padding: tokens.spacingVerticalM,
+        backgroundColor: tokens.colorNeutralBackground3,
+        borderRadius: tokens.borderRadiusMedium,
+        border: `1px solid ${tokens.colorNeutralStroke2}`,
+        marginBottom: tokens.spacingVerticalS,
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: tokens.spacingVerticalXS,
+        }}>
+          <Text style={{
+            fontWeight: tokens.fontWeightSemibold,
+            fontSize: tokens.fontSizeBase400,
+          }}>
+            {analysis.eventId} - Event at {eventTime}
+          </Text>
+          <span style={{
+            padding: '2px 8px',
+            backgroundColor: tokens.colorPaletteRedBackground2,
+            color: tokens.colorPaletteRedForeground2,
+            borderRadius: tokens.borderRadiusSmall,
+            fontSize: tokens.fontSizeBase200,
+          }}>
+            Nadir: {nadirValue}
+          </span>
+        </div>
+        
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: tokens.spacingHorizontalXS,
+          marginBottom: tokens.spacingVerticalXS,
+        }}>
+          <InfoRegular />
+          <Text>Primary Suspect:</Text>
+          <span style={{
+            padding: '4px 10px',
+            backgroundColor: tokens.colorBrandBackground2,
+            color: tokens.colorBrandForeground2,
+            borderRadius: tokens.borderRadiusSmall,
+            fontSize: tokens.fontSizeBase200,
+            fontWeight: tokens.fontWeightSemibold,
+          }}>
+            {analysis.primarySuspect}
+          </span>
+        </div>
+        
+        <Text style={{
+          fontSize: tokens.fontSizeBase300,
+          color: tokens.colorNeutralForeground1,
+          lineHeight: '1.5',
+        }}>
+          <strong>Recommendation:</strong> {analysis.actionableInsight}
+        </Text>
+        
+        {analysis.mealTime && (
+          <Text style={{
+            fontSize: tokens.fontSizeBase200,
+            color: tokens.colorNeutralForeground3,
+            marginTop: tokens.spacingVerticalXS,
+          }}>
+            Estimated meal time: {analysis.mealTime}
+          </Text>
+        )}
+      </div>
+    );
   };
   
   return (
@@ -285,26 +400,36 @@ export function HypoAIAnalysis({
         </MessageBar>
       )}
       
-      {/* AI Response */}
-      {response && !analyzing && isResponseExpanded && (
+      {/* AI Response - Parsed event cards */}
+      {response && !analyzing && isResponseExpanded && parsedEvents.size > 0 && (
         <div style={{
-          padding: '16px',
-          backgroundColor: tokens.colorNeutralBackground3,
-          borderRadius: tokens.borderRadiusMedium,
-          marginTop: '12px',
+          marginTop: tokens.spacingVerticalS,
         }}>
-          <MarkdownRenderer content={response} />
+          <Text style={{
+            display: 'block',
+            fontWeight: tokens.fontWeightSemibold,
+            fontSize: tokens.fontSizeBase400,
+            marginBottom: tokens.spacingVerticalS,
+          }}>
+            Event Analysis
+          </Text>
+          {detailedEvents.map((event, index) => {
+            const analysis = parsedEvents.get(event.eventId);
+            if (!analysis) return null;
+            return renderEventCard(analysis, event, index);
+          })}
         </div>
       )}
       
-      {/* Geek Stats - AI Prompt Accordion (only when enabled) */}
+      {/* Geek Stats - AI Prompt and Full Response Accordions */}
       {showGeekStats && activeProvider && (
-        <Accordion collapsible style={{ marginTop: '16px' }}>
+        <Accordion collapsible multiple style={{ marginTop: tokens.spacingVerticalM }}>
+          {/* AI Prompt Accordion */}
           <AccordionItem value="aiPrompt">
-            <AccordionHeader>{t('reports.dailyBG.hypoAnalysis.accordionTitle')}</AccordionHeader>
+            <AccordionHeader>{t('reports.dailyBG.hypoAnalysis.accordionPromptTitle')}</AccordionHeader>
             <AccordionPanel>
               <div style={{
-                padding: '12px',
+                padding: tokens.spacingVerticalS,
                 backgroundColor: tokens.colorNeutralBackground2,
                 borderRadius: tokens.borderRadiusMedium,
                 fontFamily: 'monospace',
@@ -314,10 +439,32 @@ export function HypoAIAnalysis({
                 maxHeight: '400px',
                 overflowY: 'auto',
               }}>
-                {buildHyposPrompt(responseLanguage, glucoseUnit, promptProvider)}
+                {buildHyposPrompt(responseLanguage, glucoseUnit, promptProvider, detailedEvents)}
               </div>
             </AccordionPanel>
           </AccordionItem>
+          
+          {/* Full AI Response Accordion */}
+          {response && (
+            <AccordionItem value="fullResponse">
+              <AccordionHeader>{t('reports.dailyBG.hypoAnalysis.accordionResponseTitle')}</AccordionHeader>
+              <AccordionPanel>
+                <div style={{
+                  padding: tokens.spacingVerticalS,
+                  backgroundColor: tokens.colorNeutralBackground2,
+                  borderRadius: tokens.borderRadiusMedium,
+                  fontFamily: 'monospace',
+                  fontSize: tokens.fontSizeBase200,
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  maxHeight: '400px',
+                  overflowY: 'auto',
+                }}>
+                  {response}
+                </div>
+              </AccordionPanel>
+            </AccordionItem>
+          )}
         </Accordion>
       )}
     </div>

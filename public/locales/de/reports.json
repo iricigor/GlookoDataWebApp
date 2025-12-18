@@ -67,7 +67,8 @@
         "errorPrefix": "Fehler:",
         "errorFailed": "KI-Antwort konnte nicht abgerufen werden",
         "errorUnexpected": "Ein unerwarteter Fehler ist aufgetreten",
-        "accordionTitle": "KI-Prompt anzeigen"
+        "accordionPromptTitle": "KI-Prompt",
+        "accordionResponseTitle": "Vollständige KI-Antwort"
       }
     }
   }

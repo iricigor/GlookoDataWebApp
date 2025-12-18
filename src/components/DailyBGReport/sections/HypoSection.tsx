@@ -350,22 +350,26 @@ export function HypoSection({
               })}</Text>
             </div>
           </div>
-          
-          {/* AI Analysis Section - Extracted component */}
-          <HypoAIAnalysis
-            hypoStats={hypoStats}
-            currentDate={currentDate}
-            hasApiKey={hasApiKey}
-            activeProvider={activeProvider}
-            apiKey={apiKey}
-            responseLanguage={responseLanguage}
-            isProUser={isProUser}
-            idToken={idToken}
-            useProKeys={useProKeys}
-            showGeekStats={showGeekStats}
-            glucoseUnit={glucoseUnit}
-          />
         </div>
+      )}
+      
+      {/* AI Analysis Section - Moved outside chart container to be at same level */}
+      {hyposChartData.length > 0 && (
+        <HypoAIAnalysis
+          hypoStats={hypoStats}
+          currentDate={currentDate}
+          hasApiKey={hasApiKey}
+          activeProvider={activeProvider}
+          apiKey={apiKey}
+          responseLanguage={responseLanguage}
+          isProUser={isProUser}
+          idToken={idToken}
+          useProKeys={useProKeys}
+          showGeekStats={showGeekStats}
+          glucoseUnit={glucoseUnit}
+          glucoseReadings={currentGlucoseReadings}
+          thresholds={thresholds}
+        />
       )}
     </div>
   );

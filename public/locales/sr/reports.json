@@ -67,7 +67,8 @@
         "errorPrefix": "Greška:",
         "errorFailed": "Neuspelo dobijanje AI odgovora",
         "errorUnexpected": "Dogodila se neočekivana greška",
-        "accordionTitle": "Prikaži AI upit"
+        "accordionPromptTitle": "AI upit",
+        "accordionResponseTitle": "Potpun AI odgovor"
       }
     }
   }

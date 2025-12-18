@@ -67,7 +67,8 @@
         "errorPrefix": "Chyba:",
         "errorFailed": "Nepodařilo se získat odpověď AI",
         "errorUnexpected": "Došlo k neočekávané chybě",
-        "accordionTitle": "Zobrazit AI prompt"
+        "accordionPromptTitle": "AI prompt",
+        "accordionResponseTitle": "Úplná odpověď AI"
       }
     }
   }
