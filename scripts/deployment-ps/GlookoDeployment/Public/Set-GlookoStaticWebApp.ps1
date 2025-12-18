@@ -208,13 +208,19 @@ function Set-GlookoStaticWebApp {
             $keyVaultName = $config.keyVaultName
             $googleAuthConfigured = $false
             
+            # Use a status flag to avoid nested if/else (Continuance Pattern)
+            $continueGoogleAuth = $true
+            
             try {
                 # Check if Key Vault exists
                 if (-not (Test-AzureResource -ResourceType 'keyvault' -Name $keyVaultName -ResourceGroup $rg)) {
                     Write-WarningMessage "Key Vault '$keyVaultName' not found. Skipping Google authentication configuration."
                     Write-InfoMessage "Run Set-GlookoKeyVault to create the Key Vault first"
+                    $continueGoogleAuth = $false
                 }
-                else {
+                
+                # Retrieve secrets from Key Vault
+                if ($continueGoogleAuth) {
                     Write-InfoMessage "Retrieving Google auth secrets from Key Vault '$keyVaultName'..."
                     
                     # Retrieve Google Client ID and Secret from Key Vault
@@ -224,40 +230,45 @@ function Set-GlookoStaticWebApp {
                     $googleClientIdSecretObj = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-id" -ErrorAction SilentlyContinue
                     $googleClientSecretSecretObj = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-secret" -ErrorAction SilentlyContinue
                     
+                    # Check if secrets exist
                     if (-not $googleClientIdSecretObj -or -not $googleClientSecretSecretObj) {
                         Write-WarningMessage "Google auth secrets not found in Key Vault"
                         Write-InfoMessage "Expected secrets: 'google-client-id' and 'google-client-secret'"
                         Write-InfoMessage "Add them to Key Vault '$keyVaultName' to enable Google authentication"
+                        $continueGoogleAuth = $false
+                    }
+                }
+                
+                # Configure Google authentication
+                if ($continueGoogleAuth) {
+                    Write-InfoMessage "Configuring Google authentication for Static Web App..."
+                    
+                    # Convert SecureString to plain text only when needed for Azure CLI
+                    # Azure CLI is used because Az.Websites module doesn't support Static Web App app settings
+                    # Note: The plain text values exist only briefly in memory during the az CLI call
+                    $googleClientId = $googleClientIdSecretObj.SecretValue | ConvertFrom-SecureString -AsPlainText
+                    $googleClientSecret = $googleClientSecretSecretObj.SecretValue | ConvertFrom-SecureString -AsPlainText
+                    
+                    # Set SWA application settings using Azure CLI
+                    # Authentication: Uses current Azure CLI session (from 'az login')
+                    # The az CLI command runs in the same security context as this PowerShell session
+                    $azCliResult = az staticwebapp appsettings set `
+                        --name $swaName `
+                        --resource-group $rg `
+                        --setting-names "AUTH_GOOGLE_CLIENT_ID=$googleClientId" "AUTH_GOOGLE_CLIENT_SECRET=$googleClientSecret" `
+                        2>&1
+                    
+                    # Clear sensitive variables from memory
+                    $googleClientId = $null
+                    $googleClientSecret = $null
+                    
+                    # Check if Azure CLI command succeeded
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-SuccessMessage "Google authentication configured successfully"
+                        $googleAuthConfigured = $true
                     }
                     else {
-                        Write-InfoMessage "Configuring Google authentication for Static Web App..."
-                        
-                        # Convert SecureString to plain text only when needed for Azure CLI
-                        # Azure CLI is used because Az.Websites module doesn't support Static Web App app settings
-                        # Note: The plain text values exist only briefly in memory during the az CLI call
-                        $googleClientId = $googleClientIdSecretObj.SecretValue | ConvertFrom-SecureString -AsPlainText
-                        $googleClientSecret = $googleClientSecretSecretObj.SecretValue | ConvertFrom-SecureString -AsPlainText
-                        
-                        # Set SWA application settings using Azure CLI
-                        # Authentication: Uses current Azure CLI session (from 'az login')
-                        # The az CLI command runs in the same security context as this PowerShell session
-                        $azCliResult = az staticwebapp appsettings set `
-                            --name $swaName `
-                            --resource-group $rg `
-                            --setting-names "AUTH_GOOGLE_CLIENT_ID=$googleClientId" "AUTH_GOOGLE_CLIENT_SECRET=$googleClientSecret" `
-                            2>&1
-                        
-                        # Clear sensitive variables from memory
-                        $googleClientId = $null
-                        $googleClientSecret = $null
-                        
-                        if ($LASTEXITCODE -eq 0) {
-                            Write-SuccessMessage "Google authentication configured successfully"
-                            $googleAuthConfigured = $true
-                        }
-                        else {
-                            Write-WarningMessage "Failed to configure Google authentication via Azure CLI: $azCliResult"
-                        }
+                        Write-WarningMessage "Failed to configure Google authentication via Azure CLI: $azCliResult"
                     }
                 }
             }
