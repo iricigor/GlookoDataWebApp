@@ -91,7 +91,13 @@ cd GlookoDataWebApp
 npm install
 ```
 
-3. Start the development server:
+3. (Optional) Configure authentication:
+```bash
+cp .env.example .env.local
+# Edit .env.local with your Microsoft/Google client IDs
+```
+
+4. Start the development server:
 ```bash
 npm run dev
 ```
@@ -115,6 +121,7 @@ Comprehensive documentation is available:
 - **[Contributing Guide](CONTRIBUTING.md)** - Learn how to contribute
 - **[E2E Testing Guide](docs/E2E_TESTING.md)** - Playwright end-to-end testing
 - **[Deployment Guide](docs/DEPLOYMENT.md)** - Deploy to Azure Static Web Apps
+- **[Authentication Configuration](scripts/deployment-cli/AUTH_CONFIGURATION.md)** - Configure Microsoft/Google auth
 - **[Changelog](CHANGELOG.md)** - Version history and release notes
 
 ## 🛠️ Tech Stack
