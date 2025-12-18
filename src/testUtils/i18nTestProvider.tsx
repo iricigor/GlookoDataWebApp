@@ -120,8 +120,8 @@ const enTranslations = {
     },
     "loginDialog": {
       "login": "Login",
-      "title": "Login with Microsoft",
-      "description": "Sign in with your personal Microsoft account to access all features.",
+      "title": "Login to Glooko",
+      "description": "Sign in with your personal account to access all features.",
       "signInButton": "Sign in with Microsoft",
       "signInWithGoogle": "Sign in with Google",
       "signingIn": "Signing in...",

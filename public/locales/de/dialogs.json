@@ -6,7 +6,7 @@
   },
   "loginDialog": {
     "title": "Bei Glooko anmelden",
-    "description": "Melden Sie sich mit Ihrem persönlichen Microsoft-Konto an, um auf alle Funktionen zuzugreifen.",
+    "description": "Melden Sie sich mit Ihrem persönlichen Konto an, um auf alle Funktionen zuzugreifen.",
     "signInButton": "Mit Microsoft anmelden",
     "signInWithGoogle": "Mit Google anmelden",
     "signingIn": "Anmeldung läuft...",
