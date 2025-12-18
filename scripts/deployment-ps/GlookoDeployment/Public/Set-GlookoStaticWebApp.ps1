@@ -243,32 +243,70 @@ function Set-GlookoStaticWebApp {
                 if ($continueGoogleAuth) {
                     Write-InfoMessage "Configuring Google authentication for Static Web App..."
                     
-                    # Convert SecureString to plain text only when needed for Azure CLI
-                    # Azure CLI is used because Az.Websites module doesn't support Static Web App app settings
-                    # Note: The plain text values exist only briefly in memory during the az CLI call
+                    # Convert SecureString to plain text only when needed
+                    # Note: The plain text values exist only briefly in memory during the configuration
                     $googleClientId = $googleClientIdSecretObj.SecretValue | ConvertFrom-SecureString -AsPlainText
                     $googleClientSecret = $googleClientSecretSecretObj.SecretValue | ConvertFrom-SecureString -AsPlainText
                     
-                    # Set SWA application settings using Azure CLI
-                    # Authentication: Uses current Azure CLI session (from 'az login')
-                    # The az CLI command runs in the same security context as this PowerShell session
-                    $azCliResult = az staticwebapp appsettings set `
-                        --name $swaName `
-                        --resource-group $rg `
-                        --setting-names "AUTH_GOOGLE_CLIENT_ID=$googleClientId" "AUTH_GOOGLE_CLIENT_SECRET=$googleClientSecret" `
-                        2>&1
+                    # Try to use PowerShell command first (if available), otherwise fall back to Azure CLI
+                    # Authentication: Uses current Azure PowerShell session (from Connect-AzAccount)
+                    $configSuccess = $false
+                    
+                    # Check if New-AzStaticWebAppSetting command is available
+                    $psCommand = Get-Command -Name 'New-AzStaticWebAppSetting' -ErrorAction SilentlyContinue
+                    
+                    if ($psCommand) {
+                        Write-InfoMessage "Using PowerShell cmdlet to configure app settings..."
+                        try {
+                            # Use PowerShell cmdlet to set app settings
+                            $appSettings = @{
+                                "AUTH_GOOGLE_CLIENT_ID" = $googleClientId
+                                "AUTH_GOOGLE_CLIENT_SECRET" = $googleClientSecret
+                            }
+                            
+                            New-AzStaticWebAppSetting `
+                                -ResourceGroupName $rg `
+                                -Name $swaName `
+                                -AppSetting $appSettings `
+                                -ErrorAction Stop | Out-Null
+                            
+                            $configSuccess = $true
+                            Write-SuccessMessage "Google authentication configured successfully using PowerShell"
+                        }
+                        catch {
+                            Write-WarningMessage "PowerShell cmdlet failed: $_"
+                            Write-InfoMessage "Falling back to Azure CLI..."
+                        }
+                    }
+                    
+                    # Fall back to Azure CLI if PowerShell command not available or failed
+                    if (-not $configSuccess) {
+                        Write-InfoMessage "Using Azure CLI to configure app settings..."
+                        # Authentication: Uses current Azure CLI session (from 'az login')
+                        # The az CLI command runs in the same security context as this PowerShell session
+                        $azCliResult = az staticwebapp appsettings set `
+                            --name $swaName `
+                            --resource-group $rg `
+                            --setting-names "AUTH_GOOGLE_CLIENT_ID=$googleClientId" "AUTH_GOOGLE_CLIENT_SECRET=$googleClientSecret" `
+                            2>&1
+                        
+                        # Check if Azure CLI command succeeded
+                        if ($LASTEXITCODE -eq 0) {
+                            $configSuccess = $true
+                            Write-SuccessMessage "Google authentication configured successfully using Azure CLI"
+                        }
+                        else {
+                            Write-WarningMessage "Failed to configure Google authentication via Azure CLI: $azCliResult"
+                        }
+                    }
                     
                     # Clear sensitive variables from memory
                     $googleClientId = $null
                     $googleClientSecret = $null
                     
-                    # Check if Azure CLI command succeeded
-                    if ($LASTEXITCODE -eq 0) {
-                        Write-SuccessMessage "Google authentication configured successfully"
+                    # Set the configuration flag based on success
+                    if ($configSuccess) {
                         $googleAuthConfigured = $true
-                    }
-                    else {
-                        Write-WarningMessage "Failed to configure Google authentication via Azure CLI: $azCliResult"
                     }
                 }
             }
