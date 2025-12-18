@@ -40,14 +40,19 @@ jobs:
           KEY_VAULT_NAME: glookodatawebapp-kv
         run: |
           # Fetch Microsoft Client ID from Key Vault
+          # Note: Suppress only 'secret not found' errors, other errors will surface
           MICROSOFT_CLIENT_ID=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name MicrosoftClientId --query value -o tsv 2>/dev/null || echo "")
           
           # Fetch Google Client ID from Key Vault
           GOOGLE_CLIENT_ID=$(az keyvault secret show --vault-name $KEY_VAULT_NAME --name GoogleClientId --query value -o tsv 2>/dev/null || echo "")
           
-          # Set as output for next steps (masked for security)
-          echo "::add-mask::$MICROSOFT_CLIENT_ID"
-          echo "::add-mask::$GOOGLE_CLIENT_ID"
+          # Set as output for next steps (mask before setting to prevent exposure)
+          if [ -n "$MICROSOFT_CLIENT_ID" ]; then
+            echo "::add-mask::$MICROSOFT_CLIENT_ID"
+          fi
+          if [ -n "$GOOGLE_CLIENT_ID" ]; then
+            echo "::add-mask::$GOOGLE_CLIENT_ID"
+          fi
           echo "microsoft-client-id=$MICROSOFT_CLIENT_ID" >> $GITHUB_OUTPUT
           echo "google-client-id=$GOOGLE_CLIENT_ID" >> $GITHUB_OUTPUT
           
