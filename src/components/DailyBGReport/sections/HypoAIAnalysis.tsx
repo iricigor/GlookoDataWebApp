@@ -231,21 +231,25 @@ export function HypoAIAnalysis({
    */
   const renderEventCard = (analysis: EventAnalysis, event: DetailedHypoEvent | undefined, index: number) => {
     const eventTime = event ? event.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : analysis.eventTime || 'Unknown';
-    const nadirValue = event ? `${event.nadirValueMgdl} mg/dL` : analysis.nadirValue || 'Unknown';
+    
+    // Format nadir value with correct unit
+    const nadirValue = event 
+      ? `${glucoseUnit === 'mg/dL' ? event.nadirValueMgdl : (event.nadirValueMgdl / 18).toFixed(1)} ${glucoseUnit}`
+      : analysis.nadirValue || 'Unknown';
     
     return (
       <div key={index} style={{
-        padding: '16px',
+        padding: tokens.spacingVerticalM,
         backgroundColor: tokens.colorNeutralBackground3,
         borderRadius: tokens.borderRadiusMedium,
         border: `1px solid ${tokens.colorNeutralStroke2}`,
-        marginBottom: '12px',
+        marginBottom: tokens.spacingVerticalS,
       }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '8px',
+          marginBottom: tokens.spacingVerticalXS,
         }}>
           <Text style={{
             fontWeight: tokens.fontWeightSemibold,
@@ -267,8 +271,8 @@ export function HypoAIAnalysis({
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '6px',
-          marginBottom: '8px',
+          gap: tokens.spacingHorizontalXS,
+          marginBottom: tokens.spacingVerticalXS,
         }}>
           <InfoRegular />
           <Text>Primary Suspect:</Text>
@@ -296,7 +300,7 @@ export function HypoAIAnalysis({
           <Text style={{
             fontSize: tokens.fontSizeBase200,
             color: tokens.colorNeutralForeground3,
-            marginTop: '8px',
+            marginTop: tokens.spacingVerticalXS,
           }}>
             Estimated meal time: {analysis.mealTime}
           </Text>
@@ -396,13 +400,13 @@ export function HypoAIAnalysis({
       {/* AI Response - Parsed event cards */}
       {response && !analyzing && isResponseExpanded && parsedEvents.size > 0 && (
         <div style={{
-          marginTop: '12px',
+          marginTop: tokens.spacingVerticalS,
         }}>
           <Text style={{
             display: 'block',
             fontWeight: tokens.fontWeightSemibold,
             fontSize: tokens.fontSizeBase400,
-            marginBottom: '12px',
+            marginBottom: tokens.spacingVerticalS,
           }}>
             Event Analysis
           </Text>
@@ -416,13 +420,13 @@ export function HypoAIAnalysis({
       
       {/* Geek Stats - AI Prompt and Full Response Accordions */}
       {showGeekStats && activeProvider && (
-        <Accordion collapsible multiple style={{ marginTop: '16px' }}>
+        <Accordion collapsible multiple style={{ marginTop: tokens.spacingVerticalM }}>
           {/* AI Prompt Accordion */}
           <AccordionItem value="aiPrompt">
             <AccordionHeader>{t('reports.dailyBG.hypoAnalysis.accordionPromptTitle')}</AccordionHeader>
             <AccordionPanel>
               <div style={{
-                padding: '12px',
+                padding: tokens.spacingVerticalS,
                 backgroundColor: tokens.colorNeutralBackground2,
                 borderRadius: tokens.borderRadiusMedium,
                 fontFamily: 'monospace',
@@ -443,7 +447,7 @@ export function HypoAIAnalysis({
               <AccordionHeader>{t('reports.dailyBG.hypoAnalysis.accordionResponseTitle')}</AccordionHeader>
               <AccordionPanel>
                 <div style={{
-                  padding: '12px',
+                  padding: tokens.spacingVerticalS,
                   backgroundColor: tokens.colorNeutralBackground2,
                   borderRadius: tokens.borderRadiusMedium,
                   fontFamily: 'monospace',
