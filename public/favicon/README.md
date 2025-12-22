@@ -63,10 +63,33 @@ The original favicon designs are preserved for reference:
 
 ## Technical Details
 
-- **Format**: SVG (Scalable Vector Graphics)
+- **Format**: SVG (Scalable Vector Graphics) and PNG (Portable Network Graphics)
 - **Size**: Optimized for display at 16×16, 32×32, and 64×64 pixels
 - **Color Scheme**: Red blood drop with white ECG line and subtle drop shadow
 - **Browser Support**: All modern browsers support SVG favicons
+
+### PNG Versions
+
+All favicon options are available in PNG format in the `png/` subdirectory at multiple resolutions:
+
+- **16×16 pixels** - Standard browser tab icon
+- **32×32 pixels** - High DPI browser tabs and bookmarks
+- **64×64 pixels** - Desktop shortcuts and high DPI displays
+- **128×128 pixels** - Touch icons and app shortcuts
+- **256×256 pixels** - High-resolution displays and app icons
+
+**File naming convention**: `png/{base-name}-{size}x{size}.png`
+
+**Examples**:
+- `png/favicon-16x16.png` - Current active icon at 16×16
+- `png/favicon-v2-option1-32x32.png` - v2 Option 1 at 32×32
+- `png/favicon-option2-256x256.png` - Legacy Option 2 at 256×256
+
+PNG versions are useful for:
+- Older browsers that don't support SVG favicons
+- Platform-specific requirements (iOS, Android, Windows tiles)
+- Build tools that require raster images
+- Favicon generators and conversion tools
 
 ## Changing the Icon
 
