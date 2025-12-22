@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>867 Add Provider column migration scripts for Google login support</summary>
+
+[#867](../../pull/867) Add Provider column migration scripts for Google login support
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>859 Add Google OAuth configuration to Azure Static Web App deployment scripts with Key Vault references</summary>
 
 [#859](../../pull/859) Add Google OAuth configuration to Azure Static Web App deployment scripts with Key Vault references
