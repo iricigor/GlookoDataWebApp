@@ -230,46 +230,70 @@ configure_google_auth() {
         return 0
     fi
     
-    print_info "Retrieving Google auth secrets from Key Vault '${KEY_VAULT_NAME}'..."
+    print_info "Retrieving Google auth secret information from Key Vault '${KEY_VAULT_NAME}'..."
     
-    # Retrieve Google Client ID and Secret from Key Vault
-    local google_client_id
-    local google_client_secret
+    # Get Key Vault URI to construct secret references
+    local vault_uri
+    vault_uri=$(az keyvault show \
+        --name "${KEY_VAULT_NAME}" \
+        --resource-group "${RESOURCE_GROUP}" \
+        --query properties.vaultUri \
+        -o tsv 2>/dev/null)
     
-    google_client_id=$(az keyvault secret show \
+    if [ -z "${vault_uri}" ]; then
+        print_warning "Could not retrieve Key Vault URI"
+        return 0
+    fi
+    
+    # Remove trailing slash from vault URI
+    vault_uri="${vault_uri%/}"
+    
+    # Verify that the secrets exist in Key Vault before configuring references
+    local client_id_exists
+    local client_secret_exists
+    
+    client_id_exists=$(az keyvault secret show \
         --vault-name "${KEY_VAULT_NAME}" \
         --name "google-client-id" \
-        --query value \
+        --query id \
         -o tsv 2>/dev/null || echo "")
     
-    google_client_secret=$(az keyvault secret show \
+    client_secret_exists=$(az keyvault secret show \
         --vault-name "${KEY_VAULT_NAME}" \
         --name "google-client-secret" \
-        --query value \
+        --query id \
         -o tsv 2>/dev/null || echo "")
     
-    if [ -z "${google_client_id}" ] || [ -z "${google_client_secret}" ]; then
+    if [ -z "${client_id_exists}" ] || [ -z "${client_secret_exists}" ]; then
         print_warning "Google auth secrets not found in Key Vault"
         print_info "Expected secrets: 'google-client-id' and 'google-client-secret'"
         print_info "Add them to Key Vault '${KEY_VAULT_NAME}' to enable Google authentication"
         return 0
     fi
     
-    print_info "Configuring Google authentication for Static Web App..."
+    print_info "Configuring Google authentication for Static Web App with Key Vault references..."
     
-    # Configure SWA application settings for Google authentication
-    # Note: Secrets are passed via command line due to Azure CLI limitations. In production Azure environments,
-    # process lists are typically restricted. The secrets are stored encrypted in Azure and only briefly
-    # visible during this deployment operation which should run in a secure environment (e.g., Azure Cloud Shell).
+    # Construct Key Vault reference URIs instead of using actual secret values
+    # This is more secure as secrets are resolved by Azure at runtime and never exposed
+    # Format: @Microsoft.KeyVault(SecretUri=https://<keyvault-name>.vault.azure.net/secrets/<secret-name>)
+    local google_client_id_ref
+    local google_client_secret_ref
+    
+    google_client_id_ref="@Microsoft.KeyVault(SecretUri=${vault_uri}/secrets/google-client-id)"
+    google_client_secret_ref="@Microsoft.KeyVault(SecretUri=${vault_uri}/secrets/google-client-secret)"
+    
+    # Configure SWA application settings with Key Vault references
+    # Azure will resolve these references at runtime, providing enhanced security
     az staticwebapp appsettings set \
         --name "${STATIC_WEB_APP_NAME}" \
         --resource-group "${RESOURCE_GROUP}" \
         --setting-names \
-            "AUTH_GOOGLE_CLIENT_ID=${google_client_id}" \
-            "AUTH_GOOGLE_CLIENT_SECRET=${google_client_secret}" \
+            "AUTH_GOOGLE_CLIENT_ID=${google_client_id_ref}" \
+            "AUTH_GOOGLE_CLIENT_SECRET=${google_client_secret_ref}" \
         --output none
     
-    print_success "Google authentication configured successfully"
+    print_success "Google authentication configured successfully with Key Vault references"
+    print_info "App settings use Key Vault references for enhanced security"
     GOOGLE_AUTH_CONFIGURED=true
 }
 

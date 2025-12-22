@@ -221,21 +221,29 @@ function Set-GlookoStaticWebApp {
                 
                 # Retrieve secrets from Key Vault
                 if ($continueGoogleAuth) {
-                    Write-InfoMessage "Retrieving Google auth secrets from Key Vault '$keyVaultName'..."
+                    Write-InfoMessage "Retrieving Google auth secret information from Key Vault '$keyVaultName'..."
                     
-                    # Retrieve Google Client ID and Secret from Key Vault
+                    # Get Key Vault details to construct the vault URI
                     # Authentication: Uses the current Azure PowerShell session credentials (from Connect-AzAccount)
                     # Required permissions: "Key Vault Secrets User" role or "Get" permission on secrets in Key Vault access policies
-                    # The secrets are retrieved as SecureString objects to minimize exposure in memory
-                    $googleClientIdSecretObj = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-id" -ErrorAction SilentlyContinue
-                    $googleClientSecretSecretObj = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-secret" -ErrorAction SilentlyContinue
+                    $keyVault = Get-AzKeyVault -ResourceGroupName $rg -VaultName $keyVaultName -ErrorAction SilentlyContinue
                     
-                    # Check if secrets exist
-                    if (-not $googleClientIdSecretObj -or -not $googleClientSecretSecretObj) {
-                        Write-WarningMessage "Google auth secrets not found in Key Vault"
-                        Write-InfoMessage "Expected secrets: 'google-client-id' and 'google-client-secret'"
-                        Write-InfoMessage "Add them to Key Vault '$keyVaultName' to enable Google authentication"
+                    if (-not $keyVault) {
+                        Write-WarningMessage "Could not retrieve Key Vault details"
                         $continueGoogleAuth = $false
+                    }
+                    else {
+                        # Verify that the secrets exist in Key Vault
+                        $googleClientIdSecretObj = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-id" -ErrorAction SilentlyContinue
+                        $googleClientSecretSecretObj = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-secret" -ErrorAction SilentlyContinue
+                        
+                        # Check if secrets exist
+                        if (-not $googleClientIdSecretObj -or -not $googleClientSecretSecretObj) {
+                            Write-WarningMessage "Google auth secrets not found in Key Vault"
+                            Write-InfoMessage "Expected secrets: 'google-client-id' and 'google-client-secret'"
+                            Write-InfoMessage "Add them to Key Vault '$keyVaultName' to enable Google authentication"
+                            $continueGoogleAuth = $false
+                        }
                     }
                 }
                 
@@ -243,10 +251,12 @@ function Set-GlookoStaticWebApp {
                 if ($continueGoogleAuth) {
                     Write-InfoMessage "Configuring Google authentication for Static Web App..."
                     
-                    # Convert SecureString to plain text only when needed
-                    # Note: The plain text values exist only briefly in memory during the configuration
-                    $googleClientId = $googleClientIdSecretObj.SecretValue | ConvertFrom-SecureString -AsPlainText
-                    $googleClientSecret = $googleClientSecretSecretObj.SecretValue | ConvertFrom-SecureString -AsPlainText
+                    # Construct Key Vault reference URIs instead of using actual secret values
+                    # This is more secure as secrets are resolved by Azure at runtime and never exposed
+                    # Format: @Microsoft.KeyVault(SecretUri=https://<keyvault-name>.vault.azure.net/secrets/<secret-name>)
+                    $vaultUri = $keyVault.VaultUri.TrimEnd('/')
+                    $googleClientIdReference = "@Microsoft.KeyVault(SecretUri=$vaultUri/secrets/google-client-id)"
+                    $googleClientSecretReference = "@Microsoft.KeyVault(SecretUri=$vaultUri/secrets/google-client-secret)"
                     
                     # Try to use PowerShell command first (if available), otherwise fall back to Azure CLI
                     # Authentication: Uses current Azure PowerShell session (from Connect-AzAccount)
@@ -256,12 +266,12 @@ function Set-GlookoStaticWebApp {
                     $psCommand = Get-Command -Name 'New-AzStaticWebAppSetting' -ErrorAction SilentlyContinue
                     
                     if ($psCommand) {
-                        Write-InfoMessage "Using PowerShell cmdlet to configure app settings..."
+                        Write-InfoMessage "Using PowerShell cmdlet to configure app settings with Key Vault references..."
                         try {
-                            # Use PowerShell cmdlet to set app settings
+                            # Use PowerShell cmdlet to set app settings with Key Vault references
                             $appSettings = @{
-                                "AUTH_GOOGLE_CLIENT_ID" = $googleClientId
-                                "AUTH_GOOGLE_CLIENT_SECRET" = $googleClientSecret
+                                "AUTH_GOOGLE_CLIENT_ID" = $googleClientIdReference
+                                "AUTH_GOOGLE_CLIENT_SECRET" = $googleClientSecretReference
                             }
                             
                             New-AzStaticWebAppSetting `
@@ -281,13 +291,13 @@ function Set-GlookoStaticWebApp {
                     
                     # Fall back to Azure CLI if PowerShell command not available or failed
                     if (-not $configSuccess) {
-                        Write-InfoMessage "Using Azure CLI to configure app settings..."
+                        Write-InfoMessage "Using Azure CLI to configure app settings with Key Vault references..."
                         # Authentication: Uses current Azure CLI session (from 'az login')
                         # The az CLI command runs in the same security context as this PowerShell session
                         $azCliResult = az staticwebapp appsettings set `
                             --name $swaName `
                             --resource-group $rg `
-                            --setting-names "AUTH_GOOGLE_CLIENT_ID=$googleClientId" "AUTH_GOOGLE_CLIENT_SECRET=$googleClientSecret" `
+                            --setting-names "AUTH_GOOGLE_CLIENT_ID=$googleClientIdReference" "AUTH_GOOGLE_CLIENT_SECRET=$googleClientSecretReference" `
                             2>&1
                         
                         # Check if Azure CLI command succeeded
@@ -300,13 +310,10 @@ function Set-GlookoStaticWebApp {
                         }
                     }
                     
-                    # Clear sensitive variables from memory
-                    $googleClientId = $null
-                    $googleClientSecret = $null
-                    
                     # Set the configuration flag based on success
                     if ($configSuccess) {
                         $googleAuthConfigured = $true
+                        Write-InfoMessage "App settings configured with Key Vault references for enhanced security"
                     }
                 }
             }
