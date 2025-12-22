@@ -59,6 +59,7 @@ Export-ModuleMember -Function @(
     'Set-GlookoSwaBackend',
     'Invoke-GlookoDeployment',
     'Invoke-GlookoProUsers',
+    'Invoke-GlookoProviderMigration',
     'Test-GlookoDeployment'
 )
 
@@ -78,5 +79,6 @@ Export-ModuleMember -Alias @(
     'Set-GSB',
     'Invoke-GD',
     'Invoke-GPU',
+    'Invoke-GPM',
     'Test-GD'
 )
