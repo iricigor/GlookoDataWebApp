@@ -220,8 +220,10 @@ export function Navigation({
     userEmail, 
     userPhoto, 
     idToken, 
+    provider,
     justLoggedIn, 
-    login, 
+    login,
+    loginWithGoogle, 
     logout, 
     acknowledgeLogin 
   } = useAuth();
@@ -485,7 +487,7 @@ export function Navigation({
               />
             </>
           ) : (
-            <LoginDialog onLogin={login} />
+            <LoginDialog onLogin={login} onGoogleLogin={loginWithGoogle} />
           )}
         </div>
       </nav>

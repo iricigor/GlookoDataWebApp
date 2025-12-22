@@ -30,6 +30,7 @@ interface UserSettingsEntity {
   rowKey: string;
   firstLoginDate?: string;
   lastLoginDate?: string;
+  provider?: string; // Authentication provider (Microsoft, Google, etc.)
 }
 
 /**

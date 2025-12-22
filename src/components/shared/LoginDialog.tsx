@@ -15,6 +15,7 @@ import {
 import { PersonRegular } from '@fluentui/react-icons';
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { GoogleLogin } from '@react-oauth/google';
 
 // Microsoft logo SVG component
 const MicrosoftLogo = () => (
@@ -99,6 +100,7 @@ const useStyles = makeStyles({
 
 interface LoginDialogProps {
   onLogin: () => Promise<void>;
+  onGoogleLogin: (credential: string) => Promise<void>;
 }
 
 /**
@@ -107,19 +109,18 @@ interface LoginDialogProps {
  * The dialog presents translated UI text with both Microsoft and Google sign-in options. When the Microsoft 
  * sign-in button is pressed, the provided `onLogin` function is invoked; the component shows a loading 
  * indicator while the call is pending, closes the dialog on success, and displays a translated error message 
- * on failure. The Google sign-in button currently shows a "coming soon" message as the functionality is 
- * under development.
+ * on failure. The Google sign-in button triggers Google OAuth flow.
  *
  * @param onLogin - Function invoked to perform the Microsoft sign-in action; should return a Promise that resolves on successful login or rejects on failure.
+ * @param onGoogleLogin - Function invoked to perform the Google sign-in action with credential; should return a Promise that resolves on successful login or rejects on failure.
  * @returns The JSX element for the login dialog and its trigger button.
  */
-export function LoginDialog({ onLogin }: LoginDialogProps) {
+export function LoginDialog({ onLogin, onGoogleLogin }: LoginDialogProps) {
   const styles = useStyles();
   const { t } = useTranslation(['dialogs', 'navigation', 'common']);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showGoogleComingSoon, setShowGoogleComingSoon] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup timeout on unmount
@@ -146,25 +147,34 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    setShowGoogleComingSoon(true);
+  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
+    if (!credentialResponse.credential) {
+      console.error('No credential in Google response');
+      setError(t('loginDialog.errorMessage'));
+      return;
+    }
+
+    setLoading(true);
     setError(null);
     
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+    try {
+      await onGoogleLogin(credentialResponse.credential);
+      setOpen(false);
+    } catch (err) {
+      console.error('Google login error:', err);
+      setError(t('loginDialog.errorMessage'));
+    } finally {
+      setLoading(false);
     }
-    
-    // Hide message after 3 seconds
-    timeoutRef.current = setTimeout(() => {
-      setShowGoogleComingSoon(false);
-      timeoutRef.current = null;
-    }, 3000);
+  };
+
+  const handleGoogleError = () => {
+    console.error('Google login failed');
+    setError(t('loginDialog.errorMessage'));
   };
 
   const handleCancel = () => {
     setOpen(false);
-    setShowGoogleComingSoon(false);
     setError(null);
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -185,11 +195,6 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
           <DialogContent className={styles.dialogContent}>
             {t('loginDialog.description')}
             {error && <div style={{ color: 'red' }}>{error}</div>}
-            {showGoogleComingSoon && (
-              <div className={styles.comingSoonMessage}>
-                {t('loginDialog.googleComingSoon')}
-              </div>
-            )}
           </DialogContent>
           <DialogActions>
             <div className={styles.buttonGroup}>
@@ -219,15 +224,15 @@ export function LoginDialog({ onLogin }: LoginDialogProps) {
                   </>
                 )}
               </Button>
-              <Button 
-                appearance="secondary"
-                onClick={handleGoogleSignIn}
-                disabled={loading}
-                className={mergeClasses(styles.baseButton, styles.googleButton)}
-              >
-                <GoogleLogo />
-                <span>{t('loginDialog.signInWithGoogle')}</span>
-              </Button>
+              <div className={mergeClasses(styles.baseButton, styles.googleButton)}>
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  useOneTap={false}
+                  text="signin_with"
+                  width="100%"
+                />
+              </div>
             </div>
           </DialogActions>
         </DialogBody>

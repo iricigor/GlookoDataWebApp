@@ -16,6 +16,8 @@ export interface AuthState {
   accessToken: string | null;
   /** ID token for authenticating with our backend API (audience is our app's client ID) */
   idToken: string | null;
+  /** Authentication provider (Microsoft or Google) */
+  provider: 'Microsoft' | 'Google' | null;
 }
 
 /**
@@ -33,6 +35,7 @@ export function useAuth() {
     account: null,
     accessToken: null,
     idToken: null,
+    provider: null,
   });
   const [isInitialized, setIsInitialized] = useState(false);
   const [justLoggedIn, setJustLoggedIn] = useState(false);
@@ -59,6 +62,7 @@ export function useAuth() {
         account: account,
         accessToken: accessToken,
         idToken: idToken || null,
+        provider: 'Microsoft',
       });
     } catch (error) {
       console.error('Failed to update auth state:', error);
@@ -71,6 +75,7 @@ export function useAuth() {
         account: account,
         accessToken: accessToken,
         idToken: idToken || null,
+        provider: 'Microsoft',
       });
     }
   }, []);
@@ -116,6 +121,7 @@ export function useAuth() {
                 account: null,
                 accessToken: null,
                 idToken: null,
+                provider: null,
               });
             }
           }
@@ -152,6 +158,7 @@ export function useAuth() {
           account: null,
           accessToken: null,
           idToken: null,
+          provider: null,
         });
         setJustLoggedIn(false);
       }
@@ -180,6 +187,7 @@ export function useAuth() {
             account: null,
             accessToken: null,
             idToken: null,
+            provider: null,
           });
           setJustLoggedIn(false);
         }
@@ -219,6 +227,7 @@ export function useAuth() {
       }
 
       const account = authState.account;
+      const provider = authState.provider;
       
       // Clear local state first
       setAuthState({
@@ -229,21 +238,53 @@ export function useAuth() {
         account: null,
         accessToken: null,
         idToken: null,
+        provider: null,
       });
       setJustLoggedIn(false);
 
       // Logout from Microsoft
-      if (account) {
+      if (account && provider === 'Microsoft') {
         await msalInstance.logoutPopup({ account });
       }
+      // For Google, token is already cleared, no need for additional logout
     } catch (error) {
       console.error('Logout failed:', error);
     }
-  }, [authState.userPhoto, authState.account]);
+  }, [authState.userPhoto, authState.account, authState.provider]);
 
   // Clear the justLoggedIn flag after it has been consumed
   const acknowledgeLogin = useCallback(() => {
     setJustLoggedIn(false);
+  }, []);
+
+  // Login with Google
+  const loginWithGoogle = useCallback(async (credential: string) => {
+    try {
+      // Decode the JWT credential to extract user information
+      const payload = JSON.parse(atob(credential.split('.')[1]));
+      
+      // Extract user information from Google JWT
+      const userName = payload.name || payload.email?.split('@')[0] || 'User';
+      const userEmail = payload.email || null;
+      const userPhoto = payload.picture || null;
+      
+      // For Google, we use the credential as the ID token
+      // The credential (JWT) can be used to authenticate with our backend
+      setAuthState({
+        isLoggedIn: true,
+        userName,
+        userEmail,
+        userPhoto,
+        account: null, // Google doesn't use MSAL AccountInfo
+        accessToken: credential, // Use credential as access token
+        idToken: credential, // Use credential as ID token for backend
+        provider: 'Google',
+      });
+      setJustLoggedIn(true);
+    } catch (error) {
+      console.error('Google login failed:', error);
+      throw error;
+    }
   }, []);
 
   return {
@@ -253,9 +294,11 @@ export function useAuth() {
     userPhoto: authState.userPhoto,
     accessToken: authState.accessToken,
     idToken: authState.idToken,
+    provider: authState.provider,
     isInitialized,
     justLoggedIn,
     login,
+    loginWithGoogle,
     logout,
     acknowledgeLogin,
   };
