@@ -88,7 +88,8 @@ describe('useUserSettings', () => {
     expect(userSettingsApi.saveUserSettings).toHaveBeenCalledWith(
       'valid-token',
       mockSettings,
-      'test@example.com'
+      'test@example.com',
+      'Microsoft'
     );
     
     // Status should transition to success
