@@ -54,10 +54,10 @@ describe('LoginDialog', () => {
     });
   });
 
-  it('should show Google sign-in button', () => {
+  it('should show Google sign-in button when Google auth is available', () => {
     const onLogin = vi.fn().mockResolvedValue(undefined);
     const onGoogleLogin = vi.fn().mockResolvedValue(undefined);
-    renderWithProviders(<LoginDialog onLogin={onLogin} onGoogleLogin={onGoogleLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} onGoogleLogin={onGoogleLogin} isGoogleAuthAvailable={true} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /login/i });
@@ -70,6 +70,26 @@ describe('LoginDialog', () => {
     // Should not call onLogin or onGoogleLogin until user clicks a button
     expect(onLogin).not.toHaveBeenCalled();
     expect(onGoogleLogin).not.toHaveBeenCalled();
+  });
+
+  it('should not show Google sign-in button when Google auth is not available', () => {
+    const onLogin = vi.fn().mockResolvedValue(undefined);
+    const onGoogleLogin = vi.fn().mockResolvedValue(undefined);
+    renderWithProviders(<LoginDialog onLogin={onLogin} onGoogleLogin={onGoogleLogin} isGoogleAuthAvailable={false} />);
+    
+    // Open dialog
+    const openButton = screen.getByRole('button', { name: /login/i });
+    fireEvent.click(openButton);
+    
+    // Microsoft button should be present
+    expect(screen.getByRole('button', { name: /sign in with microsoft/i })).toBeInTheDocument();
+    
+    // Google button should not be present (GoogleLogin component should not be rendered)
+    // We can check this by ensuring the GoogleLogin component's container is not in the document
+    // Since GoogleLogin is wrapped in a div, we can count the buttons - should only have Cancel and Microsoft
+    const buttons = screen.getAllByRole('button');
+    const buttonNames = buttons.map(btn => btn.textContent?.toLowerCase());
+    expect(buttonNames.some(name => name?.includes('google'))).toBe(false);
   });
 
   it('should close dialog when cancel is clicked', () => {

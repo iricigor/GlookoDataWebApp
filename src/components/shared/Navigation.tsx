@@ -35,6 +35,7 @@ import { InfrastructureErrorDialog } from './InfrastructureErrorDialog';
 import { type ThemeMode, isDarkTheme } from '../../hooks/useTheme';
 import type { SyncStatus } from '../../hooks/useUserSettings';
 import { detectEnvironment } from '../../utils/environment';
+import { isGoogleAuthAvailable } from '../../config/googleConfig';
 
 const useStyles = makeStyles({
   nav: {
@@ -486,7 +487,7 @@ export function Navigation({
               />
             </>
           ) : (
-            <LoginDialog onLogin={login} onGoogleLogin={loginWithGoogle} />
+            <LoginDialog onLogin={login} onGoogleLogin={loginWithGoogle} isGoogleAuthAvailable={isGoogleAuthAvailable} />
           )}
         </div>
       </nav>
