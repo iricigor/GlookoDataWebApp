@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>864 Add PNG versions of favicons at multiple resolutions</summary>
+
+[#864](../../pull/864) Add PNG versions of favicons at multiple resolutions
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>867 Add Provider column migration scripts for Google login support</summary>
 
 [#867](../../pull/867) Add Provider column migration scripts for Google login support
