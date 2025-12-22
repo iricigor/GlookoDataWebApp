@@ -217,7 +217,7 @@ migrate_pro_users_table() {
         row_key=$(echo "$entity" | jq -r '.RowKey')
         
         local email
-        email=$(echo "$entity" | jq -r '.Email // empty')
+        email=$(echo "$entity" | jq -r '.Email // ""')
         
         # Check if Provider column exists
         local has_provider
@@ -250,14 +250,8 @@ migrate_pro_users_table() {
         fi
     done
     
-    # Read the counts from the loop (workaround for subshell issue)
-    updated_count=$(echo "$entities" | jq -c '.[]' | while read -r entity; do
-        local has_provider
-        has_provider=$(echo "$entity" | jq 'has("Provider")')
-        if [ "$has_provider" = "false" ]; then
-            echo "1"
-        fi
-    done | wc -l)
+    # Count entities that need updating
+    updated_count=$(echo "$entities" | jq '[.[] | select(has("Provider") | not)] | length')
     
     skipped_count=$((total_count - updated_count))
     
@@ -352,14 +346,8 @@ migrate_user_settings_table() {
         fi
     done
     
-    # Read the counts from the loop (workaround for subshell issue)
-    updated_count=$(echo "$entities" | jq -c '.[]' | while read -r entity; do
-        local has_provider
-        has_provider=$(echo "$entity" | jq 'has("Provider")')
-        if [ "$has_provider" = "false" ]; then
-            echo "1"
-        fi
-    done | wc -l)
+    # Count entities that need updating
+    updated_count=$(echo "$entities" | jq '[.[] | select(has("Provider") | not)] | length')
     
     skipped_count=$((total_count - updated_count))
     
