@@ -106,6 +106,7 @@ Invoke-GlookoDeployment -All
 | `Set-GlookoSwaBackend` | `Set-GSB` | Link Azure Function App to Static Web App as backend |
 | `Invoke-GlookoDeployment` | `Invoke-GD` | Orchestrate full deployment |
 | `Invoke-GlookoProUsers` | `Invoke-GPU` | Manage Pro users (list, add, remove, check) |
+| `Invoke-GlookoProviderMigration` | `Invoke-GPM` | Migrate ProUsers and UserSettings tables to add Provider column |
 | `Test-GlookoDeployment` | `Test-GD` | Verify deployment state of all resources |
 
 ## Configuration
@@ -484,6 +485,60 @@ Returns a hashtable with action-specific properties:
 **Prerequisites:**
 - Storage Account must exist (run Set-GlookoStorageAccount first)
 - ProUsers table must exist (run Set-GlookoTableStorage first)
+
+### Invoke-GlookoProviderMigration
+
+Migrates ProUsers and UserSettings tables to add the Provider column with a default value of "Microsoft" for existing records that don't have this column. This migration is needed to support Google login alongside Microsoft login.
+
+**Parameters:**
+- `-StorageAccountName` - Storage account name (optional, uses config)
+- `-ResourceGroup` - Resource group (optional, uses config)
+- `-DryRun` - Show what would be updated without making changes
+
+**Examples:**
+```powershell
+# Run migration (adds Provider=Microsoft to all records without Provider column)
+Invoke-GlookoProviderMigration
+
+# Preview what would be updated (dry-run mode)
+Invoke-GlookoProviderMigration -DryRun
+
+# Run migration on specific storage account
+Invoke-GlookoProviderMigration -StorageAccountName "mystorageacct"
+
+# Use alias
+Invoke-GPM -DryRun
+```
+
+**Return Values:**
+Returns a hashtable with migration results:
+```powershell
+@{
+    StorageAccountName      = "glookodatawebappstorage"
+    ResourceGroup          = "glookodatawebapp-rg"
+    DefaultProvider        = "Microsoft"
+    DryRun                = $false
+    ProUsersUpdated       = 5
+    ProUsersSkipped       = 2
+    UserSettingsUpdated   = 10
+    UserSettingsSkipped   = 3
+}
+```
+
+**Migration Logic:**
+- If Provider column exists: **No change** (preserve existing value)
+- If Provider column missing: **Add Provider=Microsoft**
+
+**Tables Updated:**
+- **ProUsers**: Professional user information
+- **UserSettings**: User preferences and settings
+
+**Prerequisites:**
+- Storage Account must exist (run Set-GlookoStorageAccount first)
+- Tables must exist (run Set-GlookoTableStorage first)
+
+**When to Run:**
+Run this migration script once before enabling Google login to ensure all existing users have Provider=Microsoft set. New users will automatically get the Provider column set when they first log in.
 
 ### Test-GlookoDeployment
 

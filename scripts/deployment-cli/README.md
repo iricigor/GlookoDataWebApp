@@ -46,6 +46,7 @@ cd scripts/deployment-cli
 | `deploy-azure-static-web-app.sh` | Deploys Azure Static Web App with Google authentication |
 | `deploy-azure-swa-backend.sh` | Links Azure Function App to Static Web App as backend |
 | `manage-pro-users.sh` | Manages Pro users (list, add, remove, check) in ProUsers table |
+| `migrate-provider-column.sh` | Adds Provider column to ProUsers and UserSettings tables (for Google login support) |
 | `test-azure-resources.sh` | Verifies deployment state of all Azure resources |
 
 ## Configuration
@@ -552,6 +553,59 @@ Manages Pro users in the ProUsers Azure Storage Table. Users are identified by t
 **Prerequisites:**
 - Storage Account must exist (run deploy-azure-storage-account.sh first)
 - ProUsers table must exist (run deploy-azure-storage-tables.sh first)
+
+### migrate-provider-column.sh
+
+Migrates ProUsers and UserSettings tables to add the Provider column with a default value of "Microsoft" for existing records that don't have this column. This migration is needed to support Google login alongside Microsoft login.
+
+**Features:**
+- Adds Provider=Microsoft to ProUsers table records without Provider column
+- Adds Provider=Microsoft to UserSettings table records without Provider column
+- Preserves existing Provider values (idempotent - safe to run multiple times)
+- Supports dry-run mode to preview changes
+- URL encoding for ProUsers email RowKeys
+
+**Options:**
+```text
+  -h, --help              Show help message
+  -a, --storage-account   Storage account name
+  -g, --resource-group    Resource group name
+  -c, --config FILE       Custom configuration file path
+  -v, --verbose           Enable verbose output
+  --dry-run               Show what would be updated without making changes
+```
+
+**Examples:**
+```bash
+# Run migration (adds Provider=Microsoft to all records without Provider column)
+./migrate-provider-column.sh
+
+# Preview what would be updated (dry-run mode)
+./migrate-provider-column.sh --dry-run
+
+# Run migration on specific storage account
+./migrate-provider-column.sh --storage-account mystorageacct
+
+# Run with verbose output to see all entities processed
+./migrate-provider-column.sh --verbose
+```
+
+**Migration Logic:**
+- If Provider column exists: **No change** (preserve existing value)
+- If Provider column missing: **Add Provider=Microsoft**
+
+**Tables Updated:**
+- **ProUsers**: Professional user information
+- **UserSettings**: User preferences and settings
+
+**Prerequisites:**
+- Storage Account must exist (run deploy-azure-storage-account.sh first)
+- Tables must exist (run deploy-azure-storage-tables.sh first)
+- Python 3 (for URL encoding, pre-installed in Azure Cloud Shell)
+- jq (for JSON processing, pre-installed in Azure Cloud Shell)
+
+**When to Run:**
+Run this migration script once before enabling Google login to ensure all existing users have Provider=Microsoft set. New users will automatically get the Provider column set when they first log in.
 
 ## Configuration Library (config-lib.sh)
 
