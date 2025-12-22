@@ -55,7 +55,7 @@ function App() {
   const { t } = useTranslation('notifications')
   
   // Authentication state
-  const { isLoggedIn, idToken, userEmail } = useAuth()
+  const { isLoggedIn, idToken, userEmail, provider } = useAuth()
   
   // Pro user check
   const { isProUser } = useProUserCheck(isLoggedIn ? idToken : null)
@@ -106,7 +106,7 @@ function App() {
     saveSettings, 
     loadSettings, 
     saveSettingsSync 
-  } = useUserSettings(idToken, userEmail)
+  } = useUserSettings(idToken, userEmail, provider)
   
   // Track if we've loaded settings for the current session
   const [hasLoadedCloudSettings, setHasLoadedCloudSettings] = useState(false)

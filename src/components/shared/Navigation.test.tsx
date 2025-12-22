@@ -49,9 +49,11 @@ describe('Navigation', () => {
     userPhoto: null,
     accessToken: null,
     idToken: null,
+    provider: null,
     isInitialized: true,
     justLoggedIn: false,
     login: vi.fn(),
+    loginWithGoogle: vi.fn(),
     logout: vi.fn(),
     acknowledgeLogin: vi.fn(),
   };

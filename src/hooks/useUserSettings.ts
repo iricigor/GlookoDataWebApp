@@ -53,11 +53,13 @@ export interface UseUserSettingsReturn {
  * 
  * @param idToken - The ID token from MSAL authentication
  * @param userEmail - The user's email address
+ * @param provider - The authentication provider (Microsoft or Google)
  * @returns Sync state and functions for managing settings
  */
 export function useUserSettings(
   idToken: string | null,
-  userEmail: string | null
+  userEmail: string | null,
+  provider: 'Microsoft' | 'Google' | null
 ): UseUserSettingsReturn {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [syncError, setSyncError] = useState<string | null>(null);
@@ -81,7 +83,7 @@ export function useUserSettings(
     setSyncStatus('syncing');
     setSyncError(null);
 
-    const savePromise = saveUserSettings(idToken, settings, userEmail);
+    const savePromise = saveUserSettings(idToken, settings, userEmail, provider || undefined);
     // Store reference to this save promise for race condition detection
     pendingSaveRef.current = savePromise;
 
@@ -119,7 +121,7 @@ export function useUserSettings(
         errorType: 'unknown',
       };
     }
-  }, [idToken, userEmail]);
+  }, [idToken, userEmail, provider]);
 
   /**
    * Save settings and wait for completion (used before logout)
@@ -137,7 +139,7 @@ export function useUserSettings(
     setSyncError(null);
 
     try {
-      const result = await saveUserSettings(idToken, settings, userEmail);
+      const result = await saveUserSettings(idToken, settings, userEmail, provider || undefined);
       
       if (result.success) {
         setSyncStatus('success');
@@ -156,7 +158,7 @@ export function useUserSettings(
         errorType: 'unknown',
       };
     }
-  }, [idToken, userEmail]);
+  }, [idToken, userEmail, provider]);
 
   /**
    * Load settings from cloud

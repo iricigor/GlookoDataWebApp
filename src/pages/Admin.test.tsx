@@ -79,6 +79,8 @@ describe('Admin', () => {
       login: vi.fn(),
       logout: vi.fn(),
       acknowledgeLogin: vi.fn(),
+      provider: null,
+      loginWithGoogle: vi.fn(),
     });
 
     vi.mocked(useProUserCheck).mockReturnValue({
@@ -111,6 +113,8 @@ describe('Admin', () => {
       login: vi.fn(),
       logout: vi.fn(),
       acknowledgeLogin: vi.fn(),
+      provider: null,
+      loginWithGoogle: vi.fn(),
     });
 
     vi.mocked(useProUserCheck).mockReturnValue({
@@ -144,6 +148,8 @@ describe('Admin', () => {
       login: vi.fn(),
       logout: vi.fn(),
       acknowledgeLogin: vi.fn(),
+      provider: null,
+      loginWithGoogle: vi.fn(),
     });
 
     vi.mocked(useProUserCheck).mockReturnValue({
@@ -176,6 +182,8 @@ describe('Admin', () => {
       login: vi.fn(),
       logout: vi.fn(),
       acknowledgeLogin: vi.fn(),
+      provider: null,
+      loginWithGoogle: vi.fn(),
     });
 
     vi.mocked(useProUserCheck).mockReturnValue({
@@ -208,6 +216,8 @@ describe('Admin', () => {
       login: vi.fn(),
       logout: vi.fn(),
       acknowledgeLogin: vi.fn(),
+      provider: null,
+      loginWithGoogle: vi.fn(),
     });
 
     vi.mocked(useProUserCheck).mockReturnValue({
@@ -241,6 +251,8 @@ describe('Admin', () => {
       login: vi.fn(),
       logout: vi.fn(),
       acknowledgeLogin: vi.fn(),
+      provider: null,
+      loginWithGoogle: vi.fn(),
     });
 
     vi.mocked(useProUserCheck).mockReturnValue({

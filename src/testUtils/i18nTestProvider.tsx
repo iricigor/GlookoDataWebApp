@@ -7,6 +7,7 @@ import type { ReactElement } from 'react';
 import { render, type RenderOptions } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -253,11 +254,13 @@ export function renderWithProviders(
    */
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
-      <I18nextProvider i18n={i18n}>
-        <FluentProvider theme={webLightTheme}>
-          {children}
-        </FluentProvider>
-      </I18nextProvider>
+      <GoogleOAuthProvider clientId="test-client-id">
+        <I18nextProvider i18n={i18n}>
+          <FluentProvider theme={webLightTheme}>
+            {children}
+          </FluentProvider>
+        </I18nextProvider>
+      </GoogleOAuthProvider>
     );
   }
 

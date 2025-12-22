@@ -49,6 +49,7 @@ interface CloudUserSettings {
 interface SaveSettingsRequest {
   settings: CloudUserSettings;
   email: string;
+  provider?: string; // Authentication provider (Microsoft, Google, etc.)
 }
 
 /**
@@ -61,6 +62,7 @@ interface UserSettingsEntity {
   firstLoginDate?: string;
   lastLoginDate?: string;
   settingsJson?: string; // Compact JSON string of CloudUserSettings
+  provider?: string; // Authentication provider (Microsoft, Google, etc.)
 }
 
 /**
@@ -180,6 +182,7 @@ async function putUserSettings(request: HttpRequest, context: InvocationContext)
       firstLoginDate,
       lastLoginDate: now,
       settingsJson: JSON.stringify(body.settings),
+      provider: body.provider || 'Microsoft', // Default to Microsoft for backward compatibility
     };
 
     await tableClient.upsertEntity(entity, 'Replace');

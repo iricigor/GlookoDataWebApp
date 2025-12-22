@@ -228,6 +228,7 @@ export async function checkFirstLogin(
  * @param idToken - The ID token from MSAL authentication
  * @param settings - The user settings to save
  * @param email - The user's email address (for reference)
+ * @param provider - The authentication provider (Microsoft or Google)
  * @param config - Optional API configuration (defaults to /api)
  * @returns Promise with the result containing success status or error
  */
@@ -235,6 +236,7 @@ export async function saveUserSettings(
   idToken: string,
   settings: CloudUserSettings,
   email: string,
+  provider?: string,
   config: UserSettingsApiConfig = defaultConfig
 ): Promise<SaveSettingsResult> {
   const endpoint = `${config.baseUrl}/user/settings`;
@@ -260,7 +262,7 @@ export async function saveUserSettings(
         'Content-Type': 'application/json',
         'x-correlation-id': apiLogger.correlationId,
       },
-      body: JSON.stringify({ settings, email }),
+      body: JSON.stringify({ settings, email, provider }),
     });
 
     // Handle HTTP errors

@@ -16,6 +16,8 @@ export interface AuthState {
   accessToken: string | null;
   /** ID token for authenticating with our backend API (audience is our app's client ID) */
   idToken: string | null;
+  /** Authentication provider (Microsoft or Google) */
+  provider: 'Microsoft' | 'Google' | null;
 }
 
 /**
@@ -33,6 +35,7 @@ export function useAuth() {
     account: null,
     accessToken: null,
     idToken: null,
+    provider: null,
   });
   const [isInitialized, setIsInitialized] = useState(false);
   const [justLoggedIn, setJustLoggedIn] = useState(false);
@@ -59,6 +62,7 @@ export function useAuth() {
         account: account,
         accessToken: accessToken,
         idToken: idToken || null,
+        provider: 'Microsoft',
       });
     } catch (error) {
       console.error('Failed to update auth state:', error);
@@ -71,6 +75,7 @@ export function useAuth() {
         account: account,
         accessToken: accessToken,
         idToken: idToken || null,
+        provider: 'Microsoft',
       });
     }
   }, []);
@@ -116,6 +121,7 @@ export function useAuth() {
                 account: null,
                 accessToken: null,
                 idToken: null,
+                provider: null,
               });
             }
           }
@@ -152,6 +158,7 @@ export function useAuth() {
           account: null,
           accessToken: null,
           idToken: null,
+          provider: null,
         });
         setJustLoggedIn(false);
       }
@@ -180,6 +187,7 @@ export function useAuth() {
             account: null,
             accessToken: null,
             idToken: null,
+            provider: null,
           });
           setJustLoggedIn(false);
         }
@@ -219,6 +227,7 @@ export function useAuth() {
       }
 
       const account = authState.account;
+      const provider = authState.provider;
       
       // Clear local state first
       setAuthState({
@@ -229,21 +238,106 @@ export function useAuth() {
         account: null,
         accessToken: null,
         idToken: null,
+        provider: null,
       });
       setJustLoggedIn(false);
 
       // Logout from Microsoft
-      if (account) {
+      if (account && provider === 'Microsoft') {
         await msalInstance.logoutPopup({ account });
       }
+      // For Google, token is already cleared, no need for additional logout
     } catch (error) {
       console.error('Logout failed:', error);
     }
-  }, [authState.userPhoto, authState.account]);
+  }, [authState.userPhoto, authState.account, authState.provider]);
 
   // Clear the justLoggedIn flag after it has been consumed
   const acknowledgeLogin = useCallback(() => {
     setJustLoggedIn(false);
+  }, []);
+
+  /**
+   * Decodes a base64url-encoded string (JWT payload)
+   * 
+   * @param base64url - Base64url-encoded string
+   * @returns Decoded string
+   */
+  const decodeBase64Url = (base64url: string): string => {
+    // Convert base64url to standard base64
+    let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+    
+    // Add padding if needed
+    const paddingLength = base64.length % 4;
+    if (paddingLength === 2) {
+      base64 += '==';
+    } else if (paddingLength === 3) {
+      base64 += '=';
+    }
+    
+    return atob(base64);
+  };
+
+  /**
+   * Login with Google OAuth
+   * 
+   * Authenticates the user using Google OAuth by decoding the JWT credential
+   * and extracting user information. The Google "sub" (subject) claim is used
+   * as the canonical user identifier for authentication and authorization.
+   * 
+   * @param credential - JWT credential string from Google OAuth (ID token)
+   * @returns Promise that resolves when login is complete
+   * @throws {Error} If credential decoding or parsing fails
+   * 
+   * @example
+   * ```typescript
+   * // Called from GoogleLogin component's onSuccess callback
+   * const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
+   *   if (credentialResponse.credential) {
+   *     await loginWithGoogle(credentialResponse.credential);
+   *   }
+   * };
+   * ```
+   */
+  const loginWithGoogle = useCallback(async (credential: string) => {
+    try {
+      // Decode the JWT credential to extract user information
+      // JWT format: header.payload.signature
+      const payloadBase64 = credential.split('.')[1];
+      const payloadJson = decodeBase64Url(payloadBase64);
+      const payload = JSON.parse(payloadJson);
+      
+      // Extract user information from Google JWT
+      // Use 'sub' (subject) as the canonical user identifier
+      // Note: The backend will extract and use 'sub' from the JWT credential
+      // when validating the token and identifying the user
+      const userName = payload.name || payload.email?.split('@')[0] || 'User';
+      const userEmail = payload.email || null;
+      const userPhoto = payload.picture || null;
+      
+      // Verify the sub claim exists (required for user identification)
+      if (!payload.sub) {
+        throw new Error('Google JWT missing required "sub" claim');
+      }
+      
+      // For Google, we use the credential as the ID token
+      // The credential (JWT) can be used to authenticate with our backend
+      // The 'sub' claim should be used for user identification, not email domain
+      setAuthState({
+        isLoggedIn: true,
+        userName,
+        userEmail,
+        userPhoto,
+        account: null, // Google doesn't use MSAL AccountInfo
+        accessToken: credential, // Use credential as access token
+        idToken: credential, // Use credential as ID token for backend
+        provider: 'Google',
+      });
+      setJustLoggedIn(true);
+    } catch (error) {
+      console.error('Google login failed:', error);
+      throw error;
+    }
   }, []);
 
   return {
@@ -253,9 +347,11 @@ export function useAuth() {
     userPhoto: authState.userPhoto,
     accessToken: authState.accessToken,
     idToken: authState.idToken,
+    provider: authState.provider,
     isInitialized,
     justLoggedIn,
     login,
+    loginWithGoogle,
     logout,
     acknowledgeLogin,
   };
