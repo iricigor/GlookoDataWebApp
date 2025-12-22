@@ -117,6 +117,9 @@ function Invoke-GlookoProviderMigration {
                 $proUsersSkipped = 0
             }
             else {
+                # The CloudTable property returns a Microsoft.Azure.Cosmos.Table.CloudTable object
+                # This is the standard API provided by Az.Storage module for Azure Table Storage operations
+                # Note: Despite the "Cosmos" namespace, this is for Azure Table Storage, not Cosmos DB
                 $cloudTable = $proUsersTable.CloudTable
                 
                 # Query all entities with PartitionKey = "ProUser"
@@ -195,6 +198,9 @@ function Invoke-GlookoProviderMigration {
                 $userSettingsSkipped = 0
             }
             else {
+                # The CloudTable property returns a Microsoft.Azure.Cosmos.Table.CloudTable object
+                # This is the standard API provided by Az.Storage module for Azure Table Storage operations
+                # Note: Despite the "Cosmos" namespace, this is for Azure Table Storage, not Cosmos DB
                 $cloudTable = $userSettingsTable.CloudTable
                 
                 # Query all entities with PartitionKey = "users"
