@@ -84,6 +84,7 @@ const useStyles = makeStyles({
 interface LoginDialogProps {
   onLogin: () => Promise<void>;
   onGoogleLogin: (credential: string) => Promise<void>;
+  isGoogleAuthAvailable?: boolean;
 }
 
 /**
@@ -92,13 +93,14 @@ interface LoginDialogProps {
  * The dialog presents translated UI text with both Microsoft and Google sign-in options. When the Microsoft 
  * sign-in button is pressed, the provided `onLogin` function is invoked; the component shows a loading 
  * indicator while the call is pending, closes the dialog on success, and displays a translated error message 
- * on failure. The Google sign-in button triggers Google OAuth flow.
+ * on failure. The Google sign-in button triggers Google OAuth flow and is only shown if Google auth is available.
  *
  * @param onLogin - Function invoked to perform the Microsoft sign-in action; should return a Promise that resolves on successful login or rejects on failure.
  * @param onGoogleLogin - Function invoked to perform the Google sign-in action with credential; should return a Promise that resolves on successful login or rejects on failure.
+ * @param isGoogleAuthAvailable - Optional boolean indicating whether Google authentication is available (defaults to false).
  * @returns The JSX element for the login dialog and its trigger button.
  */
-export function LoginDialog({ onLogin, onGoogleLogin }: LoginDialogProps) {
+export function LoginDialog({ onLogin, onGoogleLogin, isGoogleAuthAvailable = false }: LoginDialogProps) {
   const styles = useStyles();
   const { t } = useTranslation(['dialogs', 'navigation', 'common']);
   const [open, setOpen] = useState(false);
@@ -207,15 +209,17 @@ export function LoginDialog({ onLogin, onGoogleLogin }: LoginDialogProps) {
                   </>
                 )}
               </Button>
-              <div className={mergeClasses(styles.baseButton, styles.googleButton)}>
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  useOneTap={false}
-                  text="signin_with"
-                  width="100%"
-                />
-              </div>
+              {isGoogleAuthAvailable && (
+                <div className={mergeClasses(styles.baseButton, styles.googleButton)}>
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    useOneTap={false}
+                    text="signin_with"
+                    width="100%"
+                  />
+                </div>
+              )}
             </div>
           </DialogActions>
         </DialogBody>

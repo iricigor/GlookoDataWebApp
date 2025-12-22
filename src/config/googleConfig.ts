@@ -13,19 +13,25 @@
  * This must be obtained from Google Cloud Console and configured
  * in the environment variable AUTH_GOOGLE_CLIENT_ID.
  * 
- * @throws {Error} If AUTH_GOOGLE_CLIENT_ID is not configured
+ * If not configured, Google authentication will be disabled.
  */
 const clientId = import.meta.env.AUTH_GOOGLE_CLIENT_ID;
 
+/**
+ * Indicates whether Google authentication is available.
+ * This will be false if AUTH_GOOGLE_CLIENT_ID is not configured.
+ */
+export const isGoogleAuthAvailable = !!clientId;
+
 if (!clientId) {
-  throw new Error(
+  console.warn(
     'AUTH_GOOGLE_CLIENT_ID environment variable is not configured. ' +
-    'Please set it in your environment or Azure Static Web App configuration. ' +
+    'Google authentication will be disabled. ' +
     'See docs/GOOGLE_AUTH_SETUP.md for setup instructions.'
   );
 }
 
-export const googleClientId = clientId;
+export const googleClientId = clientId || '';
 
 /**
  * Scopes for Google OAuth

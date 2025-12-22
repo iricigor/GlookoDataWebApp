@@ -6,22 +6,32 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import i18n from './i18n'
 import './index.css'
 import App from './App.tsx'
-import { googleClientId } from './config/googleConfig'
+import { googleClientId, isGoogleAuthAvailable } from './config/googleConfig'
+
+const renderApp = () => {
+  const appContent = (
+    <I18nextProvider i18n={i18n}>
+      <Suspense fallback={
+        <FluentProvider theme={webDarkTheme}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <Spinner size="large" label="Loading..." />
+          </div>
+        </FluentProvider>
+      }>
+        <App />
+      </Suspense>
+    </I18nextProvider>
+  );
+
+  return isGoogleAuthAvailable ? (
+    <GoogleOAuthProvider clientId={googleClientId}>
+      {appContent}
+    </GoogleOAuthProvider>
+  ) : appContent;
+};
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId={googleClientId}>
-      <I18nextProvider i18n={i18n}>
-        <Suspense fallback={
-          <FluentProvider theme={webDarkTheme}>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-              <Spinner size="large" label="Loading..." />
-            </div>
-          </FluentProvider>
-        }>
-          <App />
-        </Suspense>
-      </I18nextProvider>
-    </GoogleOAuthProvider>
+    {renderApp()}
   </StrictMode>,
 )
