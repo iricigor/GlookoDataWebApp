@@ -42,7 +42,7 @@ This document describes how to configure Google OAuth authentication for the Glo
 Create a `.env` file in the project root (if it doesn't exist):
 
 ```bash
-VITE_GOOGLE_CLIENT_ID=your-client-id-here.apps.googleusercontent.com
+AUTH_GOOGLE_CLIENT_ID=your-client-id-here.apps.googleusercontent.com
 ```
 
 ### For Azure Static Web App (Production)
@@ -52,7 +52,7 @@ Add the environment variable in Azure Portal:
 1. Go to your Azure Static Web App
 2. Navigate to **Configuration**
 3. Add a new application setting:
-   - Name: `VITE_GOOGLE_CLIENT_ID`
+   - Name: `AUTH_GOOGLE_CLIENT_ID`
    - Value: Your Google OAuth Client ID
 4. Save the changes
 
@@ -143,7 +143,7 @@ This typically means:
 ### "Invalid client ID" error
 
 **Solution**: Check that:
-1. The `VITE_GOOGLE_CLIENT_ID` environment variable is set correctly
+1. The `AUTH_GOOGLE_CLIENT_ID` environment variable is set correctly
 2. The client ID matches the one from Google Cloud Console
 3. You've restarted the development server after setting the environment variable
 

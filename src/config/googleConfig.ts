@@ -13,7 +13,7 @@
  * This must be obtained from Google Cloud Console and configured
  * in the environment or hardcoded for the application.
  */
-export const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID_HERE';
+export const googleClientId = import.meta.env.AUTH_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID_HERE';
 
 /**
  * Scopes for Google OAuth
