@@ -43,6 +43,7 @@ cd scripts/deployment-cli
 | `deploy-azure-managed-identity.sh` | Deploys User-Assigned Managed Identity |
 | `deploy-azure-key-vault.sh` | Deploys Azure Key Vault with RBAC authorization |
 | `deploy-azure-function.sh` | Deploys Azure Function App with managed identity |
+| `deploy-azure-static-web-app.sh` | Deploys Azure Static Web App with Google authentication |
 | `deploy-azure-swa-backend.sh` | Links Azure Function App to Static Web App as backend |
 | `manage-pro-users.sh` | Manages Pro users (list, add, remove, check) in ProUsers table |
 | `test-azure-resources.sh` | Verifies deployment state of all Azure resources |
@@ -340,6 +341,78 @@ Creates and configures an Azure Function App that serves as the API backend for 
 - Storage Account must exist (for function app storage)
 - Managed Identity should exist (for RBAC authentication)
 - Key Vault is optional but recommended
+
+### deploy-azure-static-web-app.sh
+
+Creates and configures an Azure Static Web App for GlookoDataWebApp. Automatically configures Google authentication if the required secrets exist in the Key Vault.
+
+**Features:**
+- Creates Azure Static Web App with specified SKU (Free or Standard)
+- Assigns user-assigned managed identity (optional)
+- Automatically retrieves Google OAuth secrets from Key Vault
+- Configures SWA app settings for Google authentication:
+  - `AUTH_GOOGLE_CLIENT_ID`
+  - `AUTH_GOOGLE_CLIENT_SECRET`
+- Idempotent - safe to run multiple times
+
+**Options:**
+```
+  -h, --help                  Show help message
+  -n, --name NAME             Static Web App name
+  -g, --resource-group RG     Resource group name
+  -l, --location LOCATION     Azure region
+  -k, --sku SKU               SKU tier (Free or Standard, default: Standard)
+  -i, --identity NAME         User-assigned managed identity name (optional)
+  -c, --config FILE           Custom configuration file path
+  -s, --save                  Save configuration after deployment
+  -v, --verbose               Enable verbose output
+```
+
+**Examples:**
+```bash
+# Deploy with defaults from configuration
+./deploy-azure-static-web-app.sh
+
+# Deploy with custom name and location
+./deploy-azure-static-web-app.sh --name my-swa --location westus2
+
+# Deploy Free tier with identity and save config
+./deploy-azure-static-web-app.sh --sku Free --identity my-identity --save
+```
+
+**Prerequisites:**
+- Resource Group must exist (or will be created)
+- User-Assigned Managed Identity should exist (for identity assignment)
+- Key Vault with Google auth secrets (optional, for Google authentication):
+  - `google-client-id`: Google OAuth 2.0 Client ID
+  - `google-client-secret`: Google OAuth 2.0 Client Secret
+
+**Google Authentication Setup:**
+
+To enable Google authentication for your Static Web App:
+
+1. **Create Google OAuth Credentials:**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create or select a project
+   - Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID"
+   - Set application type to "Web application"
+   - Add authorized redirect URI: `https://<your-swa-url>/.auth/login/google/callback`
+   - Copy the Client ID and Client Secret
+
+2. **Add Secrets to Key Vault:**
+   ```bash
+   az keyvault secret set --vault-name <keyvault-name> --name "google-client-id" --value "<your-client-id>"
+   az keyvault secret set --vault-name <keyvault-name> --name "google-client-secret" --value "<your-client-secret>"
+   ```
+
+3. **Deploy or Update Static Web App:**
+   ```bash
+   ./deploy-azure-static-web-app.sh
+   ```
+
+4. **Test Google Authentication:**
+   - Visit: `https://<your-swa-url>/.auth/login/google`
+   - You should be redirected to Google sign-in page
 
 ### deploy-azure-swa-backend.sh
 

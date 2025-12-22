@@ -9,6 +9,11 @@
     This function creates and configures an Azure Static Web App for the
     GlookoDataWebApp application. It is idempotent and safe to run multiple times.
     
+    The script automatically configures Google authentication if the following
+    secrets exist in the configured Key Vault:
+    - google-client-id: Google OAuth 2.0 Client ID
+    - google-client-secret: Google OAuth 2.0 Client Secret
+    
     This script uses native Azure PowerShell cmdlets (Az module) for:
     1. Native PowerShell experience in Azure Cloud Shell PowerShell flavor
     2. Better integration with PowerShell objects and pipeline
@@ -56,6 +61,10 @@
     Prerequisites:
     - Resource group must exist (or will be created)
     - User-Assigned Managed Identity should exist (for identity assignment)
+    - Key Vault with Google auth secrets (optional, for Google authentication):
+      * google-client-id
+      * google-client-secret
+    - Azure CLI must be available in PATH (for setting SWA app settings)
 #>
 function Set-GlookoStaticWebApp {
     [CmdletBinding()]
@@ -193,6 +202,126 @@ function Set-GlookoStaticWebApp {
                 }
             }
 
+            # Configure Google Authentication
+            Write-SectionHeader "Configuring Google Authentication"
+            
+            $keyVaultName = $config.keyVaultName
+            $googleAuthConfigured = $false
+            
+            # Use a status flag to avoid nested if/else (Continuance Pattern)
+            $continueGoogleAuth = $true
+            
+            try {
+                # Check if Key Vault exists
+                if (-not (Test-AzureResource -ResourceType 'keyvault' -Name $keyVaultName -ResourceGroup $rg)) {
+                    Write-WarningMessage "Key Vault '$keyVaultName' not found. Skipping Google authentication configuration."
+                    Write-InfoMessage "Run Set-GlookoKeyVault to create the Key Vault first"
+                    $continueGoogleAuth = $false
+                }
+                
+                # Retrieve secrets from Key Vault
+                if ($continueGoogleAuth) {
+                    Write-InfoMessage "Retrieving Google auth secret information from Key Vault '$keyVaultName'..."
+                    
+                    # Get Key Vault details to construct the vault URI
+                    # Authentication: Uses the current Azure PowerShell session credentials (from Connect-AzAccount)
+                    # Required permissions: "Key Vault Secrets User" role or "Get" permission on secrets in Key Vault access policies
+                    $keyVault = Get-AzKeyVault -ResourceGroupName $rg -VaultName $keyVaultName -ErrorAction SilentlyContinue
+                    
+                    if (-not $keyVault) {
+                        Write-WarningMessage "Could not retrieve Key Vault details"
+                        $continueGoogleAuth = $false
+                    }
+                    else {
+                        # Verify that the secrets exist in Key Vault
+                        $googleClientIdSecretObj = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-id" -ErrorAction SilentlyContinue
+                        $googleClientSecretSecretObj = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-secret" -ErrorAction SilentlyContinue
+                        
+                        # Check if secrets exist
+                        if (-not $googleClientIdSecretObj -or -not $googleClientSecretSecretObj) {
+                            Write-WarningMessage "Google auth secrets not found in Key Vault"
+                            Write-InfoMessage "Expected secrets: 'google-client-id' and 'google-client-secret'"
+                            Write-InfoMessage "Add them to Key Vault '$keyVaultName' to enable Google authentication"
+                            $continueGoogleAuth = $false
+                        }
+                    }
+                }
+                
+                # Configure Google authentication
+                if ($continueGoogleAuth) {
+                    Write-InfoMessage "Configuring Google authentication for Static Web App..."
+                    
+                    # Construct Key Vault reference URIs instead of using actual secret values
+                    # This is more secure as secrets are resolved by Azure at runtime and never exposed
+                    # Format: @Microsoft.KeyVault(SecretUri=https://<keyvault-name>.vault.azure.net/secrets/<secret-name>)
+                    $vaultUri = $keyVault.VaultUri.TrimEnd('/')
+                    $googleClientIdReference = "@Microsoft.KeyVault(SecretUri=$vaultUri/secrets/google-client-id)"
+                    $googleClientSecretReference = "@Microsoft.KeyVault(SecretUri=$vaultUri/secrets/google-client-secret)"
+                    
+                    # Try to use PowerShell command first (if available), otherwise fall back to Azure CLI
+                    # Authentication: Uses current Azure PowerShell session (from Connect-AzAccount)
+                    $configSuccess = $false
+                    
+                    # Check if New-AzStaticWebAppSetting command is available
+                    $psCommand = Get-Command -Name 'New-AzStaticWebAppSetting' -ErrorAction SilentlyContinue
+                    
+                    if ($psCommand) {
+                        Write-InfoMessage "Using PowerShell cmdlet to configure app settings with Key Vault references..."
+                        try {
+                            # Use PowerShell cmdlet to set app settings with Key Vault references
+                            $appSettings = @{
+                                "AUTH_GOOGLE_CLIENT_ID" = $googleClientIdReference
+                                "AUTH_GOOGLE_CLIENT_SECRET" = $googleClientSecretReference
+                            }
+                            
+                            New-AzStaticWebAppSetting `
+                                -ResourceGroupName $rg `
+                                -Name $swaName `
+                                -AppSetting $appSettings `
+                                -ErrorAction Stop | Out-Null
+                            
+                            $configSuccess = $true
+                            Write-SuccessMessage "Google authentication configured successfully using PowerShell"
+                        }
+                        catch {
+                            Write-WarningMessage "PowerShell cmdlet failed: $_"
+                            Write-InfoMessage "Falling back to Azure CLI..."
+                        }
+                    }
+                    
+                    # Fall back to Azure CLI if PowerShell command not available or failed
+                    if (-not $configSuccess) {
+                        Write-InfoMessage "Using Azure CLI to configure app settings with Key Vault references..."
+                        # Authentication: Uses current Azure CLI session (from 'az login')
+                        # The az CLI command runs in the same security context as this PowerShell session
+                        $azCliResult = az staticwebapp appsettings set `
+                            --name $swaName `
+                            --resource-group $rg `
+                            --setting-names "AUTH_GOOGLE_CLIENT_ID=$googleClientIdReference" "AUTH_GOOGLE_CLIENT_SECRET=$googleClientSecretReference" `
+                            2>&1
+                        
+                        # Check if Azure CLI command succeeded
+                        if ($LASTEXITCODE -eq 0) {
+                            $configSuccess = $true
+                            Write-SuccessMessage "Google authentication configured successfully using Azure CLI"
+                        }
+                        else {
+                            Write-WarningMessage "Failed to configure Google authentication via Azure CLI: $azCliResult"
+                        }
+                    }
+                    
+                    # Set the configuration flag based on success
+                    if ($configSuccess) {
+                        $googleAuthConfigured = $true
+                        Write-InfoMessage "App settings configured with Key Vault references for enhanced security"
+                    }
+                }
+            }
+            catch {
+                Write-WarningMessage "Failed to configure Google authentication: $_"
+                Write-InfoMessage "You can configure it manually later"
+            }
+
             # Get Static Web App details
             $swa = Get-AzStaticWebApp -ResourceGroupName $rg -Name $swaName
             $swaUrl = "https://$($swa.DefaultHostname)"
@@ -214,10 +343,24 @@ function Set-GlookoStaticWebApp {
                 Write-Host ""
             }
             
+            if ($googleAuthConfigured) {
+                Write-Host "  Google Authentication: Enabled"
+                Write-Host "  Login URL:             $swaUrl/.auth/login/google"
+                Write-Host ""
+            }
+            
             Write-Host "Next Steps:"
             Write-Host "  1. Deploy your web app code using GitHub Actions or Azure CLI"
             Write-Host "  2. Link a backend using Set-GlookoSwaBackend if needed"
             Write-Host "  3. Configure custom domain if needed"
+            if ($googleAuthConfigured) {
+                Write-Host "  4. Test Google authentication by visiting $swaUrl/.auth/login/google"
+            }
+            else {
+                Write-Host "  4. Add Google auth secrets to Key Vault to enable Google authentication:"
+                Write-Host "     - google-client-id"
+                Write-Host "     - google-client-secret"
+            }
             Write-Host ""
 
             # Return deployment details
@@ -229,6 +372,7 @@ function Set-GlookoStaticWebApp {
                 DefaultUrl        = $swaUrl
                 Created           = $created
                 ManagedIdentity   = if ($assignMI -and $miExists) { $identityName } else { $null }
+                GoogleAuthEnabled = $googleAuthConfigured
             }
         }
         catch {

@@ -205,6 +205,8 @@ function Set-GlookoKeyVault {
             Write-Host "  2. Expected secrets for GlookoDataWebApp:"
             Write-Host "     - PerplexityApiKey: API key for Perplexity AI"
             Write-Host "     - GeminiApiKey: API key for Google Gemini AI"
+            Write-Host "     - google-client-id: Google OAuth 2.0 Client ID (for SWA authentication)"
+            Write-Host "     - google-client-secret: Google OAuth 2.0 Client Secret (for SWA authentication)"
             Write-Host ""
             Write-Host "  3. Grant access to Azure Function App (if using managed identity):"
             Write-Host "     - Run Set-GlookoAzureFunction to auto-configure RBAC"

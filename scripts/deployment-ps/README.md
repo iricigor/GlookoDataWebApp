@@ -102,6 +102,7 @@ Invoke-GlookoDeployment -All
 | `Set-GlookoManagedIdentity` | `Set-GMI` | Deploy User-Assigned Managed Identity |
 | `Set-GlookoKeyVault` | `Set-GKV` | Deploy Azure Key Vault with RBAC authorization |
 | `Set-GlookoAzureFunction` | `Set-GAF` | Deploy Azure Function App |
+| `Set-GlookoStaticWebApp` | `Set-GSWA` | Deploy Azure Static Web App with Google authentication |
 | `Set-GlookoSwaBackend` | `Set-GSB` | Link Azure Function App to Static Web App as backend |
 | `Invoke-GlookoDeployment` | `Invoke-GD` | Orchestrate full deployment |
 | `Invoke-GlookoProUsers` | `Invoke-GPU` | Manage Pro users (list, add, remove, check) |
@@ -312,6 +313,70 @@ Set-GlookoAzureFunction -Runtime "dotnet" -RuntimeVersion "8"
 # Deploy with managed identity
 Set-GlookoAzureFunction -UseManagedIdentity
 ```
+
+### Set-GlookoStaticWebApp
+
+Creates and configures an Azure Static Web App for GlookoDataWebApp. Automatically configures Google authentication if the required secrets exist in the Key Vault.
+
+**Parameters:**
+- `-Name` - Static Web App name (optional, uses config)
+- `-ResourceGroup` - Resource group (optional, uses config)
+- `-Location` - Azure region (optional, uses config)
+- `-Sku` - SKU tier (Free or Standard, default: Standard)
+- `-AssignManagedIdentity` - Assign user-assigned managed identity
+
+**Examples:**
+```powershell
+# Deploy with defaults from configuration
+Set-GlookoStaticWebApp
+
+# Deploy with custom name and location
+Set-GlookoStaticWebApp -Name "my-swa" -Location "westus2"
+
+# Deploy Free tier with managed identity
+Set-GlookoStaticWebApp -Sku Free -AssignManagedIdentity
+
+# Use alias
+Set-GSWA
+```
+
+**Prerequisites:**
+- Resource Group must exist (or will be created)
+- User-Assigned Managed Identity should exist (for identity assignment)
+- Key Vault with Google auth secrets (optional, for Google authentication):
+  - `google-client-id`: Google OAuth 2.0 Client ID
+  - `google-client-secret`: Google OAuth 2.0 Client Secret
+- Azure CLI must be available in PATH (for setting SWA app settings)
+
+**Google Authentication Setup:**
+
+To enable Google authentication for your Static Web App:
+
+1. **Create Google OAuth Credentials:**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create or select a project
+   - Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID"
+   - Set application type to "Web application"
+   - Add authorized redirect URI: `https://<your-swa-url>/.auth/login/google/callback`
+   - Copy the Client ID and Client Secret
+
+2. **Add Secrets to Key Vault:**
+   ```powershell
+   $clientId = ConvertTo-SecureString "<your-client-id>" -AsPlainText -Force
+   $clientSecret = ConvertTo-SecureString "<your-client-secret>" -AsPlainText -Force
+   
+   Set-AzKeyVaultSecret -VaultName "<keyvault-name>" -Name "google-client-id" -SecretValue $clientId
+   Set-AzKeyVaultSecret -VaultName "<keyvault-name>" -Name "google-client-secret" -SecretValue $clientSecret
+   ```
+
+3. **Deploy or Update Static Web App:**
+   ```powershell
+   Set-GlookoStaticWebApp
+   ```
+
+4. **Test Google Authentication:**
+   - Visit: `https://<your-swa-url>/.auth/login/google`
+   - You should be redirected to Google sign-in page
 
 ### Set-GlookoSwaBackend
 
