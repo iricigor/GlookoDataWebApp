@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>859 Add Google OAuth configuration to Azure Static Web App deployment scripts with Key Vault references</summary>
+
+[#859](../../pull/859) Add Google OAuth configuration to Azure Static Web App deployment scripts with Key Vault references
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>856 Restructure Daily BG hypoglycemia AI analysis and add per-event parsing</summary>
 
 [#856](../../pull/856) Restructure Daily BG hypoglycemia AI analysis and add per-event parsing
