@@ -208,9 +208,6 @@ migrate_pro_users_table() {
     
     print_info "Found ${total_count} entities in ${table_name} table"
     
-    local updated_count=0
-    local skipped_count=0
-    
     # Process each entity
     echo "$entities" | jq -c '.[]' | while read -r entity; do
         local row_key
@@ -229,11 +226,9 @@ migrate_pro_users_table() {
             if [ "$VERBOSE" = true ]; then
                 print_info "Skipping ${email}: Provider already set to '${provider_value}'"
             fi
-            ((skipped_count++)) || true
         else
             if [ "$DRY_RUN" = true ]; then
                 print_info "[DRY-RUN] Would add Provider=${DEFAULT_PROVIDER} to ${email}"
-                ((updated_count++)) || true
             else
                 print_info "Adding Provider=${DEFAULT_PROVIDER} to ${email}"
                 
@@ -244,8 +239,6 @@ migrate_pro_users_table() {
                     --auth-mode login \
                     --entity "PartitionKey=${partition_key}" "RowKey=${row_key}" "Provider=${DEFAULT_PROVIDER}" \
                     --output none
-                
-                ((updated_count++)) || true
             fi
         fi
     done
@@ -304,9 +297,6 @@ migrate_user_settings_table() {
     
     print_info "Found ${total_count} entities in ${table_name} table"
     
-    local updated_count=0
-    local skipped_count=0
-    
     # Process each entity
     echo "$entities" | jq -c '.[]' | while read -r entity; do
         local row_key
@@ -325,11 +315,9 @@ migrate_user_settings_table() {
             if [ "$VERBOSE" = true ]; then
                 print_info "Skipping ${email}: Provider already set to '${provider_value}'"
             fi
-            ((skipped_count++)) || true
         else
             if [ "$DRY_RUN" = true ]; then
                 print_info "[DRY-RUN] Would add Provider=${DEFAULT_PROVIDER} to ${email} (userId: ${row_key})"
-                ((updated_count++)) || true
             else
                 print_info "Adding Provider=${DEFAULT_PROVIDER} to ${email} (userId: ${row_key})"
                 
@@ -340,8 +328,6 @@ migrate_user_settings_table() {
                     --auth-mode login \
                     --entity "PartitionKey=${partition_key}" "RowKey=${row_key}" "Provider=${DEFAULT_PROVIDER}" \
                     --output none
-                
-                ((updated_count++)) || true
             fi
         fi
     done
