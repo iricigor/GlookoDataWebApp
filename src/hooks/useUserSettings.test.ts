@@ -35,7 +35,7 @@ describe('useUserSettings', () => {
   });
 
   it('should initialize with idle sync status', () => {
-    const { result } = renderHook(() => useUserSettings(null, null));
+    const { result } = renderHook(() => useUserSettings(null, null, null));
     
     expect(result.current.syncStatus).toBe('idle');
     expect(result.current.isSyncing).toBe(false);
@@ -43,7 +43,7 @@ describe('useUserSettings', () => {
   });
 
   it('should return unauthorized error when saving without token', async () => {
-    const { result } = renderHook(() => useUserSettings(null, null));
+    const { result } = renderHook(() => useUserSettings(null, null, null));
     
     let saveResult: userSettingsApi.SaveSettingsResult | undefined;
     await act(async () => {
@@ -58,7 +58,7 @@ describe('useUserSettings', () => {
   });
 
   it('should return unauthorized error when saving without email', async () => {
-    const { result } = renderHook(() => useUserSettings('valid-token', null));
+    const { result } = renderHook(() => useUserSettings('valid-token', null, null));
     
     let saveResult: userSettingsApi.SaveSettingsResult | undefined;
     await act(async () => {
@@ -77,7 +77,7 @@ describe('useUserSettings', () => {
       success: true,
     });
 
-    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com'));
+    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com', 'Microsoft'));
     
     let saveResult: userSettingsApi.SaveSettingsResult | undefined;
     await act(async () => {
@@ -104,7 +104,7 @@ describe('useUserSettings', () => {
       errorType: 'infrastructure',
     });
 
-    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com'));
+    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com', 'Microsoft'));
     
     await act(async () => {
       await result.current.saveSettings(mockSettings);
@@ -115,7 +115,7 @@ describe('useUserSettings', () => {
   });
 
   it('should return unauthorized error when loading without token', async () => {
-    const { result } = renderHook(() => useUserSettings(null, null));
+    const { result } = renderHook(() => useUserSettings(null, null, null));
     
     let loadResult: userSettingsApi.LoadSettingsResult | undefined;
     await act(async () => {
@@ -135,7 +135,7 @@ describe('useUserSettings', () => {
       settings: mockSettings,
     });
 
-    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com'));
+    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com', 'Microsoft'));
     
     let loadResult: userSettingsApi.LoadSettingsResult | undefined;
     await act(async () => {
@@ -157,7 +157,7 @@ describe('useUserSettings', () => {
       errorType: 'infrastructure',
     });
 
-    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com'));
+    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com', 'Microsoft'));
     
     await act(async () => {
       await result.current.loadSettings();
@@ -172,7 +172,7 @@ describe('useUserSettings', () => {
       success: true,
     });
 
-    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com'));
+    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com', 'Microsoft'));
     
     let saveResult: userSettingsApi.SaveSettingsResult | undefined;
     await act(async () => {
@@ -184,7 +184,7 @@ describe('useUserSettings', () => {
   });
 
   it('should clear sync error', () => {
-    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com'));
+    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com', 'Microsoft'));
     
     // First trigger an error by mocking a failed save
     act(() => {
@@ -204,7 +204,7 @@ describe('useUserSettings', () => {
     
     vi.mocked(userSettingsApi.loadUserSettings).mockReturnValueOnce(delayedPromise);
 
-    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com'));
+    const { result } = renderHook(() => useUserSettings('valid-token', 'test@example.com', 'Microsoft'));
     
     // Start loading
     act(() => {

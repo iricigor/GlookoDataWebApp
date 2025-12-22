@@ -220,7 +220,6 @@ export function Navigation({
     userEmail, 
     userPhoto, 
     idToken, 
-    provider,
     justLoggedIn, 
     login,
     loginWithGoogle, 

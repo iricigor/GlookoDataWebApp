@@ -6,7 +6,7 @@ import { LoginDialog } from './LoginDialog';
 describe('LoginDialog', () => {
   it('should render login button', () => {
     const onLogin = vi.fn().mockResolvedValue(undefined);
-    renderWithProviders(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} onGoogleLogin={vi.fn().mockResolvedValue(undefined)} />);
     
     const button = screen.getByRole('button', { name: /login/i });
     expect(button).toBeInTheDocument();
@@ -14,7 +14,7 @@ describe('LoginDialog', () => {
 
   it('should open dialog when login button is clicked', () => {
     const onLogin = vi.fn().mockResolvedValue(undefined);
-    renderWithProviders(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} onGoogleLogin={vi.fn().mockResolvedValue(undefined)} />);
     
     const button = screen.getByRole('button', { name: /login/i });
     fireEvent.click(button);
@@ -24,7 +24,7 @@ describe('LoginDialog', () => {
 
   it('should show both Microsoft and Google sign-in buttons', () => {
     const onLogin = vi.fn().mockResolvedValue(undefined);
-    renderWithProviders(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} onGoogleLogin={vi.fn().mockResolvedValue(undefined)} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /login/i });
@@ -37,7 +37,7 @@ describe('LoginDialog', () => {
 
   it('should call onLogin when Microsoft sign-in is clicked', async () => {
     const onLogin = vi.fn().mockResolvedValue(undefined);
-    renderWithProviders(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} onGoogleLogin={vi.fn().mockResolvedValue(undefined)} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /login/i });
@@ -54,7 +54,7 @@ describe('LoginDialog', () => {
 
   it('should show coming soon message when Google sign-in is clicked', async () => {
     const onLogin = vi.fn().mockResolvedValue(undefined);
-    renderWithProviders(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} onGoogleLogin={vi.fn().mockResolvedValue(undefined)} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /login/i });
@@ -75,7 +75,7 @@ describe('LoginDialog', () => {
 
   it('should close dialog when cancel is clicked', () => {
     const onLogin = vi.fn().mockResolvedValue(undefined);
-    renderWithProviders(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} onGoogleLogin={vi.fn().mockResolvedValue(undefined)} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /login/i });
@@ -90,7 +90,7 @@ describe('LoginDialog', () => {
 
   it('should show loading state during login', async () => {
     const onLogin = vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
-    renderWithProviders(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} onGoogleLogin={vi.fn().mockResolvedValue(undefined)} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /login/i });
@@ -108,7 +108,7 @@ describe('LoginDialog', () => {
 
   it('should disable buttons during loading', async () => {
     const onLogin = vi.fn().mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
-    renderWithProviders(<LoginDialog onLogin={onLogin} />);
+    renderWithProviders(<LoginDialog onLogin={onLogin} onGoogleLogin={vi.fn().mockResolvedValue(undefined)} />);
     
     // Open dialog
     const openButton = screen.getByRole('button', { name: /login/i });
