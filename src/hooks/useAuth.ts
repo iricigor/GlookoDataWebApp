@@ -257,19 +257,72 @@ export function useAuth() {
     setJustLoggedIn(false);
   }, []);
 
-  // Login with Google
+  /**
+   * Decodes a base64url-encoded string (JWT payload)
+   * 
+   * @param base64url - Base64url-encoded string
+   * @returns Decoded string
+   */
+  const decodeBase64Url = (base64url: string): string => {
+    // Convert base64url to standard base64
+    let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+    
+    // Add padding if needed
+    const paddingLength = base64.length % 4;
+    if (paddingLength === 2) {
+      base64 += '==';
+    } else if (paddingLength === 3) {
+      base64 += '=';
+    }
+    
+    return atob(base64);
+  };
+
+  /**
+   * Login with Google OAuth
+   * 
+   * Authenticates the user using Google OAuth by decoding the JWT credential
+   * and extracting user information. The Google "sub" (subject) claim is used
+   * as the canonical user identifier for authentication and authorization.
+   * 
+   * @param credential - JWT credential string from Google OAuth (ID token)
+   * @returns Promise that resolves when login is complete
+   * @throws {Error} If credential decoding or parsing fails
+   * 
+   * @example
+   * ```typescript
+   * // Called from GoogleLogin component's onSuccess callback
+   * const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
+   *   if (credentialResponse.credential) {
+   *     await loginWithGoogle(credentialResponse.credential);
+   *   }
+   * };
+   * ```
+   */
   const loginWithGoogle = useCallback(async (credential: string) => {
     try {
       // Decode the JWT credential to extract user information
-      const payload = JSON.parse(atob(credential.split('.')[1]));
+      // JWT format: header.payload.signature
+      const payloadBase64 = credential.split('.')[1];
+      const payloadJson = decodeBase64Url(payloadBase64);
+      const payload = JSON.parse(payloadJson);
       
       // Extract user information from Google JWT
+      // Use 'sub' (subject) as the canonical user identifier
+      // Note: The backend will extract and use 'sub' from the JWT credential
+      // when validating the token and identifying the user
       const userName = payload.name || payload.email?.split('@')[0] || 'User';
       const userEmail = payload.email || null;
       const userPhoto = payload.picture || null;
       
+      // Verify the sub claim exists (required for user identification)
+      if (!payload.sub) {
+        throw new Error('Google JWT missing required "sub" claim');
+      }
+      
       // For Google, we use the credential as the ID token
       // The credential (JWT) can be used to authenticate with our backend
+      // The 'sub' claim should be used for user identification, not email domain
       setAuthState({
         isLoggedIn: true,
         userName,

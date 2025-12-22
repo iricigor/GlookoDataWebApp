@@ -11,9 +11,21 @@
 /**
  * Google OAuth Client ID
  * This must be obtained from Google Cloud Console and configured
- * in the environment or hardcoded for the application.
+ * in the environment variable AUTH_GOOGLE_CLIENT_ID.
+ * 
+ * @throws {Error} If AUTH_GOOGLE_CLIENT_ID is not configured
  */
-export const googleClientId = import.meta.env.AUTH_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID_HERE';
+const clientId = import.meta.env.AUTH_GOOGLE_CLIENT_ID;
+
+if (!clientId) {
+  throw new Error(
+    'AUTH_GOOGLE_CLIENT_ID environment variable is not configured. ' +
+    'Please set it in your environment or Azure Static Web App configuration. ' +
+    'See docs/GOOGLE_AUTH_SETUP.md for setup instructions.'
+  );
+}
+
+export const googleClientId = clientId;
 
 /**
  * Scopes for Google OAuth

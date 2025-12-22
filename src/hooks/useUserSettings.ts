@@ -158,7 +158,7 @@ export function useUserSettings(
         errorType: 'unknown',
       };
     }
-  }, [idToken, userEmail]);
+  }, [idToken, userEmail, provider]);
 
   /**
    * Load settings from cloud
