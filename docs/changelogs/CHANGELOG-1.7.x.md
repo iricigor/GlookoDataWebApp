@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>870 Soft fail when AUTH_GOOGLE_CLIENT_ID is missing</summary>
+
+[#870](../../pull/870) Soft fail when AUTH_GOOGLE_CLIENT_ID is missing
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>864 Add PNG versions of favicons at multiple resolutions</summary>
 
 [#864](../../pull/864) Add PNG versions of favicons at multiple resolutions
