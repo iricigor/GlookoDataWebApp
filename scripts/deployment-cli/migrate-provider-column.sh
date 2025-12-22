@@ -213,6 +213,7 @@ migrate_pro_users_table() {
         local row_key
         row_key=$(echo "$entity" | jq -r '.RowKey')
         
+        # Note: ProUsers table uses 'Email' (capital E) as per Azure Table Storage schema
         local email
         email=$(echo "$entity" | jq -r '.Email // ""')
         
@@ -302,6 +303,7 @@ migrate_user_settings_table() {
         local row_key
         row_key=$(echo "$entity" | jq -r '.RowKey')
         
+        # Note: UserSettings table uses 'email' (lowercase e) as per Azure Table Storage schema
         local email
         email=$(echo "$entity" | jq -r '.email // "unknown"')
         

@@ -139,6 +139,7 @@ function Invoke-GlookoProviderMigration {
                     $proUsersSkipped = 0
                     
                     foreach ($entity in $allEntities) {
+                        # Note: ProUsers table uses 'Email' (capital E) as per Azure Table Storage schema
                         $email = if ($entity.Properties['Email']) { 
                             $entity.Properties['Email'].StringValue 
                         } else { 
@@ -216,6 +217,7 @@ function Invoke-GlookoProviderMigration {
                     $userSettingsSkipped = 0
                     
                     foreach ($entity in $allEntities) {
+                        # Note: UserSettings table uses 'email' (lowercase e) as per Azure Table Storage schema
                         $email = if ($entity.Properties['email']) { 
                             $entity.Properties['email'].StringValue 
                         } else { 
