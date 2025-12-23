@@ -83,7 +83,7 @@ export async function googleTokenExchange(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
-  const log = createRequestLogger(context, 'GoogleTokenExchange');
+  const log = createRequestLogger(request, context);
   
   try {
     log.info('Processing Google token exchange request');
