@@ -114,7 +114,7 @@ export async function googleTokenExchange(
     try {
       const bodyText = await request.text();
       body = JSON.parse(bodyText) as TokenExchangeRequest;
-    } catch (error) {
+    } catch {
       log.warn('Invalid request body');
       return {
         status: 400,
