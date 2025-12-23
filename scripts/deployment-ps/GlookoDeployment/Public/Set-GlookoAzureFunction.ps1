@@ -322,10 +322,11 @@ function Set-GlookoAzureFunction {
                     $vaultUri = $keyVault.VaultUri.TrimEnd('/')
                     
                     # Check if Google OAuth secrets exist in Key Vault before creating references
-                    $googleClientIdSecret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-id" -ErrorAction SilentlyContinue
-                    $googleClientSecretSecret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-secret" -ErrorAction SilentlyContinue
+                    # Store results for reuse to avoid redundant API calls
+                    $script:googleClientIdSecret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-id" -ErrorAction SilentlyContinue
+                    $script:googleClientSecretSecret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-secret" -ErrorAction SilentlyContinue
                     
-                    if ($googleClientIdSecret -and $googleClientSecretSecret) {
+                    if ($script:googleClientIdSecret -and $script:googleClientSecretSecret) {
                         Write-InfoMessage "Configuring Key Vault references for Google OAuth credentials..."
                         $appSettings["GOOGLE_CLIENT_ID"] = "@Microsoft.KeyVault(SecretUri=$vaultUri/secrets/google-client-id)"
                         $appSettings["GOOGLE_CLIENT_SECRET"] = "@Microsoft.KeyVault(SecretUri=$vaultUri/secrets/google-client-secret)"
@@ -402,11 +403,8 @@ function Set-GlookoAzureFunction {
                 if ($kvExists) {
                     Write-Host "                      Key Vault Secrets User"
                     
-                    # Check if Google OAuth Key Vault references were configured
-                    $googleClientIdSecret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-id" -ErrorAction SilentlyContinue
-                    $googleClientSecretSecret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-secret" -ErrorAction SilentlyContinue
-                    
-                    if ($googleClientIdSecret -and $googleClientSecretSecret) {
+                    # Check if Google OAuth Key Vault references were configured (reuse earlier check)
+                    if ($script:googleClientIdSecret -and $script:googleClientSecretSecret) {
                         Write-Host "  Google OAuth:       Configured with Key Vault references"
                     }
                 }
@@ -418,12 +416,9 @@ function Set-GlookoAzureFunction {
             Write-Host "  2. Configure any additional application settings as needed"
             Write-Host "  3. Test the function endpoints"
             
-            # Check if Google OAuth secrets exist and show guidance
+            # Check if Google OAuth secrets exist and show guidance (reuse earlier check)
             if ($kvExists) {
-                $googleClientIdSecret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-id" -ErrorAction SilentlyContinue
-                $googleClientSecretSecret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-secret" -ErrorAction SilentlyContinue
-                
-                if (-not $googleClientIdSecret -or -not $googleClientSecretSecret) {
+                if (-not $script:googleClientIdSecret -or -not $script:googleClientSecretSecret) {
                     Write-Host "  4. Add Google OAuth secrets to Key Vault to enable Google authentication:"
                     Write-Host "     `$clientId = ConvertTo-SecureString '<your-google-client-id>' -AsPlainText -Force"
                     Write-Host "     Set-AzKeyVaultSecret -VaultName '$keyVaultName' -Name 'google-client-id' -SecretValue `$clientId"
