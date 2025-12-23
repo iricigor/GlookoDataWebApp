@@ -314,6 +314,28 @@ function Set-GlookoAzureFunction {
                 
                 if ($kvExists) {
                     $appSettings["KEY_VAULT_NAME"] = $keyVaultName
+                    
+                    # Configure Key Vault references for Google OAuth credentials
+                    # These references will be resolved at runtime by the Function App using the managed identity
+                    # Format: @Microsoft.KeyVault(SecretUri=https://<vault-name>.vault.azure.net/secrets/<secret-name>)
+                    $keyVault = Get-AzKeyVault -ResourceGroupName $rg -VaultName $keyVaultName
+                    $vaultUri = $keyVault.VaultUri.TrimEnd('/')
+                    
+                    # Check if Google OAuth secrets exist in Key Vault before creating references
+                    # Store results for reuse to avoid redundant API calls
+                    $script:googleClientIdSecret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-id" -ErrorAction SilentlyContinue
+                    $script:googleClientSecretSecret = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name "google-client-secret" -ErrorAction SilentlyContinue
+                    
+                    if ($script:googleClientIdSecret -and $script:googleClientSecretSecret) {
+                        Write-InfoMessage "Configuring Key Vault references for Google OAuth credentials..."
+                        $appSettings["GOOGLE_CLIENT_ID"] = "@Microsoft.KeyVault(SecretUri=$vaultUri/secrets/google-client-id)"
+                        $appSettings["GOOGLE_CLIENT_SECRET"] = "@Microsoft.KeyVault(SecretUri=$vaultUri/secrets/google-client-secret)"
+                        Write-SuccessMessage "Google OAuth Key Vault references configured"
+                    }
+                    else {
+                        Write-InfoMessage "Google OAuth secrets not found in Key Vault (optional)"
+                        Write-InfoMessage "Add 'google-client-id' and 'google-client-secret' to enable Google OAuth"
+                    }
                 }
             }
             
@@ -380,6 +402,11 @@ function Set-GlookoAzureFunction {
                 Write-Host "                      Storage Blob Data Contributor"
                 if ($kvExists) {
                     Write-Host "                      Key Vault Secrets User"
+                    
+                    # Check if Google OAuth Key Vault references were configured (reuse earlier check)
+                    if ($script:googleClientIdSecret -and $script:googleClientSecretSecret) {
+                        Write-Host "  Google OAuth:       Configured with Key Vault references"
+                    }
                 }
                 Write-Host ""
             }
@@ -388,6 +415,21 @@ function Set-GlookoAzureFunction {
             Write-Host "  1. Deploy your function code using Azure Functions Core Tools or CI/CD"
             Write-Host "  2. Configure any additional application settings as needed"
             Write-Host "  3. Test the function endpoints"
+            
+            # Check if Google OAuth secrets exist and show guidance (reuse earlier check)
+            if ($kvExists) {
+                if (-not $script:googleClientIdSecret -or -not $script:googleClientSecretSecret) {
+                    Write-Host "  4. Add Google OAuth secrets to Key Vault to enable Google authentication:"
+                    Write-Host "     `$clientId = ConvertTo-SecureString '<your-google-client-id>' -AsPlainText -Force"
+                    Write-Host "     Set-AzKeyVaultSecret -VaultName '$keyVaultName' -Name 'google-client-id' -SecretValue `$clientId"
+                    Write-Host "     `$clientSecret = ConvertTo-SecureString '<your-google-client-secret>' -AsPlainText -Force"
+                    Write-Host "     Set-AzKeyVaultSecret -VaultName '$keyVaultName' -Name 'google-client-secret' -SecretValue `$clientSecret"
+                }
+                else {
+                    Write-Host "  4. Verify Key Vault references in Azure Portal (Environment tab):"
+                    Write-Host "     Green checkmark should appear next to GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET"
+                }
+            }
             Write-Host ""
 
             # Return deployment details

@@ -315,6 +315,33 @@ Set-GlookoAzureFunction -Runtime "dotnet" -RuntimeVersion "8"
 Set-GlookoAzureFunction -UseManagedIdentity
 ```
 
+**Google OAuth Integration:**
+When deploying with managed identity and Key Vault, the function automatically configures Key Vault references for Google OAuth:
+
+1. Checks if `google-client-id` and `google-client-secret` exist in Key Vault
+2. If they exist, adds app settings with Key Vault reference syntax:
+   - `GOOGLE_CLIENT_ID`: `@Microsoft.KeyVault(SecretUri=https://...)`
+   - `GOOGLE_CLIENT_SECRET`: `@Microsoft.KeyVault(SecretUri=https://...)`
+3. The managed identity resolves these references at runtime
+
+To set up Google OAuth:
+```powershell
+# Add secrets to Key Vault
+$clientId = ConvertTo-SecureString "<your-google-client-id>" -AsPlainText -Force
+Set-AzKeyVaultSecret -VaultName "glookodatawebapp-kv" -Name "google-client-id" -SecretValue $clientId
+
+$clientSecret = ConvertTo-SecureString "<your-google-client-secret>" -AsPlainText -Force
+Set-AzKeyVaultSecret -VaultName "glookodatawebapp-kv" -Name "google-client-secret" -SecretValue $clientSecret
+
+# Deploy/update function app
+Set-GlookoAzureFunction -UseManagedIdentity
+```
+
+Verify in Azure Portal (Function App → Environment tab):
+- Green checkmarks ✅ should appear next to `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
+
+For detailed setup instructions, see [Key Vault References Guide](../../docs/KEY_VAULT_REFERENCES.md).
+
 ### Set-GlookoStaticWebApp
 
 Creates and configures an Azure Static Web App for GlookoDataWebApp. Automatically configures Google authentication if the required secrets exist in the Key Vault.
