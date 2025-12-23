@@ -11,21 +11,21 @@
 /**
  * Google OAuth Client ID
  * This must be obtained from Google Cloud Console and configured
- * in the environment variable AUTH_GOOGLE_CLIENT_ID.
+ * in the environment variable VITE_GOOGLE_CLIENT_ID.
  * 
  * If not configured, Google authentication will be disabled.
  */
-const clientId = import.meta.env.AUTH_GOOGLE_CLIENT_ID;
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 /**
  * Indicates whether Google authentication is available.
- * This will be false if AUTH_GOOGLE_CLIENT_ID is not configured.
+ * This will be false if VITE_GOOGLE_CLIENT_ID is not configured.
  */
 export const isGoogleAuthAvailable = !!clientId;
 
 if (!clientId) {
   console.warn(
-    'AUTH_GOOGLE_CLIENT_ID environment variable is not configured. ' +
+    'VITE_GOOGLE_CLIENT_ID environment variable is not configured. ' +
     'Google authentication will be disabled. ' +
     'See docs/GOOGLE_AUTH_SETUP.md for setup instructions.'
   );

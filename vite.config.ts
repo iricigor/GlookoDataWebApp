@@ -20,7 +20,7 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
     __BUILD_ID__: JSON.stringify(process.env.GITHUB_RUN_NUMBER || 'dev'),
     __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
-    'import.meta.env.AUTH_GOOGLE_CLIENT_ID': JSON.stringify(process.env.AUTH_GOOGLE_CLIENT_ID || ''),
+    'import.meta.env.VITE_GOOGLE_CLIENT_ID': JSON.stringify(process.env.VITE_GOOGLE_CLIENT_ID || ''),
   },
   server: {
     host: true, // Listen on all addresses, required for Codespaces

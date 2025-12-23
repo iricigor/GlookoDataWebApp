@@ -5,7 +5,9 @@
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "STORAGE_ACCOUNT_NAME": "",
     "AZURE_CLIENT_ID": "",
-    "AZURE_AD_CLIENT_ID": ""
+    "AZURE_AD_CLIENT_ID": "",
+    "GOOGLE_CLIENT_ID": "",
+    "GOOGLE_CLIENT_SECRET": ""
   },
   "Host": {
     "LocalHttpPort": 7071,

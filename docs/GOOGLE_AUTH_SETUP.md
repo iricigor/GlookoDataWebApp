@@ -2,6 +2,8 @@
 
 This document describes how to configure Google OAuth authentication for the GlookoDataWebApp.
 
+> **Note:** This guide covers the basic setup. For detailed information about the Authorization Code Flow implementation, redirect URIs, and security considerations, see [AUTH_FLOW.md](AUTH_FLOW.md).
+
 ## Prerequisites
 
 - Access to Google Cloud Console
@@ -39,21 +41,44 @@ This document describes how to configure Google OAuth authentication for the Glo
 
 ### For Local Development
 
-Create a `.env` file in the project root (if it doesn't exist):
+Create a `.env.local` file in the project root:
 
 ```bash
-AUTH_GOOGLE_CLIENT_ID=your-client-id-here.apps.googleusercontent.com
+VITE_GOOGLE_CLIENT_ID=your-client-id-here.apps.googleusercontent.com
 ```
 
-### For Azure Static Web App (Production)
+For the backend API (if testing token exchange locally), also configure `api/local.settings.json`:
 
-Add the environment variable in Azure Portal:
+```json
+{
+  "Values": {
+    "GOOGLE_CLIENT_ID": "your-client-id-here.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_SECRET": "your-client-secret-here"
+  }
+}
+```
 
-1. Go to your Azure Static Web App
-2. Navigate to **Configuration**
-3. Add a new application setting:
-   - Name: `AUTH_GOOGLE_CLIENT_ID`
+**Note:** See [AUTH_FLOW.md](AUTH_FLOW.md) for detailed information about the Authorization Code Flow implementation.
+
+### For Production (Azure)
+
+#### Static Web App (Frontend)
+The Client ID is automatically injected during CI/CD deployment via GitHub repository variables:
+
+1. Go to repository Settings > Secrets and variables > Actions > Variables
+2. Add variable: `GOOGLE_CLIENT_ID` (without `VITE_` prefix)
+3. The deployment workflow automatically injects it as `VITE_GOOGLE_CLIENT_ID`
+
+#### Function App (Backend)
+Add the environment variables in Azure Portal:
+
+1. Go to your Azure Function App
+2. Navigate to **Configuration** > **Application settings**
+3. Add new application settings:
+   - Name: `GOOGLE_CLIENT_ID`
    - Value: Your Google OAuth Client ID
+   - Name: `GOOGLE_CLIENT_SECRET`
+   - Value: Your Google OAuth Client Secret
 4. Save the changes
 
 ## Step 3: Test the Implementation
