@@ -548,7 +548,7 @@ describe('Navigation', () => {
       expect(setUILanguage).toHaveBeenCalledWith('cs');
     });
 
-    it('should cycle from Czech to English when language toggle is clicked', () => {
+    it('should cycle from Czech to Serbian when language toggle is clicked', () => {
       const setUILanguage = vi.fn();
       mockUseUILanguage.mockReturnValue({
         uiLanguage: 'cs',
@@ -563,6 +563,26 @@ describe('Navigation', () => {
       );
 
       const languageButton = screen.getByText('CS');
+      fireEvent.click(languageButton);
+
+      expect(setUILanguage).toHaveBeenCalledWith('sr');
+    });
+
+    it('should cycle from Serbian to English when language toggle is clicked', () => {
+      const setUILanguage = vi.fn();
+      mockUseUILanguage.mockReturnValue({
+        uiLanguage: 'sr',
+        setUILanguage,
+      });
+
+      renderWithProviders(
+        <Navigation 
+          currentPage="home" 
+          onNavigate={vi.fn()} 
+        />
+      );
+
+      const languageButton = screen.getByText('SR');
       fireEvent.click(languageButton);
 
       expect(setUILanguage).toHaveBeenCalledWith('en');
@@ -581,6 +601,7 @@ describe('Navigation', () => {
       expect(screen.queryByText('EN')).not.toBeInTheDocument();
       expect(screen.queryByText('DE')).not.toBeInTheDocument();
       expect(screen.queryByText('CS')).not.toBeInTheDocument();
+      expect(screen.queryByText('SR')).not.toBeInTheDocument();
     });
   });
 });
