@@ -268,7 +268,7 @@ function Invoke-GlookoProUsers {
                     $result = $cloudTable.Execute($retrieveOp)
                     
                     if ($result.Result) {
-                        $existingProvider = if ($result.Result.Properties['Provider']) {
+                        $existingProvider = if ($result.Result.Properties -and $result.Result.Properties['Provider']) {
                             $result.Result.Properties['Provider'].StringValue
                         } else {
                             $DefaultProvider
@@ -330,7 +330,7 @@ function Invoke-GlookoProUsers {
                     }
                     
                     # Get existing provider for confirmation message
-                    $existingProvider = if ($result.Result.Properties['Provider']) {
+                    $existingProvider = if ($result.Result.Properties -and $result.Result.Properties['Provider']) {
                         $result.Result.Properties['Provider'].StringValue
                     } else {
                         $DefaultProvider
@@ -365,12 +365,12 @@ function Invoke-GlookoProUsers {
                     
                     if ($result.Result) {
                         $entity = $result.Result
-                        $existingProvider = if ($entity.Properties['Provider']) {
+                        $existingProvider = if ($entity.Properties -and $entity.Properties['Provider']) {
                             $entity.Properties['Provider'].StringValue
                         } else {
                             $DefaultProvider
                         }
-                        $createdAt = if ($entity.Properties['CreatedAt']) { 
+                        $createdAt = if ($entity.Properties -and $entity.Properties['CreatedAt']) { 
                             $entity.Properties['CreatedAt'].StringValue 
                         } else { 
                             'unknown' 
