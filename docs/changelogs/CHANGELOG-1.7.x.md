@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>924 Add /stats/traffic endpoint and improve Admin page layout</summary>
+
+[#924](../../pull/924) Add /stats/traffic endpoint and improve Admin page layout
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>926 Remove tag additions from IaC what-if output</summary>
 
 [#926](../../pull/926) Remove tag additions from IaC what-if output
