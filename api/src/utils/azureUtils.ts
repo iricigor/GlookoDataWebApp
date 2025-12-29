@@ -52,20 +52,65 @@ const MS_JWKS_URI = 'https://login.microsoftonline.com/common/discovery/v2.0/key
 const GOOGLE_JWKS_URI = 'https://www.googleapis.com/oauth2/v3/certs';
 
 /**
+ * Check if a value is an unresolved Azure Key Vault reference.
+ * Key Vault references have the format: @Microsoft.KeyVault(SecretUri=https://...)
+ * 
+ * If Azure Functions runtime properly resolves the reference, this function returns false.
+ * If it returns true, it means the managed identity or RBAC permissions are not configured correctly.
+ * 
+ * @param value - The environment variable value to check
+ * @returns True if the value is an unresolved Key Vault reference
+ */
+export function isUnresolvedKeyVaultReference(value: string | undefined): boolean {
+  return !!value && value.startsWith('@Microsoft.KeyVault(');
+}
+
+/**
  * Google OAuth Client ID (from environment variable or empty string)
  * Used for validating Google ID tokens.
  * 
  * If not configured, Google authentication will fail at runtime with a warning.
  */
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_ID_RAW = process.env.GOOGLE_CLIENT_ID || '';
+
+// Check if the environment variable contains an unresolved Key Vault reference
+if (isUnresolvedKeyVaultReference(GOOGLE_CLIENT_ID_RAW)) {
+  console.error(
+    '❌ GOOGLE_CLIENT_ID contains an unresolved Key Vault reference: ' + GOOGLE_CLIENT_ID_RAW + '\n' +
+    '\n' +
+    'This means Azure Functions is not resolving the Key Vault reference automatically.\n' +
+    'Common causes:\n' +
+    '  1. Function App managed identity is not enabled\n' +
+    '  2. Managed identity lacks "Key Vault Secrets User" role on the Key Vault\n' +
+    '  3. Key Vault firewall is blocking access\n' +
+    '\n' +
+    'To fix this:\n' +
+    '  1. Enable system-assigned or user-assigned managed identity on the Function App\n' +
+    '  2. Grant the managed identity "Key Vault Secrets User" role on the Key Vault:\n' +
+    '     Run: Set-GlookoKeyVault -AssignIdentity\n' +
+    '  3. RESTART the Function App to apply changes (environment variables are loaded only at startup)\n' +
+    '     Azure Portal → Function App → Overview → Restart\n' +
+    '\n' +
+    'Note: Environment variables are cached at Function App startup. After fixing permissions,\n' +
+    'the Function App must be restarted for Azure to re-resolve the Key Vault reference.\n' +
+    '\n' +
+    'See: https://learn.microsoft.com/en-us/azure/app-service/app-service-key-vault-references'
+  );
+}
+
+// Use the raw value only if it's not a Key Vault reference
+const GOOGLE_CLIENT_ID = isUnresolvedKeyVaultReference(GOOGLE_CLIENT_ID_RAW) ? '' : GOOGLE_CLIENT_ID_RAW;
 
 // Warn if Google Client ID is not configured (but don't fail - allow app to run)
 if (!GOOGLE_CLIENT_ID) {
-  console.warn(
-    'GOOGLE_CLIENT_ID environment variable is not configured. ' +
-    'Google authentication will not work. ' +
-    'Configure this environment variable in Azure Function App Settings to enable Google login.'
-  );
+  if (!isUnresolvedKeyVaultReference(GOOGLE_CLIENT_ID_RAW)) {
+    // Only warn about missing config if it's not a Key Vault reference issue
+    console.warn(
+      'GOOGLE_CLIENT_ID environment variable is not configured. ' +
+      'Google authentication will not work. ' +
+      'Configure this environment variable in Azure Function App Settings to enable Google login.'
+    );
+  }
 }
 
 /**
