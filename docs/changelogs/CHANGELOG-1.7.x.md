@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>922 Adjust Pro User sparkle badge positioning to reduce avatar overlap</summary>
+
+[#922](../../pull/922) Adjust Pro User sparkle badge positioning to reduce avatar overlap
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>918 Explain what-if deltas and remove conflicting role assignments</summary>
 
 [#918](../../pull/918) Explain what-if deltas and remove conflicting role assignments
