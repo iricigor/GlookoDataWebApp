@@ -96,6 +96,7 @@ module functionApp 'modules/function-app.bicep' = {
     managedIdentityClientId: managedIdentity.outputs.managedIdentityClientId
     keyVaultName: keyVaultName
     webAppUrl: webAppUrl
+    useManagedIdentityForStorage: false  // Consumption plan uses connection strings
     tags: tags
   }
   dependsOn: [
@@ -118,12 +119,17 @@ module staticWebApp 'modules/static-web-app.bicep' = {
 
 // 6. RBAC Role Assignments for Managed Identity
 
+// Get reference to the deployed storage account for RBAC scoping
+resource storageAccountRef 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
+  name: storageAccountName
+}
+
 // Storage Table Data Contributor role for Managed Identity on Storage Account
 var storageTableDataContributorRoleId = '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
 
 resource storageTableDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storageAccountName, managedIdentityName, storageTableDataContributorRoleId, resourceGroup().id)
-  scope: resourceGroup()
+  name: guid(storageAccountRef.id, managedIdentityName, storageTableDataContributorRoleId)
+  scope: storageAccountRef
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageTableDataContributorRoleId)
     principalId: managedIdentity.outputs.managedIdentityPrincipalId
@@ -135,8 +141,8 @@ resource storageTableDataContributorRoleAssignment 'Microsoft.Authorization/role
 var storageBlobDataContributorRoleId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 
 resource storageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storageAccountName, managedIdentityName, storageBlobDataContributorRoleId, resourceGroup().id)
-  scope: resourceGroup()
+  name: guid(storageAccountRef.id, managedIdentityName, storageBlobDataContributorRoleId)
+  scope: storageAccountRef
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleId)
     principalId: managedIdentity.outputs.managedIdentityPrincipalId

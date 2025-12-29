@@ -2,7 +2,7 @@ using './main.bicep'
 
 // Generic deployment parameters with standard naming
 param location = 'westeurope'
-param storageAccountName = 'glookodatawebappstorage'
+param storageAccountName = 'glookostorage'
 param managedIdentityName = 'glooko-identity'
 param keyVaultName = 'glooko-kv'
 param functionAppName = 'glooko-func'

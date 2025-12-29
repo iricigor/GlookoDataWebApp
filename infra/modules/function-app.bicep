@@ -22,9 +22,17 @@ param webAppUrl string
 @description('Tags to apply to the function app')
 param tags object = {}
 
+@description('Whether to use managed identity for storage (requires Premium or Dedicated plan)')
+param useManagedIdentityForStorage bool = false
+
 var functionAppPlanName = '${functionAppName}-plan'
 var functionRuntime = 'node'
 var functionRuntimeVersion = '20'
+
+// Get reference to storage account for connection string
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
+  name: storageAccountName
+}
 
 resource hostingPlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   name: functionAppPlanName
@@ -56,9 +64,9 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
     httpsOnly: true
     siteConfig: {
       linuxFxVersion: '${functionRuntime}|${functionRuntimeVersion}'
-      appSettings: [
-        // Managed Identity authentication for storage (Functions v4)
-        // Using __accountName suffix instead of connection strings for passwordless auth
+      appSettings: useManagedIdentityForStorage ? [
+        // Managed Identity storage connection (Premium/Dedicated plans only)
+        // Note: Consumption plans require connection strings from Key Vault
         {
           name: 'AzureWebJobsStorage__accountName'
           value: storageAccountName
@@ -66,6 +74,49 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
         {
           name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING__accountName'
           value: storageAccountName
+        }
+        {
+          name: 'FUNCTIONS_EXTENSION_VERSION'
+          value: '~4'
+        }
+        {
+          name: 'FUNCTIONS_WORKER_RUNTIME'
+          value: functionRuntime
+        }
+        {
+          name: 'WEBSITE_NODE_DEFAULT_VERSION'
+          value: '~${functionRuntimeVersion}'
+        }
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: managedIdentityClientId
+        }
+        {
+          name: 'USE_MANAGED_IDENTITY'
+          value: 'true'
+        }
+        {
+          name: 'KEY_VAULT_NAME'
+          value: keyVaultName
+        }
+        {
+          name: 'STORAGE_ACCOUNT_NAME'
+          value: storageAccountName
+        }
+        {
+          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          value: '1'
+        }
+      ] : [
+        // Connection string-based storage (Consumption plan)
+        // AzureWebJobsStorage uses connection string
+        {
+          name: 'AzureWebJobsStorage'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+        }
+        {
+          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
         }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'

@@ -2,6 +2,115 @@
 
 This guide walks you through manually verifying the Bicep infrastructure code against your existing Azure deployment.
 
+## Choose Your Environment
+
+You can verify the Bicep infrastructure from:
+1. **Azure Cloud Shell** (recommended for quick verification) - See [Azure Cloud Shell Verification](#azure-cloud-shell-verification)
+2. **Local Machine** (with Azure CLI installed) - See [Local Machine Verification](#local-machine-verification)
+
+---
+
+## Azure Cloud Shell Verification
+
+Azure Cloud Shell is the easiest way to verify the Bicep infrastructure as it comes pre-configured with Azure CLI and Bicep.
+
+### Step 1: Open Azure Cloud Shell
+
+1. Navigate to [Azure Portal](https://portal.azure.com)
+2. Click the **Cloud Shell** icon (>_) in the top navigation bar
+3. Select **Bash** or **PowerShell** (both work - examples below use Bash)
+
+### Step 2: Clone the Repository in Cloud Shell
+
+```bash
+# Clone the repository
+git clone https://github.com/iricigor/GlookoDataWebApp.git
+cd GlookoDataWebApp/infra
+```
+
+### Step 3: Verify Azure Context
+
+Cloud Shell is automatically authenticated. Verify you're in the correct subscription:
+
+**Bash:**
+```bash
+# Check current subscription
+az account show --query "{Name:name, ID:id}" --output table
+
+# List all subscriptions if you need to switch
+az account list --output table
+
+# Switch subscription if needed
+az account set --subscription "Your Subscription Name or ID"
+```
+
+**PowerShell:**
+```powershell
+# Check current subscription
+Get-AzContext | Select-Object Name, Subscription
+
+# List all subscriptions if you need to switch
+Get-AzSubscription
+
+# Switch subscription if needed
+Set-AzContext -SubscriptionId "your-subscription-id"
+```
+
+### Step 4: Run What-If Analysis in Cloud Shell
+
+**Bash:**
+```bash
+# Navigate to infra directory (if not already there)
+cd ~/GlookoDataWebApp/infra
+
+# Run automated verification script
+chmod +x verify.sh
+./verify.sh
+
+# OR run manual what-if
+az deployment group what-if \
+  --resource-group Glooko \
+  --template-file main.bicep \
+  --parameters parameters.current.bicepparam
+```
+
+**PowerShell:**
+```powershell
+# Navigate to infra directory (if not already there)
+cd ~/GlookoDataWebApp/infra
+
+# Run what-if (PowerShell doesn't support .sh scripts)
+az deployment group what-if `
+  --resource-group Glooko `
+  --template-file main.bicep `
+  --parameters parameters.current.bicepparam
+```
+
+### Step 5: Review Results in Cloud Shell
+
+The what-if output will show predicted changes. Look for:
+- ✅ `= NoChange` - Resource has no changes (ideal)
+- ✅ `* Ignore` - Non-functional differences (acceptable)
+- ⚠️ `~ Modify` - Resource will be modified (review carefully)
+- ❌ `+ Create` - New resource will be created (may indicate mismatch)
+- ❌ `- Delete` - Resource will be deleted (dangerous!)
+
+**Success criteria:** "No Change" or only "Ignore" changes.
+
+### Cloud Shell Tips
+
+- **Storage:** Cloud Shell provides 5 GB of persistent storage in `$HOME` or `~`
+- **Timeout:** Cloud Shell sessions timeout after 20 minutes of inactivity
+- **Files persist:** Your cloned repository persists across sessions in `~/GlookoDataWebApp`
+- **Built-in tools:** Git, Azure CLI, Bicep, and common tools are pre-installed
+- **No installation needed:** Everything is ready to use
+
+---
+
+## Local Machine Verification
+
+If you prefer to verify from your local machine, follow these steps.
+
 ## Prerequisites
 
 Before you begin, ensure you have:
