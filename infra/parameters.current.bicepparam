@@ -26,3 +26,23 @@ param existingAppServicePlanName = 'WestEuropeLinuxDynamicPlan'
 
 // Application Insights integration
 param appInsightsResourceId = '/subscriptions/6558e738-8188-4771-a5fb-b62f974f971c/resourceGroups/Glooko/providers/microsoft.insights/components/glookodatawebapp-func'
+
+// Resource-specific tags to preserve existing Azure resource tags
+param managedIdentityTags = {
+  Environment: 'Production ManagedBy=GlookoDeploymentModule Application=glookodatawebapp'
+}
+
+param storageTags = {
+  Application: 'glookodatawebapp'
+  Purpose: 'UserSettings'
+}
+
+param keyVaultTags = {
+  ManagedBy: 'AzureDeploymentScripts'
+}
+
+param functionAppTags = {
+  ManagedBy: 'AzureDeploymentScripts'
+}
+
+param staticWebAppTags = {}

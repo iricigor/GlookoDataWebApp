@@ -60,8 +60,20 @@ param existingAppServicePlanName string = ''
 @description('Application Insights resource ID for Function App monitoring')
 param appInsightsResourceId string = ''
 
-@description('Tags to apply to all resources')
-param tags object = {}
+@description('Tags to apply to the managed identity')
+param managedIdentityTags object = {}
+
+@description('Tags to apply to the storage account')
+param storageTags object = {}
+
+@description('Tags to apply to the key vault')
+param keyVaultTags object = {}
+
+@description('Tags to apply to the function app')
+param functionAppTags object = {}
+
+@description('Tags to apply to the static web app')
+param staticWebAppTags object = {}
 
 // 1. Deploy User-Assigned Managed Identity first
 module managedIdentity 'modules/managed-identity.bicep' = {
@@ -69,7 +81,7 @@ module managedIdentity 'modules/managed-identity.bicep' = {
   params: {
     managedIdentityName: managedIdentityName
     location: location
-    tags: tags
+    tags: managedIdentityTags
   }
 }
 
@@ -83,7 +95,7 @@ module storage 'modules/storage.bicep' = {
     tableNames: tableNames
     enableTableCors: enableTableCors
     tableCorsAllowedOrigins: tableCorsAllowedOrigins
-    tags: tags
+    tags: storageTags
   }
 }
 
@@ -94,7 +106,7 @@ module keyVault 'modules/key-vault.bicep' = {
     keyVaultName: keyVaultName
     location: location
     managedIdentityPrincipalId: managedIdentity.outputs.managedIdentityPrincipalId
-    tags: tags
+    tags: keyVaultTags
   }
 }
 
@@ -113,7 +125,7 @@ module functionApp 'modules/function-app.bicep' = {
     useExistingAppServicePlan: useExistingAppServicePlan
     existingAppServicePlanName: existingAppServicePlanName
     appInsightsResourceId: appInsightsResourceId
-    tags: tags
+    tags: functionAppTags
   }
   dependsOn: [
     storage
@@ -129,7 +141,7 @@ module staticWebApp 'modules/static-web-app.bicep' = {
     location: location
     sku: staticWebAppSku
     managedIdentityId: managedIdentity.outputs.managedIdentityId
-    tags: tags
+    tags: staticWebAppTags
   }
 }
 
