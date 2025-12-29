@@ -21,6 +21,12 @@ param tableNames array = [
   'AIQueryLogs'
 ]
 
+@description('Enable CORS for Table Storage')
+param enableTableCors bool = true
+
+@description('CORS allowed origins for Table Storage')
+param tableCorsAllowedOrigins array = ['*']
+
 @description('Tags to apply to the storage account')
 param tags object = {}
 
@@ -57,6 +63,24 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
 resource tableService 'Microsoft.Storage/storageAccounts/tableServices@2023-01-01' = {
   parent: storageAccount
   name: 'default'
+  properties: enableTableCors ? {
+    cors: {
+      corsRules: [
+        {
+          allowedOrigins: tableCorsAllowedOrigins
+          allowedMethods: [
+            'GET'
+            'PUT'
+            'POST'
+            'DELETE'
+          ]
+          allowedHeaders: ['*']
+          exposedHeaders: ['*']
+          maxAgeInSeconds: 3600
+        }
+      ]
+    }
+  } : {}
 }
 
 resource tables 'Microsoft.Storage/storageAccounts/tableServices/tables@2023-01-01' = [for tableName in tableNames: {

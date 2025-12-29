@@ -15,6 +15,18 @@ param tableNames = [
   'ProUsers'
   'AIQueryLogs'
 ]
+
+// CORS configuration for Table Storage
+param enableTableCors = true
+param tableCorsAllowedOrigins = ['*']
+
+// Use existing App Service Plan
+param useExistingAppServicePlan = true
+param existingAppServicePlanName = 'WestEuropeLinuxDynamicPlan'
+
+// Application Insights integration
+param appInsightsResourceId = '/subscriptions/6558e738-8188-4771-a5fb-b62f974f971c/resourceGroups/Glooko/providers/microsoft.insights/components/glookodatawebapp-func'
+
 param tags = {
   Application: 'GlookoDataWebApp'
   Environment: 'Production'

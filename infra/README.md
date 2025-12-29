@@ -48,13 +48,14 @@ The infrastructure consists of:
 - **main.bicep** - Main orchestration template
 - **modules/** - Modular resource definitions
   - `managed-identity.bicep` - User-Assigned Managed Identity
-  - `storage.bicep` - Storage Account with Tables
+  - `storage.bicep` - Storage Account with Tables and CORS
   - `key-vault.bicep` - Key Vault with RBAC
-  - `function-app.bicep` - Azure Function App
+  - `function-app.bicep` - Azure Function App with flexible hosting plan support
   - `static-web-app.bicep` - Azure Static Web App
 - **parameters.generic.bicepparam** - Generic parameter file with standard names
 - **parameters.current.bicepparam** - Current production deployment parameters
 - **verify.sh** - Automated verification script (runs what-if analysis)
+- **WHAT_IF_ANALYSIS.md** - Analysis of first what-if run and resolution details
 - **MANUAL_VERIFICATION.md** - Detailed manual verification guide
 - **QUICK_REFERENCE.md** - Quick command reference
 
@@ -446,6 +447,7 @@ az ad sp create-for-rbac \
 
 ## Resources
 
+- [What-If Analysis](./WHAT_IF_ANALYSIS.md) - Detailed analysis of first what-if run and how issues were resolved
 - [Manual Verification Guide](./MANUAL_VERIFICATION.md) - Step-by-step manual verification instructions
 - [Quick Reference](./QUICK_REFERENCE.md) - Quick command reference for common tasks
 - [Azure Bicep Documentation](https://learn.microsoft.com/azure/azure-resource-manager/bicep/)

@@ -25,6 +25,15 @@ param tags object = {}
 @description('Whether to use managed identity for storage (requires Premium or Dedicated plan)')
 param useManagedIdentityForStorage bool = false
 
+@description('Use existing App Service Plan instead of creating a new one')
+param useExistingAppServicePlan bool = false
+
+@description('Name of existing App Service Plan to use (if useExistingAppServicePlan is true)')
+param existingAppServicePlanName string = ''
+
+@description('Application Insights resource ID for monitoring')
+param appInsightsResourceId string = ''
+
 var functionAppPlanName = '${functionAppName}-plan'
 var functionRuntime = 'node'
 var functionRuntimeVersion = '20'
@@ -34,7 +43,12 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' existing 
   name: storageAccountName
 }
 
-resource hostingPlan 'Microsoft.Web/serverfarms@2023-01-01' = {
+// Reference to existing hosting plan (if using one)
+resource existingHostingPlan 'Microsoft.Web/serverfarms@2023-01-01' existing = if (useExistingAppServicePlan) {
+  name: existingAppServicePlanName
+}
+
+resource hostingPlan 'Microsoft.Web/serverfarms@2023-01-01' = if (!useExistingAppServicePlan) {
   name: functionAppPlanName
   location: location
   tags: tags
@@ -50,7 +64,9 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2023-01-01' = {
 resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
   name: functionAppName
   location: location
-  tags: tags
+  tags: !empty(appInsightsResourceId) ? union(tags, {
+    'hidden-link: /app-insights-resource-id': appInsightsResourceId
+  }) : tags
   kind: 'functionapp,linux'
   identity: {
     type: 'UserAssigned'
@@ -59,7 +75,7 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
     }
   }
   properties: {
-    serverFarmId: hostingPlan.id
+    serverFarmId: useExistingAppServicePlan ? existingHostingPlan.id : hostingPlan.id
     reserved: true
     httpsOnly: true
     siteConfig: {
@@ -160,6 +176,8 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
       }
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
+      localMySqlEnabled: false
+      netFrameworkVersion: 'v4.6'
     }
   }
 }

@@ -15,6 +15,18 @@ param tableNames = [
   'ProUsers'
   'AIQueryLogs'
 ]
+
+// CORS configuration for Table Storage (enable for web access)
+param enableTableCors = true
+param tableCorsAllowedOrigins = ['*']
+
+// Create new App Service Plan for this deployment
+param useExistingAppServicePlan = false
+param existingAppServicePlanName = ''
+
+// Application Insights integration (optional)
+param appInsightsResourceId = ''
+
 param tags = {
   Application: 'GlookoDataWebApp'
   Environment: 'Production'
