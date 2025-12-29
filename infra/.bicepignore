@@ -1,0 +1,24 @@
+# Bicep ignore file
+# Files and directories to exclude from Bicep compilation
+
+# Documentation
+*.md
+README.md
+
+# Parameter files (not ignored, but documented here)
+# parameters.*.bicepparam files are used for deployment
+
+# Build artifacts
+*.cache
+.bicep/
+
+# IDE and editor files
+.vscode/
+.vs/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
