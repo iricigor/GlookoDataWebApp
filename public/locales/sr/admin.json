@@ -9,7 +9,7 @@
     "applyForProButton": "Prijavite se za Pro pristup",
     "applyForProLink": "https://github.com/iricigor/GlookoDataWebApp/issues/new?labels=pro-access-request&template=pro-access-request.md",
     "statistics": {
-      "title": "Sistemske statistike",
+      "title": "Statistike korisnika",
       "loggedInUsers": "Prijavljeni korisnici",
       "proUsers": "Pro korisnici",
       "webCalls": "Web pozivi",
