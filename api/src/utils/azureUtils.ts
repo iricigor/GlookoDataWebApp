@@ -55,7 +55,7 @@ const GOOGLE_JWKS_URI = 'https://www.googleapis.com/oauth2/v3/certs';
  * Google OAuth Client ID (from environment variable or empty string)
  * Used for validating Google ID tokens
  */
-const GOOGLE_CLIENT_ID = process.env.VITE_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 
 /**
  * JWKS client for fetching Microsoft identity platform public keys.
@@ -171,19 +171,6 @@ function validateIssuer(issuer: string, tenantId?: string): boolean {
   return false;
 }
 
-/**
- * Validate and decode a JWT token from the Authorization header.
- * 
- * This is a shared helper function that provides production-ready JWT validation:
- * - Cryptographic signature verification using Microsoft's JWKS endpoint
- * - Audience validation to ensure the token is intended for this application
- * - Issuer validation to ensure the token comes from Microsoft identity platform
- * - Expiration validation to reject expired tokens
- * 
- * @param authHeader - The Authorization header value (Bearer token)
- * @param context - The invocation context for logging
- * @returns Promise resolving to the verified token claims or null if invalid
- */
 /**
  * Validate and decode a JWT token from the Authorization header.
  * 
