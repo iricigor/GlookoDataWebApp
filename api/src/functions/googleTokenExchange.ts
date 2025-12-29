@@ -86,11 +86,11 @@ export async function googleTokenExchange(
   const log = createRequestLogger(request, context);
   
   try {
-    log.info('Processing Google token exchange request');
+    log.logInfo('Processing Google token exchange request');
 
     // Validate request method
     if (request.method !== 'POST') {
-      log.warn(`Invalid method: ${request.method}`);
+      log.logWarn(`Invalid method: ${request.method}`);
       return {
         status: 405,
         jsonBody: { error: 'Method not allowed. Use POST.' }
@@ -102,11 +102,11 @@ export async function googleTokenExchange(
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
-      log.error('Google OAuth credentials not configured');
-      return {
-        status: 500,
-        jsonBody: { error: 'Server configuration error: Google OAuth not configured' }
-      };
+      return log.logError(
+        new Error('Google OAuth credentials not configured'),
+        500,
+        'configuration_error'
+      );
     }
 
     // Parse request body
@@ -115,7 +115,7 @@ export async function googleTokenExchange(
       const bodyText = await request.text();
       body = JSON.parse(bodyText) as TokenExchangeRequest;
     } catch {
-      log.warn('Invalid request body');
+      log.logWarn('Invalid request body');
       return {
         status: 400,
         jsonBody: { error: 'Invalid request body. Expected JSON.' }
@@ -124,7 +124,7 @@ export async function googleTokenExchange(
 
     // Validate required fields
     if (!body.code || !body.redirect_uri) {
-      log.warn('Missing required fields in request');
+      log.logWarn('Missing required fields in request');
       return {
         status: 400,
         jsonBody: { error: 'Missing required fields: code and redirect_uri' }
@@ -132,7 +132,7 @@ export async function googleTokenExchange(
     }
 
     // Exchange authorization code for tokens
-    log.info('Exchanging authorization code for tokens');
+    log.logInfo('Exchanging authorization code for tokens');
     const tokenResponse = await exchangeCodeForTokens(
       body.code,
       body.redirect_uri,
@@ -140,7 +140,7 @@ export async function googleTokenExchange(
       clientSecret
     );
 
-    log.info('Token exchange successful');
+    log.logInfo('Token exchange successful');
 
     // Return tokens to client
     // Only return what the client needs - don't expose everything
@@ -155,20 +155,13 @@ export async function googleTokenExchange(
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    log.error(`Token exchange failed: ${errorMessage}`);
 
     // Check if it's an authorization error
     if (errorMessage.includes('401') || errorMessage.includes('invalid_grant')) {
-      return {
-        status: 401,
-        jsonBody: { error: 'Invalid or expired authorization code' }
-      };
+      return log.logError(error, 401, 'unauthorized');
     }
 
-    return {
-      status: 500,
-      jsonBody: { error: 'Token exchange failed. Please try again.' }
-    };
+    return log.logError(error, 500, 'token_exchange_failed');
   }
 }
 

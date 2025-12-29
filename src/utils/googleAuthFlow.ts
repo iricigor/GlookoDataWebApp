@@ -108,6 +108,11 @@ export function parseCallbackParams(): { code: string; state: string } | null {
 
 /**
  * Exchange authorization code for tokens via backend
+ * 
+ * @param code - The authorization code received from Google OAuth callback
+ * @returns Promise resolving to an object containing access_token, id_token, and expires_in
+ * @throws {Error} Network errors, HTTP errors (non-2xx status), or JSON parsing failures.
+ *   The error message will include the HTTP status code and error details when available.
  */
 export async function exchangeCodeForTokens(code: string): Promise<{
   access_token: string;
@@ -126,8 +131,22 @@ export async function exchangeCodeForTokens(code: string): Promise<{
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Token exchange failed');
+    // Safely parse error response body
+    let errorMessage = 'Token exchange failed';
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.error || errorMessage;
+    } catch {
+      // If JSON parsing fails, try to get text response
+      try {
+        const errorText = await response.text();
+        errorMessage = errorText || errorMessage;
+      } catch {
+        // If text parsing also fails, use default message with status
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      }
+    }
+    throw new Error(`[${response.status}] ${errorMessage}`);
   }
 
   return await response.json();
