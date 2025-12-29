@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>910 Fix Application Insights query for admin statistics display</summary>
+
+[#910](../../pull/910) Fix Application Insights query for admin statistics display
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>903 Add Bicep IaC for current Azure infrastructure</summary>
 
 [#903](../../pull/903) Add Bicep IaC for current Azure infrastructure
