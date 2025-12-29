@@ -120,7 +120,9 @@ function GoogleLoginButton({ onGoogleLogin, loading, setLoading, setError, setOp
       setError(null);
       
       try {
-        // Use the access_token as the credential
+        // Note: The implicit flow returns an access_token.
+        // The backend should validate this token with Google's tokeninfo endpoint
+        // to extract user information (email, sub, etc.) for authentication.
         await onGoogleLogin(tokenResponse.access_token);
         setOpen(false);
       } catch (err) {
@@ -134,7 +136,7 @@ function GoogleLoginButton({ onGoogleLogin, loading, setLoading, setError, setOp
       console.error('Google login failed');
       setError(t('loginDialog.errorMessage'));
     },
-    flow: 'implicit', // Use implicit flow to get ID token directly
+    flow: 'implicit', // Returns access_token for validation
   });
 
   return (
