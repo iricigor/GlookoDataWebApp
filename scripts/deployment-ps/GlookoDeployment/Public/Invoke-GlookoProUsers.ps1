@@ -211,13 +211,17 @@ function Invoke-GlookoProUsers {
                         Write-SuccessMessage "Found $($users.Count) Pro user(s):"
                         Write-Host ""
                         foreach ($user in $users) {
-                            $email = $user.Properties['Email'].StringValue
-                            $userProvider = if ($user.Properties['Provider']) { 
+                            $email = if ($user.Properties -and $user.Properties['Email']) { 
+                                $user.Properties['Email'].StringValue 
+                            } else { 
+                                'unknown' 
+                            }
+                            $userProvider = if ($user.Properties -and $user.Properties['Provider']) { 
                                 $user.Properties['Provider'].StringValue 
                             } else { 
                                 $DefaultProvider
                             }
-                            $createdAt = if ($user.Properties['CreatedAt']) { 
+                            $createdAt = if ($user.Properties -and $user.Properties['CreatedAt']) { 
                                 $user.Properties['CreatedAt'].StringValue 
                             } else { 
                                 'unknown' 
@@ -233,16 +237,21 @@ function Invoke-GlookoProUsers {
                         Action = 'List'
                         Count = $users.Count
                         Users = $users | ForEach-Object {
-                            $userProvider = if ($_.Properties['Provider']) { 
+                            $userProvider = if ($_.Properties -and $_.Properties['Provider']) { 
                                 $_.Properties['Provider'].StringValue 
                             } else { 
                                 $DefaultProvider
                             }
+                            $userEmail = if ($_.Properties -and $_.Properties['Email']) { 
+                                $_.Properties['Email'].StringValue 
+                            } else { 
+                                'unknown' 
+                            }
                             @{
-                                Email = $_.Properties['Email'].StringValue
+                                Email = $userEmail
                                 Provider = $userProvider
-                                User = "$($_.Properties['Email'].StringValue);$userProvider"
-                                CreatedAt = if ($_.Properties['CreatedAt']) { $_.Properties['CreatedAt'].StringValue } else { $null }
+                                User = "$userEmail;$userProvider"
+                                CreatedAt = if ($_.Properties -and $_.Properties['CreatedAt']) { $_.Properties['CreatedAt'].StringValue } else { $null }
                             }
                         }
                     }
