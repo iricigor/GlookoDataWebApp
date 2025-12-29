@@ -10,6 +10,7 @@ import {
   MessageBarBody,
   Dropdown,
   Option,
+  Tooltip,
 } from '@fluentui/react-components';
 import { PersonRegular, ShieldCheckmarkRegular, PlayRegular, ErrorCircleRegular, CheckmarkCircleRegular } from '@fluentui/react-icons';
 import { useState } from 'react';
@@ -470,53 +471,61 @@ export function Admin() {
           </div>
 
           <div className={styles.statsGrid}>
-            <Card className={styles.statCard}>
-              <div className={styles.statIcon}>
-                <CheckmarkCircleRegular />
-              </div>
-              <Text className={styles.statValue}>
-                {formatStatValue(webCalls, isLoadingApiStats)}
-              </Text>
-              <Text className={styles.statLabel}>
-                {t('admin.statistics.webCalls')}
-              </Text>
-            </Card>
+            <Tooltip content={t('admin.statistics.webCallsTooltip')} relationship="description">
+              <Card className={styles.statCard}>
+                <div className={styles.statIcon}>
+                  <CheckmarkCircleRegular />
+                </div>
+                <Text className={styles.statValue}>
+                  {formatStatValue(webCalls, isLoadingApiStats)}
+                </Text>
+                <Text className={styles.statLabel}>
+                  {t('admin.statistics.webCalls')}
+                </Text>
+              </Card>
+            </Tooltip>
 
-            <Card className={styles.statCard}>
-              <div className={styles.statIcon}>
-                <ErrorCircleRegular />
-              </div>
-              <Text className={styles.statValue}>
-                {formatStatValue(webErrors, isLoadingApiStats)}
-              </Text>
-              <Text className={styles.statLabel}>
-                {t('admin.statistics.webErrors')}
-              </Text>
-            </Card>
+            <Tooltip content={t('admin.statistics.webErrorsTooltip')} relationship="description">
+              <Card className={styles.statCard}>
+                <div className={styles.statIcon}>
+                  <ErrorCircleRegular />
+                </div>
+                <Text className={styles.statValue}>
+                  {formatStatValue(webErrors, isLoadingApiStats)}
+                </Text>
+                <Text className={styles.statLabel}>
+                  {t('admin.statistics.webErrors')}
+                </Text>
+              </Card>
+            </Tooltip>
 
-            <Card className={styles.statCard}>
-              <div className={styles.statIcon}>
-                <CheckmarkCircleRegular />
-              </div>
-              <Text className={styles.statValue}>
-                {formatStatValue(apiCalls, isLoadingApiStats)}
-              </Text>
-              <Text className={styles.statLabel}>
-                {t('admin.statistics.apiCalls')}
-              </Text>
-            </Card>
+            <Tooltip content={t('admin.statistics.apiCallsTooltip')} relationship="description">
+              <Card className={styles.statCard}>
+                <div className={styles.statIcon}>
+                  <CheckmarkCircleRegular />
+                </div>
+                <Text className={styles.statValue}>
+                  {formatStatValue(apiCalls, isLoadingApiStats)}
+                </Text>
+                <Text className={styles.statLabel}>
+                  {t('admin.statistics.apiCalls')}
+                </Text>
+              </Card>
+            </Tooltip>
 
-            <Card className={styles.statCard}>
-              <div className={styles.statIcon}>
-                <ErrorCircleRegular />
-              </div>
-              <Text className={styles.statValue}>
-                {formatStatValue(apiErrors, isLoadingApiStats)}
-              </Text>
-              <Text className={styles.statLabel}>
-                {t('admin.statistics.apiErrors')}
-              </Text>
-            </Card>
+            <Tooltip content={t('admin.statistics.apiErrorsTooltip')} relationship="description">
+              <Card className={styles.statCard}>
+                <div className={styles.statIcon}>
+                  <ErrorCircleRegular />
+                </div>
+                <Text className={styles.statValue}>
+                  {formatStatValue(apiErrors, isLoadingApiStats)}
+                </Text>
+                <Text className={styles.statLabel}>
+                  {t('admin.statistics.apiErrors')}
+                </Text>
+              </Card>
+            </Tooltip>
           </div>
         </div>
 

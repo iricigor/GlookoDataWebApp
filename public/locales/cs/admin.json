@@ -12,18 +12,42 @@
       "title": "Systémové statistiky",
       "loggedInUsers": "Přihlášení uživatelé",
       "proUsers": "Pro uživatelé",
+      "webCalls": "Web volání",
+      "webCallsTooltip": "HTTP požadavky na statické webové stránky a zdroje (HTML, CSS, JS soubory)",
+      "webErrors": "Web chyby",
+      "webErrorsTooltip": "Neúspěšné webové požadavky se stavovými kódy 4xx/5xx pro statický obsah",
       "apiCalls": "API volání",
+      "apiCallsTooltip": "HTTP požadavky na backendové API endpointy (cesty začínající /api/)",
       "apiErrors": "API chyby",
-      "placeholderNote": "Statistiky budou dostupné po dokončení integrace API"
+      "apiErrorsTooltip": "Neúspěšné API požadavky se stavovými kódy 4xx/5xx pro backendové endpointy",
+      "timePeriodLabel": "Časové období",
+      "timePeriod1Hour": "Poslední 1 hodina",
+      "timePeriod1Day": "Poslední 1 den",
+      "apiStatsTitle": "API a Web statistiky"
     },
     "aiTest": {
       "title": "Test konfigurace AI",
-      "description": "Otestujte konfiguraci Pro AI klíče a ověřte, že funguje správně",
+      "description": "Otestujte konfiguraci Pro AI klíče. Vyberte test infrastruktury pro ověření pouze přístupu k Key Vault, nebo úplný test pro ověření odpovědi poskytovatele AI.",
+      "testInfraButton": "Testovat infrastrukturu",
+      "testFullButton": "Testovat poskytovatele AI",
       "testButton": "Testovat AI klíč",
       "testing": "Testování...",
       "selectProvider": "Vybrat poskytovatele AI",
+      "infraSuccess": "✅ Test infrastruktury úspěšný! Key Vault: {keyVaultName}, Secret: {secretName}",
+      "fullSuccess": "✅ Úplný test úspěšný! Poskytovatel: {provider}",
+      "infraError": "❌ Test infrastruktury se nezdařil: {error}",
+      "fullError": "❌ Úplný test se nezdařil: {error}",
       "testSuccess": "✅ Test úspěšný! Poskytovatel: {provider}",
-      "testError": "❌ Test se nezdařil: {error}"
+      "testError": "❌ Test se nezdařil: {error}",
+      "configurationTitle": "Konfigurace",
+      "provider": "Poskytovatel",
+      "keyVaultName": "Název Key Vault",
+      "secretName": "Název secretu",
+      "secretExists": "Secret přístupný",
+      "yes": "Ano",
+      "no": "Ne",
+      "notAvailable": "Není k dispozici",
+      "notConfigured": "Není nakonfigurováno"
     }
   }
 }
