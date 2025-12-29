@@ -7,7 +7,7 @@
 
     # Version number of this module
     # NOTE: Bump this version when adding/updating scripts (see copilot-instructions.md)
-    ModuleVersion = '1.0.23'
+    ModuleVersion = '1.0.24'
 
     # ID used to uniquely identify this module
     GUID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
@@ -100,6 +100,7 @@
 
             # ReleaseNotes of this module
             ReleaseNotes = @"
+v1.0.24 - Configured keyVaultReferenceIdentity property to use User-Assigned Managed Identity (UAMI) for Key Vault references in Set-GlookoAzureFunction and Set-GlookoStaticWebApp
 v1.0.23 - Added automatic Key Vault reference configuration for Google OAuth credentials (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET) in Set-GlookoAzureFunction; Added VITE_GOOGLE_CLIENT_ID injection in GitHub Actions workflow
 v1.0.22 - Added Invoke-GlookoProviderMigration function for migrating ProUsers and UserSettings tables to add Provider column (default: Microsoft)
 v1.0.21 - Added Invoke-GlookoProUsers function for managing Pro users (list, add, remove, check) in ProUsers table

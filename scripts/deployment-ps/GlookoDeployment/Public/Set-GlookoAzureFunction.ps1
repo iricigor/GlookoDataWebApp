@@ -238,6 +238,31 @@ function Set-GlookoAzureFunction {
                 
                 Write-SuccessMessage "User-assigned managed identity assigned"
                 
+                # Configure Key Vault reference identity to use the user-assigned managed identity
+                # This tells Azure which identity to use when resolving Key Vault references in app settings
+                # Default behavior is to use system-assigned identity, but we need to explicitly specify UAMI
+                Write-InfoMessage "Configuring Key Vault reference identity..."
+                
+                # Get Function App resource ID for az resource update command
+                $functionApp = Get-AzFunctionApp -ResourceGroupName $rg -Name $functionName
+                $functionAppResourceId = $functionApp.Id
+                
+                # Set keyVaultReferenceIdentity property using Azure CLI
+                # This property cannot be set directly via PowerShell Az.Functions module
+                # We use 'az resource update' to set the property at the ARM resource level
+                $azResult = az resource update `
+                    --ids $functionAppResourceId `
+                    --set properties.keyVaultReferenceIdentity="$identityId" `
+                    --output none 2>&1
+                
+                if ($LASTEXITCODE -eq 0) {
+                    Write-SuccessMessage "Key Vault reference identity configured to use UAMI"
+                }
+                else {
+                    Write-WarningMessage "Failed to configure Key Vault reference identity: $azResult"
+                    Write-InfoMessage "Key Vault references may still work but might use system-assigned identity if present"
+                }
+                
                 # Configure RBAC roles
                 if (-not $SkipRbacAssignment) {
                     Write-SectionHeader "Configuring RBAC Roles"
