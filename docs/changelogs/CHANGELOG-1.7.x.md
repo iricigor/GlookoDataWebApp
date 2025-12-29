@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>887 Fix ProUsers list to access Azure Table entity properties correctly</summary>
+
+[#887](../../pull/887) Fix ProUsers list to access Azure Table entity properties correctly
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>885 Fix null Properties access in Invoke-GlookoProUsers List action</summary>
 
 [#885](../../pull/885) Fix null Properties access in Invoke-GlookoProUsers List action
