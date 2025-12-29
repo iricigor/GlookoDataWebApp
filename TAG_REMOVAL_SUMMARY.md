@@ -1,13 +1,15 @@
-# Tag Removal Summary
+# Tag Management Summary
 
 ## Issue
 [Feature]: Iaac - What-If remove additional tags
 
-**Requirement:** Simplify `az deployment group what-if` deltas by removing tag additions while keeping tag modifications and deletions.
+**Requirement:** Simplify `az deployment group what-if` deltas by removing tag additions while preserving existing tags and preventing modifications or deletions.
 
-## Solution
+## Evolution of Solution
 
-Changed the default `tags` parameter in `main.bicep` from:
+### Initial Approach (Tag Removal)
+
+First, we changed the default `tags` parameter in `main.bicep` from:
 ```bicep
 param tags object = {
   Application: 'GlookoDataWebApp'
@@ -21,7 +23,45 @@ To:
 param tags object = {}
 ```
 
-And removed explicit `tags` parameters from both parameter files.
+This removed tag additions but **caused unintended tag deletions and modifications**.
+
+### Final Solution (Tag Preservation)
+
+To prevent tag deletions and modifications, we implemented **resource-specific tag parameters**:
+
+```bicep
+// Instead of a single global tags parameter
+param managedIdentityTags object = {}
+param storageTags object = {}
+param keyVaultTags object = {}
+param functionAppTags object = {}
+param staticWebAppTags object = {}
+```
+
+And in `parameters.current.bicepparam`, we explicitly set tags matching current Azure state:
+
+```bicep
+param managedIdentityTags = {
+  Environment: 'Production ManagedBy=GlookoDeploymentModule Application=glookodatawebapp'
+}
+
+param storageTags = {
+  Application: 'glookodatawebapp'
+  Purpose: 'UserSettings'
+}
+
+param keyVaultTags = {
+  ManagedBy: 'AzureDeploymentScripts'
+}
+
+param functionAppTags = {
+  ManagedBy: 'AzureDeploymentScripts'
+}
+
+param staticWebAppTags = {}
+```
+
+See [TAG_PRESERVATION_FIX.md](TAG_PRESERVATION_FIX.md) for complete implementation details.
 
 ## Impact on What-If Output
 
@@ -95,14 +135,17 @@ The new what-if output will show **no tag changes**:
 | **Resources Modified** | 5-6 (mostly tags) | 3-5 (functional changes only) |
 | **What-If Noise** | High (many tag deltas) | Low (only functional changes) |
 
-## Files Changed
+## Files Changed (Current Implementation)
 
-1. **infra/main.bicep** - Changed default `tags` parameter to `{}`
-2. **infra/parameters.current.bicepparam** - Removed `tags` parameter
-3. **infra/parameters.generic.bicepparam** - Removed `tags` parameter
+### Modified Files
+1. **infra/main.bicep** - Changed from single `tags` to resource-specific tag parameters
+2. **infra/parameters.current.bicepparam** - Added explicit resource-specific tags
+3. **infra/README.md** - Updated troubleshooting section
 4. **infra/EXPECTED_WHAT_IF.md** - Updated expected output documentation
-5. **infra/README.md** - Updated troubleshooting section
-6. **infra/WHAT_IF_ANALYSIS.md** - Added removal note
+
+### New Files
+5. **infra/TAG_PRESERVATION_SUMMARY.md** - Detailed implementation documentation
+6. **TAG_PRESERVATION_FIX.md** - Comprehensive implementation summary
 
 ## Verification
 
