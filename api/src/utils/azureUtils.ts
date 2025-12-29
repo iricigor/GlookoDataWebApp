@@ -126,11 +126,13 @@ const VALID_ISSUER_PATTERNS = [
 /**
  * Valid issuers for Google OAuth tokens.
  * According to Google's OpenID Connect specification, Google ID tokens
- * always have 'https://accounts.google.com' as the issuer.
+ * can have either 'https://accounts.google.com' or 'accounts.google.com' as the issuer.
+ * Both formats must be accepted for proper validation.
  * See: https://developers.google.com/identity/openid-connect/openid-connect#validatinganidtoken
  */
 const VALID_GOOGLE_ISSUERS = [
   'https://accounts.google.com',
+  'accounts.google.com',
 ];
 
 /**
