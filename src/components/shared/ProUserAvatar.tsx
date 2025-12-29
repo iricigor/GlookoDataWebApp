@@ -57,8 +57,12 @@ function getIsLargeAvatar(avatarSize: AvatarProps['size']): boolean {
     return avatarSize >= 48;
   }
   // Handle named sizes from Fluent UI
-  const largeNamedSizes = ['large', 'larger', 'largest'];
-  return largeNamedSizes.includes(avatarSize || '');
+  if (typeof avatarSize === 'string') {
+    const largeNamedSizes = ['large', 'larger', 'largest'];
+    return largeNamedSizes.includes(avatarSize);
+  }
+  // Default to small badge for undefined
+  return false;
 }
 
 interface ProUserAvatarProps extends AvatarProps {
@@ -93,8 +97,8 @@ export function ProUserAvatar({
         <Tooltip content={t('logoutDialog.proUser')} relationship="label">
           <span 
             className={`${styles.badge} ${isLargeAvatar ? styles.badgeLarge : ''}`}
-            aria-label={t('logoutDialog.proUser')}
             role="img"
+            aria-label={t('logoutDialog.proUser')}
           >
             ✨
           </span>
