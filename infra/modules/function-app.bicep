@@ -77,7 +77,7 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
   properties: {
     serverFarmId: useExistingAppServicePlan ? existingHostingPlan.id : hostingPlan.id
     reserved: true
-    httpsOnly: true
+    // httpsOnly: true  // Removed - best practice, implement in separate PR (currently false in production)
     siteConfig: {
       linuxFxVersion: '${functionRuntime}|${functionRuntimeVersion}'
       appSettings: useManagedIdentityForStorage ? [
@@ -174,10 +174,11 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
         ]
         supportCredentials: true
       }
-      ftpsState: 'Disabled'
-      minTlsVersion: '1.2'
-      localMySqlEnabled: false
-      netFrameworkVersion: 'v4.6'
+      // Best practice settings removed - implement in separate PR:
+      // ftpsState: 'Disabled'
+      // minTlsVersion: '1.2'
+      // localMySqlEnabled: false
+      // netFrameworkVersion: 'v4.6'
     }
   }
 }

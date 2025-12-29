@@ -138,37 +138,10 @@ module staticWebApp 'modules/static-web-app.bicep' = {
 }
 
 // 6. RBAC Role Assignments for Managed Identity
-
-// Get reference to the deployed storage account for RBAC scoping
-resource storageAccountRef 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
-  name: storageAccountName
-}
-
-// Storage Table Data Contributor role for Managed Identity on Storage Account
-var storageTableDataContributorRoleId = '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
-
-resource storageTableDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storageAccountRef.id, managedIdentityName, storageTableDataContributorRoleId)
-  scope: storageAccountRef
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageTableDataContributorRoleId)
-    principalId: managedIdentity.outputs.managedIdentityPrincipalId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-// Storage Blob Data Contributor role for Managed Identity on Storage Account
-var storageBlobDataContributorRoleId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
-
-resource storageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storageAccountRef.id, managedIdentityName, storageBlobDataContributorRoleId)
-  scope: storageAccountRef
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleId)
-    principalId: managedIdentity.outputs.managedIdentityPrincipalId
-    principalType: 'ServicePrincipal'
-  }
-}
+// NOTE: Role assignments already exist in Azure and are managed separately
+// Removed from template to avoid conflicts with existing assignments
+// - Storage Table Data Contributor: 4949700a-2127-4912-bc2b-b46fe97fec30
+// - Storage Blob Data Contributor: c351193c-5102-4e17-8d3a-8209023f503a
 
 // Outputs
 output managedIdentityId string = managedIdentity.outputs.managedIdentityId

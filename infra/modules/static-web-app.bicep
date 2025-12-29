@@ -36,11 +36,12 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
   properties: {
     repositoryUrl: 'https://github.com/iricigor/GlookoDataWebApp'
     branch: 'main'
-    buildProperties: {
-      appLocation: '/'
-      apiLocation: 'api'
-      outputLocation: 'dist'
-    }
+    // buildProperties removed - best practice documentation, implement in separate PR
+    // buildProperties: {
+    //   appLocation: '/'
+    //   apiLocation: 'api'
+    //   outputLocation: 'dist'
+    // }
     stagingEnvironmentPolicy: 'Enabled'
     allowConfigFileUpdates: true
     provider: 'GitHub'
