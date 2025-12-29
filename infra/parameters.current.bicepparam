@@ -28,6 +28,8 @@ param existingAppServicePlanName = 'WestEuropeLinuxDynamicPlan'
 param appInsightsResourceId = '/subscriptions/6558e738-8188-4771-a5fb-b62f974f971c/resourceGroups/Glooko/providers/microsoft.insights/components/glookodatawebapp-func'
 
 // Resource-specific tags to preserve existing Azure resource tags
+// Note: These tags match the exact current state in Azure to prevent any modifications
+// The Environment tag for managedIdentity contains concatenated values - this is the current state
 param managedIdentityTags = {
   Environment: 'Production ManagedBy=GlookoDeploymentModule Application=glookodatawebapp'
 }
