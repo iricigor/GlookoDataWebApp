@@ -1,14 +1,14 @@
 {
   "apiDocs": {
     "title": "Glooko Insights - API dokumentace",
-    "subtitle": "Interaktivní API průzkumník s autentizací Microsoft",
+    "subtitle": "Interaktivní API průzkumník s autentizací",
     "adminPageLink": "Správcovská stránka",
     "version": "Verze: {{version}}",
     "proUserBadge": "Pro uživatel",
     "tokenActive": "Token aktivní",
     "signOut": "Odhlásit se",
     "signInPrompt": "Přihlaste se pro testování autentizovaných endpointů",
-    "signInButton": "Přihlásit se pomocí Microsoftu",
+    "signInButton": "Přihlásit se",
     "signInMessage": "Přihlaste se pomocí svého účtu Microsoft pro testování API endpointů. Váš autentizační token bude automaticky přidán k požadavkům.",
     "initializingAuth": "Inicializace autentizace...",
     "loadingDocs": "Načítání API dokumentace...",
