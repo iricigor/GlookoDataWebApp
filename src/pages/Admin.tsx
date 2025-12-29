@@ -106,12 +106,6 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     ...shorthands.gap('24px'),
   },
-  statsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    ...shorthands.gap('16px'),
-    width: '100%',
-  },
   userStatsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
