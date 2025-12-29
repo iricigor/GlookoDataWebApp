@@ -212,17 +212,17 @@ function Invoke-GlookoProUsers {
                         Write-Host ""
                         foreach ($user in $users) {
                             # Access properties via .Properties collection (DynamicTableEntity)
-                            $email = if ($user.Properties -and $user.Properties['Email']) { 
+                            $email = if ($user.Properties.ContainsKey('Email')) { 
                                 $user.Properties['Email'].StringValue 
                             } else { 
                                 'unknown' 
                             }
-                            $userProvider = if ($user.Properties -and $user.Properties['Provider']) { 
+                            $userProvider = if ($user.Properties.ContainsKey('Provider')) { 
                                 $user.Properties['Provider'].StringValue 
                             } else { 
                                 $DefaultProvider
                             }
-                            $createdAt = if ($user.Properties -and $user.Properties['CreatedAt']) { 
+                            $createdAt = if ($user.Properties.ContainsKey('CreatedAt')) { 
                                 $user.Properties['CreatedAt'].StringValue 
                             } else { 
                                 'unknown' 
@@ -239,12 +239,12 @@ function Invoke-GlookoProUsers {
                         Count = $users.Count
                         Users = $users | ForEach-Object {
                             # Access properties via .Properties collection (DynamicTableEntity)
-                            $userProvider = if ($_.Properties -and $_.Properties['Provider']) { 
+                            $userProvider = if ($_.Properties.ContainsKey('Provider')) { 
                                 $_.Properties['Provider'].StringValue 
                             } else { 
                                 $DefaultProvider
                             }
-                            $userEmail = if ($_.Properties -and $_.Properties['Email']) { 
+                            $userEmail = if ($_.Properties.ContainsKey('Email')) { 
                                 $_.Properties['Email'].StringValue 
                             } else { 
                                 'unknown' 
@@ -253,7 +253,7 @@ function Invoke-GlookoProUsers {
                                 Email = $userEmail
                                 Provider = $userProvider
                                 User = "$userEmail;$userProvider"
-                                CreatedAt = if ($_.Properties -and $_.Properties['CreatedAt']) { $_.Properties['CreatedAt'].StringValue } else { $null }
+                                CreatedAt = if ($_.Properties.ContainsKey('CreatedAt')) { $_.Properties['CreatedAt'].StringValue } else { $null }
                             }
                         }
                     }
@@ -270,7 +270,7 @@ function Invoke-GlookoProUsers {
                     $result = $cloudTable.Execute($retrieveOp)
                     
                     if ($result.Result) {
-                        $existingProvider = if ($result.Result.Properties -and $result.Result.Properties['Provider']) {
+                        $existingProvider = if ($result.Result.Properties.ContainsKey('Provider')) {
                             $result.Result.Properties['Provider'].StringValue
                         } else {
                             $DefaultProvider
@@ -332,7 +332,7 @@ function Invoke-GlookoProUsers {
                     }
                     
                     # Get existing provider for confirmation message
-                    $existingProvider = if ($result.Result.Properties -and $result.Result.Properties['Provider']) {
+                    $existingProvider = if ($result.Result.Properties.ContainsKey('Provider')) {
                         $result.Result.Properties['Provider'].StringValue
                     } else {
                         $DefaultProvider
@@ -367,25 +367,43 @@ function Invoke-GlookoProUsers {
                     
                     if ($result.Result) {
                         $entity = $result.Result
-                        $existingProvider = if ($entity.Properties -and $entity.Properties['Provider']) {
+                        $existingProvider = if ($entity.Properties.ContainsKey('Provider')) {
                             $entity.Properties['Provider'].StringValue
                         } else {
                             $DefaultProvider
                         }
-                        $createdAt = if ($entity.Properties -and $entity.Properties['CreatedAt']) { 
-                            $entity.Properties['CreatedAt'].StringValue 
-                        } else { 
-                            'unknown' 
-                        }
-                        Write-SuccessMessage "'$emailAddress;$existingProvider' is a Pro user (added: $createdAt)"
                         
-                        return @{
-                            Action = 'Check'
-                            Email = $emailAddress
-                            Provider = $existingProvider
-                            User = "$emailAddress;$existingProvider"
-                            IsProUser = $true
-                            CreatedAt = $createdAt
+                        # Check if the requested provider matches the stored provider
+                        if ($existingProvider -ieq $provider) {
+                            $createdAt = if ($entity.Properties.ContainsKey('CreatedAt')) { 
+                                $entity.Properties['CreatedAt'].StringValue 
+                            } else { 
+                                'unknown' 
+                            }
+                            Write-SuccessMessage "'$emailAddress;$existingProvider' is a Pro user (added: $createdAt)"
+                            
+                            return @{
+                                Action = 'Check'
+                                Email = $emailAddress
+                                Provider = $existingProvider
+                                User = "$emailAddress;$existingProvider"
+                                IsProUser = $true
+                                CreatedAt = $createdAt
+                            }
+                        }
+                        else {
+                            # User exists but with a different provider
+                            Write-InfoMessage "'$emailAddress;$provider' is NOT a Pro user (exists with provider: $existingProvider)"
+                            
+                            return @{
+                                Action = 'Check'
+                                Email = $emailAddress
+                                Provider = $provider
+                                User = "$emailAddress;$provider"
+                                IsProUser = $false
+                                CreatedAt = $null
+                                ExistingProvider = $existingProvider
+                            }
                         }
                     }
                     else {
