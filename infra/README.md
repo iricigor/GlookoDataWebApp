@@ -56,9 +56,14 @@ The infrastructure consists of:
 - **parameters.current.bicepparam** - Current production deployment parameters
 - **validate.sh** - Quick validation script (validates syntax and checks parameters)
 - **verify.sh** - Automated verification script (runs what-if analysis)
-- **WHAT_IF_ANALYSIS.md** - Analysis of first what-if run and resolution details
-- **EXPECTED_WHAT_IF.md** - Expected what-if output after fixes and red flags to watch for
-- **MANUAL_VERIFICATION.md** - Detailed manual verification guide
+
+### Documentation
+
+- **USER_GUIDE.md** - **START HERE** - Quick start guide for deployment
+- **FIX_SUMMARY.md** - Overview of what-if fixes and solutions
+- **WHAT_IF_ANALYSIS.md** - Detailed analysis of all what-if changes
+- **EXPECTED_WHAT_IF.md** - Expected output, red flags, and troubleshooting
+- **MANUAL_VERIFICATION.md** - Step-by-step manual verification
 - **QUICK_REFERENCE.md** - Quick command reference
 
 ## Prerequisites
@@ -473,10 +478,12 @@ az ad sp create-for-rbac \
 
 ## Resources
 
-- [What-If Analysis](./WHAT_IF_ANALYSIS.md) - Detailed analysis of first what-if run and how issues were resolved
-- [Expected What-If Results](./EXPECTED_WHAT_IF.md) - What to expect in what-if output and red flags to watch for
-- [Manual Verification Guide](./MANUAL_VERIFICATION.md) - Step-by-step manual verification instructions
-- [Quick Reference](./QUICK_REFERENCE.md) - Quick command reference for common tasks
+- **[User Guide](./USER_GUIDE.md)** - 🌟 **START HERE** - Quick start and complete deployment workflow
+- [Fix Summary](./FIX_SUMMARY.md) - Overview of what-if fixes implemented
+- [What-If Analysis](./WHAT_IF_ANALYSIS.md) - Detailed analysis of first what-if run and resolutions
+- [Expected What-If Results](./EXPECTED_WHAT_IF.md) - What to expect and red flags to watch for
+- [Manual Verification Guide](./MANUAL_VERIFICATION.md) - Step-by-step manual verification
+- [Quick Reference](./QUICK_REFERENCE.md) - Quick command reference
 - [Azure Bicep Documentation](https://learn.microsoft.com/azure/azure-resource-manager/bicep/)
 - [Bicep Best Practices](https://learn.microsoft.com/azure/azure-resource-manager/bicep/best-practices)
 - [Azure Static Web Apps](https://learn.microsoft.com/azure/static-web-apps/)
