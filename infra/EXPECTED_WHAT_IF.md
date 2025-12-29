@@ -2,6 +2,8 @@
 
 This document describes what the `az deployment group what-if` output should look like after applying the fixes from this PR.
 
+**Important Update (2024-12-29):** Tag additions have been removed from the template to simplify the what-if output. Resources will maintain their existing tags without modification. This reduces noise in the what-if deltas while preserving all functional changes.
+
 ## Running the What-If
 
 ```bash
@@ -35,9 +37,11 @@ These are **new RBAC role assignments** - expected and required:
 
 **Why:** These are required for passwordless authentication using Managed Identity.
 
-### ✅ Resources to Modify (5-6)
+### ✅ Resources to Modify (3-4)
 
-Expected modifications (security improvements and tag updates):
+Expected modifications (configuration and property updates):
+
+**Note:** Tag additions have been removed to simplify what-if output. Resources will maintain their existing tags.
 
 #### 1. Key Vault
 ```
@@ -46,30 +50,17 @@ Expected modifications (security improvements and tag updates):
   + properties.networkAcls:
       bypass: "AzureServices"
       defaultAction: "Allow"
-  ~ tags.ManagedBy: "AzureDeploymentScripts" => "Bicep"
 ```
 **Why:** Security improvements - purge protection prevents accidental deletion, network ACLs add security layer.
 
-#### 2. Managed Identity
-```
-~ Microsoft.ManagedIdentity/userAssignedIdentities/glookodatawebapp-identity
-  + tags.Application: "GlookoDataWebApp"
-  + tags.ManagedBy: "Bicep"
-  ~ tags.Environment: "Production ManagedBy=..." => "Production"
-```
-**Why:** Tag standardization for better governance.
-
-#### 3. Storage Account
+#### 2. Storage Account
 ```
 ~ Microsoft.Storage/storageAccounts/glookodatawebappstorage
-  - tags.Purpose: "UserSettings"
-  + tags.ManagedBy: "Bicep"
-  ~ tags.Application: "glookodatawebapp" => "GlookoDataWebApp"
   x properties.encryption.services: (unsupported - no change)
 ```
-**Why:** Tag standardization. Encryption services marked as unsupported are read-only.
+**Why:** Encryption services marked as unsupported are read-only properties (no actual change).
 
-#### 4. Table Service
+#### 3. Table Service
 ```
 ~ Microsoft.Storage/storageAccounts/glookodatawebappstorage/tableServices/default
   = properties.cors.corsRules: [...]  (no change or ignore)
@@ -82,7 +73,7 @@ Expected modifications (security improvements and tag updates):
 ```
 This indicates a problem - the CORS configuration is not working as expected.
 
-#### 5. Function App
+#### 4. Function App
 ```
 ~ Microsoft.Web/sites/glookodatawebapp-func
   + properties.siteConfig.cors: {...}
@@ -93,10 +84,11 @@ This indicates a problem - the CORS configuration is not working as expected.
   ~ properties.httpsOnly: false => true
   = properties.serverFarmId: "/subscriptions/.../WestEuropeLinuxDynamicPlan"
   ~ properties.siteConfig.linuxFxVersion: "Node|20" => "node|20"
-  ~ tags.ManagedBy: "AzureDeploymentScripts" => "Bicep"
   + tags.hidden-link: /app-insights-resource-id: "..."
 ```
 **Why:** Security improvements and configuration standardization. Server farm ID should show "no change" since we're using the existing plan.
+
+**Note:** The `tags.ManagedBy` change has been removed to simplify the what-if output. The Function App will keep its existing tags.
 
 **⚠️ CRITICAL CHECK:** Verify that `properties.serverFarmId` shows:
 - Either `= (no change)` 
@@ -108,16 +100,17 @@ If you see a new plan being created:
 ```
 This indicates the `useExistingAppServicePlan` parameter is not working correctly.
 
-#### 6. Static Web App
+#### 5. Static Web App
 ```
 ~ Microsoft.Web/staticSites/GlookoData
   - properties.deploymentAuthPolicy: "DeploymentToken"
   - properties.stableInboundIP: "20.101.2.157"
   - properties.trafficSplitting: {...}
   + properties.buildProperties: {...}
-  + tags: {...}
 ```
-**Why:** Read-only properties being removed by Azure, build properties being standardized, tags being added.
+**Why:** Read-only properties being removed by Azure, build properties being standardized.
+
+**Note:** Tag additions have been removed to simplify the what-if output.
 
 ### ✅ Resources with No Change (3)
 
@@ -147,7 +140,7 @@ This indicates the `useExistingAppServicePlan` parameter is not working correctl
 
 **Expected:**
 - Resources to create: **2** (RBAC role assignments)
-- Resources to modify: **5-6** (tag updates and security improvements)
+- Resources to modify: **3-5** (configuration and property updates, no tag changes)
 - Resources with no change: **3** (tables)
 - Unsupported: **1** (Key Vault role assignment - diagnostic only)
 - Ignored: **3** (resources not managed by template)
@@ -198,12 +191,11 @@ These are **expected and acceptable** changes:
 - ✅ Creating RBAC role assignments for Managed Identity
 - ✅ Adding `enablePurgeProtection` to Key Vault
 - ✅ Adding `networkAcls` to Key Vault
-- ✅ Changing tags from "AzureDeploymentScripts" to "Bicep"
-- ✅ Adding standardized tags (Application, Environment, ManagedBy)
 - ✅ Setting `httpsOnly: true` on Function App
 - ✅ Adding security settings (minTlsVersion, ftpsState)
-- ✅ Adding `hidden-link` tag for App Insights
+- ✅ Adding `hidden-link` tag for App Insights (conditionally)
 - ✅ Removing read-only properties from Static Web App
+- ✅ No tag additions (tags simplified per issue requirement)
 
 ## After What-If Verification
 

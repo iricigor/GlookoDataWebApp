@@ -394,7 +394,7 @@ param tableNames = [
 1. **Resource already exists** - Ensure resource names match exactly
 2. **Different configuration** - Check all properties in parameter file
 3. **RBAC differences** - Role assignments use GUIDs and may show as "Ignore"
-4. **Tags mismatch** - Ensure tags match existing resources
+4. **Tags** - Tags are not set by default to reduce noise in what-if output. Resources maintain their existing tags.
 
 ### Deployment Fails
 

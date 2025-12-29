@@ -26,9 +26,3 @@ param existingAppServicePlanName = ''
 
 // Application Insights integration (optional)
 param appInsightsResourceId = ''
-
-param tags = {
-  Application: 'GlookoDataWebApp'
-  Environment: 'Production'
-  ManagedBy: 'Bicep'
-}
