@@ -45,6 +45,22 @@ const useStyles = makeStyles({
   },
 });
 
+/**
+ * Determine if the avatar should use the large badge size based on avatar size.
+ * Large badge (24px) for avatars >= 48px, small badge (18px) for smaller avatars.
+ * 
+ * @param avatarSize - The size prop value from AvatarProps
+ * @returns true if the avatar is large enough for the large badge
+ */
+function getIsLargeAvatar(avatarSize: AvatarProps['size']): boolean {
+  if (typeof avatarSize === 'number') {
+    return avatarSize >= 48;
+  }
+  // Handle named sizes from Fluent UI
+  const largeNamedSizes = ['large', 'larger', 'largest'];
+  return largeNamedSizes.includes(avatarSize || '');
+}
+
 interface ProUserAvatarProps extends AvatarProps {
   /** Whether to show the Pro User badge overlay */
   isProUser?: boolean;
@@ -67,17 +83,6 @@ export function ProUserAvatar({
 }: ProUserAvatarProps) {
   const styles = useStyles();
   const { t } = useTranslation('dialogs');
-
-  // Determine badge size based on avatar size
-  // Large badge for avatars >= 48px, small badge for smaller avatars
-  const getIsLargeAvatar = (avatarSize: AvatarProps['size']): boolean => {
-    if (typeof avatarSize === 'number') {
-      return avatarSize >= 48;
-    }
-    // Handle named sizes from Fluent UI
-    const largeNamedSizes = ['large', 'larger', 'largest'];
-    return largeNamedSizes.includes(avatarSize || '');
-  };
 
   const isLargeAvatar = getIsLargeAvatar(size);
 
