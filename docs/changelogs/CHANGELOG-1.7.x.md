@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>876 Fix E2E test failures caused by responsive navigation and outdated tab references</summary>
+
+[#876](../../pull/876) Fix E2E test failures caused by responsive navigation and outdated tab references
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>874 Add Google OAuth Authorization Code Flow infrastructure</summary>
 
 [#874](../../pull/874) Add Google OAuth Authorization Code Flow infrastructure
