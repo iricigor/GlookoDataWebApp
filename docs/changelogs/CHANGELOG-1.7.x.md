@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>893 Configure keyVaultReferenceIdentity for UAMI in deployment scripts</summary>
+
+[#893](../../pull/893) Configure keyVaultReferenceIdentity for UAMI in deployment scripts
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>891 Fix Pro users management: provider verification and email display</summary>
 
 [#891](../../pull/891) Fix Pro users management: provider verification and email display
