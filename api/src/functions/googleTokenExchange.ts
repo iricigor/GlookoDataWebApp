@@ -27,6 +27,17 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { createRequestLogger } from "../utils/logger";
 
+/**
+ * Check if a value is an unresolved Azure Key Vault reference.
+ * Key Vault references have the format: @Microsoft.KeyVault(SecretUri=https://...)
+ * 
+ * @param value - The environment variable value to check
+ * @returns True if the value is an unresolved Key Vault reference
+ */
+function isUnresolvedKeyVaultReference(value: string | undefined): boolean {
+  return !!value && value.startsWith('@Microsoft.KeyVault(');
+}
+
 interface TokenExchangeRequest {
   code: string;
   redirect_uri: string;
@@ -100,6 +111,47 @@ export async function googleTokenExchange(
     // Get client ID and secret from environment
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+    // Check for unresolved Key Vault references
+    if (isUnresolvedKeyVaultReference(clientId)) {
+      log.logError(
+        new Error(
+          'GOOGLE_CLIENT_ID contains an unresolved Key Vault reference. ' +
+          'The Function App managed identity may not have access to Key Vault. ' +
+          'Ensure the managed identity has "Key Vault Secrets User" role. ' +
+          'Run: Set-GlookoKeyVault -AssignIdentity'
+        ),
+        500,
+        'configuration_error'
+      );
+      return {
+        status: 500,
+        jsonBody: { 
+          error: 'Server configuration error',
+          details: 'Google authentication is not properly configured. Please contact the administrator.'
+        }
+      };
+    }
+
+    if (isUnresolvedKeyVaultReference(clientSecret)) {
+      log.logError(
+        new Error(
+          'GOOGLE_CLIENT_SECRET contains an unresolved Key Vault reference. ' +
+          'The Function App managed identity may not have access to Key Vault. ' +
+          'Ensure the managed identity has "Key Vault Secrets User" role. ' +
+          'Run: Set-GlookoKeyVault -AssignIdentity'
+        ),
+        500,
+        'configuration_error'
+      );
+      return {
+        status: 500,
+        jsonBody: { 
+          error: 'Server configuration error',
+          details: 'Google authentication is not properly configured. Please contact the administrator.'
+        }
+      };
+    }
 
     if (!clientId || !clientSecret) {
       return log.logError(
