@@ -74,10 +74,11 @@ const useStyles = makeStyles({
     alignItems: 'center',
     justifyContent: 'center',
     ...shorthands.gap('8px'),
-    flex: '1',
+    flex: '1 1 auto',
+    minWidth: 'fit-content',
     minHeight: '40px',
     height: '40px',
-    ...shorthands.padding('8px', '16px'),
+    ...shorthands.padding('8px', '20px'),
     whiteSpace: 'nowrap',
   },
   loginButtonText: {
