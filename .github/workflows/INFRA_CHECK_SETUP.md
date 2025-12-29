@@ -62,8 +62,8 @@ Configure the app to trust GitHub Actions using OIDC:
 
 ```bash
 # Get your GitHub repository details
-GITHUB_ORG="iricigor"  # Your GitHub organization or username
-GITHUB_REPO="GlookoDataWebApp"  # Your repository name
+GITHUB_ORG="your-org"         # Replace with your GitHub organization or username
+GITHUB_REPO="your-repo"       # Replace with your repository name
 
 # Create federated credential for Pull Requests
 az ad app federated-credential create \
@@ -88,6 +88,13 @@ az ad app federated-credential create \
   }'
 
 echo "✅ OIDC federated credentials configured"
+```
+
+**Example for this repository:**
+```bash
+# For iricigor/GlookoDataWebApp
+GITHUB_ORG="iricigor"
+GITHUB_REPO="GlookoDataWebApp"
 ```
 
 ## Step 4: Configure GitHub Secrets
