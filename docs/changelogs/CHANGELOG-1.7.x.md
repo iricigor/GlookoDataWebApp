@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>902 [WIP] Fix login button width and alignment</summary>
+
+[#902](../../pull/902) [WIP] Fix login button width and alignment
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>895 Fix login button alignment and remove account caching</summary>
 
 [#895](../../pull/895) Fix login button alignment and remove account caching
