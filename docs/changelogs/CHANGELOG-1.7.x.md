@@ -4,27 +4,116 @@
 
 ---
 
-## [1.7.x] - Current Development
+## [1.7.x] - Released
 
 ### Overview
 
-Version 1.7 focuses on maintenance updates and bug fixes.
+Version 1.7 represents a major expansion of the platform with the introduction of Google OAuth authentication, Pro Users features with backend AI capabilities, comprehensive admin dashboard with Application Insights integration, Infrastructure as Code using Bicep templates, enhanced AI analysis capabilities, improved mobile UI, and expanded localization support including Serbian and Czech languages.
 
-### Planned Features
+### Major Features
 
-*(To be added as development progresses)*
+**Google OAuth Integration**
+- Complete Google Sign-In implementation with Authorization Code Flow
+- Provider-agnostic authentication supporting both Microsoft and Google accounts
+- Azure Key Vault integration for secure credential management
+- Provider column migration for multi-provider user identification
+- UTF-8 username encoding support
 
-### New Features
+**Pro Users Program**
+- Secure backend AI endpoint with race-safe rate limiting and enhanced validation
+- Pro user confirmation marker (✨) in AI responses and avatar overlays
+- Pro AI key toggle in Settings with automatic fallback to user API keys
+- Interest collection system for feature preview
+- Provider verification and email display management
 
-*(To be added as development progresses)*
+**Admin Dashboard & Statistics**
+- Application Insights integration for user analytics and traffic monitoring
+- Admin statistics endpoint with logged-in users and Pro users count
+- User statistics grid layout with clear visual presentation
+- API endpoint listing in deployment workflow
+- Test endpoints for AI infrastructure validation
+- Access control with admin-only visibility
 
-### Fixes
+**Infrastructure as Code (Bicep)**
+- Complete Bicep IaC templates for Azure infrastructure
+- Configurable parameters to preserve existing infrastructure
+- Key Vault references for sensitive configuration
+- User-assigned managed identity (UAMI) configuration
+- What-if output improvements with delta explanations
+- Deployment script enhancements
 
-*(To be added as development progresses)*
+**AI Analysis Enhancements**
+- Unified system prompt for consistent AI behavior across all queries
+- Enhanced Daily BG Hypoglycemia Analysis with LBGI statistics
+- Per-event parsing for hypoglycemia incidents
+- Inline AI analysis in Time in Range cards
+- Day-specific activity context in AI prompts
+- Improved AI provider routing and configuration
 
-### Documentation
+**UI/UX Improvements**
+- Mobile UI overhaul: dark mode background fix, hamburger menu repositioning
+- File info moved from dedicated tab to dropdown popover
+- Home navigation integrated into app brand
+- Sticky filter sections with transparent borders
+- Time-based unit display for Time in Range statistics
+- Navigation improvements with responsive design
 
-*(To be added as development progresses)*
+**Localization**
+- Serbian translation support with Latin script
+- Czech language added to language switcher
+- Fixed Serbian language placeholders and missing sections
+- Provider-agnostic login text
+
+**Performance & Storage**
+- Persistent file caching with IndexedDB
+- Getting Started Guide accordion state persistence
+- Settings page tab persistence with redesigned AI Settings layout
+
+**Code Quality & Testing**
+- Fixed E2E test failures from responsive navigation updates
+- Refactored glucoseRangeUtils into focused modules (under 700 lines)
+- Extracted promptProvider logic to custom hook
+- Separated build, translation checks, and PR preview into optional workflows
+- Fixed auth state synchronization with MSAL event listener
+
+**API & Documentation**
+- API documentation improvements with version information
+- Clear visual distinction between server and example responses
+- Admin and API docs cross-navigation links
+- Updated test-ai-key endpoint documentation
+- Swagger UI branding adjustments
+
+### Bug Fixes
+
+**Authentication & Login**
+- Fixed Google login 401 error and UTF-8 encoding issues
+- Removed account caching to prevent stale authentication state
+- Fixed login button alignment and width
+- Resolved auth state synchronization issues
+
+**Pro Users & Admin**
+- Fixed Pro users table entity properties access
+- Resolved null Properties access in PowerShell commands
+- Fixed AI provider name mismatches in responses and disclaimers
+- Corrected Gemini model name in tests
+- Fixed Pro Keys routing and API key fallback logic
+
+**Azure Functions & Deployment**
+- Fixed Azure Functions 404 errors with proper entry points
+- Resolved admin endpoint 404s by avoiding reserved SWA paths
+- Detected and handled unresolved Key Vault references
+- Configured UAMI for Key Vault reference identity
+
+**Infrastructure**
+- Removed conflicting role assignments
+- Fixed Application Insights query for statistics
+- Cleaned up IaC what-if output (tag additions)
+
+**UI/UX**
+- Fixed dark mode background on mobile
+- Removed swipe navigation (caused navigation issues)
+- Removed duplicate login button from Admin page
+- Fixed temp build warnings
 
 ### Other
 

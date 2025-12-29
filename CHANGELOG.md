@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of Contents
 
 - [Unreleased](#unreleased---partial-rollback-of-cloud-features)
-- [Current Development - 1.7.x](#17x---current-development)
+- [Current Development - 1.8.x](#18x---current-development)
+- [Version 1.7.x](#17x---released)
 - [Version 1.6.x](#16x---released)
 - [Version 1.5.x](#15x---released)
 - [Version 1.4.x](#14x---released)
@@ -52,17 +53,39 @@ All data processing continues to happen client-side in the browser. Settings are
 
 ---
 
-## [1.7.x] - Current Development
+## [1.8.x] - Current Development
+
+> **📖 Full Details:** [View complete 1.8.x changelog](docs/changelogs/CHANGELOG-1.8.x.md)
+
+### Summary
+
+Version 1.8 focuses on new features and enhancements.
+
+### Planned Features
+
+*(To be added as development progresses)*
+
+---
+
+## [1.7.x] - Released
 
 > **📖 Full Details:** [View complete 1.7.x changelog](docs/changelogs/CHANGELOG-1.7.x.md)
 
 ### Summary
 
-Version 1.7 focuses on maintenance updates and bug fixes.
+Version 1.7 represents a major expansion of the platform with the introduction of Google OAuth authentication, Pro Users features with backend AI capabilities, comprehensive admin dashboard with Application Insights integration, Infrastructure as Code using Bicep templates, enhanced AI analysis capabilities, improved mobile UI, and expanded localization support including Serbian and Czech languages.
 
-### Planned Features
+### Major Features
 
-*(To be added as development progresses)*
+- **Google OAuth Integration** - Complete sign-in flow with Authorization Code Flow, provider-agnostic authentication, and Azure Key Vault integration
+- **Pro Users Program** - Secure backend AI endpoint with rate limiting, Pro user markers (✨), and automatic API key fallback
+- **Admin Dashboard & Statistics** - Application Insights integration, user analytics, traffic monitoring, and admin-only access control
+- **Infrastructure as Code (Bicep)** - Complete Azure infrastructure templates with configurable parameters and Key Vault references
+- **AI Analysis Enhancements** - Unified system prompts, enhanced hypoglycemia analysis with LBGI stats, inline TIR analysis
+- **UI/UX Improvements** - Mobile UI overhaul, file info popover, improved navigation, sticky filters with transparency
+- **Localization** - Serbian (Latin) and Czech language support with comprehensive translations
+- **Performance & Storage** - IndexedDB file caching, persistent accordion and tab states
+- **Code Quality** - Refactored utilities, custom hooks, separated workflows, improved E2E tests
 
 ---
 
