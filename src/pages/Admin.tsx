@@ -17,10 +17,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useProUserCheck } from '../hooks/useProUserCheck';
-import { useAdminStats } from '../hooks/useAdminStats';
-import { useAdminApiStats } from '../hooks/useAdminApiStats';
+import { useUnifiedAdminStats } from '../hooks/useUnifiedAdminStats';
 import { testProAIKey, type TestAIType } from '../utils/api/adminTestAIApi';
-import type { TimePeriod } from '../utils/api/adminApiStatsApi';
+import type { TimePeriod } from '../utils/api/adminStatsUnifiedApi';
 
 /**
  * Default AI API Key secret name in Key Vault
@@ -160,12 +159,28 @@ const useStyles = makeStyles({
   link: {
     color: tokens.colorBrandForeground1,
   },
+  apiStatsTitleRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '16px',
+    ...shorthands.gap('16px'),
+    '@media (max-width: 768px)': {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      ...shorthands.gap('12px'),
+    },
+  },
+  apiStatsTitle: {
+    fontSize: tokens.fontSizeHero800,
+    fontWeight: tokens.fontWeightSemibold,
+    fontFamily: 'Segoe UI, sans-serif',
+    margin: 0,
+  },
   timePeriodControl: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
     ...shorthands.gap('12px'),
-    marginBottom: '16px',
   },
   timePeriodLabel: {
     fontSize: tokens.fontSizeBase300,
@@ -237,22 +252,18 @@ export function Admin() {
   const { isLoggedIn, idToken } = useAuth();
   const { isProUser, hasChecked } = useProUserCheck(isLoggedIn ? idToken : null);
   
-  // Fetch admin statistics only if user is a Pro user
-  const { loggedInUsersCount, proUsersCount, isLoading: isLoadingStats } = useAdminStats(
-    isLoggedIn && isProUser ? idToken : null,
-    isLoggedIn && isProUser
-  );
-
-  // Fetch API statistics with time period selection
+  // Fetch unified admin statistics (user counts + API/Web stats) in a single call
   const { 
+    loggedInUsersCount,
+    proUsersCount,
     webCalls, 
     webErrors, 
     apiCalls, 
     apiErrors, 
     timePeriod,
     setTimePeriod,
-    isLoading: isLoadingApiStats 
-  } = useAdminApiStats(
+    isLoading: isLoadingStats 
+  } = useUnifiedAdminStats(
     isLoggedIn && isProUser ? idToken : null,
     isLoggedIn && isProUser
   );
@@ -455,31 +466,27 @@ export function Admin() {
 
         {/* API & Web Statistics Section */}
         <div className={styles.apiStatsSection}>
-          <Text as="h2" style={{ 
-            fontSize: tokens.fontSizeHero800,
-            fontWeight: tokens.fontWeightSemibold,
-            textAlign: 'center',
-            fontFamily: 'Segoe UI, sans-serif',
-            marginBottom: '16px',
-          }}>
-            {t('admin.statistics.apiStatsTitle')}
-          </Text>
-
-          <div className={styles.timePeriodControl}>
-            <Text className={styles.timePeriodLabel}>
-              {t('admin.statistics.timePeriodLabel')}:
+          <div className={styles.apiStatsTitleRow}>
+            <Text as="h2" className={styles.apiStatsTitle}>
+              {t('admin.statistics.apiStatsTitle')}
             </Text>
-            <Dropdown
-              className={styles.timePeriodDropdown}
-              value={getTimePeriodLabel(timePeriod)}
-              selectedOptions={[timePeriod]}
-              onOptionSelect={(_event, data) => {
-                setTimePeriod(data.optionValue as TimePeriod);
-              }}
-            >
-              <Option value="1hour">{t('admin.statistics.timePeriod1Hour')}</Option>
-              <Option value="1day">{t('admin.statistics.timePeriod1Day')}</Option>
-            </Dropdown>
+
+            <div className={styles.timePeriodControl}>
+              <Text className={styles.timePeriodLabel}>
+                {t('admin.statistics.timePeriodLabel')}:
+              </Text>
+              <Dropdown
+                className={styles.timePeriodDropdown}
+                value={getTimePeriodLabel(timePeriod)}
+                selectedOptions={[timePeriod]}
+                onOptionSelect={(_event, data) => {
+                  setTimePeriod(data.optionValue as TimePeriod);
+                }}
+              >
+                <Option value="1hour">{t('admin.statistics.timePeriod1Hour')}</Option>
+                <Option value="1day">{t('admin.statistics.timePeriod1Day')}</Option>
+              </Dropdown>
+            </div>
           </div>
 
           <div className={styles.apiStatsGrid}>
@@ -489,7 +496,7 @@ export function Admin() {
                   <CheckmarkCircleRegular />
                 </div>
                 <Text className={styles.statValue}>
-                  {formatStatValue(webCalls, isLoadingApiStats)}
+                  {formatStatValue(webCalls, isLoadingStats)}
                 </Text>
                 <Text className={styles.statLabel}>
                   {t('admin.statistics.webCalls')}
@@ -503,7 +510,7 @@ export function Admin() {
                   <ErrorCircleRegular />
                 </div>
                 <Text className={styles.statValue}>
-                  {formatStatValue(webErrors, isLoadingApiStats)}
+                  {formatStatValue(webErrors, isLoadingStats)}
                 </Text>
                 <Text className={styles.statLabel}>
                   {t('admin.statistics.webErrors')}
@@ -517,7 +524,7 @@ export function Admin() {
                   <CheckmarkCircleRegular />
                 </div>
                 <Text className={styles.statValue}>
-                  {formatStatValue(apiCalls, isLoadingApiStats)}
+                  {formatStatValue(apiCalls, isLoadingStats)}
                 </Text>
                 <Text className={styles.statLabel}>
                   {t('admin.statistics.apiCalls')}
@@ -531,7 +538,7 @@ export function Admin() {
                   <ErrorCircleRegular />
                 </div>
                 <Text className={styles.statValue}>
-                  {formatStatValue(apiErrors, isLoadingApiStats)}
+                  {formatStatValue(apiErrors, isLoadingStats)}
                 </Text>
                 <Text className={styles.statLabel}>
                   {t('admin.statistics.apiErrors')}

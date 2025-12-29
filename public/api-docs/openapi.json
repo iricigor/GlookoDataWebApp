@@ -592,11 +592,162 @@
         }
       }
     },
+    "/glookoAdmin/stats": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get all administrative statistics (unified endpoint)",
+        "description": "Returns all administrative statistics in a single call: logged-in users count, Pro users count, and API/Web statistics from Application Insights. This endpoint is only accessible to Pro users. Replaces the separate `/glookoAdmin/stats/logged-in-users` and `/glookoAdmin/stats/api` endpoints.",
+        "operationId": "getUnifiedAdminStats",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "timePeriod",
+            "in": "query",
+            "description": "Time period for API and Web statistics",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["1hour", "1day"],
+              "default": "1hour"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved all administrative statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnifiedAdminStatsResponse"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Successful statistics retrieval",
+                    "value": {
+                      "loggedInUsersCount": 1523,
+                      "proUsersCount": 42,
+                      "webCalls": 8642,
+                      "webErrors": 23,
+                      "apiCalls": 1245,
+                      "apiErrors": 5,
+                      "timePeriod": "1hour"
+                    }
+                  },
+                  "capped": {
+                    "summary": "User counts capped at limit",
+                    "value": {
+                      "loggedInUsersCount": 100000,
+                      "proUsersCount": 100000,
+                      "webCalls": 8642,
+                      "webErrors": 23,
+                      "apiCalls": 1245,
+                      "apiErrors": 5,
+                      "timePeriod": "1hour",
+                      "capped": true,
+                      "proUsersCapped": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid timePeriod parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Invalid timePeriod parameter: invalid. Supported values: 1hour, 1day",
+                  "errorType": "validation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized access. Please log in again.",
+                  "errorType": "unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User is not a Pro user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Access denied. This endpoint requires Pro user access.",
+                  "errorType": "authorization"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Internal server error",
+                  "errorType": "infrastructure"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - Storage not configured or access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "storageNotConfigured": {
+                    "summary": "Storage not configured",
+                    "value": {
+                      "error": "Service unavailable - storage not configured",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_NOT_CONFIGURED"
+                    }
+                  },
+                  "storageAccessDenied": {
+                    "summary": "Storage access denied",
+                    "value": {
+                      "error": "Service unavailable - storage access denied",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_ACCESS_DENIED"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/glookoAdmin/stats/logged-in-users": {
       "get": {
         "tags": ["Admin"],
-        "summary": "Get count of logged-in users",
-        "description": "Returns the total count of users who have logged into the application at least once. This endpoint is only accessible to Pro users and provides administrative statistics. The count is retrieved from the UserSettings table in Azure Table Storage.",
+        "summary": "Get count of logged-in users (deprecated)",
+        "deprecated": true,
+        "description": "**DEPRECATED**: Use `/glookoAdmin/stats` instead. Returns the total count of users who have logged into the application at least once. This endpoint is only accessible to Pro users and provides administrative statistics. The count is retrieved from the UserSettings table in Azure Table Storage.",
         "operationId": "getLoggedInUsersCount",
         "security": [
           {
@@ -1090,6 +1241,58 @@
           "capped": {
             "type": "boolean",
             "description": "Whether the count was capped at the maximum limit (100,000). If true, actual count may be higher.",
+            "example": false
+          }
+        }
+      },
+      "UnifiedAdminStatsResponse": {
+        "type": "object",
+        "required": ["loggedInUsersCount", "proUsersCount", "webCalls", "webErrors", "apiCalls", "apiErrors", "timePeriod"],
+        "properties": {
+          "loggedInUsersCount": {
+            "type": "integer",
+            "description": "The total number of users who have logged in at least once",
+            "example": 1523
+          },
+          "proUsersCount": {
+            "type": "integer",
+            "description": "The total number of Pro users",
+            "example": 42
+          },
+          "webCalls": {
+            "type": "integer",
+            "description": "Number of web requests (non-API) in the specified time period",
+            "example": 8642
+          },
+          "webErrors": {
+            "type": "integer",
+            "description": "Number of web request errors in the specified time period",
+            "example": 23
+          },
+          "apiCalls": {
+            "type": "integer",
+            "description": "Number of API requests in the specified time period",
+            "example": 1245
+          },
+          "apiErrors": {
+            "type": "integer",
+            "description": "Number of API request errors in the specified time period",
+            "example": 5
+          },
+          "timePeriod": {
+            "type": "string",
+            "enum": ["1hour", "1day"],
+            "description": "Time period for API and Web statistics",
+            "example": "1hour"
+          },
+          "capped": {
+            "type": "boolean",
+            "description": "Whether the logged-in users count was capped at the maximum limit (100,000). If true, actual count may be higher.",
+            "example": false
+          },
+          "proUsersCapped": {
+            "type": "boolean",
+            "description": "Whether the Pro users count was capped at the maximum limit (100,000). If true, actual count may be higher.",
             "example": false
           }
         }
