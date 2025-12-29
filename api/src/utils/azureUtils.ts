@@ -94,7 +94,7 @@ async function getSigningKey(header: jwt.JwtHeader, issuer?: string): Promise<st
   }
   
   // Use Google JWKS endpoint if issuer is from Google
-  const isGoogleToken = issuer?.includes('accounts.google.com');
+  const isGoogleToken = issuer ? VALID_GOOGLE_ISSUERS.includes(issuer) : false;
   const client = isGoogleToken ? googleJwksClientInstance : jwksClientInstance;
   
   const key = await client.getSigningKey(header.kid);
@@ -243,9 +243,9 @@ async function validateAndDecodeToken(authHeader: string | null, context: Invoca
       clockTolerance: 60, // Allow 60 seconds of clock skew
     }) as TokenClaims;
 
-    // Validate issuer
-    if (!validateIssuer(verifiedPayload.iss!, verifiedPayload.tid)) {
-      context.warn(`Invalid token issuer: ${verifiedPayload.iss}`);
+    // Validate issuer (we already validated it's not null above, use the stored issuer)
+    if (!validateIssuer(issuer, verifiedPayload.tid)) {
+      context.warn(`Invalid token issuer: ${issuer}`);
       return null;
     }
 
