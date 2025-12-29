@@ -104,7 +104,7 @@ async function queryApplicationInsights(
   // We'll distinguish between web (client-side) and API (server-side) calls
   // Web calls are typically static content and page loads (tracked by pageViews or requests without /api/)
   // API calls are requests to /api/* endpoints
-  // 
+  //
   // Note: In Application Insights, 'name' field typically contains the route/path,
   // while 'url' may not always be available. We check both to ensure compatibility.
   const query = `
