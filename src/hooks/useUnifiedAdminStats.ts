@@ -1,0 +1,211 @@
+/**
+ * Custom hook for fetching unified admin statistics
+ * 
+ * This hook manages the state for unified admin statistics fetching,
+ * combining user counts and API/Web statistics in a single call.
+ */
+
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { getUnifiedAdminStats, type UnifiedAdminStatsResult, type TimePeriod } from '../utils/api/adminStatsUnifiedApi';
+
+/**
+ * State for the unified admin statistics
+ */
+export interface UnifiedAdminStatsState {
+  /** Whether the fetch is currently in progress */
+  isLoading: boolean;
+  /** Whether the fetch has completed (successfully or not) */
+  hasLoaded: boolean;
+  /** Count of logged-in users */
+  loggedInUsersCount: number | null;
+  /** Count of Pro users */
+  proUsersCount: number | null;
+  /** Web calls count */
+  webCalls: number | null;
+  /** Web errors count */
+  webErrors: number | null;
+  /** API calls count */
+  apiCalls: number | null;
+  /** API errors count */
+  apiErrors: number | null;
+  /** Current time period */
+  timePeriod: TimePeriod;
+  /** Whether there was an error during the fetch */
+  hasError: boolean;
+  /** Error message if the fetch failed */
+  errorMessage: string | null;
+  /** Error type if the fetch failed */
+  errorType: 'unauthorized' | 'authorization' | 'infrastructure' | 'network' | 'unknown' | null;
+}
+
+/**
+ * Return type for the useUnifiedAdminStats hook
+ */
+export interface UseUnifiedAdminStatsReturn extends UnifiedAdminStatsState {
+  /** Trigger the statistics fetch */
+  fetchStats: (idToken: string, timePeriod?: TimePeriod) => Promise<void>;
+  /** Set the time period for statistics */
+  setTimePeriod: (timePeriod: TimePeriod) => void;
+  /** Reset the state (e.g., on logout) */
+  resetState: () => void;
+}
+
+/**
+ * Initial state for the unified admin statistics
+ */
+const initialState: UnifiedAdminStatsState = {
+  isLoading: false,
+  hasLoaded: false,
+  loggedInUsersCount: null,
+  proUsersCount: null,
+  webCalls: null,
+  webErrors: null,
+  apiCalls: null,
+  apiErrors: null,
+  timePeriod: '1hour',
+  hasError: false,
+  errorMessage: null,
+  errorType: null,
+};
+
+/**
+ * Fetches unified admin statistics for Pro users and provides controls to run or reset that fetch.
+ *
+ * When an ID token is provided, the hook will automatically trigger a statistics fetch.
+ * The hook also handles time period changes and re-fetches data when the period is changed.
+ *
+ * @param idToken - Optional ID token used to authenticate the statistics fetch
+ * @param shouldFetch - Whether to automatically fetch statistics (default: true)
+ * @returns An object with the unified admin statistics state and control functions
+ */
+export function useUnifiedAdminStats(idToken?: string | null, shouldFetch: boolean = true): UseUnifiedAdminStatsReturn {
+  const [state, setState] = useState<UnifiedAdminStatsState>(initialState);
+  
+  // Use refs to track fetch state to avoid stale closure issues
+  const isLoadingRef = useRef(false);
+  const currentTokenRef = useRef<string | null>(null);
+  const currentPeriodRef = useRef<TimePeriod>('1hour');
+
+  /**
+   * Perform the statistics fetch
+   * 
+   * @param token - ID token from MSAL authentication
+   * @param period - Time period for statistics (defaults to current period)
+   */
+  const fetchStats = useCallback(async (token: string, period?: TimePeriod) => {
+    // Don't fetch again if already loading
+    if (isLoadingRef.current) {
+      return;
+    }
+
+    const targetPeriod = period || currentPeriodRef.current;
+
+    // Set refs immediately to prevent race conditions
+    isLoadingRef.current = true;
+    currentTokenRef.current = token;
+    currentPeriodRef.current = targetPeriod;
+
+    setState(prev => ({
+      ...prev,
+      isLoading: true,
+      timePeriod: targetPeriod,
+      hasError: false,
+      errorMessage: null,
+      errorType: null,
+    }));
+
+    try {
+      const result: UnifiedAdminStatsResult = await getUnifiedAdminStats(token, targetPeriod);
+
+      isLoadingRef.current = false;
+
+      if (result.success) {
+        setState({
+          isLoading: false,
+          hasLoaded: true,
+          loggedInUsersCount: result.loggedInUsersCount ?? null,
+          proUsersCount: result.proUsersCount ?? null,
+          webCalls: result.webCalls ?? null,
+          webErrors: result.webErrors ?? null,
+          apiCalls: result.apiCalls ?? null,
+          apiErrors: result.apiErrors ?? null,
+          timePeriod: targetPeriod,
+          hasError: false,
+          errorMessage: null,
+          errorType: null,
+        });
+      } else {
+        // On error, keep previous counts if any
+        setState(prev => ({
+          ...prev,
+          isLoading: false,
+          hasLoaded: true,
+          timePeriod: targetPeriod,
+          hasError: true,
+          errorMessage: result.error ?? 'Unknown error occurred',
+          errorType: result.errorType ?? 'unknown',
+        }));
+      }
+    } catch (error) {
+      isLoadingRef.current = false;
+
+      // On unexpected error
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        hasLoaded: true,
+        hasError: true,
+        errorMessage: error instanceof Error ? error.message : 'Unexpected error occurred',
+        errorType: 'unknown',
+      }));
+    }
+  }, []);
+
+  /**
+   * Set the time period and trigger a re-fetch if token is available
+   */
+  const setTimePeriod = useCallback((timePeriod: TimePeriod) => {
+    currentPeriodRef.current = timePeriod;
+    
+    // If we have a token and shouldFetch is true, re-fetch with new period
+    if (currentTokenRef.current && shouldFetch) {
+      fetchStats(currentTokenRef.current, timePeriod);
+    } else {
+      // Just update the period in state
+      setState(prev => ({ ...prev, timePeriod }));
+    }
+  }, [fetchStats, shouldFetch]);
+
+  /**
+   * Reset the state to initial values
+   * Call this on logout
+   */
+  const resetState = useCallback(() => {
+    isLoadingRef.current = false;
+    currentTokenRef.current = null;
+    currentPeriodRef.current = '1hour';
+    setState(initialState);
+  }, []);
+
+  // Auto-fetch when idToken is provided and shouldFetch is true
+  useEffect(() => {
+    if (shouldFetch && idToken && !isLoadingRef.current) {
+      // Only fetch if token changed or we haven't loaded yet
+      if (currentTokenRef.current !== idToken || !state.hasLoaded) {
+        fetchStats(idToken);
+      }
+    }
+    
+    // Reset state if idToken becomes null (user logged out)
+    if (!idToken && state.hasLoaded) {
+      resetState();
+    }
+  }, [idToken, shouldFetch, fetchStats, resetState, state.hasLoaded]);
+
+  return {
+    ...state,
+    fetchStats,
+    setTimePeriod,
+    resetState,
+  };
+}

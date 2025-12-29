@@ -1,28 +1,31 @@
 /**
- * Admin Traffic Statistics API client for Azure Functions
+ * Unified Admin Statistics API client for Azure Functions
  * 
- * This module provides an API client for fetching API and web traffic statistics
- * from Application Insights via the Azure Function backend. 
- * Access requires Pro user authentication.
+ * This module provides an API client for fetching all administrative statistics
+ * in a single call from the Azure Function backend. Access requires Pro user authentication.
  */
 
 import { createApiLogger } from '../logger';
 
 /**
- * Time period for statistics
+ * Time period for API/Web statistics
  */
 export type TimePeriod = '1hour' | '1day';
 
 /**
- * Result of fetching API statistics
+ * Result of fetching unified admin statistics
  */
-export interface ApiStatsResult {
+export interface UnifiedAdminStatsResult {
   success: boolean;
+  loggedInUsersCount?: number;
+  proUsersCount?: number;
   webCalls?: number;
   webErrors?: number;
   apiCalls?: number;
   apiErrors?: number;
   timePeriod?: TimePeriod;
+  capped?: boolean;
+  proUsersCapped?: boolean;
   error?: string;
   errorType?: 'unauthorized' | 'authorization' | 'infrastructure' | 'network' | 'unknown';
   /** HTTP status code when available */
@@ -32,18 +35,22 @@ export interface ApiStatsResult {
 /**
  * API response from the Azure Function
  */
-interface ApiStatsApiResponse {
+interface UnifiedAdminStatsApiResponse {
+  loggedInUsersCount: number;
+  proUsersCount: number;
   webCalls: number;
   webErrors: number;
   apiCalls: number;
   apiErrors: number;
   timePeriod: TimePeriod;
+  capped?: boolean;
+  proUsersCapped?: boolean;
 }
 
 /**
- * Configuration for the Admin API Statistics API
+ * Configuration for the Unified Admin Statistics API
  */
-export interface AdminApiStatsApiConfig {
+export interface UnifiedAdminStatsApiConfig {
   /** Base URL for the Azure Function API */
   baseUrl: string;
 }
@@ -51,28 +58,31 @@ export interface AdminApiStatsApiConfig {
 /**
  * Default configuration - uses the Azure Static Web App's API endpoint
  */
-const defaultConfig: AdminApiStatsApiConfig = {
+const defaultConfig: UnifiedAdminStatsApiConfig = {
   baseUrl: '/api',
 };
 
 /**
- * Fetch API and web traffic statistics
+ * Fetch all administrative statistics in a single call
  * 
- * This function calls the Azure Function to query Application Insights for
- * API call and error statistics over the specified time period.
+ * This function calls the Azure Function to get:
+ * - Count of logged-in users
+ * - Count of Pro users
+ * - API call and error statistics from Application Insights
+ * 
  * Requires the caller to be authenticated as a Pro user.
  * 
  * @param idToken - The ID token from MSAL authentication
- * @param timePeriod - Time period for statistics (1hour or 1day)
+ * @param timePeriod - Time period for API/Web statistics (1hour or 1day)
  * @param config - Optional API configuration (defaults to /api)
- * @returns Promise with the result containing success status and statistics or error
+ * @returns Promise with the result containing success status and all statistics or error
  */
-export async function getApiStats(
+export async function getUnifiedAdminStats(
   idToken: string,
   timePeriod: TimePeriod = '1hour',
-  config: AdminApiStatsApiConfig = defaultConfig
-): Promise<ApiStatsResult> {
-  const endpoint = `${config.baseUrl}/glookoAdmin/stats/traffic?timePeriod=${timePeriod}`;
+  config: UnifiedAdminStatsApiConfig = defaultConfig
+): Promise<UnifiedAdminStatsResult> {
+  const endpoint = `${config.baseUrl}/glookoAdmin/stats?timePeriod=${timePeriod}`;
   const apiLogger = createApiLogger(endpoint);
   
   // Validate ID token
@@ -101,21 +111,29 @@ export async function getApiStats(
 
     // Success case
     if (response.ok) {
-      const data = await response.json() as ApiStatsApiResponse;
+      const data = await response.json() as UnifiedAdminStatsApiResponse;
       apiLogger.logSuccess(statusCode, { 
+        loggedInUsersCount: data.loggedInUsersCount,
+        proUsersCount: data.proUsersCount,
         webCalls: data.webCalls, 
         webErrors: data.webErrors,
         apiCalls: data.apiCalls,
         apiErrors: data.apiErrors,
-        timePeriod: data.timePeriod
+        timePeriod: data.timePeriod,
+        capped: data.capped,
+        proUsersCapped: data.proUsersCapped
       });
       return {
         success: true,
+        loggedInUsersCount: data.loggedInUsersCount,
+        proUsersCount: data.proUsersCount,
         webCalls: data.webCalls,
         webErrors: data.webErrors,
         apiCalls: data.apiCalls,
         apiErrors: data.apiErrors,
         timePeriod: data.timePeriod,
+        capped: data.capped,
+        proUsersCapped: data.proUsersCapped,
         statusCode,
       };
     }
@@ -128,7 +146,7 @@ export async function getApiStats(
       console.warn('Failed to parse error response as JSON:', jsonError);
     }
     
-    const errorType = errorData.errorType as ApiStatsResult['errorType'] || 'unknown';
+    const errorType = errorData.errorType as UnifiedAdminStatsResult['errorType'] || 'unknown';
     const errorMessage = errorData.error || `Request failed with status ${statusCode}`;
 
     apiLogger.logError(errorMessage, errorType, statusCode);

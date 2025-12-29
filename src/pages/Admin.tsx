@@ -160,12 +160,28 @@ const useStyles = makeStyles({
   link: {
     color: tokens.colorBrandForeground1,
   },
+  apiStatsTitleRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '16px',
+    ...shorthands.gap('16px'),
+    '@media (max-width: 768px)': {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      ...shorthands.gap('12px'),
+    },
+  },
+  apiStatsTitle: {
+    fontSize: tokens.fontSizeHero800,
+    fontWeight: tokens.fontWeightSemibold,
+    fontFamily: 'Segoe UI, sans-serif',
+    margin: 0,
+  },
   timePeriodControl: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
     ...shorthands.gap('12px'),
-    marginBottom: '16px',
   },
   timePeriodLabel: {
     fontSize: tokens.fontSizeBase300,
@@ -243,7 +259,7 @@ export function Admin() {
     isLoggedIn && isProUser
   );
 
-  // Fetch API statistics with time period selection
+  // Fetch API and web traffic statistics with time period selection
   const { 
     webCalls, 
     webErrors, 
@@ -455,31 +471,27 @@ export function Admin() {
 
         {/* API & Web Statistics Section */}
         <div className={styles.apiStatsSection}>
-          <Text as="h2" style={{ 
-            fontSize: tokens.fontSizeHero800,
-            fontWeight: tokens.fontWeightSemibold,
-            textAlign: 'center',
-            fontFamily: 'Segoe UI, sans-serif',
-            marginBottom: '16px',
-          }}>
-            {t('admin.statistics.apiStatsTitle')}
-          </Text>
-
-          <div className={styles.timePeriodControl}>
-            <Text className={styles.timePeriodLabel}>
-              {t('admin.statistics.timePeriodLabel')}:
+          <div className={styles.apiStatsTitleRow}>
+            <Text as="h2" className={styles.apiStatsTitle}>
+              {t('admin.statistics.apiStatsTitle')}
             </Text>
-            <Dropdown
-              className={styles.timePeriodDropdown}
-              value={getTimePeriodLabel(timePeriod)}
-              selectedOptions={[timePeriod]}
-              onOptionSelect={(_event, data) => {
-                setTimePeriod(data.optionValue as TimePeriod);
-              }}
-            >
-              <Option value="1hour">{t('admin.statistics.timePeriod1Hour')}</Option>
-              <Option value="1day">{t('admin.statistics.timePeriod1Day')}</Option>
-            </Dropdown>
+
+            <div className={styles.timePeriodControl}>
+              <Text className={styles.timePeriodLabel}>
+                {t('admin.statistics.timePeriodLabel')}:
+              </Text>
+              <Dropdown
+                className={styles.timePeriodDropdown}
+                value={getTimePeriodLabel(timePeriod)}
+                selectedOptions={[timePeriod]}
+                onOptionSelect={(_event, data) => {
+                  setTimePeriod(data.optionValue as TimePeriod);
+                }}
+              >
+                <Option value="1hour">{t('admin.statistics.timePeriod1Hour')}</Option>
+                <Option value="1day">{t('admin.statistics.timePeriod1Day')}</Option>
+              </Dropdown>
+            </div>
           </div>
 
           <div className={styles.apiStatsGrid}>
