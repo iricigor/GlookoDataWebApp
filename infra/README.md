@@ -55,6 +55,8 @@ The infrastructure consists of:
 - **parameters.generic.bicepparam** - Generic parameter file with standard names
 - **parameters.current.bicepparam** - Current production deployment parameters
 - **verify.sh** - Automated verification script (runs what-if analysis)
+- **MANUAL_VERIFICATION.md** - Detailed manual verification guide
+- **QUICK_REFERENCE.md** - Quick command reference
 
 ## Prerequisites
 
@@ -446,6 +448,8 @@ az ad sp create-for-rbac \
 
 ## Resources
 
+- [Manual Verification Guide](./MANUAL_VERIFICATION.md) - Step-by-step manual verification instructions
+- [Quick Reference](./QUICK_REFERENCE.md) - Quick command reference for common tasks
 - [Azure Bicep Documentation](https://learn.microsoft.com/azure/azure-resource-manager/bicep/)
 - [Bicep Best Practices](https://learn.microsoft.com/azure/azure-resource-manager/bicep/best-practices)
 - [Azure Static Web Apps](https://learn.microsoft.com/azure/static-web-apps/)
