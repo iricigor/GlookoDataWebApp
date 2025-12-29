@@ -102,12 +102,15 @@ async function queryApplicationInsights(
 
   // Query for API calls and errors
   // We'll distinguish between web (client-side) and API (server-side) calls
-  // Web calls are typically static content and page loads
+  // Web calls are typically static content and page loads (tracked by pageViews or requests without /api/)
   // API calls are requests to /api/* endpoints
+  // 
+  // Note: In Application Insights, 'name' field typically contains the route/path,
+  // while 'url' may not always be available. We check both to ensure compatibility.
   const query = `
     requests
     | where timestamp > ago(${timePeriod === '1hour' ? '1h' : '1d'})
-    | extend isApiCall = url contains "${API_PATH_PREFIX}"
+    | extend isApiCall = (name contains "${API_PATH_PREFIX}" or url contains "${API_PATH_PREFIX}")
     | summarize 
         TotalCalls = count(),
         Errors = countif(success == false)
