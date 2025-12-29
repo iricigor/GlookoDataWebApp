@@ -60,16 +60,16 @@ param existingAppServicePlanName string = ''
 @description('Application Insights resource ID for Function App monitoring')
 param appInsightsResourceId string = ''
 
-@description('Tags to apply to all resources')
-param tags object = {}
-
 // 1. Deploy User-Assigned Managed Identity first
 module managedIdentity 'modules/managed-identity.bicep' = {
   name: 'deploy-managed-identity'
   params: {
     managedIdentityName: managedIdentityName
     location: location
-    tags: tags
+    tags: {
+      // Preserve existing tag to avoid modification in what-if
+      Environment: 'Production ManagedBy=GlookoDeploymentModule Application=glookodatawebapp'
+    }
   }
 }
 
@@ -83,7 +83,11 @@ module storage 'modules/storage.bicep' = {
     tableNames: tableNames
     enableTableCors: enableTableCors
     tableCorsAllowedOrigins: tableCorsAllowedOrigins
-    tags: tags
+    tags: {
+      // Preserve existing tags to avoid modification/deletion in what-if
+      Application: 'glookodatawebapp'
+      Purpose: 'UserSettings'
+    }
   }
 }
 
@@ -94,7 +98,10 @@ module keyVault 'modules/key-vault.bicep' = {
     keyVaultName: keyVaultName
     location: location
     managedIdentityPrincipalId: managedIdentity.outputs.managedIdentityPrincipalId
-    tags: tags
+    tags: {
+      // Preserve existing tag to avoid modification in what-if
+      ManagedBy: 'AzureDeploymentScripts'
+    }
   }
 }
 
@@ -113,7 +120,10 @@ module functionApp 'modules/function-app.bicep' = {
     useExistingAppServicePlan: useExistingAppServicePlan
     existingAppServicePlanName: existingAppServicePlanName
     appInsightsResourceId: appInsightsResourceId
-    tags: tags
+    tags: {
+      // Preserve existing tag to avoid modification in what-if
+      ManagedBy: 'AzureDeploymentScripts'
+    }
   }
   dependsOn: [
     storage
@@ -129,7 +139,7 @@ module staticWebApp 'modules/static-web-app.bicep' = {
     location: location
     sku: staticWebAppSku
     managedIdentityId: managedIdentity.outputs.managedIdentityId
-    tags: tags
+    tags: {}  // No existing tags to preserve
   }
 }
 
