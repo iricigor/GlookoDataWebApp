@@ -186,7 +186,7 @@ const enTranslations = {
       "applyForProButton": "Apply for Pro Access",
       "applyForProLink": "https://github.com/iricigor/GlookoDataWebApp/issues/new?labels=pro-access-request&template=pro-access-request.md",
       "statistics": {
-        "title": "System Statistics",
+        "title": "User Statistics",
         "loggedInUsers": "Logged In Users",
         "proUsers": "Pro Users",
         "apiCalls": "API Calls",

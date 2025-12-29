@@ -106,11 +106,23 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     ...shorthands.gap('24px'),
   },
-  statsGrid: {
+  userStatsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gridTemplateColumns: 'repeat(2, 1fr)',
     ...shorthands.gap('16px'),
     width: '100%',
+    '@media (max-width: 768px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
+  apiStatsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    ...shorthands.gap('16px'),
+    width: '100%',
+    '@media (max-width: 768px)': {
+      gridTemplateColumns: '1fr',
+    },
   },
   statCard: {
     ...shorthands.padding('24px'),
@@ -415,7 +427,7 @@ export function Admin() {
           {t('admin.statistics.title')}
         </Text>
 
-        <div className={styles.statsGrid}>
+        <div className={styles.userStatsGrid}>
           <Card className={styles.statCard}>
             <div className={styles.statIcon}>
               <PersonRegular />
@@ -470,7 +482,7 @@ export function Admin() {
             </Dropdown>
           </div>
 
-          <div className={styles.statsGrid}>
+          <div className={styles.apiStatsGrid}>
             <Tooltip content={t('admin.statistics.webCallsTooltip')} relationship="description">
               <Card className={styles.statCard}>
                 <div className={styles.statIcon}>
