@@ -69,7 +69,17 @@ export function ProUserAvatar({
   const { t } = useTranslation('dialogs');
 
   // Determine badge size based on avatar size
-  const isLargeAvatar = typeof size === 'number' ? size >= 48 : size === 'large' || size === 'larger' || size === 'largest';
+  // Large badge for avatars >= 48px, small badge for smaller avatars
+  const getIsLargeAvatar = (avatarSize: AvatarProps['size']): boolean => {
+    if (typeof avatarSize === 'number') {
+      return avatarSize >= 48;
+    }
+    // Handle named sizes from Fluent UI
+    const largeNamedSizes = ['large', 'larger', 'largest'];
+    return largeNamedSizes.includes(avatarSize || '');
+  };
+
+  const isLargeAvatar = getIsLargeAvatar(size);
 
   return (
     <div className={styles.container}>
