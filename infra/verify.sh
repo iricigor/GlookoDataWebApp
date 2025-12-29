@@ -18,22 +18,27 @@ NC='\033[0m' # No Color
 # Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
+# print_info prints an informational message prefixed with an info icon in blue to stdout.
 print_info() {
     echo -e "${BLUE}ℹ️  $1${NC}"
 }
 
+# print_success prints the provided message prefixed with a checkmark in green to stdout.
 print_success() {
     echo -e "${GREEN}✅ $1${NC}"
 }
 
+# print_warning prints a warning message prefixed with a warning emoji and colored yellow. It accepts a single argument: the message text.
 print_warning() {
     echo -e "${YELLOW}⚠️  $1${NC}"
 }
 
+# print_error prints an error message prefixed with a red cross and resets terminal color.
 print_error() {
     echo -e "${RED}❌ $1${NC}"
 }
 
+# print_section prints a blue, framed section header with the given title to stdout.
 print_section() {
     echo ""
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -42,6 +47,7 @@ print_section() {
     echo ""
 }
 
+# usage displays the help text showing available options, defaults, and examples for the Bicep infrastructure verification script.
 usage() {
     cat <<EOF
 Usage: $0 [OPTIONS]
