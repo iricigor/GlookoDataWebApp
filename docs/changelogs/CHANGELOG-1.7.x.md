@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>879 Fix Google login: 401 error and UTF-8 username encoding</summary>
+
+[#879](../../pull/879) Fix Google login: 401 error and UTF-8 username encoding
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>881 Add Provider column support to Invoke-GlookoProUsers</summary>
 
 [#881](../../pull/881) Add Provider column support to Invoke-GlookoProUsers
