@@ -211,14 +211,19 @@ function Invoke-GlookoProUsers {
                         Write-SuccessMessage "Found $($users.Count) Pro user(s):"
                         Write-Host ""
                         foreach ($user in $users) {
-                            $email = $user.Properties['Email'].StringValue
-                            $userProvider = if ($user.Properties['Provider']) { 
-                                $user.Properties['Provider'].StringValue 
+                            # Try accessing via entity indexer (DynamicTableEntity implements IDictionary)
+                            $email = if ($user['Email']) { 
+                                $user['Email'].StringValue 
+                            } else { 
+                                'unknown' 
+                            }
+                            $userProvider = if ($user['Provider']) { 
+                                $user['Provider'].StringValue 
                             } else { 
                                 $DefaultProvider
                             }
-                            $createdAt = if ($user.Properties['CreatedAt']) { 
-                                $user.Properties['CreatedAt'].StringValue 
+                            $createdAt = if ($user['CreatedAt']) { 
+                                $user['CreatedAt'].StringValue 
                             } else { 
                                 'unknown' 
                             }
@@ -233,16 +238,22 @@ function Invoke-GlookoProUsers {
                         Action = 'List'
                         Count = $users.Count
                         Users = $users | ForEach-Object {
-                            $userProvider = if ($_.Properties['Provider']) { 
-                                $_.Properties['Provider'].StringValue 
+                            # Try accessing via entity indexer (DynamicTableEntity implements IDictionary)
+                            $userProvider = if ($_['Provider']) { 
+                                $_['Provider'].StringValue 
                             } else { 
                                 $DefaultProvider
                             }
+                            $userEmail = if ($_['Email']) { 
+                                $_['Email'].StringValue 
+                            } else { 
+                                'unknown' 
+                            }
                             @{
-                                Email = $_.Properties['Email'].StringValue
+                                Email = $userEmail
                                 Provider = $userProvider
-                                User = "$($_.Properties['Email'].StringValue);$userProvider"
-                                CreatedAt = if ($_.Properties['CreatedAt']) { $_.Properties['CreatedAt'].StringValue } else { $null }
+                                User = "$userEmail;$userProvider"
+                                CreatedAt = if ($_['CreatedAt']) { $_['CreatedAt'].StringValue } else { $null }
                             }
                         }
                     }
@@ -259,7 +270,7 @@ function Invoke-GlookoProUsers {
                     $result = $cloudTable.Execute($retrieveOp)
                     
                     if ($result.Result) {
-                        $existingProvider = if ($result.Result.Properties['Provider']) {
+                        $existingProvider = if ($result.Result.Properties -and $result.Result.Properties['Provider']) {
                             $result.Result.Properties['Provider'].StringValue
                         } else {
                             $DefaultProvider
@@ -321,7 +332,7 @@ function Invoke-GlookoProUsers {
                     }
                     
                     # Get existing provider for confirmation message
-                    $existingProvider = if ($result.Result.Properties['Provider']) {
+                    $existingProvider = if ($result.Result.Properties -and $result.Result.Properties['Provider']) {
                         $result.Result.Properties['Provider'].StringValue
                     } else {
                         $DefaultProvider
@@ -356,12 +367,12 @@ function Invoke-GlookoProUsers {
                     
                     if ($result.Result) {
                         $entity = $result.Result
-                        $existingProvider = if ($entity.Properties['Provider']) {
+                        $existingProvider = if ($entity.Properties -and $entity.Properties['Provider']) {
                             $entity.Properties['Provider'].StringValue
                         } else {
                             $DefaultProvider
                         }
-                        $createdAt = if ($entity.Properties['CreatedAt']) { 
+                        $createdAt = if ($entity.Properties -and $entity.Properties['CreatedAt']) { 
                             $entity.Properties['CreatedAt'].StringValue 
                         } else { 
                             'unknown' 
