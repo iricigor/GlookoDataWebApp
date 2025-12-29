@@ -65,6 +65,20 @@
       * google-client-id
       * google-client-secret
     - Azure CLI must be available in PATH (for setting SWA app settings)
+    
+    Google OAuth Setup:
+    This function configures the Static Web App with Key Vault references for Google OAuth.
+    The frontend also needs the Google Client ID at build time. This is handled by:
+    1. Adding VITE_GOOGLE_CLIENT_ID to GitHub repository secrets
+    2. The GitHub Actions workflow injects it during build as an environment variable
+    3. Vite embeds it in the compiled frontend code
+    
+    To configure:
+    - GitHub Repository: Settings > Secrets and variables > Actions > New repository secret
+    - Name: VITE_GOOGLE_CLIENT_ID
+    - Value: <your-google-oauth-client-id> (same as in Key Vault)
+    
+    For detailed setup instructions, see docs/KEY_VAULT_REFERENCES.md
 #>
 function Set-GlookoStaticWebApp {
     [CmdletBinding()]
@@ -354,13 +368,20 @@ function Set-GlookoStaticWebApp {
             Write-Host "  2. Link a backend using Set-GlookoSwaBackend if needed"
             Write-Host "  3. Configure custom domain if needed"
             if ($googleAuthConfigured) {
-                Write-Host "  4. Test Google authentication by visiting $swaUrl/.auth/login/google"
+                Write-Host "  4. Add VITE_GOOGLE_CLIENT_ID to GitHub repository secrets:"
+                Write-Host "     - Go to: Settings > Secrets and variables > Actions"
+                Write-Host "     - Name: VITE_GOOGLE_CLIENT_ID"
+                Write-Host "     - Value: (same Google Client ID from Key Vault)"
+                Write-Host "  5. Test Google authentication by visiting $swaUrl/.auth/login/google"
             }
             else {
                 Write-Host "  4. Add Google auth secrets to Key Vault to enable Google authentication:"
                 Write-Host "     - google-client-id"
                 Write-Host "     - google-client-secret"
+                Write-Host "  5. Add VITE_GOOGLE_CLIENT_ID to GitHub repository secrets"
             }
+            Write-Host ""
+            Write-Host "For detailed Google OAuth setup, see: docs/KEY_VAULT_REFERENCES.md"
             Write-Host ""
 
             # Return deployment details
