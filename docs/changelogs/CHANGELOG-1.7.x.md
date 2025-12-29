@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>926 Remove tag additions from IaC what-if output</summary>
+
+[#926](../../pull/926) Remove tag additions from IaC what-if output
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>922 Adjust Pro User sparkle badge positioning to reduce avatar overlap</summary>
 
 [#922](../../pull/922) Adjust Pro User sparkle badge positioning to reduce avatar overlap
