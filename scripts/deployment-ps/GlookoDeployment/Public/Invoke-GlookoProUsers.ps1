@@ -7,19 +7,24 @@
 
 .DESCRIPTION
     This function provides operations to list, add, remove, and check Pro users
-    in the ProUsers Azure Storage Table. Users are identified by their email address.
+    in the ProUsers Azure Storage Table. Users are identified by their email address
+    and authentication provider.
     
     The ProUsers table stores professional user information with the following structure:
     - PartitionKey: "ProUser" (constant for all entries)
     - RowKey: Email address (URL-encoded)
     - Email: Email address (original format)
+    - Provider: Authentication provider (Microsoft or Google)
     - CreatedAt: ISO 8601 timestamp when the user was added
 
 .PARAMETER Action
     The action to perform. Valid values: List, Add, Remove, Check
 
-.PARAMETER Email
-    The email address of the user. Required for Add, Remove, and Check actions.
+.PARAMETER User
+    The user identifier in "email;provider" format.
+    Examples: "user@example.com;Microsoft" or "user@example.com;Google"
+    If provider is not specified (plain email), defaults to "Microsoft".
+    Required for Add, Remove, and Check actions.
 
 .PARAMETER StorageAccountName
     The name of the storage account. If not provided, uses value from configuration.
@@ -29,26 +34,34 @@
 
 .EXAMPLE
     Invoke-GlookoProUsers -Action List
-    Lists all Pro users in the ProUsers table.
+    Lists all Pro users in the ProUsers table in "email;provider" format.
 
 .EXAMPLE
-    Invoke-GlookoProUsers -Action Add -Email "user@example.com"
-    Adds a new Pro user with the specified email.
+    Invoke-GlookoProUsers -Action Add -User "user@example.com;Microsoft"
+    Adds a new Pro user with Microsoft provider.
 
 .EXAMPLE
-    Invoke-GlookoProUsers -Action Remove -Email "user@example.com"
-    Removes the Pro user with the specified email.
+    Invoke-GlookoProUsers -Action Add -User "user@example.com;Google"
+    Adds a new Pro user with Google provider.
 
 .EXAMPLE
-    Invoke-GlookoProUsers -Action Check -Email "user@example.com"
-    Checks if the specified email is a Pro user.
+    Invoke-GlookoProUsers -Action Add -User "user@example.com"
+    Adds a new Pro user with default provider (Microsoft).
+
+.EXAMPLE
+    Invoke-GlookoProUsers -Action Remove -User "user@example.com;Microsoft"
+    Removes the Pro user with the specified email and provider.
+
+.EXAMPLE
+    Invoke-GlookoProUsers -Action Check -User "user@example.com;Google"
+    Checks if the specified email with Google provider is a Pro user.
 
 .EXAMPLE
     Invoke-GlookoProUsers List
     Uses positional parameter for action.
 
 .EXAMPLE
-    Invoke-GPU Add user@example.com
+    Invoke-GPU Add "user@example.com;Google"
     Uses alias and positional parameters.
 
 .NOTES
@@ -72,7 +85,7 @@ function Invoke-GlookoProUsers {
         [string]$Action,
 
         [Parameter(Position = 1)]
-        [string]$Email,
+        [string]$User,
 
         [Parameter()]
         [string]$StorageAccountName,
@@ -94,12 +107,14 @@ function Invoke-GlookoProUsers {
         # Constants
         $TableName = "ProUsers"
         $PartitionKey = "ProUser"
+        $ValidProviders = @('Microsoft', 'Google')
+        $DefaultProvider = 'Microsoft'
         
         Write-InfoMessage "Storage Account: $storageName"
         Write-InfoMessage "Resource Group: $rg"
         Write-InfoMessage "Action: $Action"
-        if ($Email) {
-            Write-InfoMessage "Email: $Email"
+        if ($User) {
+            Write-InfoMessage "User: $User"
         }
     }
 
@@ -130,19 +145,48 @@ function Invoke-GlookoProUsers {
             }
             Write-SuccessMessage "Table '$TableName' exists"
             
-            # Validate email for actions that require it
+            # Validate user for actions that require it
             if ($Action -in @('Add', 'Remove', 'Check')) {
-                if (-not $Email) {
-                    throw "Email parameter is required for '$Action' action"
+                if (-not $User) {
+                    throw "User parameter is required for '$Action' action"
+                }
+                
+                # Parse email and provider from "email;provider" format
+                # Split only on first semicolon to handle edge cases
+                $userParts = $User -split ';', 2
+                $emailAddress = $userParts[0].Trim()
+                # If there's a provider part, take only the first word (in case of extra semicolons or spaces)
+                $provider = if ($userParts.Length -gt 1 -and $userParts[1].Trim()) { 
+                    # Take only the first part before any additional semicolon
+                    ($userParts[1] -split ';')[0].Trim()
+                } else { 
+                    $DefaultProvider 
+                }
+                
+                # Validate email is not empty
+                if ([string]::IsNullOrWhiteSpace($emailAddress)) {
+                    throw "Email address cannot be empty"
                 }
                 
                 # Basic email validation
-                if ($Email -notmatch '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$') {
-                    throw "Invalid email format: $Email"
+                if ($emailAddress -notmatch '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$') {
+                    throw "Invalid email format: $emailAddress"
                 }
                 
+                # Normalize and validate provider (case-insensitive)
+                $provider = $provider.Trim()
+                # Convert to proper case (Microsoft or Google)
+                $matchedProvider = $ValidProviders | Where-Object { $_ -ieq $provider }
+                if (-not $matchedProvider) {
+                    throw "Invalid provider: $provider. Valid providers are: $($ValidProviders -join ', ')"
+                }
+                $provider = $matchedProvider
+                
                 # Normalize email to lowercase for case-insensitive matching
-                $Email = $Email.ToLowerInvariant()
+                $emailAddress = $emailAddress.ToLowerInvariant()
+                
+                Write-InfoMessage "Email: $emailAddress"
+                Write-InfoMessage "Provider: $provider"
             }
 
             # Get cloud table reference for entity operations
@@ -168,12 +212,17 @@ function Invoke-GlookoProUsers {
                         Write-Host ""
                         foreach ($user in $users) {
                             $email = $user.Properties['Email'].StringValue
+                            $userProvider = if ($user.Properties['Provider']) { 
+                                $user.Properties['Provider'].StringValue 
+                            } else { 
+                                $DefaultProvider
+                            }
                             $createdAt = if ($user.Properties['CreatedAt']) { 
                                 $user.Properties['CreatedAt'].StringValue 
                             } else { 
                                 'unknown' 
                             }
-                            Write-Host "  $email  (added: $createdAt)"
+                            Write-Host "  $email;$userProvider  (added: $createdAt)"
                         }
                     }
                     
@@ -184,8 +233,15 @@ function Invoke-GlookoProUsers {
                         Action = 'List'
                         Count = $users.Count
                         Users = $users | ForEach-Object {
+                            $userProvider = if ($_.Properties['Provider']) { 
+                                $_.Properties['Provider'].StringValue 
+                            } else { 
+                                $DefaultProvider
+                            }
                             @{
                                 Email = $_.Properties['Email'].StringValue
+                                Provider = $userProvider
+                                User = "$($_.Properties['Email'].StringValue);$userProvider"
                                 CreatedAt = if ($_.Properties['CreatedAt']) { $_.Properties['CreatedAt'].StringValue } else { $null }
                             }
                         }
@@ -196,17 +252,24 @@ function Invoke-GlookoProUsers {
                     Write-SectionHeader "Adding Pro User"
                     
                     # URL encode email for RowKey (using .NET Uri class which is always available)
-                    $rowKey = [System.Uri]::EscapeDataString($Email)
+                    $rowKey = [System.Uri]::EscapeDataString($emailAddress)
                     
                     # Check if user already exists
                     $retrieveOp = [Microsoft.Azure.Cosmos.Table.TableOperation]::Retrieve($PartitionKey, $rowKey)
                     $result = $cloudTable.Execute($retrieveOp)
                     
                     if ($result.Result) {
-                        Write-WarningMessage "Pro user '$Email' already exists"
+                        $existingProvider = if ($result.Result.Properties['Provider']) {
+                            $result.Result.Properties['Provider'].StringValue
+                        } else {
+                            $DefaultProvider
+                        }
+                        Write-WarningMessage "Pro user '$emailAddress;$existingProvider' already exists"
                         return @{
                             Action = 'Add'
-                            Email = $Email
+                            Email = $emailAddress
+                            Provider = $existingProvider
+                            User = "$emailAddress;$existingProvider"
                             Success = $true
                             AlreadyExists = $true
                         }
@@ -214,7 +277,8 @@ function Invoke-GlookoProUsers {
                     
                     # Create new entity
                     $entity = [Microsoft.Azure.Cosmos.Table.DynamicTableEntity]::new($PartitionKey, $rowKey)
-                    $entity.Properties.Add("Email", [Microsoft.Azure.Cosmos.Table.EntityProperty]::GeneratePropertyForString($Email))
+                    $entity.Properties.Add("Email", [Microsoft.Azure.Cosmos.Table.EntityProperty]::GeneratePropertyForString($emailAddress))
+                    $entity.Properties.Add("Provider", [Microsoft.Azure.Cosmos.Table.EntityProperty]::GeneratePropertyForString($provider))
                     # Use UTC timestamp for consistency with bash script
                     $entity.Properties.Add("CreatedAt", [Microsoft.Azure.Cosmos.Table.EntityProperty]::GeneratePropertyForString((Get-Date -AsUTC -Format "o")))
                     
@@ -222,11 +286,13 @@ function Invoke-GlookoProUsers {
                     $insertOp = [Microsoft.Azure.Cosmos.Table.TableOperation]::Insert($entity)
                     $cloudTable.Execute($insertOp) | Out-Null
                     
-                    Write-SuccessMessage "Pro user '$Email' added successfully"
+                    Write-SuccessMessage "Pro user '$emailAddress;$provider' added successfully"
                     
                     return @{
                         Action = 'Add'
-                        Email = $Email
+                        Email = $emailAddress
+                        Provider = $provider
+                        User = "$emailAddress;$provider"
                         Success = $true
                         AlreadyExists = $false
                     }
@@ -236,20 +302,29 @@ function Invoke-GlookoProUsers {
                     Write-SectionHeader "Removing Pro User"
                     
                     # URL encode email for RowKey (using .NET Uri class which is always available)
-                    $rowKey = [System.Uri]::EscapeDataString($Email)
+                    $rowKey = [System.Uri]::EscapeDataString($emailAddress)
                     
                     # Check if user exists
                     $retrieveOp = [Microsoft.Azure.Cosmos.Table.TableOperation]::Retrieve($PartitionKey, $rowKey)
                     $result = $cloudTable.Execute($retrieveOp)
                     
                     if (-not $result.Result) {
-                        Write-WarningMessage "Pro user '$Email' does not exist"
+                        Write-WarningMessage "Pro user '$emailAddress;$provider' does not exist"
                         return @{
                             Action = 'Remove'
-                            Email = $Email
+                            Email = $emailAddress
+                            Provider = $provider
+                            User = "$emailAddress;$provider"
                             Success = $true
                             NotFound = $true
                         }
+                    }
+                    
+                    # Get existing provider for confirmation message
+                    $existingProvider = if ($result.Result.Properties['Provider']) {
+                        $result.Result.Properties['Provider'].StringValue
+                    } else {
+                        $DefaultProvider
                     }
                     
                     # Delete entity
@@ -257,11 +332,13 @@ function Invoke-GlookoProUsers {
                     $deleteOp = [Microsoft.Azure.Cosmos.Table.TableOperation]::Delete($entity)
                     $cloudTable.Execute($deleteOp) | Out-Null
                     
-                    Write-SuccessMessage "Pro user '$Email' removed successfully"
+                    Write-SuccessMessage "Pro user '$emailAddress;$existingProvider' removed successfully"
                     
                     return @{
                         Action = 'Remove'
-                        Email = $Email
+                        Email = $emailAddress
+                        Provider = $existingProvider
+                        User = "$emailAddress;$existingProvider"
                         Success = $true
                         NotFound = $false
                     }
@@ -271,7 +348,7 @@ function Invoke-GlookoProUsers {
                     Write-SectionHeader "Checking Pro User Status"
                     
                     # URL encode email for RowKey (using .NET Uri class which is always available)
-                    $rowKey = [System.Uri]::EscapeDataString($Email)
+                    $rowKey = [System.Uri]::EscapeDataString($emailAddress)
                     
                     # Check if user exists
                     $retrieveOp = [Microsoft.Azure.Cosmos.Table.TableOperation]::Retrieve($PartitionKey, $rowKey)
@@ -279,26 +356,35 @@ function Invoke-GlookoProUsers {
                     
                     if ($result.Result) {
                         $entity = $result.Result
+                        $existingProvider = if ($entity.Properties['Provider']) {
+                            $entity.Properties['Provider'].StringValue
+                        } else {
+                            $DefaultProvider
+                        }
                         $createdAt = if ($entity.Properties['CreatedAt']) { 
                             $entity.Properties['CreatedAt'].StringValue 
                         } else { 
                             'unknown' 
                         }
-                        Write-SuccessMessage "'$Email' is a Pro user (added: $createdAt)"
+                        Write-SuccessMessage "'$emailAddress;$existingProvider' is a Pro user (added: $createdAt)"
                         
                         return @{
                             Action = 'Check'
-                            Email = $Email
+                            Email = $emailAddress
+                            Provider = $existingProvider
+                            User = "$emailAddress;$existingProvider"
                             IsProUser = $true
                             CreatedAt = $createdAt
                         }
                     }
                     else {
-                        Write-InfoMessage "'$Email' is NOT a Pro user"
+                        Write-InfoMessage "'$emailAddress;$provider' is NOT a Pro user"
                         
                         return @{
                             Action = 'Check'
-                            Email = $Email
+                            Email = $emailAddress
+                            Provider = $provider
+                            User = "$emailAddress;$provider"
                             IsProUser = $false
                             CreatedAt = $null
                         }

@@ -467,30 +467,36 @@ Invoke-GlookoDeployment -FunctionApp
 
 ### Invoke-GlookoProUsers
 
-Manages Pro users in the ProUsers Azure Storage Table. Users are identified by their email address.
+Manages Pro users in the ProUsers Azure Storage Table. Users are identified by their email address and authentication provider.
 
 **Parameters:**
 - `-Action` - The action to perform: List, Add, Remove, Check (required)
-- `-Email` - The email address of the user (required for Add, Remove, Check)
+- `-User` - The user identifier in "email;provider" format (required for Add, Remove, Check). If provider is not specified, defaults to "Microsoft"
 - `-StorageAccountName` - Storage account name (optional, uses config)
 - `-ResourceGroup` - Resource group (optional, uses config)
 
 **Examples:**
 ```powershell
-# List all Pro users
+# List all Pro users (displays as "email;provider")
 Invoke-GlookoProUsers -Action List
 
-# Add a new Pro user
-Invoke-GlookoProUsers -Action Add -Email "user@example.com"
+# Add a new Pro user with Microsoft provider
+Invoke-GlookoProUsers -Action Add -User "user@example.com;Microsoft"
+
+# Add a new Pro user with Google provider
+Invoke-GlookoProUsers -Action Add -User "user@example.com;Google"
+
+# Add a new Pro user with default provider (Microsoft)
+Invoke-GlookoProUsers -Action Add -User "user@example.com"
 
 # Remove a Pro user
-Invoke-GlookoProUsers -Action Remove -Email "user@example.com"
+Invoke-GlookoProUsers -Action Remove -User "user@example.com;Microsoft"
 
-# Check if an email is a Pro user
-Invoke-GlookoProUsers -Action Check -Email "user@example.com"
+# Check if a user is a Pro user
+Invoke-GlookoProUsers -Action Check -User "user@example.com;Google"
 
 # Use alias with positional parameters
-Invoke-GPU Add user@example.com
+Invoke-GPU Add "user@example.com;Google"
 
 # List from a specific storage account
 Invoke-GlookoProUsers -Action List -StorageAccountName "mystorageacct"
@@ -498,15 +504,16 @@ Invoke-GlookoProUsers -Action List -StorageAccountName "mystorageacct"
 
 **Return Values:**
 Returns a hashtable with action-specific properties:
-- List: `@{ Action; Count; Users }`
-- Add: `@{ Action; Email; Success; AlreadyExists }`
-- Remove: `@{ Action; Email; Success; NotFound }`
-- Check: `@{ Action; Email; IsProUser; CreatedAt }`
+- List: `@{ Action; Count; Users }` - Users array contains `@{ Email; Provider; User; CreatedAt }` for each user
+- Add: `@{ Action; Email; Provider; User; Success; AlreadyExists }`
+- Remove: `@{ Action; Email; Provider; User; Success; NotFound }`
+- Check: `@{ Action; Email; Provider; User; IsProUser; CreatedAt }`
 
 **Table Structure:**
 - PartitionKey: "ProUser" (constant for all entries)
 - RowKey: Email address (URL-encoded)
 - Email: Email address (original format)
+- Provider: Authentication provider (Microsoft or Google)
 - CreatedAt: ISO 8601 timestamp when the user was added
 
 **Prerequisites:**
