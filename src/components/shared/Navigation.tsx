@@ -316,6 +316,7 @@ export function Navigation({
   const getNextLanguage = (current: string): string => {
     if (current === 'en') return 'de';
     if (current === 'de') return 'cs';
+    if (current === 'cs') return 'sr';
     return 'en';
   };
 
@@ -323,13 +324,14 @@ export function Navigation({
   const getLanguageName = (lang: string): string => {
     if (lang === 'en') return t('common:common.english');
     if (lang === 'de') return t('common:common.german');
-    return t('common:common.czech');
+    if (lang === 'cs') return t('common:common.czech');
+    return t('common:common.serbian');
   };
 
-  // Toggle UI language between English, German, and Czech
+  // Toggle UI language between English, German, Czech, and Serbian
   const handleLanguageToggle = () => {
     const nextLang = getNextLanguage(uiLanguage);
-    setUILanguage(nextLang as 'en' | 'de' | 'cs');
+    setUILanguage(nextLang as 'en' | 'de' | 'cs' | 'sr');
   };
 
   // Compute theme button label and icon class based on sync status and theme mode
