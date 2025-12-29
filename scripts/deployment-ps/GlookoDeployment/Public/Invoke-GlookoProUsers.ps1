@@ -374,7 +374,7 @@ function Invoke-GlookoProUsers {
                         }
                         
                         # Check if the requested provider matches the stored provider
-                        if ($existingProvider -eq $provider) {
+                        if ($existingProvider -ieq $provider) {
                             $createdAt = if ($entity.Properties.ContainsKey('CreatedAt')) { 
                                 $entity.Properties['CreatedAt'].StringValue 
                             } else { 
