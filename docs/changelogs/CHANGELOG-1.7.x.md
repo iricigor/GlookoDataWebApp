@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>881 Add Provider column support to Invoke-GlookoProUsers</summary>
+
+[#881](../../pull/881) Add Provider column support to Invoke-GlookoProUsers
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>883 Remove Microsoft branding from api-docs login UI</summary>
 
 [#883](../../pull/883) Remove Microsoft branding from api-docs login UI
