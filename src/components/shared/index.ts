@@ -9,3 +9,4 @@ export { WelcomeDialog } from './WelcomeDialog';
 export { InfrastructureErrorDialog } from './InfrastructureErrorDialog';
 export { LanguageSwitcher } from './LanguageSwitcher';
 export { SegmentedControl } from './SegmentedControl';
+export { ProUserAvatar } from './ProUserAvatar';

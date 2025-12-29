@@ -8,16 +8,14 @@ import {
   DialogActions,
   DialogContent,
   makeStyles,
-  Avatar,
   shorthands,
   Text,
   tokens,
-  Tooltip,
   Spinner,
 } from '@fluentui/react-components';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useProUserBadgeStyles } from '../../styles/proUserBadge';
+import { ProUserAvatar } from './ProUserAvatar';
 
 const useStyles = makeStyles({
   userButton: {
@@ -116,7 +114,6 @@ export function LogoutDialog({
   onLogout,
 }: LogoutDialogProps) {
   const styles = useStyles();
-  const proBadgeStyles = useProUserBadgeStyles();
   const { t } = useTranslation(['dialogs', 'navigation']);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -137,17 +134,13 @@ export function LogoutDialog({
     <Dialog open={open} onOpenChange={(_, data) => setOpen(data.open)}>
       <DialogTrigger disableButtonEnhancement>
         <Button appearance="subtle" className={styles.userButton}>
-          <Avatar 
+          <ProUserAvatar 
             name={userName} 
             size={28}
             image={userPhoto ? { src: userPhoto } : undefined}
+            isProUser={isProUser}
           />
           {userName}
-          {isProUser && (
-            <Tooltip content={t('logoutDialog.proUser')} relationship="label">
-              <span className={proBadgeStyles.proUserBadge} aria-label={t('logoutDialog.proUser')}>✨</span>
-            </Tooltip>
-          )}
         </Button>
       </DialogTrigger>
       <DialogSurface>
@@ -155,20 +148,14 @@ export function LogoutDialog({
           <DialogTitle>{t('logoutDialog.title')}</DialogTitle>
           <DialogContent className={styles.dialogContent}>
             <div className={styles.userInfo}>
-              <Avatar 
+              <ProUserAvatar 
                 name={userName} 
                 size={48}
                 image={userPhoto ? { src: userPhoto } : undefined}
+                isProUser={isProUser}
               />
               <div className={styles.userDetails}>
-                <div className={proBadgeStyles.userNameContainer}>
-                  <Text className={styles.userName}>{userName}</Text>
-                  {isProUser && (
-                    <Tooltip content={t('logoutDialog.proUser')} relationship="label">
-                      <span className={proBadgeStyles.proUserBadge} aria-label={t('logoutDialog.proUser')}>✨</span>
-                    </Tooltip>
-                  )}
-                </div>
+                <Text className={styles.userName}>{userName}</Text>
                 {userEmail && (
                   <Text className={styles.userEmail}>{userEmail}</Text>
                 )}
