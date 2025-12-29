@@ -54,6 +54,7 @@ The infrastructure consists of:
   - `static-web-app.bicep` - Azure Static Web App
 - **parameters.generic.bicepparam** - Generic parameter file with standard names
 - **parameters.current.bicepparam** - Current production deployment parameters
+- **verify.sh** - Automated verification script (runs what-if analysis)
 
 ## Prerequisites
 
@@ -117,6 +118,29 @@ az group create --name glooko-rg --location westeurope
 ```
 
 ### Step 3: Run What-If Analysis (Manual Verification)
+
+**Option 1: Using the automated verification script (recommended):**
+
+```bash
+cd infra
+
+# Verify current production infrastructure
+./verify.sh
+
+# OR verify generic deployment
+./verify.sh --generic
+
+# With verbose output
+./verify.sh --verbose
+```
+
+The script will:
+- ✅ Validate Bicep syntax
+- ✅ Check Azure login status
+- ✅ Run what-if analysis
+- ✅ Analyze results and provide recommendations
+
+**Option 2: Manual what-if (if you prefer):**
 
 **For current production infrastructure:**
 
