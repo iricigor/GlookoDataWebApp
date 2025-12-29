@@ -2,13 +2,16 @@
 
 This document explains the deltas shown in the second `az deployment group what-if` run output, excluding tag changes as requested in the issue.
 
+> **🔄 UPDATE:** After analysis, best practice additions have been **removed from the Bicep templates** to minimize changes. See **MINIMAL_CHANGES_SUMMARY.md** for details on what was removed and why.
+
 ## Purpose
 
 This document answers the question: **"Explain additional roleAssignments on storage account and all other deltas except tags."**
 
-The focus is on understanding **why** each delta appears in the what-if output, **what** it represents, and whether it indicates an actual infrastructure change or a what-if analysis artifact.
+The focus is on understanding **why** each delta appeared in the original what-if output, **what** it represented, and the resolution taken.
 
 > **📚 Related Documentation:**
+> - **MINIMAL_CHANGES_SUMMARY.md** - **START HERE** - What was removed and why
 > - **WHAT_IF_ANALYSIS.md** - Initial what-if analysis and the fixes applied
 > - **EXPECTED_WHAT_IF.md** - Quick reference for expected changes and red flags
 > - **This document** - Detailed explanation of each delta (roleAssignments, security changes, etc.)
@@ -16,38 +19,37 @@ The focus is on understanding **why** each delta appears in the what-if output, 
 
 ## Overview
 
-The what-if output shows the following categories of deltas (excluding tags):
+The original what-if output showed the following categories of deltas (excluding tags):
 
-1. **RBAC Role Assignments** (2 showing as "to create")
-2. **Key Vault Properties** (purge protection, network ACLs)
-3. **Function App Configuration** (CORS, security settings, HTTPS)
-4. **Static Web App Properties** (read-only properties, build configuration)
-5. **Storage Account Encryption** (marked as unsupported)
+1. **RBAC Role Assignments** (2 showing as "to create") - **REMOVED from template**
+2. **Key Vault Properties** (purge protection, network ACLs) - **REMOVED from template**
+3. **Function App Configuration** (CORS, security settings, HTTPS) - **Security settings REMOVED, CORS KEPT**
+4. **Static Web App Properties** (read-only properties, build configuration) - **buildProperties REMOVED**
+5. **Storage Account Encryption** (marked as unsupported) - **No change (read-only)**
 
 ---
 
-## 1. Role Assignments (2 to Create)
+## 1. Role Assignments (2 to Create) - **REMOVED FROM TEMPLATE**
 
-> **⚠️ IMPORTANT CLARIFICATION:**
+> **✅ RESOLUTION:**
+> 
+> These role assignments have been **removed from the Bicep template** (`infra/main.bicep` lines 140-145) because:
+> 1. They **already exist** in Azure with different IDs
+> 2. Deploying would cause a failure: "The role assignment already exists"
+> 3. They are now managed separately outside of the Bicep template
+>
+> **Status:** No longer part of what-if output
+
+> **⚠️ ORIGINAL ISSUE:**
 > 
 > These role assignments **already exist** in Azure with different IDs:
 > - **Existing Table role**: `4949700a-2127-4912-bc2b-b46fe97fec30`
-> - **What-if shows**: `1af27705-371b-5d3e-a53c-3df3874492df`
+> - **What-if showed**: `1af27705-371b-5d3e-a53c-3df3874492df`
 > - **Existing Blob role**: `c351193c-5102-4e17-8d3a-8209023f503a`
-> - **What-if shows**: `595708b8-0e71-529e-94b7-dab11d6821f3`
+> - **What-if showed**: `595708b8-0e71-529e-94b7-dab11d6821f3`
 >
 > **Why the difference?**
-> The Bicep template uses `guid(storageAccountRef.id, managedIdentityName, roleId)` to generate deterministic role assignment names. However, the existing assignments were created with different parameters (possibly just `guid(storageAccountRef.id, principalId, roleId)`), resulting in different IDs.
->
-> **What will happen during deployment?**
-> - Azure will attempt to create the new assignments with the new IDs
-> - The creation will **fail** because:
->   - The same role is already assigned to the same principal on the same scope
->   - Azure RBAC prevents duplicate role assignments
-> - **Result**: Deployment will fail with an error like "The role assignment already exists"
->
-> **Solution Options:**
-> 1. **Delete existing assignments** and let Bicep recreate them with the template-generated IDs
+> The Bicep template used `guid(storageAccountRef.id, managedIdentityName, roleId)` to generate deterministic role assignment names. However, the existing assignments were created with different parameters, resulting in different IDs.
 > 2. **Update the template** to use the existing IDs (hardcode them)
 > 3. **Accept the failure** and manually fix by either:
 >    - Removing the role assignment resources from the Bicep template
@@ -153,9 +155,19 @@ The Bicep template includes this role assignment to enable passwordless authenti
 
 ---
 
-## 2. Key Vault Changes
+## 2. Key Vault Changes - **REMOVED FROM TEMPLATE**
 
-### 2.1 Enable Purge Protection
+> **✅ RESOLUTION:**
+> 
+> Key Vault security enhancements have been **removed from the Bicep template** to minimize changes:
+> - `enablePurgeProtection: true` - Commented out in `infra/modules/key-vault.bicep` line 24
+> - `networkAcls` configuration - Removed from lines 30-33
+>
+> **Reason:** Best practice security improvements that can be implemented in a separate security hardening PR
+>
+> **Status:** No longer part of what-if output
+
+### 2.1 Enable Purge Protection - **REMOVED**
 
 ```bicep
 ~ Microsoft.KeyVault/vaults/glookodatawebapp-kv
@@ -219,7 +231,22 @@ The Bicep template includes this role assignment to enable passwordless authenti
 
 ## 3. Function App Changes
 
-### 3.1 CORS Configuration
+> **✅ RESOLUTION (Partial):**
+> 
+> Best practice security settings have been **removed from the Bicep template**:
+> - `httpsOnly: true` - Removed (currently `false` in production)
+> - `ftpsState: 'Disabled'` - Removed
+> - `minTlsVersion: '1.2'` - Removed
+> - `localMySqlEnabled: false` - Removed
+> - `netFrameworkVersion: 'v4.6'` - Removed
+>
+> **CORS configuration KEPT** - Required for frontend-backend communication
+>
+> **Reason:** Security settings are best practices that can be implemented in separate PR. CORS is required for app functionality.
+>
+> **Status:** Only CORS addition will appear in what-if output
+
+### 3.1 CORS Configuration - **KEPT (Required)**
 
 ```bicep
 ~ Microsoft.Web/sites/glookodatawebapp-func
@@ -406,7 +433,16 @@ The Bicep template includes this role assignment to enable passwordless authenti
 
 ## 4. Static Web App Changes
 
-### 4.1 Read-Only Properties Being Removed
+> **✅ RESOLUTION (Partial):**
+> 
+> **buildProperties REMOVED** from the Bicep template:
+> - Commented out in `infra/modules/static-web-app.bicep` lines 39-43
+>
+> **Reason:** Documentation improvement, not a functional requirement. Build properties already configured in GitHub Actions workflows.
+>
+> **Status:** buildProperties will not appear in what-if output. Read-only properties will still show (informational only).
+
+### 4.1 Read-Only Properties Being Removed - **Informational**
 
 ```bicep
 ~ Microsoft.Web/staticSites/GlookoData
