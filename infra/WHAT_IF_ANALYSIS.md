@@ -389,4 +389,7 @@ With the parameter adjustments made, the infrastructure deployment should now be
 
 **Document Version:** 1.0  
 **Last Updated:** 2024-12-29  
-**Status:** Ready for Deployment
+**Status:** Ready for Deployment  
+**Related Documents:**
+- EXPECTED_WHAT_IF.md - Expected what-if output after fixes
+- WHAT_IF_DELTAS_EXPLAINED.md - Detailed explanation of each delta (roleAssignments, Key Vault, Function App, Static Web App changes)
