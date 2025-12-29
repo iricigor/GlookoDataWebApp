@@ -28,6 +28,13 @@ Version 1.8 focuses on new features and enhancements.
 
 ### Other
 
+<details>
+<summary>930 Bump version to 1.8.0 and summarize 1.7.x release</summary>
+
+[#930](../../pull/930) Bump version to 1.8.0 and summarize 1.7.x release
+  - [Auto-generated entry from PR merge]
+</details>
+
 *(To be added as development progresses)*
 
 ---
