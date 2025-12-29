@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>903 Add Bicep IaC for current Azure infrastructure</summary>
+
+[#903](../../pull/903) Add Bicep IaC for current Azure infrastructure
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>902 [WIP] Fix login button width and alignment</summary>
 
 [#902](../../pull/902) [WIP] Fix login button width and alignment
