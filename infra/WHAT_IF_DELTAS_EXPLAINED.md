@@ -1,6 +1,12 @@
 # What-If Deltas Explained
 
-This document provides a comprehensive explanation of the changes shown in the second `az deployment group what-if` run, focusing on the roleAssignments and other non-tag changes.
+This document explains the deltas shown in the second `az deployment group what-if` run output, excluding tag changes as requested in the issue.
+
+## Purpose
+
+This document answers the question: **"Explain additional roleAssignments on storage account and all other deltas except tags."**
+
+The focus is on understanding **why** each delta appears in the what-if output, **what** it represents, and whether it indicates an actual infrastructure change or a what-if analysis artifact.
 
 > **📚 Related Documentation:**
 > - **WHAT_IF_ANALYSIS.md** - Initial what-if analysis and the fixes applied
@@ -10,86 +16,140 @@ This document provides a comprehensive explanation of the changes shown in the s
 
 ## Overview
 
-The what-if output shows changes that will be applied when deploying the Bicep infrastructure templates to the existing Azure environment. The changes fall into several categories:
+The what-if output shows the following categories of deltas (excluding tags):
 
-1. **New RBAC Role Assignments** (2 to create)
-2. **Security Enhancements** (Key Vault, Function App)
-3. **Configuration Updates** (Function App, Static Web App)
-4. **Property Standardization** (Storage Account encryption - unsupported)
+1. **RBAC Role Assignments** (2 showing as "to create")
+2. **Key Vault Properties** (purge protection, network ACLs)
+3. **Function App Configuration** (CORS, security settings, HTTPS)
+4. **Static Web App Properties** (read-only properties, build configuration)
+5. **Storage Account Encryption** (marked as unsupported)
 
 ---
 
 ## 1. Role Assignments (2 to Create)
 
+> **⚠️ IMPORTANT CLARIFICATION:**
+> 
+> These role assignments **already exist** in Azure with different IDs:
+> - **Existing Table role**: `4949700a-2127-4912-bc2b-b46fe97fec30`
+> - **What-if shows**: `1af27705-371b-5d3e-a53c-3df3874492df`
+> - **Existing Blob role**: `c351193c-5102-4e17-8d3a-8209023f503a`
+> - **What-if shows**: `595708b8-0e71-529e-94b7-dab11d6821f3`
+>
+> **Why the difference?**
+> The Bicep template uses `guid(storageAccountRef.id, managedIdentityName, roleId)` to generate deterministic role assignment names. However, the existing assignments were created with different parameters (possibly just `guid(storageAccountRef.id, principalId, roleId)`), resulting in different IDs.
+>
+> **What will happen during deployment?**
+> - Azure will attempt to create the new assignments with the new IDs
+> - The creation will **fail** because:
+>   - The same role is already assigned to the same principal on the same scope
+>   - Azure RBAC prevents duplicate role assignments
+> - **Result**: Deployment will fail with an error like "The role assignment already exists"
+>
+> **Solution Options:**
+> 1. **Delete existing assignments** and let Bicep recreate them with the template-generated IDs
+> 2. **Update the template** to use the existing IDs (hardcode them)
+> 3. **Accept the failure** and manually fix by either:
+>    - Removing the role assignment resources from the Bicep template
+>    - Or removing the existing Azure role assignments before deployment
+>
+> **Recommendation:** Option 1 - Delete and recreate is cleanest for IaC management.
+
 ### 1.1 Storage Table Data Contributor Role
 
+**What-If Shows:**
 ```bicep
 + Microsoft.Storage/storageAccounts/glookodatawebappstorage/providers/Microsoft.Authorization/roleAssignments/1af27705-371b-5d3e-a53c-3df3874492df
 
 properties.roleDefinitionId: "/subscriptions/.../roleDefinitions/0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3"
-properties.principalId: "[Managed Identity Principal ID]"
+properties.principalId: "[Managed Identity Principal ID: 33764511-49d8-4142-a465-dc5e96c9e476]"
 ```
 
-**What is this?**
-- This assigns the **Storage Table Data Contributor** role to the managed identity `glookodatawebapp-identity`
-- The role ID `0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3` is the Azure built-in role for Table Storage access
+**Explanation:**
 
-**Why is it being created?**
-- The Bicep template implements **passwordless authentication** using Managed Identity
-- Previously, the function app likely used storage account **access keys** (connection strings) to access Table Storage
-- This role assignment enables the managed identity to read, write, and delete data in Table Storage without needing keys
+This appears to be creating a **Storage Table Data Contributor** role assignment, but this assignment **already exists** in Azure.
+
+**Current State (Actual Azure):**
+- **Existing assignment ID**: `4949700a-2127-4912-bc2b-b46fe97fec30`
+- **Role**: Storage Table Data Contributor (`0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3`)
+- **Principal**: `glookodatawebapp-identity` (ObjectId: `33764511-49d8-4142-a465-dc5e96c9e476`)
+- **Scope**: `/subscriptions/.../storageAccounts/glookodatawebappstorage`
+
+**Why Does What-If Show "Create"?**
+
+The template generates a **different assignment ID** (`1af27705-...`) than the existing one (`4949700a-...`):
+
+1. **Bicep template uses**: `guid(storageAccountRef.id, managedIdentityName, storageTableDataContributorRoleId)`
+   - Defined in: `infra/main.bicep` line 151
+   - Inputs: storage account resource ID + string "glookodatawebapp-identity" + role ID
+
+2. **Existing assignment was created with**: Different parameters (unknown - likely manual creation or different script)
+
+3. **Result**: What-if sees the template ID doesn't exist, so shows it as "to create"
+
+**What Would Happen If Deployed?**
+
+The deployment would **fail** because:
+- Azure RBAC doesn't allow duplicate role assignments (same role + principal + scope)
+- Error: "The role assignment already exists"
+- The existing assignment with ID `4949700a-...` blocks creation of `1af27705-...`
+
+**Why Is This In The Template?**
+
+The Bicep template includes this role assignment to enable passwordless authentication for Table Storage access using the managed identity.
 
 **Where is it defined in the code?**
 - Template: `infra/main.bicep` lines 148-158
-- Role definition ID is stored in variable `storageTableDataContributorRoleId` (line 148)
-- The assignment uses `guid()` to generate a deterministic name based on the storage account, managed identity, and role
-
-**Benefits:**
-- ✅ **More secure**: No storage keys to manage, rotate, or leak
-- ✅ **Better auditing**: RBAC provides better tracking of who accessed what
-- ✅ **Automatic key rotation**: Azure manages the authentication tokens
-- ✅ **Principle of least privilege**: Only grants access to Tables, not Blobs or other services
-
-**Impact:**
-- This is a **safe addition** - it grants permissions but doesn't remove existing access
-- The function app configuration still uses connection strings (line 131-132 in function-app.bicep) because it's on a Consumption plan
-- This role assignment prepares the infrastructure for a future migration to managed identity-based access
+- Variable: `storageTableDataContributorRoleId = '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'`
 
 ---
 
 ### 1.2 Storage Blob Data Contributor Role
 
+**What-If Shows:**
 ```bicep
 + Microsoft.Storage/storageAccounts/glookodatawebappstorage/providers/Microsoft.Authorization/roleAssignments/595708b8-0e71-529e-94b7-dab11d6821f3
 
 properties.roleDefinitionId: "/subscriptions/.../roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe"
-properties.principalId: "[Managed Identity Principal ID]"
+properties.principalId: "[Managed Identity Principal ID: 33764511-49d8-4142-a465-dc5e96c9e476]"
 ```
 
-**What is this?**
-- This assigns the **Storage Blob Data Contributor** role to the managed identity `glookodatawebapp-identity`
-- The role ID `ba92f5b4-2d11-453d-a403-e96b0029c9fe` is the Azure built-in role for Blob Storage access
+**Explanation:**
 
-**Why is it being created?**
-- Similar to the Table role, this enables passwordless authentication for Blob Storage
-- Function apps use Blob Storage for:
-  - Storing function code packages (`WEBSITE_RUN_FROM_PACKAGE`)
-  - Storing function runtime state and metadata
-  - Potentially storing user-uploaded files or temporary data
+This appears to be creating a **Storage Blob Data Contributor** role assignment, but this assignment **already exists** in Azure.
+
+**Current State (Actual Azure):**
+- **Existing assignment ID**: `c351193c-5102-4e17-8d3a-8209023f503a`
+- **Role**: Storage Blob Data Contributor (`ba92f5b4-2d11-453d-a403-e96b0029c9fe`)
+- **Principal**: `glookodatawebapp-identity` (ObjectId: `33764511-49d8-4142-a465-dc5e96c9e476`)
+- **Scope**: `/subscriptions/.../storageAccounts/glookodatawebappstorage`
+
+**Why Does What-If Show "Create"?**
+
+Same reason as the Table role - the template generates a **different assignment ID** (`595708b8-...`) than the existing one (`c351193c-...`):
+
+1. **Bicep template uses**: `guid(storageAccountRef.id, managedIdentityName, storageBlobDataContributorRoleId)`
+   - Defined in: `infra/main.bicep` line 164
+   - Inputs: storage account resource ID + string "glookodatawebapp-identity" + role ID
+
+2. **Existing assignment was created with**: Different parameters
+
+3. **Result**: What-if sees a different ID, shows as "to create"
+
+**What Would Happen If Deployed?**
+
+The deployment would **fail** for the same reason:
+- Azure RBAC prevents duplicate role assignments
+- Error: "The role assignment already exists"
+- The existing assignment with ID `c351193c-...` blocks creation of `595708b8-...`
+
+**Why Is This In The Template?**
+
+The Bicep template includes this role assignment to enable passwordless authentication for Blob Storage access (used by Function App runtime and deployments).
 
 **Where is it defined in the code?**
 - Template: `infra/main.bicep` lines 161-171
-- Role definition ID is stored in variable `storageBlobDataContributorRoleId` (line 161)
-- Uses the same `guid()` pattern for deterministic naming
-
-**Benefits:**
-- ✅ **Secure deployment**: Function code can be deployed without using storage keys
-- ✅ **Runtime reliability**: Function runtime can access blob storage for state management
-- ✅ **Future-proof**: Enables migration to managed identity for `AzureWebJobsStorage` when moving to Premium plan
-
-**Impact:**
-- This is a **safe addition** - grants additional permissions without breaking existing functionality
-- Prepares infrastructure for passwordless deployment and runtime
+- Variable: `storageBlobDataContributorRoleId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'`
 
 ---
 
