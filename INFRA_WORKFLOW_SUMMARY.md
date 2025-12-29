@@ -36,15 +36,15 @@ APP_ID=$(az ad app list --display-name "$APP_NAME" --query "[0].appId" -o tsv)
 az ad sp create --id $APP_ID
 
 # 3. Assign Permissions
-SUBSCRIPTION_ID="your-subscription-id"
+SUBSCRIPTION_ID=$(az account show --query id -o tsv)  # Auto-detect current subscription
 az role assignment create \
   --role "Contributor" \
   --assignee $APP_ID \
   --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/Glooko"
 
-# 4. Configure OIDC (replace with your repo)
-GITHUB_ORG="your-org"
-GITHUB_REPO="your-repo"
+# 4. Configure OIDC (replace with your actual repo details)
+GITHUB_ORG="your-org"        # Your GitHub username or org (e.g., "iricigor")
+GITHUB_REPO="your-repo"      # Your repo name (e.g., "GlookoDataWebApp")
 
 az ad app federated-credential create --id $APP_ID --parameters '{
   "name": "GitHubActionsPR",
@@ -53,11 +53,13 @@ az ad app federated-credential create --id $APP_ID --parameters '{
   "audiences": ["api://AzureADTokenExchange"]
 }'
 
-# 5. Get secret values
+# 5. Get secret values for GitHub
 echo "AZURE_CLIENT_ID: $APP_ID"
 echo "AZURE_TENANT_ID: $(az account show --query tenantId -o tsv)"
 echo "AZURE_SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
 ```
+
+**Note:** Replace `your-org` and `your-repo` with your actual GitHub repository details from the URL: `github.com/YOUR-ORG/YOUR-REPO`
 
 ## 📋 How It Works
 

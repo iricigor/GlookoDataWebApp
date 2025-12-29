@@ -20,7 +20,7 @@ Create an Azure AD application for GitHub Actions authentication:
 ```bash
 # Set variables
 APP_NAME="GlookoDataWebApp-GitHub-Actions"
-SUBSCRIPTION_ID="your-subscription-id"
+SUBSCRIPTION_ID="your-subscription-id"  # Get with: az account show --query id -o tsv
 RESOURCE_GROUP="Glooko"
 
 # Create the app registration
@@ -33,6 +33,14 @@ echo "Application (Client) ID: $APP_ID"
 # Get the Tenant ID
 TENANT_ID=$(az account show --query tenantId -o tsv)
 echo "Tenant ID: $TENANT_ID"
+```
+
+**Example values:**
+```bash
+# Example - your values will be different
+SUBSCRIPTION_ID="12345678-1234-1234-1234-123456789abc"  # Azure Subscription ID
+APP_ID="87654321-4321-4321-4321-cba987654321"          # Will be generated
+TENANT_ID="abcdefab-abcd-abcd-abcd-abcdefabcdef"       # Your Azure AD Tenant ID
 ```
 
 ## Step 2: Create Service Principal
@@ -89,6 +97,10 @@ az ad app federated-credential create \
 
 echo "✅ OIDC federated credentials configured"
 ```
+
+**How to find your repository details:**
+- **GITHUB_ORG**: Your GitHub username or organization name (from the URL: `github.com/USERNAME/repo`)
+- **GITHUB_REPO**: Your repository name (from the URL: `github.com/user/REPOSITORY`)
 
 **Example for this repository:**
 ```bash
