@@ -140,13 +140,13 @@ const VALID_GOOGLE_ISSUERS = [
 const CONSUMER_TENANT_ID = '9188040d-6c67-4c5b-b112-36a304b66dad';
 
 interface TokenClaims {
-  aud?: string;      // Audience - should be our app's client ID
-  iss?: string;      // Issuer - Microsoft identity platform
-  oid?: string;      // Object ID (unique user identifier)
-  sub?: string;      // Subject (unique user identifier)
+  aud?: string;      // Audience - should be our app's client ID (Azure) or Google client ID
+  iss?: string;      // Issuer - Microsoft identity platform or Google
+  oid?: string;      // Object ID (unique user identifier - Microsoft only)
+  sub?: string;      // Subject (unique user identifier - both Microsoft and Google)
   exp?: number;      // Expiration time
   iat?: number;      // Issued at time
-  tid?: string;      // Tenant ID
+  tid?: string;      // Tenant ID (Microsoft only)
   email?: string;    // User's email address (when email scope is requested)
   preferred_username?: string; // User's preferred username (usually email)
   upn?: string;      // User Principal Name (common in enterprise AAD setups)
