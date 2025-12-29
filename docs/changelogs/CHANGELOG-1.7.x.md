@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>916 Align admin statistics grid layout and rename to User Statistics</summary>
+
+[#916](../../pull/916) Align admin statistics grid layout and rename to User Statistics
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>912 IaaC: Add configurable parameters to preserve existing infrastructure in Bicep templates</summary>
 
 [#912](../../pull/912) IaaC: Add configurable parameters to preserve existing infrastructure in Bicep templates
