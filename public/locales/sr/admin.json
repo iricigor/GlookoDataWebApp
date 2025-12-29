@@ -12,18 +12,42 @@
       "title": "Sistemske statistike",
       "loggedInUsers": "Prijavljeni korisnici",
       "proUsers": "Pro korisnici",
+      "webCalls": "Web pozivi",
+      "webCallsTooltip": "HTTP zahtevi za statičke web stranice i resurse (HTML, CSS, JS fajlovi)",
+      "webErrors": "Web greške",
+      "webErrorsTooltip": "Neuspešni web zahtevi sa 4xx/5xx statusnim kodovima za statički sadržaj",
       "apiCalls": "API pozivi",
+      "apiCallsTooltip": "HTTP zahtevi za backend API endpoint-e (putanje koje počinju sa /api/)",
       "apiErrors": "API greške",
-      "placeholderNote": "Statistike će biti dostupne nakon završetka integracije API-ja"
+      "apiErrorsTooltip": "Neuspešni API zahtevi sa 4xx/5xx statusnim kodovima za backend endpoint-e",
+      "timePeriodLabel": "Vremenski period",
+      "timePeriod1Hour": "Poslednji 1 sat",
+      "timePeriod1Day": "Poslednji 1 dan",
+      "apiStatsTitle": "API i Web statistike"
     },
     "aiTest": {
       "title": "Test AI konfiguracije",
-      "description": "Testirajte konfiguraciju Pro AI ključa da proverite da li radi pravilno",
+      "description": "Testirajte konfiguraciju Pro AI ključa. Odaberite test infrastrukture da proverite samo pristup Key Vault-u, ili potpuni test da proverite odgovor AI provajdera.",
+      "testInfraButton": "Testiraj infrastrukturu",
+      "testFullButton": "Testiraj AI provajdera",
       "testButton": "Testiraj AI ključ",
       "testing": "Testiranje...",
       "selectProvider": "Odaberi AI provajdera",
+      "infraSuccess": "✅ Test infrastrukture uspešan! Key Vault: {keyVaultName}, Secret: {secretName}",
+      "fullSuccess": "✅ Potpuni test uspešan! Provajder: {provider}",
+      "infraError": "❌ Test infrastrukture neuspešan: {error}",
+      "fullError": "❌ Potpuni test neuspešan: {error}",
       "testSuccess": "✅ Test uspešan! Provajder: {provider}",
-      "testError": "❌ Test neuspešan: {error}"
+      "testError": "❌ Test neuspešan: {error}",
+      "configurationTitle": "Konfiguracija",
+      "provider": "Provajder",
+      "keyVaultName": "Naziv Key Vault-a",
+      "secretName": "Naziv secret-a",
+      "secretExists": "Secret dostupan",
+      "yes": "Da",
+      "no": "Ne",
+      "notAvailable": "Nije dostupno",
+      "notConfigured": "Nije konfigurisano"
     }
   }
 }
