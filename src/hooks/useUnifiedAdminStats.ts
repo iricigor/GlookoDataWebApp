@@ -184,7 +184,7 @@ export function useUnifiedAdminStats(idToken?: string | null, shouldFetch: boole
     isLoadingRef.current = false;
     currentTokenRef.current = null;
     currentPeriodRef.current = '1hour';
-    setState(() => ({ ...initialState }));
+    setState(initialState);
   }, []);
 
   // Auto-fetch when idToken is provided and shouldFetch is true
