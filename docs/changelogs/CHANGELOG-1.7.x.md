@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>912 IaaC: Add configurable parameters to preserve existing infrastructure in Bicep templates</summary>
+
+[#912](../../pull/912) IaaC: Add configurable parameters to preserve existing infrastructure in Bicep templates
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>910 Fix Application Insights query for admin statistics display</summary>
 
 [#910](../../pull/910) Fix Application Insights query for admin statistics display
