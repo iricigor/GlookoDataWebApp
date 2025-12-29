@@ -61,11 +61,7 @@ param existingAppServicePlanName string = ''
 param appInsightsResourceId string = ''
 
 @description('Tags to apply to all resources')
-param tags object = {
-  Application: 'GlookoDataWebApp'
-  Environment: 'Production'
-  ManagedBy: 'Bicep'
-}
+param tags object = {}
 
 // 1. Deploy User-Assigned Managed Identity first
 module managedIdentity 'modules/managed-identity.bicep' = {
