@@ -2,6 +2,12 @@
 
 This document provides a comprehensive explanation of the changes shown in the second `az deployment group what-if` run, focusing on the roleAssignments and other non-tag changes.
 
+> **📚 Related Documentation:**
+> - **WHAT_IF_ANALYSIS.md** - Initial what-if analysis and the fixes applied
+> - **EXPECTED_WHAT_IF.md** - Quick reference for expected changes and red flags
+> - **This document** - Detailed explanation of each delta (roleAssignments, security changes, etc.)
+> - **USER_GUIDE.md** - Deployment guide
+
 ## Overview
 
 The what-if output shows changes that will be applied when deploying the Bicep infrastructure templates to the existing Azure environment. The changes fall into several categories:

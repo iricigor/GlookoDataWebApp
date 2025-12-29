@@ -255,4 +255,6 @@ If the what-if output shows unexpected results not covered in this document, ple
 
 **Document Version:** 1.0  
 **Last Updated:** 2024-12-29  
-**Related:** WHAT_IF_ANALYSIS.md
+**Related Documents:** 
+- WHAT_IF_ANALYSIS.md - Initial what-if analysis
+- WHAT_IF_DELTAS_EXPLAINED.md - Detailed explanation of each change (roleAssignments, security enhancements, etc.)

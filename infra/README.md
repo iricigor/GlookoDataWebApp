@@ -62,6 +62,7 @@ The infrastructure consists of:
 - **USER_GUIDE.md** - **START HERE** - Quick start guide for deployment
 - **FIX_SUMMARY.md** - Overview of what-if fixes and solutions
 - **WHAT_IF_ANALYSIS.md** - Detailed analysis of all what-if changes
+- **WHAT_IF_DELTAS_EXPLAINED.md** - **NEW** - Comprehensive explanation of what-if deltas (roleAssignments, Key Vault, Function App, etc.)
 - **EXPECTED_WHAT_IF.md** - Expected output, red flags, and troubleshooting
 - **MANUAL_VERIFICATION.md** - Step-by-step manual verification
 - **QUICK_REFERENCE.md** - Quick command reference
