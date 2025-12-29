@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>918 Explain what-if deltas and remove conflicting role assignments</summary>
+
+[#918](../../pull/918) Explain what-if deltas and remove conflicting role assignments
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>914 Move Pro User badge to avatar overlay</summary>
 
 [#914](../../pull/914) Move Pro User badge to avatar overlay
