@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>891 Fix Pro users management: provider verification and email display</summary>
+
+[#891](../../pull/891) Fix Pro users management: provider verification and email display
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>889 Detect and handle unresolved Azure Key Vault references in Function App</summary>
 
 [#889](../../pull/889) Detect and handle unresolved Azure Key Vault references in Function App
