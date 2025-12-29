@@ -152,19 +152,35 @@ function Invoke-GlookoProUsers {
                 }
                 
                 # Parse email and provider from "email;provider" format
-                $userParts = $User -split ';'
-                $emailAddress = $userParts[0]
-                $provider = if ($userParts.Length -gt 1) { $userParts[1] } else { $DefaultProvider }
+                # Split only on first semicolon to handle edge cases
+                $userParts = $User -split ';', 2
+                $emailAddress = $userParts[0].Trim()
+                # If there's a provider part, take only the first word (in case of extra semicolons or spaces)
+                $provider = if ($userParts.Length -gt 1 -and $userParts[1].Trim()) { 
+                    # Take only the first part before any additional semicolon
+                    ($userParts[1] -split ';')[0].Trim()
+                } else { 
+                    $DefaultProvider 
+                }
+                
+                # Validate email is not empty
+                if ([string]::IsNullOrWhiteSpace($emailAddress)) {
+                    throw "Email address cannot be empty"
+                }
                 
                 # Basic email validation
                 if ($emailAddress -notmatch '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$') {
                     throw "Invalid email format: $emailAddress"
                 }
                 
-                # Validate provider
-                if ($provider -notin $ValidProviders) {
+                # Normalize and validate provider (case-insensitive)
+                $provider = $provider.Trim()
+                # Convert to proper case (Microsoft or Google)
+                $matchedProvider = $ValidProviders | Where-Object { $_ -ieq $provider }
+                if (-not $matchedProvider) {
                     throw "Invalid provider: $provider. Valid providers are: $($ValidProviders -join ', ')"
                 }
+                $provider = $matchedProvider
                 
                 # Normalize email to lowercase for case-insensitive matching
                 $emailAddress = $emailAddress.ToLowerInvariant()
