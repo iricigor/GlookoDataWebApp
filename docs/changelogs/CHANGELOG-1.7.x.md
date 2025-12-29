@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>872 Configure Key Vault references for Google OAuth credentials in Azure Functions</summary>
+
+[#872](../../pull/872) Configure Key Vault references for Google OAuth credentials in Azure Functions
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>870 Soft fail when AUTH_GOOGLE_CLIENT_ID is missing</summary>
 
 [#870](../../pull/870) Soft fail when AUTH_GOOGLE_CLIENT_ID is missing
