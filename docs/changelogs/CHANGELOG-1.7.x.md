@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>889 Detect and handle unresolved Azure Key Vault references in Function App</summary>
+
+[#889](../../pull/889) Detect and handle unresolved Azure Key Vault references in Function App
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>887 Fix ProUsers list to access Azure Table entity properties correctly</summary>
 
 [#887](../../pull/887) Fix ProUsers list to access Azure Table entity properties correctly
