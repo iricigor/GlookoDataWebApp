@@ -45,6 +45,21 @@ param tableNames array = [
   'AIQueryLogs'
 ]
 
+@description('Enable CORS for Table Storage (required for web access)')
+param enableTableCors bool = true
+
+@description('CORS allowed origins for Table Storage')
+param tableCorsAllowedOrigins array = ['*']
+
+@description('Use existing App Service Plan instead of creating a new one')
+param useExistingAppServicePlan bool = false
+
+@description('Name of existing App Service Plan to use (if useExistingAppServicePlan is true)')
+param existingAppServicePlanName string = ''
+
+@description('Application Insights resource ID for Function App monitoring')
+param appInsightsResourceId string = ''
+
 @description('Tags to apply to all resources')
 param tags object = {
   Application: 'GlookoDataWebApp'
@@ -70,6 +85,8 @@ module storage 'modules/storage.bicep' = {
     location: location
     sku: storageSku
     tableNames: tableNames
+    enableTableCors: enableTableCors
+    tableCorsAllowedOrigins: tableCorsAllowedOrigins
     tags: tags
   }
 }
@@ -97,6 +114,9 @@ module functionApp 'modules/function-app.bicep' = {
     keyVaultName: keyVaultName
     webAppUrl: webAppUrl
     useManagedIdentityForStorage: false  // Consumption plan uses connection strings
+    useExistingAppServicePlan: useExistingAppServicePlan
+    existingAppServicePlanName: existingAppServicePlanName
+    appInsightsResourceId: appInsightsResourceId
     tags: tags
   }
   dependsOn: [
