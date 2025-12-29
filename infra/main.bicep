@@ -87,6 +87,7 @@ module storage 'modules/storage.bicep' = {
       // Preserve existing tags to avoid modification/deletion in what-if
       Application: 'glookodatawebapp'
       Purpose: 'UserSettings'
+      Environment: 'Production'
     }
   }
 }
@@ -101,6 +102,8 @@ module keyVault 'modules/key-vault.bicep' = {
     tags: {
       // Preserve existing tag to avoid modification in what-if
       ManagedBy: 'AzureDeploymentScripts'
+      Application: 'GlookoDataWebApp'
+      Environment: 'Production'
     }
   }
 }
@@ -123,6 +126,8 @@ module functionApp 'modules/function-app.bicep' = {
     tags: {
       // Preserve existing tag to avoid modification in what-if
       ManagedBy: 'AzureDeploymentScripts'
+      Application: 'GlookoDataWebApp'
+      Environment: 'Production'
     }
   }
   dependsOn: [
