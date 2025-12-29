@@ -2,6 +2,8 @@
 
 This document explains the changes identified in the first `az deployment group what-if` run and how they were addressed.
 
+**Update (2024-12-29):** Tag standardization (Section 7) has been removed from the template to simplify what-if output. Resources will maintain their existing tags. See [EXPECTED_WHAT_IF.md](EXPECTED_WHAT_IF.md) for the current expected output.
+
 ## Summary of Changes
 
 The what-if analysis revealed several differences between the Bicep template and the existing Azure infrastructure. Most changes were categorized into:
@@ -162,9 +164,11 @@ The what-if analysis revealed several differences between the Bicep template and
 
 ---
 
-### 7. Tag Standardization ℹ️ GOVERNANCE
+### 7. Tag Standardization ℹ️ REMOVED (2024-12-29)
 
-**What-If Output:**
+**Note:** This section describes the original tag standardization approach that has been removed to simplify what-if output.
+
+**Original What-If Output:**
 ```bicep
 ~ Microsoft.Storage/storageAccounts/glookodatawebappstorage
   - tags.Purpose: "UserSettings"
@@ -183,18 +187,12 @@ The what-if analysis revealed several differences between the Bicep template and
 - Removing old/inconsistent tags like embedded `ManagedBy=GlookoDeploymentModule` in Environment tag
 - Removing `Purpose: UserSettings` which is redundant (storage has multiple purposes)
 
-**Resolution:**
-- Accept standardized tags as defined in parameter files
-- All resources now have consistent tags:
-  ```bicep
-  tags = {
-    Application: 'GlookoDataWebApp'
-    Environment: 'Production'
-    ManagedBy: 'Bicep'
-  }
-  ```
+**Original Resolution:**
+- ~~Accept standardized tags as defined in parameter files~~ **REMOVED**
+- Tags are now empty by default to reduce noise in what-if output
+- Resources will maintain their existing tags without modification
 
-**Impact:** ✅ EXPECTED - Tag standardization for better governance.
+**Impact:** ✅ CHANGED - Tag standardization removed per issue requirement to simplify deltas.
 
 ---
 
