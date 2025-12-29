@@ -211,18 +211,19 @@ function Invoke-GlookoProUsers {
                         Write-SuccessMessage "Found $($users.Count) Pro user(s):"
                         Write-Host ""
                         foreach ($user in $users) {
-                            $email = if ($user.Properties -and $user.Properties['Email']) { 
-                                $user.Properties['Email'].StringValue 
+                            # Try accessing via entity indexer (DynamicTableEntity implements IDictionary)
+                            $email = if ($user['Email']) { 
+                                $user['Email'].StringValue 
                             } else { 
                                 'unknown' 
                             }
-                            $userProvider = if ($user.Properties -and $user.Properties['Provider']) { 
-                                $user.Properties['Provider'].StringValue 
+                            $userProvider = if ($user['Provider']) { 
+                                $user['Provider'].StringValue 
                             } else { 
                                 $DefaultProvider
                             }
-                            $createdAt = if ($user.Properties -and $user.Properties['CreatedAt']) { 
-                                $user.Properties['CreatedAt'].StringValue 
+                            $createdAt = if ($user['CreatedAt']) { 
+                                $user['CreatedAt'].StringValue 
                             } else { 
                                 'unknown' 
                             }
@@ -237,13 +238,14 @@ function Invoke-GlookoProUsers {
                         Action = 'List'
                         Count = $users.Count
                         Users = $users | ForEach-Object {
-                            $userProvider = if ($_.Properties -and $_.Properties['Provider']) { 
-                                $_.Properties['Provider'].StringValue 
+                            # Try accessing via entity indexer (DynamicTableEntity implements IDictionary)
+                            $userProvider = if ($_['Provider']) { 
+                                $_['Provider'].StringValue 
                             } else { 
                                 $DefaultProvider
                             }
-                            $userEmail = if ($_.Properties -and $_.Properties['Email']) { 
-                                $_.Properties['Email'].StringValue 
+                            $userEmail = if ($_['Email']) { 
+                                $_['Email'].StringValue 
                             } else { 
                                 'unknown' 
                             }
@@ -251,7 +253,7 @@ function Invoke-GlookoProUsers {
                                 Email = $userEmail
                                 Provider = $userProvider
                                 User = "$userEmail;$userProvider"
-                                CreatedAt = if ($_.Properties -and $_.Properties['CreatedAt']) { $_.Properties['CreatedAt'].StringValue } else { $null }
+                                CreatedAt = if ($_['CreatedAt']) { $_['CreatedAt'].StringValue } else { $null }
                             }
                         }
                     }
