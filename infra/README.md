@@ -394,7 +394,7 @@ param tableNames = [
 1. **Resource already exists** - Ensure resource names match exactly
 2. **Different configuration** - Check all properties in parameter file
 3. **RBAC differences** - Role assignments use GUIDs and may show as "Ignore"
-4. **Tags** - Tags are not set by default to reduce noise in what-if output. Resources maintain their existing tags.
+4. **Tags** - Tags are preserved using resource-specific tag parameters in `parameters.current.bicepparam`. Each resource has its own tag parameter (`managedIdentityTags`, `storageTags`, etc.) to maintain existing tags without modifications. See [TAG_PRESERVATION_SUMMARY.md](./TAG_PRESERVATION_SUMMARY.md) for details.
 
 ### Deployment Fails
 

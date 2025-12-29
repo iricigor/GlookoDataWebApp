@@ -2,7 +2,7 @@
 
 This document describes what the `az deployment group what-if` output should look like after applying the fixes from this PR.
 
-**Important Update (2024-12-29):** Tag additions have been removed from the template to simplify the what-if output. Resources will maintain their existing tags without modification. This reduces noise in the what-if deltas while preserving all functional changes.
+**Important Update (2024-12-29):** Resource-specific tags have been implemented to preserve existing Azure tags. Each resource now has its own tag parameter in `parameters.current.bicepparam` that matches the current Azure state exactly. This eliminates all tag-related deltas from the what-if output while maintaining the existing tag values.
 
 ## Running the What-If
 
@@ -41,7 +41,7 @@ These are **new RBAC role assignments** - expected and required:
 
 Expected modifications (configuration and property updates):
 
-**Note:** Tag additions have been removed to simplify what-if output. Resources will maintain their existing tags.
+**Note:** Resource-specific tags have been implemented. Each resource maintains its existing tags through explicit tag parameters in `parameters.current.bicepparam`. See [TAG_PRESERVATION_SUMMARY.md](./TAG_PRESERVATION_SUMMARY.md) for details.
 
 #### 1. Key Vault
 ```
