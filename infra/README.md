@@ -74,7 +74,6 @@ Use `parameters.generic.bicepparam` for new deployments with standard naming:
 
 ```bicep
 param location = 'westeurope'
-param appName = 'glookodatawebapp'
 param storageAccountName = 'glookodatawebappstorage'
 param managedIdentityName = 'glooko-identity'
 param keyVaultName = 'glooko-kv'
@@ -90,7 +89,6 @@ Use `parameters.current.bicepparam` to match existing production infrastructure:
 
 ```bicep
 param location = 'westeurope'
-param appName = 'glookodatawebapp'
 param storageAccountName = 'glookodatawebappstorage'
 param managedIdentityName = 'glookodatawebapp-identity'
 param keyVaultName = 'glookodatawebapp-kv'

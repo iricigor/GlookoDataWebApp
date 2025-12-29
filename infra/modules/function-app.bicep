@@ -57,6 +57,8 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
     siteConfig: {
       linuxFxVersion: '${functionRuntime}|${functionRuntimeVersion}'
       appSettings: [
+        // Managed Identity authentication for storage (Functions v4)
+        // Using __accountName suffix instead of connection strings for passwordless auth
         {
           name: 'AzureWebJobsStorage__accountName'
           value: storageAccountName
