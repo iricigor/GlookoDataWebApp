@@ -53,9 +53,20 @@ const GOOGLE_JWKS_URI = 'https://www.googleapis.com/oauth2/v3/certs';
 
 /**
  * Google OAuth Client ID (from environment variable or empty string)
- * Used for validating Google ID tokens
+ * Used for validating Google ID tokens.
+ * 
+ * If not configured, Google authentication will fail at runtime with a warning.
  */
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+
+// Warn if Google Client ID is not configured (but don't fail - allow app to run)
+if (!GOOGLE_CLIENT_ID) {
+  console.warn(
+    'GOOGLE_CLIENT_ID environment variable is not configured. ' +
+    'Google authentication will not work. ' +
+    'Configure this environment variable in Azure Function App Settings to enable Google login.'
+  );
+}
 
 /**
  * JWKS client for fetching Microsoft identity platform public keys.
@@ -94,7 +105,7 @@ async function getSigningKey(header: jwt.JwtHeader, issuer?: string): Promise<st
   }
   
   // Use Google JWKS endpoint if issuer is from Google
-  const isGoogleToken = issuer ? VALID_GOOGLE_ISSUERS.includes(issuer) : false;
+  const isGoogleToken = VALID_GOOGLE_ISSUERS.includes(issuer || '');
   const client = isGoogleToken ? googleJwksClientInstance : jwksClientInstance;
   
   const key = await client.getSigningKey(header.kid);
@@ -114,11 +125,12 @@ const VALID_ISSUER_PATTERNS = [
 
 /**
  * Valid issuers for Google OAuth tokens.
- * Google ID tokens can have either of these issuers.
+ * According to Google's OpenID Connect specification, Google ID tokens
+ * always have 'https://accounts.google.com' as the issuer.
+ * See: https://developers.google.com/identity/openid-connect/openid-connect#validatinganidtoken
  */
 const VALID_GOOGLE_ISSUERS = [
   'https://accounts.google.com',
-  'accounts.google.com',
 ];
 
 /**
