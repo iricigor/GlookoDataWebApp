@@ -296,8 +296,8 @@ describe('Admin', () => {
 
     renderWithProviders(<Admin />);
 
-    // Check System Statistics section
-    expect(screen.getByText('System Statistics')).toBeInTheDocument();
+    // Check User Statistics section
+    expect(screen.getByText('User Statistics')).toBeInTheDocument();
     expect(screen.getByText('Logged In Users')).toBeInTheDocument();
     expect(screen.getByText('Pro Users')).toBeInTheDocument();
     
