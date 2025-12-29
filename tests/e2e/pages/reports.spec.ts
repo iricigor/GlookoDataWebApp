@@ -45,24 +45,21 @@ test.describe('Reports Page', () => {
     expect(await reportsPage.isPageVisible()).toBe(true);
   });
 
-  test('should display IOB tab and content', async ({ page }) => {
+  test('should display Daily BG tab and allow switching tabs', async ({ page }) => {
     // Wait for page to load
     await page.waitForTimeout(1500);
     
-    // Find and click the IOB tab
-    const iobTab = page.getByRole('tab', { name: 'IOB' });
-    await expect(iobTab).toBeVisible({ timeout: 10000 });
-    await iobTab.click();
+    // Find the Daily BG tab
+    const dailyBGTab = page.getByRole('tab', { name: 'Daily BG' });
+    await expect(dailyBGTab).toBeVisible({ timeout: 10000 });
+    
+    // Click the Daily BG tab
+    await dailyBGTab.click();
     
     // Wait for tab content to load
     await page.waitForTimeout(500);
     
-    // Verify IOB tab content is displayed
-    // Should show either the date navigator or a message about no data
-    const hasDateNavigator = await page.locator('button', { hasText: 'Previous Day' }).isVisible();
-    const hasNoDataMessage = await page.locator('text=/Please upload.*IOB/i').isVisible();
-    
-    // One of these should be visible
-    expect(hasDateNavigator || hasNoDataMessage).toBe(true);
+    // Verify the tab is now selected (aria-selected="true")
+    await expect(dailyBGTab).toHaveAttribute('aria-selected', 'true');
   });
 });

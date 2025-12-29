@@ -26,9 +26,11 @@ export class NavigationComponent extends BasePage {
 
   /**
    * Navigate to Home page
+   * Note: Home button is hidden on desktop (viewport >= 769px), so we use direct URL navigation
    */
   async navigateToHome() {
-    await this.homeLink.click();
+    // Use direct hash navigation since Home button is hidden on desktop viewports
+    await this.page.goto('/#home');
     await this.waitForNavigation();
   }
 
@@ -66,8 +68,9 @@ export class NavigationComponent extends BasePage {
 
   /**
    * Verify navigation is visible
+   * Note: Home button is hidden on desktop, so we check for Upload link instead
    */
   async isNavigationVisible(): Promise<boolean> {
-    return await this.isVisible(this.homeLink);
+    return await this.isVisible(this.uploadLink);
   }
 }

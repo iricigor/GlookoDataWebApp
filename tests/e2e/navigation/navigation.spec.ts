@@ -12,8 +12,9 @@ test.describe('Navigation', () => {
   });
 
   test('should display all navigation links', async ({ navigation }) => {
-    // Verify all navigation links are visible
-    await expect(navigation.homeLink).toBeVisible();
+    // Verify navigation links are visible
+    // Note: Home button is hidden on desktop viewports (>= 769px), available only in hamburger menu
+    // So we check for the other navigation links that are always visible on desktop
     await expect(navigation.uploadLink).toBeVisible();
     await expect(navigation.reportsLink).toBeVisible();
     await expect(navigation.aiAnalysisLink).toBeVisible();
