@@ -55,3 +55,4 @@ api/.vscode
 # Source data files (too large for git)
 **/CGM Records.zip
 CGM Records.zip
+.env.local

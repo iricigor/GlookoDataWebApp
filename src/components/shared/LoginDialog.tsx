@@ -101,6 +101,55 @@ interface LoginDialogProps {
   isGoogleAuthAvailable?: boolean;
 }
 
+// Separate component for Google login button to properly handle the useGoogleLogin hook
+interface GoogleLoginButtonProps {
+  onGoogleLogin: (credential: string) => Promise<void>;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  setOpen: (open: boolean) => void;
+  className: string;
+}
+
+function GoogleLoginButton({ onGoogleLogin, loading, setLoading, setError, setOpen, className }: GoogleLoginButtonProps) {
+  const { t } = useTranslation(['dialogs']);
+
+  const handleGoogleClick = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Use the access_token as the credential
+        await onGoogleLogin(tokenResponse.access_token);
+        setOpen(false);
+      } catch (err) {
+        console.error('Google login error:', err);
+        setError(t('loginDialog.errorMessage'));
+      } finally {
+        setLoading(false);
+      }
+    },
+    onError: () => {
+      console.error('Google login failed');
+      setError(t('loginDialog.errorMessage'));
+    },
+    flow: 'implicit', // Use implicit flow to get ID token directly
+  });
+
+  return (
+    <Button 
+      appearance="secondary" 
+      onClick={() => handleGoogleClick()}
+      disabled={loading}
+      className={className}
+    >
+      <GoogleLogo />
+      <span>{t('loginDialog.signInWithGoogle')}</span>
+    </Button>
+  );
+}
+
 /**
  * Renders a login dialog with a trigger button, handling sign-in flow, loading state, and error display.
  *
@@ -145,31 +194,6 @@ export function LoginDialog({ onLogin, onGoogleLogin, isGoogleAuthAvailable = fa
       setLoading(false);
     }
   };
-
-  const handleGoogleClick = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // Exchange the authorization code for an ID token
-        // The tokenResponse contains access_token, but we need to get the ID token
-        // For now, we'll use the access_token as the credential
-        await onGoogleLogin(tokenResponse.access_token);
-        setOpen(false);
-      } catch (err) {
-        console.error('Google login error:', err);
-        setError(t('loginDialog.errorMessage'));
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: () => {
-      console.error('Google login failed');
-      setError(t('loginDialog.errorMessage'));
-    },
-    flow: 'implicit', // Use implicit flow to get ID token directly
-  });
 
   const handleCancel = () => {
     setOpen(false);
@@ -223,15 +247,14 @@ export function LoginDialog({ onLogin, onGoogleLogin, isGoogleAuthAvailable = fa
                 )}
               </Button>
               {isGoogleAuthAvailable && (
-                <Button 
-                  appearance="secondary" 
-                  onClick={() => handleGoogleClick()}
-                  disabled={loading}
+                <GoogleLoginButton 
+                  onGoogleLogin={onGoogleLogin}
+                  loading={loading}
+                  setLoading={setLoading}
+                  setError={setError}
+                  setOpen={setOpen}
                   className={styles.baseButton}
-                >
-                  <GoogleLogo />
-                  <span>{t('loginDialog.signInWithGoogle')}</span>
-                </Button>
+                />
               )}
             </div>
           </DialogActions>
