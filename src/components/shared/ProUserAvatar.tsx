@@ -22,8 +22,8 @@ const useStyles = makeStyles({
   },
   badge: {
     position: 'absolute',
-    top: '-2px',
-    right: '-2px',
+    top: '-6px',
+    right: '-6px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -37,8 +37,8 @@ const useStyles = makeStyles({
     height: '18px',
   },
   badgeLarge: {
-    top: '-3px',
-    right: '-3px',
+    top: '-8px',
+    right: '-8px',
     fontSize: '16px',
     width: '24px',
     height: '24px',
