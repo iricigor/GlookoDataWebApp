@@ -96,7 +96,7 @@ export function ProUserAvatar({
       {isProUser && (
         <Tooltip content={t('logoutDialog.proUser')} relationship="label">
           <span 
-            className={`${styles.badge} ${isLargeAvatar ? styles.badgeLarge : ''}`}
+            className={isLargeAvatar ? `${styles.badge} ${styles.badgeLarge}` : styles.badge}
             role="img"
             aria-label={t('logoutDialog.proUser')}
           >
