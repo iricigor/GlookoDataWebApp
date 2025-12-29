@@ -17,9 +17,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useProUserCheck } from '../hooks/useProUserCheck';
-import { useUnifiedAdminStats } from '../hooks/useUnifiedAdminStats';
+import { useAdminStats } from '../hooks/useAdminStats';
+import { useAdminApiStats } from '../hooks/useAdminApiStats';
 import { testProAIKey, type TestAIType } from '../utils/api/adminTestAIApi';
-import type { TimePeriod } from '../utils/api/adminStatsUnifiedApi';
+import type { TimePeriod } from '../utils/api/adminApiStatsApi';
 
 /**
  * Default AI API Key secret name in Key Vault
@@ -252,18 +253,22 @@ export function Admin() {
   const { isLoggedIn, idToken } = useAuth();
   const { isProUser, hasChecked } = useProUserCheck(isLoggedIn ? idToken : null);
   
-  // Fetch unified admin statistics (user counts + API/Web stats) in a single call
+  // Fetch admin statistics only if user is a Pro user
+  const { loggedInUsersCount, proUsersCount, isLoading: isLoadingStats } = useAdminStats(
+    isLoggedIn && isProUser ? idToken : null,
+    isLoggedIn && isProUser
+  );
+
+  // Fetch API and web traffic statistics with time period selection
   const { 
-    loggedInUsersCount,
-    proUsersCount,
     webCalls, 
     webErrors, 
     apiCalls, 
     apiErrors, 
     timePeriod,
     setTimePeriod,
-    isLoading: isLoadingStats 
-  } = useUnifiedAdminStats(
+    isLoading: isLoadingApiStats 
+  } = useAdminApiStats(
     isLoggedIn && isProUser ? idToken : null,
     isLoggedIn && isProUser
   );
@@ -496,7 +501,7 @@ export function Admin() {
                   <CheckmarkCircleRegular />
                 </div>
                 <Text className={styles.statValue}>
-                  {formatStatValue(webCalls, isLoadingStats)}
+                  {formatStatValue(webCalls, isLoadingApiStats)}
                 </Text>
                 <Text className={styles.statLabel}>
                   {t('admin.statistics.webCalls')}
@@ -510,7 +515,7 @@ export function Admin() {
                   <ErrorCircleRegular />
                 </div>
                 <Text className={styles.statValue}>
-                  {formatStatValue(webErrors, isLoadingStats)}
+                  {formatStatValue(webErrors, isLoadingApiStats)}
                 </Text>
                 <Text className={styles.statLabel}>
                   {t('admin.statistics.webErrors')}
@@ -524,7 +529,7 @@ export function Admin() {
                   <CheckmarkCircleRegular />
                 </div>
                 <Text className={styles.statValue}>
-                  {formatStatValue(apiCalls, isLoadingStats)}
+                  {formatStatValue(apiCalls, isLoadingApiStats)}
                 </Text>
                 <Text className={styles.statLabel}>
                   {t('admin.statistics.apiCalls')}
@@ -538,7 +543,7 @@ export function Admin() {
                   <ErrorCircleRegular />
                 </div>
                 <Text className={styles.statValue}>
-                  {formatStatValue(apiErrors, isLoadingStats)}
+                  {formatStatValue(apiErrors, isLoadingApiStats)}
                 </Text>
                 <Text className={styles.statLabel}>
                   {t('admin.statistics.apiErrors')}

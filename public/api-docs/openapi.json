@@ -592,6 +592,140 @@
         }
       }
     },
+    "/glookoAdmin/stats/traffic": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get API and web traffic statistics",
+        "description": "Returns API and web traffic statistics from Application Insights for the specified time period. This endpoint is only accessible to Pro users and provides counts of web requests, web errors, API requests, and API errors.",
+        "operationId": "getTrafficStats",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "timePeriod",
+            "in": "query",
+            "description": "Time period for statistics",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["1hour", "1day"],
+              "default": "1hour"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved traffic statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrafficStatsResponse"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "Successful statistics retrieval",
+                    "value": {
+                      "webCalls": 8642,
+                      "webErrors": 23,
+                      "apiCalls": 1245,
+                      "apiErrors": 5,
+                      "timePeriod": "1hour"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid timePeriod parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Invalid timePeriod parameter: invalid. Supported values: 1hour, 1day",
+                  "errorType": "validation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized access. Please log in again.",
+                  "errorType": "unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User is not a Pro user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Access denied. This endpoint requires Pro user access.",
+                  "errorType": "authorization"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Internal server error",
+                  "errorType": "infrastructure"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - Application Insights not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "appInsightsNotConfigured": {
+                    "summary": "Application Insights not configured",
+                    "value": {
+                      "error": "Service unavailable - Application Insights not configured",
+                      "errorType": "infrastructure",
+                      "code": "APPINSIGHTS_NOT_CONFIGURED"
+                    }
+                  },
+                  "appInsightsQueryError": {
+                    "summary": "Application Insights query error",
+                    "value": {
+                      "error": "Failed to query Application Insights",
+                      "errorType": "infrastructure",
+                      "code": "APPINSIGHTS_QUERY_ERROR"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/glookoAdmin/stats": {
       "get": {
         "tags": ["Admin"],
@@ -1241,6 +1375,38 @@
             "type": "boolean",
             "description": "Whether the count was capped at the maximum limit (100,000). If true, actual count may be higher.",
             "example": false
+          }
+        }
+      },
+      "TrafficStatsResponse": {
+        "type": "object",
+        "required": ["webCalls", "webErrors", "apiCalls", "apiErrors", "timePeriod"],
+        "properties": {
+          "webCalls": {
+            "type": "integer",
+            "description": "Number of web requests (non-API) in the specified time period",
+            "example": 8642
+          },
+          "webErrors": {
+            "type": "integer",
+            "description": "Number of web request errors in the specified time period",
+            "example": 23
+          },
+          "apiCalls": {
+            "type": "integer",
+            "description": "Number of API requests in the specified time period",
+            "example": 1245
+          },
+          "apiErrors": {
+            "type": "integer",
+            "description": "Number of API request errors in the specified time period",
+            "example": 5
+          },
+          "timePeriod": {
+            "type": "string",
+            "enum": ["1hour", "1day"],
+            "description": "Time period for the statistics",
+            "example": "1hour"
           }
         }
       },

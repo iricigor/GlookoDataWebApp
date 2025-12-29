@@ -1,7 +1,7 @@
 /**
- * Admin API Statistics API client for Azure Functions
+ * Admin Traffic Statistics API client for Azure Functions
  * 
- * This module provides an API client for fetching API call and error statistics
+ * This module provides an API client for fetching API and web traffic statistics
  * from Application Insights via the Azure Function backend. 
  * Access requires Pro user authentication.
  */
@@ -56,7 +56,7 @@ const defaultConfig: AdminApiStatsApiConfig = {
 };
 
 /**
- * Fetch API call and error statistics
+ * Fetch API and web traffic statistics
  * 
  * This function calls the Azure Function to query Application Insights for
  * API call and error statistics over the specified time period.
@@ -72,7 +72,7 @@ export async function getApiStats(
   timePeriod: TimePeriod = '1hour',
   config: AdminApiStatsApiConfig = defaultConfig
 ): Promise<ApiStatsResult> {
-  const endpoint = `${config.baseUrl}/glookoAdmin/stats/api?timePeriod=${timePeriod}`;
+  const endpoint = `${config.baseUrl}/glookoAdmin/stats/traffic?timePeriod=${timePeriod}`;
   const apiLogger = createApiLogger(endpoint);
   
   // Validate ID token
