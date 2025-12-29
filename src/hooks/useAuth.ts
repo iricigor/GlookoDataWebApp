@@ -258,10 +258,16 @@ export function useAuth() {
   }, []);
 
   /**
-   * Decodes a base64url-encoded string (JWT payload)
+   * Decodes a base64url-encoded string (JWT payload) with proper UTF-8 handling
+   * 
+   * atob() doesn't handle UTF-8 properly (only works with ASCII/Latin1).
+   * For UTF-8 characters like "Irić", we need to:
+   * 1. Decode base64 to binary string
+   * 2. Convert binary string to byte array
+   * 3. Decode byte array as UTF-8
    * 
    * @param base64url - Base64url-encoded string
-   * @returns Decoded string
+   * @returns Decoded UTF-8 string
    */
   const decodeBase64Url = (base64url: string): string => {
     // Convert base64url to standard base64
@@ -275,7 +281,17 @@ export function useAuth() {
       base64 += '=';
     }
     
-    return atob(base64);
+    // Decode base64 to binary string (Latin1/ASCII)
+    const binaryString = atob(base64);
+    
+    // Convert binary string to byte array
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    
+    // Decode byte array as UTF-8
+    return new TextDecoder('utf-8').decode(bytes);
   };
 
   /**

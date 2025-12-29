@@ -45,6 +45,19 @@ export function getExpectedAudiences(): string[] {
 const MS_JWKS_URI = 'https://login.microsoftonline.com/common/discovery/v2.0/keys';
 
 /**
+ * Google OAuth JWKS endpoint for key rotation.
+ * This endpoint provides the public keys used to verify Google ID token signatures.
+ * See: https://developers.google.com/identity/protocols/oauth2/openid-connect#discovery
+ */
+const GOOGLE_JWKS_URI = 'https://www.googleapis.com/oauth2/v3/certs';
+
+/**
+ * Google OAuth Client ID (from environment variable or empty string)
+ * Used for validating Google ID tokens
+ */
+const GOOGLE_CLIENT_ID = process.env.VITE_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID || '';
+
+/**
  * JWKS client for fetching Microsoft identity platform public keys.
  * Uses caching to minimize requests to the JWKS endpoint.
  */
@@ -57,17 +70,34 @@ const jwksClientInstance = jwksClient({
 });
 
 /**
- * Get the signing key from the JWKS endpoint based on the key ID in the JWT header.
+ * JWKS client for fetching Google OAuth public keys.
+ * Uses caching to minimize requests to the JWKS endpoint.
+ */
+const googleJwksClientInstance = jwksClient({
+  jwksUri: GOOGLE_JWKS_URI,
+  cache: true,
+  cacheMaxAge: 600000, // 10 minutes
+  rateLimit: true,
+  jwksRequestsPerMinute: 10,
+});
+
+/**
+ * Get the signing key from the appropriate JWKS endpoint based on the token issuer.
  * 
  * @param header - The JWT header containing the kid (key ID)
+ * @param issuer - The token issuer to determine which JWKS endpoint to use
  * @returns Promise resolving to the public key string
  */
-async function getSigningKey(header: jwt.JwtHeader): Promise<string> {
+async function getSigningKey(header: jwt.JwtHeader, issuer?: string): Promise<string> {
   if (!header.kid) {
     throw new Error('JWT header missing kid (key ID)');
   }
   
-  const key = await jwksClientInstance.getSigningKey(header.kid);
+  // Use Google JWKS endpoint if issuer is from Google
+  const isGoogleToken = issuer?.includes('accounts.google.com');
+  const client = isGoogleToken ? googleJwksClientInstance : jwksClientInstance;
+  
+  const key = await client.getSigningKey(header.kid);
   return key.getPublicKey();
 }
 
@@ -80,6 +110,15 @@ async function getSigningKey(header: jwt.JwtHeader): Promise<string> {
 const VALID_ISSUER_PATTERNS = [
   'https://login.microsoftonline.com/{tenantid}/v2.0',
   'https://sts.windows.net/{tenantid}/',
+];
+
+/**
+ * Valid issuers for Google OAuth tokens.
+ * Google ID tokens can have either of these issuers.
+ */
+const VALID_GOOGLE_ISSUERS = [
+  'https://accounts.google.com',
+  'accounts.google.com',
 ];
 
 /**
@@ -102,16 +141,22 @@ interface TokenClaims {
 }
 
 /**
- * Validate the issuer claim against expected Microsoft identity platform issuers.
+ * Validate the issuer claim against expected Microsoft or Google identity platform issuers.
  * 
  * The issuer (iss) claim in Microsoft tokens contains the tenant ID.
- * We validate that the issuer matches one of Microsoft's known patterns.
+ * We validate that the issuer matches one of Microsoft's or Google's known patterns.
  * 
  * @param issuer - The issuer claim from the token
- * @param tenantId - The tenant ID from the token (required for proper validation)
+ * @param tenantId - The tenant ID from the token (required for Microsoft tokens)
  * @returns True if the issuer is valid
  */
 function validateIssuer(issuer: string, tenantId?: string): boolean {
+  // Check if it's a Google token
+  if (VALID_GOOGLE_ISSUERS.includes(issuer)) {
+    return true;
+  }
+  
+  // Otherwise, validate as Microsoft token
   // If no tenant ID is provided in the token, we can't validate the issuer properly
   // Accept consumer tenant as fallback for personal Microsoft accounts
   const tid = tenantId || CONSUMER_TENANT_ID;
@@ -139,6 +184,19 @@ function validateIssuer(issuer: string, tenantId?: string): boolean {
  * @param context - The invocation context for logging
  * @returns Promise resolving to the verified token claims or null if invalid
  */
+/**
+ * Validate and decode a JWT token from the Authorization header.
+ * 
+ * This is a shared helper function that provides production-ready JWT validation:
+ * - Cryptographic signature verification using Microsoft's or Google's JWKS endpoint
+ * - Audience validation to ensure the token is intended for this application
+ * - Issuer validation to ensure the token comes from Microsoft or Google identity platform
+ * - Expiration validation to reject expired tokens
+ * 
+ * @param authHeader - The Authorization header value (Bearer token)
+ * @param context - The invocation context for logging
+ * @returns Promise resolving to the verified token claims or null if invalid
+ */
 async function validateAndDecodeToken(authHeader: string | null, context: InvocationContext): Promise<TokenClaims | null> {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     context.warn('Missing or invalid Authorization header format');
@@ -148,40 +206,58 @@ async function validateAndDecodeToken(authHeader: string | null, context: Invoca
   const token = authHeader.substring(7);
   
   try {
-    // Decode the header to get the key ID
+    // Decode the token to get header and payload (without verification)
     const decodedToken = jwt.decode(token, { complete: true });
     if (!decodedToken || typeof decodedToken === 'string') {
       context.warn('Failed to decode JWT token');
       return null;
     }
 
-    // Get the public key from Microsoft's JWKS endpoint
-    const publicKey = await getSigningKey(decodedToken.header);
+    // Extract issuer to determine token type
+    const payload = decodedToken.payload as TokenClaims;
+    const issuer = payload.iss;
     
-    // Verify the token signature and decode the payload
-    const expectedAudiences = getExpectedAudiences();
-    // Ensure audience is never empty - jsonwebtoken requires string or non-empty array
-    if (expectedAudiences.length === 0) {
-      context.warn('No expected audiences configured');
-      return null;
-    }
-    // Use single string for one audience, or cast to tuple for multiple
-    const audience: string | [string, ...string[]] = expectedAudiences.length === 1 
-      ? expectedAudiences[0] 
-      : [expectedAudiences[0], ...expectedAudiences.slice(1)];
-    const verifiedPayload = jwt.verify(token, publicKey, {
-      algorithms: ['RS256'], // Microsoft uses RS256 for ID tokens
-      audience: audience,
-      clockTolerance: 60, // Allow 60 seconds of clock skew
-    }) as TokenClaims;
-
-    // Validate issuer
-    if (!verifiedPayload.iss) {
+    if (!issuer) {
       context.warn('Token missing issuer (iss) claim');
       return null;
     }
 
-    if (!validateIssuer(verifiedPayload.iss, verifiedPayload.tid)) {
+    // Determine if this is a Google or Microsoft token
+    const isGoogleToken = VALID_GOOGLE_ISSUERS.includes(issuer);
+    
+    // Get the public key from the appropriate JWKS endpoint
+    const publicKey = await getSigningKey(decodedToken.header, issuer);
+    
+    // Determine expected audience based on token type
+    let expectedAudience: string | [string, ...string[]];
+    if (isGoogleToken) {
+      // Google tokens should have the Google Client ID as audience
+      if (!GOOGLE_CLIENT_ID) {
+        context.warn('Google Client ID not configured');
+        return null;
+      }
+      expectedAudience = GOOGLE_CLIENT_ID;
+    } else {
+      // Microsoft tokens should have the Azure AD Client ID as audience
+      const expectedAudiences = getExpectedAudiences();
+      if (expectedAudiences.length === 0) {
+        context.warn('No expected audiences configured for Microsoft tokens');
+        return null;
+      }
+      expectedAudience = expectedAudiences.length === 1 
+        ? expectedAudiences[0] 
+        : [expectedAudiences[0], ...expectedAudiences.slice(1)];
+    }
+    
+    // Verify the token signature and decode the payload
+    const verifiedPayload = jwt.verify(token, publicKey, {
+      algorithms: ['RS256'], // Both Microsoft and Google use RS256 for ID tokens
+      audience: expectedAudience,
+      clockTolerance: 60, // Allow 60 seconds of clock skew
+    }) as TokenClaims;
+
+    // Validate issuer
+    if (!validateIssuer(verifiedPayload.iss!, verifiedPayload.tid)) {
       context.warn(`Invalid token issuer: ${verifiedPayload.iss}`);
       return null;
     }
