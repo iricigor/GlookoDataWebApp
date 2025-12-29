@@ -61,7 +61,7 @@ const GOOGLE_JWKS_URI = 'https://www.googleapis.com/oauth2/v3/certs';
  * @param value - The environment variable value to check
  * @returns True if the value is an unresolved Key Vault reference
  */
-function isUnresolvedKeyVaultReference(value: string | undefined): boolean {
+export function isUnresolvedKeyVaultReference(value: string | undefined): boolean {
   return !!value && value.startsWith('@Microsoft.KeyVault(');
 }
 
@@ -88,7 +88,11 @@ if (isUnresolvedKeyVaultReference(GOOGLE_CLIENT_ID_RAW)) {
     '  1. Enable system-assigned or user-assigned managed identity on the Function App\n' +
     '  2. Grant the managed identity "Key Vault Secrets User" role on the Key Vault:\n' +
     '     Run: Set-GlookoKeyVault -AssignIdentity\n' +
-    '  3. Restart the Function App to apply changes\n' +
+    '  3. RESTART the Function App to apply changes (environment variables are loaded only at startup)\n' +
+    '     Azure Portal → Function App → Overview → Restart\n' +
+    '\n' +
+    'Note: Environment variables are cached at Function App startup. After fixing permissions,\n' +
+    'the Function App must be restarted for Azure to re-resolve the Key Vault reference.\n' +
     '\n' +
     'See: https://learn.microsoft.com/en-us/azure/app-service/app-service-key-vault-references'
   );

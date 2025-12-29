@@ -26,17 +26,7 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { createRequestLogger } from "../utils/logger";
-
-/**
- * Check if a value is an unresolved Azure Key Vault reference.
- * Key Vault references have the format: @Microsoft.KeyVault(SecretUri=https://...)
- * 
- * @param value - The environment variable value to check
- * @returns True if the value is an unresolved Key Vault reference
- */
-function isUnresolvedKeyVaultReference(value: string | undefined): boolean {
-  return !!value && value.startsWith('@Microsoft.KeyVault(');
-}
+import { isUnresolvedKeyVaultReference } from "../utils/azureUtils";
 
 interface TokenExchangeRequest {
   code: string;
