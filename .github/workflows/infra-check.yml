@@ -1,0 +1,193 @@
+# Infrastructure Check - What-If Analysis (The Watchman)
+# This workflow validates Bicep infrastructure changes using Azure what-if analysis.
+# It runs on PRs that modify infrastructure files and posts the results as a comment.
+# This is a read-only check - it does NOT deploy any changes.
+
+name: 🔍 Infrastructure Check
+
+on:
+  pull_request:
+    paths:
+      - 'infra/**/*.bicep'
+      - 'infra/**/*.bicepparam'
+      - 'infra/*.sh'
+      - '.github/workflows/infra-check.yml'
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write      # Required for OIDC authentication
+  contents: read       # Required to checkout code
+  pull-requests: write # Required to post PR comments
+
+jobs:
+  what-if-analysis:
+    name: Azure What-If Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ✅ Validate Bicep syntax
+        id: validate
+        working-directory: infra
+        run: |
+          echo "### 🔍 Bicep Validation" >> $GITHUB_STEP_SUMMARY
+          
+          # Validate main template
+          echo "Validating main.bicep..."
+          az bicep build --file main.bicep
+          
+          # Validate parameter files
+          echo "Validating parameter files..."
+          az bicep build-params --file parameters.current.bicepparam
+          az bicep build-params --file parameters.generic.bicepparam
+          
+          echo "✅ All Bicep files are valid" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🔎 Run What-If Analysis
+        id: whatif
+        working-directory: infra
+        continue-on-error: true
+        run: |
+          echo "### 🔎 Azure What-If Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "Running what-if analysis against resource group: Glooko" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Run what-if and capture output
+          az deployment group what-if \
+            --resource-group Glooko \
+            --template-file main.bicep \
+            --parameters parameters.current.bicepparam \
+            --no-pretty-print \
+            > whatif-output.txt 2>&1 || true
+          
+          # Display results
+          cat whatif-output.txt
+          
+          # Save for PR comment
+          echo "WHATIF_OUTPUT<<EOF" >> $GITHUB_ENV
+          cat whatif-output.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: 📊 Analyze What-If Results
+        id: analyze
+        run: |
+          cd infra
+          
+          # Check for critical issues
+          if grep -q "Error:" whatif-output.txt; then
+            echo "status=error" >> $GITHUB_OUTPUT
+            echo "emoji=❌" >> $GITHUB_OUTPUT
+            echo "title=What-If Analysis Failed" >> $GITHUB_OUTPUT
+          elif grep -q "Resource and property changes are indicated with this symbol:" whatif-output.txt; then
+            # Check for destructive operations
+            if grep -q "^\s*-\s*Microsoft\." whatif-output.txt || grep -q "Delete" whatif-output.txt; then
+              echo "status=warning" >> $GITHUB_OUTPUT
+              echo "emoji=⚠️" >> $GITHUB_OUTPUT
+              echo "title=What-If Analysis - Destructive Changes Detected" >> $GITHUB_OUTPUT
+            else
+              echo "status=success" >> $GITHUB_OUTPUT
+              echo "emoji=✅" >> $GITHUB_OUTPUT
+              echo "title=What-If Analysis - Changes Detected" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "emoji=✅" >> $GITHUB_OUTPUT
+            echo "title=What-If Analysis - No Changes" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 💬 Post PR Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const whatifOutput = fs.readFileSync('infra/whatif-output.txt', 'utf8');
+            const status = '${{ steps.analyze.outputs.status }}';
+            const emoji = '${{ steps.analyze.outputs.emoji }}';
+            const title = '${{ steps.analyze.outputs.title }}';
+            
+            // Format the comment
+            let comment = `## ${emoji} ${title}\n\n`;
+            
+            if (status === 'error') {
+              comment += '**The what-if analysis encountered an error. Please review the logs below.**\n\n';
+            } else if (status === 'warning') {
+              comment += '**⚠️ WARNING: Destructive changes detected!**\n';
+              comment += 'This deployment would **delete** or **modify** existing resources.\n';
+              comment += 'Please review the changes carefully before merging.\n\n';
+            } else {
+              comment += 'The infrastructure changes have been validated successfully.\n\n';
+            }
+            
+            comment += '<details>\n';
+            comment += '<summary>📋 What-If Analysis Results</summary>\n\n';
+            comment += '```\n';
+            comment += whatifOutput;
+            comment += '\n```\n';
+            comment += '</details>\n\n';
+            
+            comment += '---\n';
+            comment += '*This is a read-only check. No resources were created or modified.*\n';
+            comment += `*Workflow run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Infrastructure Check')
+            );
+            
+            // Create or update comment
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+
+      - name: 🎯 Job Summary
+        if: always()
+        run: |
+          echo "## Infrastructure Check Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ steps.analyze.outputs.emoji }} ${{ steps.analyze.outputs.title }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.analyze.outputs.status }}" = "error" ]; then
+            echo "⚠️ **Action Required:** The what-if analysis failed. Please check the logs and fix the Bicep templates." >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.analyze.outputs.status }}" = "warning" ]; then
+            echo "⚠️ **Action Required:** Destructive changes detected. Review carefully before deploying." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **All Clear:** Infrastructure changes validated successfully." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📚 Resources" >> $GITHUB_STEP_SUMMARY
+          echo "- [Infrastructure Documentation](https://github.com/${{ github.repository }}/tree/main/infra)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Expected What-If Results](https://github.com/${{ github.repository }}/blob/main/infra/EXPECTED_WHAT_IF.md)" >> $GITHUB_STEP_SUMMARY
+          echo "- [User Guide](https://github.com/${{ github.repository }}/blob/main/infra/USER_GUIDE.md)" >> $GITHUB_STEP_SUMMARY
