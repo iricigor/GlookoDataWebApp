@@ -1,14 +1,14 @@
 {
   "apiDocs": {
     "title": "Glooko Insights - API-Dokumentation",
-    "subtitle": "Interaktiver API-Explorer mit Microsoft-Authentifizierung",
+    "subtitle": "Interaktiver API-Explorer mit Authentifizierung",
     "adminPageLink": "Admin-Seite",
     "version": "Version: {{version}}",
     "proUserBadge": "Pro-Benutzer",
     "tokenActive": "Token aktiv",
     "signOut": "Abmelden",
     "signInPrompt": "Melden Sie sich an, um authentifizierte Endpunkte zu testen",
-    "signInButton": "Mit Microsoft anmelden",
+    "signInButton": "Anmelden",
     "signInMessage": "Melden Sie sich mit Ihrem Microsoft-Konto an, um API-Endpunkte zu testen. Ihr Authentifizierungstoken wird automatisch zu den Anfragen hinzugefügt.",
     "initializingAuth": "Authentifizierung wird initialisiert...",
     "loadingDocs": "API-Dokumentation wird geladen...",

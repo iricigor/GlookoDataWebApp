@@ -1,14 +1,14 @@
 {
   "apiDocs": {
     "title": "Glooko Insights - API dokumentacija",
-    "subtitle": "Interaktivni API istraživač sa Microsoft autentifikacijom",
+    "subtitle": "Interaktivni API istraživač sa autentifikacijom",
     "adminPageLink": "Admin stranica",
     "version": "Verzija: {{version}}",
     "proUserBadge": "Pro korisnik",
     "tokenActive": "Token aktivan",
     "signOut": "Odjavi se",
     "signInPrompt": "Prijavite se da testirate autentifikovane krajnje tačke",
-    "signInButton": "Prijavite se sa Microsoft-om",
+    "signInButton": "Prijavite se",
     "signInMessage": "Prijavite se sa Vašim Microsoft nalogom da testirate API krajnje tačke. Vaš token za autentifikaciju će biti automatski dodat zahtevima.",
     "initializingAuth": "Inicijalizacija autentifikacije...",
     "loadingDocs": "Učitavanje API dokumentacije...",
