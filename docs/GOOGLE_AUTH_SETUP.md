@@ -168,7 +168,7 @@ This typically means:
 ### "Invalid client ID" error
 
 **Solution**: Check that:
-1. The `AUTH_GOOGLE_CLIENT_ID` environment variable is set correctly
+1. The `VITE_GOOGLE_CLIENT_ID` environment variable is set correctly
 2. The client ID matches the one from Google Cloud Console
 3. You've restarted the development server after setting the environment variable
 
