@@ -29,6 +29,13 @@ Version 1.7 focuses on maintenance updates and bug fixes.
 ### Other
 
 <details>
+<summary>928 Preserve existing Azure resource tags to eliminate what-if deltas</summary>
+
+[#928](../../pull/928) Preserve existing Azure resource tags to eliminate what-if deltas
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>924 Add /stats/traffic endpoint and improve Admin page layout</summary>
 
 [#924](../../pull/924) Add /stats/traffic endpoint and improve Admin page layout
