@@ -104,8 +104,10 @@ export function TimeInRangeDetailsCard({}: TimeInRangeDetailsCardProps) {
       );
       
       if (!geminiResponse.ok) {
+        // Log full error for debugging, show generic message to user
         const errorText = await geminiResponse.text();
-        setError(`Gemini API error: ${geminiResponse.status} - ${errorText}`);
+        console.error('Gemini API error:', geminiResponse.status, errorText);
+        setError('AI analysis failed. Please try again later.');
         setIsAnalyzing(false);
         return;
       }
