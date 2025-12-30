@@ -99,7 +99,7 @@ Pro access is granted on a case-by-case basis. To apply:
 - `GET /api/user/check-pro-status` - Verify Pro user status
 - `GET /api/stats/logged-in-users` - Get user counts
 - `GET /api/stats/traffic` - Get traffic statistics
-- `POST /api/glookoAdmin/test-ai-key` - Test AI configuration
+- `POST /api/ai/test-ai-key` - Test AI configuration
 
 ### Translations
 All text is localized using the `admin` namespace:
