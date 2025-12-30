@@ -7,6 +7,27 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      # Source code and tests
+      - 'src/**'
+      # Public assets (translations, etc.)
+      - 'public/**'
+      # API backend code
+      - 'api/**'
+      # Configuration files
+      - '*.config.ts'
+      - '*.config.js'
+      - 'eslint.config.js'
+      - 'vite.config.ts'
+      - 'vitest.config.ts'
+      - 'playwright.config.ts'
+      # TypeScript configuration
+      - 'tsconfig*.json'
+      # Dependencies
+      - 'package.json'
+      - 'package-lock.json'
+      # Test workflow itself
+      - '.github/workflows/test.yml'
   workflow_dispatch:
 
 jobs:
