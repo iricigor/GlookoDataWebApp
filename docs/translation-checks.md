@@ -342,7 +342,7 @@ Potential improvements to the translation check system:
 
 - [i18next Namespace Design](i18n-namespace-design.md)
 - [Contributing Guide](../CONTRIBUTING.md) - Localization section
-- [Localization Summary](../LOCALIZATION_SUMMARY.md)
+- [Localization Summary](summaries/LOCALIZATION_SUMMARY.md)
 
 ---
 

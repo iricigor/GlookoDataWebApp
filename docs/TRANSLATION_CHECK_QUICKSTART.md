@@ -141,9 +141,9 @@ Looks for potential hardcoded UI text that should use i18n:
 
 ## More Information
 
-- **Full Documentation:** [docs/translation-checks.md](docs/translation-checks.md)
-- **Contributing Guide:** [CONTRIBUTING.md](CONTRIBUTING.md#-localization-and-i18next)
-- **Localization Summary:** [LOCALIZATION_SUMMARY.md](LOCALIZATION_SUMMARY.md)
+- **Full Documentation:** [docs/translation-checks.md](translation-checks.md)
+- **Contributing Guide:** [CONTRIBUTING.md](../CONTRIBUTING.md#-localization-and-i18next)
+- **Localization Summary:** [summaries/LOCALIZATION_SUMMARY.md](summaries/LOCALIZATION_SUMMARY.md)
 
 ## Support
 

@@ -7,24 +7,20 @@ The `startAISession` endpoint enables Pro users to interact with Gemini AI while
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant Frontend
+    participant UserFrontend as User/Frontend
     participant Backend as Backend API<br/>/api/ai/start-session
-    participant Gemini as Gemini AI
+    participant AI as Gemini AI
 
-    User->>Frontend: Click "Analyze with AI"
-    Frontend->>Backend: POST /api/ai/start-session<br/>{testData}
+    UserFrontend->>Backend: Click "Analyze with AI"<br/>POST /api/ai/start-session
     Backend->>Backend: Validate Pro user
-    Backend->>Gemini: Generate ephemeral token
-    Gemini-->>Backend: {token, expiresAt}
-    Backend->>Gemini: Send initial prompt
-    Gemini-->>Backend: Initial AI response
-    Backend-->>Frontend: {token, expiresAt, initialResponse}
-    Frontend->>User: Display initial response
+    Backend->>AI: Generate ephemeral token<br/>Send initial prompt
+    AI-->>Backend: {token, expiresAt, initialResponse}
+    Backend-->>UserFrontend: {token, expiresAt, initialResponse}
+    UserFrontend->>UserFrontend: Display initial response
     
-    Frontend->>Gemini: POST with additional data<br/>Headers: x-goog-api-key: ephemeralToken
-    Gemini-->>Frontend: Additional AI response
-    Frontend->>User: Display additional response
+    UserFrontend->>AI: POST with additional data
+    AI-->>UserFrontend: Additional AI response
+    UserFrontend->>UserFrontend: Display additional response
 ```
 
 ## Architecture
