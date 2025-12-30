@@ -334,3 +334,16 @@ export interface UserSettingsRecord {
   /** Compact JSON settings data */
   settings: CloudUserSettings;
 }
+
+/**
+ * Gemini ephemeral token response from Azure Function
+ * Used for secure client-side access to Gemini Multimodal Live API
+ */
+export interface IGeminiTokenResponse {
+  /** Ephemeral access token name (use as authentication for WebSocket) */
+  token: string;
+  /** Token expiration timestamp (ISO 8601 format) */
+  expiresAt: string;
+  /** Success status */
+  success: boolean;
+}
