@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>946 Add path filters to skip unit tests on documentation-only PRs</summary>
+
+[#946](../../pull/946) Add path filters to skip unit tests on documentation-only PRs
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>944 Implement GetGeminiToken Azure Function for ephemeral access tokens</summary>
 
 [#944](../../pull/944) Implement GetGeminiToken Azure Function for ephemeral access tokens
