@@ -21,7 +21,6 @@ import { useTranslation } from 'react-i18next';
 import { useBGOverviewStyles } from './styles';
 import { useAuth } from '../../hooks/useAuth';
 import { startAISession } from '../../utils/api/startAISessionApi';
-import { callBackendAI } from '../../utils/api/backendAIApi';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface TimeInRangeDetailsCardProps {
@@ -52,7 +51,7 @@ export function TimeInRangeDetailsCard({}: TimeInRangeDetailsCardProps) {
     setAiResponse('');
     
     try {
-      // Step 1: Start AI session with test data
+      // Step 1: Start AI session - backend sends initial prompt to Gemini and returns ephemeral token
       const testData = `Readings in range: ${mockReadingsInRange}`;
       const sessionResult = await startAISession(idToken, testData);
       
@@ -62,24 +61,62 @@ export function TimeInRangeDetailsCard({}: TimeInRangeDetailsCardProps) {
         return;
       }
       
-      // Step 2: Send additional data to AI using the backend AI endpoint
-      // Combine the initial prompt from the session with additional context
-      const followUpPrompt = [
-        sessionResult.initialPrompt,
-        '',
-        'Based on the test data provided, please analyze the Time in Range statistics and provide a brief summary.',
-      ].join('\n');
+      // Display the initial AI response from the backend
+      if (sessionResult.initialResponse) {
+        setAiResponse(sessionResult.initialResponse);
+      }
       
-      const aiResult = await callBackendAI(idToken, followUpPrompt);
-      
-      if (!aiResult.success) {
-        setError(aiResult.error || 'Failed to get AI response');
+      // Ensure we have a token before proceeding
+      if (!sessionResult.token) {
+        setError('No token received from session');
         setIsAnalyzing(false);
         return;
       }
       
-      // Step 3: Display the response
-      setAiResponse(aiResult.content || '');
+      // Step 2: Send additional data directly to Gemini AI using the ephemeral token
+      // This bypasses our backend and goes straight to Gemini
+      const additionalPrompt = 'Based on the test data provided, please analyze the Time in Range statistics and provide a brief summary.';
+      
+      const geminiResponse = await fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': sessionResult.token,
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: additionalPrompt,
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.2,
+              maxOutputTokens: 4000,
+            },
+          }),
+        }
+      );
+      
+      if (!geminiResponse.ok) {
+        const errorText = await geminiResponse.text();
+        setError(`Gemini API error: ${geminiResponse.status} - ${errorText}`);
+        setIsAnalyzing(false);
+        return;
+      }
+      
+      const geminiData = await geminiResponse.json();
+      const additionalResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (additionalResponse) {
+        // Append additional response to the initial response
+        setAiResponse(prev => `${prev}\n\n--- Additional Analysis ---\n${additionalResponse}`);
+      }
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');

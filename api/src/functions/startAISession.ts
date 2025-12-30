@@ -1,8 +1,16 @@
 /**
  * Start AI Session Azure Function
  * 
- * This function initiates an AI session with a test prompt and returns a temporary token
- * for the frontend to continue the conversation. It's designed for testing the full AI flow.
+ * This function initiates an AI session with Gemini by sending a test prompt and returns 
+ * an ephemeral token for the frontend to send additional data directly to Gemini AI.
+ * 
+ * Flow:
+ * 1. Validates Pro user
+ * 2. Gets Gemini API key from Key Vault
+ * 3. Generates ephemeral Gemini token
+ * 4. Sends initial prompt to Gemini AI
+ * 5. Returns ephemeral token + initial response to frontend
+ * 6. Frontend uses token to send additional data directly to Gemini
  * 
  * POST /api/ai/start-session
  * 
@@ -16,14 +24,14 @@
  *   }
  * 
  * Response:
- *   - 200 OK: { success: true, token: string, sessionId: string, initialPrompt: string }
+ *   - 200 OK: { success: true, token: string, expiresAt: string, initialResponse: string }
  *   - 401 Unauthorized: Invalid or missing token
  *   - 403 Forbidden: Not a Pro user
  *   - 500 Internal Server Error: Infrastructure error
  */
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import { extractUserInfoFromToken, getTableClient, isNotFoundError } from "../utils/azureUtils";
+import { extractUserInfoFromToken, getTableClient, isNotFoundError, getSecretFromKeyVault } from "../utils/azureUtils";
 import { createRequestLogger } from "../utils/logger";
 import { AI_SYSTEM_PROMPT } from "../utils/aiPrompts";
 
@@ -40,9 +48,36 @@ interface StartAISessionRequest {
 interface StartAISessionResponse {
   success: boolean;
   token: string;
-  sessionId: string;
-  initialPrompt: string;
+  expiresAt: string;
+  initialResponse: string;
 }
+
+/**
+ * Gemini ephemeral token API response
+ */
+interface GeminiTokenApiResponse {
+  name: string;
+  expireTime: string;
+  newSessionExpireTime: string;
+}
+
+/**
+ * Gemini API response structure
+ */
+interface GeminiResponse {
+  candidates: Array<{
+    content: {
+      parts: Array<{
+        text: string;
+      }>;
+    };
+  }>;
+}
+
+/**
+ * Default Gemini API Key secret name in Key Vault
+ */
+const DEFAULT_GEMINI_API_KEY_SECRET = 'AI-API-Key';
 
 /**
  * URL-encode a string for use as RowKey
@@ -68,30 +103,90 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
 }
 
 /**
- * Generate a simple temporary token for testing
+ * Generate ephemeral access token for Gemini API
  * 
- * NOTE: This is a TESTING implementation only. The token is a simple base64-encoded
- * string without cryptographic signing. For production use, this should be replaced
- * with a proper JWT or secure session token with expiration and validation.
- * 
- * In production, consider:
- * - Using jsonwebtoken library for proper JWT creation
- * - Adding expiration time (e.g., 1 hour)
- * - Including user permissions/scopes
- * - Cryptographic signing with a secret key
- * - Token refresh mechanism
+ * @param apiKey - The Gemini API key from Key Vault
+ * @returns Ephemeral token response with token name and expiration
  */
-function generateTemporaryToken(userId: string, sessionId: string): string {
-  const timestamp = Date.now();
-  const tokenData = `${userId}:${sessionId}:${timestamp}`;
-  return Buffer.from(tokenData).toString('base64');
+async function generateEphemeralToken(apiKey: string): Promise<{ token: string; expiresAt: string }> {
+  const now = new Date();
+  const expireTime = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutes from now
+  const newSessionExpireTime = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes to start session
+
+  const response = await fetch('https://generativelanguage.googleapis.com/v1/authTokens:create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey,
+    },
+    body: JSON.stringify({
+      uses: 1, // Single-use token for security
+      expireTime: expireTime.toISOString(),
+      newSessionExpireTime: newSessionExpireTime.toISOString(),
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini API error (${response.status}): ${errorText}`);
+  }
+
+  const data = await response.json() as GeminiTokenApiResponse;
+  
+  return {
+    token: data.name,
+    expiresAt: data.expireTime,
+  };
 }
 
 /**
- * Generate a unique session ID
+ * Send initial prompt to Gemini AI
+ * 
+ * @param apiKey - The Gemini API key
+ * @param prompt - The initial prompt to send
+ * @returns The AI's response text
  */
-function generateSessionId(): string {
-  return `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+async function sendInitialPromptToGemini(apiKey: string, prompt: string): Promise<string> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`;
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey,
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [
+            {
+              text: `${AI_SYSTEM_PROMPT}\n\n${prompt}`,
+            },
+          ],
+        },
+      ],
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 4000,
+        topP: 0.8,
+        topK: 40,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini API error (${response.status}): ${errorText}`);
+  }
+
+  const data = await response.json() as GeminiResponse;
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  
+  if (!content) {
+    throw new Error('Invalid response from Gemini API - no content');
+  }
+  
+  return content;
 }
 
 /**
@@ -142,29 +237,40 @@ async function startAISession(request: HttpRequest, context: InvocationContext):
       return requestLogger.logError('Invalid JSON in request body', 400, 'validation');
     }
     
-    // Generate session ID and token
-    const sessionId = generateSessionId();
-    const token = generateTemporaryToken(userId, sessionId);
+    // Get Gemini API key from Key Vault
+    const secretName = process.env.AI_API_KEY_SECRET || DEFAULT_GEMINI_API_KEY_SECRET;
+    const apiKey = await getSecretFromKeyVault(undefined, secretName);
     
-    // Create test prompt with system prompt
+    if (!apiKey) {
+      throw new Error(`Gemini API key not configured in Key Vault secret: ${secretName}`);
+    }
+    
+    requestLogger.logInfo('Retrieved Gemini API key from Key Vault', { secretName });
+    
+    // Generate ephemeral token for frontend to use
+    const tokenData = await generateEphemeralToken(apiKey);
+    
+    requestLogger.logInfo('Gemini ephemeral token generated', { expiresAt: tokenData.expiresAt });
+    
+    // Create and send initial prompt to Gemini
     const testDataInfo = requestBody.testData ? `\nTest data: ${requestBody.testData}` : '';
-    const initialPrompt = `${AI_SYSTEM_PROMPT}
-
-This is a test session to verify AI integration.${testDataInfo}
+    const initialPrompt = `This is a test session to verify AI integration.${testDataInfo}
 
 Please confirm you received this message and are ready to analyze diabetes-related data.`;
     
+    const initialResponse = await sendInitialPromptToGemini(apiKey, initialPrompt);
+    
     requestLogger.logInfo('AI session started successfully', {
       userId,
-      sessionId,
       hasTestData: !!requestBody.testData,
+      responseLength: initialResponse.length,
     });
     
     const response: StartAISessionResponse = {
       success: true,
-      token,
-      sessionId,
-      initialPrompt,
+      token: tokenData.token,
+      expiresAt: tokenData.expiresAt,
+      initialResponse,
     };
     
     return requestLogger.logSuccess({

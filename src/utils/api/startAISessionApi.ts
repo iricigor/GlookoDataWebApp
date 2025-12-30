@@ -35,8 +35,8 @@ interface StartAISessionRequest {
 interface StartAISessionResponse {
   success: boolean;
   token: string;
-  sessionId: string;
-  initialPrompt: string;
+  expiresAt: string;
+  initialResponse: string;
 }
 
 /**
@@ -54,8 +54,8 @@ interface StartAISessionErrorResponse {
 export interface StartAISessionResult {
   success: boolean;
   token?: string;
-  sessionId?: string;
-  initialPrompt?: string;
+  expiresAt?: string;
+  initialResponse?: string;
   error?: string;
   errorType?: 'unauthorized' | 'forbidden' | 'validation' | 'infrastructure' | 'network' | 'unknown';
   statusCode?: number;
@@ -67,7 +67,7 @@ export interface StartAISessionResult {
  * @param idToken - MSAL ID token used for Authorization header
  * @param testData - Optional test data to include in the initial prompt
  * @param config - Optional API configuration; defaults to the module's default (baseUrl '/api')
- * @returns A `StartAISessionResult` containing `success` and, on success, `token`, `sessionId`, and `initialPrompt`; on failure, `error`, `errorType`, and optionally `statusCode`
+ * @returns A `StartAISessionResult` containing `success` and, on success, `token`, `expiresAt`, and `initialResponse`; on failure, `error`, `errorType`, and optionally `statusCode`
  */
 export async function startAISession(
   idToken: string,
@@ -165,7 +165,7 @@ export async function startAISession(
     // Parse successful response
     const data: StartAISessionResponse = await response.json();
     
-    if (!data.success || !data.token || !data.sessionId || !data.initialPrompt) {
+    if (!data.success || !data.token || !data.expiresAt || !data.initialResponse) {
       apiLogger.logError('Invalid response from backend', 'unknown', 200);
       return {
         success: false,
@@ -175,15 +175,15 @@ export async function startAISession(
     }
     
     apiLogger.logSuccess(200, {
-      sessionId: data.sessionId,
-      promptLength: data.initialPrompt.length,
+      expiresAt: data.expiresAt,
+      responseLength: data.initialResponse.length,
     });
     
     return {
       success: true,
       token: data.token,
-      sessionId: data.sessionId,
-      initialPrompt: data.initialPrompt,
+      expiresAt: data.expiresAt,
+      initialResponse: data.initialResponse,
     };
     
   } catch (error) {
