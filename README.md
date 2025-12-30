@@ -71,6 +71,22 @@ The application provides full internationalization:
 
 See the [Data Upload Guide](docs/DATA_UPLOAD.md) for details.
 
+### 🔧 Advanced Pages
+
+The application includes advanced features accessible via direct URL (not shown in main navigation):
+
+- **[Admin Page](/#admin)** - Administrative statistics and AI configuration testing for Pro users
+  - User statistics (logged-in users, Pro users count)
+  - API & web traffic monitoring
+  - AI provider testing
+  - See [Admin Page Guide](docs/ADMIN_PAGE.md) for details
+
+- **[API Documentation](/#api-docs)** - Interactive Swagger UI for testing backend endpoints
+  - Complete API reference with examples
+  - Test endpoints directly in your browser
+  - Automatic authentication token integration
+  - See [API Documentation Guide](docs/API_DOCUMENTATION.md) for details
+
 
 ## 🚀 Quick Start
 
@@ -111,10 +127,15 @@ Comprehensive documentation is available:
 - **[Settings Guide](docs/SETTINGS.md)** - Configure themes and glucose thresholds
 - **[Screenshots](docs/SCREENSHOTS.md)** - View all application screenshots
 
+### Advanced Features
+- **[Admin Page Guide](docs/ADMIN_PAGE.md)** - Administrative features for Pro users
+- **[API Documentation Guide](docs/API_DOCUMENTATION.md)** - Interactive API explorer and testing
+
 ### Developer Guides
 - **[Contributing Guide](CONTRIBUTING.md)** - Learn how to contribute
 - **[E2E Testing Guide](docs/E2E_TESTING.md)** - Playwright end-to-end testing
 - **[Deployment Guide](docs/DEPLOYMENT.md)** - Deploy to Azure Static Web Apps
+- **[API Backend Documentation](api/README.md)** - Azure Functions backend API
 - **[Changelog](CHANGELOG.md)** - Version history and release notes
 
 ## 🛠️ Tech Stack

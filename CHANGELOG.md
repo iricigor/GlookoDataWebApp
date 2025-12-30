@@ -25,6 +25,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - Partial Rollback of Cloud Features
 
+### Added
+
+- **Documentation for Admin Page**: Comprehensive guide for the Admin page
+  - Added `docs/ADMIN_PAGE.md` with full feature documentation
+  - Documented access requirements for Pro users
+  - Included user statistics, API/web traffic monitoring, and AI testing features
+- **Documentation for API Documentation Page**: Comprehensive guide for the API docs page
+  - Added `docs/API_DOCUMENTATION.md` with full interactive API explorer guide
+  - Documented authentication integration and Swagger UI features
+  - Included developer information for updating OpenAPI specs
+- **README Updates**: Added visibility for advanced hidden pages
+  - New "Advanced Pages" section highlighting Admin and API Docs pages
+  - Updated "Documentation" section with links to new guides
+  - Direct links to both pages from the main README
+
 ### Removed
 
 - **Settings Synchronization**: Cloud-based settings sync removed
