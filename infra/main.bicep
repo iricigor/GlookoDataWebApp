@@ -76,7 +76,7 @@ param functionAppTags object = {}
 param staticWebAppTags object = {}
 
 // 1. Deploy User-Assigned Managed Identity first
-module managedIdentity 'managed-identity.bicep' = {
+module managedIdentity 'module_managed-identity.bicep' = {
   name: 'deploy-managed-identity'
   params: {
     managedIdentityName: managedIdentityName
@@ -86,7 +86,7 @@ module managedIdentity 'managed-identity.bicep' = {
 }
 
 // 2. Deploy Storage Account with Tables
-module storage 'storage.bicep' = {
+module storage 'module_storage.bicep' = {
   name: 'deploy-storage'
   params: {
     storageAccountName: storageAccountName
@@ -100,7 +100,7 @@ module storage 'storage.bicep' = {
 }
 
 // 3. Deploy Key Vault with RBAC for Managed Identity
-module keyVault 'key-vault.bicep' = {
+module keyVault 'module_key-vault.bicep' = {
   name: 'deploy-key-vault'
   params: {
     keyVaultName: keyVaultName
@@ -111,7 +111,7 @@ module keyVault 'key-vault.bicep' = {
 }
 
 // 4. Deploy Function App
-module functionApp 'function-app.bicep' = {
+module functionApp 'module_function-app.bicep' = {
   name: 'deploy-function-app'
   params: {
     functionAppName: functionAppName
@@ -134,7 +134,7 @@ module functionApp 'function-app.bicep' = {
 }
 
 // 5. Deploy Static Web App
-module staticWebApp 'static-web-app.bicep' = {
+module staticWebApp 'module_static-web-app.bicep' = {
   name: 'deploy-static-web-app'
   params: {
     staticWebAppName: staticWebAppName
