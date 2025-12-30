@@ -46,12 +46,12 @@ The infrastructure consists of:
 ## Files
 
 - **main.bicep** - Main orchestration template
-- **modules/** - Modular resource definitions
-  - `managed-identity.bicep` - User-Assigned Managed Identity
-  - `storage.bicep` - Storage Account with Tables and CORS
-  - `key-vault.bicep` - Key Vault with RBAC
-  - `function-app.bicep` - Azure Function App with flexible hosting plan support
-  - `static-web-app.bicep` - Azure Static Web App
+- **Bicep modules** - Modular resource definitions in infra root (prefixed with `module_`):
+  - `module_managed-identity.bicep` - User-Assigned Managed Identity
+  - `module_storage.bicep` - Storage Account with Tables and CORS
+  - `module_key-vault.bicep` - Key Vault with RBAC
+  - `module_function-app.bicep` - Azure Function App with flexible hosting plan support
+  - `module_static-web-app.bicep` - Azure Static Web App
 - **parameters.generic.bicepparam** - Generic parameter file with standard names
 - **parameters.current.bicepparam** - Current production deployment parameters
 - **validate.sh** - Quick validation script (validates syntax and checks parameters)
@@ -59,14 +59,16 @@ The infrastructure consists of:
 
 ### Documentation
 
-- **USER_GUIDE.md** - **START HERE** - Quick start guide for deployment
-- **MINIMAL_CHANGES_SUMMARY.md** - **NEW** - Explains removed best practices and minimal changes approach
-- **FIX_SUMMARY.md** - Overview of what-if fixes and solutions
-- **WHAT_IF_ANALYSIS.md** - Detailed analysis of all what-if changes
-- **WHAT_IF_DELTAS_EXPLAINED.md** - Comprehensive explanation of what-if deltas (roleAssignments, Key Vault, Function App, etc.)
-- **EXPECTED_WHAT_IF.md** - Expected output, red flags, and troubleshooting
-- **MANUAL_VERIFICATION.md** - Step-by-step manual verification
-- **QUICK_REFERENCE.md** - Quick command reference
+Documentation files are located in the `docs/` subdirectory:
+
+- **docs/USER_GUIDE.md** - **START HERE** - Quick start guide for deployment
+- **docs/MINIMAL_CHANGES_SUMMARY.md** - **NEW** - Explains removed best practices and minimal changes approach
+- **docs/FIX_SUMMARY.md** - Overview of what-if fixes and solutions
+- **docs/WHAT_IF_ANALYSIS.md** - Detailed analysis of all what-if changes
+- **docs/WHAT_IF_DELTAS_EXPLAINED.md** - Comprehensive explanation of what-if deltas (roleAssignments, Key Vault, Function App, etc.)
+- **docs/EXPECTED_WHAT_IF.md** - Expected output, red flags, and troubleshooting
+- **docs/MANUAL_VERIFICATION.md** - Step-by-step manual verification
+- **docs/QUICK_REFERENCE.md** - Quick command reference
 
 ## Prerequisites
 

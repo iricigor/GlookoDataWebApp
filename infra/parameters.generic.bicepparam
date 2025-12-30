@@ -26,3 +26,30 @@ param existingAppServicePlanName = ''
 
 // Application Insights integration (optional)
 param appInsightsResourceId = ''
+
+// Tags for resources (customize for your environment)
+param managedIdentityTags = {
+  Environment: 'Development'
+  Application: 'GlookoDataWebApp'
+}
+
+param storageTags = {
+  Application: 'GlookoDataWebApp'
+  Purpose: 'UserSettings'
+  Environment: 'Development'
+}
+
+param keyVaultTags = {
+  Application: 'GlookoDataWebApp'
+  Environment: 'Development'
+}
+
+param functionAppTags = {
+  Application: 'GlookoDataWebApp'
+  Environment: 'Development'
+}
+
+param staticWebAppTags = {
+  Application: 'GlookoDataWebApp'
+  Environment: 'Development'
+}
