@@ -40,7 +40,11 @@
           "title": "TIR podle hodiny",
           "placeholder": "Obsah bude brzy k dispozici..."
         },
-        "analyzeButton": "Analyzovat s AI"
+        "analyzeButton": "Analyzovat s AI",
+        "analyzingButton": "Analyzuji...",
+        "readingsInRange": "Měření v cílovém rozsahu: {{count}}",
+        "aiResponse": "AI analýza",
+        "errorPrefix": "Chyba:"
       }
     },
     "dailyBG": {

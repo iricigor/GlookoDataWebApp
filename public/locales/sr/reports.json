@@ -40,7 +40,11 @@
           "title": "TIR po satu",
           "placeholder": "Sadržaj dolazi uskoro..."
         },
-        "analyzeButton": "Analizirajte sa AI"
+        "analyzeButton": "Analizirajte sa AI",
+        "analyzingButton": "Analiziram...",
+        "readingsInRange": "Očitavanja u opsegu: {{count}}",
+        "aiResponse": "AI analiza",
+        "errorPrefix": "Greška:"
       }
     },
     "dailyBG": {
