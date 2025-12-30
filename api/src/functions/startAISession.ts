@@ -69,7 +69,17 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
 
 /**
  * Generate a simple temporary token for testing
- * In production, this would be a proper JWT or session token
+ * 
+ * NOTE: This is a TESTING implementation only. The token is a simple base64-encoded
+ * string without cryptographic signing. For production use, this should be replaced
+ * with a proper JWT or secure session token with expiration and validation.
+ * 
+ * In production, consider:
+ * - Using jsonwebtoken library for proper JWT creation
+ * - Adding expiration time (e.g., 1 hour)
+ * - Including user permissions/scopes
+ * - Cryptographic signing with a secret key
+ * - Token refresh mechanism
  */
 function generateTemporaryToken(userId: string, sessionId: string): string {
   const timestamp = Date.now();

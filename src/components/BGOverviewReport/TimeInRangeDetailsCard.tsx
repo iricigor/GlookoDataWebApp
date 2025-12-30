@@ -63,9 +63,12 @@ export function TimeInRangeDetailsCard({}: TimeInRangeDetailsCardProps) {
       }
       
       // Step 2: Send additional data to AI using the backend AI endpoint
-      const followUpPrompt = `${sessionResult.initialPrompt}
-
-Based on the test data provided, please analyze the Time in Range statistics and provide a brief summary.`;
+      // Combine the initial prompt from the session with additional context
+      const followUpPrompt = [
+        sessionResult.initialPrompt,
+        '',
+        'Based on the test data provided, please analyze the Time in Range statistics and provide a brief summary.',
+      ].join('\n');
       
       const aiResult = await callBackendAI(idToken, followUpPrompt);
       
