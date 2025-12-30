@@ -46,10 +46,7 @@ type TimePeriod = '1hour' | '1day';
 const TIMESPAN_1_HOUR = 'PT1H';
 const TIMESPAN_1_DAY = 'P1D';
 
-/**
- * API path prefix for distinguishing API calls from web requests
- */
-const API_PATH_PREFIX = '/api/';
+
 
 /**
  * Maximum count limit for entity counting operations
@@ -158,14 +155,38 @@ async function queryApplicationInsights(
 
   const timespan = timePeriod === '1hour' ? TIMESPAN_1_HOUR : TIMESPAN_1_DAY;
 
+  // Query for API calls and errors
+  // In Azure Static Web Apps with Application Insights:
+  // - Web traffic (page views, static content) is tracked in the 'pageViews' table (client-side telemetry)
+  // - API calls (Azure Functions) are tracked in the 'requests' table (server-side telemetry)
+  // 
+  // Note: The 'requests' table in a Static Web App deployment typically ONLY contains API calls,
+  // so we query both tables separately and union the results.
+  // Query for API calls and errors
+  // In Azure Static Web Apps with Application Insights:
+  // - API calls (Azure Functions) are tracked in the 'requests' table (server-side telemetry)
+  // - Web traffic (page views) would be in 'pageViews' table, but requires client-side SDK integration
+  // 
+  // Note: For privacy-focused apps that process data client-side, the pageViews table may be empty.
+  // We query the requests table for API statistics and check pageViews separately.
+  // The pageViews query will return no rows if client-side monitoring isn't configured.
+  //
+  // Error detection: We count errors based on HTTP status codes (4xx and 5xx) rather than the
+  // 'success' field, as the success field may not always reflect HTTP-level errors correctly.
   const query = `
-    requests
+    let apiData = requests
     | where timestamp > ago(${timePeriod === '1hour' ? '1h' : '1d'})
-    | extend isApiCall = (name contains "${API_PATH_PREFIX}" or url contains "${API_PATH_PREFIX}")
     | summarize 
         TotalCalls = count(),
-        Errors = countif(success == false)
-        by isApiCall
+        Errors = countif(toint(resultCode) >= 400)
+    | extend isApiCall = true;
+    let webData = pageViews
+    | where timestamp > ago(${timePeriod === '1hour' ? '1h' : '1d'})
+    | summarize 
+        TotalCalls = count(),
+        Errors = 0
+    | extend isApiCall = false;
+    union apiData, webData
     | project isApiCall, TotalCalls, Errors
   `;
 
