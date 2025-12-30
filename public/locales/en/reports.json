@@ -29,16 +29,19 @@
       "tirDetails": {
         "title": "Time In Range - Details",
         "byPeriod": {
-          "title": "TIR by period",
-          "placeholder": "Content coming soon..."
+          "title": "TIR by Period",
+          "placeholder": "Content coming soon...",
+          "noData": "No period data available"
         },
         "byDayOfWeek": {
-          "title": "TIR by day of week",
-          "placeholder": "Content coming soon..."
+          "title": "TIR by Day",
+          "placeholder": "Content coming soon...",
+          "noData": "No day-of-week data available"
         },
         "byHour": {
-          "title": "TIR by hour",
-          "placeholder": "Content coming soon..."
+          "title": "TIR by Hour",
+          "placeholder": "Content coming soon...",
+          "noData": "No hourly data available"
         },
         "analyzeButton": "Analyze with AI",
         "analyzingButton": "Analyzing...",

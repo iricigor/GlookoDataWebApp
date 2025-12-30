@@ -30,15 +30,18 @@
         "title": "Čas v rozmezí - Detaily",
         "byPeriod": {
           "title": "TIR podle období",
-          "placeholder": "Obsah bude brzy k dispozici..."
+          "placeholder": "Obsah bude brzy k dispozici...",
+          "noData": "Žádná data o období nejsou k dispozici"
         },
         "byDayOfWeek": {
-          "title": "TIR podle dne v týdnu",
-          "placeholder": "Obsah bude brzy k dispozici..."
+          "title": "TIR podle dne",
+          "placeholder": "Obsah bude brzy k dispozici...",
+          "noData": "Žádná data o dnech v týdnu nejsou k dispozici"
         },
         "byHour": {
           "title": "TIR podle hodiny",
-          "placeholder": "Obsah bude brzy k dispozici..."
+          "placeholder": "Obsah bude brzy k dispozici...",
+          "noData": "Žádná hodinová data nejsou k dispozici"
         },
         "analyzeButton": "Analyzovat s AI",
         "analyzingButton": "Analyzuji...",
