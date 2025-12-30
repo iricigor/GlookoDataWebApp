@@ -108,12 +108,15 @@ async function queryApplicationInsights(
   // Note: For privacy-focused apps that process data client-side, the pageViews table may be empty.
   // We query the requests table for API statistics and check pageViews separately.
   // The pageViews query will return no rows if client-side monitoring isn't configured.
+  //
+  // Error detection: We count errors based on HTTP status codes (4xx and 5xx) rather than the
+  // 'success' field, as the success field may not always reflect HTTP-level errors correctly.
   const query = `
     let apiData = requests
     | where timestamp > ago(${timePeriod === '1hour' ? '1h' : '1d'})
     | summarize 
         TotalCalls = count(),
-        Errors = countif(success == false)
+        Errors = countif(toint(resultCode) >= 400)
     | extend isApiCall = true;
     let webData = pageViews
     | where timestamp > ago(${timePeriod === '1hour' ? '1h' : '1d'})

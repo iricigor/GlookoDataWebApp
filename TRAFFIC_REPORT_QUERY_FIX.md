@@ -11,59 +11,20 @@ In Azure Static Web Apps with Application Insights:
 - **Result:** `webCalls` = 0, `webErrors` = 0 (expected for now)
 
 ## Root Cause - API Errors
-Need to verify if API errors are being tracked correctly in the `success` field of the `requests` table.
+The original query used `countif(success == false)` to detect errors, but this field doesn't always reflect HTTP-level errors correctly. 
 
-## Testing Queries for Application Insights
+User testing revealed actual errors exist in the data:
+- **200:** 120 requests (successful)
+- **401:** 29 requests (unauthorized errors)
+- **503:** 8 requests (service unavailable errors)
+- **Total:** 157 requests with 37 errors (23.6% error rate)
 
-### Query 1: Check Total API Requests (should return 157 for 1 day)
-```kusto
-requests
-| where timestamp > ago(1d)
-| summarize count()
-```
+## Solution
+Changed error detection from `success == false` to checking HTTP status codes:
+- **Before:** `countif(success == false)` - returned 0 errors incorrectly
+- **After:** `countif(toint(resultCode) >= 400)` - correctly counts 4xx and 5xx errors
 
-### Query 2: Check Success Field Distribution
-This will show how many requests have `success == true` vs `success == false`:
-```kusto
-requests
-| where timestamp > ago(1d)
-| summarize 
-    Total = count(),
-    SuccessTrue = countif(success == true),
-    SuccessFalse = countif(success == false),
-    SuccessNull = countif(isnull(success))
-```
-
-### Query 3: Check Result Codes
-This will show the HTTP status codes returned:
-```kusto
-requests
-| where timestamp > ago(1d)
-| summarize count() by resultCode
-| order by count_ desc
-```
-
-### Query 4: Show Sample Failed Requests
-This will show details of any failed requests:
-```kusto
-requests
-| where timestamp > ago(1d)
-| where success == false
-| project timestamp, name, resultCode, duration, success, url
-| order by timestamp desc
-| take 10
-```
-
-### Query 5: Show Requests with 4xx or 5xx Status Codes
-Alternative way to find errors:
-```kusto
-requests
-| where timestamp > ago(1d)
-| where resultCode startswith "4" or resultCode startswith "5"
-| project timestamp, name, resultCode, duration, success, url
-| order by timestamp desc
-| take 10
-```
+This properly detects all client errors (4xx) and server errors (5xx) based on the `resultCode` field.
 
 ## Updated Query (Current Implementation)
 ```kusto
@@ -71,7 +32,7 @@ let apiData = requests
 | where timestamp > ago(1d)  // or ago(1h)
 | summarize 
     TotalCalls = count(),
-    Errors = countif(success == false)
+    Errors = countif(toint(resultCode) >= 400)
 | extend isApiCall = true;
 
 let webData = pageViews
@@ -87,33 +48,58 @@ union apiData, webData
 
 ## Expected Results
 
-### Current Status
-- **API Calls:** 157 (confirmed) ✅
-- **API Errors:** Need to verify with queries above
-- **Web Calls:** 0 (pageViews is empty - accepted for now) ✅
-- **Web Errors:** 0 (pageViews is empty - accepted for now) ✅
+### Current Status (1 day period)
+- **API Calls:** 157 ✅
+- **API Errors:** 37 (29 × 401 + 8 × 503) ✅
+- **Web Calls:** 0 (pageViews is empty - accepted) ✅
+- **Web Errors:** 0 (pageViews is empty - accepted) ✅
 
-### Next Steps
-1. Run Query 2 to check if `success` field is populated correctly
-2. Run Query 3 to see HTTP status codes
-3. Run Query 4 and 5 to identify any failed requests
-4. If errors exist but aren't showing up, investigate the `success` field format
+## Diagnostic Queries for Verification
 
-## Potential Issues with Error Detection
+### Query 1: Total Request Count
+```kusto
+requests
+| where timestamp > ago(1d)
+| summarize count()
+```
+Expected: 157
 
-### Issue 1: success field might not be boolean
-The `success` field in Application Insights might be:
-- A string: "True" / "False" instead of boolean true/false
-- Null for some requests
-- Not set at all
+### Query 2: Result Code Distribution
+```kusto
+requests
+| where timestamp > ago(1d)
+| summarize count() by resultCode
+| order by count_ desc
+```
+Expected:
+- 200: 120
+- 401: 29
+- 503: 8
 
-### Issue 2: Errors might be in exceptions table
-Some API errors might be logged in the `exceptions` table instead of marking `success == false` in `requests`.
+### Query 3: Verify Error Count
+```kusto
+requests
+| where timestamp > ago(1d)
+| summarize 
+    Total = count(),
+    Errors = countif(toint(resultCode) >= 400)
+```
+Expected: Total = 157, Errors = 37
 
-### Issue 3: All requests might be successful
-If all 157 requests completed successfully (status 200), then 0 errors is correct.
+### Query 4: Error Breakdown by Status Code
+```kusto
+requests
+| where timestamp > ago(1d)
+| where toint(resultCode) >= 400
+| summarize count() by resultCode
+| order by resultCode asc
+```
+Expected:
+- 401: 29
+- 503: 8
 
 ## Files Changed
-- `api/src/functions/adminApiStats.ts` - Updated KQL query
-- `api/src/functions/adminStatsUnified.ts` - Updated KQL query
+- `api/src/functions/adminApiStats.ts` - Updated error detection to use `resultCode >= 400`
+- `api/src/functions/adminStatsUnified.ts` - Updated error detection to use `resultCode >= 400`
+
 
