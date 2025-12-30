@@ -13,30 +13,15 @@ The GlookoDataWebApp is deployed as an Azure Static Web App, which provides:
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Azure Static Web App                          │
-│                   (wonderful-stone-071384103)                    │
-│                                                                   │
-│   ┌─────────────────┐          ┌─────────────────────┐          │
-│   │   React SPA     │   /api/* │   Linked Backend    │          │
-│   │   (Frontend)    │─────────▶│  (Function App)     │          │
-│   │                 │          │                     │          │
-│   └─────────────────┘          └─────────────────────┘          │
-└─────────────────────────────────────────────────────────────────┘
-                                           │
-                                           ▼
-                              ┌─────────────────────┐
-                              │   Azure Function    │
-                              │  (glookodatawebapp- │
-                              │       func)         │
-                              └─────────────────────┘
-                                           │
-                                           ▼
-                              ┌─────────────────────┐
-                              │  Table Storage      │
-                              │  (UserSettings)     │
-                              └─────────────────────┘
+```mermaid
+graph TB
+    subgraph SWA["Azure Static Web App<br/>(wonderful-stone-071384103)"]
+        Frontend["React SPA<br/>(Frontend)"]
+        Backend["Linked Backend<br/>(Function App)"]
+        Frontend -->|"/api/*"| Backend
+    end
+    Backend --> FA["Azure Function<br/>(glookodatawebapp-func)"]
+    FA --> TS["Table Storage<br/>(UserSettings)"]
 ```
 
 ## Prerequisites

@@ -31,12 +31,10 @@ The admin API implements a two-tier security model:
 
 ## Architecture
 
-```
-┌─────────────────┐      ┌──────────────────┐      ┌─────────────────────┐
-│   React App     │─────▶│  Azure Function  │─────▶│  Table Storage      │
-│   (Admin Page)  │◀─────│    (API)         │─────▶│  (UserSettings +    │
-└─────────────────┘      └──────────────────┘      │   ProUsers)         │
-                                                     └─────────────────────┘
+```mermaid
+graph LR
+    A["React App<br/>(Admin Page)"] <-->|API calls| B["Azure Function<br/>(API)"]
+    B <-->|Data access| C["Table Storage<br/>(UserSettings +<br/>ProUsers)"]
 ```
 
 ## Flow
