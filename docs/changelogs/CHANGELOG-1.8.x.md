@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>937 Fix: Use User-Assigned Managed Identity for Application Insights queries</summary>
+
+[#937](../../pull/937) Fix: Use User-Assigned Managed Identity for Application Insights queries
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>934 Add Infrastructure Check workflow with OIDC-based what-if analysis</summary>
 
 [#934](../../pull/934) Add Infrastructure Check workflow with OIDC-based what-if analysis
