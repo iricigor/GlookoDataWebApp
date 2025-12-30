@@ -5,7 +5,7 @@
  * The ephemeral tokens are short-lived (30 minutes by default) and secure - they ensure the master
  * Gemini API key remains on the server and is never exposed to the client.
  * 
- * GET /api/GetGeminiToken
+ * GET /api/ai/GetGeminiToken
  * 
  * Headers:
  *   - Authorization: Bearer <id_token> (required)
@@ -95,7 +95,7 @@ async function generateEphemeralToken(apiKey: string): Promise<{ token: string; 
   const expireTime = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutes from now
   const newSessionExpireTime = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes to start session
 
-  const response = await fetch('https://generativelanguage.googleapis.com/v1/authTokens:create', {
+  const response = await fetch('https://generativelanguage.googleapis.com/v1alpha/authTokens:generate', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -248,7 +248,7 @@ async function getGeminiToken(request: HttpRequest, context: InvocationContext):
 // Register the function with Azure Functions v4
 app.http('getGeminiToken', {
   methods: ['GET'],
-  route: 'GetGeminiToken',
+  route: 'ai/GetGeminiToken',
   authLevel: 'anonymous',
   handler: getGeminiToken,
 });

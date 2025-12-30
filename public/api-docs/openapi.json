@@ -1349,7 +1349,7 @@
         }
       }
     },
-    "/GetGeminiToken": {
+    "/ai/GetGeminiToken": {
       "get": {
         "tags": ["AI"],
         "summary": "Generate ephemeral access token for Gemini Multimodal Live API",
