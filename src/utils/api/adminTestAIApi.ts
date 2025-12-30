@@ -66,7 +66,7 @@ export async function testProAIKey(
   testType: TestAIType = 'full',
   config: AdminTestAIConfig = defaultConfig
 ): Promise<TestAIResult> {
-  const endpoint = `${config.baseUrl}/glookoAdmin/test-ai-key?testType=${testType}`;
+  const endpoint = `${config.baseUrl}/ai/test-ai-key?testType=${testType}`;
   const apiLogger = createApiLogger(endpoint);
   
   // Validate ID token

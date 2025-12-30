@@ -70,7 +70,7 @@ describe('adminTestAIApi', () => {
         statusCode: 200,
       });
       expect(mockFetch).toHaveBeenCalledWith(
-        '/api/glookoAdmin/test-ai-key?testType=infra',
+        '/api/ai/test-ai-key?testType=infra',
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
@@ -110,7 +110,7 @@ describe('adminTestAIApi', () => {
         statusCode: 200,
       });
       expect(mockFetch).toHaveBeenCalledWith(
-        '/api/glookoAdmin/test-ai-key?testType=full',
+        '/api/ai/test-ai-key?testType=full',
         expect.any(Object)
       );
     });
@@ -134,7 +134,7 @@ describe('adminTestAIApi', () => {
       await testProAIKey('valid-token');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        '/api/glookoAdmin/test-ai-key?testType=full',
+        '/api/ai/test-ai-key?testType=full',
         expect.any(Object)
       );
     });
@@ -318,7 +318,7 @@ describe('adminTestAIApi', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://custom-api.example.com/api/glookoAdmin/test-ai-key?testType=infra',
+        'https://custom-api.example.com/api/ai/test-ai-key?testType=infra',
         expect.any(Object)
       );
     });

@@ -86,9 +86,9 @@ Returns the total count of users who have logged in at least once.
 
 These endpoints are planned but not yet implemented:
 
-- `GET /api/glookoAdmin/stats/pro-users` - Count of Pro users
+- `GET /api/stats/pro-users` - Count of Pro users
 - `GET /api/glookoAdmin/stats/api-calls` - Total API call count
-- `GET /api/glookoAdmin/stats/api-errors` - Total API error count
+- `GET /api/stats/api-errors` - Total API error count
 
 ## Implementation Details
 

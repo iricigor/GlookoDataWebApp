@@ -2,7 +2,7 @@
 
 ## Issue Summary
 
-The Admin page shows dashes ("-") instead of actual numbers for web and API traffic statistics, and the `/api/glookoAdmin/stats/traffic` endpoint returns 404 even though the deployment reports success with 9 endpoints.
+The Admin page shows dashes ("-") instead of actual numbers for web and API traffic statistics, and the `/api/stats/traffic` endpoint returns 404 even though the deployment reports success with 9 endpoints.
 
 ## Root Cause
 
@@ -19,7 +19,7 @@ The `api/src/index.ts` file was only importing 6 out of 9 functions:
 6. `adminTestAI`
 
 ### ❌ Functions that were NOT imported (404 errors):
-7. **`adminApiStats`** ← Traffic statistics endpoint (`/api/glookoAdmin/stats/traffic`)
+7. **`adminApiStats`** ← Traffic statistics endpoint (`/api/stats/traffic`)
 8. **`adminStatsUnified`** ← Unified stats endpoint (`/api/glookoAdmin/stats`)
 9. **`googleTokenExchange`** ← Google OAuth token exchange (`/api/auth/google/token`)
 
@@ -50,7 +50,7 @@ import './functions/adminTestAI';
 
 ### Before Fix:
 - Admin page: Shows "-" for all traffic statistics
-- API endpoint `/api/glookoAdmin/stats/traffic`: Returns 404
+- API endpoint `/api/stats/traffic`: Returns 404
 - API endpoint `/api/glookoAdmin/stats`: Returns 404
 - API endpoint `/api/auth/google/token`: Returns 404
 - Azure Portal: Shows 6 functions
@@ -58,7 +58,7 @@ import './functions/adminTestAI';
 
 ### After Fix (after deployment):
 - Admin page: Shows actual traffic numbers
-- API endpoint `/api/glookoAdmin/stats/traffic`: Returns traffic data
+- API endpoint `/api/stats/traffic`: Returns traffic data
 - API endpoint `/api/glookoAdmin/stats`: Returns unified stats
 - API endpoint `/api/auth/google/token`: Works for Google login
 - Azure Portal: Shows all 9 functions
@@ -105,7 +105,7 @@ After deployment, verify:
    - Should show 9 functions (currently shows 6)
 
 2. **API Documentation Page** (`/#api-docs`):
-   - Test `/api/glookoAdmin/stats/traffic` endpoint
+   - Test `/api/stats/traffic` endpoint
    - Test `/api/glookoAdmin/stats` endpoint
    - Test `/api/auth/google/token` endpoint
    - All should return 200 (not 404)

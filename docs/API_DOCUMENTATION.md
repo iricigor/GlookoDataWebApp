@@ -60,12 +60,12 @@ The API documentation is loaded from `/api-docs/openapi.json` and includes:
 
 ### AI Endpoints (Pro Users Only)
 - `POST /api/ai/query` - Query AI providers with diabetes-related prompts
+- `POST /api/ai/test-ai-key` - Test Pro AI key configuration
 
-### Admin Endpoints (Pro Users Only)
-- `GET /api/glookoAdmin/stats/logged-in-users` - Get count of logged-in users
-- `GET /api/glookoAdmin/stats/traffic` - Get API and web traffic statistics
-- `GET /api/glookoAdmin/stats` - Get all administrative statistics (unified)
-- `POST /api/glookoAdmin/test-ai-key` - Test Pro AI key configuration
+### Stats Endpoints (Pro Users Only)
+- `GET /api/stats/logged-in-users` - Get count of logged-in users
+- `GET /api/stats/traffic` - Get API and web traffic statistics
+- `GET /api/stats/unified` - Get all administrative statistics (unified)
 
 ## ⚙️ Swagger UI Features
 

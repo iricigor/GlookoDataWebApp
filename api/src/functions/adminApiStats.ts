@@ -4,7 +4,7 @@
  * This function provides API call and error statistics from Application Insights
  * for Pro users with admin access.
  * 
- * GET /api/glookoAdmin/stats/traffic
+ * GET /api/stats/traffic
  * 
  * Headers:
  *   - Authorization: Bearer <id_token> (required)
@@ -288,7 +288,7 @@ async function getApiStats(request: HttpRequest, context: InvocationContext): Pr
 // Register the function with Azure Functions v4
 app.http('adminTrafficStats', {
   methods: ['GET'],
-  route: 'glookoAdmin/stats/traffic',
+  route: 'stats/traffic',
   authLevel: 'anonymous',
   handler: getApiStats,
 });

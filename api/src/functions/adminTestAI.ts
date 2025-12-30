@@ -6,7 +6,7 @@
  * 1. Infrastructure test - verifies Key Vault access and environment configuration
  * 2. Full test - includes infrastructure test plus sending a test query to the AI provider
  * 
- * POST /api/glookoAdmin/test-ai-key
+ * POST /api/ai/test-ai-key
  * 
  * Headers:
  *   - Authorization: Bearer <id_token> (required)
@@ -470,7 +470,7 @@ async function testAI(request: HttpRequest, context: InvocationContext): Promise
 // Register the function with Azure Functions v4
 app.http('adminTestAI', {
   methods: ['POST'],
-  route: 'glookoAdmin/test-ai-key',
+  route: 'ai/test-ai-key',
   authLevel: 'anonymous',
   handler: testAI,
 });
