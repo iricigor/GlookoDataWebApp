@@ -102,11 +102,12 @@ async function queryApplicationInsights(
 
   // Query for API calls and errors
   // In Azure Static Web Apps with Application Insights:
-  // - Web traffic (page views, static content) is tracked in the 'pageViews' table (client-side telemetry)
   // - API calls (Azure Functions) are tracked in the 'requests' table (server-side telemetry)
+  // - Web traffic (page views) would be in 'pageViews' table, but requires client-side SDK integration
   // 
-  // Note: The 'requests' table in a Static Web App deployment typically ONLY contains API calls,
-  // so we query both tables separately and union the results.
+  // Note: For privacy-focused apps that process data client-side, the pageViews table may be empty.
+  // We query the requests table for API statistics and check pageViews separately.
+  // The pageViews query will return no rows if client-side monitoring isn't configured.
   const query = `
     let apiData = requests
     | where timestamp > ago(${timePeriod === '1hour' ? '1h' : '1d'})
