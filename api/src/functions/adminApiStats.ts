@@ -20,10 +20,10 @@
  *       apiErrors: number,
  *       timePeriod: string 
  *     }
+ *     Note: Returns zeros for all statistics if Application Insights is not configured
  *   - 401 Unauthorized: Invalid or missing token
  *   - 403 Forbidden: Not a Pro user
  *   - 500 Internal Server Error: Infrastructure error
- *   - 503 Service Unavailable: Application Insights not configured
  */
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
@@ -93,8 +93,11 @@ async function queryApplicationInsights(
   workspaceId: string,
   timePeriod: TimePeriod
 ): Promise<{ webCalls: number; webErrors: number; apiCalls: number; apiErrors: number }> {
-  // Initialize the Azure Monitor Logs client with managed identity
-  const credential = new DefaultAzureCredential();
+  // Initialize the Azure Monitor Logs client with User-Assigned Managed Identity
+  // DefaultAzureCredential uses AZURE_CLIENT_ID environment variable to identify the User-Assigned MI
+  const credential = new DefaultAzureCredential({
+    managedIdentityClientId: process.env.AZURE_CLIENT_ID
+  });
   const logsQueryClient = new LogsQueryClient(credential);
 
   // Determine timespan based on period
@@ -207,39 +210,45 @@ async function getApiStats(request: HttpRequest, context: InvocationContext): Pr
 
     const timePeriod = timePeriodParam as TimePeriod;
 
-    // Check if Application Insights is configured
+    // Get Application Insights statistics
     const workspaceId = getWorkspaceId();
+    let webCalls = 0;
+    let webErrors = 0;
+    let apiCalls = 0;
+    let apiErrors = 0;
     
-    if (!workspaceId) {
-      requestLogger.logWarn('Application Insights workspace ID not configured');
-      return requestLogger.logError(
-        'Service unavailable - Application Insights not configured',
-        503,
-        'infrastructure',
-        { code: 'APPINSIGHTS_NOT_CONFIGURED' }
-      );
+    if (workspaceId) {
+      try {
+        requestLogger.logInfo('Querying Application Insights', { workspaceId, timePeriod });
+        const stats = await queryApplicationInsights(workspaceId, timePeriod);
+        webCalls = stats.webCalls;
+        webErrors = stats.webErrors;
+        apiCalls = stats.apiCalls;
+        apiErrors = stats.apiErrors;
+        
+        requestLogger.logInfo('Application Insights query successful', { 
+          webCalls,
+          webErrors,
+          apiCalls,
+          apiErrors,
+          timePeriod
+        });
+      } catch (error: unknown) {
+        // Log warning but don't fail the entire request
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        requestLogger.logWarn('Application Insights query failed - returning zeros for API stats', { error: errorMessage });
+      }
+    } else {
+      requestLogger.logWarn('Application Insights workspace ID not configured - returning zeros for API stats');
     }
-
-    requestLogger.logInfo('Querying Application Insights', { workspaceId, timePeriod });
-
-    // Query Application Insights
-    const stats = await queryApplicationInsights(workspaceId, timePeriod);
-
-    requestLogger.logInfo('Application Insights query successful', { 
-      webCalls: stats.webCalls,
-      webErrors: stats.webErrors,
-      apiCalls: stats.apiCalls,
-      apiErrors: stats.apiErrors,
-      timePeriod
-    });
 
     return requestLogger.logSuccess({
       status: 200,
       jsonBody: {
-        webCalls: stats.webCalls,
-        webErrors: stats.webErrors,
-        apiCalls: stats.apiCalls,
-        apiErrors: stats.apiErrors,
+        webCalls,
+        webErrors,
+        apiCalls,
+        apiErrors,
         timePeriod,
       },
     });
@@ -247,22 +256,6 @@ async function getApiStats(request: HttpRequest, context: InvocationContext): Pr
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorStack = error instanceof Error ? error.stack : undefined;
-
-    // Check for specific error types
-    if (errorMessage.includes('Application Insights')) {
-      requestLogger.logWarn('Application Insights error', { error: errorMessage });
-      return {
-        status: 503,
-        jsonBody: {
-          error: `Failed to query Application Insights: ${errorMessage}`,
-          errorType: 'infrastructure',
-          code: 'APPINSIGHTS_QUERY_ERROR',
-        },
-        headers: {
-          'x-correlation-id': requestLogger.correlationId,
-        },
-      };
-    }
 
     // Generic error
     requestLogger.logStorage('apiStats', false, { 

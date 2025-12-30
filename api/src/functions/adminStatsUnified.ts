@@ -150,7 +150,10 @@ async function queryApplicationInsights(
   workspaceId: string,
   timePeriod: TimePeriod
 ): Promise<{ webCalls: number; webErrors: number; apiCalls: number; apiErrors: number }> {
-  const credential = new DefaultAzureCredential();
+  // Initialize with User-Assigned Managed Identity using AZURE_CLIENT_ID
+  const credential = new DefaultAzureCredential({
+    managedIdentityClientId: process.env.AZURE_CLIENT_ID
+  });
   const logsQueryClient = new LogsQueryClient(credential);
 
   const timespan = timePeriod === '1hour' ? TIMESPAN_1_HOUR : TIMESPAN_1_DAY;
