@@ -432,7 +432,7 @@ The repository now includes an automated infrastructure validation workflow that
 **Setup Instructions:** See [`.github/workflows/INFRA_CHECK_SETUP.md`](../.github/workflows/INFRA_CHECK_SETUP.md)
 
 **Required GitHub Secrets:**
-- `AZURE_CLIENT_ID` - Application (Client) ID
+- `AZURE_DEPLOYER_CLIENT_ID` - Application (Client) ID
 - `AZURE_TENANT_ID` - Azure AD Tenant ID
 - `AZURE_SUBSCRIPTION_ID` - Azure Subscription ID
 
@@ -467,7 +467,7 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-id: ${{ secrets.AZURE_DEPLOYER_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       

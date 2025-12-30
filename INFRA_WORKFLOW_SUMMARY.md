@@ -19,9 +19,9 @@ Automatically validates Bicep infrastructure changes on every Pull Request using
 Configure these secrets in **Settings** → **Secrets and variables** → **Actions**:
 
 ```
-AZURE_CLIENT_ID         (Azure AD Application ID)
-AZURE_TENANT_ID         (Azure AD Tenant ID)
-AZURE_SUBSCRIPTION_ID   (Azure Subscription ID)
+AZURE_DEPLOYER_CLIENT_ID    (Azure AD Application ID)
+AZURE_TENANT_ID             (Azure AD Tenant ID)
+AZURE_SUBSCRIPTION_ID       (Azure Subscription ID)
 ```
 
 ### Setup Commands (5 Minutes)
@@ -54,7 +54,7 @@ az ad app federated-credential create --id $APP_ID --parameters '{
 }'
 
 # 5. Get secret values for GitHub
-echo "AZURE_CLIENT_ID: $APP_ID"
+echo "AZURE_DEPLOYER_CLIENT_ID: $APP_ID"
 echo "AZURE_TENANT_ID: $(az account show --query tenantId -o tsv)"
 echo "AZURE_SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
 ```
