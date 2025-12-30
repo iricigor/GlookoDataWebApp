@@ -7,10 +7,12 @@
     "AZURE_CLIENT_ID": "",
     "AZURE_AD_CLIENT_ID": "",
     "GOOGLE_CLIENT_ID": "",
-    "GOOGLE_CLIENT_SECRET": ""
+    "GOOGLE_CLIENT_SECRET": "",
+    "APPLICATIONINSIGHTS_WORKSPACE_ID": ""
   },
   "Host": {
     "LocalHttpPort": 7071,
     "CORS": "*"
-  }
+  },
+  "comment": "APPLICATIONINSIGHTS_WORKSPACE_ID is optional - required only for /api/glookoAdmin/stats/traffic endpoint. See docs/APPLICATION_INSIGHTS_SETUP.md for setup instructions."
 }

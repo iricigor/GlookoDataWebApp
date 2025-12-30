@@ -51,6 +51,9 @@ The API will be available at `http://localhost:7071/api/`
 | `/api/user/settings` | GET, PUT | Load and save user settings |
 | `/api/user/check-pro-status` | GET | Check if user is a Pro user |
 | `/api/glookoAdmin/stats/logged-in-users` | GET | Get count of logged-in users (Pro users only) |
+| `/api/glookoAdmin/stats/traffic` | GET | Get API/web traffic statistics (Pro users only, **requires Application Insights**) |
+
+**Note:** The `/api/glookoAdmin/stats/traffic` endpoint requires Application Insights to be configured. See [Application Insights Setup Guide](../docs/APPLICATION_INSIGHTS_SETUP.md) for instructions.
 
 ## Deployment
 
@@ -94,6 +97,9 @@ api/
 | `STORAGE_ACCOUNT_NAME` | Azure Storage account name | Yes |
 | `AZURE_CLIENT_ID` | Managed identity client ID | Yes (for managed identity) |
 | `AZURE_AD_CLIENT_ID` | Azure App Registration client ID | Optional (for JWT audience validation, falls back to hardcoded ID) |
+| `APPLICATIONINSIGHTS_WORKSPACE_ID` | Azure Application Insights Log Analytics Workspace ID | Optional (required for traffic statistics endpoint) |
+
+**Note:** The `APPLICATIONINSIGHTS_WORKSPACE_ID` is only required for the `/api/glookoAdmin/stats/traffic` endpoint. If not configured, this endpoint will return a 503 error. See [Application Insights Setup Guide](../docs/APPLICATION_INSIGHTS_SETUP.md) for detailed configuration instructions.
 
 ### Azure Resources
 
