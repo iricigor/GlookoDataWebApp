@@ -60,21 +60,33 @@ param existingAppServicePlanName string = ''
 @description('Application Insights resource ID for Function App monitoring')
 param appInsightsResourceId string = ''
 
+@description('Tags for Managed Identity')
+param managedIdentityTags object = {}
+
+@description('Tags for Storage Account')
+param storageTags object = {}
+
+@description('Tags for Key Vault')
+param keyVaultTags object = {}
+
+@description('Tags for Function App')
+param functionAppTags object = {}
+
+@description('Tags for Static Web App')
+param staticWebAppTags object = {}
+
 // 1. Deploy User-Assigned Managed Identity first
-module managedIdentity 'modules/managed-identity.bicep' = {
+module managedIdentity 'managed-identity.bicep' = {
   name: 'deploy-managed-identity'
   params: {
     managedIdentityName: managedIdentityName
     location: location
-    tags: {
-      // Preserve existing tag to avoid modification in what-if
-      Environment: 'Production ManagedBy=GlookoDeploymentModule Application=glookodatawebapp'
-    }
+    tags: managedIdentityTags
   }
 }
 
 // 2. Deploy Storage Account with Tables
-module storage 'modules/storage.bicep' = {
+module storage 'storage.bicep' = {
   name: 'deploy-storage'
   params: {
     storageAccountName: storageAccountName
@@ -83,33 +95,23 @@ module storage 'modules/storage.bicep' = {
     tableNames: tableNames
     enableTableCors: enableTableCors
     tableCorsAllowedOrigins: tableCorsAllowedOrigins
-    tags: {
-      // Preserve existing tags to avoid modification/deletion in what-if
-      Application: 'glookodatawebapp'
-      Purpose: 'UserSettings'
-      Environment: 'Production'
-    }
+    tags: storageTags
   }
 }
 
 // 3. Deploy Key Vault with RBAC for Managed Identity
-module keyVault 'modules/key-vault.bicep' = {
+module keyVault 'key-vault.bicep' = {
   name: 'deploy-key-vault'
   params: {
     keyVaultName: keyVaultName
     location: location
     managedIdentityPrincipalId: managedIdentity.outputs.managedIdentityPrincipalId
-    tags: {
-      // Preserve existing tag to avoid modification in what-if
-      ManagedBy: 'AzureDeploymentScripts'
-      Application: 'GlookoDataWebApp'
-      Environment: 'Production'
-    }
+    tags: keyVaultTags
   }
 }
 
 // 4. Deploy Function App
-module functionApp 'modules/function-app.bicep' = {
+module functionApp 'function-app.bicep' = {
   name: 'deploy-function-app'
   params: {
     functionAppName: functionAppName
@@ -123,12 +125,7 @@ module functionApp 'modules/function-app.bicep' = {
     useExistingAppServicePlan: useExistingAppServicePlan
     existingAppServicePlanName: existingAppServicePlanName
     appInsightsResourceId: appInsightsResourceId
-    tags: {
-      // Preserve existing tag to avoid modification in what-if
-      ManagedBy: 'AzureDeploymentScripts'
-      Application: 'GlookoDataWebApp'
-      Environment: 'Production'
-    }
+    tags: functionAppTags
   }
   dependsOn: [
     storage
@@ -137,14 +134,14 @@ module functionApp 'modules/function-app.bicep' = {
 }
 
 // 5. Deploy Static Web App
-module staticWebApp 'modules/static-web-app.bicep' = {
+module staticWebApp 'static-web-app.bicep' = {
   name: 'deploy-static-web-app'
   params: {
     staticWebAppName: staticWebAppName
     location: location
     sku: staticWebAppSku
     managedIdentityId: managedIdentity.outputs.managedIdentityId
-    tags: {}  // No existing tags to preserve
+    tags: staticWebAppTags
   }
 }
 

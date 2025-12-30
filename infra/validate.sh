@@ -104,7 +104,7 @@ echo ""
 
 # Step 4: Validate module files
 echo "Step 4: Validating module files..."
-for module in modules/*.bicep; do
+for module in function-app.bicep key-vault.bicep managed-identity.bicep static-web-app.bicep storage.bicep; do
     if [ -f "$module" ]; then
         module_name=$(basename "$module")
         if az bicep build --file "$module" > /dev/null 2>&1; then
