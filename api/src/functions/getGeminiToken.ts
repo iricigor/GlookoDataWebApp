@@ -22,6 +22,19 @@ import { extractUserInfoFromToken, getTableClient, isNotFoundError, getSecretFro
 import { createRequestLogger } from "../utils/logger";
 
 /**
+ * Gemini ephemeral token response
+ * This matches the IGeminiTokenResponse interface in src/types/index.ts
+ */
+interface GeminiTokenResponse {
+  /** Ephemeral access token name (use as authentication for WebSocket) */
+  token: string;
+  /** Token expiration timestamp (ISO 8601 format) */
+  expiresAt: string;
+  /** Success status */
+  success: boolean;
+}
+
+/**
  * Default Gemini API Key secret name in Key Vault
  */
 const DEFAULT_GEMINI_API_KEY_SECRET = 'AI-API-Key';
@@ -163,13 +176,15 @@ async function getGeminiToken(request: HttpRequest, context: InvocationContext):
       expiresAt: tokenData.expiresAt,
     });
 
+    const response: GeminiTokenResponse = {
+      success: true,
+      token: tokenData.token,
+      expiresAt: tokenData.expiresAt,
+    };
+
     return requestLogger.logSuccess({
       status: 200,
-      jsonBody: {
-        success: true,
-        token: tokenData.token,
-        expiresAt: tokenData.expiresAt,
-      },
+      jsonBody: response,
     });
 
   } catch (error: unknown) {
