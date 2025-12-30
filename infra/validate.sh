@@ -104,8 +104,10 @@ echo ""
 
 # Step 4: Validate module files
 echo "Step 4: Validating module files..."
-for module in module_function-app.bicep module_key-vault.bicep module_managed-identity.bicep module_static-web-app.bicep module_storage.bicep; do
+module_count=0
+for module in module_*.bicep; do
     if [ -f "$module" ]; then
+        module_count=$((module_count + 1))
         module_name=$(basename "$module")
         if az bicep build --file "$module" > /dev/null 2>&1; then
             print_success "$module_name is valid"
@@ -116,6 +118,10 @@ for module in module_function-app.bicep module_key-vault.bicep module_managed-id
         fi
     fi
 done
+
+if [ $module_count -eq 0 ]; then
+    print_warning "No module files found (module_*.bicep)"
+fi
 echo ""
 
 # Step 5: Summary and next steps
