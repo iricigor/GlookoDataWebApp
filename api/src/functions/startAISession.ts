@@ -135,7 +135,7 @@ async function generateEphemeralToken(apiKey: string): Promise<{ token: string; 
   const timeoutId = setTimeout(() => abortController.abort(), GEMINI_API_TIMEOUT);
 
   try {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1/authTokens:create', {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1alpha/authTokens:generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
