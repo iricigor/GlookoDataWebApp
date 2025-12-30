@@ -417,9 +417,35 @@ az staticwebapp backends link \
 
 ## CI/CD Integration
 
-### GitHub Actions Workflow
+### Infrastructure Check Workflow (The Watchman) 🔍
 
-Create `.github/workflows/deploy-infrastructure.yml`:
+**Status:** ✅ **IMPLEMENTED**
+
+The repository now includes an automated infrastructure validation workflow that runs on every Pull Request:
+
+- **Workflow File:** `.github/workflows/infra-check.yml`
+- **Purpose:** Validates Bicep changes using Azure what-if analysis (read-only)
+- **Triggers:** Automatically runs when PR modifies files in `infra/`
+- **Authentication:** Uses OIDC (OpenID Connect) for keyless Azure authentication
+- **Output:** Posts what-if results as PR comment
+
+**Setup Instructions:** See [`.github/workflows/INFRA_CHECK_SETUP.md`](../.github/workflows/INFRA_CHECK_SETUP.md)
+
+**Required GitHub Secrets:**
+- `AZURE_DEPLOYER_CLIENT_ID` - Application (Client) ID
+- `AZURE_TENANT_ID` - Azure AD Tenant ID
+- `AZURE_SUBSCRIPTION_ID` - Azure Subscription ID
+
+**What it does:**
+1. ✅ Validates Bicep syntax
+2. ✅ Runs `az deployment group what-if` analysis
+3. ✅ Detects destructive changes (deletions, modifications)
+4. ✅ Posts formatted results as PR comment
+5. ✅ Read-only - never deploys resources
+
+### Future: Deployment Workflow (Write Access)
+
+After testing the read-only workflow, you can create `.github/workflows/deploy-infrastructure.yml` for automated deployments:
 
 ```yaml
 name: Deploy Infrastructure
@@ -439,9 +465,11 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Azure Login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_DEPLOYER_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       
       - name: Deploy Bicep
         run: |
@@ -452,20 +480,45 @@ jobs:
             --confirm-with-what-if
 ```
 
-### Service Principal Setup
+### OIDC Setup for GitHub Actions
 
-Create a service principal for GitHub Actions:
+Modern approach using OpenID Connect (recommended):
 
 ```bash
-# Create service principal
-az ad sp create-for-rbac \
-  --name "GlookoDataWebApp-GitHub-Actions" \
-  --role contributor \
-  --scopes /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/Glooko \
-  --sdk-auth
+# Create Azure AD application
+APP_NAME="GlookoDataWebApp-GitHub-Actions"
+az ad app create --display-name "$APP_NAME"
 
-# Add the output JSON to GitHub Secrets as AZURE_CREDENTIALS
+APP_ID=$(az ad app list --display-name "$APP_NAME" --query "[0].appId" -o tsv)
+TENANT_ID=$(az account show --query tenantId -o tsv)
+
+# Create service principal
+az ad sp create --id $APP_ID
+
+# Assign Contributor role
+az role assignment create \
+  --role "Contributor" \
+  --assignee $APP_ID \
+  --scope "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/Glooko"
+
+# Configure federated credentials for GitHub
+az ad app federated-credential create \
+  --id $APP_ID \
+  --parameters '{
+    "name": "GitHubActionsPR",
+    "issuer": "https://token.actions.githubusercontent.com",
+    "subject": "repo:iricigor/GlookoDataWebApp:pull_request",
+    "audiences": ["api://AzureADTokenExchange"]
+  }'
 ```
+
+**Benefits of OIDC:**
+- ✅ No long-lived secrets to manage
+- ✅ Automatic credential rotation
+- ✅ More secure than service principal keys
+- ✅ Granular permissions per workflow
+
+See [INFRA_CHECK_SETUP.md](../.github/workflows/INFRA_CHECK_SETUP.md) for detailed setup instructions.
 
 ## Best Practices
 
