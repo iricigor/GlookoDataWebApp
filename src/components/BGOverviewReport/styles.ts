@@ -305,6 +305,23 @@ export const useBGOverviewStyles = makeStyles({
     maxHeight: '400px',
     overflowY: 'auto',
   },
+  errorContainer: {
+    marginTop: '12px',
+    color: tokens.colorPaletteRedForeground1,
+  },
+  aiResponseContainer: {
+    marginTop: '16px',
+    ...shorthands.padding('12px'),
+    backgroundColor: tokens.colorNeutralBackground3,
+    ...shorthands.borderRadius(tokens.borderRadiusMedium),
+  },
+  aiResponseTitle: {
+    display: 'block',
+    marginBottom: '8px',
+  },
+  aiResponseText: {
+    whiteSpace: 'pre-wrap' as const,
+  },
   hba1cCard: {
     ...cardBaseStyle,
   },

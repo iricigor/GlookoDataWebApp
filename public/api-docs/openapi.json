@@ -592,6 +592,172 @@
         }
       }
     },
+    "/ai/start-session": {
+      "post": {
+        "tags": ["AI"],
+        "summary": "Start a new AI session with test prompt",
+        "description": "Initiates an AI session for Pro users by sending a test prompt to Gemini AI and returns an ephemeral token. The backend sends the initial prompt to Gemini, and the frontend can use the returned token to send additional data directly to Gemini AI (bypassing our backend). This demonstrates the full AI flow where additional data never comes to our API.",
+        "operationId": "startAISession",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "testData": {
+                    "type": "string",
+                    "description": "Optional test data to include in the initial prompt"
+                  }
+                }
+              },
+              "examples": {
+                "withTestData": {
+                  "summary": "Session with test data",
+                  "value": {
+                    "testData": "Sample TIR statistics: 65% in range"
+                  }
+                },
+                "withoutTestData": {
+                  "summary": "Session without test data",
+                  "value": {}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI session started successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "token", "expiresAt", "initialResponse"],
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "Ephemeral Gemini token for frontend to send additional data directly to Gemini AI",
+                      "example": "authTokens/abc123def456"
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Token expiration timestamp (ISO 8601 format)",
+                      "example": "2024-03-01T12:30:00.000Z"
+                    },
+                    "initialResponse": {
+                      "type": "string",
+                      "description": "The AI's response to the initial test prompt",
+                      "example": "I confirm I have received your message and I am ready to analyze diabetes-related data..."
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "token": "authTokens/abc123def456",
+                  "expiresAt": "2024-03-01T12:30:00.000Z",
+                  "initialResponse": "I confirm I have received your message and I am ready to analyze diabetes-related data. Please provide the glucose readings, insulin doses, or other relevant information you would like me to analyze."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid JSON in request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Invalid JSON in request body",
+                  "errorType": "validation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized access. Please log in again.",
+                  "errorType": "unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Not a Pro user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "This feature is only available for Pro users.",
+                  "errorType": "forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Internal server error",
+                  "errorType": "infrastructure"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - Storage not configured or access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "storageNotConfigured": {
+                    "summary": "Storage not configured",
+                    "value": {
+                      "error": "Service unavailable - storage not configured",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_NOT_CONFIGURED"
+                    }
+                  },
+                  "storageAccessDenied": {
+                    "summary": "Storage access denied",
+                    "value": {
+                      "error": "Service unavailable - storage access denied",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_ACCESS_DENIED"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/glookoAdmin/stats/traffic": {
       "get": {
         "tags": ["Admin"],
