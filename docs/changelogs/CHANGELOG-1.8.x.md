@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>952 Add startAISession endpoint with ephemeral Gemini tokens for direct AI communication</summary>
+
+[#952](../../pull/952) Add startAISession endpoint with ephemeral Gemini tokens for direct AI communication
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>949 Add TIR Details section with accordion placeholder UI to bgOverview report</summary>
 
 [#949](../../pull/949) Add TIR Details section with accordion placeholder UI to bgOverview report
