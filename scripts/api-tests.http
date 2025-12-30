@@ -1,0 +1,49 @@
+### API Test Requests for GlookoDataWebApp Azure Functions
+###
+### This file contains sample HTTP requests for testing Azure Function endpoints.
+### Use the REST Client extension in VS Code to run these requests.
+###
+### Prerequisites:
+### 1. Set @baseUrl to your Azure Function URL or local development URL
+### 2. Set @authToken to a valid ID token from Azure AD or Google authentication
+###
+
+### Variables
+@baseUrl = http://localhost:7071
+# For deployed function, use: https://glookodatawebapp-func.azurewebsites.net
+@authToken = YOUR_ID_TOKEN_HERE
+
+###############################################################################
+### GetGeminiToken - Generate ephemeral access token for Gemini Live API
+###############################################################################
+
+### Get Gemini Token (Pro users only)
+GET {{baseUrl}}/api/GetGeminiToken
+Authorization: Bearer {{authToken}}
+
+###
+### Expected Response (200 OK):
+### {
+###   "success": true,
+###   "token": "projects/.../locations/.../authTokens/...",
+###   "expiresAt": "2024-01-01T12:30:00.000Z"
+### }
+###
+
+###############################################################################
+### Admin Test AI - Test AI provider configuration (Pro users only)
+###############################################################################
+
+### Test AI Infrastructure (Key Vault access only)
+POST {{baseUrl}}/api/glookoAdmin/test-ai-key?testType=infra
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###
+
+### Test AI Full (includes AI provider test)
+POST {{baseUrl}}/api/glookoAdmin/test-ai-key?testType=full
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+###

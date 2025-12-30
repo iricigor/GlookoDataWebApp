@@ -25,3 +25,4 @@ import './functions/adminStats';
 import './functions/adminStatsUnified';
 import './functions/adminApiStats';
 import './functions/adminTestAI';
+import './functions/getGeminiToken';

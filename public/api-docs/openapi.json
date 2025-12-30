@@ -1182,6 +1182,92 @@
           }
         }
       }
+    },
+    "/GetGeminiToken": {
+      "get": {
+        "tags": ["AI"],
+        "summary": "Generate ephemeral access token for Gemini Multimodal Live API",
+        "description": "Allows Pro users to obtain ephemeral access tokens for the Gemini Multimodal Live API. The ephemeral tokens are short-lived (30 minutes by default) and secure - they ensure the master Gemini API key remains on the server and is never exposed to the client. The token is single-use for enhanced security.",
+        "operationId": "getGeminiToken",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ephemeral token generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeminiTokenResponse"
+                },
+                "example": {
+                  "success": true,
+                  "token": "projects/123456789/locations/us-central1/authTokens/abc123xyz",
+                  "expiresAt": "2024-12-30T14:00:00.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized access. Please log in again.",
+                  "errorType": "unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User is not a Pro user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Access denied. This endpoint requires Pro user access.",
+                  "errorType": "authorization"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error - Key Vault or Gemini API error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "keyVaultError": {
+                    "summary": "Key Vault access error",
+                    "value": {
+                      "error": "Failed to retrieve Gemini API key configuration",
+                      "errorType": "infrastructure",
+                      "code": "KEY_VAULT_ERROR"
+                    }
+                  },
+                  "geminiApiError": {
+                    "summary": "Gemini API error",
+                    "value": {
+                      "error": "Failed to generate ephemeral token: Gemini API error (400): Invalid request",
+                      "errorType": "provider",
+                      "code": "GEMINI_API_ERROR"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1326,6 +1412,28 @@
           "code": {
             "type": "string",
             "description": "Optional error code for specific errors"
+          }
+        }
+      },
+      "GeminiTokenResponse": {
+        "type": "object",
+        "required": ["success", "token", "expiresAt"],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates if token generation was successful",
+            "example": true
+          },
+          "token": {
+            "type": "string",
+            "description": "Ephemeral access token name to use for WebSocket authentication with Gemini Live API. This is a resource identifier that should be used as-is.",
+            "example": "projects/123456789/locations/us-central1/authTokens/abc123xyz"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Token expiration timestamp in ISO 8601 format. The token is valid for 30 minutes from generation and is single-use only.",
+            "example": "2024-12-30T14:00:00.000Z"
           }
         }
       },
