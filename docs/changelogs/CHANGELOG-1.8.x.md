@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>944 Implement GetGeminiToken Azure Function for ephemeral access tokens</summary>
+
+[#944](../../pull/944) Implement GetGeminiToken Azure Function for ephemeral access tokens
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>942 Fix KQL query for traffic statistics - use pageViews table for web traffic and HTTP status codes for error detection</summary>
 
 [#942](../../pull/942) Fix KQL query for traffic statistics - use pageViews table for web traffic and HTTP status codes for error detection
