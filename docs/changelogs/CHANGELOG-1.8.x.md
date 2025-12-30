@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>956 Fix Gemini API 404 errors and relocate GetGeminiToken endpoint</summary>
+
+[#956](../../pull/956) Fix Gemini API 404 errors and relocate GetGeminiToken endpoint
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>954 Consolidate markdown files and convert ASCII diagrams to Mermaid</summary>
 
 [#954](../../pull/954) Consolidate markdown files and convert ASCII diagrams to Mermaid
