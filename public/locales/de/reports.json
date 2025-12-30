@@ -40,7 +40,11 @@
           "title": "TIR nach Stunde",
           "placeholder": "Inhalt folgt in Kürze..."
         },
-        "analyzeButton": "Mit KI analysieren"
+        "analyzeButton": "Mit KI analysieren",
+        "analyzingButton": "Analysiere...",
+        "readingsInRange": "Messwerte im Zielbereich: {{count}}",
+        "aiResponse": "KI-Analyse",
+        "errorPrefix": "Fehler:"
       }
     },
     "dailyBG": {

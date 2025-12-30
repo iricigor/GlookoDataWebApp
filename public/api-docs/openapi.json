@@ -592,6 +592,171 @@
         }
       }
     },
+    "/ai/start-session": {
+      "post": {
+        "tags": ["AI"],
+        "summary": "Start a new AI session with test prompt",
+        "description": "Initiates an AI session for Pro users with a test system prompt and returns a temporary token for the frontend to continue the conversation. This endpoint is designed for testing the full AI flow.",
+        "operationId": "startAISession",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "testData": {
+                    "type": "string",
+                    "description": "Optional test data to include in the initial prompt"
+                  }
+                }
+              },
+              "examples": {
+                "withTestData": {
+                  "summary": "Session with test data",
+                  "value": {
+                    "testData": "Sample TIR statistics: 65% in range"
+                  }
+                },
+                "withoutTestData": {
+                  "summary": "Session without test data",
+                  "value": {}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AI session started successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "token", "sessionId", "initialPrompt"],
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "Temporary token for continuing the AI session",
+                      "example": "dXNlcl9hYmMxMjM6c2Vzc2lvbl8xNzA5MjM0NTY3ODkwXzEyMzQ1Njc4OTA6MTcwOTIzNDU2Nzg5MA=="
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "description": "Unique session identifier",
+                      "example": "session_1709234567890_abc123def456"
+                    },
+                    "initialPrompt": {
+                      "type": "string",
+                      "description": "The test system prompt that was sent to initialize the session",
+                      "example": "You are an expert endocrinologist specialized in type-1 diabetes and CGM/insulin pump data analysis..."
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "token": "dXNlcl9hYmMxMjM6c2Vzc2lvbl8xNzA5MjM0NTY3ODkwXzEyMzQ1Njc4OTA6MTcwOTIzNDU2Nzg5MA==",
+                  "sessionId": "session_1709234567890_abc123def456",
+                  "initialPrompt": "You are an expert endocrinologist specialized in type-1 diabetes and CGM/insulin pump data analysis. I am providing aggregated and anonymized data only — never guess or invent missing raw data points.\n\nThis is a test session to verify AI integration.\n\nPlease confirm you received this message and are ready to analyze diabetes-related data."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid JSON in request body",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Invalid JSON in request body",
+                  "errorType": "validation"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Unauthorized access. Please log in again.",
+                  "errorType": "unauthorized"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Not a Pro user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "This feature is only available for Pro users.",
+                  "errorType": "forbidden"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "Internal server error",
+                  "errorType": "infrastructure"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable - Storage not configured or access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "storageNotConfigured": {
+                    "summary": "Storage not configured",
+                    "value": {
+                      "error": "Service unavailable - storage not configured",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_NOT_CONFIGURED"
+                    }
+                  },
+                  "storageAccessDenied": {
+                    "summary": "Storage access denied",
+                    "value": {
+                      "error": "Service unavailable - storage access denied",
+                      "errorType": "infrastructure",
+                      "code": "STORAGE_ACCESS_DENIED"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/glookoAdmin/stats/traffic": {
       "get": {
         "tags": ["Admin"],

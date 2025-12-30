@@ -20,6 +20,7 @@ import './functions/checkFirstLogin';
 import './functions/checkProStatus';
 import './functions/userSettings';
 import './functions/aiQuery';
+import './functions/startAISession';
 import './functions/googleTokenExchange';
 import './functions/adminStats';
 import './functions/adminStatsUnified';

@@ -40,7 +40,11 @@
           "title": "TIR by hour",
           "placeholder": "Content coming soon..."
         },
-        "analyzeButton": "Analyze with AI"
+        "analyzeButton": "Analyze with AI",
+        "analyzingButton": "Analyzing...",
+        "readingsInRange": "Readings in range: {{count}}",
+        "aiResponse": "AI Analysis",
+        "errorPrefix": "Error:"
       }
     },
     "dailyBG": {
