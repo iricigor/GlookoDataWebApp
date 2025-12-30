@@ -95,7 +95,7 @@ async function generateEphemeralToken(apiKey: string): Promise<{ token: string; 
   const expireTime = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutes from now
   const newSessionExpireTime = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes to start session
 
-  const response = await fetch('https://generativelanguage.googleapis.com/v1alpha/authTokens:create', {
+  const response = await fetch('https://generativelanguage.googleapis.com/v1/authTokens:create', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
