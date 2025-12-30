@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>940 Refactor infra: flatten modules, organize docs, parameterize tags</summary>
+
+[#940](../../pull/940) Refactor infra: flatten modules, organize docs, parameterize tags
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>937 Fix: Use User-Assigned Managed Identity for Application Insights queries</summary>
 
 [#937](../../pull/937) Fix: Use User-Assigned Managed Identity for Application Insights queries
