@@ -53,6 +53,7 @@ import { AGPGraph } from '../AGPGraph';
 import { useBGOverviewStyles } from './styles';
 import { ControlBar } from './ControlBar';
 import { TimeInRangeCard } from './TimeInRangeCard';
+import { TimeInRangeDetailsCard } from './TimeInRangeDetailsCard';
 import { HbA1cEstimateCard } from './HbA1cEstimateCard';
 import { RiskAssessmentCard } from './RiskAssessmentCard';
 import { SugarmateStatsCard } from './SugarmateStatsCard';
@@ -415,6 +416,11 @@ export function BGOverviewReport({
           idToken={idToken}
           useProKeys={useProKeys}
         />
+      )}
+
+      {/* Time In Range - Details Card */}
+      {!loading && !error && tirStats.total > 0 && (
+        <TimeInRangeDetailsCard />
       )}
 
       {/* Time in Range by Period Section */}
