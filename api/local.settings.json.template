@@ -7,8 +7,7 @@
     "AZURE_CLIENT_ID": "",
     "AZURE_AD_CLIENT_ID": "",
     "GOOGLE_CLIENT_ID": "",
-    "GOOGLE_CLIENT_SECRET": "",
-    "APPLICATIONINSIGHTS_WORKSPACE_ID": ""
+    "GOOGLE_CLIENT_SECRET": ""
   },
   "Host": {
     "LocalHttpPort": 7071,

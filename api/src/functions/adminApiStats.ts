@@ -93,8 +93,11 @@ async function queryApplicationInsights(
   workspaceId: string,
   timePeriod: TimePeriod
 ): Promise<{ webCalls: number; webErrors: number; apiCalls: number; apiErrors: number }> {
-  // Initialize the Azure Monitor Logs client with managed identity
-  const credential = new DefaultAzureCredential();
+  // Initialize the Azure Monitor Logs client with User-Assigned Managed Identity
+  // DefaultAzureCredential uses AZURE_CLIENT_ID environment variable to identify the User-Assigned MI
+  const credential = new DefaultAzureCredential({
+    managedIdentityClientId: process.env.AZURE_CLIENT_ID
+  });
   const logsQueryClient = new LogsQueryClient(credential);
 
   // Determine timespan based on period
