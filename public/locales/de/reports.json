@@ -25,6 +25,22 @@
           "percentage": "100%",
           "time": "24h"
         }
+      },
+      "tirDetails": {
+        "title": "Zeit im Zielbereich - Details",
+        "byPeriod": {
+          "title": "TIR nach Zeitraum",
+          "placeholder": "Inhalt folgt in Kürze..."
+        },
+        "byDayOfWeek": {
+          "title": "TIR nach Wochentag",
+          "placeholder": "Inhalt folgt in Kürze..."
+        },
+        "byHour": {
+          "title": "TIR nach Stunde",
+          "placeholder": "Inhalt folgt in Kürze..."
+        },
+        "analyzeButton": "Mit KI analysieren"
       }
     },
     "dailyBG": {

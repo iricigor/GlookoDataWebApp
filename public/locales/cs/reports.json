@@ -25,6 +25,22 @@
           "percentage": "100%",
           "time": "24h"
         }
+      },
+      "tirDetails": {
+        "title": "Čas v rozmezí - Detaily",
+        "byPeriod": {
+          "title": "TIR podle období",
+          "placeholder": "Obsah bude brzy k dispozici..."
+        },
+        "byDayOfWeek": {
+          "title": "TIR podle dne v týdnu",
+          "placeholder": "Obsah bude brzy k dispozici..."
+        },
+        "byHour": {
+          "title": "TIR podle hodiny",
+          "placeholder": "Obsah bude brzy k dispozici..."
+        },
+        "analyzeButton": "Analyzovat s AI"
       }
     },
     "dailyBG": {

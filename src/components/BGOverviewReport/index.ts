@@ -5,6 +5,7 @@
 
 export { BGOverviewReport } from './BGOverviewReport';
 export { TimeInRangeCard } from './TimeInRangeCard';
+export { TimeInRangeDetailsCard } from './TimeInRangeDetailsCard';
 export { HbA1cEstimateCard } from './HbA1cEstimateCard';
 export { RiskAssessmentCard } from './RiskAssessmentCard';
 export { SugarmateStatsCard } from './SugarmateStatsCard';
