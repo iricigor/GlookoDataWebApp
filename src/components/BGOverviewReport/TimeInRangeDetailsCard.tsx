@@ -421,7 +421,7 @@ export function TimeInRangeDetailsCard({
                   ))}
                 </div>
                 <Text className={styles.chartDescription}>
-                  Visualize hourly glucose patterns to identify trends and optimize management strategies.
+                  {t('reports.bgOverview.tirDetails.byHour.chartDescription')}
                 </Text>
               </div>
             ) : (

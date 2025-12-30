@@ -41,7 +41,8 @@
         "byHour": {
           "title": "TIR nach Stunde",
           "placeholder": "Inhalt folgt in Kürze...",
-          "noData": "Keine Stundendaten verfügbar"
+          "noData": "Keine Stundendaten verfügbar",
+          "chartDescription": "Visualisieren Sie stündliche Glukosemuster, um Trends zu erkennen und Managementstrategien zu optimieren."
         },
         "analyzeButton": "Mit KI analysieren",
         "analyzingButton": "Analysiere...",

@@ -41,7 +41,8 @@
         "byHour": {
           "title": "TIR podle hodiny",
           "placeholder": "Obsah bude brzy k dispozici...",
-          "noData": "Žádná hodinová data nejsou k dispozici"
+          "noData": "Žádná hodinová data nejsou k dispozici",
+          "chartDescription": "Vizualizujte hodinové vzorce glukózy pro identifikaci trendů a optimalizaci strategií řízení."
         },
         "analyzeButton": "Analyzovat s AI",
         "analyzingButton": "Analyzuji...",

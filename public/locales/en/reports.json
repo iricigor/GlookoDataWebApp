@@ -41,7 +41,8 @@
         "byHour": {
           "title": "TIR by Hour",
           "placeholder": "Content coming soon...",
-          "noData": "No hourly data available"
+          "noData": "No hourly data available",
+          "chartDescription": "Visualize hourly glucose patterns to identify trends and optimize management strategies."
         },
         "analyzeButton": "Analyze with AI",
         "analyzingButton": "Analyzing...",
