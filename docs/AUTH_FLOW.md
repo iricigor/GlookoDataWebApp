@@ -8,40 +8,20 @@ The application uses the **Authorization Code Flow** for Google authentication, 
 
 ## Flow Diagram
 
-```
-┌─────────┐                                  ┌──────────┐
-│ Browser │                                  │  Google  │
-│ (React) │                                  │  OAuth   │
-└────┬────┘                                  └────┬─────┘
-     │                                            │
-     │ 1. Click "Sign in with Google"            │
-     │──────────────────────────────────────────>│
-     │                                            │
-     │ 2. Redirect to Google login               │
-     │<──────────────────────────────────────────│
-     │                                            │
-     │ 3. User authenticates                     │
-     │──────────────────────────────────────────>│
-     │                                            │
-     │ 4. Redirect back with auth code           │
-     │<──────────────────────────────────────────│
-     │                                            │
-     ▼                                            │
-┌─────────────────┐                              │
-│ Azure Functions │                              │
-│   (Backend)     │                              │
-└────┬────────────┘                              │
-     │                                            │
-     │ 5. Exchange code for tokens               │
-     │───────────────────────────────────────────>│
-     │    (with client_id + client_secret)       │
-     │                                            │
-     │ 6. Return access_token + id_token         │
-     │<───────────────────────────────────────────│
-     │                                            │
-     │ 7. Return tokens to browser               │
-     │──────────────────────────────────────────>│
-     │                                            │
+```mermaid
+sequenceDiagram
+    participant Browser as Browser<br/>(React)
+    participant Backend as Azure Functions<br/>(Backend)
+    participant Google as Google<br/>OAuth
+
+    Browser->>Google: 1. Click "Sign in with Google"
+    Google->>Browser: 2. Redirect to Google login
+    Browser->>Google: 3. User authenticates
+    Google->>Browser: 4. Redirect back with auth code
+    Browser->>Backend: 5. Exchange code for tokens<br/>(with client_id + client_secret)
+    Backend->>Google: Request tokens
+    Google->>Backend: 6. Return access_token + id_token
+    Backend->>Browser: 7. Return tokens to browser
 ```
 
 ## Redirect URIs

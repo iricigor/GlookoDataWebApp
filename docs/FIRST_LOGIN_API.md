@@ -8,11 +8,10 @@ The first login check API allows the application to determine if a user is loggi
 
 ## Architecture
 
-```
-┌─────────────────┐      ┌──────────────────┐      ┌─────────────────────┐
-│   React App     │─────▶│  Azure Function  │─────▶│  Table Storage      │
-│  (Frontend)     │◀─────│    (API)         │◀─────│  (UserSettings)     │
-└─────────────────┘      └──────────────────┘      └─────────────────────┘
+```mermaid
+graph LR
+    A["React App<br/>(Frontend)"] <-->|API calls| B["Azure Function<br/>(API)"]
+    B <-->|Data storage| C["Table Storage<br/>(UserSettings)"]
 ```
 
 ## Flow

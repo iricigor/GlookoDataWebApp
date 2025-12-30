@@ -15,32 +15,20 @@ The infrastructure consists of:
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                   Resource Group (Glooko)                    │
-│                                                               │
-│  ┌──────────────────┐        ┌──────────────────┐           │
-│  │ Static Web App   │  /api  │  Function App    │           │
-│  │  (GlookoData)    │───────▶│ (Node.js 20)     │           │
-│  │                  │        │                  │           │
-│  └──────────────────┘        └────────┬─────────┘           │
-│                                       │                      │
-│                                       │ Uses UAMI            │
-│                                       ▼                      │
-│              ┌────────────────────────────────────┐          │
-│              │  User-Assigned Managed Identity    │          │
-│              │  (glookodatawebapp-identity)       │          │
-│              └────────┬───────────────────┬───────┘          │
-│                       │                   │                  │
-│           RBAC Roles  │                   │ RBAC Roles       │
-│                       ▼                   ▼                  │
-│  ┌──────────────────────┐    ┌──────────────────────┐       │
-│  │  Storage Account     │    │   Key Vault          │       │
-│  │  - UserSettings      │    │   - PerplexityApiKey │       │
-│  │  - ProUsers          │    │   - GeminiApiKey     │       │
-│  │  - AIQueryLogs       │    │   - google-client-*  │       │
-│  └──────────────────────┘    └──────────────────────┘       │
-└───────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph RG["Resource Group (Glooko)"]
+        SWA["Static Web App<br/>(GlookoData)"]
+        FA["Function App<br/>(Node.js 20)"]
+        UAMI["User-Assigned Managed Identity<br/>(glookodatawebapp-identity)"]
+        SA["Storage Account<br/>- UserSettings<br/>- ProUsers<br/>- AIQueryLogs"]
+        KV["Key Vault<br/>- PerplexityApiKey<br/>- GeminiApiKey<br/>- google-client-*"]
+        
+        SWA -->|"/api"| FA
+        FA -->|"Uses UAMI"| UAMI
+        UAMI -->|"RBAC Roles"| SA
+        UAMI -->|"RBAC Roles"| KV
+    end
 ```
 
 ## Files
