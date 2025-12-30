@@ -50,6 +50,10 @@ export function TimeInRangeDetailsCard({}: TimeInRangeDetailsCardProps) {
     setError('');
     setAiResponse('');
     
+    // Create AbortController for cleanup
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), 30000); // 30 second timeout
+    
     try {
       // Step 1: Start AI session - backend sends initial prompt to Gemini and returns ephemeral token
       const testData = `Readings in range: ${mockReadingsInRange}`;
@@ -58,6 +62,7 @@ export function TimeInRangeDetailsCard({}: TimeInRangeDetailsCardProps) {
       if (!sessionResult.success) {
         setError(sessionResult.error || 'Failed to start AI session');
         setIsAnalyzing(false);
+        clearTimeout(timeoutId);
         return;
       }
       
@@ -70,6 +75,7 @@ export function TimeInRangeDetailsCard({}: TimeInRangeDetailsCardProps) {
       if (!sessionResult.token) {
         setError('No token received from session');
         setIsAnalyzing(false);
+        clearTimeout(timeoutId);
         return;
       }
       
@@ -100,8 +106,11 @@ export function TimeInRangeDetailsCard({}: TimeInRangeDetailsCardProps) {
               maxOutputTokens: 4000,
             },
           }),
+          signal: abortController.signal,
         }
       );
+      
+      clearTimeout(timeoutId);
       
       if (!geminiResponse.ok) {
         // Log full error for debugging, show generic message to user
@@ -121,7 +130,16 @@ export function TimeInRangeDetailsCard({}: TimeInRangeDetailsCardProps) {
       }
       
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      clearTimeout(timeoutId);
+      if (err instanceof Error) {
+        if (err.name === 'AbortError') {
+          setError('Request timed out. Please try again.');
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError('An unexpected error occurred');
+      }
     } finally {
       setIsAnalyzing(false);
     }
@@ -190,7 +208,7 @@ export function TimeInRangeDetailsCard({}: TimeInRangeDetailsCardProps) {
       
       {/* Display error if any */}
       {error && (
-        <div style={{ marginTop: '12px', color: 'red' }}>
+        <div className={styles.errorContainer}>
           <Text>
             {t('reports.bgOverview.tirDetails.errorPrefix')} {error}
           </Text>
@@ -199,11 +217,11 @@ export function TimeInRangeDetailsCard({}: TimeInRangeDetailsCardProps) {
       
       {/* Display AI response */}
       {aiResponse && (
-        <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-          <Text weight="semibold" style={{ display: 'block', marginBottom: '8px' }}>
+        <div className={styles.aiResponseContainer}>
+          <Text weight="semibold" className={styles.aiResponseTitle}>
             {t('reports.bgOverview.tirDetails.aiResponse')}
           </Text>
-          <Text style={{ whiteSpace: 'pre-wrap' }}>
+          <Text className={styles.aiResponseText}>
             {aiResponse}
           </Text>
         </div>

@@ -63,6 +63,7 @@ interface GeminiTokenApiResponse {
 
 /**
  * Gemini API response structure
+ * Simplified version compatible with src/utils/api/geminiApi.ts GeminiResponse
  */
 interface GeminiResponse {
   candidates: Array<{
@@ -70,14 +71,31 @@ interface GeminiResponse {
       parts: Array<{
         text: string;
       }>;
+      role?: string;
     };
+    finishReason?: string;
+    index?: number;
+    safetyRatings?: Array<{
+      category: string;
+      probability: string;
+    }>;
   }>;
+  usageMetadata?: {
+    promptTokenCount: number;
+    candidatesTokenCount: number;
+    totalTokenCount: number;
+  };
 }
 
 /**
  * Default Gemini API Key secret name in Key Vault
  */
 const DEFAULT_GEMINI_API_KEY_SECRET = 'AI-API-Key';
+
+/**
+ * Request timeout for Gemini API calls (20 seconds)
+ */
+const GEMINI_API_TIMEOUT = 20000;
 
 /**
  * URL-encode a string for use as RowKey
@@ -113,30 +131,44 @@ async function generateEphemeralToken(apiKey: string): Promise<{ token: string; 
   const expireTime = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutes from now
   const newSessionExpireTime = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes to start session
 
-  const response = await fetch('https://generativelanguage.googleapis.com/v1/authTokens:create', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey,
-    },
-    body: JSON.stringify({
-      uses: 1, // Single-use token for security
-      expireTime: expireTime.toISOString(),
-      newSessionExpireTime: newSessionExpireTime.toISOString(),
-    }),
-  });
+  const abortController = new AbortController();
+  const timeoutId = setTimeout(() => abortController.abort(), GEMINI_API_TIMEOUT);
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API error (${response.status}): ${errorText}`);
+  try {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1/authTokens:create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
+      body: JSON.stringify({
+        uses: 1, // Single-use token for security
+        expireTime: expireTime.toISOString(),
+        newSessionExpireTime: newSessionExpireTime.toISOString(),
+      }),
+      signal: abortController.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API error (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json() as GeminiTokenApiResponse;
+    
+    return {
+      token: data.name,
+      expiresAt: data.expireTime,
+    };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Gemini API timeout: Failed to generate ephemeral token');
+    }
+    throw error;
   }
-
-  const data = await response.json() as GeminiTokenApiResponse;
-  
-  return {
-    token: data.name,
-    expiresAt: data.expireTime,
-  };
 }
 
 /**
@@ -149,44 +181,58 @@ async function generateEphemeralToken(apiKey: string): Promise<{ token: string; 
 async function sendInitialPromptToGemini(apiKey: string, prompt: string): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`;
   
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey,
-    },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [
-            {
-              text: `${AI_SYSTEM_PROMPT}\n\n${prompt}`,
-            },
-          ],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.2,
-        maxOutputTokens: 4000,
-        topP: 0.8,
-        topK: 40,
+  const abortController = new AbortController();
+  const timeoutId = setTimeout(() => abortController.abort(), GEMINI_API_TIMEOUT);
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
       },
-    }),
-  });
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: `${AI_SYSTEM_PROMPT}\n\n${prompt}`,
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 4000,
+          topP: 0.8,
+          topK: 40,
+        },
+      }),
+      signal: abortController.signal,
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API error (${response.status}): ${errorText}`);
-  }
+    clearTimeout(timeoutId);
 
-  const data = await response.json() as GeminiResponse;
-  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  
-  if (!content) {
-    throw new Error('Invalid response from Gemini API - no content');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API error (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json() as GeminiResponse;
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!content) {
+      throw new Error('Invalid response from Gemini API - no content');
+    }
+    
+    return content;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Gemini API timeout: Failed to send initial prompt');
+    }
+    throw error;
   }
-  
-  return content;
 }
 
 /**

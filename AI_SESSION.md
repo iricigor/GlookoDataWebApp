@@ -10,14 +10,11 @@ sequenceDiagram
     participant User
     participant Frontend
     participant Backend as Backend API<br/>/api/ai/start-session
-    participant KeyVault as Azure Key Vault
     participant Gemini as Gemini AI
 
     User->>Frontend: Click "Analyze with AI"
     Frontend->>Backend: POST /api/ai/start-session<br/>{testData}
     Backend->>Backend: Validate Pro user
-    Backend->>KeyVault: Get Gemini API key
-    KeyVault-->>Backend: API key
     Backend->>Gemini: Generate ephemeral token
     Gemini-->>Backend: {token, expiresAt}
     Backend->>Gemini: Send initial prompt
@@ -25,7 +22,6 @@ sequenceDiagram
     Backend-->>Frontend: {token, expiresAt, initialResponse}
     Frontend->>User: Display initial response
     
-    Note over Frontend,Gemini: Additional data sent directly to Gemini
     Frontend->>Gemini: POST with additional data<br/>Headers: x-goog-api-key: ephemeralToken
     Gemini-->>Frontend: Additional AI response
     Frontend->>User: Display additional response
