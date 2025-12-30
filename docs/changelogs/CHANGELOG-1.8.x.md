@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>935 Fix missing Azure Functions imports causing 404s on deployed endpoints</summary>
+
+[#935](../../pull/935) Fix missing Azure Functions imports causing 404s on deployed endpoints
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>933 Add missing Azure resource tags to prevent deletion in what-if</summary>
 
 [#933](../../pull/933) Add missing Azure resource tags to prevent deletion in what-if
