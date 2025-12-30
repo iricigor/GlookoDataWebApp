@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>958 Rename API endpoints and reorganize endpoint groups</summary>
+
+[#958](../../pull/958) Rename API endpoints and reorganize endpoint groups
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>956 Fix Gemini API 404 errors and relocate GetGeminiToken endpoint</summary>
 
 [#956](../../pull/956) Fix Gemini API 404 errors and relocate GetGeminiToken endpoint
