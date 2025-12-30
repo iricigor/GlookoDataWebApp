@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>954 Consolidate markdown files and convert ASCII diagrams to Mermaid</summary>
+
+[#954](../../pull/954) Consolidate markdown files and convert ASCII diagrams to Mermaid
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>952 Add startAISession endpoint with ephemeral Gemini tokens for direct AI communication</summary>
 
 [#952](../../pull/952) Add startAISession endpoint with ephemeral Gemini tokens for direct AI communication
