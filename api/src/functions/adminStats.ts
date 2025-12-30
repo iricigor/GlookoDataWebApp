@@ -3,7 +3,7 @@
  * 
  * These functions provide administrative statistics for Pro users.
  * 
- * GET /api/glookoAdmin/stats/logged-in-users - Get count of logged-in users and Pro users
+ * GET /api/stats/logged-in-users - Get count of logged-in users and Pro users
  * 
  * Headers:
  *   - Authorization: Bearer <id_token> (required)
@@ -271,7 +271,7 @@ async function getLoggedInUsersCount(request: HttpRequest, context: InvocationCo
 // Register the function with Azure Functions v4
 app.http('adminStatsLoggedInUsers', {
   methods: ['GET'],
-  route: 'glookoAdmin/stats/logged-in-users',
+  route: 'stats/logged-in-users',
   authLevel: 'anonymous', // We handle auth manually via Bearer token
   handler: getLoggedInUsersCount,
 });

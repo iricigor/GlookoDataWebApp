@@ -60,3 +60,4 @@ infra/**/*.json
 **/CGM Records.zip
 CGM Records.zip
 .env.local
+public/api-docs/openapi.json.backup

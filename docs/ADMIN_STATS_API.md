@@ -41,7 +41,7 @@ graph LR
 
 1. Pro user logs in via Microsoft Authentication
 2. Frontend verifies Pro status via `/api/user/check-pro-status`
-3. Admin page automatically calls `/api/glookoAdmin/stats/logged-in-users` with ID token
+3. Admin page automatically calls `/api/stats/logged-in-users` with ID token
 4. Azure Function validates token and checks Pro user status
 5. Function queries UserSettings table to count users
 6. Response returns aggregated count
@@ -49,7 +49,7 @@ graph LR
 
 ## API Endpoints
 
-### GET /api/glookoAdmin/stats/logged-in-users
+### GET /api/stats/logged-in-users
 
 Returns the total count of users who have logged in at least once.
 
@@ -86,9 +86,9 @@ Returns the total count of users who have logged in at least once.
 
 These endpoints are planned but not yet implemented:
 
-- `GET /api/glookoAdmin/stats/pro-users` - Count of Pro users
-- `GET /api/glookoAdmin/stats/api-calls` - Total API call count
-- `GET /api/glookoAdmin/stats/api-errors` - Total API error count
+- `GET /api/stats/pro-users` - Count of Pro users
+- `GET /api/stats/api-calls` - Total API call count
+- `GET /api/stats/api-errors` - Total API error count
 
 ## Implementation Details
 
@@ -279,11 +279,11 @@ All requests include:
 
 Example log entry:
 ```
-[abc123de] GET /api/glookoAdmin/stats/logged-in-users - Request completed successfully (200) in 125ms
+[abc123de] GET /api/stats/logged-in-users - Request completed successfully (200) in 125ms
 {
   correlationId: "abc123de",
   method: "GET",
-  path: "/api/glookoAdmin/stats/logged-in-users",
+  path: "/api/stats/logged-in-users",
   statusCode: 200,
   durationMs: 125,
   userId: "user-guid",

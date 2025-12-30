@@ -62,7 +62,7 @@ export async function getLoggedInUsersCount(
   idToken: string,
   config: AdminStatsApiConfig = defaultConfig
 ): Promise<LoggedInUsersCountResult> {
-  const endpoint = `${config.baseUrl}/glookoAdmin/stats/logged-in-users`;
+  const endpoint = `${config.baseUrl}/stats/logged-in-users`;
   const apiLogger = createApiLogger(endpoint);
   
   // Validate ID token

@@ -29,8 +29,8 @@
       "description": "AI analysis operations for Pro users"
     },
     {
-      "name": "Admin",
-      "description": "Administrative operations for Pro users"
+      "name": "Stats",
+      "description": "Statistics operations for Pro users"
     }
   ],
   "security": [
@@ -41,7 +41,9 @@
   "paths": {
     "/user/check-first-login": {
       "get": {
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "summary": "Check if user is logging in for the first time",
         "description": "Checks if a user is logging in for the first time by querying the UserSettings table in Azure Table Storage. If it's a first login, creates a new user record. If returning user, updates the last login date.",
         "operationId": "checkFirstLogin",
@@ -138,9 +140,11 @@
     },
     "/user/check-pro-status": {
       "get": {
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "summary": "Check if user is a pro user",
-        "description": "Checks if a user is a pro user by querying the ProUsers table in Azure Table Storage. Pro users receive special features and are indicated with a ✨ symbol.",
+        "description": "Checks if a user is a pro user by querying the ProUsers table in Azure Table Storage. Pro users receive special features and are indicated with a \u2728 symbol.",
         "operationId": "checkProStatus",
         "security": [
           {
@@ -235,7 +239,9 @@
     },
     "/user/settings": {
       "get": {
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "summary": "Get user settings",
         "description": "Retrieves the user's saved settings from Azure Table Storage.",
         "operationId": "getUserSettings",
@@ -321,7 +327,9 @@
         }
       },
       "put": {
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "summary": "Save user settings",
         "description": "Saves the user's settings to Azure Table Storage. Creates or updates the user record.",
         "operationId": "saveUserSettings",
@@ -419,7 +427,9 @@
     },
     "/ai/query": {
       "post": {
-        "tags": ["AI"],
+        "tags": [
+          "AI"
+        ],
         "summary": "Query AI providers with diabetes-related prompts",
         "description": "Allows Pro users to query AI providers (Perplexity, Gemini, Grok, or DeepSeek) through the backend, keeping API keys secure in Azure Key Vault. The backend automatically selects the provider based on the AI_PROVIDER environment variable. The function validates the user's authentication token, verifies Pro user status, validates that the prompt is diabetes-related, and makes the AI API call on behalf of the user. Implements rate limiting (50 requests per hour per user) and abuse detection.",
         "operationId": "aiQuery",
@@ -594,7 +604,9 @@
     },
     "/ai/start-session": {
       "post": {
-        "tags": ["AI"],
+        "tags": [
+          "AI"
+        ],
         "summary": "Start a new AI session with test prompt",
         "description": "Initiates an AI session for Pro users by sending a test prompt to Gemini AI and returns an ephemeral token. The backend sends the initial prompt to Gemini, and the frontend can use the returned token to send additional data directly to Gemini AI (bypassing our backend). This demonstrates the full AI flow where additional data never comes to our API.",
         "operationId": "startAISession",
@@ -638,7 +650,12 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["success", "token", "expiresAt", "initialResponse"],
+                  "required": [
+                    "success",
+                    "token",
+                    "expiresAt",
+                    "initialResponse"
+                  ],
                   "properties": {
                     "success": {
                       "type": "boolean",
@@ -758,9 +775,11 @@
         }
       }
     },
-    "/glookoAdmin/stats/traffic": {
+    "/stats/traffic": {
       "get": {
-        "tags": ["Admin"],
+        "tags": [
+          "Stats"
+        ],
         "summary": "Get API and web traffic statistics",
         "description": "Returns API and web traffic statistics from Application Insights for the specified time period. This endpoint is only accessible to Pro users and provides counts of web requests, web errors, API requests, and API errors.",
         "operationId": "getTrafficStats",
@@ -777,7 +796,10 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["1hour", "1day"],
+              "enum": [
+                "1hour",
+                "1day"
+              ],
               "default": "1hour"
             }
           }
@@ -892,9 +914,11 @@
         }
       }
     },
-    "/glookoAdmin/stats": {
+    "/stats/unified": {
       "get": {
-        "tags": ["Admin"],
+        "tags": [
+          "Stats"
+        ],
         "summary": "Get all administrative statistics (unified endpoint)",
         "description": "Returns all administrative statistics in a single call: logged-in users count, Pro users count, and API/Web statistics from Application Insights. This endpoint is only accessible to Pro users and provides a convenient way to fetch all admin statistics at once.",
         "operationId": "getUnifiedAdminStats",
@@ -911,7 +935,10 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["1hour", "1day"],
+              "enum": [
+                "1hour",
+                "1day"
+              ],
               "default": "1hour"
             }
           }
@@ -1042,9 +1069,11 @@
         }
       }
     },
-    "/glookoAdmin/stats/logged-in-users": {
+    "/stats/logged-in-users": {
       "get": {
-        "tags": ["Admin"],
+        "tags": [
+          "Stats"
+        ],
         "summary": "Get count of logged-in users",
         "description": "Returns the total count of users who have logged into the application at least once. This endpoint is only accessible to Pro users and provides administrative statistics. The count is retrieved from the UserSettings table in Azure Table Storage.",
         "operationId": "getLoggedInUsersCount",
@@ -1153,9 +1182,11 @@
         }
       }
     },
-    "/glookoAdmin/test-ai-key": {
+    "/ai/test-ai-key": {
       "post": {
-        "tags": ["Admin"],
+        "tags": [
+          "AI"
+        ],
         "summary": "Test Pro AI key configuration",
         "description": "Allows Pro users with admin access to test the Pro AI key configuration. Supports two test modes: **Infrastructure test** (verifies Key Vault access and environment configuration) and **Full test** (includes infrastructure test plus sends a test query to the configured AI provider). The AI provider is determined by the backend's AI_PROVIDER environment variable.",
         "operationId": "testProAIKey",
@@ -1172,7 +1203,10 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["infra", "full"],
+              "enum": [
+                "infra",
+                "full"
+              ],
               "default": "full"
             }
           }
@@ -1351,7 +1385,9 @@
     },
     "/ai/GetGeminiToken": {
       "get": {
-        "tags": ["AI"],
+        "tags": [
+          "AI"
+        ],
         "summary": "Generate ephemeral access token for Gemini Multimodal Live API",
         "description": "Allows Pro users to obtain ephemeral access tokens for the Gemini Multimodal Live API. The ephemeral tokens are short-lived (30 minutes by default) and secure - they ensure the master Gemini API key remains on the server and is never exposed to the client. The token is single-use for enhanced security.",
         "operationId": "getGeminiToken",
@@ -1448,7 +1484,10 @@
     "schemas": {
       "CheckFirstLoginResponse": {
         "type": "object",
-        "required": ["isFirstLogin", "userId"],
+        "required": [
+          "isFirstLogin",
+          "userId"
+        ],
         "properties": {
           "isFirstLogin": {
             "type": "boolean",
@@ -1462,7 +1501,10 @@
       },
       "CheckProStatusResponse": {
         "type": "object",
-        "required": ["isProUser", "userId"],
+        "required": [
+          "isProUser",
+          "userId"
+        ],
         "properties": {
           "isProUser": {
             "type": "boolean",
@@ -1476,26 +1518,48 @@
       },
       "CloudUserSettings": {
         "type": "object",
-        "required": ["themeMode", "exportFormat", "responseLanguage", "glucoseUnit", "insulinDuration", "glucoseThresholds"],
+        "required": [
+          "themeMode",
+          "exportFormat",
+          "responseLanguage",
+          "glucoseUnit",
+          "insulinDuration",
+          "glucoseThresholds"
+        ],
         "properties": {
           "themeMode": {
             "type": "string",
-            "enum": ["light", "dark", "system"],
+            "enum": [
+              "light",
+              "dark",
+              "system"
+            ],
             "description": "UI theme preference"
           },
           "exportFormat": {
             "type": "string",
-            "enum": ["csv", "tsv"],
+            "enum": [
+              "csv",
+              "tsv"
+            ],
             "description": "Data export format preference"
           },
           "responseLanguage": {
             "type": "string",
-            "enum": ["english", "czech", "german", "serbian"],
+            "enum": [
+              "english",
+              "czech",
+              "german",
+              "serbian"
+            ],
             "description": "Language for AI responses"
           },
           "glucoseUnit": {
             "type": "string",
-            "enum": ["mmol/L", "mg/dL"],
+            "enum": [
+              "mmol/L",
+              "mg/dL"
+            ],
             "description": "Preferred glucose unit"
           },
           "insulinDuration": {
@@ -1509,7 +1573,12 @@
       },
       "GlucoseThresholds": {
         "type": "object",
-        "required": ["veryHigh", "high", "low", "veryLow"],
+        "required": [
+          "veryHigh",
+          "high",
+          "low",
+          "veryLow"
+        ],
         "properties": {
           "veryHigh": {
             "type": "number",
@@ -1531,7 +1600,9 @@
       },
       "GetSettingsResponse": {
         "type": "object",
-        "required": ["settings"],
+        "required": [
+          "settings"
+        ],
         "properties": {
           "settings": {
             "$ref": "#/components/schemas/CloudUserSettings"
@@ -1540,7 +1611,9 @@
       },
       "SaveSettingsRequest": {
         "type": "object",
-        "required": ["settings"],
+        "required": [
+          "settings"
+        ],
         "properties": {
           "settings": {
             "$ref": "#/components/schemas/CloudUserSettings"
@@ -1554,7 +1627,9 @@
       },
       "SuccessResponse": {
         "type": "object",
-        "required": ["success"],
+        "required": [
+          "success"
+        ],
         "properties": {
           "success": {
             "type": "boolean",
@@ -1564,7 +1639,10 @@
       },
       "ErrorResponse": {
         "type": "object",
-        "required": ["error", "errorType"],
+        "required": [
+          "error",
+          "errorType"
+        ],
         "properties": {
           "error": {
             "type": "string",
@@ -1572,7 +1650,12 @@
           },
           "errorType": {
             "type": "string",
-            "enum": ["unauthorized", "not_found", "validation", "infrastructure"],
+            "enum": [
+              "unauthorized",
+              "not_found",
+              "validation",
+              "infrastructure"
+            ],
             "description": "Type of error for client handling"
           },
           "code": {
@@ -1583,7 +1666,11 @@
       },
       "GeminiTokenResponse": {
         "type": "object",
-        "required": ["success", "token", "expiresAt"],
+        "required": [
+          "success",
+          "token",
+          "expiresAt"
+        ],
         "properties": {
           "success": {
             "type": "boolean",
@@ -1605,7 +1692,9 @@
       },
       "AIQueryRequest": {
         "type": "object",
-        "required": ["prompt"],
+        "required": [
+          "prompt"
+        ],
         "properties": {
           "prompt": {
             "type": "string",
@@ -1617,7 +1706,11 @@
       },
       "AIQueryResponse": {
         "type": "object",
-        "required": ["success", "content", "provider"],
+        "required": [
+          "success",
+          "content",
+          "provider"
+        ],
         "properties": {
           "success": {
             "type": "boolean",
@@ -1638,7 +1731,9 @@
       },
       "LoggedInUsersCountResponse": {
         "type": "object",
-        "required": ["count"],
+        "required": [
+          "count"
+        ],
         "properties": {
           "count": {
             "type": "integer",
@@ -1654,7 +1749,13 @@
       },
       "TrafficStatsResponse": {
         "type": "object",
-        "required": ["webCalls", "webErrors", "apiCalls", "apiErrors", "timePeriod"],
+        "required": [
+          "webCalls",
+          "webErrors",
+          "apiCalls",
+          "apiErrors",
+          "timePeriod"
+        ],
         "properties": {
           "webCalls": {
             "type": "integer",
@@ -1678,7 +1779,10 @@
           },
           "timePeriod": {
             "type": "string",
-            "enum": ["1hour", "1day"],
+            "enum": [
+              "1hour",
+              "1day"
+            ],
             "description": "Time period for the statistics",
             "example": "1hour"
           }
@@ -1686,7 +1790,15 @@
       },
       "UnifiedAdminStatsResponse": {
         "type": "object",
-        "required": ["loggedInUsersCount", "proUsersCount", "webCalls", "webErrors", "apiCalls", "apiErrors", "timePeriod"],
+        "required": [
+          "loggedInUsersCount",
+          "proUsersCount",
+          "webCalls",
+          "webErrors",
+          "apiCalls",
+          "apiErrors",
+          "timePeriod"
+        ],
         "properties": {
           "loggedInUsersCount": {
             "type": "integer",
@@ -1720,7 +1832,10 @@
           },
           "timePeriod": {
             "type": "string",
-            "enum": ["1hour", "1day"],
+            "enum": [
+              "1hour",
+              "1day"
+            ],
             "description": "Time period for API and Web statistics",
             "example": "1hour"
           },
@@ -1743,7 +1858,11 @@
       },
       "AdminTestAIResponse": {
         "type": "object",
-        "required": ["success", "testType", "provider"],
+        "required": [
+          "success",
+          "testType",
+          "provider"
+        ],
         "properties": {
           "success": {
             "type": "boolean",
@@ -1752,7 +1871,10 @@
           },
           "testType": {
             "type": "string",
-            "enum": ["infra", "full"],
+            "enum": [
+              "infra",
+              "full"
+            ],
             "description": "Type of test that was performed",
             "example": "full"
           },

@@ -58,7 +58,7 @@ describe('adminStatsApi', () => {
         statusCode: 200,
       });
       expect(mockFetch).toHaveBeenCalledWith(
-        '/api/glookoAdmin/stats/logged-in-users',
+        '/api/stats/logged-in-users',
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({
@@ -204,7 +204,7 @@ describe('adminStatsApi', () => {
       });
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://custom-api.example.com/api/glookoAdmin/stats/logged-in-users',
+        'https://custom-api.example.com/api/stats/logged-in-users',
         expect.any(Object)
       );
     });

@@ -82,7 +82,7 @@ export async function getUnifiedAdminStats(
   timePeriod: TimePeriod = '1hour',
   config: UnifiedAdminStatsApiConfig = defaultConfig
 ): Promise<UnifiedAdminStatsResult> {
-  const endpoint = `${config.baseUrl}/glookoAdmin/stats?timePeriod=${timePeriod}`;
+  const endpoint = `${config.baseUrl}/stats/unified?timePeriod=${timePeriod}`;
   const apiLogger = createApiLogger(endpoint);
   
   // Validate ID token

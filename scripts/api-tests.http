@@ -35,14 +35,14 @@ Authorization: Bearer {{authToken}}
 ###############################################################################
 
 ### Test AI Infrastructure (Key Vault access only)
-POST {{baseUrl}}/api/glookoAdmin/test-ai-key?testType=infra
+POST {{baseUrl}}/api/ai/test-ai-key?testType=infra
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 ###
 
 ### Test AI Full (includes AI provider test)
-POST {{baseUrl}}/api/glookoAdmin/test-ai-key?testType=full
+POST {{baseUrl}}/api/ai/test-ai-key?testType=full
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 

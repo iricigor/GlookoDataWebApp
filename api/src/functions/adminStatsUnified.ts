@@ -3,7 +3,7 @@
  * 
  * This function provides all administrative statistics in a single endpoint for Pro users.
  * 
- * GET /api/glookoAdmin/stats
+ * GET /api/stats/unified
  * 
  * Headers:
  *   - Authorization: Bearer <id_token> (required)
@@ -405,7 +405,7 @@ async function getUnifiedAdminStats(request: HttpRequest, context: InvocationCon
 // Register the function with Azure Functions v4
 app.http('adminStatsUnified', {
   methods: ['GET'],
-  route: 'glookoAdmin/stats',
+  route: 'stats/unified',
   authLevel: 'anonymous',
   handler: getUnifiedAdminStats,
 });

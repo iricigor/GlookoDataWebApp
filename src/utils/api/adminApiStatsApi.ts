@@ -72,7 +72,7 @@ export async function getApiStats(
   timePeriod: TimePeriod = '1hour',
   config: AdminApiStatsApiConfig = defaultConfig
 ): Promise<ApiStatsResult> {
-  const endpoint = `${config.baseUrl}/glookoAdmin/stats/traffic?timePeriod=${timePeriod}`;
+  const endpoint = `${config.baseUrl}/stats/traffic?timePeriod=${timePeriod}`;
   const apiLogger = createApiLogger(endpoint);
   
   // Validate ID token
