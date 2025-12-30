@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>949 Add TIR Details section with accordion placeholder UI to bgOverview report</summary>
+
+[#949](../../pull/949) Add TIR Details section with accordion placeholder UI to bgOverview report
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>946 Add path filters to skip unit tests on documentation-only PRs</summary>
 
 [#946](../../pull/946) Add path filters to skip unit tests on documentation-only PRs
