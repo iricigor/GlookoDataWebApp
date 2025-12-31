@@ -29,16 +29,20 @@
       "tirDetails": {
         "title": "Time In Range - Details",
         "byPeriod": {
-          "title": "TIR by period",
-          "placeholder": "Content coming soon..."
+          "title": "TIR by Period",
+          "placeholder": "Content coming soon...",
+          "noData": "No period data available"
         },
         "byDayOfWeek": {
-          "title": "TIR by day of week",
-          "placeholder": "Content coming soon..."
+          "title": "TIR by Weekday",
+          "placeholder": "Content coming soon...",
+          "noData": "No day-of-week data available"
         },
         "byHour": {
-          "title": "TIR by hour",
-          "placeholder": "Content coming soon..."
+          "title": "TIR by Hour",
+          "placeholder": "Content coming soon...",
+          "noData": "No hourly data available",
+          "chartDescription": "Visualize hourly glucose patterns to identify trends and optimize management strategies."
         },
         "analyzeButton": "Analyze with AI",
         "analyzingButton": "Analyzing...",

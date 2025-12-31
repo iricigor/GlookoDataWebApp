@@ -57,8 +57,6 @@ import { TimeInRangeDetailsCard } from './TimeInRangeDetailsCard';
 import { HbA1cEstimateCard } from './HbA1cEstimateCard';
 import { RiskAssessmentCard } from './RiskAssessmentCard';
 import { SugarmateStatsCard } from './SugarmateStatsCard';
-import { TimeInRangeByPeriodSection } from './TimeInRangeByPeriodSection';
-import { TimeInRangeByTimeOfDaySection } from './TimeInRangeByTimeOfDaySection';
 import { DetailedBreakdownAccordion } from './DetailedBreakdownAccordion';
 import type { TIRStats, HbA1cStats, RiskStats } from './types';
 
@@ -420,15 +418,12 @@ export function BGOverviewReport({
 
       {/* Time In Range - Details Card */}
       {!loading && !error && tirStats.total > 0 && (
-        <TimeInRangeDetailsCard />
-      )}
-
-      {/* Time in Range by Period Section */}
-      {!loading && !error && periodStats.length > 0 && (
-        <TimeInRangeByPeriodSection
+        <TimeInRangeDetailsCard 
           categoryMode={categoryMode}
           dayFilter={dayFilter}
+          dayOfWeekReports={dayOfWeekReports}
           periodStats={periodStats}
+          hourlyStats={hourlyStats}
         />
       )}
 
@@ -467,15 +462,6 @@ export function BGOverviewReport({
           </Text>
           <AGPGraph data={agpStats} glucoseUnit={glucoseUnit} />
         </Card>
-      )}
-
-      {/* Time in Range by Time of Day Section */}
-      {!loading && !error && hourlyStats.length > 0 && (
-        <TimeInRangeByTimeOfDaySection
-          categoryMode={categoryMode}
-          dayFilter={dayFilter}
-          hourlyStats={hourlyStats}
-        />
       )}
 
       {/* Detailed Breakdown Accordion */}

@@ -30,15 +30,19 @@
         "title": "Vreme u opsegu - Detalji",
         "byPeriod": {
           "title": "TIR po periodu",
-          "placeholder": "Sadržaj dolazi uskoro..."
+          "placeholder": "Sadržaj dolazi uskoro...",
+          "noData": "Nema dostupnih podataka o periodu"
         },
         "byDayOfWeek": {
           "title": "TIR po danu u nedelji",
-          "placeholder": "Sadržaj dolazi uskoro..."
+          "placeholder": "Sadržaj dolazi uskoro...",
+          "noData": "Nema dostupnih podataka po danima u nedelji"
         },
         "byHour": {
           "title": "TIR po satu",
-          "placeholder": "Sadržaj dolazi uskoro..."
+          "placeholder": "Sadržaj dolazi uskoro...",
+          "noData": "Nema dostupnih podataka po satima",
+          "chartDescription": "Vizualizujte satne obrasce glukoze kako biste identifikovali trendove i optimizovali strategije upravljanja."
         },
         "analyzeButton": "Analizirajte sa AI",
         "analyzingButton": "Analiziram...",

@@ -30,15 +30,19 @@
         "title": "Zeit im Zielbereich - Details",
         "byPeriod": {
           "title": "TIR nach Zeitraum",
-          "placeholder": "Inhalt folgt in Kürze..."
+          "placeholder": "Inhalt folgt in Kürze...",
+          "noData": "Keine Zeitraumdaten verfügbar"
         },
         "byDayOfWeek": {
           "title": "TIR nach Wochentag",
-          "placeholder": "Inhalt folgt in Kürze..."
+          "placeholder": "Inhalt folgt in Kürze...",
+          "noData": "Keine Wochentagsdaten verfügbar"
         },
         "byHour": {
           "title": "TIR nach Stunde",
-          "placeholder": "Inhalt folgt in Kürze..."
+          "placeholder": "Inhalt folgt in Kürze...",
+          "noData": "Keine Stundendaten verfügbar",
+          "chartDescription": "Visualisieren Sie stündliche Glukosemuster, um Trends zu erkennen und Managementstrategien zu optimieren."
         },
         "analyzeButton": "Mit KI analysieren",
         "analyzingButton": "Analysiere...",
