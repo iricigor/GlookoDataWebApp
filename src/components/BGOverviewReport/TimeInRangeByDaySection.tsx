@@ -41,19 +41,21 @@ export function TimeInRangeByDaySection({
     return null;
   }
 
-  // Filter out the individual days (Mon-Sun) and separate aggregates (Workday/Weekend)
-  const individualDays = dayOfWeekReports.filter(
-    r => r.day !== 'Workday' && r.day !== 'Weekend'
-  );
-  const aggregateDays = dayOfWeekReports.filter(
-    r => r.day === 'Workday' || r.day === 'Weekend'
-  );
+  // Define day order: Mon-Fri, then Workday, then Sat-Sun, then Weekend
+  const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Workday', 'Saturday', 'Sunday', 'Weekend'];
+  
+  // Sort the reports according to the defined order
+  const sortedReports = dayOfWeekReports.sort((a, b) => {
+    const indexA = dayOrder.indexOf(a.day);
+    const indexB = dayOrder.indexOf(b.day);
+    return indexA - indexB;
+  });
 
   return (
     <div>
-      {/* Individual days (Monday - Sunday) */}
+      {/* All days in sorted order */}
       <div className={styles.periodBarsContainer}>
-        {individualDays.map((dayReport) => {
+        {sortedReports.map((dayReport) => {
           const total = dayReport.stats.total;
           const veryLowPct = categoryMode === 5 ? calculatePercentage(dayReport.stats.veryLow ?? 0, total) : 0;
           const lowPct = calculatePercentage(dayReport.stats.low, total);
@@ -137,95 +139,6 @@ export function TimeInRangeByDaySection({
           );
         })}
       </div>
-
-      {/* Aggregate days (Weekdays / Weekend) */}
-      {aggregateDays.length > 0 && (
-        <div className={styles.periodBarsContainer} style={{ marginTop: '16px' }}>
-          {aggregateDays.map((dayReport) => {
-            const total = dayReport.stats.total;
-            const veryLowPct = categoryMode === 5 ? calculatePercentage(dayReport.stats.veryLow ?? 0, total) : 0;
-            const lowPct = calculatePercentage(dayReport.stats.low, total);
-            const inRangePct = calculatePercentage(dayReport.stats.inRange, total);
-            const highPct = calculatePercentage(dayReport.stats.high, total);
-            const veryHighPct = categoryMode === 5 ? calculatePercentage(dayReport.stats.veryHigh ?? 0, total) : 0;
-
-            return (
-              <div key={dayReport.day} className={styles.periodBarRow}>
-                <Text className={styles.periodLabel}>{dayReport.day}</Text>
-                <div className={styles.periodBarWrapper}>
-                  <div className={styles.periodBar}>
-                    {categoryMode === 5 && (dayReport.stats.veryLow ?? 0) > 0 && (
-                      <Tooltip content={`Very Low: ${veryLowPct}% (${dayReport.stats.veryLow ?? 0})`} relationship="description">
-                        <div
-                          className={styles.periodSegment}
-                          style={{
-                            width: `${veryLowPct}%`,
-                            backgroundColor: getColorForCategory('veryLow'),
-                          }}
-                        >
-                          {veryLowPct >= MIN_PERCENTAGE_FOR_PERIOD_BAR && `${veryLowPct}%`}
-                        </div>
-                      </Tooltip>
-                    )}
-                    {dayReport.stats.low > 0 && (
-                      <Tooltip content={`Low: ${lowPct}% (${dayReport.stats.low})`} relationship="description">
-                        <div
-                          className={styles.periodSegment}
-                          style={{
-                            width: `${lowPct}%`,
-                            backgroundColor: getColorForCategory('low'),
-                          }}
-                        >
-                          {lowPct >= MIN_PERCENTAGE_FOR_PERIOD_BAR && `${lowPct}%`}
-                        </div>
-                      </Tooltip>
-                    )}
-                    {dayReport.stats.inRange > 0 && (
-                      <Tooltip content={`In Range: ${inRangePct}% (${dayReport.stats.inRange})`} relationship="description">
-                        <div
-                          className={styles.periodSegment}
-                          style={{
-                            width: `${inRangePct}%`,
-                            backgroundColor: getColorForCategory('inRange'),
-                          }}
-                        >
-                          {inRangePct >= MIN_PERCENTAGE_FOR_PERIOD_BAR && `${inRangePct}%`}
-                        </div>
-                      </Tooltip>
-                    )}
-                    {dayReport.stats.high > 0 && (
-                      <Tooltip content={`High: ${highPct}% (${dayReport.stats.high})`} relationship="description">
-                        <div
-                          className={styles.periodSegment}
-                          style={{
-                            width: `${highPct}%`,
-                            backgroundColor: getColorForCategory('high'),
-                          }}
-                        >
-                          {highPct >= MIN_PERCENTAGE_FOR_PERIOD_BAR && `${highPct}%`}
-                        </div>
-                      </Tooltip>
-                    )}
-                    {categoryMode === 5 && (dayReport.stats.veryHigh ?? 0) > 0 && (
-                      <Tooltip content={`Very High: ${veryHighPct}% (${dayReport.stats.veryHigh ?? 0})`} relationship="description">
-                        <div
-                          className={styles.periodSegment}
-                          style={{
-                            width: `${veryHighPct}%`,
-                            backgroundColor: getColorForCategory('veryHigh'),
-                          }}
-                        >
-                          {veryHighPct >= MIN_PERCENTAGE_FOR_PERIOD_BAR && `${veryHighPct}%`}
-                        </div>
-                      </Tooltip>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }

@@ -34,7 +34,7 @@
           "noData": "Keine Zeitraumdaten verfügbar"
         },
         "byDayOfWeek": {
-          "title": "TIR nach Tag",
+          "title": "TIR nach Wochentag",
           "placeholder": "Inhalt folgt in Kürze...",
           "noData": "Keine Wochentagsdaten verfügbar"
         },

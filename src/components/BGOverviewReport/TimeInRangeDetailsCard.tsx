@@ -19,8 +19,6 @@ import {
 import { 
   DataTrendingRegular,
   FilterRegular,
-  CalendarLtrRegular,
-  ClockRegular,
 } from '@fluentui/react-icons';
 import { useTranslation } from 'react-i18next';
 import type { 
@@ -197,12 +195,11 @@ export function TimeInRangeDetailsCard({
         {t('reports.bgOverview.tirDetails.title')}
       </Text>
 
-      {/* Three collapsed accordion sections with actual content */}
-      <Accordion collapsible>
+      {/* Three accordion sections with actual content - multiple can be expanded */}
+      <Accordion multiple>
         {/* TIR by Period Section */}
         <AccordionItem value="byPeriod">
           <AccordionHeader>
-            <CalendarLtrRegular style={{ marginRight: '8px' }} />
             {t('reports.bgOverview.tirDetails.byPeriod.title')}
             {dayFilter !== 'All Days' && (
               <Tooltip content={`Filtered by: ${dayFilter}`} relationship="description">
@@ -323,7 +320,6 @@ export function TimeInRangeDetailsCard({
         {/* TIR by Hour Section */}
         <AccordionItem value="byHour">
           <AccordionHeader>
-            <ClockRegular style={{ marginRight: '8px' }} />
             {t('reports.bgOverview.tirDetails.byHour.title')}
             {dayFilter !== 'All Days' && (
               <Tooltip content={`Filtered by: ${dayFilter}`} relationship="description">

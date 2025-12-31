@@ -34,7 +34,7 @@
           "noData": "Nema dostupnih podataka o periodu"
         },
         "byDayOfWeek": {
-          "title": "TIR po danu",
+          "title": "TIR po danu u nedelji",
           "placeholder": "Sadržaj dolazi uskoro...",
           "noData": "Nema dostupnih podataka po danima u nedelji"
         },

@@ -34,7 +34,7 @@
           "noData": "No period data available"
         },
         "byDayOfWeek": {
-          "title": "TIR by Day",
+          "title": "TIR by Weekday",
           "placeholder": "Content coming soon...",
           "noData": "No day-of-week data available"
         },

@@ -34,7 +34,7 @@
           "noData": "Žádná data o období nejsou k dispozici"
         },
         "byDayOfWeek": {
-          "title": "TIR podle dne",
+          "title": "TIR podle dne v týdnu",
           "placeholder": "Obsah bude brzy k dispozici...",
           "noData": "Žádná data o dnech v týdnu nejsou k dispozici"
         },
