@@ -35,6 +35,7 @@ import {
 import { useBGOverviewStyles } from './styles';
 import { useAuth } from '../../hooks/useAuth';
 import { startAISession } from '../../utils/api/startAISessionApi';
+import { getSystemPrompt } from '../../features/aiAnalysis/prompts/promptUtils';
 import { getColorForCategory } from './types';
 import type { TIRStats } from './types';
 import { TimeInRangeByDaySection } from './TimeInRangeByDaySection';
@@ -110,7 +111,7 @@ Please provide insights about the glucose control and any recommendations.`;
       const sessionResult = await startAISession(
         idToken,
         userPrompt,
-        'You are a diabetes data analyst. Analyze the provided glucose data and give helpful insights.'
+        getSystemPrompt() // Use standardized system prompt
       );
       
       clearTimeout(timeoutId);
