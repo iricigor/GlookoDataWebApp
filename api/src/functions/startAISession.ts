@@ -1,16 +1,17 @@
 /**
  * Start AI Session Azure Function
  * 
- * This function initiates an AI session with Gemini by sending a test prompt and returns 
- * an ephemeral token for the frontend to send additional data directly to Gemini AI.
+ * This function acts as a secure proxy between the frontend and Gemini AI REST API.
+ * It validates Pro users and forwards their AI requests to Gemini without logging user data.
+ * The Gemini API key remains secure on the backend and is never exposed to the client.
+ * 
+ * PRIVACY: User prompts and data are forwarded directly to Gemini without being logged or stored.
  * 
  * Flow:
- * 1. Validates Pro user
+ * 1. Validates Pro user (logs only userId, not content)
  * 2. Gets Gemini API key from Key Vault
- * 3. Generates ephemeral Gemini token
- * 4. Sends initial prompt to Gemini AI
- * 5. Returns ephemeral token + initial response to frontend
- * 6. Frontend uses token to send additional data directly to Gemini
+ * 3. Forwards the request body directly to Gemini AI (no logging of content)
+ * 4. Returns Gemini's response as-is to frontend
  * 
  * POST /api/ai/start-session
  * 
@@ -19,12 +20,20 @@
  *   - Content-Type: application/json
  * 
  * Body:
+ *   Gemini API request format (forwarded as-is)
  *   {
- *     "testData": "optional test data to include in prompt"
+ *     "contents": [{ "parts": [{ "text": "user prompt" }] }],
+ *     "generationConfig": { "temperature": 0.2, "maxOutputTokens": 4000, ... }
  *   }
  * 
  * Response:
- *   - 200 OK: { success: true, token: string, expiresAt: string, initialResponse: string }
+ *   Gemini API response (forwarded as-is)
+ *   {
+ *     "candidates": [{ "content": { "parts": [{ "text": "..." }] } }],
+ *     "usageMetadata": { ... }
+ *   }
+ * 
+ * Error Responses:
  *   - 401 Unauthorized: Invalid or missing token
  *   - 403 Forbidden: Not a Pro user
  *   - 500 Internal Server Error: Infrastructure error
@@ -33,59 +42,6 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { extractUserInfoFromToken, getTableClient, isNotFoundError, getSecretFromKeyVault } from "../utils/azureUtils";
 import { createRequestLogger } from "../utils/logger";
-import { AI_SYSTEM_PROMPT } from "../utils/aiPrompts";
-
-/**
- * Request body interface
- */
-interface StartAISessionRequest {
-  testData?: string;
-}
-
-/**
- * Response interface
- */
-interface StartAISessionResponse {
-  success: boolean;
-  token: string;
-  expiresAt: string;
-  initialResponse: string;
-}
-
-/**
- * Gemini ephemeral token API response
- */
-interface GeminiTokenApiResponse {
-  name: string;
-  expireTime: string;
-  newSessionExpireTime: string;
-}
-
-/**
- * Gemini API response structure
- * Simplified version compatible with src/utils/api/geminiApi.ts GeminiResponse
- */
-interface GeminiResponse {
-  candidates: Array<{
-    content: {
-      parts: Array<{
-        text: string;
-      }>;
-      role?: string;
-    };
-    finishReason?: string;
-    index?: number;
-    safetyRatings?: Array<{
-      category: string;
-      probability: string;
-    }>;
-  }>;
-  usageMetadata?: {
-    promptTokenCount: number;
-    candidatesTokenCount: number;
-    totalTokenCount: number;
-  };
-}
 
 /**
  * Default Gemini API Key secret name in Key Vault
@@ -93,9 +49,9 @@ interface GeminiResponse {
 const DEFAULT_GEMINI_API_KEY_SECRET = 'AI-API-Key';
 
 /**
- * Request timeout for Gemini API calls (20 seconds)
+ * Request timeout for Gemini API calls (30 seconds)
  */
-const GEMINI_API_TIMEOUT = 20000;
+const GEMINI_API_TIMEOUT = 30000;
 
 /**
  * URL-encode a string for use as RowKey
@@ -121,64 +77,13 @@ async function checkProUserExists(tableClient: ReturnType<typeof getTableClient>
 }
 
 /**
- * Generate ephemeral access token for Gemini API
- * 
- * @param apiKey - The Gemini API key from Key Vault
- * @returns Ephemeral token response with token name and expiration
- */
-async function generateEphemeralToken(apiKey: string): Promise<{ token: string; expiresAt: string }> {
-  const now = new Date();
-  const expireTime = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutes from now
-  const newSessionExpireTime = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes to start session
-
-  const abortController = new AbortController();
-  const timeoutId = setTimeout(() => abortController.abort(), GEMINI_API_TIMEOUT);
-
-  try {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1alpha/authTokens:generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
-      },
-      body: JSON.stringify({
-        uses: 1, // Single-use token for security
-        expireTime: expireTime.toISOString(),
-        newSessionExpireTime: newSessionExpireTime.toISOString(),
-      }),
-      signal: abortController.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Gemini API error (${response.status}): ${errorText}`);
-    }
-
-    const data = await response.json() as GeminiTokenApiResponse;
-    
-    return {
-      token: data.name,
-      expiresAt: data.expireTime,
-    };
-  } catch (error) {
-    clearTimeout(timeoutId);
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Gemini API timeout: Failed to generate ephemeral token');
-    }
-    throw error;
-  }
-}
-
-/**
- * Send initial prompt to Gemini AI
+ * Forward request to Gemini AI as a proxy (without logging user data)
  * 
  * @param apiKey - The Gemini API key
- * @param prompt - The initial prompt to send
- * @returns The AI's response text
+ * @param requestBody - The request body from the client (forwarded as-is)
+ * @returns The Gemini API response
  */
-async function sendInitialPromptToGemini(apiKey: string, prompt: string): Promise<string> {
+async function proxyToGemini(apiKey: string, requestBody: string): Promise<{ status: number; body: string; headers: Headers }> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`;
   
   const abortController = new AbortController();
@@ -191,45 +96,23 @@ async function sendInitialPromptToGemini(apiKey: string, prompt: string): Promis
         'Content-Type': 'application/json',
         'x-goog-api-key': apiKey,
       },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: `${AI_SYSTEM_PROMPT}\n\n${prompt}`,
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 4000,
-          topP: 0.8,
-          topK: 40,
-        },
-      }),
+      body: requestBody,
       signal: abortController.signal,
     });
 
     clearTimeout(timeoutId);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Gemini API error (${response.status}): ${errorText}`);
-    }
-
-    const data = await response.json() as GeminiResponse;
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const responseBody = await response.text();
     
-    if (!content) {
-      throw new Error('Invalid response from Gemini API - no content');
-    }
-    
-    return content;
+    return {
+      status: response.status,
+      body: responseBody,
+      headers: response.headers,
+    };
   } catch (error) {
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Gemini API timeout: Failed to send initial prompt');
+      throw new Error('Gemini API timeout');
     }
     throw error;
   }
@@ -272,15 +155,11 @@ async function startAISession(request: HttpRequest, context: InvocationContext):
     
     requestLogger.logInfo('Pro user verified', { userId });
     
-    // Parse request body
-    let requestBody: StartAISessionRequest = {};
-    try {
-      const bodyText = await request.text();
-      if (bodyText) {
-        requestBody = JSON.parse(bodyText) as StartAISessionRequest;
-      }
-    } catch {
-      return requestLogger.logError('Invalid JSON in request body', 400, 'validation');
+    // Get request body as raw text (to forward as-is without parsing/logging user data)
+    const bodyText = await request.text();
+    
+    if (!bodyText) {
+      return requestLogger.logError('Request body is required', 400, 'validation');
     }
     
     // Get Gemini API key from Key Vault
@@ -293,36 +172,23 @@ async function startAISession(request: HttpRequest, context: InvocationContext):
     
     requestLogger.logInfo('Retrieved Gemini API key from Key Vault', { secretName });
     
-    // Generate ephemeral token for frontend to use
-    const tokenData = await generateEphemeralToken(apiKey);
+    // Proxy request to Gemini AI (without logging user data)
+    const geminiResponse = await proxyToGemini(apiKey, bodyText);
     
-    requestLogger.logInfo('Gemini ephemeral token generated', { expiresAt: tokenData.expiresAt });
-    
-    // Create and send initial prompt to Gemini
-    const testDataInfo = requestBody.testData ? `\nTest data: ${requestBody.testData}` : '';
-    const initialPrompt = `This is a test session to verify AI integration.${testDataInfo}
-
-Please confirm you received this message and are ready to analyze diabetes-related data.`;
-    
-    const initialResponse = await sendInitialPromptToGemini(apiKey, initialPrompt);
-    
-    requestLogger.logInfo('AI session started successfully', {
+    // Log success without user data details
+    requestLogger.logInfo('AI request proxied successfully', {
       userId,
-      hasTestData: !!requestBody.testData,
-      responseLength: initialResponse.length,
+      geminiStatus: geminiResponse.status,
     });
     
-    const response: StartAISessionResponse = {
-      success: true,
-      token: tokenData.token,
-      expiresAt: tokenData.expiresAt,
-      initialResponse,
+    // Return Gemini's response as-is
+    return {
+      status: geminiResponse.status,
+      headers: {
+        'Content-Type': geminiResponse.headers.get('Content-Type') || 'application/json',
+      },
+      body: geminiResponse.body,
     };
-    
-    return requestLogger.logSuccess({
-      status: 200,
-      jsonBody: response,
-    });
     
   } catch (error: unknown) {
     // Check for specific Azure SDK error types

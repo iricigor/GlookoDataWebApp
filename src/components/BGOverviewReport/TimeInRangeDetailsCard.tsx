@@ -98,78 +98,32 @@ export function TimeInRangeDetailsCard({
     const timeoutId = setTimeout(() => abortController.abort(), 30000); // 30 second timeout
     
     try {
-      // Step 1: Start AI session - backend sends initial prompt to Gemini and returns ephemeral token
-      const testData = `Readings in range: ${mockReadingsInRange}`;
-      const sessionResult = await startAISession(idToken, testData);
+      // Build the user prompt with sensitive data (sent directly to Gemini via proxy)
+      const userPrompt = `Based on the following diabetes data, please analyze the Time in Range statistics and provide a brief summary:
+
+Readings in range: ${mockReadingsInRange}
+
+Please provide insights about the glucose control and any recommendations.`;
       
-      if (!sessionResult.success) {
-        setError(sessionResult.error || 'Failed to start AI session');
-        setIsAnalyzing(false);
-        clearTimeout(timeoutId);
-        return;
-      }
-      
-      // Display the initial AI response from the backend
-      if (sessionResult.initialResponse) {
-        setAiResponse(sessionResult.initialResponse);
-      }
-      
-      // Ensure we have a token before proceeding
-      if (!sessionResult.token) {
-        setError('No token received from session');
-        setIsAnalyzing(false);
-        clearTimeout(timeoutId);
-        return;
-      }
-      
-      // Step 2: Send additional data directly to Gemini AI using the ephemeral token
-      // This bypasses our backend and goes straight to Gemini
-      const additionalPrompt = 'Based on the test data provided, please analyze the Time in Range statistics and provide a brief summary.';
-      
-      const geminiResponse = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': sessionResult.token,
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: additionalPrompt,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.2,
-              maxOutputTokens: 4000,
-            },
-          }),
-          signal: abortController.signal,
-        }
+      // Send request to backend proxy which forwards to Gemini
+      // User data is sent directly to Gemini and not logged by our backend
+      const sessionResult = await startAISession(
+        idToken,
+        userPrompt,
+        'You are a diabetes data analyst. Analyze the provided glucose data and give helpful insights.'
       );
       
       clearTimeout(timeoutId);
       
-      if (!geminiResponse.ok) {
-        // Log full error for debugging, show generic message to user
-        const errorText = await geminiResponse.text();
-        console.error('Gemini API error:', geminiResponse.status, errorText);
-        setError('AI analysis failed. Please try again later.');
+      if (!sessionResult.success) {
+        setError(sessionResult.error || 'Failed to get AI analysis');
         setIsAnalyzing(false);
         return;
       }
       
-      const geminiData = await geminiResponse.json();
-      const additionalResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (additionalResponse) {
-        // Append additional response to the initial response
-        setAiResponse(prev => `${prev}\n\n--- Additional Analysis ---\n${additionalResponse}`);
+      // Display the AI response
+      if (sessionResult.response) {
+        setAiResponse(sessionResult.response);
       }
       
     } catch (err) {

@@ -2,7 +2,8 @@
  * Start AI Session API Client
  * 
  * This module provides a client for calling the startAISession backend endpoint
- * which initiates an AI session and returns a temporary token.
+ * which acts as a secure proxy to Gemini AI. The backend validates Pro users and
+ * forwards requests to Gemini without logging user data.
  */
 
 import { createApiLogger } from '../logger';
@@ -23,20 +24,42 @@ const defaultConfig: StartAISessionApiConfig = {
 };
 
 /**
- * Request body for start AI session
+ * Gemini API request structure (sent to our proxy)
  */
-interface StartAISessionRequest {
-  testData?: string;
+interface GeminiRequest {
+  contents: Array<{
+    parts: Array<{
+      text: string;
+    }>;
+    role?: string;
+  }>;
+  generationConfig?: {
+    temperature?: number;
+    maxOutputTokens?: number;
+    topP?: number;
+    topK?: number;
+  };
 }
 
 /**
- * Response from start AI session
+ * Gemini API response structure (received from our proxy)
  */
-interface StartAISessionResponse {
-  success: boolean;
-  token: string;
-  expiresAt: string;
-  initialResponse: string;
+interface GeminiResponse {
+  candidates?: Array<{
+    content: {
+      parts: Array<{
+        text: string;
+      }>;
+      role?: string;
+    };
+    finishReason?: string;
+    index?: number;
+  }>;
+  usageMetadata?: {
+    promptTokenCount: number;
+    candidatesTokenCount: number;
+    totalTokenCount: number;
+  };
 }
 
 /**
@@ -53,25 +76,27 @@ interface StartAISessionErrorResponse {
  */
 export interface StartAISessionResult {
   success: boolean;
-  token?: string;
-  expiresAt?: string;
-  initialResponse?: string;
+  response?: string;
   error?: string;
   errorType?: 'unauthorized' | 'forbidden' | 'validation' | 'infrastructure' | 'network' | 'unknown';
   statusCode?: number;
 }
 
 /**
- * Start an AI session and return a temporary token.
+ * Send an AI analysis request through the backend proxy to Gemini AI.
+ * The backend validates Pro user status and forwards the request to Gemini.
+ * User data is sent directly to Gemini and not logged by our backend.
  *
  * @param idToken - MSAL ID token used for Authorization header
- * @param testData - Optional test data to include in the initial prompt
+ * @param prompt - User prompt for AI analysis (required)
+ * @param systemPrompt - Optional system prompt to prepend
  * @param config - Optional API configuration; defaults to the module's default (baseUrl '/api')
- * @returns A `StartAISessionResult` containing `success` and, on success, `token`, `expiresAt`, and `initialResponse`; on failure, `error`, `errorType`, and optionally `statusCode`
+ * @returns A `StartAISessionResult` containing `success` and, on success, `response`; on failure, `error`, `errorType`, and optionally `statusCode`
  */
 export async function startAISession(
   idToken: string,
-  testData?: string,
+  prompt: string,
+  systemPrompt?: string,
   config: StartAISessionApiConfig = defaultConfig
 ): Promise<StartAISessionResult> {
   const endpoint = `${config.baseUrl}/ai/start-session`;
@@ -87,13 +112,40 @@ export async function startAISession(
     };
   }
   
+  // Validate prompt
+  if (!prompt || prompt.trim() === '') {
+    apiLogger.logError('Prompt is required', 'validation');
+    return {
+      success: false,
+      error: 'Prompt is required',
+      errorType: 'validation',
+    };
+  }
+  
   apiLogger.logStart('POST');
   
   try {
-    const requestBody: StartAISessionRequest = {};
-    if (testData) {
-      requestBody.testData = testData;
-    }
+    // Build the full prompt with optional system prompt
+    const fullPrompt = systemPrompt ? `${systemPrompt}\n\n${prompt}` : prompt;
+    
+    // Create Gemini API request format
+    const geminiRequest: GeminiRequest = {
+      contents: [
+        {
+          parts: [
+            {
+              text: fullPrompt,
+            },
+          ],
+        },
+      ],
+      generationConfig: {
+        temperature: 0.2,
+        maxOutputTokens: 4000,
+        topP: 0.8,
+        topK: 40,
+      },
+    };
     
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -102,7 +154,7 @@ export async function startAISession(
         'Content-Type': 'application/json',
         'x-correlation-id': apiLogger.correlationId,
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(geminiRequest),
     });
     
     // Handle HTTP errors
@@ -162,28 +214,27 @@ export async function startAISession(
       };
     }
     
-    // Parse successful response
-    const data: StartAISessionResponse = await response.json();
+    // Parse Gemini response
+    const data: GeminiResponse = await response.json();
     
-    if (!data.success || !data.token || !data.expiresAt || !data.initialResponse) {
-      apiLogger.logError('Invalid response from backend', 'unknown', 200);
+    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!responseText) {
+      apiLogger.logError('Invalid response from Gemini API', 'unknown', 200);
       return {
         success: false,
-        error: 'Invalid response from backend',
+        error: 'Invalid response from Gemini API',
         errorType: 'unknown',
       };
     }
     
     apiLogger.logSuccess(200, {
-      expiresAt: data.expiresAt,
-      responseLength: data.initialResponse.length,
+      responseLength: responseText.length,
     });
     
     return {
       success: true,
-      token: data.token,
-      expiresAt: data.expiresAt,
-      initialResponse: data.initialResponse,
+      response: responseText,
     };
     
   } catch (error) {
