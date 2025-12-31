@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>960 Add TIR visualizations to Time in Range Details accordion</summary>
+
+[#960](../../pull/960) Add TIR visualizations to Time in Range Details accordion
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>958 Rename API endpoints and reorganize endpoint groups</summary>
 
 [#958](../../pull/958) Rename API endpoints and reorganize endpoint groups
