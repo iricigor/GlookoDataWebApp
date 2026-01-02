@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>965 Add production deployment workflow with manual control and change detection</summary>
+
+[#965](../../pull/965) Add production deployment workflow with manual control and change detection
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>967 Fix accordion collapse behavior in Time in Range Details</summary>
 
 [#967](../../pull/967) Fix accordion collapse behavior in Time in Range Details
