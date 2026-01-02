@@ -45,20 +45,43 @@ The deployment workflow requires the following secrets to be configured in GitHu
 
 ## Deployment via GitHub Actions (Recommended)
 
-The repository includes a GitHub Actions workflow that automatically deploys to Azure Static Web Apps:
+The repository includes GitHub Actions workflows for automated deployments:
+
+### Production Deployment Workflow (New) ⭐
+
+The recommended approach for production deployments with manual control and intelligent change detection:
+
+- **Workflow file**: `.github/workflows/deploy-production.yml`
+- **Trigger**: Manual only (workflow_dispatch)
+- **Features**:
+  - **Manual control**: Choose to deploy infrastructure, application, or both via checkboxes
+  - **Change detection**: Automatically analyzes what changed since last deployment
+  - **Warnings**: Alerts if you're skipping deployments when files have changed
+  - **Manual approval**: Infrastructure changes require approval via `Infra-Prod` environment
+  - **Smart execution**: App deployment waits for infrastructure if both selected
+  - **Deployment tracking**: Creates git tags to track successful deployments
+
+**Setup Guide**: See [`.github/workflows/DEPLOYMENT_SETUP.md`](../.github/workflows/DEPLOYMENT_SETUP.md)
+**Change Detection**: See [`.github/workflows/CHANGE_DETECTION.md`](../.github/workflows/CHANGE_DETECTION.md)
+
+### Legacy Deployment Workflow
+
+The original deployment workflow (still functional):
 
 - **Workflow file**: `.github/workflows/azure-static-web-apps-wonderful-stone-071384103.yml`
 - **Trigger**: Manual (workflow_dispatch)
 - **Build**: Runs `npm run build` automatically
 - **Deploy**: Deploys frontend to Static Web Apps and API to Function App
 
-### What the Workflow Does
+### What the Workflows Do
 
-1. **Builds and deploys the React frontend** to Azure Static Web Apps
-2. **Builds and deploys the API** to Azure Function App (`glookodatawebapp-func`)
-3. **Creates a GitHub release** with the version from package.json
+1. **Validate infrastructure** (if infrastructure files changed)
+2. **Deploy infrastructure** with Bicep (requires manual approval)
+3. **Build and deploy the React frontend** to Azure Static Web Apps
+4. **Build and deploy the API** to Azure Function App (`glookodatawebapp-func`)
+5. **Create a GitHub release** with the version from package.json
 
-> **Note**: After deployment, you need to link the Function App backend manually using the deployment scripts. See "Linking the Function App Backend" below.
+> **Note**: After initial deployment, you need to link the Function App backend manually using the deployment scripts. See "Linking the Function App Backend" below.
 
 ## Manual Deployment via Azure Portal
 

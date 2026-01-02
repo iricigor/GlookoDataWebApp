@@ -13,6 +13,23 @@ GlookoDataWebApp is a modern web application for importing, visualizing, and ana
 
 **Target Users:** Healthcare professionals, diabetes patients, and researchers analyzing Glooko diabetes data exports.
 
+## Table of Contents
+
+- [Tech Stack & Architecture](#tech-stack--architecture)
+- [🌐 Code Language Standards (MANDATORY)](#-code-language-standards-mandatory)
+- [🔄 Localization Workflow (i18next) - MANDATORY](#-localization-workflow-i18next---mandatory)
+- [Coding Guidelines](#coding-guidelines)
+- [Documentation Standards](#documentation-standards)
+- [Directory & File Structure](#directory--file-structure)
+- [Development Workflow](#development-workflow)
+- [Common Tasks & Patterns](#common-tasks--patterns)
+- [Resources & References](#resources--references)
+- [AI Assistance Tips](#ai-assistance-tips)
+- [Important Notes](#important-notes)
+- [Adding New AI Analysis Prompts](#adding-new-ai-analysis-prompts)
+- [Azure Infrastructure Deployment Scripts](#azure-infrastructure-deployment-scripts)
+- [Questions or Issues?](#questions-or-issues)
+
 ## Tech Stack & Architecture
 
 ### Core Technologies
@@ -481,6 +498,54 @@ public/
 3. **Validate user input** - Especially file uploads
 4. **Use npm audit** before adding dependencies
 5. **No hardcoded secrets** or API keys
+
+## Documentation Standards
+
+### Markdown Files
+
+**Table of Contents (TOC) Requirement:**
+- **ALWAYS** add a Table of Contents to markdown files that are **longer than 300 lines**
+- Place the TOC **immediately after the Overview section** (or after the first main section if there's no Overview)
+- Use proper heading hierarchy and anchor links following GitHub's anchor generation rules
+- **Include only two levels**: major sections (`## headings`) and subsections (`### headings`)
+  - Do NOT include level 4 headers (`####`) or deeper in the TOC
+  - This keeps the TOC concise and navigable
+- List all major sections (## headings) and their immediate subsections (### headings)
+
+**GitHub Anchor Link Rules:**
+
+GitHub automatically generates anchor links from headers with specific rules:
+- Everything is **lowercase**
+- Spaces become **hyphens** `-`
+- Punctuation (`:`, `?`, `!`, `,`, `.`, `'`, `"`, `/`, `\`) is **stripped out**
+- Emojis and special symbols are removed or converted
+
+**Examples:**
+```markdown
+## Step 1: Create Application     → #step-1-create-application
+### What's Next?                  → #whats-next
+## 🚀 Getting Started!!           → #-getting-started
+### Option A: Simple Setup        → #option-a-simple-setup
+## FAQ (Frequently Asked)         → #faq-frequently-asked
+```
+
+**Example TOC format:**
+```markdown
+## Table of Contents
+
+- [Step 1: Create Application](#step-1-create-application)
+  - [Option A: Simple Setup](#option-a-simple-setup)
+  - [Option B: Advanced Setup](#option-b-advanced-setup)
+- [What's Next?](#whats-next)
+- [FAQ](#faq)
+```
+
+**Why this matters:**
+- Improves navigation in long documents
+- Makes documentation more accessible
+- Helps readers quickly find relevant information
+- Correct anchor links ensure TOC navigation works properly
+- Standard practice for comprehensive technical documentation
 
 ## Directory & File Structure
 

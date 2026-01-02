@@ -119,7 +119,7 @@ Add the following secrets to your GitHub repository:
 
 | Secret Name | Value | How to Get |
 |-------------|-------|------------|
-| `AZURE_DEPLOYER_CLIENT_ID` | Application (Client) ID | `echo $APP_ID` or from Azure Portal |
+| `AZURE_SCANNER_CLIENT_ID` | Application (Client) ID | `echo $APP_ID` or from Azure Portal |
 | `AZURE_TENANT_ID` | Azure AD Tenant ID | `echo $TENANT_ID` or from Azure Portal |
 | `AZURE_SUBSCRIPTION_ID` | Azure Subscription ID | `echo $SUBSCRIPTION_ID` or `az account show --query id -o tsv` |
 
@@ -127,7 +127,7 @@ Add the following secrets to your GitHub repository:
 
 Alternatively, you can find these values in the Azure Portal:
 
-- **AZURE_DEPLOYER_CLIENT_ID**: 
+- **AZURE_SCANNER_CLIENT_ID**: 
   - Azure Portal → Azure Active Directory → App registrations → Your App → Overview → Application (client) ID
 
 - **AZURE_TENANT_ID**: 
