@@ -73,7 +73,6 @@
   "overrides": {
     "archiver": "^7.0.1",
     "unzipper": "^0.12.3",
-    "lodash.isequal": "npm:lodash@^4.17.21",
-    "node-domexception": "file:node-domexception-1.0.0.tgz"
+    "lodash.isequal": "npm:lodash@^4.17.21"
   }
 }
