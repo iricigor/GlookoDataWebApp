@@ -21,9 +21,9 @@ az deployment group what-if \
 
 ## Expected Changes
 
-### ✅ Resources to Create (2)
+### ✅ Resources to Create (5)
 
-These are **new RBAC role assignments** - expected and required:
+These are **new RBAC role assignments and resource locks** - expected and required:
 
 ```
 + Microsoft.Storage/storageAccounts/glookodatawebappstorage/.../roleAssignments/1af27705-...
@@ -33,9 +33,23 @@ These are **new RBAC role assignments** - expected and required:
 + Microsoft.Storage/storageAccounts/glookodatawebappstorage/.../roleAssignments/595708b8-...
   Role: Storage Blob Data Contributor
   Purpose: Enable Managed Identity to access Blob Storage
+
++ Microsoft.Authorization/locks/glookodatawebappstorage-lock
+  Level: CanNotDelete
+  Purpose: Prevent accidental deletion of Storage Account containing user data
+
++ Microsoft.Authorization/locks/glookodatawebapp-kv-lock
+  Level: CanNotDelete
+  Purpose: Prevent accidental deletion of Key Vault containing secrets
+
++ Microsoft.Authorization/locks/glookodatawebapp-identity-lock
+  Level: CanNotDelete
+  Purpose: Prevent accidental deletion of Managed Identity
 ```
 
-**Why:** These are required for passwordless authentication using Managed Identity.
+**Why:** 
+- Role assignments are required for passwordless authentication using Managed Identity
+- Resource locks protect critical resources from accidental deletion (Storage Account, Key Vault, Managed Identity)
 
 ### ✅ Resources to Modify (3-4)
 
@@ -139,7 +153,7 @@ This indicates the `useExistingAppServicePlan` parameter is not working correctl
 ## Summary Counts
 
 **Expected:**
-- Resources to create: **2** (RBAC role assignments)
+- Resources to create: **5** (2 RBAC role assignments + 3 resource locks)
 - Resources to modify: **3-5** (configuration and property updates, no tag changes)
 - Resources with no change: **3** (tables)
 - Unsupported: **1** (Key Vault role assignment - diagnostic only)
@@ -189,6 +203,7 @@ If you see any of these in the what-if output, **STOP and investigate:**
 These are **expected and acceptable** changes:
 
 - ✅ Creating RBAC role assignments for Managed Identity
+- ✅ Creating CanNotDelete resource locks on Storage Account, Key Vault, and Managed Identity
 - ✅ Adding `enablePurgeProtection` to Key Vault
 - ✅ Adding `networkAcls` to Key Vault
 - ✅ Setting `httpsOnly: true` on Function App
