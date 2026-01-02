@@ -31,6 +31,6 @@ This eliminates the deprecation warning during `npm install` while maintaining c
 
 If you need to update the shim:
 1. Modify files in `.npm-shims/node-domexception/`
-2. Run: `npm pack .npm-shims/node-domexception`
+2. Run: `npm pack .npm-shims/node-domexception` and move the generated .tgz file to the root directory
 3. Update package.json override if the tarball name changes
 4. Run: `npm install` to apply changes
