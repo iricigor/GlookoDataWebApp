@@ -84,11 +84,12 @@ jobs:
         run: |
           cd infra
           
-          # Check for critical issues
-          if grep -q "Error:" whatif-output.txt; then
+          # Check for critical issues (case-insensitive error detection)
+          if grep -qi "^ERROR:" whatif-output.txt; then
             echo "status=error" >> $GITHUB_OUTPUT
             echo "emoji=❌" >> $GITHUB_OUTPUT
             echo "title=What-If Analysis Failed" >> $GITHUB_OUTPUT
+            exit 1  # Fail the workflow on errors
           elif grep -q "Resource and property changes are indicated with this symbol:" whatif-output.txt; then
             # Check for destructive operations
             if grep -q "^\s*-\s*Microsoft\." whatif-output.txt || grep -q "Delete" whatif-output.txt; then
@@ -107,7 +108,7 @@ jobs:
           fi
 
       - name: 💬 Post PR Comment
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@v7
         with:
           script: |
@@ -132,7 +133,12 @@ jobs:
             let comment = `${COMMENT_MARKER}\n## ${emoji} ${title}\n\n`;
             
             if (status === 'error') {
-              comment += '**The what-if analysis encountered an error. Please review the logs below.**\n\n';
+              comment += '**❌ The what-if analysis encountered an error. Please review the logs below.**\n\n';
+              comment += '> [!CAUTION]\n';
+              comment += '> This typically indicates:\n';
+              comment += '> - Permission issues with the Azure service principal\n';
+              comment += '> - Invalid Bicep syntax or template errors\n';
+              comment += '> - Missing required Azure resources\n\n';
             } else if (status === 'warning') {
               comment += '**⚠️ WARNING: Destructive changes detected!**\n';
               comment += 'This deployment would **delete** or **modify** existing resources.\n';
@@ -142,7 +148,7 @@ jobs:
             }
             
             comment += '<details>\n';
-            comment += '<summary>📋 What-If Analysis Results</summary>\n\n';
+            comment += `<summary>${emoji} 📋 What-If Analysis Results</summary>\n\n`;
             comment += '```\n';
             comment += whatifOutput;
             comment += '\n```\n';

@@ -88,6 +88,15 @@ resource tables 'Microsoft.Storage/storageAccounts/tableServices/tables@2023-01-
   name: tableName
 }]
 
+resource storageAccountLock 'Microsoft.Authorization/locks@2020-05-01' = {
+  scope: storageAccount
+  name: '${storageAccountName}-lock'
+  properties: {
+    level: 'CanNotDelete'
+    notes: 'Prevents accidental deletion of the storage account containing critical user data.'
+  }
+}
+
 output storageAccountId string = storageAccount.id
 output storageAccountName string = storageAccount.name
 output storageAccountPrimaryEndpoints object = storageAccount.properties.primaryEndpoints

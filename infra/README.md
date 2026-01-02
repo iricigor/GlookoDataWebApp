@@ -12,6 +12,7 @@ The infrastructure consists of:
 4. **Function App** - Node.js 20 backend API (consumption plan)
 5. **Static Web App** - React frontend with global CDN
 6. **RBAC Role Assignments** - Managed Identity permissions for Storage and Key Vault
+7. **Resource Locks** - CanNotDelete protection on Storage Account, Key Vault, and Managed Identity
 
 ## Architecture
 
@@ -50,6 +51,7 @@ graph TB
 Documentation files are located in the `docs/` subdirectory:
 
 - **docs/USER_GUIDE.md** - **START HERE** - Quick start guide for deployment
+- **docs/RESOURCE_LOCKS.md** - **NEW** - Resource locks for data protection and lock management guide
 - **docs/MINIMAL_CHANGES_SUMMARY.md** - **NEW** - Explains removed best practices and minimal changes approach
 - **docs/FIX_SUMMARY.md** - Overview of what-if fixes and solutions
 - **docs/WHAT_IF_ANALYSIS.md** - Detailed analysis of all what-if changes
@@ -523,12 +525,13 @@ See [INFRA_CHECK_SETUP.md](../.github/workflows/INFRA_CHECK_SETUP.md) for detail
 
 ## Resources
 
-- **[User Guide](./USER_GUIDE.md)** - 🌟 **START HERE** - Quick start and complete deployment workflow
-- [Fix Summary](./FIX_SUMMARY.md) - Overview of what-if fixes implemented
-- [What-If Analysis](./WHAT_IF_ANALYSIS.md) - Detailed analysis of first what-if run and resolutions
-- [Expected What-If Results](./EXPECTED_WHAT_IF.md) - What to expect and red flags to watch for
-- [Manual Verification Guide](./MANUAL_VERIFICATION.md) - Step-by-step manual verification
-- [Quick Reference](./QUICK_REFERENCE.md) - Quick command reference
+- **[User Guide](./docs/USER_GUIDE.md)** - 🌟 **START HERE** - Quick start and complete deployment workflow
+- **[Resource Locks Guide](./docs/RESOURCE_LOCKS.md)** - 🔒 Resource locks for data protection and lock management
+- [Fix Summary](./docs/FIX_SUMMARY.md) - Overview of what-if fixes implemented
+- [What-If Analysis](./docs/WHAT_IF_ANALYSIS.md) - Detailed analysis of first what-if run and resolutions
+- [Expected What-If Results](./docs/EXPECTED_WHAT_IF.md) - What to expect and red flags to watch for
+- [Manual Verification Guide](./docs/MANUAL_VERIFICATION.md) - Step-by-step manual verification
+- [Quick Reference](./docs/QUICK_REFERENCE.md) - Quick command reference
 - [Azure Bicep Documentation](https://learn.microsoft.com/azure/azure-resource-manager/bicep/)
 - [Bicep Best Practices](https://learn.microsoft.com/azure/azure-resource-manager/bicep/best-practices)
 - [Azure Static Web Apps](https://learn.microsoft.com/azure/static-web-apps/)
