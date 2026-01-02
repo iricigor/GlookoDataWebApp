@@ -205,7 +205,7 @@ Add the following secrets to your GitHub repository:
 | `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` | Function App publish profile | Azure Portal → Function App → Get publish profile |
 | `VITE_GOOGLE_CLIENT_ID` | Google OAuth Client ID | Google Cloud Console |
 
-**Note:** The first three secrets (`AZURE_DEPLOYER_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`) are the same ones used by the Infrastructure Check workflow.
+**Note:** These are deployment-specific secrets. The Infrastructure Check workflow uses separate secrets (`AZURE_SCANNER_CLIENT_ID`) with read-only permissions following the principle of least privilege.
 
 ## Step 5: Configure GitHub Environments
 
