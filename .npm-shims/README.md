@@ -17,7 +17,7 @@ Since Node.js 16+ and modern browsers have native `DOMException` support, we don
 We use npm overrides to replace `node-domexception` with this local shim that simply exports the native `DOMException`:
 
 ```javascript
-module.exports = globalThis.DOMException || DOMException;
+module.exports = globalThis.DOMException;
 ```
 
 This eliminates the deprecation warning during `npm install` while maintaining compatibility with packages that expect the `node-domexception` module.
