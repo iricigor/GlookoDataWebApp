@@ -16,9 +16,9 @@ The Production Deployment workflow (`deploy-production.yml`) provides:
 
 - [Differences from Infrastructure Check Workflow](#differences-from-infrastructure-check-workflow)
 - [Prerequisites](#prerequisites)
-- [Step 1: Create Azure AD Application (if not exists)](#step-1-create-azure-ad-application-if-not-exists)
-  - [Option A: Reuse Existing App Registration](#option-a-reuse-existing-app-registration)
-  - [Option B: Create New App Registration](#option-b-create-new-app-registration)
+- [Step 1: Create Azure AD Application](#step-1-create-azure-ad-application)
+  - [Recommended: Create New App Registration (Separate Permissions)](#recommended-create-new-app-registration-separate-permissions)
+  - [Advanced: Reuse Existing App Registration (Shared Permissions)](#advanced-reuse-existing-app-registration-shared-permissions)
 - [Step 2: Create Service Principal and Assign Permissions](#step-2-create-service-principal-and-assign-permissions)
 - [Step 3: Configure OIDC Federated Credentials for Deployment](#step-3-configure-oidc-federated-credentials-for-deployment)
   - [Verify Federated Credentials](#verify-federated-credentials)
@@ -60,26 +60,18 @@ The Production Deployment workflow (`deploy-production.yml`) provides:
 - Admin access to GitHub repository settings
 - Existing infrastructure deployed or ready to deploy
 
-## Step 1: Create Azure AD Application (if not exists)
+## Step 1: Create Azure AD Application
 
-If you already created an App Registration for the Infrastructure Check workflow, you can **reuse the same application** but add additional federated credentials for deployment.
+**Security Best Practice:** Create a **separate** App Registration for deployment with write permissions, distinct from the read-only Infrastructure Check workflow.
 
-### Option A: Reuse Existing App Registration
+### Recommended: Create New App Registration (Separate Permissions)
 
-```bash
-# Get existing app ID
-APP_NAME="GlookoDataWebApp-GitHub-Actions"
-APP_ID=$(az ad app list --display-name "$APP_NAME" --query "[0].appId" -o tsv)
-TENANT_ID=$(az account show --query tenantId -o tsv)
-SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+Creating a separate App Registration follows the **principle of least privilege** and **defense in depth**:
 
-echo "Reusing existing App Registration:"
-echo "Application (Client) ID: $APP_ID"
-echo "Tenant ID: $TENANT_ID"
-echo "Subscription ID: $SUBSCRIPTION_ID"
-```
-
-### Option B: Create New App Registration
+- ✅ Infrastructure Check workflow: `Reader` role (read-only, what-if analysis)
+- ✅ Production Deployment workflow: `Contributor` role (write access)
+- ✅ Compromise of one workflow doesn't affect the other
+- ✅ Clear audit trail of which principal did what
 
 ```bash
 # Set variables
@@ -98,6 +90,30 @@ echo "Application (Client) ID: $APP_ID"
 TENANT_ID=$(az account show --query tenantId -o tsv)
 echo "Tenant ID: $TENANT_ID"
 ```
+
+### Advanced: Reuse Existing App Registration (Shared Permissions)
+
+⚠️ **Security Consideration:** Reusing the same App Registration for both workflows means both share the same permissions. If the Infrastructure Check workflow is compromised or modified, it could potentially gain write access.
+
+**Only use this option if:**
+- You fully understand the security implications
+- You have strong branch protection and PR review processes
+- You regularly audit federated credentials and workflow permissions
+
+```bash
+# Get existing app ID
+APP_NAME="GlookoDataWebApp-GitHub-Actions"
+APP_ID=$(az ad app list --display-name "$APP_NAME" --query "[0].appId" -o tsv)
+TENANT_ID=$(az account show --query tenantId -o tsv)
+SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+
+echo "Reusing existing App Registration:"
+echo "Application (Client) ID: $APP_ID"
+echo "Tenant ID: $TENANT_ID"
+echo "Subscription ID: $SUBSCRIPTION_ID"
+```
+
+**Note:** The federated credentials DO provide some isolation (PR scope vs main branch scope), but separate principals with distinct permissions provide stronger security boundaries.
 
 ## Step 2: Create Service Principal and Assign Permissions
 
