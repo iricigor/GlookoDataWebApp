@@ -209,11 +209,42 @@ jobs:
           echo "### 🔎 Pre-Deployment What-If Analysis" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
+          # Run what-if and capture output
           az deployment group what-if \
             --resource-group Glooko \
             --template-file main.bicep \
             --parameters parameters.current.bicepparam \
-            --no-pretty-print
+            --no-pretty-print \
+            > whatif-output.txt 2>&1
+          
+          WHATIF_EXIT_CODE=$?
+          
+          # Display the output
+          cat whatif-output.txt
+          
+          # Check for errors (case-insensitive)
+          if grep -qi "^ERROR:" whatif-output.txt; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **What-If Analysis Failed**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The what-if analysis encountered errors. Common causes:" >> $GITHUB_STEP_SUMMARY
+            echo "- Permission issues with Azure service principal" >> $GITHUB_STEP_SUMMARY
+            echo "- Invalid Bicep syntax or template errors" >> $GITHUB_STEP_SUMMARY
+            echo "- Missing required Azure resources" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please review the logs above for details." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          
+          # Exit with the original exit code if non-zero
+          if [ $WHATIF_EXIT_CODE -ne 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **What-If Analysis Failed** (exit code: $WHATIF_EXIT_CODE)" >> $GITHUB_STEP_SUMMARY
+            exit $WHATIF_EXIT_CODE
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ What-If analysis completed successfully" >> $GITHUB_STEP_SUMMARY
 
       - name: 🚀 Deploy Infrastructure
         id: deploy
