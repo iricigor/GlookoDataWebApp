@@ -218,12 +218,43 @@ This environment tracks application deployments but doesn't require approval.
 
 ## How the Workflow Works
 
-### Conditional Logic
+### Conditional Logic - Path-Based Filtering
 
-The workflow uses path-based filtering to determine what to deploy:
+The workflow intelligently determines what to deploy by analyzing file changes in the push:
 
+**For automatic deployments (push to main):**
+- Compares **all files changed** between the commit before the push (`github.event.before`) and the latest commit (`github.event.after`)
+- This captures changes across **multiple commits** in a single push
 - **Infrastructure changes** detected in: `infra/**`, `scripts/**`
-- **Application changes** detected in: `src/**`, `api/**`, `public/**`, `package.json`, etc.
+- **Application changes** detected in: `src/**`, `api/**`, `public/**`, `package.json`, `package-lock.json`, `vite.config.ts`, `staticwebapp.config.json`
+
+**For manual deployments (workflow_dispatch):**
+- Uses the manual input checkboxes to control what gets deployed
+- Allows deploying infrastructure, application, or both
+
+**Examples:**
+
+1. **Single commit with infra change:**
+   - Commit: Changes `infra/main.bicep`
+   - Push to main
+   - Result: Infrastructure deployment triggered ✅
+
+2. **Multiple commits with mixed changes:**
+   - Commit 1: Changes `infra/main.bicep`
+   - Commit 2: Changes `src/App.tsx`
+   - Commit 3: Changes `README.md`
+   - Push all to main
+   - Result: Both infrastructure AND application deployments triggered ✅
+
+3. **Application-only change:**
+   - Commit: Changes `src/components/Dashboard.tsx`
+   - Push to main
+   - Result: Only application deployment triggered, infrastructure skipped ⏭️
+
+4. **Documentation-only change:**
+   - Commit: Changes `docs/DEPLOYMENT.md`
+   - Push to main
+   - Result: Both deployments skipped (no relevant files changed) ⏭️
 
 ### Execution Flow
 
