@@ -49,17 +49,20 @@ The repository includes GitHub Actions workflows for automated deployments:
 
 ### Production Deployment Workflow (New) ⭐
 
-The recommended approach for production deployments with infrastructure and application deployment:
+The recommended approach for production deployments with manual control and intelligent change detection:
 
 - **Workflow file**: `.github/workflows/deploy-production.yml`
-- **Trigger**: Automatic on push to `main`, or manual (workflow_dispatch)
+- **Trigger**: Manual only (workflow_dispatch)
 - **Features**:
-  - **Conditional logic**: Deploys infrastructure only if `infra/` or `scripts/` changed
+  - **Manual control**: Choose to deploy infrastructure, application, or both via checkboxes
+  - **Change detection**: Automatically analyzes what changed since last deployment
+  - **Warnings**: Alerts if you're skipping deployments when files have changed
   - **Manual approval**: Infrastructure changes require approval via `Infra-Prod` environment
-  - **Auto-deployment**: Application changes deploy automatically via `SWA-Prod` environment
-  - **Smart execution**: App deployment waits for infrastructure if both changed
+  - **Smart execution**: App deployment waits for infrastructure if both selected
+  - **Deployment tracking**: Creates git tags to track successful deployments
 
 **Setup Guide**: See [`.github/workflows/DEPLOYMENT_SETUP.md`](../.github/workflows/DEPLOYMENT_SETUP.md)
+**Change Detection**: See [`.github/workflows/CHANGE_DETECTION.md`](../.github/workflows/CHANGE_DETECTION.md)
 
 ### Legacy Deployment Workflow
 

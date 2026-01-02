@@ -4,10 +4,13 @@ This guide explains how to configure the Production Deployment workflow for auto
 
 ## Overview
 
-The Production Deployment workflow (`deploy-production.yml`) automates:
+The Production Deployment workflow (`deploy-production.yml`) provides:
+- **Manual-only deployment** via workflow_dispatch (no automatic triggers)
 - **Infrastructure deployment** (Bicep templates) with manual approval
-- **Application deployment** (Static Web App + Function App) with automatic approval
-- **Conditional logic** to skip infrastructure deployment if no infra/scripts changes
+- **Application deployment** (Static Web App + Function App) with automatic approval  
+- **Controlled execution**: Choose to deploy infrastructure, application, or both via checkboxes
+
+**Key Design Decision:** This workflow is intentionally **manual-only** to ensure controlled, deliberate deployments to production. It does NOT trigger automatically on push to main.
 
 ## Differences from Infrastructure Check Workflow
 
@@ -17,7 +20,7 @@ The Production Deployment workflow (`deploy-production.yml`) automates:
 | **Authentication** | OIDC with read permissions | OIDC with write permissions |
 | **Approval** | None (automatic) | Infrastructure: Manual, App: Automatic |
 | **Secrets** | `AZURE_DEPLOYER_CLIENT_ID` | Same secrets, different federated credentials |
-| **Triggers** | Pull requests | Push to main, workflow_dispatch |
+| **Triggers** | Pull requests | Manual only (workflow_dispatch) |
 | **Environments** | None | `Infra-Prod` (manual), `SWA-Prod` (tracking) |
 
 ## Prerequisites
@@ -188,86 +191,108 @@ This environment tracks application deployments but doesn't require approval.
 
 ## Step 6: Test the Workflow
 
-### Option 1: Manual Test (workflow_dispatch)
+### Manual Deployment Test
 
 1. Go to **Actions** tab in your GitHub repository
-2. Select **Deploy to Production** workflow
+2. Select **🚀 Deploy to Production** workflow
 3. Click **Run workflow**
-4. Choose options:
-   - **Deploy infrastructure**: ✅ (to test infrastructure deployment)
-   - **Deploy application**: ✅ (to test application deployment)
+4. Choose deployment options:
+   - **Deploy infrastructure**: ✅ Check to deploy infrastructure (requires manual approval)
+   - **Deploy application**: ✅ Check to deploy application
 5. Click **Run workflow**
-6. The workflow will wait for manual approval on the `Infra-Prod` environment
-7. Approve the deployment in the **Environments** section
+6. If infrastructure deployment is selected:
+   - The workflow will wait for manual approval on the `Infra-Prod` environment
+   - Go to the workflow run and click **Review deployments**
+   - Select `Infra-Prod` and click **Approve and deploy**
+7. If application deployment is selected:
+   - It will wait for infrastructure to complete (if also selected)
+   - Then proceed automatically via `SWA-Prod` environment
 
-### Option 2: Push to Main Branch
+### Test Scenarios
 
-1. Make a change to an infrastructure file (e.g., `infra/main.bicep`)
-2. Commit and push to `main` branch
-3. The workflow will automatically trigger
-4. The `deploy-infra` job will wait for manual approval
-5. The `deploy-app` job will wait for `deploy-infra` to complete
+**Scenario 1: Deploy Application Only**
+- ❌ Deploy infrastructure: Unchecked
+- ✅ Deploy application: Checked
+- Result: Only application deploys, infrastructure is skipped
 
-### Option 3: Test Application Deployment Only
+**Scenario 2: Deploy Infrastructure Only**
+- ✅ Deploy infrastructure: Checked
+- ❌ Deploy application: Unchecked
+- Result: Only infrastructure deploys (requires approval), application is skipped
 
-1. Make a change to application code (e.g., `src/App.tsx`)
-2. Commit and push to `main` branch
-3. The workflow will automatically trigger
-4. The `deploy-infra` job will be **skipped** (no infrastructure changes)
-5. The `deploy-app` job will proceed **immediately** without waiting
+**Scenario 3: Deploy Both**
+- ✅ Deploy infrastructure: Checked
+- ✅ Deploy application: Checked
+- Result: Infrastructure deploys first (requires approval), then application deploys
 
 ## How the Workflow Works
 
-### Conditional Logic - Path-Based Filtering
+### Manual Deployment Control
 
-The workflow intelligently determines what to deploy by analyzing file changes in the push:
+This workflow is **manual-only** and uses workflow_dispatch inputs:
 
-**For automatic deployments (push to main):**
-- Compares **all files changed** between the commit before the push (`github.event.before`) and the latest commit (`github.event.after`)
-- This captures changes across **multiple commits** in a single push
-- **Infrastructure changes** detected in: `infra/**`, `scripts/**`
-- **Application changes** detected in: `src/**`, `api/**`, `public/**`, `package.json`, `package-lock.json`, `vite.config.ts`, `staticwebapp.config.json`
+**Deployment Options:**
+- **Deploy infrastructure** (checkbox): 
+  - Default: `false` (unchecked)
+  - Triggers infrastructure deployment with manual approval required
+  - Deploys Bicep templates to Azure
+  
+- **Deploy application** (checkbox):
+  - Default: `true` (checked)
+  - Triggers application deployment (automatic after infrastructure if both selected)
+  - Deploys Static Web App and Function App
 
-**For manual deployments (workflow_dispatch):**
-- Uses the manual input checkboxes to control what gets deployed
-- Allows deploying infrastructure, application, or both
+**Why Manual-Only?**
+- Ensures controlled, deliberate production deployments
+- Prevents accidental deployments from code merges
+- Allows deploying infrastructure and application independently
+- Provides flexibility in deployment timing
 
-**Examples:**
+### Change Detection Since Last Deployment
 
-1. **Single commit with infra change:**
-   - Commit: Changes `infra/main.bicep`
-   - Push to main
-   - Result: Infrastructure deployment triggered ✅
+Even though the workflow is manual, it intelligently **analyzes what changed since the last successful deployment** to provide helpful context:
 
-2. **Multiple commits with mixed changes:**
-   - Commit 1: Changes `infra/main.bicep`
-   - Commit 2: Changes `src/App.tsx`
-   - Commit 3: Changes `README.md`
-   - Push all to main
-   - Result: Both infrastructure AND application deployments triggered ✅
+**How it works:**
+1. Finds the last successful infrastructure deployment using git tags (format: `deploy-infra-YYYYMMDD-HHMMSS`)
+2. Compares current commit to the last deployment commit
+3. Detects which files changed: infrastructure (`infra/**`, `scripts/**`) or application (`src/**`, `api/**`, etc.)
+4. Shows warnings if you're skipping a deployment when files have changed
 
-3. **Application-only change:**
-   - Commit: Changes `src/components/Dashboard.tsx`
-   - Push to main
-   - Result: Only application deployment triggered, infrastructure skipped ⏭️
+**Benefits:**
+- ✅ See what changed since last deployment before deciding what to deploy
+- ✅ Get warnings if infrastructure files changed but you're only deploying the app
+- ✅ Track deployment history via git tags
+- ✅ Make informed deployment decisions
 
-4. **Documentation-only change:**
-   - Commit: Changes `docs/DEPLOYMENT.md`
-   - Push to main
-   - Result: Both deployments skipped (no relevant files changed) ⏭️
+**Example:**
+```
+Last deployment commit: abc123 (3 days ago)
+Current commit: def456
+
+Changes since last deployment:
+- Infrastructure files changed: true
+  - infra/main.bicep
+  - scripts/deployment-cli/deploy.sh
+- Application files changed: true
+  - src/App.tsx
+  - api/src/functions/user.ts
+
+⚠️ Warning: Infrastructure files have changed since last deployment, 
+but infrastructure deployment is not selected.
+```
 
 ### Execution Flow
 
 ```mermaid
 graph TD
-    A[Workflow Triggered] --> B[check-changes]
-    B --> C{Infra Changed?}
+    A[Manual Trigger<br/>workflow_dispatch] --> B[check-changes]
+    B --> C{Deploy Infra<br/>Selected?}
     C -->|Yes| D[deploy-infra]
     C -->|No| E[Skip deploy-infra]
-    D --> F[Manual Approval Required]
+    D --> F[Manual Approval Required<br/>Infra-Prod]
     F --> G[Deploy Infrastructure]
-    B --> H{App Changed?}
-    H -->|Yes| I{Infra Changed?}
+    B --> H{Deploy App<br/>Selected?}
+    H -->|Yes| I{Deploy Infra<br/>Selected?}
     I -->|Yes| J[Wait for deploy-infra]
     I -->|No| K[Deploy Immediately]
     J --> L[deploy-app]
@@ -281,8 +306,8 @@ graph TD
 - `deploy-app` depends on both `check-changes` and `deploy-infra`
 - `deploy-app` uses `always()` to run even if `deploy-infra` is skipped
 - `deploy-app` only runs if:
-  - App changed AND
-  - (Infra didn't change OR infra deployment succeeded)
+  - Application deployment is selected AND
+  - (Infrastructure deployment is NOT selected OR infrastructure deployed successfully)
 
 ## Troubleshooting
 
@@ -322,17 +347,17 @@ Ensure the `subject` field matches: `repo:OWNER/REPO:ref:refs/heads/main`
 3. Select `Infra-Prod`
 4. Click **Approve and deploy**
 
-### Application Job Skipped Even Though App Changed
+### Application Job Skipped Even Though Checkbox Checked
 
 **Cause:** The `deploy-infra` job failed, so `deploy-app` was skipped.
 
-**Solution:** Fix the infrastructure deployment issue first, then retry.
+**Solution:** Fix the infrastructure deployment issue first, then retry the workflow.
 
 ### Both Jobs Skipped
 
-**Cause:** No relevant files were changed.
+**Cause:** Both checkboxes were unchecked in the workflow_dispatch inputs.
 
-**Solution:** This is expected. The workflow only runs when infrastructure or application files are modified.
+**Solution:** This is expected behavior. Select at least one deployment option when running the workflow.
 
 ## Security Best Practices
 
@@ -343,44 +368,51 @@ Ensure the `subject` field matches: `repo:OWNER/REPO:ref:refs/heads/main`
 - Regularly review and rotate credentials
 - Monitor workflow runs for suspicious activity
 - Use separate environments for infra and app deployments
+- Use manual-only workflows for production deployments
 
 ❌ **Don'ts:**
 - Never store Azure credentials (passwords, keys) as GitHub secrets
 - Don't grant Owner role unless absolutely necessary
 - Don't disable environment protection for infrastructure deployments
 - Don't use service principal authentication keys (use OIDC instead)
-- Don't allow infrastructure deployments from feature branches
+- Don't enable automatic deployments to production
 
 ## Workflow Behavior Examples
 
-### Example 1: Infrastructure Change Only
+### Example 1: Deploy Infrastructure Only
 
-**Files Changed:** `infra/main.bicep`
+**Manual Input:**
+- ✅ Deploy infrastructure: Checked
+- ❌ Deploy application: Unchecked
 
 **Workflow Behavior:**
 1. ✅ `check-changes`: infra=true, app=false
 2. ✅ `deploy-infra`: Waits for manual approval, then deploys infrastructure
-3. ⏭️ `deploy-app`: Skipped (no app changes)
+3. ⏭️ `deploy-app`: Skipped (not selected)
 
-### Example 2: Application Change Only
+### Example 2: Deploy Application Only
 
-**Files Changed:** `src/App.tsx`
+**Manual Input:**
+- ❌ Deploy infrastructure: Unchecked
+- ✅ Deploy application: Checked
 
 **Workflow Behavior:**
 1. ✅ `check-changes`: infra=false, app=true
-2. ⏭️ `deploy-infra`: Skipped (no infra changes)
+2. ⏭️ `deploy-infra`: Skipped (not selected)
 3. ✅ `deploy-app`: Deploys immediately (no waiting for deploy-infra)
 
-### Example 3: Both Infrastructure and Application Changes
+### Example 3: Deploy Both Infrastructure and Application
 
-**Files Changed:** `infra/main.bicep`, `src/App.tsx`
+**Manual Input:**
+- ✅ Deploy infrastructure: Checked
+- ✅ Deploy application: Checked
 
 **Workflow Behavior:**
 1. ✅ `check-changes`: infra=true, app=true
 2. ✅ `deploy-infra`: Waits for manual approval, then deploys infrastructure
 3. ✅ `deploy-app`: Waits for deploy-infra to complete, then deploys application
 
-### Example 4: Documentation Change Only
+### Example 4: Deploy Nothing (Both Unchecked)
 
 **Files Changed:** `README.md`
 

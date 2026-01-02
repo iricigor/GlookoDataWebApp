@@ -1,23 +1,14 @@
 # Production Deployment - Infrastructure & Application
 # This workflow handles both Azure Infrastructure (Bicep) and React Frontend (SWA) deployments.
 # Infrastructure changes require manual approval, while app deployments are automatic.
+# 
+# IMPORTANT: This workflow is MANUAL ONLY (workflow_dispatch)
+# It does NOT trigger automatically on push to main.
+# This ensures controlled, deliberate deployments to production.
 
 name: 🚀 Deploy to Production
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'infra/**'
-      - 'scripts/**'
-      - 'src/**'
-      - 'api/**'
-      - 'public/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'vite.config.ts'
-      - 'staticwebapp.config.json'
   workflow_dispatch:
     inputs:
       deploy_infra:
@@ -37,78 +28,145 @@ permissions:
   pull-requests: write # Required for PR comments
 
 jobs:
-  # Check which components need deployment based on changed files
-  # 
-  # Path-based filtering logic:
-  # - For PUSH events: Compares github.event.before (commit before push) 
-  #   to github.event.after (latest commit after push)
-  #   This captures ALL files changed across ALL commits in the push
-  # - For WORKFLOW_DISPATCH: Uses manual input checkboxes
-  #
-  # Infrastructure files: infra/**, scripts/**
-  # Application files: src/**, api/**, public/**, package.json, vite.config.ts, etc.
+  # Check deployment options from manual inputs
+  # Also analyzes what changed since last deployment to provide context
   check-changes:
-    name: Check What Changed
+    name: Check Deployment Options
     runs-on: ubuntu-latest
     outputs:
       infra_changed: ${{ steps.filter.outputs.infra }}
       app_changed: ${{ steps.filter.outputs.app }}
+      infra_files_changed_since_last_deploy: ${{ steps.analyze.outputs.infra_files_changed }}
+      app_files_changed_since_last_deploy: ${{ steps.analyze.outputs.app_files_changed }}
+      last_deploy_commit: ${{ steps.find-last-deploy.outputs.commit }}
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for proper diff
+          fetch-depth: 0  # Fetch all history to find last deployment
 
-      - name: 🔍 Check changed files
-        id: filter
+      - name: 🔍 Find last successful deployment
+        id: find-last-deploy
         run: |
-          # For workflow_dispatch, use manual inputs
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "infra=${{ github.event.inputs.deploy_infra }}" >> $GITHUB_OUTPUT
-            echo "app=${{ github.event.inputs.deploy_app }}" >> $GITHUB_OUTPUT
+          # Find the last successful run of this workflow that deployed infrastructure
+          # We'll look for the commit SHA from the last successful deployment
+          
+          echo "Looking for last successful infrastructure deployment..."
+          
+          # Try to find the last deployment commit from git tags
+          # Convention: tag deployments with "deploy-infra-v*" or similar
+          LAST_DEPLOY_TAG=$(git tag --list "deploy-infra-*" --sort=-version:refname | head -1)
+          
+          if [ -n "$LAST_DEPLOY_TAG" ]; then
+            LAST_COMMIT=$(git rev-list -n 1 "$LAST_DEPLOY_TAG")
+            echo "Found last deployment tag: $LAST_DEPLOY_TAG at commit $LAST_COMMIT"
+            echo "commit=$LAST_COMMIT" >> $GITHUB_OUTPUT
+            echo "source=tag" >> $GITHUB_OUTPUT
+          else
+            # Fallback: use main branch as comparison point
+            # This ensures we always have something to compare against
+            LAST_COMMIT=$(git rev-parse origin/main 2>/dev/null || git rev-parse HEAD)
+            echo "No deployment tag found, using current main: $LAST_COMMIT"
+            echo "commit=$LAST_COMMIT" >> $GITHUB_OUTPUT
+            echo "source=main" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📊 Analyze changes since last deployment
+        id: analyze
+        run: |
+          LAST_COMMIT="${{ steps.find-last-deploy.outputs.commit }}"
+          CURRENT_COMMIT="${{ github.sha }}"
+          
+          echo "Comparing changes from last deployment:"
+          echo "  Last deploy: $LAST_COMMIT"
+          echo "  Current:     $CURRENT_COMMIT"
+          echo ""
+          
+          # Get list of changed files since last deployment
+          if [ "$LAST_COMMIT" = "$CURRENT_COMMIT" ]; then
+            echo "Current commit is the same as last deployment - no changes"
+            echo "infra_files_changed=false" >> $GITHUB_OUTPUT
+            echo "app_files_changed=false" >> $GITHUB_OUTPUT
             exit 0
           fi
           
-          # For push events, check all changed files in the push
-          # Compare the commit before the push to the latest commit
-          # This captures all files changed across all commits in the push
-          BEFORE="${{ github.event.before }}"
-          AFTER="${{ github.event.after }}"
+          CHANGED_FILES=$(git diff --name-only "$LAST_COMMIT" "$CURRENT_COMMIT" 2>&1)
           
-          echo "Comparing changes from $BEFORE to $AFTER"
+          if [ $? -ne 0 ]; then
+            echo "::warning::Unable to compare commits. Assuming changes exist."
+            echo "infra_files_changed=unknown" >> $GITHUB_OUTPUT
+            echo "app_files_changed=unknown" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Files changed since last deployment:"
+          echo "$CHANGED_FILES"
+          echo ""
           
           # Check for infrastructure changes
-          if git diff --name-only "$BEFORE" "$AFTER" | grep -qE '^(infra|scripts)/'; then
-            echo "infra=true" >> $GITHUB_OUTPUT
-            echo "Infrastructure files changed"
+          if echo "$CHANGED_FILES" | grep -qE '^(infra|scripts)/'; then
+            INFRA_CHANGED_FILES=$(echo "$CHANGED_FILES" | grep -E '^(infra|scripts)/' || true)
+            echo "Infrastructure files changed:"
+            echo "$INFRA_CHANGED_FILES"
+            echo "infra_files_changed=true" >> $GITHUB_OUTPUT
           else
-            echo "infra=false" >> $GITHUB_OUTPUT
             echo "No infrastructure files changed"
+            echo "infra_files_changed=false" >> $GITHUB_OUTPUT
           fi
           
           # Check for application changes
-          if git diff --name-only "$BEFORE" "$AFTER" | grep -qE '^(src|api|public|package\.json|package-lock\.json|vite\.config\.ts|staticwebapp\.config\.json)'; then
-            echo "app=true" >> $GITHUB_OUTPUT
-            echo "Application files changed"
+          if echo "$CHANGED_FILES" | grep -qE '^(src|api|public|package\.json|package-lock\.json|vite\.config\.ts|staticwebapp\.config\.json)'; then
+            APP_CHANGED_FILES=$(echo "$CHANGED_FILES" | grep -E '^(src|api|public|package\.json|package-lock\.json|vite\.config\.ts|staticwebapp\.config\.json)' || true)
+            echo "Application files changed:"
+            echo "$APP_CHANGED_FILES"
+            echo "app_files_changed=true" >> $GITHUB_OUTPUT
           else
-            echo "app=false" >> $GITHUB_OUTPUT
             echo "No application files changed"
+            echo "app_files_changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: 📊 Report Changes
+      - name: 🔍 Read deployment inputs
+        id: filter
+        run: |
+          # Read manual inputs from workflow_dispatch
+          echo "infra=${{ github.event.inputs.deploy_infra }}" >> $GITHUB_OUTPUT
+          echo "app=${{ github.event.inputs.deploy_app }}" >> $GITHUB_OUTPUT
+          
+          echo "Deployment options selected:"
+          echo "  Infrastructure: ${{ github.event.inputs.deploy_infra }}"
+          echo "  Application: ${{ github.event.inputs.deploy_app }}"
+
+      - name: 📊 Report Deployment Plan
         run: |
           echo "### 📋 Deployment Plan" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Infrastructure Changed:** ${{ steps.filter.outputs.infra }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Application Changed:** ${{ steps.filter.outputs.app }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deploy Infrastructure:** ${{ steps.filter.outputs.infra }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Deploy Application:** ${{ steps.filter.outputs.app }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
+          # Show what changed since last deployment
+          echo "### 📝 Changes Since Last Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Last deployment commit:** \`${{ steps.find-last-deploy.outputs.commit }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Infrastructure files changed:** ${{ steps.analyze.outputs.infra_files_changed }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Application files changed:** ${{ steps.analyze.outputs.app_files_changed }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Provide recommendations
+          if [ "${{ steps.analyze.outputs.infra_files_changed }}" = "true" ] && [ "${{ steps.filter.outputs.infra }}" = "false" ]; then
+            echo "⚠️ **Warning:** Infrastructure files have changed since last deployment, but infrastructure deployment is not selected." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ steps.analyze.outputs.app_files_changed }}" = "true" ] && [ "${{ steps.filter.outputs.app }}" = "false" ]; then
+            echo "ℹ️ **Note:** Application files have changed since last deployment, but application deployment is not selected." >> $GITHUB_STEP_SUMMARY
+          fi
+          
           if [ "${{ steps.filter.outputs.infra }}" = "true" ]; then
-            echo "🏗️ Infrastructure deployment will require **manual approval**" >> $GITHUB_STEP_SUMMARY
+            echo "🏗️ Infrastructure deployment will require **manual approval** via Infra-Prod environment" >> $GITHUB_STEP_SUMMARY
           fi
           
           if [ "${{ steps.filter.outputs.app }}" = "true" ]; then
-            echo "🚀 Application deployment will proceed automatically" >> $GITHUB_STEP_SUMMARY
+            echo "🚀 Application deployment will proceed after infrastructure (if selected)" >> $GITHUB_STEP_SUMMARY
           fi
 
   # Deploy Azure Infrastructure (Bicep)
@@ -180,7 +238,32 @@ jobs:
           
           # List all resources in the resource group
           echo "**Resources in Glooko resource group:**" >> $GITHUB_STEP_SUMMARY
-          az resource list --resource-group Glooko --output table >> $GITHUB_STEP_SUMMARY
+          if az resource list --resource-group Glooko --output table >> $GITHUB_STEP_SUMMARY 2>&1; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Unable to list resources" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 🏷️ Tag successful infrastructure deployment
+        if: success()
+        run: |
+          # Create a git tag to mark this successful deployment
+          # This tag will be used as a reference point for future deployments
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          TAG_NAME="deploy-infra-$TIMESTAMP"
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git tag -a "$TAG_NAME" -m "Infrastructure deployment at $TIMESTAMP
+          
+          Commit: ${{ github.sha }}
+          Workflow Run: ${{ github.run_id }}
+          Triggered by: ${{ github.actor }}"
+          
+          git push origin "$TAG_NAME"
+          
+          echo "✅ Created deployment tag: $TAG_NAME" >> $GITHUB_STEP_SUMMARY
 
   # Deploy Application (Static Web App + Function App)
   # Auto-approved via SWA-Prod environment (tracking only)
