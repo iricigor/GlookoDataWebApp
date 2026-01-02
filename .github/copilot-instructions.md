@@ -13,6 +13,23 @@ GlookoDataWebApp is a modern web application for importing, visualizing, and ana
 
 **Target Users:** Healthcare professionals, diabetes patients, and researchers analyzing Glooko diabetes data exports.
 
+## Table of Contents
+
+- [Tech Stack & Architecture](#tech-stack--architecture)
+- [🌐 Code Language Standards (MANDATORY)](#-code-language-standards-mandatory)
+- [🔄 Localization Workflow (i18next) - MANDATORY](#-localization-workflow-i18next---mandatory)
+- [Coding Guidelines](#coding-guidelines)
+- [Documentation Standards](#documentation-standards)
+- [Directory & File Structure](#directory--file-structure)
+- [Development Workflow](#development-workflow)
+- [Common Tasks & Patterns](#common-tasks--patterns)
+- [Resources & References](#resources--references)
+- [AI Assistance Tips](#ai-assistance-tips)
+- [Important Notes](#important-notes)
+- [Adding New AI Analysis Prompts](#adding-new-ai-analysis-prompts)
+- [Azure Infrastructure Deployment Scripts](#azure-infrastructure-deployment-scripts)
+- [Questions or Issues?](#questions-or-issues)
+
 ## Tech Stack & Architecture
 
 ### Core Technologies
@@ -490,7 +507,10 @@ public/
 - **ALWAYS** add a Table of Contents to markdown files that are **longer than 300 lines**
 - Place the TOC **immediately after the Overview section** (or after the first main section if there's no Overview)
 - Use proper heading hierarchy and anchor links following GitHub's anchor generation rules
-- Include all major sections (## headings) and subsections (### headings)
+- **Include only two levels**: major sections (`## headings`) and subsections (`### headings`)
+  - Do NOT include level 4 headers (`####`) or deeper in the TOC
+  - This keeps the TOC concise and navigable
+- List all major sections (## headings) and their immediate subsections (### headings)
 
 **GitHub Anchor Link Rules:**
 
