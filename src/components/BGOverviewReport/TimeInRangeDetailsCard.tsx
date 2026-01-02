@@ -196,7 +196,7 @@ export function TimeInRangeDetailsCard({
       </Text>
 
       {/* Three accordion sections with actual content - multiple can be expanded */}
-      <Accordion multiple>
+      <Accordion multiple collapsible>
         {/* TIR by Period Section */}
         <AccordionItem value="byPeriod">
           <AccordionHeader>
