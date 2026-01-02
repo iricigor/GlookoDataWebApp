@@ -44,6 +44,15 @@ resource keyVaultSecretsUserRoleAssignment 'Microsoft.Authorization/roleAssignme
   }
 }
 
+resource keyVaultLock 'Microsoft.Authorization/locks@2020-05-01' = {
+  scope: keyVault
+  name: '${keyVaultName}-lock'
+  properties: {
+    level: 'CanNotDelete'
+    notes: 'Prevents accidental deletion of the Key Vault containing critical secrets and API keys.'
+  }
+}
+
 output keyVaultId string = keyVault.id
 output keyVaultName string = keyVault.name
 output keyVaultUri string = keyVault.properties.vaultUri
