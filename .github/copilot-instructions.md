@@ -489,24 +489,42 @@ public/
 **Table of Contents (TOC) Requirement:**
 - **ALWAYS** add a Table of Contents to markdown files that are **longer than 300 lines**
 - Place the TOC **immediately after the Overview section** (or after the first main section if there's no Overview)
-- Use proper heading hierarchy and anchor links
+- Use proper heading hierarchy and anchor links following GitHub's anchor generation rules
 - Include all major sections (## headings) and subsections (### headings)
+
+**GitHub Anchor Link Rules:**
+
+GitHub automatically generates anchor links from headers with specific rules:
+- Everything is **lowercase**
+- Spaces become **hyphens** `-`
+- Punctuation (`:`, `?`, `!`, `,`, `.`, `'`, `"`, `/`, `\`) is **stripped out**
+- Emojis and special symbols are removed or converted
+
+**Examples:**
+```markdown
+## Step 1: Create Application     → #step-1-create-application
+### What's Next?                  → #whats-next
+## 🚀 Getting Started!!           → #-getting-started
+### Option A: Simple Setup        → #option-a-simple-setup
+## FAQ (Frequently Asked)         → #faq-frequently-asked
+```
 
 **Example TOC format:**
 ```markdown
 ## Table of Contents
 
-- [Section 1](#section-1)
-  - [Subsection 1.1](#subsection-11)
-  - [Subsection 1.2](#subsection-12)
-- [Section 2](#section-2)
-- [Section 3](#section-3)
+- [Step 1: Create Application](#step-1-create-application)
+  - [Option A: Simple Setup](#option-a-simple-setup)
+  - [Option B: Advanced Setup](#option-b-advanced-setup)
+- [What's Next?](#whats-next)
+- [FAQ](#faq)
 ```
 
 **Why this matters:**
 - Improves navigation in long documents
 - Makes documentation more accessible
 - Helps readers quickly find relevant information
+- Correct anchor links ensure TOC navigation works properly
 - Standard practice for comprehensive technical documentation
 
 ## Directory & File Structure
