@@ -11,6 +11,34 @@ Even though the workflow is **manual-only**, it provides intelligent change dete
 3. Shows what changed (infrastructure vs application files)
 4. Provides warnings if you're skipping something that has changed
 
+## Table of Contents
+
+- [How Change Detection Works](#how-change-detection-works)
+  - [Step 1: Find Last Successful Deployment](#step-1-find-last-successful-deployment)
+  - [Step 2: Compare Current Code to Last Deployment](#step-2-compare-current-code-to-last-deployment)
+  - [Step 3: Categorize Changes](#step-3-categorize-changes)
+  - [Step 4: Provide Recommendations](#step-4-provide-recommendations)
+- [Deployment Tagging](#deployment-tagging)
+  - [Why Tag Deployments?](#why-tag-deployments)
+  - [Tag Format](#tag-format)
+  - [Tag Content](#tag-content)
+  - [When Tags Are Created](#when-tags-are-created)
+- [Change Detection Examples](#change-detection-examples)
+  - [Example 1: No Changes Since Last Deployment](#example-1-no-changes-since-last-deployment)
+  - [Example 2: Infrastructure Changed, Deploying Both](#example-2-infrastructure-changed-deploying-both)
+  - [Example 3: Infrastructure Changed, NOT Deploying Infrastructure](#example-3-infrastructure-changed-not-deploying-infrastructure)
+  - [Example 4: Only Application Changed](#example-4-only-application-changed)
+  - [Example 5: Multiple Commits Between Deployments](#example-5-multiple-commits-between-deployments)
+- [Comparison: Before vs After Last Deployment](#comparison-before-vs-after-last-deployment)
+  - [Understanding "Since Last Deployment"](#understanding-since-last-deployment)
+  - [Visual Example](#visual-example)
+- [Benefits of Change Detection](#benefits-of-change-detection)
+- [Fallback Behavior](#fallback-behavior)
+  - [No Deployment Tags Exist](#no-deployment-tags-exist)
+  - [Unable to Compare Commits](#unable-to-compare-commits)
+- [Best Practices](#best-practices)
+- [Summary](#summary)
+
 ## How Change Detection Works
 
 ### Step 1: Find Last Successful Deployment

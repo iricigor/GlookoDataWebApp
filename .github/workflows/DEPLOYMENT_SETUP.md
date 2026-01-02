@@ -12,6 +12,35 @@ The Production Deployment workflow (`deploy-production.yml`) provides:
 
 **Key Design Decision:** This workflow is intentionally **manual-only** to ensure controlled, deliberate deployments to production. It does NOT trigger automatically on push to main.
 
+## Table of Contents
+
+- [Differences from Infrastructure Check Workflow](#differences-from-infrastructure-check-workflow)
+- [Prerequisites](#prerequisites)
+- [Step 1: Create Azure AD Application (if not exists)](#step-1-create-azure-ad-application-if-not-exists)
+  - [Option A: Reuse Existing App Registration](#option-a-reuse-existing-app-registration)
+  - [Option B: Create New App Registration](#option-b-create-new-app-registration)
+- [Step 2: Create Service Principal and Assign Permissions](#step-2-create-service-principal-and-assign-permissions)
+- [Step 3: Configure OIDC Federated Credentials for Deployment](#step-3-configure-oidc-federated-credentials-for-deployment)
+  - [Verify Federated Credentials](#verify-federated-credentials)
+- [Step 4: Configure GitHub Secrets](#step-4-configure-github-secrets)
+- [Step 5: Configure GitHub Environments](#step-5-configure-github-environments)
+  - [Environment 1: Infra-Prod (Manual Approval Required)](#environment-1-infra-prod-manual-approval-required)
+  - [Environment 2: SWA-Prod (Auto-Approved/Tracking Only)](#environment-2-swa-prod-auto-approvedtracking-only)
+- [Step 6: Test the Workflow](#step-6-test-the-workflow)
+  - [Manual Deployment Test](#manual-deployment-test)
+  - [Test Scenarios](#test-scenarios)
+- [How the Workflow Works](#how-the-workflow-works)
+  - [Manual Deployment Control](#manual-deployment-control)
+  - [Change Detection Since Last Deployment](#change-detection-since-last-deployment)
+  - [Execution Flow](#execution-flow)
+  - [Job Dependencies](#job-dependencies)
+- [Troubleshooting](#troubleshooting)
+- [Security Best Practices](#security-best-practices)
+- [Workflow Behavior Examples](#workflow-behavior-examples)
+- [Next Steps](#next-steps)
+- [Resources](#resources)
+- [Support](#support)
+
 ## Differences from Infrastructure Check Workflow
 
 | Aspect | Infrastructure Check | Production Deployment |

@@ -482,6 +482,33 @@ public/
 4. **Use npm audit** before adding dependencies
 5. **No hardcoded secrets** or API keys
 
+## Documentation Standards
+
+### Markdown Files
+
+**Table of Contents (TOC) Requirement:**
+- **ALWAYS** add a Table of Contents to markdown files that are **longer than 300 lines**
+- Place the TOC **immediately after the Overview section** (or after the first main section if there's no Overview)
+- Use proper heading hierarchy and anchor links
+- Include all major sections (## headings) and subsections (### headings)
+
+**Example TOC format:**
+```markdown
+## Table of Contents
+
+- [Section 1](#section-1)
+  - [Subsection 1.1](#subsection-11)
+  - [Subsection 1.2](#subsection-12)
+- [Section 2](#section-2)
+- [Section 3](#section-3)
+```
+
+**Why this matters:**
+- Improves navigation in long documents
+- Makes documentation more accessible
+- Helps readers quickly find relevant information
+- Standard practice for comprehensive technical documentation
+
 ## Directory & File Structure
 
 ```

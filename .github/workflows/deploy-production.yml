@@ -17,7 +17,7 @@ on:
         type: boolean
         default: false
       deploy_app:
-        description: 'Deploy application'
+        description: 'Deploy application to SWA'
         required: false
         type: boolean
         default: true
