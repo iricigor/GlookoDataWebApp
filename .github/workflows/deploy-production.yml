@@ -1,0 +1,260 @@
+# Production Deployment - Infrastructure & Application
+# This workflow handles both Azure Infrastructure (Bicep) and React Frontend (SWA) deployments.
+# Infrastructure changes require manual approval, while app deployments are automatic.
+
+name: 🚀 Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+      - 'scripts/**'
+      - 'src/**'
+      - 'api/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'staticwebapp.config.json'
+  workflow_dispatch:
+    inputs:
+      deploy_infra:
+        description: 'Deploy infrastructure (requires approval)'
+        required: false
+        type: boolean
+        default: false
+      deploy_app:
+        description: 'Deploy application'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  id-token: write      # Required for OIDC authentication
+  contents: write      # Required for creating releases
+  pull-requests: write # Required for PR comments
+
+jobs:
+  # Check which components need deployment based on changed files
+  check-changes:
+    name: Check What Changed
+    runs-on: ubuntu-latest
+    outputs:
+      infra_changed: ${{ steps.filter.outputs.infra }}
+      app_changed: ${{ steps.filter.outputs.app }}
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper diff
+
+      - name: 🔍 Check changed files
+        id: filter
+        run: |
+          # For workflow_dispatch, use manual inputs
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "infra=${{ github.event.inputs.deploy_infra }}" >> $GITHUB_OUTPUT
+            echo "app=${{ github.event.inputs.deploy_app }}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # For push events, check changed files
+          if git diff --name-only HEAD^ HEAD | grep -qE '^(infra|scripts)/'; then
+            echo "infra=true" >> $GITHUB_OUTPUT
+          else
+            echo "infra=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if git diff --name-only HEAD^ HEAD | grep -qE '^(src|api|public|package\.json|package-lock\.json|vite\.config\.ts|staticwebapp\.config\.json)'; then
+            echo "app=true" >> $GITHUB_OUTPUT
+          else
+            echo "app=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 📊 Report Changes
+        run: |
+          echo "### 📋 Deployment Plan" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Infrastructure Changed:** ${{ steps.filter.outputs.infra }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Application Changed:** ${{ steps.filter.outputs.app }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.filter.outputs.infra }}" = "true" ]; then
+            echo "🏗️ Infrastructure deployment will require **manual approval**" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ steps.filter.outputs.app }}" = "true" ]; then
+            echo "🚀 Application deployment will proceed automatically" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Deploy Azure Infrastructure (Bicep)
+  # Requires manual approval via Infra-Prod environment
+  deploy-infra:
+    name: Deploy Infrastructure
+    needs: check-changes
+    if: needs.check-changes.outputs.infra_changed == 'true'
+    runs-on: ubuntu-latest
+    environment: Infra-Prod  # This environment should require manual approval
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_DEPLOYER_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: ✅ Validate Bicep templates
+        working-directory: infra
+        run: |
+          echo "### 🔍 Bicep Validation" >> $GITHUB_STEP_SUMMARY
+          
+          # Validate main template
+          echo "Validating main.bicep..."
+          az bicep build --file main.bicep
+          
+          # Validate parameter files
+          echo "Validating parameter files..."
+          az bicep build-params --file parameters.current.bicepparam
+          
+          echo "✅ All Bicep files are valid" >> $GITHUB_STEP_SUMMARY
+
+      - name: 🔎 Run What-If Analysis
+        working-directory: infra
+        run: |
+          echo "### 🔎 Pre-Deployment What-If Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          az deployment group what-if \
+            --resource-group Glooko \
+            --template-file main.bicep \
+            --parameters parameters.current.bicepparam \
+            --no-pretty-print
+
+      - name: 🚀 Deploy Infrastructure
+        id: deploy
+        working-directory: infra
+        run: |
+          echo "### 🚀 Deploying Infrastructure" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          az deployment group create \
+            --resource-group Glooko \
+            --template-file main.bicep \
+            --parameters parameters.current.bicepparam \
+            --mode Incremental \
+            --verbose
+          
+          echo "✅ Infrastructure deployment completed successfully" >> $GITHUB_STEP_SUMMARY
+
+      - name: 📊 Verify Deployment
+        run: |
+          echo "### 📊 Deployment Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # List all resources in the resource group
+          echo "**Resources in Glooko resource group:**" >> $GITHUB_STEP_SUMMARY
+          az resource list --resource-group Glooko --output table >> $GITHUB_STEP_SUMMARY
+
+  # Deploy Application (Static Web App + Function App)
+  # Auto-approved via SWA-Prod environment (tracking only)
+  # Waits for deploy-infra if infrastructure was deployed
+  deploy-app:
+    name: Deploy Application
+    needs: [check-changes, deploy-infra]
+    # Run if app changed AND (infra didn't change OR infra deployment succeeded)
+    if: |
+      always() && 
+      needs.check-changes.outputs.app_changed == 'true' && 
+      (needs.check-changes.outputs.infra_changed == 'false' || needs.deploy-infra.result == 'success')
+    runs-on: ubuntu-latest
+    environment: SWA-Prod  # This environment should be auto-approved (tracking only)
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          lfs: false
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            api/package-lock.json
+
+      - name: 📦 Get version from package.json
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: 🚀 Build and Deploy Static Web App
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@v1
+        env:
+          NODE_VERSION: '20.19.5'
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WONDERFUL_STONE_071384103 }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/"
+          api_location: ""
+          output_location: "dist"
+
+      - name: 🔧 Fix file permissions
+        run: sudo chown -R $USER:$USER .
+
+      - name: 📦 Install API dependencies
+        working-directory: ./api
+        run: npm ci
+
+      - name: 🏗️ Build API
+        working-directory: ./api
+        run: npm run build
+
+      - name: 📋 List API Endpoints
+        run: node scripts/list-api-endpoints.cjs
+
+      - name: 🚀 Deploy API to Azure Function
+        uses: Azure/functions-action@v1
+        with:
+          app-name: glookodatawebapp-func
+          package: ./api
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+      - name: 🏷️ Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ## Release v${{ steps.version.outputs.version }}
+            
+            This release was automatically deployed to Azure Static Web Apps.
+            
+            **Deployment Details:**
+            - Workflow Run: ${{ github.run_number }}
+            - Commit: ${{ github.sha }}
+            - Infrastructure Deployed: ${{ needs.check-changes.outputs.infra_changed }}
+            - Application Deployed: ${{ needs.check-changes.outputs.app_changed }}
+            
+            **Changes:**
+            See commit history for details.
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📊 Deployment Summary
+        run: |
+          echo "### ✅ Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Static Web App:** Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "**Function App:** Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "**GitHub Release:** Created" >> $GITHUB_STEP_SUMMARY
