@@ -29,6 +29,13 @@ Version 1.8 focuses on new features and enhancements.
 ### Other
 
 <details>
+<summary>967 Fix accordion collapse behavior in Time in Range Details</summary>
+
+[#967](../../pull/967) Fix accordion collapse behavior in Time in Range Details
+  - [Auto-generated entry from PR merge]
+</details>
+
+<details>
 <summary>960 Add TIR visualizations to Time in Range Details accordion</summary>
 
 [#960](../../pull/960) Add TIR visualizations to Time in Range Details accordion
